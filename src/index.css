@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light dark;
+  --color-bg: #f7f7f5;
+  --color-ink: #141414;
+  --color-ink-muted: #5c5c5c;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121212;
+    --color-ink: #f0f0ee;
+    --color-ink-muted: #a3a3a3;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}
+
+.app__meta {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}
