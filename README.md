@@ -1,7 +1,55 @@
 # Mylder
 
-A live map of Copenhagen's buses, S-tog, metro and trains, honest about how fresh its data is
-(reported, estimated or stale). Rejseplanen is the core data source.
+**Watch Copenhagen move.** A live map of the city's buses, S-tog, metro and regional trains, and honest about how fresh each position is.
+
+*Mylder* is Danish for a teeming crowd, and it echoes *myldretid*, rush hour.
+
+> **Status: early.** The app shell, tests and CI are set up. The live map comes next, once the Rejseplanen API access arrives. See the [roadmap](#roadmap).
+
+<!-- Add a screenshot or GIF of the moving map here as soon as there is one. It's the first thing a visitor should see. -->
+
+## Why
+
+Trip planners like Rejseplanen, Citymapper and Google Maps tell you how to get somewhere. None of them shows the whole city moving at once. Mylder is for that view first, with useful info (departures, delays, disruptions) one tap away.
+
+## Honest data states
+
+Live transit data is patchy: some vehicles report GPS, some are estimated from the timetable, and feeds drop out. Mylder never hides which is which. Every vehicle, departure and road carries one of these states:
+
+| State          | Meaning                                         | Example label              |
+| -------------- | ----------------------------------------------- | -------------------------- |
+| Live           | Reported position, under 60 s old               | "Reported 20 s ago"        |
+| Ageing         | Reported, but 1 to 5 min old                    | "Last seen 3 min ago"      |
+| Estimated      | Calculated from the timetable plus latest delay | "Estimated from schedule"  |
+| Scheduled only | No real-time data for this trip                 | "Timetable only"           |
+| Stale / lost   | No update for over 5 min, or the feed is down   | "No signal since 10:42"    |
+
+On the map, reported positions are solid dots and estimated ones are hollow. Thresholds are first guesses until real coverage is known.
+
+## How it works (planned)
+
+```
+Rejseplanen API ──▶ one small Node server ──SSE──▶ browsers
+ (positions,         polls on a fixed budget,        animate vehicles
+  departures,        keeps live state in memory      between updates
+  disruptions)
+```
+
+The free Rejseplanen tier allows about one call a minute, so browsers never call the API. One server polls, shares the result with everyone over Server-Sent Events, and the browser animates vehicles along their routes between updates.
+
+## Roadmap
+
+**First public version**
+
+- [x] App shell: React 19, TypeScript, Vite, Vitest, Playwright, CI
+- [ ] Live map with every vehicle moving along its route (MapLibre GL + deck.gl)
+- [ ] City pulse: vehicles moving now, average delay, share reporting per operator
+- [ ] Stop view: next departures, each with its data state
+- [ ] Vehicle list: a virtualised table sortable by line, delay and data age
+- [ ] Disruptions on one screen
+- [ ] English first, Danish second, mobile first
+
+**Later:** harbour ships from AIS, car traffic flow, replay of a past rush hour, a full-screen kiosk mode, more cities.
 
 ## Stack
 
@@ -9,8 +57,7 @@ A live map of Copenhagen's buses, S-tog, metro and trains, honest about how fres
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-
-The map layer (MapLibre GL, deck.gl) is not added yet.
+- Planned: MapLibre GL and deck.gl for the map, TanStack Virtual for the list, Node + Hono for the server
 
 ## Getting started
 
@@ -21,7 +68,7 @@ npm install
 npm run dev
 ```
 
-## Scripts
+Before the first e2e run, install a browser with `npx playwright install chromium`.
 
 | Script                  | What it does                                     |
 | ----------------------- | ------------------------------------------------ |
@@ -36,13 +83,17 @@ npm run dev
 | `npm run lint`          | Lint with oxlint                                 |
 | `npm run format`        | Format everything with Prettier                  |
 
-Before the first e2e run, install a browser with `npx playwright install chromium`.
-
-## Layout
-
 ```
 src/
   app/     App shell
   test/    Test setup
 e2e/       Playwright tests
 ```
+
+## Data
+
+Transit data from [Rejseplanen Labs](https://labs.rejseplanen.dk), used under its non-commercial guidelines. API keys stay on the server and are never committed.
+
+## About
+
+Built by [Marcin Sieradzki](https://github.com/marcin-sieradzki), a frontend and AI engineer in Copenhagen.
