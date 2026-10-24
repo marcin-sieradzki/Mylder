@@ -2,7 +2,7 @@
 
 **Watch Copenhagen move.** A live map of the city's buses, S-tog, metro and regional trains, and honest about how fresh each position is.
 
-*Mylder* is Danish for a teeming crowd, and it echoes *myldretid*, rush hour.
+_Mylder_ is Danish for a teeming crowd, and it echoes _myldretid_, rush hour.
 
 > **Status: early.** The app shell, tests and CI are set up. The live map comes next, once the Rejseplanen API access arrives. See the [roadmap](#roadmap).
 
@@ -16,13 +16,13 @@ Trip planners like Rejseplanen, Citymapper and Google Maps tell you how to get s
 
 Live transit data is patchy: some vehicles report GPS, some are estimated from the timetable, and feeds drop out. Mylder never hides which is which. Every vehicle, departure and road carries one of these states:
 
-| State          | Meaning                                         | Example label              |
-| -------------- | ----------------------------------------------- | -------------------------- |
-| Live           | Reported position, under 60 s old               | "Reported 20 s ago"        |
-| Ageing         | Reported, but 1 to 5 min old                    | "Last seen 3 min ago"      |
-| Estimated      | Calculated from the timetable plus latest delay | "Estimated from schedule"  |
-| Scheduled only | No real-time data for this trip                 | "Timetable only"           |
-| Stale / lost   | No update for over 5 min, or the feed is down   | "No signal since 10:42"    |
+| State          | Meaning                                         | Example label             |
+| -------------- | ----------------------------------------------- | ------------------------- |
+| Live           | Reported position, under 60 s old               | "Reported 20 s ago"       |
+| Ageing         | Reported, but 1 to 5 min old                    | "Last seen 3 min ago"     |
+| Estimated      | Calculated from the timetable plus latest delay | "Estimated from schedule" |
+| Scheduled only | No real-time data for this trip                 | "Timetable only"          |
+| Stale / lost   | No update for over 5 min, or the feed is down   | "No signal since 10:42"   |
 
 On the map, reported positions are solid dots and estimated ones are hollow. Thresholds are first guesses until real coverage is known.
 
@@ -57,6 +57,7 @@ The free Rejseplanen tier allows about one call a minute, so browsers never call
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
 - Planned: MapLibre GL and deck.gl for the map, TanStack Virtual for the list, Node + Hono for the server
 
 ## Getting started
