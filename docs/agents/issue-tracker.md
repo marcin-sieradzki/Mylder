@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder` skill reads and writes issues as this page says.
+Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder`, `to-spec` and `to-tickets` skills read and write issues as this page says.
 
 ## Operations
 
@@ -11,6 +11,10 @@ Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CL
 - **Comment**: `gh issue comment <n> --body-file -`.
 - **Labels**: `gh issue edit <n> --add-label "..."` / `--remove-label "..."`. Create a label the repository lacks with `gh label create <name>` before its first use, or `gh issue create --label` fails.
 - **Close**: `gh issue close <n> --comment "..."`.
+
+## Specs and tickets
+
+A spec from `to-spec` is a GitHub issue. `to-tickets` slices it into tickets, each a sub-issue of the spec, blocked through GitHub's native issue dependencies (see **Blocking** under Wayfinding operations). Specs and tickets go up unlabelled: Mylder has no triage labels, and the only labels these skills use are wayfinder's. A ticket closes through a PR whose body says `Closes #<n>`.
 
 ## When a skill says "publish to the issue tracker"
 
