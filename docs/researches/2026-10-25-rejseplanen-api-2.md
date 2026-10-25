@@ -41,6 +41,12 @@ Research caveat: this environment could not open labs.rejseplanen.dk, labs.rejse
 | Timetable only | Labs GTFS alone. A departure with no `prognosisType` has no realtime data [9].                                                                                                                                       | 0                               |
 | No signal      | A journey that left the `journeyPos` answer, an API error, or a spent budget.                                                                                                                                        | 0                               |
 
+A second `journeyPos` call each minute does not fit the budget. So the first-day test decides the one call:
+
+- If `REPORT_ONLY` returns most vehicles, use it. Vehicles missing from it fall back to the browser's estimate from GTFS.
+- If it returns few or none, use `CALC_REPORT`. Every position is then Estimated, and this API gives Mylder no Live state.
+- In between, alternate the two modes each minute. Each then refreshes every 2 minutes.
+
 **Use `journeyDetail` and `departureBoard` on demand only.** `journeyDetail` gives one trip per call: full stop times, cancellations and `lastPos`. It suits a viewer tapping a vehicle, cached per trip ref. `multiDepartureBoard` suits the stop view. Neither scales to a whole-city map: tracking every running trip with `journeyDetail` takes 30 to 60 calls a second at peak (Reported [9]).
 
 **Treat `lastPos` as Estimated, not Live.** It has no time and no source flag. In one saved answer, an S-tog sat about 70 m from København H five seconds before its timetabled, on-time arrival there (Confirmed [10]). That fits a computed position, though one sample cannot prove it.
