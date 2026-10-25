@@ -57,7 +57,7 @@ The free Rejseplanen tier allows about one call a minute, so browsers never call
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-- Agent skills in `.claude/skills/`: `grill-me`, `grilling` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`) and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
 - Planned: MapLibre GL and deck.gl for the map, TanStack Virtual for the list, Node + Hono for the server
 
 ## Getting started
