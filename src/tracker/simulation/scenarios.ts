@@ -16,7 +16,7 @@ export interface Scenario {
   readonly reporting: Readonly<Record<Mode, number>>
   /**
    * The share of each mode's trips that `CALC_REPORT` carries, reported or computed. The Metro
-   * is in no answer (ADR 0006).
+   * is in no answer whatever this says (ADR 0006).
    */
   readonly computed: Readonly<Record<Mode, number>>
   /** Where each mode's trips start their day's delay. */
@@ -47,3 +47,14 @@ export const SCENARIOS: Readonly<Record<string, Scenario>> = { weekday: WEEKDAY 
 
 /** The scenario `simulated` runs when none is named. */
 export const DEFAULT_SCENARIO = 'weekday'
+
+/** The scenario of a name, `weekday` when none is named, or an error naming the ones there are. */
+export function scenarioNamed(name: string = DEFAULT_SCENARIO): Scenario {
+  const scenario = SCENARIOS[name]
+  if (!scenario) {
+    throw new Error(
+      `No simulated scenario "${name}"; there are ${Object.keys(SCENARIOS).join(', ')}`,
+    )
+  }
+  return scenario
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect, Schema } from 'effect'
-import { HttpClient } from 'effect/http'
+import { HttpClient } from '../rejseplanen/http'
 import { TestClock } from 'effect/testing'
 import type { LatLon } from '../../domain/trip-motion'
 import { COPENHAGEN_BOX, type Box } from '../../timetable/format'
@@ -73,15 +73,20 @@ function distanceToPath([lat, lon]: LatLon, points: readonly LatLon[]): number {
   return best
 }
 
-/** How far a journey's position lies from the nearest pattern of its line. */
-function distanceFromLine(journey: PositionJourney): number {
-  const line = journey.Product?.[0].line
+/** How far a journey's position lies from its own pattern, the one that calls at its stops. */
+function distanceFromPattern(journey: PositionJourney): number {
+  const { platforms } = timetable.stops
+  const stops = (journey.Stops?.Stop ?? []).map((stop) => stop.extId)
+  const own = timetable.patterns.patterns.filter(
+    (pattern) =>
+      timetable.patterns.lines[pattern.line].name === journey.Product?.[0].line &&
+      stops.every((id) => pattern.stops.some((platform) => platforms[platform].id === id)),
+  )
+  expect(own.length).toBeGreaterThan(0)
   return Math.min(
-    ...timetable.patterns.patterns
-      .filter((pattern) => timetable.patterns.lines[pattern.line].name === line)
-      .map((pattern) =>
-        distanceToPath([journey.lat, journey.lon], patternPath(pattern, timetable.paths).points),
-      ),
+    ...own.map((pattern) =>
+      distanceToPath([journey.lat, journey.lon], patternPath(pattern, timetable.paths).points),
+    ),
   )
 }
 
@@ -137,7 +142,7 @@ describe('the simulated journeyPos', () => {
         expect(lat).toBeLessThanOrEqual(COPENHAGEN_BOX.north)
         expect(lon).toBeGreaterThanOrEqual(COPENHAGEN_BOX.west)
         expect(lon).toBeLessThanOrEqual(COPENHAGEN_BOX.east)
-        expect(distanceFromLine(journey)).toBeLessThanOrEqual(NOISE * Math.SQRT2 + 0.5)
+        expect(distanceFromPattern(journey)).toBeLessThanOrEqual(NOISE * Math.SQRT2 + 0.5)
       }
     }).pipe(Effect.provide(simulation())),
   )
@@ -165,12 +170,12 @@ describe('the simulated journeyPos', () => {
       const reported = new Set(refs(yield* answer({ positionMode: 'REPORT_ONLY' })))
       const calc = yield* answer({ positionMode: 'CALC' })
       const computed = calc.filter((j) => !reported.has(j.JourneyDetailRef.ref))
-      for (const journey of calc) expect(distanceFromLine(journey)).toBeLessThan(0.5)
+      for (const journey of calc) expect(distanceFromPattern(journey)).toBeLessThan(0.5)
       const noisy = (yield* answer({ positionMode: 'CALC_REPORT' })).filter((j) =>
         reported.has(j.JourneyDetailRef.ref),
       )
       expect(computed.length + noisy.length).toBeGreaterThan(0)
-      expect(noisy.some((j) => distanceFromLine(j) > 0.5)).toBe(true)
+      expect(noisy.some((j) => distanceFromPattern(j) > 0.5)).toBe(true)
     }).pipe(Effect.provide(simulation())),
   )
 
@@ -186,6 +191,22 @@ describe('the simulated journeyPos', () => {
         expect(stop.rtDepTime).toMatch(/^\d\d:\d\d:00$/)
         expect(stop.rtDepTime).not.toBe(stop.depTime)
       }
+    }).pipe(Effect.provide(simulation())),
+  )
+
+  it.effect('places a trip Waiting at its first stop, standing still', () =>
+    Effect.gen(function* () {
+      // The RE leaves København H at 07:17; from 07:12 it stands Waiting there.
+      const re = (journeys: readonly PositionJourney[]) =>
+        journeys.find((j) => j.trainNumber === '2427')!
+      const first = re(yield* answer({}, Date.UTC(2026, 5, 16, 5, 13)))
+      const second = re(yield* answer({}, Date.UTC(2026, 5, 16, 5, 14)))
+      expect(first.JourneyOrigin?.name).toBe('København H')
+      const { lat, lon } = first.JourneyOrigin!
+      const from = (point: LatLon, j: PositionJourney) =>
+        distanceToPath([j.lat, j.lon], [point, point])
+      expect(from([lat, lon], first)).toBeLessThan(100)
+      expect(from([first.lat, first.lon], second)).toBeLessThan(2 * NOISE * Math.SQRT2)
     }).pipe(Effect.provide(simulation())),
   )
 

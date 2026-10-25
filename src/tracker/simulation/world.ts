@@ -104,9 +104,11 @@ export function simulateTrip(
   const delayAt = delays(settings, trip, minute)
   const calls = timedCalls(expectedCalls(trip, delayAt, now))
   const delay = toMinutes(delayAt(minute))
-  // The Metro reports nowhere, whatever a scenario says (ADR 0006).
-  const reports = mode !== 'metro' && chance(seed, trip.key, 'reports') < scenario.reporting[mode]
-  const carried = reports || chance(seed, trip.key, 'computed') < scenario.computed[mode]
+  // The Metro is in no answer, whatever a scenario says, as an interval line (ADR 0006).
+  const metro = mode === 'metro'
+  const reports = !metro && chance(seed, trip.key, 'reports') < scenario.reporting[mode]
+  const carried =
+    reports || (!metro && chance(seed, trip.key, 'computed') < scenario.computed[mode])
   const vehicle = tripAt(calls, timetable.pathOf(trip.pattern), now)
   return { trip, delay, calls, vehicle, reports, carried }
 }

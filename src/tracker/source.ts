@@ -2,11 +2,11 @@
 // (docs/testing-seams.md, "The switch"): the simulated Rejseplanen, a recording, or the real API.
 // The key never picks the source, so a missing key fails loudly instead of showing a simulation.
 import 'server-only'
-import { Effect, Layer, Schema } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientResponse } from 'effect/http'
-import { ErrorAnswer, REFUSED_KEY } from './rejseplanen/answers.ts'
+import { Effect, type Layer } from 'effect'
+import { REFUSED_KEY } from './rejseplanen/answers.ts'
+import * as Http from './rejseplanen/http.ts'
 import * as SimulatedRejseplanen from './simulation/layer.ts'
-import { DEFAULT_SCENARIO } from './simulation/scenarios.ts'
+import { DEFAULT_SCENARIO, scenarioNamed } from './simulation/scenarios.ts'
 import type { Timetable } from './timetable.ts'
 
 export type Source =
@@ -37,25 +37,12 @@ export function readSource(value: string | undefined): Source {
 }
 
 /**
- * Rejseplanen with no key: every call answers as a refused key would, after one logged fault,
- * so the snapshot's API health shows the mistake.
+ * Rejseplanen with no key: every call logs the fault and answers as a refused key would, so the
+ * snapshot's API health shows the mistake.
  */
-const missingKey: HttpClient.HttpClient = HttpClient.make((request) =>
-  Effect.logError(`MYLDER_SOURCE=rejseplanen needs ${KEY_VARIABLE}; every call is refused`).pipe(
-    Effect.as(
-      HttpClientResponse.fromWeb(
-        request,
-        new Response(
-          JSON.stringify(
-            Schema.encodeSync(ErrorAnswer)({
-              errorCode: REFUSED_KEY,
-              errorText: `No ${KEY_VARIABLE} is set`,
-            }),
-          ),
-          { status: 401, headers: { 'content-type': 'application/json' } },
-        ),
-      ),
-    ),
+const missingKey = Http.client((request) =>
+  Effect.logError(`MYLDER_SOURCE=rejseplanen needs ${KEY_VARIABLE}; the call is refused`).pipe(
+    Effect.as(Http.error(request, 401, REFUSED_KEY, `No ${KEY_VARIABLE} is set`)),
   ),
 )
 
@@ -69,19 +56,19 @@ export interface SourceSettings {
 }
 
 /** The `HttpClient` layer a source answers through. */
-export function apiLayer(settings: SourceSettings): Layer.Layer<HttpClient.HttpClient> {
+export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.HttpClient> {
   const { source } = settings
   switch (source.kind) {
     case 'simulated':
       return SimulatedRejseplanen.layer({
         timetable: settings.timetable,
-        scenario: SimulatedRejseplanen.scenarioNamed(source.scenario),
+        scenario: scenarioNamed(source.scenario),
         seed: settings.seed,
       })
     case 'recording':
       // The recorded layer arrives with the recordings (#53).
       throw new Error(`MYLDER_SOURCE=recording:${source.folder} isn't built yet`)
     case 'rejseplanen':
-      return settings.key ? FetchHttpClient.layer : Layer.succeed(HttpClient.HttpClient, missingKey)
+      return settings.key ? Http.fetchLayer : Http.layer(missingKey)
   }
 }

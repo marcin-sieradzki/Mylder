@@ -1,5 +1,5 @@
-// The simulated `journeyPos`: every trip underway in the box, of the requested products, that
-// the position mode carries, up to `maxJny`.
+// The simulated `journeyPos`: every trip underway or Waiting in the box, of the requested
+// products, that the position mode carries, up to `maxJny`.
 import 'server-only'
 import type { LatLon } from '../../domain/trip-motion.ts'
 import type { Box } from '../../timetable/format.ts'
@@ -111,7 +111,6 @@ function nearStops({ timetable }: SimulationSettings, { trip, calls, vehicle }: 
     timetable,
     trip,
     calls,
-    true,
     Math.max(ahead - STOPS_BEHIND, 0),
     Math.min(ahead + STOPS_AHEAD, trip.calls.length),
   )
@@ -127,15 +126,16 @@ export function journeyPos(
   for (const simulated of world.trips) {
     if (journeys.length === request.maxJny) break
     const { vehicle, trip } = simulated
-    // Rejseplanen places journeys that have left; one Waiting at its first stop is the tracker's.
-    if (vehicle?.phase !== 'underway' || !inBox(vehicle.point, request.box)) continue
-    if ((productClass(trip.line) & request.products) === 0) continue
+    // A vehicle underway, or Waiting at its first stop.
+    if (!vehicle) continue
+    if ((productClass(trip.line).cls & request.products) === 0) continue
     const carried = request.positionMode === 'REPORT_ONLY' ? simulated.reports : simulated.carried
     if (!carried) continue
     const reported = simulated.reports && request.positionMode !== 'CALC'
     const point = reported
       ? withNoise(vehicle.point, trip.key, world.now, settings.seed)
       : vehicle.point
+    if (!inBox(point, request.box)) continue
     journeys.push(positionJourney(settings, simulated, point))
   }
   const head = envelope(world.now, settings.timetable.manifest.timezone)

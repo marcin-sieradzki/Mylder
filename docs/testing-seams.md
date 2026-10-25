@@ -18,7 +18,7 @@ Every time check in the tracker reads `Clock.currentTimeMillis`, never `Date.now
 
 ### The switch: `MYLDER_SOURCE`
 
-One environment variable picks where the tracker's answers come from, and `src/tracker/runtime.ts` builds its runtime from it. It is read at request time, so one `next build` serves CI's Playwright run, previews and production.
+One environment variable picks where the tracker's answers come from (`src/tracker/source.ts`), and the tracker builds its runtime from it. It is read at request time, so one `next build` serves CI's Playwright run, previews and production.
 
 | Value                                 | API layer                                                                                        | Clock                                          | Timetable                    |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ---------------------------- |
