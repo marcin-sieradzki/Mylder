@@ -1,0 +1,159 @@
+# Screens
+
+What each of Mylder's six screens shows, and where every figure on it comes from. The figures rest on three things only: the whole-city snapshot every browser polls (one `journeyPos` answer a minute, joined to the timetable and given data states by the server; [`live-data.md`](live-data.md)), the prepared timetable ([`timetable.md`](timetable.md)), and a call made because a person opened a stop or a vehicle. A figure the data can't back shows "—" and says why; nothing is averaged from a biased sample, and nothing is invented to fill a slot. The data-state rules are in [`data-states.md`](data-states.md) and the words in [`GLOSSARY.md`](../GLOSSARY.md); this page doesn't repeat them. Every screen is built from Perron, and this page names the components it uses; the changes Perron still needs, and each screen's stand-in until they ship, are listed in the spec rather than here, since that list shrinks as Perron ships.
+
+The six screens are the moving map, vehicle detail, stop departures, City pulse, the Vehicles list and Disruptions. On a desktop the map fills the window, City pulse, the Vehicles list and Disruptions are tabs in a side sheet, and vehicle detail and stop departures open as a panel. On a phone the sheet is a bottom sheet with a peek, and the panels open from the bottom. The About dialog is one tap from every screen. Everything is in English and Danish, light and dark.
+
+## The moving map
+
+**Shows.** Every trip on the map as a dot on its pattern's path, moving between polls: underway trips, Waiting trips standing at their first stop, Timetable only trips placed from the timetable, No signal trips moving on the timetable and their last delay. Each dot is drawn in its line's colour (its mode's colour for buses and trains) in the glyph of its data state, so the five states can be told apart without colour. Line paths and stops are drawn under the dots from the timetable's patterns, stops and paths. The basemap is one forked style recoloured from Perron's map tokens into light and dark. The glyph treatment and the overlay mode are chosen from the map-layer prototype (Prototype the map layer with Perron, #14); the rest of the map's rendering is as settled in ADR 0003.
+
+**The top bar** holds the brand, the Updated line, the mode filters, the language switch and the About button. The Updated line reads "Updated 08:14:05": the time the server received the position answer the snapshot was built from, with seconds, because the poll is a minute and the second matters for a dot's age. It is the one time the whole map moves on, so it is the only time in the top bar, and it never counts up: while the page is Disconnected it keeps the last snapshot's time, and while Paused it keeps the last answer's time and adds "paused". The mode filters are one chip per mode in the timetable (Bus, Metro, S-tog, Train, and Light rail where the timetable has it), each with the count of trips underway in that mode before filtering. A filter changes what is drawn and counted on every screen, never what the data says, and the sub-lines keep the whole in view ("of 1 312 in service").
+
+**The legend** names the five data states with their glyphs, in the states' order. If the first day with the key leaves Mylder on `CALC_REPORT` alone, no trip can be Live, and the legend says so once rather than every dot pretending.
+
+**Map controls:** zoom in, zoom out, reset view, and a pause control that stops the dots moving (they then step to their new positions when each snapshot lands). The same stepping is used when the viewer's system asks for reduced motion. A scale bar sits beside the controls. Every dot has a tap target of at least 24 px.
+
+**The hover card** on a dot shows its line, its destination, its data state's word and its state label ("Reported 20 s ago", "Last seen 3 min ago", "Estimated from schedule", "Timetable only", "No signal since 10:42"), aged by the clock from the snapshot's times. A tap on a dot opens vehicle detail; a tap on a stop opens its departures.
+
+**The highlight chip** appears while something is highlighted, "Showing: Signal fault at Danshøj · Clear", from Show whole line in vehicle detail or Show on map on a disruption. Clearing it returns the map to normal.
+
+**The corner credit** reads "Transit data: Rejseplanen (CC BY 4.0) · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap", each a link, at the bottom right on a desktop and above the sheet's peek on a phone, wrapping to two lines and never hidden behind a button. The Rejseplanen link leads to the About dialog, so a phone reader can read the full terms in one tap.
+
+**Page notices**, as alerts at the top of the map, above every panel:
+
+- **Disconnected**, when the browser's own polls of Mylder fail: "No connection since 08:16. Vehicles move on the last data from 08:14:05." It appears at once, because the browser knows at once. The dots keep moving on what the browser has, and every state ages by the clock.
+- **Paused**, when Mylder's server gets no position answers from Rejseplanen: "Rejseplanen hasn't answered since 08:09." when calls fail or answer nothing, shown once the latest answer is older than the Live limit; or "Live data is paused until 1 November: this month's calls are used up." when the month's budget is spent, shown at once, since the server knows. Dots keep moving; states age by the rules in [`data-states.md`](data-states.md).
+- **The budget line**, when the poll has stretched: "Updating every 90 s to stay within the data budget." (or "2 min"), in the About dialog and at the head of City pulse, never on a dot.
+- **The timetable notice**, when the prepared timetable has under 7 days of service left, and the recorded-data banner on a preview deployment.
+
+When both Disconnected and Paused hold, Disconnected is shown and the Paused notice from the last snapshot is kept beneath it.
+
+**Accessibility.** The canvas has an accessible name ("Live map of Copenhagen"). The dots themselves are not reachable by keyboard; the Vehicles list is the text alternative, and every vehicle on the map is a row there. Keys: + and − zoom, arrows pan, Esc closes panels; the About dialog lists them.
+
+**Built from:** the dots and paths on the canvas read Perron's tokens directly (no component); Brand, Surface (glass), FilterChip with Count, IconButton, VehicleDotLegend, MapControls, ScaleBar, Attribution, MapTooltip, HighlightChip, Alert, Toast, Text, Link, Dialog and Kbd, under PerronProvider.
+
+## Vehicle detail
+
+**Shows.** A panel for one trip, opened from a dot, a Vehicles list row or a departure row.
+
+- **Header:** the line badge, "to Destination", and a subheader with the mode and the operator ("S-tog · DSB"), from the timetable. No vehicle name: the glossary's fleet number is shown only when a source reports one, and none does.
+- **State block:** the state's dot and word, and one line per state: Live, "Reported by the vehicle; seen 08:14:05" (the time of the answer that last carried it); Ageing, "Last reported 08:09; moving on the timetable since."; Estimated, "Estimated from the timetable and a delay of +3 min" or "Position computed by Rejseplanen"; Timetable only, "No realtime for this trip today; placed from the timetable."; No signal, "No signal since 08:09; moving on the timetable and its last delay."; a Metro trip, "Runs to an interval". A cancelled trip's panel says "Cancelled".
+- **Facts:** Delay, Last seen, Next stop. The delay is Rejseplanen's own, expected minus timetabled at the trip's next call, from `journeyDetail` while the panel is open (one call, cached a minute) or from the snapshot when the answer carries delays; "—" for Timetable only and No signal; "Runs to an interval" for the Metro. Last seen is the answer time for Live and Ageing, "—" otherwise. There is no speed: the API gives none, and two positions a minute apart give a mean that is wrong at every stop.
+- **Where:** "Between Nørreport and Kongens Nytorv" or "At Nørreport", read from the position's place on the pattern; "Last seen near Nørreport" for No signal; "Waiting at Hundige, departs 10:42" for a Waiting trip, never "At Hundige" unless a report puts it there.
+- **Next stops:** the calls ahead with their timetabled times and a delay per call from `journeyDetail`, or the snapshot's delay for every later call until the detail has loaded, the next stop marked. For a No signal trip the times are the timetable's with "Delay unknown". Cancelled calls are marked. A Metro trip lists its calls without times, with the interval instead.
+- **Follow** keeps the camera on the dot and ends when the trip reaches its last stop, when the viewer pans, or when the panel closes. **Show whole line** fits the trip's pattern and raises the highlight chip.
+- **Messages:** the trip's own messages from `journeyDetail`, as cards, with their stop range marked on the next-stops list. This is the one honest tie from a message to a trip, and it costs no extra call.
+- **Source line:** "Rejseplanen · position 08:14:05 · times 08:14:20" when `journeyDetail` was called; "Rejseplanen · position 08:14:05 · times from the timetable" when not; the messages carry "checked 08:15".
+
+When on-demand calls are stopped by the budget, or the API is failing, the panel is served from the timetable plus the snapshot's delay and says "From the timetable".
+
+**Built from:** DetailPanel (Sheet and DetailHeader), VehicleDotLabel, FactList, StopTimeline, Button, Delay, DisruptionCard, Text.
+
+## Stop departures
+
+**Shows.** A panel for one stop, opened from a stop on the map or a disruption card, with the stop's name, its lines as badges, and its departures for the next 30 minutes across its platforms.
+
+- **The list** comes from one `multiDepartureBoard` call for the stop's platforms when it opens, cached a minute; when on-demand calls are stopped or the API is failing, from the timetable with the snapshot's delay where a trip has one. Each row shows the line, the destination, a countdown from the expected time (or the timetabled time when there is none; under 45 s it reads "Now"), the timetabled time struck through when the two differ by a minute or more, the platform or track when the board gives one, the delay, and the trip's data state, joined to the snapshot by the trip's key. A row whose trip is not in the snapshot but carries realtime shows as Estimated, since its expected time is realtime without a position. A departure's time follows its trip's state as [`data-states.md`](data-states.md) sets out: "~" before an Estimated time, "Unknown" beside the timetabled time for No signal.
+- **The Metro:** an interval row, "every 3 min" or "every 3 to 4 min", worked out from the planned departures in the current hour in that direction, with no countdown and no clock time, and the note "Metro: planned times". If the first calls with the key show Metro realtime, Metro rows become ordinary rows.
+- **Cancelled** rows stay, marked Cancelled, with the countdown struck.
+- **Empty:** "No departures in the next 30 minutes for the vehicle types shown."
+- **Messages:** the cards from the disruption list already loaded whose stops include this one; no call.
+- **Note:** "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so."
+- **Source line:** "Rejseplanen · departures 08:14:20" when the board was called; "Timetable and positions 08:14:05" when served from the timetable plus the snapshot's delays.
+
+**Built from:** DetailPanel (stop variant) with LineBadges in its subheader, DepartureRow, DataStatePanel, DisruptionCard, Text.
+
+## City pulse
+
+**Shows.** Three key figures, a meter per mode, the day's profile, and the five states with their counts. Every count respects the mode filters and ages by the clock between polls, from the same pure rules the dots use, so the figures and the map never disagree.
+
+| Figure                                     | Shows                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Computed from                                                                                                                                                                                                                                                                                                                                                | "—" when                                                                                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| On the move                                | "1 046", "of 1 312 in service"                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Trips underway now (between first departure and last arrival on their expected or timetabled times) that are not No signal and not standing at a stop; standing is read from the position on the path for Live and Ageing trips and from the call times for the rest. "In service" is every trip on the map, Waiting trips included.                         | The timetable is missing. It is still computed while Paused, from the timetable, with the notice saying positions are paused. |
+| Reported this minute                       | "412", "vehicles that reported their position"                                                                                                                                                                                                                                                                                                                                                                                                                                         | Trips whose position in the latest `REPORT_ONLY` answer is new or has moved since the previous answer. A position identical to the last answer's is not counted, though the trip stays Live until its limit.                                                                                                                                                 | The position mode is `CALC_REPORT` alone ("Rejseplanen sends computed positions only"); Paused.                               |
+| Average delay (if the answers carry delay) | "+1.4", "min, vehicles with a known delay, Metro left out"; one decimal, a true minus sign when early                                                                                                                                                                                                                                                                                                                                                                                  | The mean of the delays the snapshot itself carries for Live, Ageing and Estimated trips, which exists only if the first day shows `journeyPos` answers give expected times per trip. Metro trips are left out. Delays learnt from a stop or vehicle someone opened never enter it: people open late buses.                                                   | Fewer than 20 trips have a known delay ("too few vehicles with a known delay"); Paused.                                       |
+| Reporting live (otherwise)                 | "62 %", "412 of 668 vehicles that could report"                                                                                                                                                                                                                                                                                                                                                                                                                                        | Takes the third slot when the answers carry no delay: the sum of the meters below.                                                                                                                                                                                                                                                                           | As the meters.                                                                                                                |
+| Reporting live, by mode                    | One meter per mode: the share, "412/668", the mode's authority or operator as a second line (Movia, DSB, Metroselskabet)                                                                                                                                                                                                                                                                                                                                                               | Per mode, Live and Ageing trips over all trips underway in the mode, Waiting trips left out. Green at or above 70 %, amber from 40 %, red under 40 %. The operator is the mode's, from the timetable, never per trip. The Metro's meter reads "—" with "No realtime from the Metro; placed from the timetable" while it is an interval line, not 0 % in red. | `CALC_REPORT` alone (every meter "—", "every position is computed by Rejseplanen"); Paused.                                   |
+| Vehicles in service today                  | The planned trips underway at each quarter hour of the service day, "Planned, from today's timetable"                                                                                                                                                                                                                                                                                                                                                                                  | The timetable job's day profile for today's service day, prepared offline. The plan, not the day, so it has no data state and no "now" marker; the On the move figure beside it carries now.                                                                                                                                                                 | The timetable is missing: the panel's error state in its place.                                                               |
+| How sure are we?                           | The five states in order, each with its dot, its word, one sentence and its count: Live, "Reported by the vehicle in the latest answers."; Ageing, "Last reported a few minutes ago; moving on along its path since."; Estimated, "Placed from the timetable and a known delay, or computed by Rejseplanen."; Timetable only, "No realtime for this trip today; placed from the timetable."; No signal, "Had realtime, missing for 5 min; moving on the timetable and its last delay." | Counts of the trips on the map per state, from the pure rules, so they age as the dots do: while Disconnected, Live drains into Ageing and then No signal, which is the truth of what the browser knows.                                                                                                                                                     | Never: the counts are always what the browser knows.                                                                          |
+
+The tab counts: Vehicles, the trips on the map after the mode filters; Disruptions, the number of cards listed. The budget line ("Updating every 90 s to stay within the data budget.") heads the panel when the poll has stretched. The prototype's simulated clock and speed controls, its "Later" chips for harbour and traffic, and its prose about when rush hour peaks are gone; the curve shows the peaks itself.
+
+**Source line:** "Rejseplanen · positions 08:14:05 · timetable of 12 October", under the figures; the chart carries its own caption.
+
+**Built from:** Stat, Meter, DayProfileChart, ReportStrip, VehicleDotLegend, Section, Sheet, Tabs with Tab counts, DataStatePanel, Text.
+
+## The Vehicles list
+
+**Shows.** Every trip on the map as a row, so the list is the text alternative to the canvas: about 1,300 to 1,600 rows at the morning peak. Columns: Line, Destination, Position (the state's dot and word) and Delay. There is no age column, because the API gives no report time and an age would be the poll's age; the state word says enough in a list, and the detail panel shows "Last seen". There is no fleet number.
+
+- **Delay** is shown when the snapshot carries delays for the city; if the first day shows it doesn't, the column is hidden rather than filled with "—" for all but the trips someone happened to open.
+- **Sort:** by Line (modes in the order Metro, S-tog, Train, Bus, then line names in numeric order), by Destination, by Delay (unknown delays last whichever way) or by Position (state order, then Live before Ageing by the time last seen). The order stays steady between polls, so rows don't jump under a finger.
+- **Search** over line name and destination. "No vehicles match." when nothing does.
+- **A row** opens the vehicle's detail. The list re-renders when a snapshot lands and when a row's state ages, not every frame.
+- **Count:** the Vehicles tab's count.
+- **Source line:** "Rejseplanen · positions 08:14:05", above the rows, so it is seen before scrolling.
+
+**Built from:** SearchField, Select (the sort), VehicleTable, DataStatePanel, Text.
+
+## Disruptions
+
+**Shows.** One list of cards, in this order:
+
+1. **Mylder's own data cards**, at most one each, made by the server from the snapshot's history: "Live data paused until the 1st" (the budget is spent); "No answer from Rejseplanen since 08:09" (the API has failed or answered nothing for 5 min); "No bus positions since 08:09" (a mode that reported positions in the last hour has had none for 5 min, one card per mode, never for a mode that doesn't report, such as the Metro while it is an interval line); "Disruption messages not updated since 07:45" (the last `himsearch` call failed and the list is older than 15 min). Disconnected is not a card: it is the browser's own condition and shows as the page notice.
+2. **Rejseplanen's messages active now**, from `himsearch`, called every 15 minutes while anyone watches (every 30 at the tight budget level), on the same cached route as the snapshot. Sorted by priority if the first day shows priority orders messages, else by start time, newest first.
+3. **Later:** messages starting within the next 7 days, under a heading, by start time.
+
+A message belongs to Copenhagen when it names at least one stop in Mylder's stop set, or names no stops and its products overlap the modes Mylder shows. One naming only stops outside the box is left out. When an answer holds exactly 100 messages, the footer says "Rejseplanen sends at most 100 messages, so the list may be incomplete."
+
+**A card** shows its kind (Delays, Diversion, Planned works, Data feed, or Service notice for a message whose fields don't say), read from the message's structured fields only: Planned works for a message that starts in the future or spans more than a day; Delays or Diversion only where the category or icon values the first day reveals mean them. Then the message's heading, its lead, and its full text behind "More" when longer, all as Rejseplanen wrote it, in Danish, in both languages, with the caption "From Rejseplanen, in Danish" in the English UI. Its modes as tags. "Affects Nørreport, Kongens Nytorv and 3 more" or "Between Hellerup and Klampenborg" from its stops. Its time, "From 08:03" or "24 to 25 October". And **Show on map**, which rings each affected stop in the card's severity colour, draws the stretch between its from and to stops along every pattern that runs through both, fits the camera to them and raises the highlight chip. A message with no stops has no Show on map.
+
+No line badges, unless the first day shows the answers name lines in a field: a line read out of prose ("Linje 2A kører en anden rute") would often work and sometimes mislead, and a wrong badge on a disruption is worse than none. For the same reason the prototype's per-line "Running normally" list is gone: with messages naming stops, no line can honestly be called untouched. When no message is active and the last check succeeded, the screen shows "Running normally" once, for the network, with the time it was checked.
+
+Cancellations make no card. They are shown where they are seen: a cancelled row in a stop's departures, a cancelled trip's panel, cancelled calls on a trip's next stops. A card per cancellation would describe where people looked, not the network.
+
+**Footer:** "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open." After a failed check, "Last checked 07:45; the latest check failed." After an hour without a successful check the list stays, marked "May be out of date", and the data card above says so. The time is the server's receipt time of the last good answer.
+
+**Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, LinkButton, Accordion, Separator, DataStatePanel, Text.
+
+## The About dialog
+
+Opened from the top bar's About button and from the corner credit. It holds the full terms and the page's status:
+
+- Rejseplanen as the source of the realtime data and the timetable, under CC BY 4.0, with the link; the timetable's version date.
+- The map credits: OpenStreetMap contributors under ODbL, OpenMapTiles, OpenFreeMap, and the forked style's notice, each linked.
+- "Mylder shows the data as Rejseplanen sends it, in its own words and language, and marks every figure it works out itself." and the non-commercial statement: no advertising, no paid tier, no sale of the data or of anything built on it.
+- The five data states with their sentences, and, when the position mode leaves no trip Live, one line saying so.
+- The page's status, from the snapshot: the position mode, Rejseplanen's own realtime time (`planRtTs`, shown here and used nowhere else), the budget level and the calls used this month, whether the server store is available (and when not, that no trip can be Ageing or No signal until it returns), the disruption list's last check, and the budget line when the poll has stretched.
+- The keys: + and − zoom, arrows pan, Esc closes panels, with the pause control named.
+
+**Built from:** Dialog, Kbd, Link, Text.
+
+## Sources and times on every screen
+
+Each source has its own clock, and the screens never blend them. A time is always the time the server received the answer a figure came from, in Copenhagen's clock, 24-hour; the data state says when that answer is old.
+
+| Screen          | Source line                                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Moving map      | The corner credit, and "Updated 08:14:05" in the top bar: the positions' time, with seconds                                         |
+| Vehicle detail  | "Rejseplanen · position 08:14:05 · times 08:14:20", or "· times from the timetable"; the messages' "checked 08:15"                  |
+| Stop departures | "Rejseplanen · departures 08:14:20", or "Timetable and positions 08:14:05"; "Metro: planned times" beside an interval row           |
+| City pulse      | "Rejseplanen · positions 08:14:05 · timetable of 12 October"; the chart's "Planned, from today's timetable"                         |
+| Vehicles list   | "Rejseplanen · positions 08:14:05"                                                                                                  |
+| Disruptions     | "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open.", and the 100-message footer when it applies |
+| About           | Everything above, with the full terms                                                                                               |
+
+The positions' time is shown with seconds in the top bar and to the minute elsewhere. When an answer is older than its refresh (a snapshot older than the poll interval, a board older than a minute, messages older than 15 minutes), the source line adds "may be out of date", and the page notice takes over when Disconnected or Paused applies. On a phone a sheet or panel can cover the map and its corner credit, so each panel's own source line is what keeps the terms met there, and the About dialog is one tap away. Every panel says it the same way: the same words, the same order, source then time.
+
+## Not altering the data
+
+Rejseplanen's guidelines ask that its data not be altered so that it differs from the original or can be misread. What that means on each screen, so a builder can check it:
+
+- A computed position never counts as Live; the dot's glyph and its word say which it is.
+- Rejseplanen's messages are shown in its words and its language, with a caption in the English UI; no translation, no summary, no line read out of the prose.
+- A delay is Rejseplanen's own, expected minus timetabled, to the minute it gives. Mylder's own placements say "Estimated" or "~", its day profile says "Planned, from today's timetable", and the shift that keeps a dot from jumping back at the next answer is never shown as a delay or a time.
+- A figure the data can't back shows "—" and the reason, never a stand-in number; nothing is averaged from the stops and vehicles people happened to open.
+- Mode filters, sorting and search change what is shown, not what the data says; the "of N in service" sub-line keeps the whole in view.
+- The Metro's planned clock times are never shown as departures, because the trains don't keep them; the interval is what the Metro itself tells passengers.
+- A time is the time of one answer, never a blend, and never counts up while the page is Disconnected.

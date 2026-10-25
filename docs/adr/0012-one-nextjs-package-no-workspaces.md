@@ -5,4 +5,4 @@ Mylder is one deployable, a Next.js app on Vercel, whose tracker module is meant
 ## Consequences
 
 - Moving the tracker out later means copying `src/tracker/` and `src/domain/` behind an HTTP server and changing the route handlers' callers, not untangling a package graph.
-- Mylder cannot use a Perron component before it is published; until `@mylder/perron` 0.2.0 is on npm, screen work runs on a local link and its pull requests wait.
+- Mylder cannot use a Perron component before it is published; until the Perron release with its components (0.2.0 as its changesets stand) is on npm, screen work runs on a local link and its pull requests wait.

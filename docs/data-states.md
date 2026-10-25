@@ -22,7 +22,7 @@ The **poll interval** is the time between position answers. It is about 60 s, an
 | Ageing         | The trip's latest report is older than the Live limit and under 5 min                                       | "Last seen 3 min ago"     | Faint dot, outlined |
 | Estimated      | No report under 5 min, but Rejseplanen's realtime still has the trip: a computed position or expected times | "Estimated from schedule" | Hollow dot          |
 | Timetable only | No realtime for the trip this service day; placed from the timetable. Every Metro trip                      | "Timetable only"          | Dashed hollow dot   |
-| No signal      | The trip had realtime, and it stopped: missing from the position answers for 5 min, or no answers for 5 min | "No signal since 10:42"   | Grey dot            |
+| No signal      | The trip had realtime, and it stopped: missing from the position answers for 5 min, or no answers for 5 min | "No signal since 10:42"   | Grey dot, cut       |
 
 Only `REPORT_ONLY` answers can make a trip Live or Ageing. A computed position never counts as Live, however fresh: it is Rejseplanen's estimate, not the vehicle's word. If the first day shows that `REPORT_ONLY` returns nothing useful and Mylder runs on `CALC_REPORT` alone, no trip is ever Live, and the map says so in its legend rather than pretending.
 
@@ -44,16 +44,18 @@ A departure shows its trip's data state: the expected time when Live or Ageing (
 
 ## Thresholds
 
-| Threshold      | Rule                                                                      | At 60 s polls | At 90 s | At 120 s, or alternating modes at 60 s |
-| -------------- | ------------------------------------------------------------------------- | ------------- | ------- | -------------------------------------- |
-| Live limit     | 2.5 × the interval between report answers, and never more than 4 min      | 150 s         | 225 s   | 4 min                                  |
-| Ageing ends    | 5 min since the latest report                                             | 5 min         | 5 min   | 5 min                                  |
-| Fresh realtime | 5 min since the position answer that carried the trip, for Estimated      | 5 min         | 5 min   | 5 min                                  |
-| No signal      | 5 min missing from position answers, or 5 min without any position answer | 5 min         | 5 min   | 5 min                                  |
-| Waiting        | From 5 min before the trip's first departure                              | 5 min         | 5 min   | 5 min                                  |
-| Paused notice  | When the latest position answer is older than the Live limit              | 150 s         | 225 s   | 4 min                                  |
+| Threshold      | Rule                                                                                           | At 60 s polls | At 90 s | At 120 s, or alternating modes at 60 s |
+| -------------- | ---------------------------------------------------------------------------------------------- | ------------- | ------- | -------------------------------------- |
+| Live limit     | 2.5 × the interval between report answers, and never more than 4 min                           | 150 s         | 225 s   | 4 min                                  |
+| Ageing ends    | 5 min since the latest report                                                                  | 5 min         | 5 min   | 5 min                                  |
+| Fresh realtime | 5 min since the position answer that carried the trip, for Estimated                           | 5 min         | 5 min   | 5 min                                  |
+| No signal      | 5 min missing from position answers, or 5 min without any position answer                      | 5 min         | 5 min   | 5 min                                  |
+| Waiting        | From 5 min before the trip's first departure                                                   | 5 min         | 5 min   | 5 min                                  |
+| Paused notice  | When the latest position answer is older than the Live limit; at once when the budget is spent | 150 s         | 225 s   | 4 min                                  |
 
 The Live limit follows the poll so that one missed answer, whether the trip skipped an answer or a poll failed, does not change a dot's state, while two do. The 5 min bounds are absolute: at 120 s polls, Ageing lasts from 4 to 5 min. All of these are first guesses; the recording (#12) sets them.
+
+Perron's `vehicle-dot.live-threshold` token is 60 s, which suits a feed that reports every few seconds. Mylder's position answers come once a minute at best, so a 60 s limit would turn every dot Ageing between two polls; Mylder computes its Live limit from the poll interval as above, and keeps Perron's 5 min `vehicle-dot.ageing-threshold`. The glyphs themselves are Perron's, as its data-states page draws them: No signal is the grey dot cut by a diagonal slash.
 
 ## Times for each call
 
@@ -96,7 +98,7 @@ If the first calls with the key return Metro positions, or Metro departures with
 
 Two conditions sit above the data states. Neither is a data state; both are notices on the page.
 
-**Paused** is when Mylder's server gets no position answers from Rejseplanen. It shows the moment the latest answer is older than the Live limit, with the reason: "Rejseplanen hasn't answered since 10:42" when calls fail, or "Live data is paused until 1 November: this month's calls are used up" when the budget is spent. Meanwhile Mylder serves the last snapshot it has, dots keep moving, and states age by the clock: Live turns Ageing at the Live limit, and every trip that had realtime turns No signal at 5 min. Timetable only trips are unchanged. The first good answer lifts the notice and restores every state at once.
+**Paused** is when Mylder's server gets no position answers from Rejseplanen. It shows with its reason: "Rejseplanen hasn't answered since 10:42" when calls fail, the moment the latest answer is older than the Live limit; or "Live data is paused until 1 November: this month's calls are used up" at once when the budget is spent, since the server knows. Meanwhile Mylder serves the last snapshot it has, dots keep moving, and states age by the clock: Live turns Ageing at the Live limit, and every trip that had realtime turns No signal at 5 min. Timetable only trips are unchanged. The first good answer lifts the notice and restores every state at once.
 
 - _The API answers HTTP 500 for 7 min:_ the notice appears after about 2.5 min; at 5 min every bus and train with realtime is No signal, still moving on timetable plus last delay; at 7 min one good answer brings them all back to Live or Estimated.
 - _The budget runs out at 18:00:_ the notice names the date; within 5 min every trip with realtime that day is No signal. From the next service day, no trip has had realtime, so the whole city is Timetable only until the 1st. Opening a stop or a vehicle spends no calls either; departures come from the timetable and say so.
