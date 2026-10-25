@@ -11,5 +11,13 @@
     "react/exhaustive-deps": "warn",
     "react/only-export-components": ["warn", { "allowConstantExport": true }]
   },
-  "ignorePatterns": ["dist", "coverage", "playwright-report", "test-results", "prototypes"]
+  "ignorePatterns": [
+    "dist",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "prototypes",
+    ".next",
+    "scripts"
+  ]
 }
