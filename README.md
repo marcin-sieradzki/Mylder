@@ -57,7 +57,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-- Agent skills in `.claude/skills/`: `grill-me`, `grilling` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `implement-spec` (with `tdd`, `codebase-design` and `code-review`), `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT)
 - Planned: Next.js on Vercel in place of Vite, Effect for the server's tracker, MapLibre GL and deck.gl for the map, and Perron for every component and token
 
 ## Getting started
