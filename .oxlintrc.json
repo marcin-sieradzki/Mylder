@@ -32,5 +32,53 @@
     "playwright-report",
     "test-results",
     "prototypes"
+  ],
+  "overrides": [
+    {
+      "files": ["src/domain/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["../*", "/*", "@/*"],
+                "message": "The domain rules import nothing from Mylder's other folders."
+              }
+            ],
+            "paths": [
+              {
+                "name": "react",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "react-dom",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "next",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "effect",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "server-only",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "client-only",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              },
+              {
+                "name": "@mylder/perron",
+                "message": "The domain rules run on both sides with no I/O, Effect, React or Next.js."
+              }
+            ]
+          }
+        ]
+      }
+    }
   ]
 }

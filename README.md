@@ -85,11 +85,21 @@ Before the first e2e run, install a browser with `npx playwright install chromiu
 | `npm run lint`          | Lint with oxlint                              |
 | `npm run format`        | Format everything with Prettier               |
 
-```
-app/       Next.js routes, kept thin
-src/test/  Test setup
-e2e/       Playwright tests
-```
+## Folders
+
+Each folder's name says where its code may run, and a wrong import fails the build or the lint:
+
+| Folder           | Runs on                    | What it holds                                         | Guard                                                  |
+| ---------------- | -------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| `app/`           | Server                     | Next.js routes and route handlers, kept thin          |                                                        |
+| `src/domain/`    | Both                       | Pure rules: data states, positions, delays            | `npm run lint` fails on any import from another folder |
+| `src/tracker/`   | Server only                | The Effect tracker behind the snapshot                | `server-only`: `next build` fails in a client module   |
+| `src/timetable/` | Both                       | The prepared timetable's format and readers           |                                                        |
+| `src/map/`       | Browser only               | MapLibre, the deck.gl layer and the animation loop    | `client-only`: `next build` fails in a server module   |
+| `src/screens/`   | Browser                    | Client components for the screens, built from Perron  |                                                        |
+| `src/i18n/`      | Both, loader on the server | English and Danish dictionaries and the language type |                                                        |
+
+Tests sit beside the code they test; Playwright journeys are in `e2e/`, and the timetable job in `scripts/timetable/`.
 
 ## Data
 
