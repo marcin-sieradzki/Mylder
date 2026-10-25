@@ -187,7 +187,7 @@ describe('the simulated journeyPos', () => {
       const late = stops.flat().filter((stop) => stop.rtDepTime !== undefined)
       expect(late.length).toBeGreaterThan(0)
       for (const stop of late) {
-        expect(stop.depPrognosisType).toBe('PROGNOSED')
+        expect(['PROGNOSED', 'CALCULATED']).toContain(stop.depPrognosisType)
         expect(stop.rtDepTime).toMatch(/^\d\d:\d\d:00$/)
         expect(stop.rtDepTime).not.toBe(stop.depTime)
       }

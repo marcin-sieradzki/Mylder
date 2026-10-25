@@ -22,6 +22,13 @@ export const json = (request: Request, status: number, body: unknown): Response 
     }),
   )
 
+/** Answers a request with a plain body, as a server in front of Rejseplanen might fail. */
+export const text = (request: Request, status: number, body: string): Response =>
+  HttpClientResponse.fromWeb(
+    request,
+    new globalThis.Response(body, { status, headers: { 'content-type': 'text/plain' } }),
+  )
+
 /** Answers a request with Rejseplanen's error answer. */
 export const error = (request: Request, status: number, errorCode: string, errorText: string) =>
   json(request, status, Schema.encodeSync(ErrorAnswer)({ errorCode, errorText }))

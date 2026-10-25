@@ -10,9 +10,10 @@ import {
   type TimedCall,
   type Vehicle,
 } from '../../domain/trip-motion.ts'
+import type { IsoDate } from '../../timetable/format.ts'
 import type { PlannedTrip } from '../../timetable/trips.ts'
 import type { Timetable } from '../timetable.ts'
-import { chance } from './random.ts'
+import { chance, hash } from './random.ts'
 import type { Scenario } from './scenarios.ts'
 
 const MINUTE = 60_000
@@ -20,9 +21,23 @@ const MINUTE = 60_000
 /** No simulated trip runs later than this, so a trip is looked at only near its planned times. */
 export const MAX_DELAY = 15 * MINUTE
 
+/**
+ * Whether a trip runs on an interval line, the Metro (ADR 0006): it is in no answer, never
+ * cancelled and never doubled, and its departures carry no prognosis, whatever a scenario says.
+ */
+export const isIntervalLine = (trip: PlannedTrip) => trip.line.mode === 'metro'
+
 /** One trip of the simulated city at a moment. */
 export interface SimulatedTrip {
   readonly trip: PlannedTrip
+  /** Its journey number for the day, the `ZI` of its reference. */
+  readonly journeyNumber: number
+  /** Whether it is an Extra trip: one the timetable doesn't have. */
+  readonly extra: boolean
+  /** Whether it is cancelled outright. A cancelled trip is on no map and in no position answer. */
+  readonly cancelled: boolean
+  /** The calls it passes without calling, by their index. */
+  readonly cancelledCalls: readonly number[]
   /** Its delay now, in seconds, a whole number of minutes as Rejseplanen's times have. */
   readonly delay: number
   /** Each call's expected times: those it kept for calls behind it, `delay` for those ahead. */
@@ -33,6 +48,8 @@ export interface SimulatedTrip {
   readonly reports: boolean
   /** Whether `CALC_REPORT` carries it, with a reported or a computed position. */
   readonly carried: boolean
+  /** Whether it has gone quiet now, so that no position answer carries it. */
+  readonly quiet: boolean
 }
 
 export interface World {
@@ -45,6 +62,121 @@ export interface SimulationSettings {
   readonly timetable: Timetable
   readonly scenario: Scenario
   readonly seed: number
+}
+
+/** A service day's trips as the simulation runs them: the timetable's and its Extra trips. */
+export interface SimulatedDay {
+  readonly trips: readonly PlannedTrip[]
+  readonly extras: ReadonlySet<string>
+  /** Each trip's journey number, by its key. */
+  readonly numbers: ReadonlyMap<string, number>
+  /** Each trip, by its journey number. */
+  readonly byNumber: ReadonlyMap<number, PlannedTrip>
+  /** The trips that call at each platform, by the platform's index. */
+  readonly byPlatform: ReadonlyMap<number, readonly PlannedTrip[]>
+}
+
+/**
+ * Each trip of a service day's journey number, stable for the trip: drawn from its key, and on a
+ * clash moved on to the next free number, in key order.
+ */
+function journeyNumbers(trips: readonly PlannedTrip[]): Map<string, number> {
+  const numbers = new Map<string, number>()
+  const taken = new Set<number>()
+  for (const key of trips.map((trip) => trip.key).sort()) {
+    let number = 10_000 + (hash(key) % 890_000)
+    while (taken.has(number)) number = number === 899_999 ? 10_000 : number + 1
+    taken.add(number)
+    numbers.set(key, number)
+  }
+  return numbers
+}
+
+/**
+ * A planned trip's Extra trips: as many as the scenario's rate draws, each a copy of it running
+ * three to seven minutes behind the one before. The Metro gets none.
+ */
+function extrasOf({ scenario, seed }: SimulationSettings, trip: PlannedTrip): PlannedTrip[] {
+  if (isIntervalLine(trip)) return []
+  const whole = Math.floor(scenario.extra)
+  const count = whole + (chance(seed, trip.key, 'extra') < scenario.extra - whole ? 1 : 0)
+  const copies: PlannedTrip[] = []
+  let behind = 0
+  for (let i = 1; i <= count; i++) {
+    behind += (3 + Math.floor(chance(seed, trip.key, 'extra', i) * 5)) * MINUTE
+    const shift = behind
+    copies.push({
+      ...trip,
+      key: `${trip.key}.extra${i}`,
+      calls: trip.calls.map((call) => ({
+        ...call,
+        arrival: call.arrival + shift,
+        departure: call.departure + shift,
+      })),
+    })
+  }
+  return copies
+}
+
+const days = new WeakMap<SimulationSettings, Map<IsoDate, SimulatedDay>>()
+
+/** A service day's simulated trips, worked out once per day for a simulation. */
+export function simulatedDay(settings: SimulationSettings, day: IsoDate): SimulatedDay {
+  let cached = days.get(settings)
+  if (!cached) days.set(settings, (cached = new Map()))
+  const known = cached.get(day)
+  if (known) return known
+  const planned = settings.timetable.tripsOn(day)
+  const extraTrips = planned.flatMap((trip) => extrasOf(settings, trip))
+  const trips = [...planned, ...extraTrips]
+  const numbers = journeyNumbers(trips)
+  const byPlatform = new Map<number, PlannedTrip[]>()
+  for (const trip of trips) {
+    for (const { platform } of trip.calls) {
+      const calling = byPlatform.get(platform)
+      if (calling) calling.push(trip)
+      else byPlatform.set(platform, [trip])
+    }
+  }
+  const simulated: SimulatedDay = {
+    trips,
+    extras: new Set(extraTrips.map((trip) => trip.key)),
+    numbers,
+    byNumber: new Map(trips.map((trip) => [numbers.get(trip.key)!, trip])),
+    byPlatform,
+  }
+  cached.set(day, simulated)
+  return simulated
+}
+
+/**
+ * Whether a trip has gone quiet at a moment. A share of trips goes quiet once, somewhere along
+ * their run, for a few whole minutes; a smaller share goes quiet partway and stays quiet.
+ */
+function quietAt({ scenario, seed }: SimulationSettings, trip: PlannedTrip, now: number): boolean {
+  const { silence } = scenario
+  const first = trip.calls[0].departure
+  const run = trip.calls.at(-1)!.arrival - first
+  const at = (label: string) =>
+    first + Math.floor((chance(seed, trip.key, label) * run) / MINUTE) * MINUTE
+  if (chance(seed, trip.key, 'gone') < silence.forGood && now >= at('gone at')) return true
+  if (chance(seed, trip.key, 'silence') >= silence.share) return false
+  const { from, to } = silence.minutes
+  const minutes = from + Math.floor(chance(seed, trip.key, 'silence for') * (to - from + 1))
+  const start = at('silence at')
+  return now >= start && now < start + minutes * MINUTE
+}
+
+/** The call a trip passes without calling, when the scenario cancels one: never its first or last. */
+function cancelledCallOf({ scenario, seed }: SimulationSettings, trip: PlannedTrip): number[] {
+  if (
+    isIntervalLine(trip) ||
+    trip.calls.length < 3 ||
+    chance(seed, trip.key, 'cancelled call') >= scenario.cancelledCall
+  ) {
+    return []
+  }
+  return [1 + Math.floor(chance(seed, trip.key, 'which call') * (trip.calls.length - 2))]
 }
 
 /**
@@ -99,18 +231,30 @@ export function simulateTrip(
   now: number,
 ): SimulatedTrip {
   const { timetable, scenario, seed } = settings
+  const day = simulatedDay(settings, trip.serviceDay)
   const mode = trip.line.mode
   const minute = Math.floor(now / MINUTE)
   const delayAt = delays(settings, trip, minute)
   const calls = timedCalls(expectedCalls(trip, delayAt, now))
   const delay = toMinutes(delayAt(minute))
-  // The Metro is in no answer, whatever a scenario says, as an interval line (ADR 0006).
-  const metro = mode === 'metro'
+  const metro = isIntervalLine(trip)
   const reports = !metro && chance(seed, trip.key, 'reports') < scenario.reporting[mode]
   const carried =
     reports || (!metro && chance(seed, trip.key, 'computed') < scenario.computed[mode])
-  const vehicle = tripAt(calls, timetable.pathOf(trip.pattern), now)
-  return { trip, delay, calls, vehicle, reports, carried }
+  const cancelled = !metro && chance(seed, trip.key, 'cancelled') < scenario.cancelled
+  return {
+    trip,
+    journeyNumber: day.numbers.get(trip.key)!,
+    extra: day.extras.has(trip.key),
+    cancelled,
+    cancelledCalls: cancelledCallOf(settings, trip),
+    delay,
+    calls,
+    vehicle: cancelled ? undefined : tripAt(calls, timetable.pathOf(trip.pattern), now),
+    reports,
+    carried,
+    quiet: quietAt(settings, trip, now),
+  }
 }
 
 /**
@@ -121,7 +265,7 @@ export function worldAt(settings: SimulationSettings, now: number): World {
   const { timetable } = settings
   const trips: SimulatedTrip[] = []
   for (const day of timetable.serviceDaysAt(now)) {
-    for (const trip of timetable.tripsOn(day)) {
+    for (const trip of simulatedDay(settings, day).trips) {
       const first = trip.calls[0].departure
       const last = trip.calls.at(-1)!.arrival
       if (now < first - WAITING_FROM - MINUTE || now > last + MAX_DELAY) continue

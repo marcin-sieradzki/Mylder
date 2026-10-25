@@ -7,7 +7,6 @@ import type { JourneyPosAnswer, PositionJourney } from '../rejseplanen/answers.t
 import {
   envelope,
   journeyName,
-  journeyNumberOf,
   journeyRef,
   journeyStops,
   productClass,
@@ -75,7 +74,7 @@ function positionJourney(
 ): PositionJourney {
   const { timetable, scenario } = settings
   const { trip } = simulated
-  const number = journeyNumberOf(timetable, trip)
+  const number = simulated.journeyNumber
   const trainNumber = trainNumberOf(trip)
   const product = productOf(trip, number)
   return {
@@ -102,15 +101,16 @@ const STOPS_AHEAD = 3
  * reads, and keeps a city's answer a few hundred kilobytes. Whether Rejseplanen sends these, all
  * of them or none is a first-day fact.
  */
-function nearStops({ timetable }: SimulationSettings, { trip, calls, vehicle }: SimulatedTrip) {
+function nearStops({ timetable }: SimulationSettings, simulated: SimulatedTrip) {
+  const { trip, vehicle } = simulated
   const { stops } = timetable.pathOf(trip.pattern)
   const progress = vehicle?.progress ?? 0
   const next = stops.findIndex((along) => along > progress)
   const ahead = next === -1 ? stops.length : next
   return journeyStops(
     timetable,
-    trip,
-    calls,
+    simulated,
+    true,
     Math.max(ahead - STOPS_BEHIND, 0),
     Math.min(ahead + STOPS_AHEAD, trip.calls.length),
   )
@@ -126,8 +126,8 @@ export function journeyPos(
   for (const simulated of world.trips) {
     if (journeys.length === request.maxJny) break
     const { vehicle, trip } = simulated
-    // A vehicle underway, or Waiting at its first stop.
-    if (!vehicle) continue
+    // A vehicle underway, or Waiting at its first stop, that hasn't gone quiet.
+    if (!vehicle || simulated.quiet) continue
     if ((productClass(trip.line).cls & request.products) === 0) continue
     const carried = request.positionMode === 'REPORT_ONLY' ? simulated.reports : simulated.carried
     if (!carried) continue

@@ -3,7 +3,8 @@
 import 'server-only'
 import type { TimedCall } from '../../domain/trip-motion.ts'
 import type { IsoDate, LineRecord } from '../../timetable/format.ts'
-import { serviceDayStart } from '../../timetable/time.ts'
+import { platformId } from '../../timetable/stops.ts'
+import { serviceDayStart, wallClock } from '../../timetable/time.ts'
 import type { PlannedTrip } from '../../timetable/trips.ts'
 import type { Product, Stop, StopLocation } from '../rejseplanen/answers.ts'
 import type { Timetable } from '../timetable.ts'
@@ -134,34 +135,6 @@ export function journeyRef(timetable: Timetable, trip: PlannedTrip, journeyNumbe
   return `2|#${fields.map(([key, value]) => `${key}#${value}`).join('#')}#`
 }
 
-/**
- * Each trip of a service day's journey number, stable for the trip: drawn from its key, and on a
- * clash moved on to the next free number, in key order.
- */
-export function journeyNumbers(trips: readonly PlannedTrip[]): ReadonlyMap<string, number> {
-  const numbers = new Map<string, number>()
-  const taken = new Set<number>()
-  for (const key of trips.map((trip) => trip.key).sort()) {
-    let number = 10_000 + (hash(key) % 890_000)
-    while (taken.has(number)) number = number === 899_999 ? 10_000 : number + 1
-    taken.add(number)
-    numbers.set(key, number)
-  }
-  return numbers
-}
-
-const numbersByDay = new WeakMap<Timetable, Map<IsoDate, ReadonlyMap<string, number>>>()
-
-/** A trip's journey number, from its service day's numbers, worked out once per day. */
-export function journeyNumberOf(timetable: Timetable, trip: PlannedTrip): number {
-  let days = numbersByDay.get(timetable)
-  if (!days) numbersByDay.set(timetable, (days = new Map()))
-  let numbers = days.get(trip.serviceDay)
-  if (!numbers)
-    days.set(trip.serviceDay, (numbers = journeyNumbers(timetable.tripsOn(trip.serviceDay))))
-  return numbers.get(trip.key)!
-}
-
 const formatters = new Map<string, Intl.DateTimeFormat>()
 
 /** A moment's date, time and offset from UTC in the zone: `2026-10-26`, `10:33:00`, `+01:00`. */
@@ -210,31 +183,65 @@ export function envelope(now: number, timezone: string) {
 }
 
 /** A platform as a stop location. */
+/** A moment from a calendar date and an `HH:MM` time on its clock. */
+export function atClock(date: IsoDate, time: string, timezone: string): number {
+  const [hours, minutes] = time.split(':').map(Number)
+  return wallClock(date, hours * 3600 + minutes * 60, timezone)
+}
+
+/** The platforms a list of stop or platform ids names: every platform of each stop they're in. */
+export function platformsOfStops(timetable: Timetable, ids: readonly string[]): number[] {
+  const { platforms } = timetable.stops
+  const named = new Set(ids.map(platformId))
+  const stops = new Set(platforms.flatMap((p) => (named.has(p.id) ? [p.stop] : [])))
+  return platforms.flatMap((platform, i) => (stops.has(platform.stop) ? [i] : []))
+}
+
+/** `A` for an extra trip, one the timetable doesn't have, else `P` for a planned one. */
+export const journeyStatus = ({ extra }: { readonly extra: boolean }) =>
+  extra ? ('A' as const) : ('P' as const)
+
 export function stopLocation(timetable: Timetable, platform: number): StopLocation {
   const { name, id, lat, lon } = timetable.stops.platforms[platform]
   return { name, extId: id, lon, lat }
 }
 
+/** What a journey's stops need from a simulated trip. */
+export interface StopsOf {
+  readonly trip: PlannedTrip
+  readonly calls: readonly TimedCall[]
+  readonly cancelledCalls: readonly number[]
+  readonly reports: boolean
+}
+
+/**
+ * How a simulated trip's expected times came about: `PROGNOSED` from its own reports, and
+ * `CALCULATED` from the timetable plus its delay for a trip that doesn't report.
+ */
+export const prognosisOf = ({ reports }: { readonly reports: boolean }) =>
+  reports ? ('PROGNOSED' as const) : ('CALCULATED' as const)
+
 /**
  * A trip's calls as a journey's stops, those from `start` up to `end`: planned times, and
  * expected ones where they differ, as Rejseplanen leaves a realtime time out when it equals the
- * plan.
+ * plan. A trip without `realtime`, such as the Metro, has no prognosis at all; a cancelled call
+ * says so on both sides.
  */
 export function journeyStops(
   timetable: Timetable,
-  trip: PlannedTrip,
-  calls: readonly TimedCall[],
+  { trip, calls, cancelledCalls, reports }: StopsOf,
+  realtime: boolean,
   start = 0,
   end = trip.calls.length,
 ): Stop[] {
   const { timezone } = timetable.manifest
+  const prognosis = prognosisOf({ reports })
   /** One side of a call: its planned time, and its expected one where it differs. */
   const times = (plan: number, expected: number) => {
     const [date, time] = dateAndTime(plan, timezone)
+    if (!realtime) return { date, time }
     const [rtDate, rtTime] = dateAndTime(expected, timezone)
-    return expected === plan
-      ? { date, time, prognosis: 'PROGNOSED' as const }
-      : { date, time, rtDate, rtTime, prognosis: 'PROGNOSED' as const }
+    return expected === plan ? { date, time, prognosis } : { date, time, rtDate, rtTime, prognosis }
   }
   return trip.calls.slice(start, end).map((planned, offset): Stop => {
     const i = start + offset
@@ -250,6 +257,7 @@ export function journeyStops(
       ...(departure?.rtTime && { rtDepTime: departure.rtTime, rtDepDate: departure.rtDate }),
       ...(arrival?.prognosis && { arrPrognosisType: arrival.prognosis }),
       ...(departure?.prognosis && { depPrognosisType: departure.prognosis }),
+      ...(cancelledCalls.includes(i) && { cancelledArrival: true, cancelledDeparture: true }),
     }
   })
 }
