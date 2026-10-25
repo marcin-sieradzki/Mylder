@@ -9,7 +9,66 @@
     "react/rules-of-hooks": "error",
     "react/react-in-jsx-scope": "off",
     "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true,
+        "allowExportNames": [
+          "metadata",
+          "generateMetadata",
+          "viewport",
+          "generateViewport",
+          "generateStaticParams",
+          "dynamicParams"
+        ]
+      }
+    ]
   },
-  "ignorePatterns": ["dist", "coverage", "playwright-report", "test-results", "prototypes"]
+  "ignorePatterns": [
+    ".next",
+    "next-env.d.ts",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "prototypes"
+  ],
+  "overrides": [
+    {
+      "files": ["src/domain/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(app|i18n|map|screens|timetable|tracker)(/|$)|^@/",
+                "message": "The domain rules import nothing from Mylder's other folders."
+              },
+              {
+                "group": [
+                  "react",
+                  "react/**",
+                  "react-dom",
+                  "react-dom/**",
+                  "next",
+                  "next/**",
+                  "effect",
+                  "effect/**",
+                  "@effect/*",
+                  "server-only",
+                  "server-only/**",
+                  "client-only",
+                  "client-only/**",
+                  "@mylder/perron",
+                  "@mylder/perron/**",
+                  "node:*"
+                ],
+                "message": "The domain rules run on both sides, with no I/O, Effect, React or Next.js."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

@@ -4,7 +4,7 @@
 
 _Mylder_ is Danish for a teeming crowd, and it echoes _myldretid_, rush hour.
 
-> **Status: early.** The app shell, tests and CI are set up. The live map comes next, once the Rejseplanen API access arrives. See the [roadmap](#roadmap).
+> **Status: early.** The Next.js app shell, tests and CI are set up. The live map comes next, once the Rejseplanen API access arrives. See the [roadmap](#roadmap).
 
 <!-- Add a screenshot or GIF of the moving map here as soon as there is one. It's the first thing a visitor should see. -->
 
@@ -41,7 +41,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 
 **First public version**
 
-- [x] App shell: React 19, TypeScript, Vite, Vitest, Playwright, CI
+- [x] App shell: Next.js, React 19, TypeScript, Vitest, Playwright, CI
 - [ ] Live map with every vehicle moving along its route (MapLibre GL + deck.gl)
 - [ ] City pulse: vehicles moving now, share reporting per mode, and average delay if the data can back it
 - [ ] Stop view: next departures, each with its data state
@@ -53,12 +53,12 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 
 ## Stack
 
-- [React 19](https://react.dev) + TypeScript, built with [Vite](https://vite.dev)
-- [Vitest](https://vitest.dev) + Testing Library for unit and component tests
+- [Next.js 16](https://nextjs.org) with the App Router, [React 19](https://react.dev) and TypeScript
+- [Vitest](https://vitest.dev) + Testing Library for unit and component tests, with Vite only as Vitest's compiler
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
 - Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `implement-spec` (with `tdd`, `codebase-design` and `code-review`), `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT)
-- Planned: Next.js on Vercel in place of Vite, Effect for the server's tracker, MapLibre GL and deck.gl for the map, and Perron for every component and token
+- Planned: Vercel for deploys, Effect for the server's tracker, MapLibre GL and deck.gl for the map, and Perron for every component and token
 
 ## Getting started
 
@@ -71,25 +71,35 @@ npm run dev
 
 Before the first e2e run, install a browser with `npx playwright install chromium`.
 
-| Script                  | What it does                                     |
-| ----------------------- | ------------------------------------------------ |
-| `npm run dev`           | Start the dev server                             |
-| `npm run build`         | Type-check and build for production into `dist/` |
-| `npm run preview`       | Serve the production build                       |
-| `npm run check`         | Type-check, lint, format check and unit tests    |
-| `npm run test`          | Run unit tests once                              |
-| `npm run test:watch`    | Run unit tests in watch mode                     |
-| `npm run test:coverage` | Run unit tests with coverage                     |
-| `npm run test:e2e`      | Build, serve and run Playwright tests            |
-| `npm run lint`          | Lint with oxlint                                 |
-| `npm run format`        | Format everything with Prettier                  |
+| Script                  | What it does                                  |
+| ----------------------- | --------------------------------------------- |
+| `npm run dev`           | Start the Next.js dev server                  |
+| `npm run build`         | Build for production into `.next/`            |
+| `npm start`             | Serve the production build                    |
+| `npm run check`         | Type-check, lint, format check and unit tests |
+| `npm run typecheck`     | Type-check with `tsc`                         |
+| `npm run test`          | Run unit tests once                           |
+| `npm run test:watch`    | Run unit tests in watch mode                  |
+| `npm run test:coverage` | Run unit tests with coverage                  |
+| `npm run test:e2e`      | Build, serve and run Playwright tests         |
+| `npm run lint`          | Lint with oxlint                              |
+| `npm run format`        | Format everything with Prettier               |
 
-```
-src/
-  app/     App shell
-  test/    Test setup
-e2e/       Playwright tests
-```
+## Folders
+
+Each folder's name says where its code may run. Three are guarded, so a wrong import fails the build or the lint:
+
+| Folder           | Runs on                    | What it holds                                         | Guard                                                  |
+| ---------------- | -------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| `app/`           | Server                     | Next.js routes and route handlers, kept thin          |                                                        |
+| `src/domain/`    | Both                       | Pure rules: data states, positions, delays            | `npm run lint` fails on any import from another folder |
+| `src/tracker/`   | Server only                | The Effect tracker behind the snapshot                | `server-only`: `next build` fails in a client module   |
+| `src/timetable/` | Both                       | The prepared timetable's format and readers           |                                                        |
+| `src/map/`       | Browser only               | MapLibre, the deck.gl layer and the animation loop    | `client-only`: `next build` fails in a server module   |
+| `src/screens/`   | Browser                    | Client components for the screens, built from Perron  |                                                        |
+| `src/i18n/`      | Both, loader on the server | English and Danish dictionaries and the language type |                                                        |
+
+Tests sit beside the code they test; Playwright journeys are in `e2e/`, and the timetable job in `scripts/timetable/`.
 
 ## Data
 
