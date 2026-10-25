@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "title": "Mylder: live kort over København",
+    "description": "Københavns busser, S-tog, metro og tog på ét live kort, ærligt om hvor friske positionerne er."
+  },
+  "home": {
+    "heading": "Se København bevæge sig.",
+    "intro": "Et live kort over Københavns busser, S-tog, metro og tog, ærligt om hvor friske positionerne er. Kortet kommer snart."
+  },
+  "language": {
+    "label": "Sprog",
+    "switchTo": "English"
+  }
+}

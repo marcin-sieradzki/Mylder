@@ -10,13 +10,13 @@ async function backgroundLightness(page: import('@playwright/test').Page) {
 test.describe('theme', () => {
   test('follows a light system setting', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
-    await page.goto('/')
+    await page.goto('/en')
     expect(await backgroundLightness(page)).toBeGreaterThan(200)
   })
 
   test('follows a dark system setting', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
-    await page.goto('/')
+    await page.goto('/en')
     await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
     expect(await backgroundLightness(page)).toBeLessThan(60)
   })
