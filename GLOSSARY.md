@@ -12,6 +12,14 @@ _Avoid_: Transport type, product
 A service known to passengers by one public name, such as 5C, M2, A or Re.
 _Avoid_: Route, service
 
+**Interval line**:
+A line that runs to an interval rather than to its clock times, such as the Metro. Its timetable's trips show the planned rhythm, not real trains.
+_Avoid_: Headway line, frequency-based line, headway trip, turn-up-and-go
+
+**Interval**:
+How often an interval line's trips leave a stop, worked out from its planned times for the hour, such as "every 3 min".
+_Avoid_: Headway, frequency
+
 **Pattern**:
 One ordered sequence of stops that a line's trips follow in one direction, with the path between them.
 _Avoid_: Route, variant, shape
@@ -42,12 +50,8 @@ _Avoid_: Journey, run, service journey
 A trip on the map, waiting or underway, as passengers see it. Its fleet number is known only when a source reports one.
 _Avoid_: Bus (for the general case), unit
 
-**Headway trip**:
-A trip Mylder infers from a line's published frequency, because no timetable lists it.
-_Avoid_: Virtual trip, synthetic trip
-
 **Extra trip**:
-A trip an update adds that the timetable doesn't have.
+A trip an answer adds that the timetable doesn't have.
 _Avoid_: Unplanned trip, added trip
 
 **Cancelled trip**:
@@ -72,13 +76,21 @@ _Avoid_: Arrival (for the list), next bus
 
 ## Realtime
 
+**Answer**:
+One reply from Rejseplanen to one call Mylder makes: the whole city's positions, one stop's departures, or one trip's calls. Everything realtime carries the time of the answer that last brought it.
+_Avoid_: Response, feed, message
+
 **Update**:
-A message from the realtime feed that revises a trip: new expected or recorded times, or a cancellation.
+An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation.
 _Avoid_: Report, prediction, event
 
 **Report**:
-A message giving a trip's position at a moment, from a position source.
-_Avoid_: Ping, fix, update
+A trip's position at a moment, as its vehicle sent it, from an answer that holds reports only. A computed position is not one.
+_Avoid_: Ping, fix, update, GPS
+
+**Computed position**:
+A position Rejseplanen works out for a trip from its timetable and realtime, rather than one its vehicle sent. An answer never says which positions are computed; the kind of call does.
+_Avoid_: Calculated position, last position, estimate
 
 **Delay**:
 How far a trip runs behind its timetable: expected minus scheduled time at its latest updated call. Negative when early.
@@ -95,21 +107,31 @@ How much Mylder knows about a trip right now, one of Live, Ageing, Estimated, Ti
 _Avoid_: Status, freshness, quality
 
 **Live**:
-The trip's position comes from a report under a minute old.
+The trip's position is a report no older than about two polls, so the vehicle itself said where it is.
 _Avoid_: Real-time, GPS
 
 **Ageing**:
-The trip's latest report is one to five minutes old.
+The trip's latest report is older than about two polls and under five minutes, carried forward along its path.
 _Avoid_: Old, delayed
 
 **Estimated**:
-The trip's position is worked out from its timetable and its updates, with no fresh report.
+The trip's position is worked out, by Rejseplanen or by Mylder, from its timetable and its realtime, with no fresh report.
 _Avoid_: Predicted, calculated
 
 **Timetable only**:
-The trip has had no realtime at all, so it is placed where its timetable says it should be.
+The trip has had no realtime this service day, so it is placed where its timetable says it should be. Every trip of an interval line is one.
 _Avoid_: Scheduled, scheduled only, static
 
 **No signal**:
-The trip had realtime, and its source has gone quiet.
+The trip had realtime, and it stopped: the trip has been missing from the answers for five minutes, or no answers have come for five minutes.
 _Avoid_: Stale, lost, offline
+
+## Page conditions
+
+**Paused**:
+Mylder gets no answers from Rejseplanen, because calls fail or the month's calls are spent. The page says so and why, dots keep moving on what Mylder has, and data states age by the clock. A condition of the page, not a data state.
+_Avoid_: Outage, down, No signal (for the page)
+
+**Disconnected**:
+The browser's own polls of Mylder fail. The page says so at once, dots keep moving on what the browser has, and data states age by the clock. A condition of the page, not a data state.
+_Avoid_: Offline, No signal (for the page)
