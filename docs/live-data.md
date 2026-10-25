@@ -1,0 +1,257 @@
+# Live data
+
+How Mylder gets positions from Rejseplanen API 2.0 to the browser on a free key, and what the browser receives. The data states themselves are defined in [`data-states.md`](data-states.md); this page covers the plumbing: the one call a minute, the snapshot every browser polls, the caches between them, the small server store and the call budget. The words are in [`GLOSSARY.md`](../GLOSSARY.md).
+
+Every number here is a starting value. The first day with the key settles the ones marked "first day", and a month of running settles the rest.
+
+## The shape in one paragraph
+
+Browsers never call Rejseplanen. Each browser polls one route of the app, which answers with one snapshot of every trip on the map for the whole city. The CDN in front of the app caches that snapshot until the next one is due, so a thousand browsers cost one request to the app a minute. When the cached snapshot expires and a browser asks for a new one, the app's tracker takes a one-minute lease in a small hosted Redis, calls Rejseplanen once, joins the answer to the timetable, decides each trip's data state, stores the snapshot and returns it. Nobody watching means no browser asks, so no call is made. The API is called only while someone watches, without a scheduler, a watcher count or an always-on process.
+
+## One call a minute
+
+The tracker runs at most once a minute, whoever asked. It is one function on the app's host, and it may run on several instances at once, so the once-a-minute rule cannot live in memory. It lives in the store: the first instance to take the lease for the current minute slot does the work; any other instance that lands in the same slot serves the stored snapshot instead and never calls the API.
+
+One tracker run does, in order:
+
+1. Take the lease for this minute. If another run holds it, serve the stored snapshot and stop.
+2. Check the budget level (below). If the month is spent, make no call: build the snapshot from the timetable and the stored history, so states age by the rules in [`data-states.md`](data-states.md), and stop.
+3. Call `journeyPos` once for the city box, in the position mode decided on the first day. Count the call before sending it.
+4. Every 15 minutes, also call `himsearch` once, for the disruption list. Count it.
+5. Load the previous snapshot from the store, join the answer to the service day's timetable, and run the data-state rules for every trip the timetable says is on the map (underway, or waiting from 5 minutes before its first departure).
+6. Store the new snapshot and the updated call counter. Return the snapshot.
+
+A run that fails between steps 3 and 6 still counts its calls, and the stored snapshot stays the previous one, with its API health set to the failure.
+
+### The call
+
+- **Service**: `journeyPos`, JSON, the key as a query parameter, host `www.rejseplan.dk`.
+- **Box**: Greater Copenhagen, lower-left 55.45 N, 12.05 E, upper-right 56.05 N, 12.70 E. This holds every line the prototype draws on the Danish side: the S-tog network to Køge, Frederikssund, Hillerød and Klampenborg, the Kystbanen to Helsingør, the regional trains to Roskilde, the Metro, the airport, and all the A-buses and S-buses. The east edge stops at the Øresund, so the Swedish side (out of scope) is never requested. The prototype's own routes span 55.46 to 56.03 N and 12.07 to 13.00 E, the last 0.3 degrees being the Øresundstog to Malmö.
+- **How full it gets**: the timetable puts at most about 1,010 trips underway in this box at once on a June 2026 weekday (07:37), counting every trip with a call in the box, including those partly outside it; Saturday peaks at about 640 and Sunday at about 580 (measured on the Labs GTFS, `docs/timetable.md`). Fewer than that have a position inside the box at any moment, but the morning peak is close to the cap.
+- **Products**: everything that runs on a line: 1 IC, 2 ICL, 4 regional, 8 other trains, 16 S-tog, 32 bus, 64 express bus, 128 night bus, 512 ferry (harbour buses count as Bus), 1024 Metro, 2048 light rail. Not 256 flexible (demand-responsive, no line to draw on) and not 4096 flight. As one bitmask that is 3839.
+- **Lines and operators**: no filter. The box and products are enough, and a filter would hide a line the timetable knows.
+- **Cap**: `maxJny` at its maximum, 1,000. The answer holds at most 1,000 trips and says nothing about the rest, so a full answer is a warning, not a result. If the first day's `CALC_REPORT` count at the morning peak reaches 950, split the box into a northern and a southern half and poll them on alternate minutes: each half refreshes every 2 minutes, and the Live limit follows the interval between a half's answers, as it does for alternating modes. That keeps the whole map at the same cost. Shrinking the box is rejected because trips would leave the live area while still on the map; two boxes a minute do not fit the budget.
+- **Mode**: `positionMode` as decided on the first day (next section).
+- **Timeout and retry**: 8 seconds, one retry on a network error or a 5xx, none on a 4xx. The retry counts as a call.
+
+### Which position mode, decided on the first day
+
+`journeyPos` carries no "reported" or "computed" flag and no time per position. The request's mode decides what comes back: `REPORT_ONLY` (only positions a vehicle reported), `CALC_REPORT` (a reported position where there is one, else one Rejseplanen computed) or `CALC`. One October 2026 test found `REPORT_ONLY` empty with a Labs key while `journeyDetail`'s last position worked. So the first morning with the key, at the peak (08:00 on a weekday), call both modes once and count trips per product class. With R the `REPORT_ONLY` count and C the `CALC_REPORT` count:
+
+| Finding                      | Mode every minute                                              | What the map can say                                                                                                                                                                                                                                                                                           |
+| ---------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R is at least 70 % of C      | `REPORT_ONLY`                                                  | Live and Ageing for reporting trips. A trip the timetable expects but the answer lacks is Timetable only, or Ageing then No signal if it reported earlier. Estimated only from Mylder's own timetable-plus-delay, where a delay is known from an opened stop or vehicle.                                       |
+| R is between 20 % and 70 %   | Alternate: `REPORT_ONLY` on odd minutes, `CALC_REPORT` on even | Each mode refreshes every 2 minutes. A trip in the `REPORT_ONLY` answer is Live, with the Live limit measured on the interval between report answers (2 minutes), as [`data-states.md`](data-states.md) sets it. A trip only in the `CALC_REPORT` answer is Estimated. Both answers feed Ageing and No signal. |
+| R is under 20 %, or zero     | `CALC_REPORT`                                                  | Every position is Estimated. The map has no Live or Ageing state at all, because a computed position never counts as Live. The page says so once, in the about text, not on every dot.                                                                                                                         |
+| Both modes empty or erroring | None for positions                                             | The city is Timetable only. A vehicle a person opens gets one `journeyDetail` call and its last position, shown as Estimated. Raise it with Labs the same day. This branch cannot carry the first public version.                                                                                              |
+
+The mode is one setting the server reads at start, and the snapshot names it, so the browser and the tests know which states can occur. A trip's state never depends on guessing the mode.
+
+Per-trip delay in `REPORT_ONLY` and `CALC_REPORT` answers is a first-day fact: the answer may carry each trip's stops with expected times, or a path with progress. If it does, every trip in the answer gets a delay and its next calls from the answer itself; if not, only opened stops and vehicles do, and the rest run on the timetable.
+
+## The snapshot
+
+One answer, one cache key, the same bytes for every viewer and both languages. It carries codes and times, never translated text, so the browser localises everything. It names the timetable version it was built against, so the browser loads matching static pattern and stop files.
+
+### The whole answer
+
+| Field             | Meaning                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fetched           | When the tracker built this snapshot, to the second. Every age on the page counts from here.                                                                                                                                                                                                                                                                      |
+| Next due          | When the next snapshot is due: fetched plus the current poll interval. Browsers poll just after it.                                                                                                                                                                                                                                                               |
+| Poll interval     | The current interval in seconds: 60, 90 or 120 by budget level. The data-state thresholds that are relative to the poll interval read it from here.                                                                                                                                                                                                               |
+| Service day       | The operating day the trips belong to.                                                                                                                                                                                                                                                                                                                            |
+| Timetable version | Which prepared timetable the patterns, stops and trip keys refer to.                                                                                                                                                                                                                                                                                              |
+| Position mode     | `REPORT_ONLY`, `CALC_REPORT`, alternating (with which mode this answer used), or none.                                                                                                                                                                                                                                                                            |
+| API time          | The answer's own `planRtTs`, when Rejseplanen last updated its realtime. Shown in the about text, used nowhere else.                                                                                                                                                                                                                                              |
+| API health        | `ok`, `empty` (an answer with no trips at a time the timetable expects at least 50 underway), `error` (a failed call, with the kind: timeout, HTTP status, bad body) or `spent` (the budget), with the time this health began.                                                                                                                                    |
+| Budget            | The level: `normal`, `stretched`, `tight` or `spent`, the calls used this month and, when spent, the date live data resumes.                                                                                                                                                                                                                                      |
+| Store             | `ok` or `unavailable`. When unavailable, the server had no history, so no trip can be Ageing or No signal (below).                                                                                                                                                                                                                                                |
+| Disruptions       | When the disruption list was last fetched, whether that fetch succeeded, how many messages it holds and its version. The list itself (each message's id, head, lead, text, category, priority, products, validity and affected stops) has its own cached route, refreshed with each `himsearch`; the browser fetches it on load and whenever the version changes. |
+| Trips             | One record per trip on the map, including Waiting and Timetable only ones.                                                                                                                                                                                                                                                                                        |
+
+### Each trip
+
+| Field          | Meaning                                                                                                                                                                                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Key            | Mylder's own trip key, built from the timetable's content (mode, line, pattern, service day, first departure; see [`timetable.md`](timetable.md)), so it holds across polls and deployments. Rejseplanen's journey number and day (`ZI@DA`) rides along once the trip has appeared in an answer. |
+| Line           | The public line name, as the timetable gives it, such as 5C or A.                                                                                                                                                                                                                                |
+| Mode           | Bus, Metro, S-tog, Train or Light rail.                                                                                                                                                                                                                                                          |
+| Pattern        | The pattern id in the static files, which gives the browser the path and the stops' distances along it.                                                                                                                                                                                          |
+| Headsign       | The destination as shown on the vehicle, from the timetable.                                                                                                                                                                                                                                     |
+| Data state     | Live, Ageing, Estimated, Timetable only or No signal, as decided by the server at fetch time.                                                                                                                                                                                                    |
+| Source         | Where the position came from: reported (a `REPORT_ONLY` answer), computed (a `CALC_REPORT` answer or `journeyDetail`'s last position) or timetable (Mylder's own placement).                                                                                                                     |
+| Seen           | When the trip was last in any answer. Absent for a trip that has never been.                                                                                                                                                                                                                     |
+| Reported       | When the trip was last in a `REPORT_ONLY` answer. Absent if never. Live and Ageing age from here.                                                                                                                                                                                                |
+| Had realtime   | Whether any answer this service day has carried the trip. Tells Timetable only from No signal.                                                                                                                                                                                                   |
+| Delay          | Seconds behind the timetable at the latest call with an expected time, negative when early. Absent when unknown.                                                                                                                                                                                 |
+| Position       | Latitude and longitude at fetch time, snapped by the server to the pattern's path.                                                                                                                                                                                                               |
+| Progress       | The same point as a distance along the pattern's path, so the browser animates without snapping again.                                                                                                                                                                                           |
+| Next calls     | Up to three: the call's index in the pattern, the stop id and the expected departure time. The browser moves the dot between them.                                                                                                                                                               |
+| Flags          | Waiting, Cancelled (whole trip, kept so lists can show it; not drawn), Extra (not in the timetable; drawn only if its stops match a pattern), and which calls are cancelled.                                                                                                                     |
+| Vehicle number | The train or vehicle number when the answer gives one.                                                                                                                                                                                                                                           |
+
+### Size
+
+A 1,500-trip snapshot with these fields is about 450 KB as JSON and about 50 to 70 KB gzipped (measured on generated data with random positions; real data, with repeated stops and lines, should sit at the low end). A browser polling every minute pulls 3 to 4 MB an hour. The app host's free bandwidth, 100 GB a month, covers about 25,000 viewer-hours a month, more than the first public version will see. If the snapshot grows past 100 KB gzipped, the first saving is to send next calls as offsets from fetched and positions as progress only.
+
+## The browser
+
+### Polling
+
+- The browser asks for the snapshot when the page opens, then just after each snapshot's next-due time: at next due plus a jitter of 1 to 4 seconds, drawn once per page load. So every browser polls at nearly the same moment, which is what a CDN wants: one miss, then hits.
+- Only while the page is visible. When the tab is hidden, polling stops. When it returns, the browser polls at once if the snapshot it holds is past its next-due time, else at that time.
+- On a failed poll (network error, timeout after 10 seconds, or a 5xx), the browser keeps the snapshot it has and keeps the clock running: dots keep moving on their timed segments and states age by the clock. It retries after 5, 10, 20 and then every 30 seconds. The Disconnected notice and its timing are in [`data-states.md`](data-states.md).
+- On a successful poll that returns the snapshot it already holds (same fetched time, which happens when the tracker's run has not finished), it retries after 5 seconds, up to three times, then waits for the next due time.
+- The poll sends no parameters. There is one snapshot for everyone.
+
+### Opening mid-minute
+
+A browser that opens at 10:42:37 gets the snapshot fetched at 10:42:03. It places every dot where its timed segments say it is now, 34 seconds in, not where it was at fetch time, and ages every state from the clock. It then polls at 10:43:03 plus jitter. So an opening page is never a minute behind. The browser takes the server's clock from the response's own date header, and keeps the difference to its clock, so a wrong device clock does not age every state at once.
+
+### Moving between polls
+
+The browser holds the pattern's path and the distance of each stop along it, from the static timetable files. For each trip it builds a timeline from the snapshot: progress at fetch time, then the progress of each next call at its expected time. Between two points the dot moves at constant speed along the path; before its first departure a Waiting trip stands still; after its last next call it continues at the last speed until the next snapshot arrives, and never beyond the pattern's end. The same rule serves every state: a Live dot and a Timetable only dot move the same way, and only their glyph differs.
+
+When a new snapshot lands, each dot's target for the current moment comes from the new timeline. The dot eases from where it is drawn to that target over about one second, along the path when both points are on the same pattern and less than 500 metres apart, and with a short fade and a jump otherwise. A target that lies behind the drawn point by less than 150 metres is treated as jitter: the dot holds still until the new timeline catches up, so vehicles never visibly reverse at a bus stop.
+
+The animation loop runs outside React and feeds the map layer directly; React renders the panels from the snapshot at the poll's pace.
+
+### What ages where
+
+The data-state rules are one pure module the server and the browser both run. The server runs it at fetch time to set each trip's state; the browser runs it every frame from the same fields (reported, seen, had realtime, source, API health and its start time, the poll interval) and the clock. So a Live dot becomes Ageing on the browser at the right second without a poll, and a whole city turns No signal 5 minutes into an API outage even on a browser that has stopped getting fresh snapshots.
+
+## Caching
+
+Three layers, each with one job.
+
+| Layer       | What it caches                                                            | For how long                                                                                                                                               | Why                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The browser | Nothing. `max-age=0`.                                                     |                                                                                                                                                            | The snapshot's own next-due time drives the poll, not a browser cache.                                                                                |
+| The CDN     | The snapshot, by the one cache key.                                       | Until the snapshot's next-due time, never less than 5 seconds. Stale for up to 30 seconds while a fresh one is fetched; up to 5 minutes if the app errors. | So a hundred browsers polling at the same second cost one request to the app, and the app's own hiccup serves the last snapshot rather than an error. |
+| The store   | The latest snapshot, the previous one's history, the lease, the counters. | Snapshot until replaced; counters for the month plus a margin.                                                                                             | So every instance of the app, wherever the CDN missed, serves the same snapshot and only one of them calls Rejseplanen.                               |
+
+The CDN's TTL is set per response, as the seconds left until the next-due time, using the host's own CDN header so the browser never sees it. The CDN caches per region and expires each region at the same wall-clock moment, so after each minute boundary the app may get one request per region; all but the lease holder answer from the store. The app's host runs its functions in one region (Stockholm is the closest choice), so there is one store and one lease to reason about.
+
+The host's own data cache is not relied on for the once-a-minute rule. Its default is per instance and in memory; its shared form is regional and durable but documents no collapsing of concurrent misses. The lease in the store is what guarantees one call. The shared form may still wrap the snapshot read as a cheap first layer, as long as the lease remains the rule.
+
+## The server store
+
+### What must persist between polls
+
+- **The previous snapshot's history**: per trip, its key, when it was last seen and last reported, its last reported position and progress, whether it has had realtime this service day, and its last delay. Without it, no trip can be Ageing or No signal, and Timetable only cannot be told from a trip that dropped out.
+- **The latest snapshot**, compressed, so an instance that did not build it can serve it.
+- **The lease**: one key per minute slot, set only if absent, expiring with the slot.
+- **The call counter**: one counter per calendar month, plus one per service (`journeyPos`, `himsearch`, `journeyDetail`, `multiDepartureBoard`) for the about page and the logs. Keyed by month, so there is no reset to get wrong; kept two months.
+- **On-demand caches**: a stop's departures and a vehicle's detail, for 60 seconds each, keyed by stop id or trip key.
+
+### What the store is
+
+A free hosted Redis from the host's marketplace, reached through one small interface (get, set-if-absent with expiry, set with expiry, increment) with an in-memory implementation for tests and local runs. The free tier of the first candidate allows 500,000 commands and 10 GB of transfer a month and one database. One tracker run uses about seven commands and moves about 150 KB (read history, write snapshot and history, lease, counters), so a month watched around the clock is about 310,000 commands and 7 GB. An instance that is still warm skips the history read when its own last snapshot matches the stored one, which is most minutes. The second candidate's free tier, 30 MB and 30 connections, is too small for a 70 KB snapshot plus history with room to spare, so it is the fallback only.
+
+### If the store is down
+
+The tracker still runs, from memory:
+
+- It uses its own last snapshot as history if it is warm, else none. With none, every trip in the answer gets its state from the answer alone and every trip not in it is Timetable only; the snapshot's store field says `unavailable`, and the page can say freshness history is missing.
+- Without the lease, two instances could both call Rejseplanen in one minute. To bound that, the budget level drops to `stretched` (90-second polls) while the store is down, and each instance keeps a tally of the calls it made and adds them to the counter once the store is back. Each instance also refuses to make more than 1,800 calls in a calendar day on its own count, which is one day's share of the budget plus slack.
+- On-demand calls stop, since their caches are in the store.
+
+Store outages are expected to be rare and short; a long one is a reason to stretch the poll further by hand, not to redesign.
+
+## The budget
+
+The free key allows 50,000 calls a calendar month. Every request the app sends with the key counts as one, whatever the service and whatever came back: a timeout, an error, an empty list and a retry all count, and are counted before the request is sent. The counter in the store is the only truth; the host's logs are a cross-check.
+
+### Calls per service
+
+| Service               | When                                                                                    | Month watched around the clock | Realistic month, 6 hours watched a day |
+| --------------------- | --------------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------- |
+| `journeyPos`          | Once a minute while anyone watches, at the budget level's interval                      | 44,640 (31 days at 60 s)       | 11,160                                 |
+| `himsearch`           | Once every 15 minutes while anyone watches, inside a tracker run                        | 2,976                          | 744                                    |
+| `multiDepartureBoard` | Only when a person opens a stop, one call for the stop (and its platforms), cached 60 s | At most the slack: about 2,000 | Up to 10,000, by the cushion rule      |
+| `journeyDetail`       | Only when a person opens a vehicle, cached 60 s per trip                                | Shares the slack above         | Shares the cushion above               |
+| Retries and failures  | Counted with the service that made them                                                 | Inside the figures above       | Inside the figures above               |
+| **Total**             |                                                                                         | **about 49,600**               | **about 22,000**                       |
+
+A stop or a vehicle that is opened when on-demand calls are stopped is served from the timetable plus the snapshot's delay for that trip, and its departures carry their trips' data states. Metro departures never spend a call: they show interval text from the planned times.
+
+### The pacing rule
+
+Each tracker run computes the **line**: 50,000 times the share of the month's minutes that have passed. The **gap** is calls spent minus the line. Spending under the line is a cushion; over it, the month is running ahead.
+
+| Level                | When                                                          | Poll interval | `himsearch` | On-demand calls | The page                                                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------- | ------------- | ----------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `normal`             | gap at or under −100                                          | 60 s          | 15 min      | Allowed         | Nothing extra.                                                                                                                                                                                                                                                                                                                                |
+| `normal`, no cushion | gap between −100 and 0                                        | 60 s          | 15 min      | Stopped         | Stop and vehicle panels say "From the timetable" where a call would have been made.                                                                                                                                                                                                                                                           |
+| `stretched`          | gap over 0                                                    | 90 s          | 15 min      | Stopped         | A line in the about panel and the City pulse header: "Updating every 90 s to stay within the data budget."                                                                                                                                                                                                                                    |
+| `tight`              | gap over 1,500                                                | 120 s         | 30 min      | Stopped         | The same line with "2 min".                                                                                                                                                                                                                                                                                                                   |
+| `spent`              | spent at or over 49,500, or a 4xx that says the quota is gone | None          | None        | None            | The Paused notice on every screen: "Live data is paused until 1 November: this month's calls are used up." States age as in [`data-states.md`](data-states.md): trips with realtime turn No signal after 5 minutes, and from the next service day the city is Timetable only. The Disruptions screen keeps its last list with its fetch time. |
+
+The numbers work out so that a month watched around the clock at 60 seconds stays `normal` (it spends 1.07 calls a minute against a line that grows 1.12 a minute), and the cushion it builds, about 70 calls a day, pays for a few opened stops and vehicles. A realistic month builds a cushion of hundreds a day, so on-demand calls are almost always allowed. The 500 calls held back before `spent` cover the counter being a few minutes behind a store outage.
+
+On-demand calls are also rate-limited on their own: at most 10 a minute across all viewers, whatever the cushion, so one busy evening cannot drain a week.
+
+The level only moves at a tracker run, and the snapshot carries it, so every browser shows the same level at the same time.
+
+### What the page shows
+
+The budget level and the API health are two different things on the page:
+
+- The budget level is a page-wide note, worded as above, in Perron's notice style, never on a dot. Below `spent` it changes no data state.
+- The API health reaches the data states through the rules: after 5 minutes of `error`, `empty` or `spent`, every trip that had realtime is No signal, since the time the health changed. Before those 5 minutes nothing changes, so a single failed minute is invisible. `error`, `empty` and `spent` are the page condition Paused, whose notice and timing are in [`data-states.md`](data-states.md).
+- The Disconnected notice is the browser's own, for its own failed polls, and is separate from both.
+
+## API health and observability
+
+How the app knows, and where it shows.
+
+| Signal            | How the tracker sees it                                                                  | In the snapshot                             | Where it surfaces                                                                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Call failed       | Timeout, network error, non-2xx status, or a body that does not decode                   | health `error` with its kind and start time | Nothing for 5 minutes (the previous snapshot stays, dots keep moving). Then No signal on every trip that had realtime; City pulse shows the share.            |
+| Empty answer      | A 2xx with no trips while the timetable expects at least 50 underway in the box          | health `empty`                              | As for a failed call. Below 50 expected trips, at night, an empty answer is `ok`.                                                                             |
+| Quota gone        | The counter reaches 49,500, or Rejseplanen answers with its authorisation or quota error | health `spent`, budget `spent`              | The Paused notice at once, naming the date live data resumes; trips with realtime turn No signal after 5 minutes, and the next service day is Timetable only. |
+| Disruptions stale | `himsearch` failed, or the budget stopped it                                             | disruptions `fetched` and `ok`              | The Disruptions footer gives the last good check's time and, when the fetch failed, "Last checked 07:45; the latest check failed." (`docs/screens.md`).       |
+| Store down        | The store's client errors                                                                | store `unavailable`                         | The about panel; no Ageing or No signal while it lasts, as above.                                                                                             |
+| Tracker slow      | A run longer than 20 seconds                                                             | Nothing                                     | The host's logs. The CDN serves stale meanwhile.                                                                                                              |
+
+Every tracker run writes one structured log line: the minute slot, which instance held the lease, the mode, the calls made and their statuses and durations, the trip counts per product and per state, the answer size, the run's CPU time, the budget level and the counter. The host keeps Hobby logs for about an hour, so the same numbers go into the snapshot's own small status section, which the about panel shows and a monitor can poll. The first month, read them daily: the trip counts tell whether the cap bites, the CPU time whether the run fits the host's free active-CPU allowance, and the counter whether the pacing holds.
+
+## Platform limits that shape this
+
+The host and the store are free tiers, and their limits are as real as Rejseplanen's. The figures are from the providers' pages as search results quoted them on 2026-10-25; the pages could not be opened from the research environment, so each is marked as the API research is: Confirmed (the provider's own words), Reported (a second-hand source) or Unconfirmed.
+
+| Limit                                  | Figure                                                                                                                                                                                                                                | Mylder's use, month watched around the clock                                                                                                | Status                                                                  |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Host plan: non-commercial              | Hobby is for personal, non-commercial use; commercial use needs a paid plan                                                                                                                                                           | A portfolio piece with no payments, ads or affiliate links fits. Donations may count as commercial on the current page; have none.          | Confirmed (snippets)                                                    |
+| Function invocations                   | 1 million a month                                                                                                                                                                                                                     | One per CDN miss: about 45,000 per CDN region that sees viewers, so well under 200,000                                                      | Confirmed (snippets)                                                    |
+| Active CPU                             | 4 CPU-hours a month, counted only while code runs, not while waiting on a call                                                                                                                                                        | 44,640 tracker runs. The run must stay under about 250 ms of CPU to fit with margin: measure on the first day.                              | Confirmed (snippets); the per-run cost is first day                     |
+| Provisioned memory                     | 360 GB-hours a month                                                                                                                                                                                                                  | About 1 to 2 seconds of wall time per run at the default memory: about 20 GB-hours                                                          | Reported for what it counts                                             |
+| Fast data transfer (CDN to browsers)   | 100 GB a month                                                                                                                                                                                                                        | 3 to 4 MB per viewer-hour: about 25,000 viewer-hours                                                                                        | Confirmed (snippets)                                                    |
+| Fast origin transfer (function to CDN) | 10 GB a month                                                                                                                                                                                                                         | About 3 GB per CDN region that misses every minute; two or three regions fit, more would not. A realistic month uses under 1 GB per region. | Confirmed (snippets)                                                    |
+| Edge requests                          | About 1 million a month                                                                                                                                                                                                               | One per browser poll: 60 a viewer-hour, so about 16,000 viewer-hours                                                                        | Reported                                                                |
+| Function regions                       | One region on Hobby, default Washington; any region may be chosen                                                                                                                                                                     | One region, Stockholm                                                                                                                       | Confirmed (snippets)                                                    |
+| Function duration                      | 300 s maximum on Hobby                                                                                                                                                                                                                | A run takes seconds                                                                                                                         | Reported                                                                |
+| Cron                                   | Once a day on Hobby, with an hour's imprecision                                                                                                                                                                                       | Not used; polling is pull-driven                                                                                                            | Confirmed (snippets)                                                    |
+| CDN caching                            | Caches a function response only with `s-maxage` or the host's own CDN header; stale-while-revalidate and stale-if-error supported; the host's own header takes priority and is stripped before the browser; cache segmented by region | As in Caching above                                                                                                                         | Confirmed (snippets)                                                    |
+| Request collapsing                     | Concurrent requests for an uncached path become one invocation per region; documented for ISR routes, applied "automatically for cacheable routes"                                                                                    | Not relied on. The lease makes it moot.                                                                                                     | Reported for function routes                                            |
+| Server cache                           | `use cache` is in memory per instance and does not persist across serverless requests; `use cache: remote` is a durable handler shared across instances; the host's Runtime Cache is regional                                         | Not relied on for the once-a-minute rule                                                                                                    | Confirmed (Next.js 16.4.3 docs read from source; host docs as snippets) |
+| Store: commands                        | 500,000 a month on the free tier                                                                                                                                                                                                      | About 310,000                                                                                                                               | Confirmed (snippets)                                                    |
+| Store: transfer and size               | 10 GB a month, 256 MB stored, 10 MB a request, one database                                                                                                                                                                           | About 7 GB; under 1 MB stored                                                                                                               | Confirmed (snippets)                                                    |
+| Store: over the quota                  | Further commands return an error until the next month or an upgrade                                                                                                                                                                   | Treated as the store being down                                                                                                             | Reported                                                                |
+| Store, fallback candidate              | 30 MB, 30 connections, 5 GB a month                                                                                                                                                                                                   | Too small with margin                                                                                                                       | Confirmed (snippets)                                                    |
+
+The two figures that bite first are active CPU in a month watched around the clock and the store's transfer. Both are measured on the first day and tracked in the logs; both have an easy out (a lighter join, a smaller history record) before any paid tier.
+
+## First day with the key
+
+What this page needs settled, one call each where possible, at a weekday morning peak:
+
+1. `journeyPos` in `REPORT_ONLY` and in `CALC_REPORT` for the city box: trips per product class in each, and whether either reaches 950. This picks the mode and the box.
+2. Every field of one trip in each answer: whether stops with expected times or a path with progress come back, so delay and next calls can come from the answer.
+3. Whether `planRtTs` moves between two calls a minute apart.
+4. Whether an empty answer and a refused key arrive as an empty list, an error body with a 2xx, or an HTTP error.
+5. The answer's size in bytes and its latency, and the tracker run's CPU time on the host.
+6. Whether the Metro appears in either mode at all.
+7. `himsearch` with the box and with lines set: its size and whether lines or trips come back.
+8. Whether two calls in the same second are accepted (the first-day tests send several).

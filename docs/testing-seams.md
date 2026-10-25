@@ -1,0 +1,37 @@
+# Testing seams
+
+Where Mylder's tests cut in, what each cut replays or fakes, and what a good test looks like. Fewer seams, placed higher, mean more of the real code runs in every test. There are two seams, both Effect layers inside `src/tracker/`, and one switch that sets both.
+
+## The seams
+
+### 1. The API: a recorded `HttpClient` layer
+
+The tracker reaches Rejseplanen through Effect's `HttpClient` service. Live, that is `FetchHttpClient.layer`. In tests it is `RecordedHttpClient.layer(dir)`, built with `HttpClient.make`: for each request it reads the service name from the URL path (`journeyPos`, `multiDepartureBoard`, `journeyDetail`, `himsearch`), takes the next file for that service in call order from the recording folder (`journeyPos/0001.json`, `0002.json`, ...), and returns it with `HttpClientResponse.fromWeb`. A file may also describe a failure (`{ "status": 503 }`, `{ "timeout": true }`), and a service with no files left repeats its last answer. Nothing above the HTTP layer is faked: the schemas, the retries, the timeout, the budget, the store, the timetable join and the data-state rules all run as in production.
+
+A recording is one folder: the API answers, a `timetable/` folder with prepared files for the same service day and box, and `clock.json` with the moment the recording started. Recordings are saved from real answers once the key arrives (Record an hour of journeyPos at morning rush (#12)), with the key stripped from any URL, and a few are hand-made for cases a real hour may not show: an empty `journeyPos`, a refused key, a spent budget, a 1,000-journey cap.
+
+### 2. Time: Effect's `Clock`
+
+Every time check in the tracker reads `Clock.currentTimeMillis`, never `Date.now()`. In Vitest, `@effect/vitest`'s `it.effect` provides `TestClock`, so `TestClock.adjust('5 minutes')` moves the tracker's clock without waiting. Under a recording in a production build, the runtime provides a clock that starts at `clock.json`'s moment and advances in real time, so the recorded day is "today" for the timetable and the snapshot's ages are the recorded ones. The browser's clock in Playwright is set with `page.clock.install({ time })` to the same moment.
+
+### The switch: `MYLDER_RECORDING`
+
+One environment variable, `MYLDER_RECORDING=<folder>`, makes `src/tracker/runtime.ts` build its runtime with the recorded HTTP layer, the fixed clock and the recording's timetable instead of the live layers. It is read at request time, so one `next build` serves both CI's Playwright run and production. Without it, the live layers are used. The store needs no switch: `SnapshotStore` is in memory whenever no Redis URL is set, which is also how local development runs.
+
+There is no third seam. Screens are tested with real snapshots (saved from the tracker's output over a recording), the map's loop with real patterns, and nothing in the browser is mocked.
+
+## What each kind of test looks like
+
+Every test asserts external behaviour: what the route returns, what the snapshot says, what a person sees. None asserts that a function was called.
+
+- **Domain** (`src/domain/*.test.ts`): plain Vitest, tables of inputs and expected states. "A trip reported 70 s ago on a 60 s interval is Ageing." "A computed position is never Live." These are the same functions the browser runs, so a table proven here holds on both sides.
+- **Tracker** (`src/tracker/*.test.ts`, `it.effect`): provide `RecordedHttpClient.layer('recordings/weekday-morning')` and the in-memory store, then play requests against `Tracker.getSnapshot` with `TestClock.adjust` between them, and assert on the snapshot. A good one: "Two requests 10 s apart make one API call." "A trip in the first answer and absent from the next six, over 6 min, is No signal; one absent for 3 min is Ageing." "When the month's counter runs ahead of the day, `nextDue` stretches to 90 s and `getStopDepartures` answers from the timetable with the snapshot's delay." "Three 503s in a row give `api.health: 'error'` and a 200 with the previous snapshot's trips, still moving on their timelines." "An answer the schema rejects is logged without the key and counts as `error`."
+- **Screens** (`src/screens/*.test.tsx`, jsdom, Testing Library): render with a saved snapshot and assert text and roles in English and Danish. "A No signal vehicle's detail says 'No signal since 10:42'." "Metro departures read 'every 3 min'."
+- **End to end** (`e2e/*.spec.ts`, Playwright on the production build with a recording): a few journeys that prove the wiring, not the time rules. The map shows as many vehicles as the recording's snapshot; open one and follow it; a stop's departures; the Disruptions screen; `/da`; the page's notice when its own polls fail (block the route with `page.route`). The 5-minute rules are proven in the tracker tests, where the clock is free.
+
+## Rules
+
+- Recordings carry no key, no personal data and no more than a scenario needs; prefer a hand-made 20-journey recording to a full-city hour where the case allows.
+- A test never reads `Date.now()` on the server side and never sleeps.
+- A change to the snapshot schema regenerates the saved snapshots the screen tests use, from the recordings, with one script.
+- CI needs no secrets, because no test calls the API.
