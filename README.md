@@ -16,15 +16,15 @@ Trip planners like Rejseplanen, Citymapper and Google Maps tell you how to get s
 
 Live transit data is patchy: some vehicles report GPS, some are estimated from the timetable, and feeds drop out. Mylder never hides which is which. Every vehicle, departure and road carries one of these states:
 
-| State          | Meaning                                         | Example label             |
-| -------------- | ----------------------------------------------- | ------------------------- |
-| Live           | Reported position, under 60 s old               | "Reported 20 s ago"       |
-| Ageing         | Reported, but 1 to 5 min old                    | "Last seen 3 min ago"     |
-| Estimated      | Calculated from the timetable plus latest delay | "Estimated from schedule" |
-| Scheduled only | No real-time data for this trip                 | "Timetable only"          |
-| Stale / lost   | No update for over 5 min, or the feed is down   | "No signal since 10:42"   |
+| State          | Meaning                                               | Example label             |
+| -------------- | ----------------------------------------------------- | ------------------------- |
+| Live           | Reported position, under 60 s old                     | "Reported 20 s ago"       |
+| Ageing         | Reported, but 1 to 5 min old                          | "Last seen 3 min ago"     |
+| Estimated      | Worked out from the timetable and the latest realtime | "Estimated from schedule" |
+| Timetable only | No realtime data for this trip                        | "Timetable only"          |
+| No signal      | Had realtime, but its source has been quiet for 5 min | "No signal since 10:42"   |
 
-On the map, reported positions are solid dots and estimated ones are hollow. Thresholds are first guesses until real coverage is known.
+On the map, reported positions are solid dots and estimated ones are hollow. Thresholds are first guesses until real coverage is known. The full rules are in [`docs/data-states.md`](docs/data-states.md), and the words in [`GLOSSARY.md`](GLOSSARY.md).
 
 ## How it works (planned)
 
