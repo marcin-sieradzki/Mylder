@@ -3,8 +3,8 @@
 // so a minor release can break only this file.
 import 'server-only'
 import { Effect, Layer, Schema } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientResponse } from 'effect/http'
-import type { HttpClientError, HttpClientRequest } from 'effect/http'
+import { FetchHttpClient, HttpClient, HttpClientError, HttpClientResponse } from 'effect/http'
+import type { HttpClientRequest } from 'effect/http'
 import { ErrorAnswer } from './answers.ts'
 
 export { HttpClient }
@@ -44,3 +44,25 @@ export const layer = (provided: HttpClient.HttpClient): Layer.Layer<HttpClient.H
 
 /** The real network, for the real Rejseplanen. */
 export const fetchLayer: Layer.Layer<HttpClient.HttpClient> = FetchHttpClient.layer
+
+/** A request that failed before an answer came back, and whether the network was to blame. */
+export interface Unanswered {
+  readonly network: boolean
+  readonly message: string
+}
+
+/** GETs a URL with a query through a client, answering with the status and the body's text. */
+export const getText = (
+  httpClient: HttpClient.HttpClient,
+  url: string,
+  urlParams: Readonly<Record<string, string | number>>,
+): Effect.Effect<{ readonly status: number; readonly text: string }, Unanswered> =>
+  httpClient.get(url, { urlParams }).pipe(
+    Effect.flatMap((response) =>
+      Effect.map(response.text, (body) => ({ status: response.status, text: body })),
+    ),
+    Effect.mapError((failure) => ({
+      network: failure.reason instanceof HttpClientError.TransportError,
+      message: failure.message,
+    })),
+  )
