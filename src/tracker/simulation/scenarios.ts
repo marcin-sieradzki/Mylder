@@ -20,15 +20,19 @@ export interface Failure {
   readonly kind: FailureKind
 }
 
-/** A moment relative to the service day: days after it, and the time on the clock that day. */
+/** A moment in a message's day or week: whole days after its start, and the time that day. */
 export interface DayTime {
   readonly day: number
   readonly time: `${number}:${number}`
 }
 
-/** A disruption message, in Danish as Rejseplanen writes them, valid between two moments. */
+/**
+ * A disruption message, in Danish as Rejseplanen writes them, valid between two moments that
+ * repeat every day, or every week from Monday, so the clock always finds it active or coming.
+ */
 export interface ScenarioMessage {
   readonly id: string
+  readonly every: 'day' | 'week'
   readonly head: string
   readonly lead: string
   readonly text: string
@@ -78,6 +82,7 @@ export interface Scenario {
 const WEEKDAY_MESSAGES: readonly ScenarioMessage[] = [
   {
     id: 'simulated-1',
+    every: 'week',
     head: 'Linje 5C kører en anden rute ved Langebro',
     lead: 'På grund af vejarbejde kører linje 5C via Knippelsbro.',
     text: 'På grund af vejarbejde på Langebro kører linje 5C via Knippelsbro. Stoppestedet Klaksvigsgade (Langebro) betjenes ikke.',
@@ -91,6 +96,7 @@ const WEEKDAY_MESSAGES: readonly ScenarioMessage[] = [
   },
   {
     id: 'simulated-2',
+    every: 'day',
     head: 'Færre S-tog mellem København H og Hellerup',
     lead: 'Signalfejl ved Østerport. Forvent ventetid og ændrede spor.',
     text: 'På grund af en signalfejl ved Østerport kører der færre S-tog mellem København H og Hellerup. Forvent ventetid og ændrede spor.',
@@ -104,6 +110,7 @@ const WEEKDAY_MESSAGES: readonly ScenarioMessage[] = [
   },
   {
     id: 'simulated-3',
+    every: 'week',
     head: 'Ingen S-tog mellem Hellerup og Holte i weekenden',
     lead: 'Sporarbejde. Togbusser kører i stedet.',
     text: 'På grund af sporarbejde kører der ingen S-tog mellem Hellerup og Holte. Togbusser kører i stedet.',
@@ -112,8 +119,8 @@ const WEEKDAY_MESSAGES: readonly ScenarioMessage[] = [
     priority: 40,
     products: 16,
     stops: ['8600655', '8600677'],
-    from: { day: 1, time: '01:00' },
-    to: { day: 2, time: '23:00' },
+    from: { day: 5, time: '01:00' },
+    to: { day: 6, time: '23:00' },
   },
 ]
 

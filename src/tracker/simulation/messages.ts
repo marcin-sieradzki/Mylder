@@ -1,10 +1,10 @@
-// The simulated disruption messages: the scenario's, placed on the calendar around the service
-// day of the moment, for `himsearch` and for the trips they touch in `journeyDetail`.
+// The simulated disruption messages: the scenario's, placed on the calendar around the moment,
+// for `himsearch` and for the trips they touch in `journeyDetail`.
 import 'server-only'
-import { addDays } from '../../timetable/dates.ts'
-import { wallClock } from '../../timetable/time.ts'
+import { addDays, weekday } from '../../timetable/dates.ts'
+import type { IsoDate } from '../../timetable/format.ts'
 import type { Message } from '../rejseplanen/answers.ts'
-import { dateAndTime, productClass, stopLocation } from './journeys.ts'
+import { atClock, dateAndTime, platformsOfStops, productClass, stopLocation } from './journeys.ts'
 import type { DayTime, ScenarioMessage } from './scenarios.ts'
 import type { SimulatedTrip, SimulationSettings } from './world.ts'
 
@@ -17,24 +17,27 @@ interface PlacedMessage {
   readonly platforms: readonly number[]
 }
 
-/** The scenario's messages, placed around the calendar day of a moment. */
+/**
+ * The scenario's messages, each placed in the day or week of the moment, or in the one before
+ * while that one still runs, such as a multi-day diversion before its first morning's start.
+ */
 function placed({ scenario, timetable }: SimulationSettings, now: number): PlacedMessage[] {
   const { timezone } = timetable.manifest
-  const [, today] = timetable.serviceDaysAt(now)
-  const moment = ({ day, time }: DayTime) => {
-    const [hours, minutes] = time.split(':').map(Number)
-    return wallClock(addDays(today, day), hours * 3600 + minutes * 60, timezone)
-  }
-  const { platforms } = timetable.stops
-  return scenario.messages.map((message) => ({
-    message,
-    from: moment(message.from),
-    to: moment(message.to),
-    platforms: message.stops.flatMap((id) => {
-      const index = platforms.findIndex((platform) => platform.id === id)
-      return index === -1 ? [] : [index]
-    }),
-  }))
+  const [today] = dateAndTime(now, timezone)
+  const moment = (start: IsoDate, { day, time }: DayTime) =>
+    atClock(addDays(start, day), time, timezone)
+  return scenario.messages.map((message) => {
+    const length = message.every === 'week' ? 7 : 1
+    const current = addDays(today, message.every === 'week' ? -weekday(today) : 0)
+    const before = addDays(current, -length)
+    const start = moment(before, message.to) > now ? before : current
+    return {
+      message,
+      from: moment(start, message.from),
+      to: moment(start, message.to),
+      platforms: platformsOfStops(timetable, message.stops),
+    }
+  })
 }
 
 function toMessage(

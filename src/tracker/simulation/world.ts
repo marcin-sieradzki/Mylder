@@ -21,6 +21,12 @@ const MINUTE = 60_000
 /** No simulated trip runs later than this, so a trip is looked at only near its planned times. */
 export const MAX_DELAY = 15 * MINUTE
 
+/**
+ * Whether a trip runs on an interval line, the Metro (ADR 0006): it is in no answer, never
+ * cancelled and never doubled, and its departures carry no prognosis, whatever a scenario says.
+ */
+export const isIntervalLine = (trip: PlannedTrip) => trip.line.mode === 'metro'
+
 /** One trip of the simulated city at a moment. */
 export interface SimulatedTrip {
   readonly trip: PlannedTrip
@@ -91,7 +97,7 @@ function journeyNumbers(trips: readonly PlannedTrip[]): Map<string, number> {
  * three to seven minutes behind the one before. The Metro gets none.
  */
 function extrasOf({ scenario, seed }: SimulationSettings, trip: PlannedTrip): PlannedTrip[] {
-  if (trip.line.mode === 'metro') return []
+  if (isIntervalLine(trip)) return []
   const whole = Math.floor(scenario.extra)
   const count = whole + (chance(seed, trip.key, 'extra') < scenario.extra - whole ? 1 : 0)
   const copies: PlannedTrip[] = []
@@ -163,7 +169,11 @@ function quietAt({ scenario, seed }: SimulationSettings, trip: PlannedTrip, now:
 
 /** The call a trip passes without calling, when the scenario cancels one: never its first or last. */
 function cancelledCallOf({ scenario, seed }: SimulationSettings, trip: PlannedTrip): number[] {
-  if (trip.calls.length < 3 || chance(seed, trip.key, 'cancelled call') >= scenario.cancelledCall) {
+  if (
+    isIntervalLine(trip) ||
+    trip.calls.length < 3 ||
+    chance(seed, trip.key, 'cancelled call') >= scenario.cancelledCall
+  ) {
     return []
   }
   return [1 + Math.floor(chance(seed, trip.key, 'which call') * (trip.calls.length - 2))]
@@ -227,12 +237,11 @@ export function simulateTrip(
   const delayAt = delays(settings, trip, minute)
   const calls = timedCalls(expectedCalls(trip, delayAt, now))
   const delay = toMinutes(delayAt(minute))
-  // The Metro is in no answer, whatever a scenario says, as an interval line (ADR 0006).
-  const metro = mode === 'metro'
+  const metro = isIntervalLine(trip)
   const reports = !metro && chance(seed, trip.key, 'reports') < scenario.reporting[mode]
   const carried =
     reports || (!metro && chance(seed, trip.key, 'computed') < scenario.computed[mode])
-  const cancelled = mode !== 'metro' && chance(seed, trip.key, 'cancelled') < scenario.cancelled
+  const cancelled = !metro && chance(seed, trip.key, 'cancelled') < scenario.cancelled
   return {
     trip,
     journeyNumber: day.numbers.get(trip.key)!,

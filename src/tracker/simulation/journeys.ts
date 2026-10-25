@@ -3,7 +3,8 @@
 import 'server-only'
 import type { TimedCall } from '../../domain/trip-motion.ts'
 import type { IsoDate, LineRecord } from '../../timetable/format.ts'
-import { serviceDayStart } from '../../timetable/time.ts'
+import { platformId } from '../../timetable/stops.ts'
+import { serviceDayStart, wallClock } from '../../timetable/time.ts'
 import type { PlannedTrip } from '../../timetable/trips.ts'
 import type { Product, Stop, StopLocation } from '../rejseplanen/answers.ts'
 import type { Timetable } from '../timetable.ts'
@@ -182,6 +183,24 @@ export function envelope(now: number, timezone: string) {
 }
 
 /** A platform as a stop location. */
+/** A moment from a calendar date and an `HH:MM` time on its clock. */
+export function atClock(date: IsoDate, time: string, timezone: string): number {
+  const [hours, minutes] = time.split(':').map(Number)
+  return wallClock(date, hours * 3600 + minutes * 60, timezone)
+}
+
+/** The platforms a list of stop or platform ids names: every platform of each stop they're in. */
+export function platformsOfStops(timetable: Timetable, ids: readonly string[]): number[] {
+  const { platforms } = timetable.stops
+  const named = new Set(ids.map(platformId))
+  const stops = new Set(platforms.flatMap((p) => (named.has(p.id) ? [p.stop] : [])))
+  return platforms.flatMap((platform, i) => (stops.has(platform.stop) ? [i] : []))
+}
+
+/** `A` for an extra trip, one the timetable doesn't have, else `P` for a planned one. */
+export const journeyStatus = ({ extra }: { readonly extra: boolean }) =>
+  extra ? ('A' as const) : ('P' as const)
+
 export function stopLocation(timetable: Timetable, platform: number): StopLocation {
   const { name, id, lat, lon } = timetable.stops.platforms[platform]
   return { name, extId: id, lon, lat }
@@ -192,7 +211,15 @@ export interface StopsOf {
   readonly trip: PlannedTrip
   readonly calls: readonly TimedCall[]
   readonly cancelledCalls: readonly number[]
+  readonly reports: boolean
 }
+
+/**
+ * How a simulated trip's expected times came about: `PROGNOSED` from its own reports, and
+ * `CALCULATED` from the timetable plus its delay for a trip that doesn't report.
+ */
+export const prognosisOf = ({ reports }: { readonly reports: boolean }) =>
+  reports ? ('PROGNOSED' as const) : ('CALCULATED' as const)
 
 /**
  * A trip's calls as a journey's stops, those from `start` up to `end`: planned times, and
@@ -202,20 +229,19 @@ export interface StopsOf {
  */
 export function journeyStops(
   timetable: Timetable,
-  { trip, calls, cancelledCalls }: StopsOf,
+  { trip, calls, cancelledCalls, reports }: StopsOf,
   realtime: boolean,
   start = 0,
   end = trip.calls.length,
 ): Stop[] {
   const { timezone } = timetable.manifest
+  const prognosis = prognosisOf({ reports })
   /** One side of a call: its planned time, and its expected one where it differs. */
   const times = (plan: number, expected: number) => {
     const [date, time] = dateAndTime(plan, timezone)
     if (!realtime) return { date, time }
     const [rtDate, rtTime] = dateAndTime(expected, timezone)
-    return expected === plan
-      ? { date, time, prognosis: 'PROGNOSED' as const }
-      : { date, time, rtDate, rtTime, prognosis: 'PROGNOSED' as const }
+    return expected === plan ? { date, time, prognosis } : { date, time, rtDate, rtTime, prognosis }
   }
   return trip.calls.slice(start, end).map((planned, offset): Stop => {
     const i = start + offset

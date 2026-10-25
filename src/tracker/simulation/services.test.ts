@@ -49,7 +49,10 @@ describe('the simulated multiDepartureBoard', () => {
         (d) => d.ProductAtStop?.cls === '16' && !d.cancelled,
       )
       expect(stog.length).toBeGreaterThan(0)
-      for (const d of stog) expect(d).toMatchObject({ prognosisType: 'PROGNOSED', reachable: true })
+      for (const d of stog) {
+        expect(['PROGNOSED', 'CALCULATED']).toContain(d.prognosisType)
+        expect(d.reachable).toBe(true)
+      }
       expect(stog.every((d) => d.rtTrack !== undefined)).toBe(true)
     }).pipe(Effect.provide(simulation)),
   )
@@ -128,15 +131,28 @@ describe('the simulated himsearch', () => {
         'simulated-2': true,
         'simulated-3': false,
       })
+      // 03:30 on Wednesday: the diversion still runs overnight; the signal fault is over.
+      expect(active(yield* messages(Date.UTC(2026, 5, 17, 1, 30)))).toEqual({
+        'simulated-1': true,
+        'simulated-2': false,
+        'simulated-3': false,
+      })
+      // Saturday noon: the weekend's works are on, and the diversion has ended for the week.
+      expect(active(yield* messages(Date.UTC(2026, 5, 20, 10)))).toEqual({
+        'simulated-2': true,
+        'simulated-3': true,
+      })
     }).pipe(Effect.provide(simulation)),
   )
 
-  it.effect('names the affected stops the timetable has, in Danish', () =>
+  it.effect('names every platform of the stops it affects, in Danish', () =>
     Effect.gen(function* () {
       const [diversion] = (yield* messages()).Message ?? []
       expect(diversion.head).toBe('Linje 5C kører en anden rute ved Langebro')
-      expect(diversion.affectedStops?.StopLocation.map((s) => s.extId)).toEqual(['807'])
-      expect(diversion).toMatchObject({ sDate: '2026-06-16', sTime: '04:00:00', products: 32 })
+      // Both sides of the street at Klaksvigsgade.
+      expect(diversion.affectedStops?.StopLocation.map((s) => s.extId)).toEqual(['807', '25109'])
+      // Since Monday morning, the week's start.
+      expect(diversion).toMatchObject({ sDate: '2026-06-15', sTime: '04:00:00', products: 32 })
     }).pipe(Effect.provide(simulation)),
   )
 })

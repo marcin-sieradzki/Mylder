@@ -1,11 +1,26 @@
 // The simulated `multiDepartureBoard`: the departures from every platform of the stops asked
 // for, over a window, with expected times from the same world as `journeyPos`.
 import 'server-only'
-import { wallClock } from '../../timetable/time.ts'
 import type { Departure, DepartureBoardAnswer } from '../rejseplanen/answers.ts'
-import { dateAndTime, envelope, journeyName, journeyRef, productOf } from './journeys.ts'
+import {
+  atClock,
+  dateAndTime,
+  envelope,
+  journeyName,
+  journeyRef,
+  journeyStatus,
+  platformsOfStops,
+  prognosisOf,
+  productOf,
+} from './journeys.ts'
 import { hash } from './random.ts'
-import { simulateTrip, simulatedDay, type SimulatedTrip, type SimulationSettings } from './world.ts'
+import {
+  isIntervalLine,
+  simulateTrip,
+  simulatedDay,
+  type SimulatedTrip,
+  type SimulationSettings,
+} from './world.ts'
 
 const MINUTE = 60_000
 
@@ -28,32 +43,17 @@ export function readDepartureBoardRequest(
   const date = query.get('date')
   const time = query.get('time')
   let from = Math.floor(now / MINUTE) * MINUTE
-  if (date && time) {
-    const [hours, minutes] = time.split(':').map(Number)
-    from = wallClock(date, hours * 3600 + minutes * 60, timetable.manifest.timezone)
-  }
-  const number = (name: string, fallback: number) => {
+  if (date && time) from = atClock(date, time, timetable.manifest.timezone)
+  const positive = (name: string, fallback: number) => {
     const value = Number(query.get(name) ?? '')
     return query.get(name) && Number.isFinite(value) && value > 0 ? value : fallback
   }
   return {
     ids,
     from,
-    duration: number('duration', 60),
-    maxJourneys: number('maxJourneys', Infinity),
+    duration: positive('duration', 60),
+    maxJourneys: positive('maxJourneys', Infinity),
   }
-}
-
-/** The platforms a list of ids names: every platform of each stop an id belongs to. */
-function platformsOf({ timetable }: SimulationSettings, ids: readonly string[]): Set<number> {
-  const { platforms } = timetable.stops
-  const stops = new Set(
-    ids.flatMap((id) => {
-      const bare = id.replace(/^0+(?=.)/, '')
-      return platforms.filter((platform) => platform.id === bare).map((platform) => platform.stop)
-    }),
-  )
-  return new Set(platforms.flatMap((platform, i) => (stops.has(platform.stop) ? [i] : [])))
 }
 
 function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: number): Departure {
@@ -64,7 +64,7 @@ function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: nu
   const planned = trip.calls[i].departure
   const expected = simulated.calls[i].departure
   const cancelled = simulated.cancelled || simulated.cancelledCalls.includes(i)
-  const realtime = trip.line.mode !== 'metro' && !cancelled
+  const realtime = !isIntervalLine(trip) && !cancelled
   const [date, time] = dateAndTime(planned, timezone)
   const [rtDate, rtTime] = dateAndTime(expected, timezone)
   const train = trip.line.mode === 'train' || trip.line.mode === 's-tog'
@@ -81,11 +81,11 @@ function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: nu
     ...(realtime && expected !== planned && { rtTime, rtDate }),
     // Tracks are made up, one per platform, where trains have them.
     ...(realtime && train && { rtTrack: String(1 + (hash(platform.id) % 8)) }),
-    ...(realtime && { prognosisType: 'PROGNOSED' as const }),
+    ...(realtime && { prognosisType: prognosisOf(simulated) }),
     direction: trip.headsign,
     reachable: !cancelled,
     ...(cancelled && { cancelled: true }),
-    JourneyStatus: simulated.extra ? 'A' : 'P',
+    JourneyStatus: journeyStatus(simulated),
     ProductAtStop: productOf(trip, simulated.journeyNumber),
   }
 }
@@ -96,7 +96,7 @@ export function departureBoard(
   request: DepartureBoardRequest,
   now: number,
 ): DepartureBoardAnswer {
-  const platforms = platformsOf(settings, request.ids)
+  const platforms = new Set(platformsOfStops(settings.timetable, request.ids))
   const until = request.from + request.duration * MINUTE
   const found: { at: number; departure: Departure }[] = []
   const days = settings.timetable.serviceDaysAt(request.from)

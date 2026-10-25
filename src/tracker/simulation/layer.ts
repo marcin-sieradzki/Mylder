@@ -47,7 +47,7 @@ function failureAt(scenario: Scenario, now: number): FailureKind | undefined {
 }
 
 /** How long a timed-out call hangs before the gateway gives up, past any client's timeout. */
-export const TIMEOUT_AFTER = '30 seconds'
+const TIMEOUT_AFTER = '30 seconds'
 
 /**
  * A scheduled failure's answer. Rejseplanen's own error shapes are guesses until the first real
@@ -87,22 +87,20 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
       const query = url.searchParams
       const failing = failureAt(settings.scenario, now)
       if (failing && failing !== 'empty') return yield* failure(request, failing)
+      // An empty answer, the one docs/live-data.md watches for, has no list at all.
+      const empty = failing === 'empty'
       switch (service) {
         case 'journeyPos': {
-          // An empty answer is the one docs/live-data.md watches for: no journeys at all.
-          const answer =
-            failing === 'empty'
-              ? envelope(now, timezone)
-              : journeyPos(settings, worldAt(settings, now), readJourneyPosRequest(query))
+          const answer = empty
+            ? envelope(now, timezone)
+            : journeyPos(settings, worldAt(settings, now), readJourneyPosRequest(query))
           return Http.json(request, 200, encode.journeyPos(answer))
         }
         case 'multiDepartureBoard': {
-          const board = readDepartureBoardRequest(settings, query, now)
-          return Http.json(
-            request,
-            200,
-            encode.multiDepartureBoard(departureBoard(settings, board, now)),
-          )
+          const answer = empty
+            ? envelope(now, timezone)
+            : departureBoard(settings, readDepartureBoardRequest(settings, query, now), now)
+          return Http.json(request, 200, encode.multiDepartureBoard(answer))
         }
         case 'journeyDetail': {
           const detail = journeyDetail(settings, query.get('id') ?? '', now)
@@ -111,7 +109,7 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
             : Http.error(request, 400, 'SVC_PARAM', 'Unknown journey reference')
         }
         case 'himsearch': {
-          const messages = messagesAt(settings, now)
+          const messages = empty ? [] : messagesAt(settings, now)
           const answer =
             messages.length > 0
               ? { Message: messages, ...envelope(now, timezone) }

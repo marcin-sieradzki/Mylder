@@ -32,7 +32,6 @@ const journeyRefs = (query: Record<string, string | number> = {}, moment = MOMEN
 const refOf = ({ trip, journeyNumber }: SimulatedTrip) => journeyRef(timetable, trip, journeyNumber)
 
 describe('silences', () => {
-  const patchy: SimulationSettings = { timetable, scenario: SCENARIOS.patchy, seed: 1 }
   const quietOften: Scenario = {
     ...WEEKDAY,
     name: 'quiet-often',
@@ -67,17 +66,18 @@ describe('silences', () => {
     }).pipe(Effect.provide(simulation(quietOften))),
   )
 
-  it('are the same for a seed and differ between seeds', () => {
-    const quiet = (seed: number) =>
-      moments.flatMap((m) =>
-        worldAt({ ...patchy, seed }, m)
-          .trips.filter((t) => t.quiet)
-          .map((t) => `${m} ${t.trip.key}`),
-      )
-    expect(quiet(1).length).toBeGreaterThan(0)
-    expect(quiet(1)).toEqual(quiet(1))
-    expect(quiet(2)).not.toEqual(quiet(1))
-  })
+  it.effect('are the same for a seed and differ between seeds', () =>
+    Effect.gen(function* () {
+      // The answers over ten minutes of the patchy scenario, clear of its outage.
+      const answers = (seed: number) =>
+        Effect.forEach(moments.slice(0, 10), (moment) => journeyRefs({}, moment)).pipe(
+          Effect.provide(simulation(SCENARIOS.patchy, seed)),
+        )
+      const first = yield* answers(1)
+      expect(yield* answers(1)).toEqual(first)
+      expect(yield* answers(2)).not.toEqual(first)
+    }),
+  )
 })
 
 describe('cancellations', () => {
@@ -134,12 +134,23 @@ describe('cancellations', () => {
     }).pipe(Effect.provide(simulation(often))),
   )
 
-  it('are the same for a seed', () => {
-    const cancelled = (seed: number) =>
-      worldAt({ ...settings, seed }, MOMENT).trips.flatMap((t) => (t.cancelled ? [t.trip.key] : []))
-    expect(cancelled(1)).toEqual(cancelled(1))
-    expect(cancelled(1).length).toBeGreaterThan(0)
-  })
+  it.effect('are the same for a seed', () =>
+    Effect.gen(function* () {
+      // The cancelled departures at København H over an hour.
+      const cancelled = (seed: number) =>
+        call('multiDepartureBoard', { idList: '8600626', duration: 60 }).pipe(
+          Effect.map(({ body }) =>
+            (Schema.decodeUnknownSync(DepartureBoardAnswer)(JSON.parse(body)).Departure ?? [])
+              .filter((d) => d.cancelled)
+              .map((d) => d.JourneyDetailRef.ref),
+          ),
+          Effect.provide(simulation(often, seed)),
+        )
+      const first = yield* cancelled(1)
+      expect(first.length).toBeGreaterThan(0)
+      expect(yield* cancelled(1)).toEqual(first)
+    }),
+  )
 })
 
 describe('extra trips', () => {
@@ -220,21 +231,26 @@ describe('the named scenarios', () => {
     }).pipe(Effect.provide(apiLayer({ source: readSource(`simulated:${name}`), timetable }))),
   )
 
-  it.effect('empty REPORT_ONLY in computed-only, while CALC_REPORT still answers', () =>
+  it.effect('empty REPORT_ONLY in computed-only, while CALC_REPORT still answers, calculated', () =>
     Effect.gen(function* () {
       expect(yield* journeyRefs({ positionMode: 'REPORT_ONLY' })).toEqual([])
       expect((yield* journeyRefs()).length).toBeGreaterThan(0)
+      const { body } = yield* call('multiDepartureBoard', { idList: '8600626' })
+      const departures = Schema.decodeUnknownSync(DepartureBoardAnswer)(JSON.parse(body)).Departure
+      const prognoses = new Set(departures?.map((d) => d.prognosisType).filter(Boolean))
+      expect([...prognoses]).toEqual(['CALCULATED'])
     }).pipe(Effect.provide(simulation(SCENARIOS['computed-only']))),
   )
 
   it.effect('fill maxJny in cap at a weekday peak on the real timetable', () =>
     Effect.gen(function* () {
       const real = yield* Effect.promise(() => loadTimetable())
-      // 08:00 on the first Tuesday of the deployed timetable.
-      const [tuesday] = real
+      // 07:00 UTC, the morning peak, on the deployed timetable's comparison day. The fixture
+      // has too few trips to fill a box of 1,000.
+      const [day] = real
         .serviceDaysAt(Date.parse(`${real.manifest.comparisonDay}T12:00:00Z`))
         .slice(-1)
-      const peak = Date.parse(`${tuesday}T07:00:00Z`)
+      const peak = Date.parse(`${day}T07:00:00Z`)
       const refs = yield* journeyRefs({ maxJny: 1000 }, peak).pipe(
         Effect.provide(SimulatedRejseplanen.layer({ timetable: real, scenario: SCENARIOS.cap })),
       )
