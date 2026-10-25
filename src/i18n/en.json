@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "title": "Mylder: live map of Copenhagen",
+    "description": "Copenhagen's buses, S-tog, metro and trains on one live map, honest about how fresh each position is."
+  },
+  "home": {
+    "heading": "All of Copenhagen moving on one map",
+    "intro": "A live map of Copenhagen's buses, S-tog, metro and trains, honest about how fresh each position is. The map comes next."
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "Dansk"
+  }
+}

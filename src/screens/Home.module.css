@@ -1,0 +1,31 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100svh;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--perron-space-300);
+  min-block-size: var(--perron-size-top-bar-phone);
+  padding-inline: var(--perron-space-400);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-300);
+  inline-size: 100%;
+  max-inline-size: var(--perron-size-dialog-width);
+  margin-inline: auto;
+  padding: var(--perron-space-800) var(--perron-space-400);
+}
+
+/* Above Perron's breakpoint.phone (760px); a custom property cannot sit in a media query. */
+@media (min-width: 761px) {
+  .bar {
+    min-block-size: var(--perron-size-top-bar);
+  }
+}
