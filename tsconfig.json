@@ -4,6 +4,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "types": ["node"],
     "allowJs": false,
     "skipLibCheck": true,

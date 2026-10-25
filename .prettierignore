@@ -7,3 +7,4 @@ prototypes
 .claude/skills/software-factory
 .claude/skills/vercel-react-best-practices
 next-env.d.ts
+public/timetable

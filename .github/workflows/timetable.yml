@@ -1,0 +1,74 @@
+name: Timetable
+
+# Prepares the timetable from the Labs GTFS and commits it to the default branch when the feed
+# changed (docs/timetable.md). Daily at an off-hour minute, by hand, and as a dry run that
+# commits nothing on a pull request that changes the job.
+
+on:
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/timetable.yml
+      - scripts/timetable/**
+      - src/timetable/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: timetable-${{ github.ref }}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # The download source: the repository variable when set, else the Mobility Database's
+      # public copy of the latest Labs download. docs/timetable.md says how to switch to Labs.
+      GTFS_URL: ${{ vars.TIMETABLE_GTFS_URL || 'https://files.mobilitydatabase.org/mdb-1292/latest.zip' }}
+      GTFS_USER: ${{ secrets.TIMETABLE_GTFS_USER }}
+      GTFS_PASSWORD: ${{ secrets.TIMETABLE_GTFS_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Download the GTFS
+        run: |
+          auth=()
+          if [ -n "$GTFS_USER" ]; then auth=(--user "$GTFS_USER:$GTFS_PASSWORD"); fi
+          curl --fail --location --retry 3 --silent --show-error "${auth[@]}" --output GTFS.zip "$GTFS_URL"
+          ls -l GTFS.zip
+      - name: Prepare the timetable
+        # A dry run prepares the feed even when it is unchanged, to try the job's change on it.
+        run: npm run timetable -- --zip GTFS.zip ${{ github.event_name == 'pull_request' && '--force' || '' }}
+      - name: Check the app with the new timetable
+        run: npm run check
+      - name: Report the files
+        run: |
+          {
+            echo '| File | Bytes | Gzipped |'
+            echo '| --- | --- | --- |'
+            for f in public/timetable/manifest.json public/timetable/*/*.json; do
+              echo "| ${f#public/timetable/} | $(wc -c < "$f") | $(gzip -9c "$f" | wc -c) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit a changed timetable
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        run: |
+          git add --all public/timetable
+          if git diff --cached --quiet; then
+            echo 'No change to commit.'
+            exit 0
+          fi
+          version=$(node -p "require('./public/timetable/manifest.json').version")
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit --message "Timetable $version"
+          # The default branch may have moved during the run; the timetable's files are the job's alone.
+          git pull --rebase
+          git push
