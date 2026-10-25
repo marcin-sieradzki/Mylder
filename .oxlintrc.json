@@ -22,6 +22,12 @@
           "dynamicParams"
         ]
       }
+    ],
+    "vitest/no-standalone-expect": [
+      "error",
+      {
+        "additionalTestBlockFunctions": ["it.effect", "it.live", "it.effect.each"]
+      }
     ]
   },
   "ignorePatterns": [

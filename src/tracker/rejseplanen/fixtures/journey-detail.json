@@ -1,0 +1,75 @@
+{
+  "Stops": {
+    "Stop": [
+      {
+        "name": "Nørreport St.",
+        "extId": "8600646",
+        "routeIdx": 13,
+        "lon": 12.571,
+        "lat": 55.683,
+        "arrTime": "10:28:00",
+        "arrDate": "2026-10-26",
+        "depTime": "10:29:00",
+        "depDate": "2026-10-26",
+        "rtArrTime": "10:29:00",
+        "rtArrDate": "2026-10-26",
+        "rtDepTime": "10:30:00",
+        "rtDepDate": "2026-10-26",
+        "arrPrognosisType": "PROGNOSED",
+        "depPrognosisType": "PROGNOSED",
+        "rtArrTrack": "2",
+        "rtDepTrack": "2",
+        "rtDepPlatform": { "type": "PL", "text": "2" }
+      },
+      {
+        "name": "Vesterport St.",
+        "extId": "8600650",
+        "routeIdx": 14,
+        "lon": 12.562,
+        "lat": 55.676,
+        "arrTime": "10:30:00",
+        "arrDate": "2026-10-26",
+        "depTime": "10:30:00",
+        "depDate": "2026-10-26",
+        "cancelledArrival": true,
+        "cancelledDeparture": true
+      },
+      {
+        "name": "København H",
+        "extId": "8600626",
+        "routeIdx": 15,
+        "lon": 12.564968,
+        "lat": 55.672683,
+        "arrTime": "10:31:00",
+        "arrDate": "2026-10-26",
+        "rtArrTime": "10:32:00",
+        "rtArrDate": "2026-10-26",
+        "arrPrognosisType": "CALCULATED"
+      }
+    ]
+  },
+  "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#58845#TA#0#DA#261026#1S#8600798#1T#950#LS#8600696#LT#1055#PU#86#RT#3#CA#006#ZE#B#ZB#B#PC#4#FR#8600798#FT#950#TO#8600696#TT#1055#",
+  "dayOfOperation": "2026-10-26",
+  "lastPos": { "lon": 12.566, "lat": 55.679 },
+  "Product": [{ "name": "S-tog B", "line": "B", "num": "54321", "catOut": "S-tog", "cls": "16" }],
+  "Messages": {
+    "Message": [
+      {
+        "id": "fixture-1",
+        "act": true,
+        "head": "Ingen stop på Vesterport St.",
+        "lead": "Togene kører igennem Vesterport St. på grund af sporarbejde.",
+        "category": "1",
+        "priority": 50,
+        "products": 16,
+        "routeIdxFrom": 14,
+        "routeIdxTo": 14
+      }
+    ]
+  },
+  "JourneyStatus": "P",
+  "reachable": true,
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-10-26T10:30:41+01:00"
+}

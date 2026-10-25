@@ -2,11 +2,13 @@
 
 Where Mylder's tests cut in, what each cut replays or fakes, and what a good test looks like. Fewer seams, placed higher, mean more of the real code runs in every test. There are two seams, both Effect layers inside `src/tracker/`, and one switch that sets both.
 
+Until the Rejseplanen key arrives, a third adapter at the API seam answers in its place: the simulated Rejseplanen (spec #29), which builds every answer from the prepared timetable at the runtime's clock.
+
 ## The seams
 
 ### 1. The API: a recorded `HttpClient` layer
 
-The tracker reaches Rejseplanen through Effect's `HttpClient` service. Live, that is `FetchHttpClient.layer`. In tests it is `RecordedHttpClient.layer(dir)`, built with `HttpClient.make`: for each request it reads the service name from the URL path (`journeyPos`, `multiDepartureBoard`, `journeyDetail`, `himsearch`), takes the next file for that service in call order from the recording folder (`journeyPos/0001.json`, `0002.json`, ...), and returns it with `HttpClientResponse.fromWeb`. A file may also describe a failure (`{ "status": 503 }`, `{ "timeout": true }`), and a service with no files left repeats its last answer. Nothing above the HTTP layer is faked: the schemas, the retries, the timeout, the budget, the store, the timetable join and the data-state rules all run as in production.
+The tracker reaches Rejseplanen through Effect's `HttpClient` service. Live, that is `FetchHttpClient.layer`. In tests it is `RecordedHttpClient.layer(dir)`, built with `HttpClient.make`: for each request it reads the service name from the URL path (`journeyPos`, `multiDepartureBoard`, `journeyDetail`, `himsearch`), takes the next file for that service in call order from the recording folder (`journeyPos/0001.json`, `0002.json`, ...), and returns it with `HttpClientResponse.fromWeb`. A file may also describe a failure (`{ "status": 503 }`, `{ "timeout": true }`), and a service with no files left repeats its last answer. Nothing above the HTTP layer is faked: the schemas, the retries, the timeout, the budget, the store, the timetable join and the data-state rules all run as in production. Every source's answers decode with the schemas in `src/tracker/rejseplanen/answers.ts`, whose hand-written contract fixtures sit beside them.
 
 A recording is one folder: the API answers, a `timetable/` folder with prepared files for the same service day and box, and `clock.json` with the moment the recording started. Recordings are saved from real answers once the key arrives (Record an hour of journeyPos at morning rush (#12)), with the key stripped from any URL, and a few are hand-made for cases a real hour may not show: an empty `journeyPos`, a refused key, a spent budget, a 1,000-journey cap.
 
@@ -14,11 +16,21 @@ A recording is one folder: the API answers, a `timetable/` folder with prepared 
 
 Every time check in the tracker reads `Clock.currentTimeMillis`, never `Date.now()`. In Vitest, `@effect/vitest`'s `it.effect` provides `TestClock`, so `TestClock.adjust('5 minutes')` moves the tracker's clock without waiting. Under a recording in a production build, the runtime provides a clock that starts at `clock.json`'s moment and advances in real time, so the recorded day is "today" for the timetable and the snapshot's ages are the recorded ones. The browser's clock in Playwright is set with `page.clock.install({ time })` to the same moment.
 
-### The switch: `MYLDER_RECORDING`
+### The switch: `MYLDER_SOURCE`
 
-One environment variable, `MYLDER_RECORDING=<folder>`, makes `src/tracker/runtime.ts` build its runtime with the recorded HTTP layer, the fixed clock and the recording's timetable instead of the live layers. It is read at request time, so one `next build` serves both CI's Playwright run and production. Without it, the live layers are used. The store needs no switch: `SnapshotStore` is in memory whenever no Redis URL is set, which is also how local development runs.
+One environment variable picks where the tracker's answers come from (`src/tracker/source.ts`), and the tracker builds its runtime from it. It is read at request time, so one `next build` serves CI's Playwright run, previews and production.
 
-There is no third seam. Screens are tested with real snapshots (saved from the tracker's output over a recording), the map's loop with real patterns, and nothing in the browser is mocked.
+| Value                                 | API layer                                                                                        | Clock                                          | Timetable                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ---------------------------- |
+| `simulated` or `simulated:<scenario>` | The simulated Rejseplanen, under the named scenario (`weekday` when none is named). The default. | The runtime's: real time, `TestClock` in tests | The deployed one             |
+| `recording:<folder>`                  | The recorded layer above, replaying the folder                                                   | Fixed start from `clock.json`                  | The recording's `timetable/` |
+| `rejseplanen`                         | `FetchHttpClient.layer`, with the key from its own variable                                      | The runtime's                                  | The deployed one             |
+
+The key never picks the source. `rejseplanen` without a key logs the fault and the snapshot's API health reads as a refused key, so a missing key fails visibly instead of quietly showing a simulation. Going live is the key and `MYLDER_SOURCE=rejseplanen` in Production. While the source is not `rejseplanen`, the snapshot names it and every screen says so in a banner.
+
+The store needs no switch: `SnapshotStore` is in memory whenever no Redis URL is set, which is also how local development runs. Its keys carry the source, so a simulated call counter never shares a key with the real one.
+
+There is no third seam: the simulation is an adapter at the API seam, not a seam of its own. Screens are tested with real snapshots (saved from the tracker's output over a recording), the map's loop with real patterns, and nothing in the browser is mocked.
 
 ## What each kind of test looks like
 
