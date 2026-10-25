@@ -7,7 +7,8 @@ import {
   type IsoDate,
   type Manifest,
 } from '../../src/timetable/format.ts'
-import { readFeed, type Service } from './feed.ts'
+import { readFeed, readShapes, type Service } from './feed.ts'
+import { buildPatterns } from './patterns.ts'
 import { buildStops } from './stops.ts'
 
 export interface PrepareOptions {
@@ -27,9 +28,16 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Manifes
   const box = options.box ?? COPENHAGEN_BOX
   const version = `${options.preparedDate}-${options.sourceHash.slice(0, 8)}`
   const feed = await readFeed(options.gtfs, box)
+  const log = options.log ?? (() => {})
   const stops = buildStops(feed)
+  const shapes = await readShapes(options.gtfs, new Set(feed.trips.map((t) => t.shapeId)))
+  const patterns = buildPatterns(feed, stops, shapes, log)
 
-  const files = { stops: `${version}/stops.json` }
+  const files = {
+    stops: `${version}/stops.json`,
+    patterns: `${version}/patterns.json`,
+    paths: `${version}/paths.json`,
+  }
   const manifest: Manifest = {
     version,
     sourceHash: options.sourceHash,
@@ -37,11 +45,19 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Manifes
     window: serviceWindow(feed.services.values()),
     timezone: feed.timezone,
     box,
-    counts: { stops: stops.file.stops.length, platforms: stops.file.platforms.length },
+    counts: {
+      stops: stops.file.stops.length,
+      platforms: stops.file.platforms.length,
+      lines: patterns.patterns.lines.length,
+      patterns: patterns.patterns.patterns.length,
+      segments: patterns.paths.segments.length,
+    },
     files,
   }
 
   await write(join(options.out, files.stops), stops.file)
+  await write(join(options.out, files.patterns), patterns.patterns)
+  await write(join(options.out, files.paths), patterns.paths)
   await write(join(options.out, 'manifest.json'), manifest)
   return manifest
 }

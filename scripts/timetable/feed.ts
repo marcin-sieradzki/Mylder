@@ -254,3 +254,27 @@ async function readServices(
 function isoDate(gtfsDate: string): string {
   return `${gtfsDate.slice(0, 4)}-${gtfsDate.slice(4, 6)}-${gtfsDate.slice(6, 8)}`
 }
+
+/** The points of the named shapes, in sequence order, as `[lat, lon]`. */
+export async function readShapes(
+  dir: string,
+  ids: ReadonlySet<string>,
+): Promise<Map<string, (readonly [number, number])[]>> {
+  const rows = new Map<string, { lat: number; lon: number; sequence: number }[]>()
+  await forEachRow(
+    join(dir, 'shapes.txt'),
+    ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence'],
+    ([id, lat, lon, sequence]) => {
+      if (!ids.has(id)) return
+      let points = rows.get(id)
+      if (!points) rows.set(id, (points = []))
+      points.push({ lat: +lat, lon: +lon, sequence: +sequence })
+    },
+  )
+  return new Map(
+    [...rows].map(([id, points]) => [
+      id,
+      points.sort((a, b) => a.sequence - b.sequence).map((p) => [p.lat, p.lon] as const),
+    ]),
+  )
+}

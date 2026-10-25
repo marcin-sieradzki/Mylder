@@ -21,9 +21,14 @@ export function readManifest(json: unknown): Manifest {
     counts: {
       stops: number(counts.stops, 'manifest.counts.stops'),
       platforms: number(counts.platforms, 'manifest.counts.platforms'),
+      lines: number(counts.lines, 'manifest.counts.lines'),
+      patterns: number(counts.patterns, 'manifest.counts.patterns'),
+      segments: number(counts.segments, 'manifest.counts.segments'),
     },
     files: {
       stops: string(files.stops, 'manifest.files.stops'),
+      patterns: string(files.patterns, 'manifest.files.patterns'),
+      paths: string(files.paths, 'manifest.files.paths'),
     },
   }
 }

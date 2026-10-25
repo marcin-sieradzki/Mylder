@@ -30,10 +30,15 @@ export interface Manifest {
   readonly counts: {
     readonly stops: number
     readonly platforms: number
+    readonly lines: number
+    readonly patterns: number
+    readonly segments: number
   }
   /** Each file's name, relative to the manifest. */
   readonly files: {
     readonly stops: string
+    readonly patterns: string
+    readonly paths: string
   }
 }
 
@@ -63,4 +68,38 @@ export interface PlatformRecord {
   readonly name: string
   readonly lat: number
   readonly lon: number
+}
+
+/** Lines and the patterns their trips follow. */
+export interface PatternsFile {
+  readonly lines: readonly LineRecord[]
+  readonly patterns: readonly PatternRecord[]
+}
+
+export interface LineRecord {
+  /** The public name, such as `5C`, `M2` or `A`. */
+  readonly name: string
+  readonly mode: Mode
+  /** The Perron colour token the line is drawn in, such as `perron-color-transit-line-a`. */
+  readonly colour: string
+}
+
+export interface PatternRecord {
+  /** Built from the pattern's content, so it lasts across releases that renumber GTFS ids. */
+  readonly key: string
+  /** The index of its line in `lines`. */
+  readonly line: number
+  /** The GTFS `direction_id`, 0 or 1. */
+  readonly direction: number
+  readonly headsign: string
+  /** Its platforms in calling order, as indexes in the stops file's `platforms`. */
+  readonly stops: readonly number[]
+  /** The path between each stop and the next, as indexes in the paths file's `segments`. */
+  readonly segments: readonly number[]
+}
+
+/** Stop-to-stop paths, shared between the patterns that run along them. */
+export interface PathsFile {
+  /** Each segment as an encoded polyline at five decimals, from one stop to the next. */
+  readonly segments: readonly string[]
 }
