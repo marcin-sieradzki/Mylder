@@ -1,8 +1,10 @@
 # Issue tracker: GitHub
 
-Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder`, `to-spec` and `to-tickets` skills read and write issues as this page says.
+Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder`, `to-spec`, `to-tickets`, `implement-spec` and `code-review` skills read and write issues as this page says.
 
 ## Operations
+
+Where `gh` isn't available, such as in a cloud session, do the same operations with the GitHub MCP tools (`issue_read`, `issue_write`, `sub_issue_write`, `add_issue_comment`).
 
 - **Create**: `gh issue create --title "..." --body-file -`, with the body in a heredoc.
 - **Read**: `gh issue view <n> --json number,title,body,labels,comments`. A bare `#<n>` may be a PR, since issues and PRs share numbers: fall back to `gh pr view <n>`.
@@ -14,7 +16,7 @@ Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CL
 
 ## Specs and tickets
 
-A spec from `to-spec` is a GitHub issue. `to-tickets` slices it into tickets, each a sub-issue of the spec, blocked through GitHub's native issue dependencies (see **Blocking** under Wayfinding operations). Specs and tickets go up unlabelled: Mylder has no triage labels, and the only labels these skills use are wayfinder's. A ticket closes through a PR whose body says `Closes #<n>`.
+A spec from `to-spec` is a GitHub issue. `to-tickets` slices it into tickets, each a sub-issue of the spec, blocked through GitHub's native issue dependencies (see **Blocking** under Wayfinding operations). Where a native edge couldn't be added, the ticket's body lists its blockers under `## Blocked by`, and names its spec under `## Parent`; read both kinds of edge. Specs and tickets go up unlabelled: Mylder has no triage labels, and the only labels these skills use are wayfinder's. A ticket closes through a PR whose body says `Closes #<n>`.
 
 ## When a skill says "publish to the issue tracker"
 

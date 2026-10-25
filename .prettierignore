@@ -5,3 +5,4 @@ test-results
 package-lock.json
 prototypes
 .claude/skills/software-factory
+.claude/skills/vercel-react-best-practices
