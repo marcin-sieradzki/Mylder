@@ -9,5 +9,6 @@ Runs on the server only. Every module here starts with `import 'server-only'`, s
 - `index.ts`: the four plain functions the routes call (`getSnapshot`, `getStopDepartures`, `getTripDetail`, `getDisruptions`); no Effect type leaves the tracker.
 - `tracker.ts`: the run (lease, call, build, store) and the stop and trip answers; `runtime.ts` composes its layers once per instance from `MYLDER_SOURCE`, `MYLDER_POSITION_MODE` and `REJSEPLANEN_KEY`.
 - `rejseplanen/client.ts`: the Rejseplanen client, one function per service, every attempt counted before it is sent.
-- `join.ts` joins a journey to its trip; `build.ts` builds the snapshot's trips with the domain rules; `snapshot.ts` is the snapshot's schema, whose types the browser imports.
+- `join.ts` joins a journey to its trip; `build.ts` builds the snapshot's trips with the domain rules from the answer and each trip's history between runs; `snapshot.ts` is the snapshot's schema, whose types the browser imports.
+- `health.ts`: the API's health (ok, empty, error, spent) and when it began.
 - `store.ts`: the store's four operations, in memory until the hosted Redis (#56); `caching.ts`: the CDN header.

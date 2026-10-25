@@ -1,6 +1,9 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Effect, type Layer } from 'effect'
+import { Effect, Layer, Logger } from 'effect'
 import { TestClock } from 'effect/testing'
+import { expectedUnderway } from './build'
+import { EMPTY_ANSWER_MIN_UNDERWAY } from './health'
+import { readRef } from './join'
 import * as Http from './rejseplanen/http'
 import { trackerLayer } from './runtime'
 import { simulatedClient } from './simulation/layer'
@@ -89,7 +92,68 @@ const twinPlatforms = Http.layer(
   ),
 )
 
+/** The planned arrival at a trip's last stop. */
+const arrives = (key: string) =>
+  timetable
+    .tripsOn('2026-06-16')
+    .find((trip) => trip.key === key)!
+    .calls.at(-1)!.arrival
+
+/** The simulation, leaving out the journeys (`ZI@DA`) in `dropped`. */
+const dropping = (dropped: ReadonlySet<string>) =>
+  Http.layer(
+    Http.client((request) =>
+      Effect.gen(function* () {
+        const response = yield* simulatedClient({ timetable }).execute(request)
+        const answer = (yield* response.json) as {
+          Journey?: { JourneyDetailRef: { ref: string } }[]
+        }
+        const kept = (answer.Journey ?? []).filter(
+          (journey) => !dropped.has(readRef(journey.JourneyDetailRef.ref)?.journey ?? ''),
+        )
+        return Http.json(request, 200, { ...answer, Journey: kept })
+      }).pipe(Effect.orDie),
+    ),
+  )
+
+/** The tracker on the patchy scenario, whose hourly outage runs from minute 20 to 27. */
+const patchy = (positionMode: PositionMode) =>
+  trackerLayer({ timetable, source: readSource('simulated:patchy'), positionMode })
+
+/** An answer with no trips in it. */
+const empty = Http.layer(Http.client((request) => Effect.succeed(Http.json(request, 200, {}))))
+
+/** The fixture with each trip running ten times over, so the morning expects plenty underway. */
+const busy: Timetable = {
+  ...timetable,
+  tripsOn: (day) =>
+    timetable
+      .tripsOn(day)
+      .flatMap((trip) =>
+        Array.from({ length: 10 }, (_, copy) => ({ ...trip, key: `${trip.key}.${copy}` })),
+      ),
+}
+
+/** A key no answer or log line may carry. */
+const KEY = 'test-key-1234'
+
+/** An answer the schema rejects, echoing the request's query the way a broken gateway might. */
+const rejected = Http.layer(
+  Http.client((request) => Effect.succeed(Http.json(request, 200, { Journey: `accessId=${KEY}` }))),
+)
+
 const calls = (s: Snapshot) => s.budget.calls
+
+/** The snapshot `count` minutes on, asking for one every minute as a watching browser does. */
+const minutesLater = (count: number) =>
+  Effect.gen(function* () {
+    let latest: Snapshot | undefined
+    for (let i = 0; i < count; i++) {
+      yield* TestClock.adjust('60 seconds')
+      latest = yield* snapshot
+    }
+    return latest!
+  })
 
 describe('the tracker', () => {
   it.effect('makes one call for two requests 10 s apart, and a second in the next minute', () =>
@@ -190,6 +254,28 @@ describe('the tracker', () => {
     }).pipe(Effect.provide(tracker('alternating'))),
   )
 
+  it.effect('keeps a reporting trip Live on its report through the computed minute between', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      let previous = yield* snapshot
+      if (previous.answerMode !== 'REPORT_ONLY') previous = yield* minutesLater(1)
+      const reporting = previous.trips.filter((trip) => trip.state === 'live')
+      const computed = yield* minutesLater(1)
+      expect(computed.answerMode).toBe('CALC_REPORT')
+      const keys = new Set(reporting.map((trip) => trip.key))
+      const live = computed.trips.filter((trip) => keys.has(trip.key))
+      expect(live.length).toBeGreaterThan(0)
+      // Live, labelled from its report, and drawn from it, never from the computed position.
+      for (const trip of live) {
+        expect(trip).toMatchObject({
+          state: 'live',
+          source: 'reported',
+          reported: previous.fetched,
+        })
+      }
+    }).pipe(Effect.provide(tracker('alternating'))),
+  )
+
   it.effect('counts a journey no trip fits, and doesn’t draw it', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
@@ -199,26 +285,163 @@ describe('the tracker', () => {
     }).pipe(Effect.provide(tracker('CALC_REPORT', withStranger))),
   )
 
-  it.effect('keeps the previous trips when a call fails, with an error health', () =>
+  it.effect('ages a trip that drops out of the answers, moving on all the while', () => {
+    const dropped = new Set<string>()
+    return Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const first = yield* snapshot
+      const trip = first.trips.find(
+        (each) => each.state === 'live' && arrives(each.key) > MOMENT + 8 * 60_000,
+      )!
+      expect(trip).toBeDefined()
+      dropped.add(trip.journey!)
+      const at = (s: Snapshot) => s.trips.find((each) => each.key === trip.key)!
+      const states: string[] = []
+      const sources: string[] = []
+      const progress: number[] = []
+      for (let minute = 1; minute <= 6; minute++) {
+        yield* TestClock.adjust('60 seconds')
+        const later = at(yield* snapshot)
+        states.push(later.state)
+        sources.push(later.source)
+        progress.push(later.progress)
+        expect(later.reported).toBe(MOMENT)
+        expect(later.hadRealtime).toBe(true)
+      }
+      // One missed answer ends nothing and two (at 60 s polls, 150 s) do: Live, then Ageing
+      // from 3 min, then No signal from 5 min, five minutes after the last answer to carry it.
+      expect(states).toEqual(['live', 'live', 'ageing', 'ageing', 'no-signal', 'no-signal'])
+      // Its last report carried on while Live and Ageing, then the timetable plus its delay.
+      expect(sources).toEqual([
+        'reported',
+        'reported',
+        'reported',
+        'reported',
+        'timetable',
+        'timetable',
+      ])
+      expect(progress[0]).toBeGreaterThan(trip.progress)
+      expect(progress).toEqual([...progress].sort((a, b) => a - b))
+      expect(progress[5]).toBeGreaterThan(progress[2])
+    }).pipe(Effect.provide(tracker('REPORT_ONLY', dropping(dropped))))
+  })
+
+  it.effect('lets one failed answer change no trip’s state, and two end Live', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
       const good = yield* snapshot
-      yield* TestClock.adjust('60 seconds')
-      const failed = yield* snapshot
+      const live = good.trips.filter((trip) => trip.state === 'live')
+      expect(live.length).toBeGreaterThan(0)
+      const failed = yield* minutesLater(1)
       expect(failed.api).toEqual({ status: 'error', since: MOMENT + 60_000, kind: 'status' })
-      expect(failed.trips).toEqual(good.trips)
-      expect(failed.fetched).toBe(good.fetched)
-      expect(failed.nextDue).toBe(MOMENT + 120_000)
       expect(failed.status.calls).toEqual([
         { service: 'journeyPos', outcome: 'status', attempts: 2, ms: 0 },
       ])
       // Every attempt is counted: one good call, then a 503 tried twice.
       expect(calls(failed)).toBe(3)
-      yield* TestClock.adjust('60 seconds')
-      const again = yield* snapshot
-      expect(again.api.since).toBe(MOMENT + 60_000)
-    }).pipe(Effect.provide(tracker('CALC_REPORT', failingAfter(1)))),
+      const before = new Map(good.trips.map((trip) => [trip.key, trip]))
+      const kept = failed.trips.filter((trip) => before.has(trip.key))
+      expect(kept.length).toBeGreaterThan(0)
+      for (const trip of kept) {
+        expect(trip.state).toBe(before.get(trip.key)!.state)
+        expect(trip.progress).toBeGreaterThanOrEqual(before.get(trip.key)!.progress)
+      }
+      // Past the Live limit, 150 s at 60 s polls, the reports are Ageing.
+      const later = yield* minutesLater(2)
+      expect(later.api.since).toBe(MOMENT + 60_000)
+      const states = new Map(later.trips.map((trip) => [trip.key, trip.state]))
+      const still = live.filter((trip) => states.has(trip.key))
+      expect(still.length).toBeGreaterThan(0)
+      expect(still.every((trip) => states.get(trip.key) === 'ageing')).toBe(true)
+    }).pipe(Effect.provide(tracker('REPORT_ONLY', failingAfter(1)))),
   )
+
+  for (const [mode, restored] of [
+    ['CALC_REPORT', 'estimated'],
+    ['REPORT_ONLY', 'live'],
+  ] as const) {
+    it.effect(
+      `rides out an outage in ${mode}: error health, trips moving, No signal, then ${restored}`,
+      () =>
+        Effect.gen(function* () {
+          // The patchy scenario answers 503 from minute 20 to 27 of every hour.
+          yield* TestClock.setTime(MOMENT - 60_000)
+          const good = yield* snapshot
+          expect(good.api.status).toBe('ok')
+          const seen = good.trips.filter((trip) => trip.hadRealtime)
+          expect(seen.length).toBeGreaterThan(0)
+
+          // Three 503s in a row: error health, and the trips still there, still moving.
+          const third = yield* minutesLater(3)
+          expect(third.api).toEqual({ status: 'error', since: MOMENT, kind: 'status' })
+          const now = new Map(third.trips.map((trip) => [trip.key, trip]))
+          const underway = seen.filter((trip) => !trip.waiting && now.has(trip.key))
+          expect(underway.length).toBeGreaterThan(0)
+          expect(underway.some((trip) => now.get(trip.key)!.progress > trip.progress)).toBe(true)
+          expect(underway.every((trip) => now.get(trip.key)!.hadRealtime)).toBe(true)
+
+          // Six minutes after the last answer, every trip with realtime is No signal.
+          const out = yield* minutesLater(3)
+          const withRealtime = out.trips.filter((trip) => trip.hadRealtime)
+          expect(withRealtime.length).toBeGreaterThan(0)
+          expect(withRealtime.every((trip) => trip.state === 'no-signal')).toBe(true)
+
+          // The first good answer, at minute 27, restores every trip it carries; one it leaves
+          // out stays No signal.
+          const back = yield* minutesLater(2)
+          expect(back.api).toEqual({ status: 'ok', since: back.fetched })
+          const carried = back.trips.filter((trip) => trip.seen === back.fetched)
+          expect(carried.length).toBeGreaterThan(0)
+          expect(carried.every((trip) => trip.state === restored)).toBe(true)
+          const left = back.trips.filter((trip) => trip.hadRealtime && trip.seen !== back.fetched)
+          expect(left.every((trip) => trip.state === 'no-signal')).toBe(true)
+        }).pipe(Effect.provide(patchy(mode))),
+    )
+  }
+
+  it.effect('counts an answer with no trips as empty when the timetable expects plenty', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const t = yield* Tracker
+      const s = yield* t.getSnapshot
+      expect(s.api).toEqual({ status: 'empty', since: MOMENT })
+      expect(s.status.calls[0].outcome).toBe('empty')
+    }).pipe(Effect.provide(trackerLayer({ timetable: busy, source: simulated, http: empty }))),
+  )
+
+  it.effect(
+    'counts an answer with no trips as ok when the timetable expects few, as at night',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        expect(expectedUnderway(timetable, MOMENT)).toBeLessThan(EMPTY_ANSWER_MIN_UNDERWAY)
+        expect((yield* snapshot).api).toEqual({ status: 'ok', since: MOMENT })
+      }).pipe(Effect.provide(tracker('CALC_REPORT', empty))),
+  )
+
+  it.effect('counts an answer the schema rejects as an error, and logs it without the key', () => {
+    const logged: string[] = []
+    return Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const s = yield* snapshot
+      expect(s.api).toEqual({ status: 'error', since: MOMENT, kind: 'body' })
+      expect(logged.length).toBeGreaterThan(0)
+      expect(logged.join('\n')).not.toContain(KEY)
+    }).pipe(
+      Effect.provide(
+        Layer.merge(
+          trackerLayer({
+            timetable,
+            source: simulated,
+            positionMode: 'CALC_REPORT',
+            key: KEY,
+            http: rejected,
+          }),
+          Logger.layer([Logger.make(({ message }) => void logged.push(String(message)))]),
+        ),
+      ),
+    )
+  })
 
   it.effect('joins a journey whose reference names another platform of its first stop', () =>
     Effect.gen(function* () {
