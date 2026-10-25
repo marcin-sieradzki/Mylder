@@ -28,3 +28,8 @@ coverage
 playwright-report
 test-results
 blob-report
+
+# Next.js
+.next
+next-env.d.ts
+*.tsbuildinfo

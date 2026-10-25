@@ -9,7 +9,28 @@
     "react/rules-of-hooks": "error",
     "react/react-in-jsx-scope": "off",
     "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true,
+        "allowExportNames": [
+          "metadata",
+          "generateMetadata",
+          "viewport",
+          "generateViewport",
+          "generateStaticParams",
+          "dynamicParams",
+          "config"
+        ]
+      }
+    ]
   },
-  "ignorePatterns": ["dist", "coverage", "playwright-report", "test-results", "prototypes"]
+  "ignorePatterns": [
+    ".next",
+    "next-env.d.ts",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "prototypes"
+  ]
 }
