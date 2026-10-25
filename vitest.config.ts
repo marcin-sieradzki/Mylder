@@ -34,6 +34,8 @@ export default defineConfig({
             'src/map/**/*.test.{ts,tsx}',
           ],
           css: true,
+          // Perron's components import their own CSS, which only Vite can load.
+          server: { deps: { inline: ['@mylder/perron'] } },
         },
       },
     ],

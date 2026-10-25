@@ -1,0 +1,4 @@
+/* The page background is the app's to set (Perron's base.css). */
+body {
+  background: var(--perron-color-surface-default);
+}

@@ -18,6 +18,7 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },
   "dependencies": {
+    "@mylder/perron": "0.4.0",
     "client-only": "0.0.1",
     "next": "16.4.3",
     "react": "^19.3.1",
