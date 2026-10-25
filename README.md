@@ -87,7 +87,7 @@ Before the first e2e run, install a browser with `npx playwright install chromiu
 
 ## Folders
 
-Each folder's name says where its code may run, and a wrong import fails the build or the lint:
+Each folder's name says where its code may run. Three are guarded, so a wrong import fails the build or the lint:
 
 | Folder           | Runs on                    | What it holds                                         | Guard                                                  |
 | ---------------- | -------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |

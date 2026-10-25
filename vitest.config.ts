@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
 // Two projects, as the repo layout settles: server and shared code in Node, the browser's in jsdom.
+// A test outside these globs does not run.
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -12,6 +13,7 @@ export default defineConfig({
           name: 'node',
           environment: 'node',
           include: [
+            'app/**/*.test.ts',
             'src/domain/**/*.test.ts',
             'src/tracker/**/*.test.ts',
             'src/timetable/**/*.test.ts',

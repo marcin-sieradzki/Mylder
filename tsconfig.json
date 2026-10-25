@@ -21,7 +21,8 @@
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "erasableSyntaxOnly": true
   },
   "include": [
     "next-env.d.ts",
