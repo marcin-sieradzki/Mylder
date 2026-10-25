@@ -33,12 +33,17 @@ export interface Manifest {
     readonly lines: number
     readonly patterns: number
     readonly segments: number
+    readonly trips: number
+    readonly profiles: number
+    readonly services: number
   }
   /** Each file's name, relative to the manifest. */
   readonly files: {
     readonly stops: string
     readonly patterns: string
     readonly paths: string
+    readonly trips: string
+    readonly dayProfiles: string
   }
 }
 
@@ -102,4 +107,39 @@ export interface PatternRecord {
 export interface PathsFile {
   /** Each segment as an encoded polyline at five decimals, from one stop to the next. */
   readonly segments: readonly string[]
+}
+
+/**
+ * Every trip in the window, for the tracker. A trip's calls follow its pattern's stops, at its
+ * first departure plus its run profile's offsets, on the days its service runs. The trips are
+ * stored as columns, which gzip packs far tighter than a record per trip.
+ */
+export interface TripsFile {
+  /** The window's first day, from which each service's days are counted. */
+  readonly first: IsoDate
+  /** Each service as one character per day of the window: `1` when it runs, else `0`. */
+  readonly services: readonly string[]
+  /**
+   * Run profiles, shared by the trips that run to them: each call's arrival and departure,
+   * flattened as `[arrival, departure, arrival, ...]`, each in seconds after the value before
+   * it, starting from the trip's first departure.
+   */
+  readonly profiles: readonly (readonly number[])[]
+  readonly trips: {
+    /** The index of each trip's pattern in the patterns file. */
+    readonly pattern: readonly number[]
+    /** Seconds after the service day's noon minus twelve hours, as GTFS counts; past 24:00 for a late trip. */
+    readonly departure: readonly number[]
+    readonly profile: readonly number[]
+    readonly service: readonly number[]
+    /** The train number from `trip_short_name` for S-tog and train trips, else an empty string. */
+    readonly number: readonly string[]
+  }
+}
+
+/** Planned trips underway, by quarter hour of the clock, for each day of the window. */
+export interface DayProfilesFile {
+  readonly first: IsoDate
+  /** Ninety-six counts per day (a few more or fewer on a day the clocks change), from 00:00. */
+  readonly days: readonly (readonly number[])[]
 }

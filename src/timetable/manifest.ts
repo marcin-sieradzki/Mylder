@@ -24,11 +24,16 @@ export function readManifest(json: unknown): Manifest {
       lines: number(counts.lines, 'manifest.counts.lines'),
       patterns: number(counts.patterns, 'manifest.counts.patterns'),
       segments: number(counts.segments, 'manifest.counts.segments'),
+      trips: number(counts.trips, 'manifest.counts.trips'),
+      profiles: number(counts.profiles, 'manifest.counts.profiles'),
+      services: number(counts.services, 'manifest.counts.services'),
     },
     files: {
       stops: string(files.stops, 'manifest.files.stops'),
       patterns: string(files.patterns, 'manifest.files.patterns'),
       paths: string(files.paths, 'manifest.files.paths'),
+      trips: string(files.trips, 'manifest.files.trips'),
+      dayProfiles: string(files.dayProfiles, 'manifest.files.dayProfiles'),
     },
   }
 }

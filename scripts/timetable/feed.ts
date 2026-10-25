@@ -1,5 +1,6 @@
 import { join } from 'node:path'
-import type { Box, Mode } from '../../src/timetable/format.ts'
+import { addDays, weekday } from '../../src/timetable/dates.ts'
+import type { Box, IsoDate, Mode } from '../../src/timetable/format.ts'
 import { forEachRow } from './csv.ts'
 
 // The GTFS feed as the job reads it: only the lines of Mylder's modes, only the trips with a
@@ -277,4 +278,14 @@ export async function readShapes(
       points.sort((a, b) => a.sequence - b.sequence).map((p) => [p.lat, p.lon] as const),
     ]),
   )
+}
+
+/** Every day a service runs, from its weekdays between its dates and its added days. */
+export function* runningDays(service: Service): Generator<IsoDate> {
+  if (service.start) {
+    for (let day = service.start; day <= service.end; day = addDays(day, 1)) {
+      if (service.weekdays[weekday(day)] && !service.removed.has(day)) yield day
+    }
+  }
+  for (const day of service.added) if (!service.removed.has(day)) yield day
 }
