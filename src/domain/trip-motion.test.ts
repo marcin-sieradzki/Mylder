@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   delayOf,
-  intervalOf,
   measurePath,
   pointAt,
   progressAt,
@@ -47,6 +46,17 @@ describe('measurePath', () => {
     expect(path.stops[1]).toBeLessThan(2_860)
     expect(path.length - path.stops[1]).toBeGreaterThan(1_245)
     expect(path.length - path.stops[1]).toBeLessThan(1_265)
+  })
+})
+
+describe('measurePath (gaps)', () => {
+  it('puts a stop at its own segment’s start when the segment before stops short of it', () => {
+    const gappy = measurePath([
+      [A, [55.68, 12.505]],
+      [B, C],
+    ])
+    expectPoint(pointAt(gappy, gappy.stops[1]), B)
+    expect(gappy.length).toBeCloseTo(path.length - path.stops[1] + gappy.stops[1], 6)
   })
 })
 
@@ -142,7 +152,17 @@ describe('timedCalls', () => {
       { arrival: minutes(15), departure: minutes(15) },
     ]
     expect(timedCalls(updated)).toEqual([
-      { arrival: minutes(0), departure: minutes(1) },
+      { arrival: minutes(1), departure: minutes(1) },
+      { arrival: minutes(13), departure: minutes(14) },
+      { arrival: minutes(18), departure: minutes(18) },
+    ])
+  })
+
+  it('runs the calls before an update’s first expected time late by its delay', () => {
+    // An opened stop ahead says the trip will leave B 3 min late.
+    const ahead: Call[] = [calls[0], { ...calls[1], expectedDeparture: minutes(14) }, calls[2]]
+    expect(timedCalls(ahead)).toEqual([
+      { arrival: minutes(3), departure: minutes(3) },
       { arrival: minutes(13), departure: minutes(14) },
       { arrival: minutes(18), departure: minutes(18) },
     ])
@@ -179,34 +199,5 @@ describe('delayOf', () => {
     ],
   ])('a trip %s is %s s late', (_, trip, delay) => {
     expect(delayOf(trip)).toBe(delay)
-  })
-})
-
-describe('intervalOf', () => {
-  const hour = (h: number) => Date.UTC(2026, 9, 26, h)
-  // An M3 platform's planned departures, one direction, by minute past the hour.
-  const m3 = {
-    rush: [0, 3, 7, 10, 13, 17, 20, 23, 27, 30, 33, 37, 40, 43, 47, 50, 53, 57],
-    evening: [0, 6, 12, 18, 24, 30, 36, 42, 48, 54],
-    even: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57],
-  }
-  const departures = (h: number, past: number[]) => past.map((m) => hour(h) + m * 60_000)
-
-  it.each([
-    ['every 3 to 4 min at rush hour', departures(8, m3.rush), 8, { from: 3, to: 4 }],
-    ['every 6 min in the evening', departures(21, m3.evening), 21, { from: 6, to: 6 }],
-    ['every 3 min when the gaps are even', departures(14, m3.even), 14, { from: 3, to: 3 }],
-  ])('gives %s', (_, planned, h, interval) => {
-    expect(intervalOf(planned, hour(h), hour(h + 1))).toEqual(interval)
-  })
-
-  it('reads only the hour asked for, in any order', () => {
-    const planned = [...departures(21, m3.evening), ...departures(8, m3.rush)].reverse()
-    expect(intervalOf(planned, hour(8), hour(9))).toEqual({ from: 3, to: 4 })
-    expect(intervalOf(planned, hour(21), hour(22))).toEqual({ from: 6, to: 6 })
-  })
-
-  it('has no interval for an hour with fewer than two departures', () => {
-    expect(intervalOf([hour(3)], hour(3), hour(4))).toBeUndefined()
   })
 })

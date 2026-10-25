@@ -23,7 +23,11 @@ export interface TripRealtime {
   readonly seen?: number
   /** When a `REPORT_ONLY` answer last carried the trip. Only these can make it Live or Ageing. */
   readonly reported?: number
-  /** When an update (an opened stop or vehicle) last gave the trip a time, platform or cancellation. */
+  /**
+   * When an update (an opened stop or vehicle) last gave the trip an expected time, a platform or
+   * a cancellation. A departure row with none of them, such as a Metro row without a prognosis,
+   * is no update.
+   */
   readonly updated?: number
   /** Whether any answer this service day has carried the trip. */
   readonly hadRealtime: boolean
@@ -50,7 +54,7 @@ export const LIVE_LIMIT_MAX = 4 * 60_000
 /** A report this old is no longer Ageing. */
 export const AGEING_ENDS = 5 * 60_000
 
-/** A computed position or an update counts as fresh realtime, for Estimated, for this long. */
+/** A position answer's computed position keeps a trip Estimated for this long. */
 export const FRESH_REALTIME = 5 * 60_000
 
 /** A trip missing from position answers this long, or with no position answers at all, is No signal. */
