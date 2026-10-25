@@ -14,28 +14,28 @@ Trip planners like Rejseplanen, Citymapper and Google Maps tell you how to get s
 
 ## Honest data states
 
-Live transit data is patchy: some vehicles report GPS, some are estimated from the timetable, and feeds drop out. Mylder never hides which is which. Every vehicle, departure and road carries one of these states:
+Live transit data is patchy: some vehicles report their position, some are only estimated, some have no realtime at all, and answers stop coming. Mylder never hides which is which. Every vehicle and departure carries one of these states:
 
-| State          | Meaning                                         | Example label             |
-| -------------- | ----------------------------------------------- | ------------------------- |
-| Live           | Reported position, under 60 s old               | "Reported 20 s ago"       |
-| Ageing         | Reported, but 1 to 5 min old                    | "Last seen 3 min ago"     |
-| Estimated      | Calculated from the timetable plus latest delay | "Estimated from schedule" |
-| Scheduled only | No real-time data for this trip                 | "Timetable only"          |
-| Stale / lost   | No update for over 5 min, or the feed is down   | "No signal since 10:42"   |
+| State          | Meaning                                                                          | Example label             |
+| -------------- | -------------------------------------------------------------------------------- | ------------------------- |
+| Live           | Reported by the vehicle, within about two polls                                  | "Reported 20 s ago"       |
+| Ageing         | Reported, but older than that and under 5 min                                    | "Last seen 3 min ago"     |
+| Estimated      | Computed by Rejseplanen, or worked out by Mylder from the timetable and realtime | "Estimated from schedule" |
+| Timetable only | No realtime for this trip today, like every Metro train                          | "Timetable only"          |
+| No signal      | Had realtime, then missing for 5 min                                             | "No signal since 10:42"   |
 
-On the map, reported positions are solid dots and estimated ones are hollow. Thresholds are first guesses until real coverage is known.
+On the map, reported positions are solid dots and estimated ones are hollow. A position Rejseplanen computes is never shown as Live. Thresholds are first guesses until real coverage is measured. The full rules are in [`docs/data-states.md`](docs/data-states.md), and the words in [`GLOSSARY.md`](GLOSSARY.md).
 
 ## How it works (planned)
 
 ```
-Rejseplanen API ──▶ one small Node server ──SSE──▶ browsers
- (positions,         polls on a fixed budget,        animate vehicles
-  departures,        keeps live state in memory      between updates
-  disruptions)
+Rejseplanen API ──▶ one Next.js app on Vercel ──CDN──▶ browsers
+ (positions,         one call a minute while        poll one snapshot,
+  departures,        someone watches; joins it      animate vehicles
+  disruptions)       to the Labs GTFS timetable     along their paths
 ```
 
-The free Rejseplanen tier allows about one call a minute, so browsers never call the API. One server polls, shares the result with everyone over Server-Sent Events, and the browser animates vehicles along their routes between updates.
+The free Rejseplanen key allows about one call a minute, so browsers never call the API. The app's server makes that call only while someone is watching, joins the answer to a timetable prepared from Rejseplan Labs GTFS, decides each trip's data state, and serves one snapshot of the whole city through the CDN. Every browser polls that snapshot and moves each vehicle along its path until the next one. The decisions and their reasons are in [`docs/adr/`](docs/adr/); the plumbing in [`docs/live-data.md`](docs/live-data.md), [`docs/timetable.md`](docs/timetable.md) and [`docs/screens.md`](docs/screens.md).
 
 ## Roadmap
 
@@ -43,9 +43,9 @@ The free Rejseplanen tier allows about one call a minute, so browsers never call
 
 - [x] App shell: React 19, TypeScript, Vite, Vitest, Playwright, CI
 - [ ] Live map with every vehicle moving along its route (MapLibre GL + deck.gl)
-- [ ] City pulse: vehicles moving now, average delay, share reporting per operator
+- [ ] City pulse: vehicles moving now, share reporting per mode, and average delay if the data can back it
 - [ ] Stop view: next departures, each with its data state
-- [ ] Vehicle list: a virtualised table sortable by line, delay and data age
+- [ ] Vehicle list: every vehicle on the map in a table, sortable by line, destination and data state
 - [ ] Disruptions on one screen
 - [ ] English first, Danish second, mobile first
 
@@ -57,8 +57,8 @@ The free Rejseplanen tier allows about one call a minute, so browsers never call
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT)
-- Planned: MapLibre GL and deck.gl for the map, TanStack Virtual for the list, Node + Hono for the server
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `implement-spec` (with `tdd`, `codebase-design` and `code-review`), `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT)
+- Planned: Next.js on Vercel in place of Vite, Effect for the server's tracker, MapLibre GL and deck.gl for the map, and Perron for every component and token
 
 ## Getting started
 
