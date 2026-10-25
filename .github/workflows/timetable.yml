@@ -44,7 +44,8 @@ jobs:
           curl --fail --location --retry 3 --silent --show-error "${auth[@]}" --output GTFS.zip "$GTFS_URL"
           ls -l GTFS.zip
       - name: Prepare the timetable
-        run: npm run timetable -- --zip GTFS.zip
+        # A dry run prepares the feed even when it is unchanged, to try the job's change on it.
+        run: npm run timetable -- --zip GTFS.zip ${{ github.event_name == 'pull_request' && '--force' || '' }}
       - name: Check the app with the new timetable
         run: npm run check
       - name: Report the files
@@ -57,7 +58,7 @@ jobs:
             done
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Commit a changed timetable
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
         run: |
           git add --all public/timetable
           if git diff --cached --quiet; then
@@ -68,4 +69,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit --message "Timetable $version"
+          # The default branch may have moved during the run; the timetable's files are the job's alone.
+          git pull --rebase
           git push

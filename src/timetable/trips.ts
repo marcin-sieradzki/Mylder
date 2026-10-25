@@ -67,6 +67,11 @@ export function readTrips(json: unknown): Trips {
   return { first: string(file.first, 'trips file.first'), services, profiles, trips }
 }
 
+/** Whether trip `t` runs on the window's day `day` (0 for the window's first). */
+export function runsOn(trips: Pick<TripsFile, 'services' | 'trips'>, t: number, day: number) {
+  return trips.services[trips.trips.service[t]][day] === '1'
+}
+
 /**
  * Every trip that runs on a service day, with each call's planned times. A service day's
  * trips run past midnight into the next date; their times count from the service day.
@@ -85,12 +90,14 @@ export function expandServiceDay(
   const planned: PlannedTrip[] = []
   const { pattern: patternColumn, departure: departures, profile: profileColumn } = trips.trips
   for (let t = 0; t < patternColumn.length; t++) {
-    if (trips.services[trips.trips.service[t]][index] !== '1') continue
+    if (!runsOn(trips, t, index)) continue
     const patternIndex = patternColumn[t]
     const departure = departures[t]
     const profile = profileColumn[t]
     const trainNumber = trips.trips.number[t]
     const pattern = patterns.patterns[patternIndex]
+    if (!pattern)
+      throw new TimetableFormatError(`trip ${t} names a pattern that is not in the file`)
     const line = patterns.lines[pattern.line]
     const offsets = trips.profiles[profile]
     const base = `${line.mode}.${line.name}.${pattern.key}.${dayKey}.${clock(departure)}`

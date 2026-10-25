@@ -19,7 +19,14 @@ export const COPENHAGEN_BOX: Box = { south: 55.45, west: 12.05, north: 56.05, ea
 /** A calendar date as `YYYY-MM-DD`. */
 export type IsoDate = string
 
+/**
+ * The files' format. The job writes it into the manifest and prepares an unchanged feed again
+ * when it differs, so a change to the format reaches the deployed files on the next run.
+ */
+export const FORMAT = 1
+
 export interface Manifest {
+  readonly format: number
   readonly version: string
   readonly sourceHash: string
   readonly preparedDate: IsoDate
@@ -30,7 +37,7 @@ export interface Manifest {
   /** Each GTFS file's row count, before the cut, for the next release's input checks. */
   readonly sourceRows: Readonly<Record<string, number>>
   /** The first Tuesday from the prepared date, whose trips the next release's checks compare. */
-  readonly weekday: IsoDate
+  readonly comparisonDay: IsoDate
   readonly counts: {
     readonly stops: number
     readonly platforms: number
@@ -40,7 +47,8 @@ export interface Manifest {
     readonly trips: number
     readonly profiles: number
     readonly services: number
-    readonly weekdayTrips: number
+    /** The trips that run on `comparisonDay`. */
+    readonly comparisonDayTrips: number
   }
   /** Each file's name, relative to the manifest. */
   readonly files: {

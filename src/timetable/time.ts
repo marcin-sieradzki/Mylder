@@ -1,4 +1,4 @@
-import { addDays } from './dates.ts'
+import { addDays, utc } from './dates.ts'
 import type { IsoDate } from './format.ts'
 
 // Wall-clock times in the timetable's zone, worked out with Intl so no library is needed.
@@ -6,7 +6,7 @@ import type { IsoDate } from './format.ts'
 const formatters = new Map<string, Intl.DateTimeFormat>()
 
 /** How far the zone's clock runs ahead of UTC at a moment, in milliseconds. */
-function offset(utc: number, timezone: string): number {
+function offset(moment: number, timezone: string): number {
   let formatter = formatters.get(timezone)
   if (!formatter) {
     formatter = new Intl.DateTimeFormat('en-GB', {
@@ -22,18 +22,16 @@ function offset(utc: number, timezone: string): number {
     formatters.set(timezone, formatter)
   }
   const part: Record<string, number> = {}
-  for (const { type, value } of formatter.formatToParts(utc)) part[type] = Number(value)
+  for (const { type, value } of formatter.formatToParts(moment)) part[type] = Number(value)
   const wall = Date.UTC(part.year, part.month - 1, part.day, part.hour, part.minute, part.second)
-  return wall - Math.floor(utc / 1000) * 1000
+  return wall - Math.floor(moment / 1000) * 1000
 }
 
 /** The moment the zone's clock reads `seconds` after midnight on `day`. */
 export function wallClock(day: IsoDate, seconds: number, timezone: string): number {
   const extraDays = Math.floor(seconds / 86_400)
   const date = addDays(day, extraDays)
-  const wall =
-    Date.UTC(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10)) +
-    (seconds - extraDays * 86_400) * 1000
+  const wall = utc(date) + (seconds - extraDays * 86_400) * 1000
   const guess = wall - offset(wall, timezone)
   return wall - offset(guess, timezone)
 }

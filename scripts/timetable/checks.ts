@@ -1,5 +1,6 @@
-import { addDays, daysBetween, weekday } from '../../src/timetable/dates.ts'
+import { addDays, daysBetween } from '../../src/timetable/dates.ts'
 import type { IsoDate, Manifest, TripsFile } from '../../src/timetable/format.ts'
+import { runsOn } from '../../src/timetable/trips.ts'
 import type { PreparedStops } from './stops.ts'
 import type { PreparedPatterns } from './patterns.ts'
 import { GTFS_FILES, type Feed } from './feed.ts'
@@ -46,14 +47,9 @@ export function checkInput(feed: Feed, preparedDate: IsoDate, previous?: Manifes
   }
 }
 
-/** The first Tuesday on or after a day, the weekday whose trips releases are compared on. */
-export function weekdayFrom(day: IsoDate): IsoDate {
-  return addDays(day, (1 - weekday(day) + 7) % 7)
-}
-
 export function tripsOn(trips: TripsFile, day: IsoDate): number {
   const index = daysBetween(trips.first, day)
-  return trips.trips.service.filter((s) => trips.services[s][index] === '1').length
+  return trips.trips.service.filter((_, t) => runsOn(trips, t, index)).length
 }
 
 export function checkOutput(
@@ -66,20 +62,23 @@ export function checkOutput(
   previous?: Manifest,
 ): void {
   const { stops, patterns, trips, manifest } = result
-  const patternCount = patterns.patterns.patterns.length
+  const patternCount = patterns.file.patterns.length
   const missingPattern = trips.trips.pattern.filter((p) => !(p >= 0 && p < patternCount)).length
   if (missingPattern > 0) fail('Output', `${missingPattern} trips have no pattern`)
 
   if (patterns.withoutShape.length > 0) {
     fail('Output', `no path for ${patterns.withoutShape.join('; ')}, whose trips have no shape`)
   }
-  for (const pattern of patterns.patterns.patterns) {
-    const line = patterns.patterns.lines[pattern.line].name
+  for (const pattern of patterns.file.patterns) {
+    const line = patterns.file.lines[pattern.line].name
     if (pattern.stops.length < 2) fail('Output', `a pattern of ${line} has fewer than two stops`)
     if (pattern.segments.length !== pattern.stops.length - 1) {
       fail('Output', `a pattern of ${line} has no path between some of its stops`)
     }
   }
+  const untimed = trips.profiles.filter((p) => p.some((step) => !Number.isFinite(step))).length
+  if (untimed > 0) fail('Output', `${untimed} run profiles have calls without a time`)
+
   const unplaced = [...stops.file.stops, ...stops.file.platforms].filter(
     (s) => !Number.isFinite(s.lat) || !Number.isFinite(s.lon) || (s.lat === 0 && s.lon === 0),
   )
@@ -91,11 +90,12 @@ export function checkOutput(
   if (manifest.window.last < needed) {
     fail('Output', `the trips run to ${manifest.window.last}, short of ${DAYS_AHEAD} days ahead`)
   }
-  if (previous && !withinAThird(manifest.counts.weekdayTrips, previous.counts.weekdayTrips)) {
+  const { comparisonDayTrips } = manifest.counts
+  if (previous && !withinAThird(comparisonDayTrips, previous.counts.comparisonDayTrips)) {
     fail(
       'Output',
-      `${manifest.weekday} has ${manifest.counts.weekdayTrips} trips, against ` +
-        `${previous.counts.weekdayTrips} on ${previous.weekday} in ${previous.version}`,
+      `${manifest.comparisonDay} has ${comparisonDayTrips} trips, against ` +
+        `${previous.counts.comparisonDayTrips} on ${previous.comparisonDay} in ${previous.version}`,
     )
   }
 }

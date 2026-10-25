@@ -43,10 +43,10 @@ export interface Service {
   readonly id: string
   /** Monday first, as `calendar.txt` orders its columns. */
   readonly weekdays: readonly boolean[]
-  readonly start: string
-  readonly end: string
-  readonly added: ReadonlySet<string>
-  readonly removed: ReadonlySet<string>
+  readonly start: IsoDate
+  readonly end: IsoDate
+  readonly added: ReadonlySet<IsoDate>
+  readonly removed: ReadonlySet<IsoDate>
 }
 
 export interface Feed {
@@ -159,7 +159,7 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
         route,
         serviceId,
         shapeId,
-        headsign: headsign.replace(/\s+/g, ' ').trim(),
+        headsign: tidy(headsign),
         shortName,
         direction,
         calls: [],
@@ -175,7 +175,7 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
     ['stop_id', 'stop_name', 'stop_lat', 'stop_lon'],
     ([gtfsId, name, lat, lon]) => {
       stopIndex.set(gtfsId, allStops.length)
-      allStops.push({ gtfsId, name: name.replace(/\s+/g, ' ').trim(), lat: +lat, lon: +lon })
+      allStops.push({ gtfsId, name: tidy(name), lat: +lat, lon: +lon })
     },
   )
   const stopInBox = allStops.map((s) => inBox(box, s.lat, s.lon))
@@ -236,7 +236,13 @@ async function readServices(
   let calendarEnd = ''
   const services = new Map<
     string,
-    { weekdays: boolean[]; start: string; end: string; added: Set<string>; removed: Set<string> }
+    {
+      weekdays: boolean[]
+      start: IsoDate
+      end: IsoDate
+      added: Set<IsoDate>
+      removed: Set<IsoDate>
+    }
   >()
   const service = (id: string) => {
     let s = services.get(id)
@@ -253,13 +259,14 @@ async function readServices(
     return s
   }
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-  await each('calendar.txt', ['service_id', ...days, 'start_date', 'end_date'], ([id, ...rest]) => {
-    if (isoDate(rest[8]) > calendarEnd) calendarEnd = isoDate(rest[8])
+  await each('calendar.txt', ['service_id', ...days, 'start_date', 'end_date'], ([id, ...row]) => {
+    const [start, end] = row.slice(7).map(isoDate)
+    if (end > calendarEnd) calendarEnd = end
     if (!used.has(id)) return
     const s = service(id)
-    s.weekdays = rest.slice(0, 7).map((d) => d === '1')
-    s.start = isoDate(rest[7])
-    s.end = isoDate(rest[8])
+    s.weekdays = row.slice(0, 7).map((d) => d === '1')
+    s.start = start
+    s.end = end
   })
   await each('calendar_dates.txt', ['service_id', 'date', 'exception_type'], ([id, date, type]) => {
     if (type === '1' && isoDate(date) > calendarEnd) calendarEnd = isoDate(date)
@@ -272,7 +279,7 @@ async function readServices(
 }
 
 /** `20260616` to `2026-06-16`. */
-function isoDate(gtfsDate: string): string {
+function isoDate(gtfsDate: string): IsoDate {
   return `${gtfsDate.slice(0, 4)}-${gtfsDate.slice(4, 6)}-${gtfsDate.slice(6, 8)}`
 }
 
@@ -307,4 +314,9 @@ export function* runningDays(service: Service): Generator<IsoDate> {
     }
   }
   for (const day of service.added) if (!service.removed.has(day)) yield day
+}
+
+/** Collapses the runs of spaces the feed leaves in names and headsigns. */
+function tidy(text: string): string {
+  return text.replace(/\s+/g, ' ').trim()
 }

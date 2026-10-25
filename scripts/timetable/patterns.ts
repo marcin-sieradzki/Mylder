@@ -18,9 +18,9 @@ const SIMPLIFY_METRES = 4
 const SHARE_METRES = 5
 
 export interface PreparedPatterns {
-  readonly patterns: PatternsFile
+  readonly file: PatternsFile
   readonly paths: PathsFile
-  /** Each kept trip's pattern, as its index in `patterns.patterns`. */
+  /** Each kept trip's pattern, as its index in `file.patterns`. */
   readonly patternOf: ReadonlyMap<Trip, number>
   /** Patterns whose trips have no shape, so no path. */
   readonly withoutShape: readonly string[]
@@ -117,7 +117,7 @@ export function buildPatterns(
       const raw = [anchors.get(from)!, ...piece.slice(1, -1), anchors.get(to)!]
       const pair = `${from}-${to}`
       const candidates = segmentsBetween.get(pair) ?? []
-      const shared = candidates.find((s) => near(raw, segmentPoints[s]))
+      const shared = candidates.find((s) => alongside(raw, segmentPoints[s]))
       if (shared !== undefined) return shared
       const points = simplify(raw, SIMPLIFY_METRES).map(fromXY)
       segments.push(encodePolyline(points))
@@ -136,11 +136,11 @@ export function buildPatterns(
     }
   })
 
-  return { patterns: { lines, patterns }, paths: { segments }, patternOf, withoutShape }
+  return { file: { lines, patterns }, paths: { segments }, patternOf, withoutShape }
 }
 
 /** Whether two lines stay within SHARE_METRES of each other along their whole length. */
-function near(a: readonly XY[], b: readonly XY[]): boolean {
+function alongside(a: readonly XY[], b: readonly XY[]): boolean {
   return (
     a.every((p) => distanceToLine(p, b) <= SHARE_METRES) &&
     b.every((p) => distanceToLine(p, a) <= SHARE_METRES)

@@ -1,15 +1,16 @@
-import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { access, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { tuesdayFrom } from '../../src/timetable/dates.ts'
 import {
   COPENHAGEN_BOX,
+  FORMAT,
   type Box,
   type IsoDate,
   type Manifest,
 } from '../../src/timetable/format.ts'
 import { readManifest } from '../../src/timetable/manifest.ts'
 import { readTrips } from '../../src/timetable/trips.ts'
-import { checkFiles, checkInput, checkOutput, tripsOn, weekdayFrom } from './checks.ts'
-import { exists } from './csv.ts'
+import { checkFiles, checkInput, checkOutput, tripsOn } from './checks.ts'
 import { readFeed, runningDays, type Service } from './feed.ts'
 import { buildPatterns } from './patterns.ts'
 import { buildStops } from './stops.ts'
@@ -27,6 +28,8 @@ export interface PrepareOptions {
   readonly sourceHash: string
   readonly preparedDate: IsoDate
   readonly box?: Box
+  /** Prepare the feed even when it is the one the last release was prepared from. */
+  readonly force?: boolean
   readonly log?: (message: string) => void
 }
 
@@ -43,7 +46,8 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
   const log = options.log ?? (() => {})
   const box = options.box ?? COPENHAGEN_BOX
   const previous = await readPrevious(options.out)
-  if (previous?.sourceHash === options.sourceHash) return { changed: false, manifest: previous }
+  const unchanged = previous?.sourceHash === options.sourceHash && previous.format === FORMAT
+  if (previous && unchanged && !options.force) return { changed: false, manifest: previous }
 
   checkFiles(await readdir(options.gtfs))
   const feed = await readFeed(options.gtfs, box)
@@ -55,7 +59,7 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
   const window = serviceWindow(feed.services.values())
   const trips = buildTrips(feed, patterns.patternOf, window)
   const dayProfiles = buildDayProfiles(readTrips(trips), window, feed.timezone)
-  const weekday = weekdayFrom(
+  const comparisonDay = tuesdayFrom(
     options.preparedDate > window.first ? options.preparedDate : window.first,
   )
 
@@ -67,6 +71,7 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
     dayProfiles: `${version}/day-profiles.json`,
   }
   const manifest: Manifest = {
+    format: FORMAT,
     version,
     sourceHash: options.sourceHash,
     preparedDate: options.preparedDate,
@@ -74,17 +79,17 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
     timezone: feed.timezone,
     box,
     sourceRows: feed.rows,
-    weekday,
+    comparisonDay,
     counts: {
       stops: stops.file.stops.length,
       platforms: stops.file.platforms.length,
-      lines: patterns.patterns.lines.length,
-      patterns: patterns.patterns.patterns.length,
+      lines: patterns.file.lines.length,
+      patterns: patterns.file.patterns.length,
       segments: patterns.paths.segments.length,
       trips: trips.trips.pattern.length,
       profiles: trips.profiles.length,
       services: trips.services.length,
-      weekdayTrips: tripsOn(trips, weekday),
+      comparisonDayTrips: tripsOn(trips, comparisonDay),
     },
     files,
   }
@@ -92,7 +97,7 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
 
   // The new version's files first and the manifest that names them last, then older versions go.
   await write(join(options.out, files.stops), stops.file)
-  await write(join(options.out, files.patterns), patterns.patterns)
+  await write(join(options.out, files.patterns), patterns.file)
   await write(join(options.out, files.paths), patterns.paths)
   await write(join(options.out, files.trips), trips)
   await write(join(options.out, files.dayProfiles), dayProfiles)
@@ -107,7 +112,11 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Prepare
 
 async function readPrevious(out: string): Promise<Manifest | undefined> {
   const path = join(out, 'manifest.json')
-  if (!(await exists(path))) return undefined
+  try {
+    await access(path)
+  } catch {
+    return undefined
+  }
   return readManifest(JSON.parse(await readFile(path, 'utf8')))
 }
 

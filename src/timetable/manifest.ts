@@ -9,6 +9,7 @@ export function readManifest(json: unknown): Manifest {
   const counts = object(m.counts, 'manifest.counts')
   const files = object(m.files, 'manifest.files')
   return {
+    format: number(m.format, 'manifest.format'),
     version: string(m.version, 'manifest.version'),
     sourceHash: string(m.sourceHash, 'manifest.sourceHash'),
     preparedDate: string(m.preparedDate, 'manifest.preparedDate'),
@@ -24,7 +25,7 @@ export function readManifest(json: unknown): Manifest {
         number(rows, `manifest.sourceRows.${file}`),
       ]),
     ),
-    weekday: string(m.weekday, 'manifest.weekday'),
+    comparisonDay: string(m.comparisonDay, 'manifest.comparisonDay'),
     counts: {
       stops: number(counts.stops, 'manifest.counts.stops'),
       platforms: number(counts.platforms, 'manifest.counts.platforms'),
@@ -34,7 +35,7 @@ export function readManifest(json: unknown): Manifest {
       trips: number(counts.trips, 'manifest.counts.trips'),
       profiles: number(counts.profiles, 'manifest.counts.profiles'),
       services: number(counts.services, 'manifest.counts.services'),
-      weekdayTrips: number(counts.weekdayTrips, 'manifest.counts.weekdayTrips'),
+      comparisonDayTrips: number(counts.comparisonDayTrips, 'manifest.counts.comparisonDayTrips'),
     },
     files: {
       stops: string(files.stops, 'manifest.files.stops'),

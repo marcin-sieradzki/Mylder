@@ -50,6 +50,26 @@ describe('an unchanged feed', () => {
   })
 })
 
+describe('a feed prepared again', () => {
+  it('is prepared when asked to be, though unchanged', async () => {
+    await prepare()
+    const again = await prepare({ force: true })
+
+    expect(again.changed).toBe(true)
+  })
+
+  it('is prepared when the last release was written in an older format', async () => {
+    const first = await prepare()
+    const path = join(out, 'manifest.json')
+    await writeFile(path, JSON.stringify({ ...first.manifest, format: 0 }))
+
+    const again = await prepare()
+
+    expect(again.changed).toBe(true)
+    expect(again.manifest.format).toBeGreaterThan(0)
+  })
+})
+
 describe('a changed feed', () => {
   it('replaces the files of the release before', async () => {
     const first = await prepare()
@@ -103,6 +123,16 @@ describe('the output checks', () => {
     await edit('shapes.txt', (line) => (line.startsWith('6327,') ? undefined : line))
 
     await expect(prepare({ gtfs: broken })).rejects.toThrow(/output.*no path.*991/i)
+    expect(await listing()).toEqual([])
+  })
+
+  it('fail on a stop without a position', async () => {
+    // Hellerup St. keeps its row but loses its coordinates.
+    await edit('stops.txt', (line) =>
+      line.startsWith('000008600655,') ? line.replace(/"55\.[0-9]+","12\.[0-9]+"/, '"",""') : line,
+    )
+
+    await expect(prepare({ gtfs: broken })).rejects.toThrow(/output.*no position.*Hellerup/i)
     expect(await listing()).toEqual([])
   })
 

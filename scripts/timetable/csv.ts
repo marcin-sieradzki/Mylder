@@ -1,5 +1,4 @@
 import { createReadStream } from 'node:fs'
-import { access } from 'node:fs/promises'
 import { createInterface } from 'node:readline'
 
 /**
@@ -27,15 +26,6 @@ export async function forEachRow(
     rows++
   }
   return rows
-}
-
-export async function exists(path: string): Promise<boolean> {
-  try {
-    await access(path)
-    return true
-  } catch {
-    return false
-  }
 }
 
 /** Splits one CSV line, unquoting fields; Labs quotes some fields and not others. */

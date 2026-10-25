@@ -15,12 +15,13 @@ const { values } = parseArgs({
     zip: { type: 'string' },
     out: { type: 'string', default: 'public/timetable' },
     date: { type: 'string', default: new Date().toISOString().slice(0, 10) },
+    force: { type: 'boolean', default: false },
   },
 })
 
 if (!values.zip) {
   console.error(
-    'Usage: npm run timetable -- --zip GTFS.zip [--out public/timetable] [--date YYYY-MM-DD]',
+    'Usage: npm run timetable -- --zip GTFS.zip [--out public/timetable] [--date YYYY-MM-DD] [--force]',
   )
   process.exit(2)
 }
@@ -37,6 +38,7 @@ try {
     out: values.out,
     sourceHash,
     preparedDate: values.date,
+    force: values.force,
     log: (message) => console.log(message),
   })
   if (changed) {

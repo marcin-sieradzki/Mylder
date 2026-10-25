@@ -1,6 +1,6 @@
 import { addDays, daysBetween } from '../../src/timetable/dates.ts'
 import type { DayProfilesFile, IsoDate, Manifest, TripsFile } from '../../src/timetable/format.ts'
-import type { Trips } from '../../src/timetable/trips.ts'
+import { runsOn, type Trips } from '../../src/timetable/trips.ts'
 import { serviceDayStart, wallClock } from '../../src/timetable/time.ts'
 import { runningDays, type Feed, type Service, type Trip } from './feed.ts'
 
@@ -109,12 +109,13 @@ export function buildDayProfiles(
 
   days.forEach((day, d) => {
     const start = serviceDayStart(day, timezone)
-    const { departure, profile, service } = trips.trips
+    const { departure, profile } = trips.trips
     for (let t = 0; t < departure.length; t++) {
-      if (trips.services[service[t]][d] !== '1') continue
+      if (!runsOn(trips, t, d)) continue
       const offsets = trips.profiles[profile[t]]
+      const lastArrival = offsets[offsets.length - 2]
       const from = start + departure[t] * 1000
-      const to = from + offsets[offsets.length - 2] * 1000
+      const to = from + lastArrival * 1000
       for (let q = firstQuarter(from); q < quarters.length && quarters[q] < to; q++) counts[q]++
     }
   })
