@@ -21,12 +21,14 @@
   "dependencies": {
     "@mylder/perron": "0.4.0",
     "client-only": "0.0.1",
+    "effect": "4.0.6",
     "next": "16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "server-only": "0.0.1"
   },
   "devDependencies": {
+    "@effect/vitest": "4.0.6",
     "@playwright/test": "^1.64.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

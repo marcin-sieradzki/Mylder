@@ -1,0 +1,60 @@
+{
+  "Message": [
+    {
+      "id": "fixture-2",
+      "act": true,
+      "head": "Linje 2A kører en anden rute",
+      "lead": "På grund af vejarbejde på Langebro kører linje 2A via Knippelsbro.",
+      "text": "På grund af vejarbejde på Langebro kører linje 2A via Knippelsbro. Stoppestederne på Langebro betjenes ikke.",
+      "company": "Movia H",
+      "category": "2",
+      "priority": 60,
+      "products": 32,
+      "sDate": "2026-10-26",
+      "sTime": "05:00:00",
+      "eDate": "2026-10-30",
+      "eTime": "23:59:00",
+      "affectedStops": {
+        "StopLocation": [
+          {
+            "name": "Langebro (H.C. Andersens Boulevard)",
+            "extId": "1632",
+            "lon": 12.578,
+            "lat": 55.668
+          }
+        ]
+      },
+      "validFromStop": { "name": "Rådhuspladsen", "extId": "1550", "lon": 12.568, "lat": 55.676 },
+      "validToStop": {
+        "name": "Christianshavn St.",
+        "extId": "8603309",
+        "lon": 12.591,
+        "lat": 55.672
+      },
+      "Note": [
+        {
+          "value": "Omkørsel",
+          "type": "I",
+          "Note": [{ "value": "Via Knippelsbro", "type": "I" }]
+        }
+      ]
+    },
+    {
+      "id": "fixture-3",
+      "act": false,
+      "head": "Ingen S-tog mellem Hellerup og Holte",
+      "lead": "Sporarbejde i weekenden.",
+      "company": "DSB S-tog",
+      "category": "1",
+      "priority": 40,
+      "products": 16,
+      "sDate": "2026-10-31",
+      "sTime": "01:00:00",
+      "eDate": "2026-11-01",
+      "eTime": "23:00:00"
+    }
+  ],
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-10-26T10:30:41+01:00"
+}

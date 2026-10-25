@@ -1,0 +1,114 @@
+{
+  "Journey": [
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#58845#TA#0#DA#261026#1S#8600798#1T#950#LS#8600696#LT#1055#PU#86#RT#3#CA#006#ZE#B#ZB#B#PC#4#FR#8600798#FT#950#TO#8600696#TT#1055#"
+      },
+      "lat": 55.672991,
+      "lon": 12.564502,
+      "name": "S-tog B",
+      "direction": "Høje Taastrup St.",
+      "trainNumber": "54321",
+      "trainCategory": "S",
+      "Product": [
+        {
+          "name": "S-tog B",
+          "displayNumber": "B",
+          "num": "54321",
+          "line": "B",
+          "catOut": "S-tog",
+          "catIn": "S",
+          "catCode": "4",
+          "cls": "16",
+          "operatorCode": "DSB",
+          "operator": "DSB"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "Farum St.",
+        "extId": "8600798",
+        "lon": 12.369,
+        "lat": 55.812
+      },
+      "JourneyDestination": {
+        "name": "Høje Taastrup St.",
+        "extId": "8600696",
+        "lon": 12.27,
+        "lat": 55.649
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 14,
+            "lon": 12.564968,
+            "lat": 55.672683,
+            "arrTime": "10:31:00",
+            "arrDate": "2026-10-26",
+            "depTime": "10:32:00",
+            "depDate": "2026-10-26",
+            "rtArrTime": "10:32:00",
+            "rtArrDate": "2026-10-26",
+            "rtDepTime": "10:33:00",
+            "rtDepDate": "2026-10-26",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED",
+            "rtDepTrack": "10"
+          },
+          {
+            "name": "Dybbølsbro St.",
+            "extId": "8600645",
+            "routeIdx": 15,
+            "lon": 12.559,
+            "lat": 55.665,
+            "arrTime": "10:34:00",
+            "arrDate": "2026-10-26",
+            "depTime": "10:34:00",
+            "depDate": "2026-10-26",
+            "rtArrTime": "10:35:00",
+            "rtArrDate": "2026-10-26",
+            "arrPrognosisType": "CALCULATED",
+            "depPrognosisType": "CALCULATED"
+          }
+        ]
+      },
+      "JourneyPath": [
+        {
+          "progressInTime": 40,
+          "progressInPercent": 12,
+          "dirGeo": 200,
+          "state": "RUNNING",
+          "fromLocationId": "8600626",
+          "toLocationId": "8600645"
+        }
+      ]
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#120455#TA#0#DA#261026#1S#1550#1T#1012#LS#8603#LT#1104#PU#86#RT#1#CA#BUS#ZE#5C#ZB#Bus 5C#PC#5#FR#1550#FT#1012#TO#8603#TT#1104#"
+      },
+      "lat": 55.676,
+      "lon": 12.568,
+      "name": "Bus 5C",
+      "direction": "Husum Torv",
+      "Product": [
+        {
+          "name": "Bus 5C",
+          "displayNumber": "5C",
+          "line": "5C",
+          "catOut": "Bus",
+          "catIn": "BUS",
+          "catCode": "5",
+          "cls": "32",
+          "operatorCode": "MOV",
+          "operator": "Movia"
+        }
+      ]
+    }
+  ],
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-10-26T10:33:12+01:00",
+  "requestId": "fixture-journey-pos"
+}

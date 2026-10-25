@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
@@ -12,6 +13,13 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
+          // Server modules start with `import 'server-only'`, which throws outside a React Server
+          // Components build; its empty twin stands in, as Next.js's server build resolves it.
+          alias: {
+            'server-only': fileURLToPath(
+              new URL('./node_modules/server-only/empty.js', import.meta.url),
+            ),
+          },
           include: [
             'app/**/*.test.ts',
             'src/domain/**/*.test.ts',
