@@ -1,0 +1,6 @@
+"agency_id","agency_name","agency_url","agency_timezone","agency_lang","agency_phone"
+203,"DSB","http://www.dsb.dk","Europe/Copenhagen","",""
+221,"Movia","https://www.moviatrafik.dk","Europe/Copenhagen","",""
+318,"DSB S-tog","https://www.dsb.dk","Europe/Copenhagen","",""
+319,"Metroselskabet","https://m.dk","Europe/Copenhagen","",""
+456,"Odense Letbane","https://www.odenseletbane.dk","Europe/Copenhagen","",""
