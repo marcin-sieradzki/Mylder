@@ -206,3 +206,45 @@ export function tripAt(
   const progress = progressAt(timelineOf(calls, path), now, path.length)
   return { phase, progress, point: pointAt(path, progress) }
 }
+
+/** Points this close to the path, in metres, count as on it when choosing between two stretches. */
+const SNAP_TIE = 30
+
+/**
+ * The progress of a point snapped to the path: the nearest point along it. Where the path passes
+ * near the point more than once, as a loop or an out-and-back does, the stretch nearer `hint`,
+ * the timetable's guess at the trip's progress, wins.
+ */
+export function snapToPath(path: MeasuredPath, point: LatLon, hint: number): number {
+  const { points, distances } = path
+  if (points.length < 2) return 0
+  const rad = Math.PI / 180
+  const across = Math.cos(point[0] * rad) * rad * EARTH_RADIUS
+  const up = rad * EARTH_RADIUS
+  // Metres east and north of the point, on a plane through it.
+  const local = ([lat, lon]: LatLon) => [(lon - point[1]) * across, (lat - point[0]) * up]
+  const candidates: { off: number; along: number }[] = []
+  for (let i = 1; i < points.length; i++) {
+    const [ax, ay] = local(points[i - 1])
+    const [bx, by] = local(points[i])
+    const length = (bx - ax) ** 2 + (by - ay) ** 2
+    const share =
+      length === 0 ? 0 : Math.max(0, Math.min(1, -(ax * (bx - ax) + ay * (by - ay)) / length))
+    candidates.push({
+      off: Math.hypot(ax + share * (bx - ax), ay + share * (by - ay)),
+      along: distances[i - 1] + share * (distances[i] - distances[i - 1]),
+    })
+  }
+  const nearest = Math.min(...candidates.map(({ off }) => off))
+  let best = candidates[0]
+  for (const candidate of candidates) {
+    if (candidate.off > nearest + SNAP_TIE) continue
+    if (
+      best.off > nearest + SNAP_TIE ||
+      Math.abs(candidate.along - hint) < Math.abs(best.along - hint)
+    ) {
+      best = candidate
+    }
+  }
+  return best.along
+}

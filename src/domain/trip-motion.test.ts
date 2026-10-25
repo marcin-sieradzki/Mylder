@@ -3,6 +3,7 @@ import {
   delayOf,
   measurePath,
   pointAt,
+  snapToPath,
   progressAt,
   timedCalls,
   tripAt,
@@ -199,5 +200,26 @@ describe('delayOf', () => {
     ],
   ])('a trip %s is %s s late', (_, trip, delay) => {
     expect(delayOf(trip)).toBe(delay)
+  })
+})
+
+describe('snapToPath', () => {
+  it('puts a point a few metres off the path at the nearest point along it', () => {
+    // 20 m north of the crossing's middle.
+    const progress = snapToPath(path, [55.69 + 20 / 111_320, 12.505], 0)
+    expect(progress).toBeCloseTo(path.stops[1] / 2, 0)
+  })
+
+  it('takes the stretch nearer the timetable’s guess where the path passes a point twice', () => {
+    // Out and back along one street: the same point lies 500 m and 1,500 m along.
+    const there: LatLon = [55.68, 12.5]
+    const back: LatLon = [55.68 + 1_000 / 111_320, 12.5]
+    const loop = measurePath([
+      [there, back],
+      [back, there],
+    ])
+    const middle: LatLon = [55.68 + 500 / 111_320, 12.5]
+    expect(snapToPath(loop, middle, 400)).toBeCloseTo(loop.length / 4, 3)
+    expect(snapToPath(loop, middle, 1_700)).toBeCloseTo((loop.length * 3) / 4, 3)
   })
 })

@@ -80,8 +80,15 @@ export function timetableFrom(files: TimetableFiles): Timetable {
 
 /** Reads the deployed timetable: the manifest, then the files it names. */
 export async function loadTimetable(dir: string = TIMETABLE_DIR): Promise<Timetable> {
+  // The files reach the deployment through `outputFileTracingIncludes`, so the build needn't trace
+  // this read, which would otherwise pull in the whole project.
   const json = async (name: string): Promise<unknown> =>
-    JSON.parse(await readFile(join(dir, name), 'utf8'))
+    JSON.parse(
+      await readFile(
+        /* turbopackIgnore: true */ join(/* turbopackIgnore: true */ dir, name),
+        'utf8',
+      ),
+    )
   const manifest = readManifest(await json('manifest.json'))
   const { files } = manifest
   const [stops, patterns, paths, trips] = await Promise.all(
