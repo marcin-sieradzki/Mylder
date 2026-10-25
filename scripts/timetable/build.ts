@@ -7,6 +7,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
+import { TimetableCheckError } from './checks.ts'
 import { prepareTimetable } from './prepare.ts'
 
 const { values } = parseArgs({
@@ -31,17 +32,23 @@ const gtfs = await mkdtemp(join(tmpdir(), 'mylder-gtfs-'))
 try {
   execFileSync('unzip', ['-q', '-o', values.zip, '-d', gtfs])
   const started = Date.now()
-  const manifest = await prepareTimetable({
+  const { changed, manifest } = await prepareTimetable({
     gtfs,
     out: values.out,
     sourceHash,
     preparedDate: values.date,
     log: (message) => console.log(message),
   })
-  console.log(
-    `Prepared ${manifest.version} in ${Math.round((Date.now() - started) / 1000)} s:`,
-    JSON.stringify(manifest.counts),
-  )
+  if (changed) {
+    const seconds = Math.round((Date.now() - started) / 1000)
+    console.log(`Prepared ${manifest.version} in ${seconds} s: ${JSON.stringify(manifest.counts)}`)
+  } else {
+    console.log(`No change: the feed is the one ${manifest.version} was prepared from.`)
+  }
+} catch (error) {
+  if (!(error instanceof TimetableCheckError)) throw error
+  console.error(error.message)
+  process.exitCode = 1
 } finally {
   await rm(gtfs, { recursive: true, force: true })
 }

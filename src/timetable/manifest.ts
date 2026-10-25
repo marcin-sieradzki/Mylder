@@ -18,6 +18,13 @@ export function readManifest(json: unknown): Manifest {
     },
     timezone: string(m.timezone, 'manifest.timezone'),
     box: readBox(box),
+    sourceRows: Object.fromEntries(
+      Object.entries(object(m.sourceRows, 'manifest.sourceRows')).map(([file, rows]) => [
+        file,
+        number(rows, `manifest.sourceRows.${file}`),
+      ]),
+    ),
+    weekday: string(m.weekday, 'manifest.weekday'),
     counts: {
       stops: number(counts.stops, 'manifest.counts.stops'),
       platforms: number(counts.platforms, 'manifest.counts.platforms'),
@@ -27,6 +34,7 @@ export function readManifest(json: unknown): Manifest {
       trips: number(counts.trips, 'manifest.counts.trips'),
       profiles: number(counts.profiles, 'manifest.counts.profiles'),
       services: number(counts.services, 'manifest.counts.services'),
+      weekdayTrips: number(counts.weekdayTrips, 'manifest.counts.weekdayTrips'),
     },
     files: {
       stops: string(files.stops, 'manifest.files.stops'),

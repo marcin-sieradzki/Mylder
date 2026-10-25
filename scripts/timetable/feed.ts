@@ -56,7 +56,26 @@ export interface Feed {
   readonly services: ReadonlyMap<string, Service>
   /** Pairs of GTFS stop ids the feed links for transfers, both kept. */
   readonly transfers: readonly (readonly [string, string])[]
+  /** The points of the kept trips' shapes, in order, as `[lat, lon]`. */
+  readonly shapes: ReadonlyMap<string, readonly (readonly [number, number])[]>
+  /** Each file's row count, before any cut. */
+  readonly rows: Readonly<Record<string, number>>
+  /** The last day any service in the feed runs to, kept or not. */
+  readonly calendarEnd: IsoDate
 }
+
+/** The files the job reads; a feed without one of them is refused. */
+export const GTFS_FILES = [
+  'agency.txt',
+  'routes.txt',
+  'trips.txt',
+  'stop_times.txt',
+  'stops.txt',
+  'shapes.txt',
+  'calendar.txt',
+  'calendar_dates.txt',
+  'transfers.txt',
+] as const
 
 /**
  * Mylder's mode for a GTFS line, or undefined for a line Mylder doesn't show: ferries, demand
@@ -94,17 +113,21 @@ export function seconds(time: string): number {
 
 export async function readFeed(dir: string, box: Box): Promise<Feed> {
   const file = (name: string) => join(dir, name)
+  const rows: Record<string, number> = {}
+  const each = async (name: string, columns: string[], onRow: (values: string[]) => void) => {
+    rows[name] = await forEachRow(file(name), columns, onRow)
+  }
 
   const agencies = new Map<string, string>()
   let timezone = ''
-  await forEachRow(file('agency.txt'), ['agency_id', 'agency_name', 'agency_timezone'], (r) => {
+  await each('agency.txt', ['agency_id', 'agency_name', 'agency_timezone'], (r) => {
     agencies.set(r[0], r[1])
     timezone ||= r[2]
   })
 
   const routes = new Map<string, Route>()
-  await forEachRow(
-    file('routes.txt'),
+  await each(
+    'routes.txt',
     ['route_id', 'agency_id', 'route_short_name', 'route_type'],
     ([id, agency, line, type]) => {
       const mode = modeOf(type, agencies.get(agency) ?? '')
@@ -117,8 +140,8 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
     touchesBox: boolean
   }
   const trips = new Map<string, TripRow>()
-  await forEachRow(
-    file('trips.txt'),
+  await each(
+    'trips.txt',
     [
       'trip_id',
       'route_id',
@@ -147,8 +170,8 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
 
   const allStops: StopRow[] = []
   const stopIndex = new Map<string, number>()
-  await forEachRow(
-    file('stops.txt'),
+  await each(
+    'stops.txt',
     ['stop_id', 'stop_name', 'stop_lat', 'stop_lon'],
     ([gtfsId, name, lat, lon]) => {
       stopIndex.set(gtfsId, allStops.length)
@@ -157,8 +180,8 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
   )
   const stopInBox = allStops.map((s) => inBox(box, s.lat, s.lon))
 
-  await forEachRow(
-    file('stop_times.txt'),
+  await each(
+    'stop_times.txt',
     ['trip_id', 'arrival_time', 'departure_time', 'stop_id', 'stop_sequence'],
     ([tripId, arrival, departure, stopId, sequence]) => {
       const trip = trips.get(tripId)
@@ -194,20 +217,23 @@ export async function readFeed(dir: string, box: Box): Promise<Feed> {
   const kept = new Set(stops.map((s) => s.gtfsId))
 
   const usedServices = new Set(keptTrips.map((t) => t.serviceId))
-  const services = await readServices(file, usedServices)
+  const { services, calendarEnd } = await readServices(each, usedServices)
 
   const transfers: [string, string][] = []
-  await forEachRow(file('transfers.txt'), ['from_stop_id', 'to_stop_id'], ([from, to]) => {
+  await each('transfers.txt', ['from_stop_id', 'to_stop_id'], ([from, to]) => {
     if (from !== to && kept.has(from) && kept.has(to)) transfers.push([from, to])
   })
 
-  return { timezone, trips: keptTrips, stops, services, transfers }
+  const shapes = await readShapes(each, new Set(keptTrips.map((t) => t.shapeId)))
+
+  return { timezone, trips: keptTrips, stops, services, transfers, shapes, rows, calendarEnd }
 }
 
 async function readServices(
-  file: (name: string) => string,
+  each: (name: string, columns: string[], onRow: (values: string[]) => void) => Promise<void>,
   used: ReadonlySet<string>,
-): Promise<Map<string, Service>> {
+): Promise<{ services: Map<string, Service>; calendarEnd: IsoDate }> {
+  let calendarEnd = ''
   const services = new Map<
     string,
     { weekdays: boolean[]; start: string; end: string; added: Set<string>; removed: Set<string> }
@@ -227,28 +253,22 @@ async function readServices(
     return s
   }
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-  await forEachRow(
-    file('calendar.txt'),
-    ['service_id', ...days, 'start_date', 'end_date'],
-    ([id, ...rest]) => {
-      if (!used.has(id)) return
-      const s = service(id)
-      s.weekdays = rest.slice(0, 7).map((d) => d === '1')
-      s.start = isoDate(rest[7])
-      s.end = isoDate(rest[8])
-    },
-  )
-  await forEachRow(
-    file('calendar_dates.txt'),
-    ['service_id', 'date', 'exception_type'],
-    ([id, date, type]) => {
-      if (!used.has(id)) return
-      const s = service(id)
-      if (type === '1') s.added.add(isoDate(date))
-      if (type === '2') s.removed.add(isoDate(date))
-    },
-  )
-  return new Map([...services].map(([id, s]) => [id, { id, ...s }]))
+  await each('calendar.txt', ['service_id', ...days, 'start_date', 'end_date'], ([id, ...rest]) => {
+    if (isoDate(rest[8]) > calendarEnd) calendarEnd = isoDate(rest[8])
+    if (!used.has(id)) return
+    const s = service(id)
+    s.weekdays = rest.slice(0, 7).map((d) => d === '1')
+    s.start = isoDate(rest[7])
+    s.end = isoDate(rest[8])
+  })
+  await each('calendar_dates.txt', ['service_id', 'date', 'exception_type'], ([id, date, type]) => {
+    if (type === '1' && isoDate(date) > calendarEnd) calendarEnd = isoDate(date)
+    if (!used.has(id)) return
+    const s = service(id)
+    if (type === '1') s.added.add(isoDate(date))
+    if (type === '2') s.removed.add(isoDate(date))
+  })
+  return { services: new Map([...services].map(([id, s]) => [id, { id, ...s }])), calendarEnd }
 }
 
 /** `20260616` to `2026-06-16`. */
@@ -256,14 +276,13 @@ function isoDate(gtfsDate: string): string {
   return `${gtfsDate.slice(0, 4)}-${gtfsDate.slice(4, 6)}-${gtfsDate.slice(6, 8)}`
 }
 
-/** The points of the named shapes, in sequence order, as `[lat, lon]`. */
-export async function readShapes(
-  dir: string,
+async function readShapes(
+  each: (name: string, columns: string[], onRow: (values: string[]) => void) => Promise<void>,
   ids: ReadonlySet<string>,
 ): Promise<Map<string, (readonly [number, number])[]>> {
   const rows = new Map<string, { lat: number; lon: number; sequence: number }[]>()
-  await forEachRow(
-    join(dir, 'shapes.txt'),
+  await each(
+    'shapes.txt',
     ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence'],
     ([id, lat, lon, sequence]) => {
       if (!ids.has(id)) return

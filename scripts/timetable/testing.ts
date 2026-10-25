@@ -12,7 +12,7 @@ export async function prepareFixture(options: Partial<PrepareOptions> = {}) {
   const out = await mkdtemp(join(tmpdir(), 'mylder-timetable-'))
   const logs: string[] = []
   try {
-    const manifest = await prepareTimetable({
+    const { manifest } = await prepareTimetable({
       gtfs: FIXTURE,
       out,
       sourceHash: FIXTURE_HASH,

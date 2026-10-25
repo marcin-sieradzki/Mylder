@@ -27,6 +27,10 @@ export interface Manifest {
   readonly window: { readonly first: IsoDate; readonly last: IsoDate }
   readonly timezone: string
   readonly box: Box
+  /** Each GTFS file's row count, before the cut, for the next release's input checks. */
+  readonly sourceRows: Readonly<Record<string, number>>
+  /** The first Tuesday from the prepared date, whose trips the next release's checks compare. */
+  readonly weekday: IsoDate
   readonly counts: {
     readonly stops: number
     readonly platforms: number
@@ -36,6 +40,7 @@ export interface Manifest {
     readonly trips: number
     readonly profiles: number
     readonly services: number
+    readonly weekdayTrips: number
   }
   /** Each file's name, relative to the manifest. */
   readonly files: {

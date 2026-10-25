@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import {
   COPENHAGEN_BOX,
@@ -6,16 +6,22 @@ import {
   type IsoDate,
   type Manifest,
 } from '../../src/timetable/format.ts'
-import { readFeed, readShapes, runningDays, type Service } from './feed.ts'
-import { buildPatterns } from './patterns.ts'
+import { readManifest } from '../../src/timetable/manifest.ts'
 import { readTrips } from '../../src/timetable/trips.ts'
+import { checkFiles, checkInput, checkOutput, tripsOn, weekdayFrom } from './checks.ts'
+import { exists } from './csv.ts'
+import { readFeed, runningDays, type Service } from './feed.ts'
+import { buildPatterns } from './patterns.ts'
 import { buildStops } from './stops.ts'
 import { buildDayProfiles, buildTrips } from './trips.ts'
+
+/** A version folder's name: the prepared date and the start of the source hash. */
+const VERSION = /^\d{4}-\d{2}-\d{2}-[0-9a-f]{8}$/
 
 export interface PrepareOptions {
   /** An unzipped GTFS folder. */
   readonly gtfs: string
-  /** Where the manifest and the version's folder are written. */
+  /** Where the manifest and the version's folder are written; it may hold the last release. */
   readonly out: string
   /** The SHA-256 of the downloaded zip, which names the version and spots an unchanged feed. */
   readonly sourceHash: string
@@ -24,18 +30,34 @@ export interface PrepareOptions {
   readonly log?: (message: string) => void
 }
 
-/** Prepares the timetable from a GTFS folder and writes its files. */
-export async function prepareTimetable(options: PrepareOptions): Promise<Manifest> {
-  const box = options.box ?? COPENHAGEN_BOX
-  const version = `${options.preparedDate}-${options.sourceHash.slice(0, 8)}`
-  const feed = await readFeed(options.gtfs, box)
+export type PrepareResult =
+  /** The feed is the one the last release was prepared from; nothing was written. */
+  | { readonly changed: false; readonly manifest: Manifest }
+  | { readonly changed: true; readonly manifest: Manifest }
+
+/**
+ * Prepares the timetable from a GTFS folder and writes its files over the last release's. A
+ * failed check throws a TimetableCheckError and writes nothing.
+ */
+export async function prepareTimetable(options: PrepareOptions): Promise<PrepareResult> {
   const log = options.log ?? (() => {})
+  const box = options.box ?? COPENHAGEN_BOX
+  const previous = await readPrevious(options.out)
+  if (previous?.sourceHash === options.sourceHash) return { changed: false, manifest: previous }
+
+  checkFiles(await readdir(options.gtfs))
+  const feed = await readFeed(options.gtfs, box)
+  checkInput(feed, options.preparedDate, previous)
+
+  const version = `${options.preparedDate}-${options.sourceHash.slice(0, 8)}`
   const stops = buildStops(feed)
-  const shapes = await readShapes(options.gtfs, new Set(feed.trips.map((t) => t.shapeId)))
-  const patterns = buildPatterns(feed, stops, shapes, log)
+  const patterns = buildPatterns(feed, stops, log)
   const window = serviceWindow(feed.services.values())
   const trips = buildTrips(feed, patterns.patternOf, window)
   const dayProfiles = buildDayProfiles(readTrips(trips), window, feed.timezone)
+  const weekday = weekdayFrom(
+    options.preparedDate > window.first ? options.preparedDate : window.first,
+  )
 
   const files = {
     stops: `${version}/stops.json`,
@@ -51,6 +73,8 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Manifes
     window,
     timezone: feed.timezone,
     box,
+    sourceRows: feed.rows,
+    weekday,
     counts: {
       stops: stops.file.stops.length,
       platforms: stops.file.platforms.length,
@@ -60,17 +84,31 @@ export async function prepareTimetable(options: PrepareOptions): Promise<Manifes
       trips: trips.trips.pattern.length,
       profiles: trips.profiles.length,
       services: trips.services.length,
+      weekdayTrips: tripsOn(trips, weekday),
     },
     files,
   }
+  checkOutput({ stops, patterns, trips, manifest }, previous)
 
+  // The new version's files first and the manifest that names them last, then older versions go.
   await write(join(options.out, files.stops), stops.file)
   await write(join(options.out, files.patterns), patterns.patterns)
   await write(join(options.out, files.paths), patterns.paths)
   await write(join(options.out, files.trips), trips)
   await write(join(options.out, files.dayProfiles), dayProfiles)
   await write(join(options.out, 'manifest.json'), manifest)
-  return manifest
+  for (const entry of await readdir(options.out)) {
+    if (entry !== version && VERSION.test(entry)) {
+      await rm(join(options.out, entry), { recursive: true, force: true })
+    }
+  }
+  return { changed: true, manifest }
+}
+
+async function readPrevious(out: string): Promise<Manifest | undefined> {
+  const path = join(out, 'manifest.json')
+  if (!(await exists(path))) return undefined
+  return readManifest(JSON.parse(await readFile(path, 'utf8')))
 }
 
 /** The first and last days any of the services runs. */

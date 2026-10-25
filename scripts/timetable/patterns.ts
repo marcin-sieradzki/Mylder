@@ -6,7 +6,7 @@ import {
   type PatternRecord,
   type PatternsFile,
 } from '../../src/timetable/format.ts'
-import { encodePolyline, type LatLon } from '../../src/timetable/polyline.ts'
+import { encodePolyline } from '../../src/timetable/polyline.ts'
 import { lineColour } from './colours.ts'
 import type { Feed, Trip } from './feed.ts'
 import { cutAtStops, distanceToLine, fromXY, simplify, toXY, type XY } from './geo.ts'
@@ -33,7 +33,6 @@ export interface PreparedPatterns {
 export function buildPatterns(
   feed: Feed,
   stops: PreparedStops,
-  shapes: ReadonlyMap<string, readonly LatLon[]>,
   log: (message: string) => void,
 ): PreparedPatterns {
   const lineKey = (trip: Trip) => `${trip.route.mode}|${trip.route.line}`
@@ -92,7 +91,7 @@ export function buildPatterns(
     const platformXY = first.calls.map((c) => toXY(c.stop.lat, c.stop.lon))
     for (const trip of trips) patternOf.set(trip, index)
 
-    const shape = shapes.get(mostCommon(trips.map((t) => t.shapeId)))
+    const shape = feed.shapes.get(mostCommon(trips.map((t) => t.shapeId)))
     let pieces: XY[][]
     if (shape && shape.length >= 2) {
       const shapeXY = shape.map(([lat, lon]) => toXY(lat, lon))
