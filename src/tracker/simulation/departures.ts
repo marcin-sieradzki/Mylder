@@ -1,0 +1,123 @@
+// The simulated `multiDepartureBoard`: the departures from every platform of the stops asked
+// for, over a window, with expected times from the same world as `journeyPos`.
+import 'server-only'
+import { wallClock } from '../../timetable/time.ts'
+import type { Departure, DepartureBoardAnswer } from '../rejseplanen/answers.ts'
+import { dateAndTime, envelope, journeyName, journeyRef, productOf } from './journeys.ts'
+import { hash } from './random.ts'
+import { simulateTrip, simulatedDay, type SimulatedTrip, type SimulationSettings } from './world.ts'
+
+const MINUTE = 60_000
+
+export interface DepartureBoardRequest {
+  /** The stop or platform ids asked for, as the API writes them. */
+  readonly ids: readonly string[]
+  /** The window's start: the request's date and time, else now. */
+  readonly from: number
+  readonly duration: number
+  readonly maxJourneys: number
+}
+
+/** Reads a request's query as Rejseplanen would: `idList`, `date`, `time`, `duration`, `maxJourneys`. */
+export function readDepartureBoardRequest(
+  { timetable }: SimulationSettings,
+  query: URLSearchParams,
+  now: number,
+): DepartureBoardRequest {
+  const ids = (query.get('idList') ?? query.get('id') ?? '').split('|').filter(Boolean)
+  const date = query.get('date')
+  const time = query.get('time')
+  let from = Math.floor(now / MINUTE) * MINUTE
+  if (date && time) {
+    const [hours, minutes] = time.split(':').map(Number)
+    from = wallClock(date, hours * 3600 + minutes * 60, timetable.manifest.timezone)
+  }
+  const number = (name: string, fallback: number) => {
+    const value = Number(query.get(name) ?? '')
+    return query.get(name) && Number.isFinite(value) && value > 0 ? value : fallback
+  }
+  return {
+    ids,
+    from,
+    duration: number('duration', 60),
+    maxJourneys: number('maxJourneys', Infinity),
+  }
+}
+
+/** The platforms a list of ids names: every platform of each stop an id belongs to. */
+function platformsOf({ timetable }: SimulationSettings, ids: readonly string[]): Set<number> {
+  const { platforms } = timetable.stops
+  const stops = new Set(
+    ids.flatMap((id) => {
+      const bare = id.replace(/^0+(?=.)/, '')
+      return platforms.filter((platform) => platform.id === bare).map((platform) => platform.stop)
+    }),
+  )
+  return new Set(platforms.flatMap((platform, i) => (stops.has(platform.stop) ? [i] : [])))
+}
+
+function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: number): Departure {
+  const { timetable } = settings
+  const { timezone } = timetable.manifest
+  const { trip } = simulated
+  const platform = timetable.stops.platforms[trip.calls[i].platform]
+  const planned = trip.calls[i].departure
+  const expected = simulated.calls[i].departure
+  const cancelled = simulated.cancelled || simulated.cancelledCalls.includes(i)
+  const realtime = trip.line.mode !== 'metro' && !cancelled
+  const [date, time] = dateAndTime(planned, timezone)
+  const [rtDate, rtTime] = dateAndTime(expected, timezone)
+  const train = trip.line.mode === 'train' || trip.line.mode === 's-tog'
+  return {
+    JourneyDetailRef: { ref: journeyRef(timetable, trip, simulated.journeyNumber) },
+    name: journeyName(trip),
+    type: 'ST',
+    stop: platform.name,
+    stopExtId: platform.id,
+    lon: platform.lon,
+    lat: platform.lat,
+    time,
+    date,
+    ...(realtime && expected !== planned && { rtTime, rtDate }),
+    // Tracks are made up, one per platform, where trains have them.
+    ...(realtime && train && { rtTrack: String(1 + (hash(platform.id) % 8)) }),
+    ...(realtime && { prognosisType: 'PROGNOSED' as const }),
+    direction: trip.headsign,
+    reachable: !cancelled,
+    ...(cancelled && { cancelled: true }),
+    JourneyStatus: simulated.extra ? 'A' : 'P',
+    ProductAtStop: productOf(trip, simulated.journeyNumber),
+  }
+}
+
+/** The `multiDepartureBoard` answer for a request, at a moment. */
+export function departureBoard(
+  settings: SimulationSettings,
+  request: DepartureBoardRequest,
+  now: number,
+): DepartureBoardAnswer {
+  const platforms = platformsOf(settings, request.ids)
+  const until = request.from + request.duration * MINUTE
+  const found: { at: number; departure: Departure }[] = []
+  const days = settings.timetable.serviceDaysAt(request.from)
+  for (const day of new Set([...days, ...settings.timetable.serviceDaysAt(now)])) {
+    const calling = new Set(
+      [...platforms].flatMap((p) => simulatedDay(settings, day).byPlatform.get(p) ?? []),
+    )
+    for (const trip of calling) {
+      const simulated = simulateTrip(settings, trip, now)
+      // A trip's last call is an arrival, not a departure.
+      for (let i = 0; i < trip.calls.length - 1; i++) {
+        const at = simulated.calls[i].departure
+        if (!platforms.has(trip.calls[i].platform) || at < request.from || at >= until) continue
+        found.push({ at, departure: departure(settings, simulated, i) })
+      }
+    }
+  }
+  const departures = found
+    .sort((a, b) => a.at - b.at || a.departure.name.localeCompare(b.departure.name))
+    .slice(0, request.maxJourneys)
+    .map((row) => row.departure)
+  const head = envelope(now, settings.timetable.manifest.timezone)
+  return departures.length > 0 ? { Departure: departures, ...head } : head
+}
