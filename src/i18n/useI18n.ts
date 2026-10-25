@@ -1,12 +1,12 @@
 'use client'
 
 import { createContext, use } from 'react'
-import type { Dictionary } from './dictionary'
+import type { ClientDictionary } from './dictionary'
 import type { Lang } from './lang'
 
 export interface I18n {
   lang: Lang
-  dictionary: Dictionary
+  dictionary: ClientDictionary
 }
 
 export const I18nContext = createContext<I18n | null>(null)

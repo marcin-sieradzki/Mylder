@@ -20,9 +20,9 @@ export function langFromAcceptLanguage(header: string | null): Lang {
   const asked = (header ?? '')
     .split(',')
     .map((part) => {
-      const [tag, ...params] = part.trim().split(';')
-      const q = params.find((param) => param.trim().startsWith('q='))
-      return { lang: tag.split('-')[0].toLowerCase(), weight: q ? Number(q.trim().slice(2)) : 1 }
+      const [tag, ...params] = part.split(';').map((piece) => piece.trim().toLowerCase())
+      const q = params.find((param) => param.startsWith('q='))
+      return { lang: tag.split('-')[0], weight: q ? Number(q.slice(2)) : 1 }
     })
     .filter(({ weight }) => weight > 0)
     .sort((a, b) => b.weight - a.weight)

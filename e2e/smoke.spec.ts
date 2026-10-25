@@ -6,13 +6,13 @@ test('the English shell loads at /en', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
   await expect(page.getByRole('link', { name: 'Mylder' })).toBeVisible()
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Watch Copenhagen move.' }),
+    page.getByRole('heading', { level: 1, name: 'All of Copenhagen moving on one map' }),
   ).toBeVisible()
 })
 
 test('the Danish shell loads at /da', async ({ page }) => {
   await page.goto('/da')
-  await expect(page).toHaveTitle('Mylder: live kort over København')
+  await expect(page).toHaveTitle('Mylder: livekort over København')
   await expect(page.locator('html')).toHaveAttribute('lang', 'da')
 })
 

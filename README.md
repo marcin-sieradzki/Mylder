@@ -69,7 +69,7 @@ npm install
 npm run dev
 ```
 
-The interface lives at `/en` and `/da`; `/` sends a first visit to the language its browser asks for, English when it asks for neither.
+The interface lives at `/en` and `/da`; `/` sends a visit to the language its browser asks for, English when it asks for neither.
 
 Before the first e2e run, install a browser with `npx playwright install chromium`.
 

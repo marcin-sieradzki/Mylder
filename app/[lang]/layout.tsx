@@ -25,7 +25,12 @@ export async function generateMetadata({ params }: LangProps): Promise<Metadata>
   return {
     title: meta.title,
     description: meta.description,
-    alternates: { languages: Object.fromEntries(langs.map((each) => [each, `/${each}`])) },
+    alternates: {
+      languages: {
+        ...Object.fromEntries(langs.map((each) => [each, `/${each}`])),
+        'x-default': '/',
+      },
+    },
   }
 }
 
@@ -35,7 +40,8 @@ export default async function LangLayout({
 }: LangProps & { children: ReactNode }) {
   const { lang } = await params
   if (!isLang(lang)) notFound()
-  const dictionary = await getDictionary(lang)
+  // the metadata words stay on the server; the client tree gets the rest
+  const { meta: _meta, ...dictionary } = await getDictionary(lang)
   return (
     <html lang={lang}>
       <body>

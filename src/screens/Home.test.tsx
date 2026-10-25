@@ -17,7 +17,7 @@ describe('Home', () => {
     expect(
       within(screen.getByRole('main')).getByRole('heading', {
         level: 1,
-        name: 'Watch Copenhagen move.',
+        name: 'All of Copenhagen moving on one map',
       }),
     ).toBeInTheDocument()
     const languages = screen.getByRole('navigation', { name: 'Language' })
@@ -34,7 +34,7 @@ describe('Home', () => {
       within(screen.getByRole('banner')).getByRole('link', { name: 'Mylder' }),
     ).toHaveAttribute('href', '/da')
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Se København bevæge sig.' }),
+      screen.getByRole('heading', { level: 1, name: 'Hele København i bevægelse på ét kort' }),
     ).toBeInTheDocument()
     const languages = screen.getByRole('navigation', { name: 'Sprog' })
     expect(within(languages).getByRole('link', { name: 'English' })).toHaveAttribute(
