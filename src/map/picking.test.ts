@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest'
 import type { Snapshot } from '../tracker/index.ts'
 import { readPaint } from './paint.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
-import { aircraftDrawn, aircraftOf, aircraftPaint } from './AircraftGlyphLayer.ts'
+import { aircraftLookNow } from '../test/aircraftIcon.ts'
+import { AIRCRAFT_LAYER, aircraftDrawn, aircraftOf } from './AircraftGlyphLayer.ts'
 import { aircraftStatesAt } from './aircraft-states.ts'
 import { dotPicking, pickedStore } from './picking.ts'
 import { tripsDrawn, vehicleLayers } from './VehicleGlyphLayer.ts'
@@ -30,7 +31,7 @@ const aircraftSnapshot = JSON.parse(
 ) as AircraftSnapshot
 const aircraft = aircraftOf(
   aircraftSnapshot,
-  readPaint(document.documentElement, aircraftPaint()),
+  aircraftLookNow(),
   aircraftStatesAt(aircraftSnapshot, aircraftSnapshot.fetched),
 )
 /** Both kinds as the overlay draws them, the aircraft above the vehicles. */
@@ -72,7 +73,7 @@ const overAircraft = (x: number, y: number, hex: string) =>
     index: aircraftDrawn(aircraft).keys.indexOf(hex),
     layer: aircraftDrawn(aircraft)
       .layers(1)
-      .find((layer) => layer.id === 'aircraft'),
+      .find((layer) => layer.id === AIRCRAFT_LAYER),
   }) as unknown as PickingInfo
 
 /** Every dot drawn 20 px from the canvas's left and 10 px from its top. */
@@ -190,15 +191,15 @@ describe('picking an aircraft', () => {
     expect(missed).toEqual([])
   })
 
-  it('makes only the aircraft dots pickable, never their halos or ticks', () => {
+  it("makes only the aircraft's halos pickable, which every state fills, a hollow plane too", () => {
     const drawnLayers = aircraftDrawn(aircraft).layers(1)
     expect(drawnLayers.map((layer) => layer.id)).toEqual([
       'aircraft-halos',
-      'aircraft-ticks',
       'aircraft',
+      'aircraft-rims',
     ])
     expect(drawnLayers.filter((layer) => layer.props.pickable).map((layer) => layer.id)).toEqual([
-      'aircraft',
+      'aircraft-halos',
     ])
   })
 })

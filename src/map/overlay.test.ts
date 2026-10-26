@@ -5,6 +5,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { AIRCRAFT_LAYER } from './AircraftGlyphLayer.ts'
 import { liveAircraft } from './aircraft.ts'
 import { liveSnapshot } from './live.ts'
 import { pickedVehicle } from './picking.ts'
@@ -54,8 +55,15 @@ const atFetch = (snapshot: AircraftSnapshot) => ({
 /** The paths the page asked for, in order. */
 let asked: string[] = []
 
-/** The timetable routes as the server answers them on the recording; the snapshot's is down. */
+/** The fetch the page has, which reads the data: URLs Vite inlines small files as. */
+const fetchData = globalThis.fetch
+
+/**
+ * The timetable routes as the server answers them on the recording, and Perron's aircraft icon as
+ * the build hands it over; the snapshot's is down.
+ */
 const routes = async (input: RequestInfo | URL): Promise<Response> => {
+  if (String(input).startsWith('data:')) return fetchData(input)
   asked.push(String(input))
   const manifest = JSON.parse(read('timetable/manifest.json')) as {
     version: string
@@ -135,8 +143,8 @@ describe('the vehicles over the map', () => {
       'vehicle-halos',
       'vehicles',
       'aircraft-halos',
-      'aircraft-ticks',
       'aircraft',
+      'aircraft-rims',
     ])
     expect(aircraft.aircraft.length).toBe(9)
   })
@@ -265,7 +273,7 @@ describe('the vehicles over the map', () => {
     liveAircraft.update(atFetch(aircraft))
     await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    const onPlane = { picked: true, index: 3, layer: { id: 'aircraft' }, x: 5, y: 5 }
+    const onPlane = { picked: true, index: 3, layer: { id: AIRCRAFT_LAYER }, x: 5, y: 5 }
     hovering.onHover!(onPlane)
     const hex = pickedVehicle.get()?.key
     expect(aircraft.aircraft.map((each) => each.hex)).toContain(hex)

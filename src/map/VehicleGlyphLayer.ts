@@ -34,7 +34,7 @@ const cutModule = {
 
 /**
  * A scatterplot with two more attributes per vehicle: the width of its No signal cut, and how
- * opaque it is drawn. The aircraft's stand-in glyphs (AircraftGlyphLayer.ts) are drawn with it too.
+ * opaque it is drawn.
  */
 export class VehicleGlyphLayer<D = unknown> extends ScatterplotLayer<D, CutProps<D>> {
   static override layerName = 'VehicleGlyphLayer'

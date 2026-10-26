@@ -16,14 +16,14 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Network } from '../timetable/network.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
-import {
-  aircraftDrawn,
-  aircraftOf,
-  aircraftPaint,
-  restyled,
-  type DrawnAircraft,
-} from './AircraftGlyphLayer.ts'
+import { aircraftDrawn, aircraftOf, restyled, type DrawnAircraft } from './AircraftGlyphLayer.ts'
 import { liveAircraft, pollAircraft } from './aircraft.ts'
+import {
+  aircraftLookOf,
+  aircraftOutline,
+  aircraftTokens,
+  type AircraftLook,
+} from './aircraft-glyphs.ts'
 import { aircraftLoop } from './aircraft-loop.ts'
 import { aircraftStates } from './aircraft-states.ts'
 import { followCamera } from './follow.ts'
@@ -31,7 +31,7 @@ import { frameDriver } from './frames.ts'
 import { radiusScaleAt } from './glyphs.ts'
 import { liveSnapshot, pollSnapshot, serverNow } from './live.ts'
 import { vehicleLoop } from './loop.ts'
-import { readPaint, type Paint } from './paint.ts'
+import { readPaint } from './paint.ts'
 import { dotPicking, TAP_RADIUS, type DrawnKind } from './picking.ts'
 import { dataStates } from './states.ts'
 import { timetables } from './timetable.ts'
@@ -157,21 +157,23 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   }
 
   // The aircraft, drawn again when an answer lands or a state turns by the clock, unless the
-  // Planes filter keeps them off the map. Their paint is read once per theme; a state turning
-  // makes only the glyphs again, and leaves each aircraft's motion as it was.
+  // Planes filter keeps them off the map, once Perron's outline has loaded. Their look is read
+  // once per theme; a state turning makes only the glyphs again, and leaves each aircraft's motion
+  // as it was.
   let aircraftShown = mapView.get().aircraftHidden !== true
-  let paintOfAircraft: Paint | undefined
+  let outline: string | undefined
+  let lookOfAircraft: AircraftLook | undefined
   let aircraftDrawnFrom: AircraftSnapshot | undefined
   const drawAircraft = () => {
     const { snapshot } = liveAircraft.get()
-    if (!snapshot || !aircraftShown) {
+    if (!snapshot || !aircraftShown || outline === undefined) {
       aircraft = aircraftDrawnFrom = undefined
       return aircraftMotion.show(undefined)
     }
-    const paint = (paintOfAircraft ??= readPaint(root, aircraftPaint()))
+    const look = (lookOfAircraft ??= aircraftLookOf(readPaint(root, aircraftTokens()), outline))
     const states = aircraftStates.get()
     const again = aircraft && aircraftDrawnFrom === snapshot ? aircraft : undefined
-    aircraft = (again && restyled(again, paint, states)) ?? aircraftOf(snapshot, paint, states)
+    aircraft = (again && restyled(again, look, states)) ?? aircraftOf(snapshot, look, states)
     aircraftDrawnFrom = snapshot
     aircraftMotion.show(aircraft, snapshot)
   }
@@ -247,6 +249,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     drawAircraft()
   })
   drawAircraft()
+  aircraftOutline().then(
+    (loaded) => {
+      outline = loaded
+      if (!removed) drawAircraft()
+    },
+    (error: unknown) => console.error("Perron's aircraft glyph could not load", error),
+  )
 
   const onZoom = () => {
     const scale = radiusScaleAt(map.getZoom())
@@ -267,7 +276,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
 
   return {
     repaint() {
-      paintOfAircraft = undefined
+      lookOfAircraft = undefined
       drawAircraft()
       void draw()
     },

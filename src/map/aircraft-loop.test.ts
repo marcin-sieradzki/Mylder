@@ -3,12 +3,12 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { distance } from '../domain/trip-motion.ts'
+import { aircraftLookNow } from '../test/aircraftIcon.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import { aircraftLoop, type AircraftLoop } from './aircraft-loop.ts'
 import { aircraftStatesAt } from './aircraft-states.ts'
-import { aircraftOf, aircraftPaint, type DrawnAircraft } from './AircraftGlyphLayer.ts'
+import { aircraftOf, type DrawnAircraft } from './AircraftGlyphLayer.ts'
 import { frameDriver, type FrameDriver } from './frames.ts'
-import { readPaint } from './paint.ts'
 import { motionPauseStore, type MotionPause } from './pause.ts'
 
 // The weekday recording's last two aircraft snapshots, 10 s apart: SAS4304 on short final at
@@ -25,11 +25,7 @@ const SAS4304 = '4acaa6'
 const ON_GROUND = '45ab23'
 
 const drawnFrom = (snapshot: AircraftSnapshot, at: number) =>
-  aircraftOf(
-    snapshot,
-    readPaint(document.documentElement, aircraftPaint()),
-    aircraftStatesAt(snapshot, at),
-  )
+  aircraftOf(snapshot, aircraftLookNow(), aircraftStatesAt(snapshot, at))
 
 /** Where `hex` is drawn, as longitude and latitude. */
 const where = (drawn: DrawnAircraft, hex: string) => {
