@@ -129,6 +129,12 @@ export function basemapStyle(paint: Paint, network?: Network): StyleSpecificatio
   return style
 }
 
+const BUS_STOPS = 'mylder-stops-bus'
+const RAIL_STOPS = 'mylder-stops-rail'
+
+/** The layers the stops are drawn in, whose features carry each stop's `id`, for a tap to open. */
+export const STOP_LAYERS: readonly string[] = [RAIL_STOPS, BUS_STOPS]
+
 function networkLayers(paint: Paint): LayerSpecification[] {
   const lines = RAIL.map(({ mode, layer }): LayerSpecification => ({
     id: layer,
@@ -161,7 +167,7 @@ function networkLayers(paint: Paint): LayerSpecification[] {
     },
   })
   // A bus stop shows only close in, where the streets it stands on can be told apart.
-  return [...lines, stops('mylder-stops-bus', false, 14, 2), stops('mylder-stops-rail', true, 9, 3)]
+  return [...lines, stops(BUS_STOPS, false, 14, 2), stops(RAIL_STOPS, true, 9, 3)]
 }
 
 /** The lines drawn at rest: every Metro, S-tog, train and light rail line with a pattern. */
@@ -247,7 +253,11 @@ function stopFeatures(network: Network): FeatureCollection<Point> {
     type: 'FeatureCollection',
     features: network.stops.stops.map((stop) => ({
       type: 'Feature',
-      properties: { name: stop.name, rail: stop.modes.some((mode) => mode !== 'bus') },
+      properties: {
+        id: stop.id,
+        name: stop.name,
+        rail: stop.modes.some((mode) => mode !== 'bus'),
+      },
       geometry: { type: 'Point', coordinates: [stop.lon, stop.lat] },
     })),
   }

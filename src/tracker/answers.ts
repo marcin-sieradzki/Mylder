@@ -4,35 +4,59 @@
 // reads the snapshot and calls them. The on-demand calls (#32) fall back to them.
 import 'server-only'
 import { timedCalls } from '../domain/trip-motion.ts'
-import type { Mode } from '../timetable/format.ts'
+import { MODES, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
 
-/** How long a stop's departures look ahead. */
-export const DEPARTURES_AHEAD = 60 * 60_000
+/** How long a stop's departures look ahead (docs/screens.md, "Stop departures"). */
+export const DEPARTURES_AHEAD = 30 * 60_000
 
 /** The most departures a stop's answer lists. */
 export const MAX_DEPARTURES = 30
+
+/**
+ * Where an answer's times came from: the timetable plus the snapshot's delays, or an on-demand
+ * call to Rejseplanen made at `at`.
+ */
+export type AnswerSource =
+  { readonly kind: 'timetable' } | { readonly kind: 'rejseplanen'; readonly at: number }
+
+const FROM_TIMETABLE: AnswerSource = { kind: 'timetable' }
+
+/** A line as a panel names it: its public name, its mode and its Perron colour token. */
+export type AnswerLine = Pick<LineRecord, 'name' | 'mode' | 'colour'>
 
 /** One departure from a stop: the timetable's time plus the snapshot's delay for its trip. */
 export interface StopDeparture {
   readonly trip: string
   readonly line: string
   readonly mode: Mode
+  /** The line's Perron colour token, such as `perron-color-transit-line-a`. */
+  readonly colour: string
   readonly headsign: string
   readonly platform: string
   readonly scheduled: number
   readonly expected?: number
   readonly state: SnapshotTrip['state']
+  /** The trip won't call here: cancelled whole, or this call. The row stays, marked. */
+  readonly cancelled?: true
+  /** The platform or track the board gives, when it gives one. */
+  readonly track?: string
 }
 
 export interface StopDepartures {
-  readonly stop: { readonly id: string; readonly name: string }
+  /** The stop, and the lines that call at it, in the modes' order and then by name. */
+  readonly stop: {
+    readonly id: string
+    readonly name: string
+    readonly lines: readonly AnswerLine[]
+  }
   /** The snapshot the delays came from, and when the next one is due. */
   readonly fetched: number
   readonly nextDue: number
+  readonly source: AnswerSource
   readonly departures: readonly StopDeparture[]
 }
 
@@ -56,6 +80,7 @@ export interface TripDetail {
   readonly delay?: number
   readonly fetched: number
   readonly nextDue: number
+  readonly source: AnswerSource
   readonly calls: readonly TripCall[]
 }
 
@@ -79,6 +104,25 @@ export function stopIndexOf(timetable: Timetable, id: string): number {
   return platform >= 0 ? platforms[platform].stop : -1
 }
 
+/** The lines whose patterns call at a stop's platforms, in the modes' order and then by name. */
+function linesAt(timetable: Timetable, stopIndex: number): AnswerLine[] {
+  const { platforms } = timetable.stops
+  const { lines, patterns } = timetable.patterns
+  const calling = new Set<number>()
+  for (const pattern of patterns) {
+    if (pattern.stops.some((platform) => platforms[platform].stop === stopIndex))
+      calling.add(pattern.line)
+  }
+  return [...calling]
+    .map((index) => lines[index])
+    .sort(
+      (a, b) =>
+        MODES.indexOf(a.mode) - MODES.indexOf(b.mode) ||
+        a.name.localeCompare(b.name, 'da', { numeric: true }),
+    )
+    .map(({ name, mode, colour }) => ({ name, mode, colour }))
+}
+
 /** A planned trip of the service days running at a moment, by its key. */
 export function plannedTrip(
   timetable: Timetable,
@@ -93,9 +137,9 @@ export function plannedTrip(
 }
 
 /**
- * A stop's departures in the hour after the snapshot, across its platforms, soonest first, each at
- * its timetabled time shifted by the snapshot's delay for its trip; undefined for a stop the
- * timetable doesn't know, by its own id or a platform's.
+ * A stop's departures in the 30 minutes after the snapshot, across its platforms, soonest first,
+ * each at its timetabled time shifted by the snapshot's delay for its trip, a cancelled one kept
+ * and marked; undefined for a stop the timetable doesn't know, by its own id or a platform's.
  */
 export function stopDeparturesFrom(
   timetable: Timetable,
@@ -118,15 +162,18 @@ export function stopDeparturesFrom(
         if (expected === null) expected = withDelay(trip, live?.delay)
         const leaves = expected?.[i].departure ?? call.departure
         if (leaves < now || leaves > now + DEPARTURES_AHEAD) return
+        const cancelled = live?.cancelled || live?.cancelledCalls?.includes(i)
         departures.push({
           trip: trip.key,
           line: trip.line.name,
           mode: trip.line.mode,
+          colour: trip.line.colour,
           headsign: trip.headsign,
           platform: platforms[call.platform].id,
           scheduled: call.departure,
           ...(expected ? { expected: leaves } : {}),
           state: live?.state ?? 'timetable-only',
+          ...(cancelled ? { cancelled: true as const } : {}),
         })
       })
     }
@@ -134,9 +181,10 @@ export function stopDeparturesFrom(
   departures.sort((a, b) => (a.expected ?? a.scheduled) - (b.expected ?? b.scheduled))
   const stop = stops[stopIndex]
   return {
-    stop: { id: stop.id, name: stop.name },
+    stop: { id: stop.id, name: stop.name, lines: linesAt(timetable, stopIndex) },
     fetched: now,
     nextDue: snapshot.nextDue,
+    source: FROM_TIMETABLE,
     departures: departures.slice(0, MAX_DEPARTURES),
   }
 }
@@ -166,6 +214,7 @@ export function tripDetailFrom(
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
+    source: FROM_TIMETABLE,
     calls: trip.calls.map((call, index) => ({
       index,
       stop: platforms[call.platform].id,

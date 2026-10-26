@@ -7,14 +7,23 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { MODES, type Mode } from '../timetable/format.ts'
 
+/** What a panel shows: a stop by its id, or a trip, a vehicle's detail, by its key. */
+export type PanelKind = 'stop' | 'trip'
+
+/** An open panel, kept in the address as `?stop=<id>` or `?trip=<key>`. */
+export interface Panel {
+  readonly kind: PanelKind
+  readonly id: string
+}
+
 export interface MapView {
   /** Longitude and latitude, once the map has been moved or the address names them. */
   readonly centre?: readonly [number, number]
   readonly zoom?: number
   /** The modes a filter keeps off the map; none by default. */
   readonly hidden: ReadonlySet<Mode>
-  /** The open panel, such as a vehicle or a stop, by the id its own screen gives it. */
-  readonly panel?: string
+  /** The open panel, a stop's departures or a vehicle's detail; one at a time. */
+  readonly panel?: Panel
 }
 
 export interface ViewStore {
@@ -28,7 +37,9 @@ export interface ViewStore {
 // `map=11.20/55.68000/12.56500`: zoom, latitude and longitude, in the order map links use.
 const MAP = 'map'
 const HIDE = 'hide'
-const PANEL = 'panel'
+/** Each panel's parameter, by what it shows. */
+const PANELS: Readonly<Record<PanelKind, string>> = { stop: 'stop', trip: 'trip' }
+const KINDS = Object.keys(PANELS) as PanelKind[]
 
 const NOTHING: MapView = { hidden: new Set() }
 
@@ -46,12 +57,21 @@ export function viewOf(search: string): MapView {
   const hidden = new Set(
     (query.get(HIDE) ?? '').split(',').filter((mode): mode is Mode => isMode(mode)),
   )
-  const panel = query.get(PANEL) ?? undefined
+  const panel = panelOf(query)
   return {
     ...(placed ? { centre: [lon, lat] as const, zoom } : {}),
     hidden,
     ...(panel ? { panel } : {}),
   }
+}
+
+/** The panel a query opens: the first of `stop` and `trip` it names, when it names one. */
+function panelOf(query: URLSearchParams): Panel | undefined {
+  for (const [name, value] of query) {
+    const kind = KINDS.find((each) => PANELS[each] === name)
+    if (kind && value) return { kind, id: value }
+  }
+  return undefined
 }
 
 /** The closest zoom MapLibre draws. */
@@ -74,7 +94,7 @@ export function searchWith(search: string, view: MapView): string {
       : undefined,
   )
   put(HIDE, MODES.filter((mode) => view.hidden.has(mode)).join(','))
-  put(PANEL, view.panel)
+  for (const kind of KINDS) put(PANELS[kind], view.panel?.kind === kind ? view.panel.id : undefined)
   const written = readableQuery(query)
   return written ? `?${written}` : ''
 }
@@ -93,15 +113,24 @@ export function addressView(): ViewStore {
   const notify = () => {
     for (const listener of listeners) listener()
   }
-  // The filters stay the same set while the map moves, so what follows them sees they didn't
-  // change.
+  // The filters stay the same set, and the panel the same object, while the map moves, so what
+  // follows them sees they didn't change.
   const get = (): MapView => {
     const search = window.location.search
     if (read?.search === search) return read.view
     const view = viewOf(search)
-    const was = read?.view.hidden
-    const same = was?.size === view.hidden.size && [...view.hidden].every((mode) => was.has(mode))
-    read = { search, view: same ? { ...view, hidden: was } : view }
+    const was = read?.view
+    const sameHidden =
+      was?.hidden.size === view.hidden.size && [...view.hidden].every((m) => was.hidden.has(m))
+    const samePanel = was?.panel?.kind === view.panel?.kind && was?.panel?.id === view.panel?.id
+    read = {
+      search,
+      view: {
+        ...view,
+        hidden: sameHidden ? was.hidden : view.hidden,
+        ...(samePanel && was?.panel ? { panel: was.panel } : {}),
+      },
+    }
     return read.view
   }
   return {
@@ -139,3 +168,19 @@ export function useHiddenModes(store: ViewStore = mapView): ReadonlySet<Mode> {
     () => NOTHING.hidden,
   )
 }
+
+/**
+ * The open panel, for a component such as the one that chooses it: it renders again when a panel
+ * opens, closes or changes, not when the map moves. The prerendered page has none open.
+ */
+export function usePanel(store: ViewStore = mapView): Panel | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().panel,
+    () => undefined,
+  )
+}
+
+/** Opens a panel in the address, closing whichever was open; none closes it. */
+export const openPanel = (panel: Panel | undefined, store: ViewStore = mapView): void =>
+  store.update({ panel })

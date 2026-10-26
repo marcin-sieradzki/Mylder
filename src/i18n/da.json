@@ -44,5 +44,21 @@
   "credit": {
     "transitData": "Trafikdata",
     "openStreetMap": "OpenStreetMap-bidragydere"
+  },
+  "stop": {
+    "fallbackTitle": "Stoppested",
+    "lines": "Linjer",
+    "departures": "Afgange",
+    "loading": "Henter afgange…",
+    "empty": "Ingen afgange de næste 30 minutter for de viste transportformer.",
+    "notFound": "Stoppestedet findes ikke",
+    "notFoundDetail": "Mylders køreplan har intet stoppested med dette id.",
+    "failed": "Afgangene kunne ikke hentes",
+    "failedDetail": "Prøver igen om lidt.",
+    "timetabled": "køreplan",
+    "unknown": "Ukendt",
+    "note": "Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.",
+    "fromTimetable": "Fra køreplanen",
+    "timetableAndPositions": "Køreplan og positioner"
   }
 }

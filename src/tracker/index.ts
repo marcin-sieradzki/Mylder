@@ -9,7 +9,14 @@ import type { Snapshot } from './snapshot.ts'
 
 export type { Snapshot, SnapshotTrip, NextCall } from './snapshot.ts'
 export type { Disruption, Disruptions } from './disruptions.ts'
-export type { StopDepartures, StopDeparture, TripCall, TripDetail } from './answers.ts'
+export type {
+  AnswerLine,
+  AnswerSource,
+  StopDepartures,
+  StopDeparture,
+  TripCall,
+  TripDetail,
+} from './answers.ts'
 
 /** The whole-city snapshot: the stored one while it is fresh, else a new run's. */
 export const getSnapshot = (): Promise<Snapshot> => run((tracker) => tracker.getSnapshot)

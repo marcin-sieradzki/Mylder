@@ -1,0 +1,51 @@
+/* Stop departures: the lines' badges in a row under the stop's name, then the departures, each
+   Perron's DepartureRow with the time its state shows on a line under it, a divider between. */
+.lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--perron-space-100);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.departures {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.departure + .departure {
+  border-block-start: 1px solid var(--perron-color-border-subtle);
+}
+
+/* Under the row's countdown and delay, at the end, in the row's time type: the timetabled time
+   struck beside the expected one, "~" before an estimate, "Unknown" beside No signal's. */
+.times {
+  display: flex;
+  justify-content: flex-end;
+  column-gap: var(--perron-space-100);
+  margin: 0;
+  padding-block-end: var(--perron-space-200);
+  font: var(--perron-typography-data-sm);
+  letter-spacing: var(--perron-typography-data-sm-tracking);
+  font-variant-numeric: tabular-nums;
+  color: var(--perron-color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Struck with CSS, never <s> or <del>, which screen readers announce unevenly: the hidden word
+   says it to the ear (Perron's DepartureRow, CR-13). */
+.struck,
+.departure[data-cancelled] .times time {
+  text-decoration-line: line-through;
+}
+
+.hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

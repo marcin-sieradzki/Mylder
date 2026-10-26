@@ -1,0 +1,19 @@
+{
+  "stop": {
+    "id": "8600683",
+    "name": "Hillerød St.",
+    "lines": [
+      {
+        "name": "A",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-a"
+      }
+    ]
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "departures": []
+}

@@ -79,14 +79,21 @@ export interface VehiclePicking {
 /** Turns a longitude and latitude into pixels from the canvas's top left. */
 type Project = (lonLat: [number, number]) => { x: number; y: number }
 
-/**
- * Picking for the dots drawn in `canvas`, the element deck.gl's pixels count from, into `store`.
- * `onPointer` hears whether the pointer rests on a dot, for its cursor.
- */
+export interface PickingListeners {
+  /** Hears whether the pointer rests on a dot, for its cursor. */
+  readonly onPointer?: (onDot: boolean) => void
+  /**
+   * Hears a tap that found no dot, at its pixels from the canvas's top left, so that a stop under
+   * it can open: a dot wins over a stop.
+   */
+  readonly onMiss?: (x: number, y: number) => void
+}
+
+/** Picking for the dots drawn in `canvas`, the element deck.gl's pixels count from, into `store`. */
 export function vehiclePicking(
   canvas: HTMLElement,
   store: PickedStore = pickedVehicle,
-  onPointer: (onDot: boolean) => void = () => {},
+  { onPointer = () => {}, onMiss = () => {} }: PickingListeners = {},
 ): VehiclePicking {
   let vehicles: Vehicles | undefined
   let project: Project | undefined
@@ -130,8 +137,10 @@ export function vehiclePicking(
       },
       onClick(info) {
         const key = keyOf(info)
-        if (key === undefined) store.clear()
-        else store.pick({ key, point: dotAt(info.index, info), pinned: true })
+        if (key !== undefined)
+          return store.pick({ key, point: dotAt(info.index, info), pinned: true })
+        store.clear()
+        onMiss(info.x, info.y)
       },
     },
     follow(drawn, projection) {

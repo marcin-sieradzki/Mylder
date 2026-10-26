@@ -83,6 +83,19 @@ describe('picking a dot', () => {
     expect(store.get()).toBeUndefined()
   })
 
+  it('hands on a tap that finds no dot, for the stop under it; a dot wins over a stop', () => {
+    const store = pickedStore()
+    const missed: [number, number][] = []
+    const picks = vehiclePicking(canvas().element, store, {
+      onMiss: (x, y) => missed.push([x, y]),
+    })
+    picks.follow(vehicles, still)
+    picks.props.onClick(pointer(30, 18, A_LIVE))
+    expect(missed).toEqual([])
+    picks.props.onClick(pointer(400, 300))
+    expect(missed).toEqual([[400, 300]])
+  })
+
   it('shows a card while the pointer rests on a dot, and none once it leaves', () => {
     const { store, picks } = picking()
     picks.props.onHover(pointer(10, 4, BUS_LIVE))

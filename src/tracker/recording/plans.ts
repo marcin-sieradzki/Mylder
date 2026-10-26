@@ -15,6 +15,11 @@ export interface RecordingPlan {
   readonly minutes: number
   /** Fill every `journeyPos` answer to this many journeys, as a full box at a peak would be. */
   readonly fill?: number
+  /**
+   * Route answers saved beside the snapshots, for screen tests: these stops' departures as the
+   * stop route gives them at the start of the plan's `minute`, counted from 0.
+   */
+  readonly answers?: { readonly minute: number; readonly stops: readonly string[] }
 }
 
 /** 07:20 in Copenhagen on Tuesday 2026-06-16, when the fixture has trips underway. */
@@ -28,7 +33,15 @@ const failingAll = (kind: FailureKind): Scenario => ({
 })
 
 export const RECORDINGS: readonly RecordingPlan[] = [
-  { name: 'weekday', scenario: WEEKDAY, start: RECORDING_START, minutes: 10 },
+  {
+    name: 'weekday',
+    scenario: WEEKDAY,
+    start: RECORDING_START,
+    minutes: 10,
+    // Nørreport, with Live and Estimated departures by bus and S-tog; Orientkaj St., Timetable only;
+    // Hillerød St., with none in the next 30 minutes.
+    answers: { minute: 1, stops: ['27532', '54307', '8600683'] },
+  },
   { name: 'empty', scenario: failingAll('empty'), start: RECORDING_START, minutes: 3 },
   { name: 'refused-key', scenario: failingAll('refused-key'), start: RECORDING_START, minutes: 3 },
   { name: 'spent', scenario: SPENT, start: RECORDING_START, minutes: 3 },

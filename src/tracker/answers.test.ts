@@ -35,7 +35,12 @@ const delayed = snapshot([{ key: late.key, delay: 120, state: 'estimated' }])
 describe('a trip’s calls', () => {
   it('shifts each call by the snapshot’s delay', () => {
     const detail = tripDetailFrom(timetable, delayed, late.key, MOMENT)!
-    expect(detail).toMatchObject({ key: late.key, delay: 120, state: 'estimated' })
+    expect(detail).toMatchObject({
+      key: late.key,
+      delay: 120,
+      state: 'estimated',
+      source: { kind: 'timetable' },
+    })
     const call = detail.calls[ahead]
     expect(call).toMatchObject({ stop: platform.id, name: platform.name })
     expect(call.expectedDeparture! - call.departure).toBe(120_000)
@@ -58,7 +63,7 @@ describe('a trip’s calls', () => {
 describe('a stop’s departures', () => {
   it('lists the trip at its delayed time, soonest first', () => {
     const board = stopDeparturesFrom(timetable, delayed, stop.id)!
-    expect(board.stop).toEqual({ id: stop.id, name: stop.name })
+    expect(board.stop).toMatchObject({ id: stop.id, name: stop.name })
     const row = board.departures.find((each) => each.trip === late.key)
     expect(row).toMatchObject({
       platform: platform.id,
@@ -71,6 +76,54 @@ describe('a stop’s departures', () => {
     expect(
       board.departures.every((each) => each.expected === undefined || each.trip === late.key),
     ).toBe(true)
+  })
+
+  it('says its times come from the timetable', () => {
+    expect(stopDeparturesFrom(timetable, delayed, stop.id)?.source).toEqual({ kind: 'timetable' })
+  })
+
+  it('names the lines that call at the stop, in their colours', () => {
+    const board = stopDeparturesFrom(timetable, delayed, stop.id)!
+    expect(board.stop.lines).toContainEqual({
+      name: late.line.name,
+      mode: late.line.mode,
+      colour: late.line.colour,
+    })
+    const row = board.departures.find((each) => each.trip === late.key)
+    expect(row?.colour).toBe(late.line.colour)
+  })
+
+  it('looks 30 minutes ahead', () => {
+    // The fixture's stop has a departure 30 to 60 minutes on, which the board leaves out.
+    const later = timetable
+      .tripsOn(today)
+      .flatMap((trip) => trip.calls.slice(0, -1))
+      .filter((call) => timetable.stops.platforms[call.platform].stop === platform.stop)
+      .some(
+        (call) => call.departure > MOMENT + 31 * 60_000 && call.departure < MOMENT + 60 * 60_000,
+      )
+    expect(later).toBe(true)
+    const board = stopDeparturesFrom(timetable, snapshot([]), stop.id)!
+    expect(board.departures.length).toBeGreaterThan(0)
+    for (const row of board.departures)
+      expect(row.scheduled).toBeLessThanOrEqual(MOMENT + 30 * 60_000)
+  })
+
+  it('keeps a cancelled trip’s departure, marked cancelled', () => {
+    const cancelled = snapshot([{ key: late.key, state: 'estimated', cancelled: true }])
+    const row = stopDeparturesFrom(timetable, cancelled, stop.id)!.departures.find(
+      (each) => each.trip === late.key,
+    )
+    expect(row?.cancelled).toBe(true)
+  })
+
+  it('marks a departure cancelled when its trip skips this call', () => {
+    const skips = snapshot([{ key: late.key, state: 'estimated', cancelledCalls: [ahead] }])
+    const rows = stopDeparturesFrom(timetable, skips, stop.id)!.departures
+    expect(rows.find((each) => each.trip === late.key)?.cancelled).toBe(true)
+    expect(rows.filter((each) => each.trip !== late.key).every((each) => !each.cancelled)).toBe(
+      true,
+    )
   })
 
   it('finds a stop by a platform’s id', () => {

@@ -44,5 +44,21 @@
   "credit": {
     "transitData": "Transit data",
     "openStreetMap": "OpenStreetMap contributors"
+  },
+  "stop": {
+    "fallbackTitle": "Stop",
+    "lines": "Lines",
+    "departures": "Departures",
+    "loading": "Loading departures…",
+    "empty": "No departures in the next 30 minutes for the vehicle types shown.",
+    "notFound": "Stop not found",
+    "notFoundDetail": "Mylder's timetable has no stop with this id.",
+    "failed": "The departures could not be loaded",
+    "failedDetail": "Trying again shortly.",
+    "timetabled": "timetabled",
+    "unknown": "Unknown",
+    "note": "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
+    "fromTimetable": "From the timetable",
+    "timetableAndPositions": "Timetable and positions"
   }
 }

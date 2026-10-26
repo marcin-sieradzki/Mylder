@@ -1,13 +1,14 @@
 'use client'
 
 import { MapTooltip, VehicleDotLabel } from '@mylder/perron'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import { pickedVehicle, usePickedVehicle } from '../map/picking'
-import { serverNow, useDataState } from '../map/states'
+import { useDataState } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
+import { useServerSecond } from './useServerSecond'
 import styles from './VehicleCard.module.css'
 import { stateLabelOf, titleOf } from './vehicleLabel'
 
@@ -19,22 +20,6 @@ function tripOf(snapshot: Snapshot | undefined, key: string | undefined) {
   let trips = tripsBy.get(snapshot)
   if (!trips) tripsBy.set(snapshot, (trips = new Map(snapshot.trips.map((t) => [t.key, t]))))
   return trips.get(key)
-}
-
-/** The server's time, read again on each of its whole seconds while the card is open. */
-function useServerSecond(clockOffset: number): number {
-  const [now, setNow] = useState(() => serverNow({ clockOffset }))
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>
-    const tick = () => {
-      const at = serverNow({ clockOffset })
-      setNow(at)
-      timer = setTimeout(tick, 1000 - (at % 1000))
-    }
-    tick()
-    return () => clearTimeout(timer)
-  }, [clockOffset])
-  return now
 }
 
 const close = () => pickedVehicle.clear()

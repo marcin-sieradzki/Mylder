@@ -1,6 +1,6 @@
 import { act, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { addressView, useHiddenModes, viewOf } from './view.ts'
+import { addressView, searchWith, useHiddenModes, usePanel, viewOf } from './view.ts'
 
 describe("the view an address's query names", () => {
   it('reads the zoom, latitude and longitude a map link gives', () => {
@@ -22,6 +22,31 @@ describe("the view an address's query names", () => {
   })
 })
 
+describe('the open panel in the address', () => {
+  it('reads an open stop and an open trip', () => {
+    expect(viewOf('?stop=8600626').panel).toEqual({ kind: 'stop', id: '8600626' })
+    expect(viewOf('?trip=bus.5C.32331e0e20.20260616.0707').panel).toEqual({
+      kind: 'trip',
+      id: 'bus.5C.32331e0e20.20260616.0707',
+    })
+    expect(viewOf('?hide=bus').panel).toBeUndefined()
+  })
+
+  it('writes one panel at a time, and keeps every other parameter', () => {
+    const trip = { kind: 'trip', id: 'bus.5C.32331e0e20.20260616.0707' } as const
+    expect(searchWith('?line=5C&stop=8600626', { hidden: new Set(), panel: trip })).toBe(
+      '?line=5C&trip=bus.5C.32331e0e20.20260616.0707',
+    )
+    expect(
+      searchWith('?trip=bus.5C.32331e0e20.20260616.0707', {
+        hidden: new Set(),
+        panel: { kind: 'stop', id: '8600626' },
+      }),
+    ).toBe('?stop=8600626')
+    expect(searchWith('?stop=8600626', { hidden: new Set() })).toBe('')
+  })
+})
+
 describe("the view kept in the page's address", () => {
   afterEach(() => {
     window.history.replaceState(null, '', '/')
@@ -35,6 +60,26 @@ describe("the view kept in the page's address", () => {
     expect(store.get().hidden).toBe(hidden)
     store.update({ hidden: new Set(['bus', 'metro']) })
     expect([...store.get().hidden]).toEqual(['bus', 'metro'])
+  })
+
+  it('keeps the same open panel while the map moves, and renders its reader only when it changes', () => {
+    window.history.replaceState(null, '', '/?stop=8600626')
+    const store = addressView()
+    let renders = 0
+    function Panel() {
+      renders++
+      return <p>{usePanel(store)?.id}</p>
+    }
+    const { container } = render(<Panel />)
+    const { panel } = store.get()
+    act(() => store.update({ centre: [12.5683, 55.6761], zoom: 12.5 }))
+    expect(store.get().panel).toBe(panel)
+    expect(renders).toBe(1)
+    act(() => store.update({ panel: { kind: 'stop', id: '8600017' } }))
+    expect(container).toHaveTextContent('8600017')
+    act(() => store.update({ panel: undefined }))
+    expect(window.location.search).toBe('?map=12.50/55.67610/12.56830')
+    expect(renders).toBe(3)
   })
 
   it('renders a component that reads the filters only when they change, not when the map moves', () => {

@@ -11,7 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork } from '../../timetable/network.ts'
 import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
 import { readPaint } from '../paint.ts'
-import { basemapStyle, paintTokens } from './basemap.ts'
+import { basemapStyle, paintTokens, STOP_LAYERS } from './basemap.ts'
 
 // The basemap as the page paints it: Perron's own token sheet on the document, and the weekday
 // recording's network (lines 5C, 991, M1, A, E and RE).
@@ -155,6 +155,15 @@ describe('the basemap', () => {
     expect(index('mylder-lines-metro')).toBeGreaterThan(index('mylder-lines-train'))
     expect(index('mylder-stops-rail')).toBeGreaterThan(index('mylder-lines-metro'))
     expect(index('mylder-stops-rail')).toBeLessThan(firstLabel)
+  })
+
+  it('gives each drawn stop its id, in the layers a tap on a stop reads', () => {
+    const style = styleNow()
+    const norreport = features(style, 'mylder-stops').find(
+      (f) => f.properties!.name === 'Nørreport St.',
+    )
+    expect(norreport?.properties).toMatchObject({ id: '27532', rail: true })
+    for (const id of STOP_LAYERS) expect(style.layers.some((each) => each.id === id)).toBe(true)
   })
 
   it('draws the basemap alone until the network has loaded', () => {

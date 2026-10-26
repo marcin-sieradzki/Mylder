@@ -1,0 +1,145 @@
+{
+  "stop": {
+    "id": "27532",
+    "name": "Nørreport St.",
+    "lines": [
+      {
+        "name": "5C",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "M1",
+        "mode": "metro",
+        "colour": "perron-color-transit-line-m1"
+      },
+      {
+        "name": "A",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-a"
+      },
+      {
+        "name": "E",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-e"
+      }
+    ]
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "departures": [
+    {
+      "trip": "s-tog.E.e8dc141a28.20260616.0702",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Køge St.",
+      "platform": "8600646",
+      "scheduled": 1781587620000,
+      "expected": 1781587740000,
+      "state": "live"
+    },
+    {
+      "trip": "bus.5C.32331e0e20.20260616.0707",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Husum Torv",
+      "platform": "50461",
+      "scheduled": 1781588160000,
+      "expected": 1781588280000,
+      "state": "estimated"
+    },
+    {
+      "trip": "bus.5C.b4936c5f43.20260616.0700",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1781588340000,
+      "expected": 1781588340000,
+      "state": "estimated"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0707",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600646",
+      "scheduled": 1781588160000,
+      "expected": 1781588400000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.79fbe8e1f8.20260616.0705",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hundige St.",
+      "platform": "8600646",
+      "scheduled": 1781588340000,
+      "expected": 1781588460000,
+      "state": "live"
+    },
+    {
+      "trip": "bus.5C.32331e0e20.20260616.0716",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Husum Torv",
+      "platform": "50461",
+      "scheduled": 1781588700000,
+      "expected": 1781588640000,
+      "state": "estimated"
+    },
+    {
+      "trip": "bus.5C.a74214d87d.20260616.0714",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1781588640000,
+      "expected": 1781588760000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0717",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600646",
+      "scheduled": 1781588760000,
+      "expected": 1781588820000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.E.7c0294e28d.20260616.0705",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Holte St.",
+      "platform": "8600646",
+      "scheduled": 1781588880000,
+      "expected": 1781588940000,
+      "state": "estimated"
+    },
+    {
+      "trip": "s-tog.A.79fbe8e1f8.20260616.0715",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hundige St.",
+      "platform": "8600646",
+      "scheduled": 1781588940000,
+      "expected": 1781589060000,
+      "state": "live"
+    }
+  ]
+}
