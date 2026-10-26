@@ -1,0 +1,16 @@
+/* City pulse's figures: one column in the sheet, each figure's sub-line under it. */
+.figures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-400);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-100);
+}
+
+.whole {
+  margin: 0;
+}

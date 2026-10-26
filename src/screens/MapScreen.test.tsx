@@ -207,8 +207,10 @@ describe('the top bar', () => {
     await user.click(about)
     expect(await screen.findByRole('dialog', { name: 'About Mylder' })).toBeInTheDocument()
     await user.keyboard('{Escape}')
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'About Mylder' })).not.toBeInTheDocument()
     expect(about).toHaveFocus()
+    // The sheet beside the map stays open: the Esc was the dialog's.
+    expect(screen.getByRole('dialog', { name: 'Overview' })).toBeInTheDocument()
   })
 
   it('shows no time before a snapshot built from an answer has landed', () => {

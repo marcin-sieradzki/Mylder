@@ -107,5 +107,15 @@
       "close": "{esc} lukker køretøjets kort eller panel.",
       "pause": "Pause, ved siden af zoomknapperne, stopper køretøjerne, og Fortsæt sætter dem i gang igen."
     }
+  },
+  "sheet": {
+    "title": "Overblik",
+    "pulse": "Byens puls",
+    "vehicles": "Køretøjer",
+    "disruptions": "Driftsforstyrrelser"
+  },
+  "pulse": {
+    "onTheMove": "I bevægelse",
+    "inService": "af {total} i drift"
   }
 }

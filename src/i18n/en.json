@@ -107,5 +107,15 @@
       "close": "{esc} closes the vehicle card or panel.",
       "pause": "Pause, beside the zoom buttons, stops the vehicles moving, and Resume starts them again."
     }
+  },
+  "sheet": {
+    "title": "Overview",
+    "pulse": "City pulse",
+    "vehicles": "Vehicles",
+    "disruptions": "Disruptions"
+  },
+  "pulse": {
+    "onTheMove": "On the move",
+    "inService": "of {total} in service"
   }
 }

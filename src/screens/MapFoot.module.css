@@ -14,6 +14,10 @@
   align-items: end;
   gap: var(--perron-size-panel-gap);
   pointer-events: none;
+  /* It moves with the sheet as the sheet opens and closes. */
+  transition-property: inset-inline-start, inset-block-end;
+  transition-duration: var(--perron-duration-sheet);
+  transition-timing-function: var(--perron-easing-sheet);
 }
 
 .legend,
@@ -24,6 +28,10 @@
 
 .legend {
   grid-area: legend;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--perron-size-panel-gap);
 }
 
 .tools {
@@ -49,5 +57,34 @@
   .credit {
     justify-self: stretch;
     text-align: start;
+  }
+}
+
+/* Beside the open side sheet on a desktop, past its width and the gaps either side of it. Up to
+   Perron's breakpoint.tablet (1180px) and a little past it, what is left is too narrow for the
+   credit beside the legend, so the credit takes a row of its own, as on a phone. */
+@media (min-width: 761px) {
+  .foot[data-sheet='open'] {
+    inset-inline-start: calc(var(--perron-size-sheet-width) + 2 * var(--perron-size-panel-gap));
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1280px) {
+  .foot[data-sheet='open'] {
+    grid-template-areas:
+      'legend tools'
+      'credit credit';
+  }
+
+  .foot[data-sheet='open'] .credit {
+    justify-self: stretch;
+    text-align: start;
+  }
+}
+
+/* On the open bottom sheet's peek on a phone, so the credit stays above it. */
+@media (max-width: 760px) {
+  .foot[data-sheet='open'] {
+    inset-block-end: calc(var(--perron-size-sheet-peek) + var(--perron-size-panel-gap));
   }
 }
