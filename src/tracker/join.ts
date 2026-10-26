@@ -83,6 +83,9 @@ function indexOf(timetable: Timetable, day: IsoDate): Index {
   return index
 }
 
+/** What the join reads from a journey: its reference and direction, as positions and boards give them. */
+export type Joinable = Pick<PositionJourney, 'JourneyDetailRef' | 'direction'>
+
 /**
  * The trip a journey is, or undefined when no trip of its day fits: an unmatched journey. Trips
  * alike in line, first stop and departure are told apart by the last stop, its arrival and the
@@ -91,7 +94,7 @@ function indexOf(timetable: Timetable, day: IsoDate): Index {
  */
 export function joinJourney(
   timetable: Timetable,
-  journey: PositionJourney,
+  journey: Joinable,
   taken: { has(key: string): boolean } = new Set<string>(),
 ): { trip: PlannedTrip; ref: JourneyRef } | undefined {
   const ref = readRef(journey.JourneyDetailRef.ref)

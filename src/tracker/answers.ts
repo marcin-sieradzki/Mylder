@@ -1,22 +1,34 @@
 // The stop and trip answers (docs/screens.md, "Vehicle detail" and "Stop departures"): a stop's
 // departures and a trip's calls from the timetable plus the snapshot's delay for each trip. They
 // share nothing with the run but the snapshot, so they are pure functions of the two; the tracker
-// reads the snapshot and calls them. The on-demand calls (#32) fall back to them.
+// reads the snapshot and calls them. The on-demand calls (`on-demand.ts`, `stop-board.ts`) fall
+// back to them.
 import 'server-only'
 import { timedCalls } from '../domain/trip-motion.ts'
 import type { Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
+import type { Disruption } from './disruptions.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
 
 /** How long a stop's departures look ahead. */
-export const DEPARTURES_AHEAD = 60 * 60_000
+export const DEPARTURES_AHEAD = 30 * 60_000
 
 /** The most departures a stop's answer lists. */
 export const MAX_DEPARTURES = 30
 
-/** One departure from a stop: the timetable's time plus the snapshot's delay for its trip. */
+/**
+ * Where an answer's times came from: the timetable plus the snapshot's delays, or an on-demand
+ * call to Rejseplanen at a moment.
+ */
+export type AnswerSource =
+  { readonly kind: 'timetable' } | { readonly kind: 'rejseplanen'; readonly at: number }
+
+/**
+ * One departure from a stop: the timetable's time, and the expected one from the board or the
+ * snapshot's delay for its trip. Its delay is `expected - scheduled`.
+ */
 export interface StopDeparture {
   readonly trip: string
   readonly line: string
@@ -25,15 +37,22 @@ export interface StopDeparture {
   readonly platform: string
   readonly scheduled: number
   readonly expected?: number
+  /** The platform's track or stand, when the board gives one. */
+  readonly track?: string
+  /** When the board says the trip doesn't call here. */
+  readonly cancelled?: true
   readonly state: SnapshotTrip['state']
 }
 
 export interface StopDepartures {
   readonly stop: { readonly id: string; readonly name: string }
-  /** The snapshot the delays came from, and when the next one is due. */
+  /** The snapshot the states and delays came from, and when the answer is next due. */
   readonly fetched: number
   readonly nextDue: number
+  readonly source: AnswerSource
   readonly departures: readonly StopDeparture[]
+  /** The stop's disruption messages, from the board and the disruption list, as received. */
+  readonly messages: readonly Disruption[]
 }
 
 export interface TripCall {
@@ -56,6 +75,7 @@ export interface TripDetail {
   readonly delay?: number
   readonly fetched: number
   readonly nextDue: number
+  readonly source: AnswerSource
   readonly calls: readonly TripCall[]
 }
 
@@ -63,7 +83,7 @@ export interface TripDetail {
 export type SnapshotDelays = Pick<Snapshot, 'fetched' | 'nextDue' | 'trips'>
 
 /** The snapshot's trips by key. */
-const tripsByKey = (snapshot: SnapshotDelays) =>
+export const tripsByKey = (snapshot: SnapshotDelays) =>
   new Map(snapshot.trips.map((trip) => [trip.key, trip]))
 
 /** A trip's calls shifted by the snapshot's delay for it, when it has one. */
@@ -93,7 +113,7 @@ export function plannedTrip(
 }
 
 /**
- * A stop's departures in the hour after the snapshot, across its platforms, soonest first, each at
+ * A stop's departures in the half hour after the snapshot, across its platforms, soonest first, each at
  * its timetabled time shifted by the snapshot's delay for its trip; undefined for a stop the
  * timetable doesn't know, by its own id or a platform's.
  */
@@ -137,7 +157,9 @@ export function stopDeparturesFrom(
     stop: { id: stop.id, name: stop.name },
     fetched: now,
     nextDue: snapshot.nextDue,
+    source: { kind: 'timetable' },
     departures: departures.slice(0, MAX_DEPARTURES),
+    messages: [],
   }
 }
 
@@ -166,6 +188,7 @@ export function tripDetailFrom(
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
+    source: { kind: 'timetable' },
     calls: trip.calls.map((call, index) => ({
       index,
       stop: platforms[call.platform].id,

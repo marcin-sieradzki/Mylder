@@ -56,6 +56,25 @@ describe('the simulated multiDepartureBoard', () => {
       expect(stog.every((d) => d.rtTrack !== undefined)).toBe(true)
     }).pipe(Effect.provide(simulation)),
   )
+
+  it.effect('gives each departure its trip’s own messages, for its product', () =>
+    Effect.gen(function* () {
+      const departures = (yield* board('8600626')).Departure ?? []
+      const stog = departures.filter((d) => d.ProductAtStop?.cls === '16')
+      expect(stog.length).toBeGreaterThan(0)
+      for (const d of stog) {
+        expect(d.Messages?.Message.map((m) => m.head)).toEqual([
+          'Færre S-tog mellem København H og Hellerup',
+        ])
+      }
+      const buses = (yield* board('27532')).Departure ?? []
+      const bus = buses.filter((d) => d.ProductAtStop?.cls === '32')
+      expect(bus.length).toBeGreaterThan(0)
+      // The 5C's diversion at Langebro, and never the S-tog's fault.
+      const heads = new Set(bus.flatMap((d) => d.Messages?.Message.map((m) => m.head) ?? []))
+      expect([...heads]).toEqual(['Linje 5C kører en anden rute ved Langebro'])
+    }).pipe(Effect.provide(simulation)),
+  )
 })
 
 describe('one trip in every service', () => {

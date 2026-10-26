@@ -58,7 +58,7 @@ When on-demand calls are stopped by the budget, or the API is failing, the panel
 - **The Metro:** an interval row, "every 3 min" or "every 3 to 4 min", worked out from the planned departures in the current hour in that direction, with no countdown and no clock time, and the note "Metro: planned times". If the first calls with the key show Metro realtime, Metro rows become ordinary rows.
 - **Cancelled** rows stay, marked Cancelled, with the countdown struck.
 - **Empty:** "No departures in the next 30 minutes for the vehicle types shown."
-- **Messages:** the cards from the disruption list already loaded whose stops include this one; no call.
+- **Messages:** the messages on the stop's board, and the disruption list's whose stops include this one, as cards; both come with the stop's answer, so no call of their own.
 - **Note:** "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so."
 - **Source line:** "Rejseplanen · departures 08:14:20" when the board was called; "Timetable and positions 08:14:05" when served from the timetable plus the snapshot's delays.
 

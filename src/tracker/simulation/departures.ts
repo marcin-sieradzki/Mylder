@@ -1,5 +1,6 @@
 // The simulated `multiDepartureBoard`: the departures from every platform of the stops asked
-// for, over a window, with expected times from the same world as `journeyPos`.
+// for, over a window, with expected times from the same world as `journeyPos`, each carrying its
+// trip's own messages as `journeyDetail` gives them.
 import 'server-only'
 import type { Departure, DepartureBoardAnswer } from '../rejseplanen/answers.ts'
 import {
@@ -13,6 +14,7 @@ import {
   prognosisOf,
   productOf,
 } from './journeys.ts'
+import { tripMessages } from './messages.ts'
 import { hash } from './random.ts'
 import {
   isIntervalLine,
@@ -56,7 +58,12 @@ export function readDepartureBoardRequest(
   }
 }
 
-function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: number): Departure {
+function departure(
+  settings: SimulationSettings,
+  simulated: SimulatedTrip,
+  i: number,
+  now: number,
+): Departure {
   const { timetable } = settings
   const { timezone } = timetable.manifest
   const { trip } = simulated
@@ -68,6 +75,7 @@ function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: nu
   const [date, time] = dateAndTime(planned, timezone)
   const [rtDate, rtTime] = dateAndTime(expected, timezone)
   const train = trip.line.mode === 'train' || trip.line.mode === 's-tog'
+  const messages = tripMessages(settings, simulated, now)
   return {
     JourneyDetailRef: { ref: journeyRef(timetable, trip, simulated.journeyNumber) },
     name: journeyName(trip),
@@ -87,6 +95,7 @@ function departure(settings: SimulationSettings, simulated: SimulatedTrip, i: nu
     ...(cancelled && { cancelled: true }),
     JourneyStatus: journeyStatus(simulated),
     ProductAtStop: productOf(trip, simulated.journeyNumber),
+    ...(messages.length > 0 && { Messages: { Message: messages } }),
   }
 }
 
@@ -110,7 +119,7 @@ export function departureBoard(
       for (let i = 0; i < trip.calls.length - 1; i++) {
         const at = simulated.calls[i].departure
         if (!platforms.has(trip.calls[i].platform) || at < request.from || at >= until) continue
-        found.push({ at, departure: departure(settings, simulated, i) })
+        found.push({ at, departure: departure(settings, simulated, i, now) })
       }
     }
   }

@@ -181,6 +181,17 @@ The free key allows 50,000 calls a calendar month. Every request the app sends w
 
 A stop or a vehicle that is opened when on-demand calls are stopped is served from the timetable plus the snapshot's delay for that trip, and its departures carry their trips' data states. Metro departures never spend a call: they show interval text from the planned times.
 
+An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-board.ts`); an opened vehicle's `journeyDetail` shares the same cache and limit:
+
+1. A board kept in the store for the stop, under `<prefix>:on-demand:stop:<stop id>`, answers while it is under a minute old, whatever the budget says now.
+2. Otherwise a call is made only when the pacing allows on-demand calls (normal, with the cushion) and the minute's shared counter, `<prefix>:on-demand:minute:<minute>`, is at 10 or under once this call has added itself to it. The 11th in a minute answers from the timetable.
+3. The call asks for every platform of the stop at once, for the next 30 minutes, and is counted with the month's calls before it is sent, as every call is. A stop whose departures are all Metro makes none.
+4. Each departure is joined back to its trip by its journey reference (`join.ts`), else by its line and planned time, so the row keeps its trip's key and takes its data state from the snapshot. The expected time, the track and a cancellation are the board's; a row whose trip has no realtime on the map but has it on the board is Estimated. A departure that joins no trip, such as an Extra trip, is left out, as the map leaves it out.
+5. The answer says where its times came from: `{ kind: 'rejseplanen', at }` with the call's moment, or `{ kind: 'timetable' }`. It is due again when the snapshot is, or when the board's minute runs out if sooner.
+6. A failed call is logged, a quota error spends the month as a run's does, and nothing is kept, so the stop answers from the timetable and the next viewer may ask again.
+
+Either way the answer carries the stop's messages: those on its board's departures, then the disruption list's that name the stop, each once.
+
 ### The pacing rule
 
 Each tracker run computes the **line**: 50,000 times the share of the month's minutes that have passed. The **gap** is calls spent minus the line. Spending under the line is a cushion; over it, the month is running ahead.
