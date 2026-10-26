@@ -22,6 +22,8 @@ import { demoAircraftLayer, demoRoutes, type ReadTimetableFile } from './routes.
 const dir = recordingDir('weekday')
 const VERSION = '2026-06-02-4f2b8119'
 const start = await readStart(dir)
+/** The moment the planes' answers were recorded from, on a day of their own. */
+const aircraftStart = await readStart(dir, 'aircraft')
 const fromDisk: ReadTimetableFile = (file) => readFile(join(dir, 'timetable', file), 'utf8')
 const route = demoRoutes({ read: fromDisk, aircraft: { dir }, beneath: startingAt(start) })
 
@@ -88,7 +90,7 @@ describe("the demo's routes", () => {
         const served: AircraftSnapshot[] = []
         // A poll at each next due, for two passes and the start of a third.
         for (let call = 0; call < 2 * calls + 1; call++) {
-          yield* TestClock.setTime(start + call * 10_000)
+          yield* TestClock.setTime(aircraftStart + call * 10_000)
           served.push((yield* aircraft.getSnapshot)!)
         }
         expect(served.slice(0, calls)).toEqual(saved)

@@ -206,7 +206,7 @@ describe('the top bar', () => {
   })
 
   it('has a Planes chip after the modes, counting the aircraft in the box', async () => {
-    // The sixth call holds 27 aircraft over Copenhagen.
+    // The sixth call holds 9 aircraft over Copenhagen.
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
     landAircraft(savedAircraft('0006.json'))
     renderScreen('en')
@@ -217,9 +217,9 @@ describe('the top bar', () => {
       'Metro 4',
       'S-tog 6',
       'Train 1',
-      'Planes 27',
+      'Planes 9',
     ])
-    expect(within(filters).getByRole('button', { name: 'Planes 27' })).toHaveAttribute(
+    expect(within(filters).getByRole('button', { name: 'Planes 9' })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
@@ -230,9 +230,9 @@ describe('the top bar', () => {
     landAircraft(savedAircraft('0001.json'))
     renderScreen('da')
     const filters = await screen.findByRole('group', { name: 'Filtre' })
-    expect(within(filters).getByRole('button', { name: 'Fly 26' })).toBeInTheDocument()
+    expect(within(filters).getByRole('button', { name: 'Fly 8' })).toBeInTheDocument()
     landAircraft(savedAircraft('0006.json'))
-    expect(within(filters).getByRole('button', { name: 'Fly 27' })).toBeInTheDocument()
+    expect(within(filters).getByRole('button', { name: 'Fly 9' })).toBeInTheDocument()
   })
 
   it('counts the aircraft the map draws, less one whose position the clock has dropped', async () => {
@@ -243,7 +243,7 @@ describe('the top bar', () => {
     landAircraft({ ...sixth, aircraft: [{ ...old, age: 299 }, ...rest] })
     renderScreen('en')
     const filters = await screen.findByRole('group', { name: 'Filters' })
-    expect(within(filters).getByRole('button', { name: 'Planes 26' })).toBeInTheDocument()
+    expect(within(filters).getByRole('button', { name: 'Planes 8' })).toBeInTheDocument()
   })
 
   it('has no Planes chip while the aircraft are off, or before their first answer', async () => {
@@ -269,7 +269,7 @@ describe('the top bar', () => {
     landAircraft(savedAircraft('0006.json'))
     renderScreen('en')
     const filters = await screen.findByRole('group', { name: 'Filters' })
-    fireEvent.click(within(filters).getByRole('button', { name: 'Planes 27' }))
+    fireEvent.click(within(filters).getByRole('button', { name: 'Planes 9' }))
     // Off, the page no longer asks for the aircraft, so the count it last had is no longer theirs.
     const planes = within(filters).getByRole('button', { name: 'Planes' })
     expect(planes).toHaveAttribute('aria-pressed', 'false')
@@ -277,7 +277,7 @@ describe('the top bar', () => {
     fireEvent.click(within(filters).getByRole('button', { name: 'Bus 6' }))
     expect(window.location.search).toBe('?hide=bus,aircraft')
     fireEvent.click(planes)
-    expect(within(filters).getByRole('button', { name: 'Planes 27' })).toHaveAttribute(
+    expect(within(filters).getByRole('button', { name: 'Planes 9' })).toHaveAttribute(
       'aria-pressed',
       'true',
     )

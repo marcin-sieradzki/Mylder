@@ -138,7 +138,7 @@ describe('the vehicles over the map', () => {
       'aircraft-ticks',
       'aircraft',
     ])
-    expect(aircraft.aircraft.length).toBe(27)
+    expect(aircraft.aircraft.length).toBe(9)
   })
 
   it('renders both kinds once in a frame when both land at once', async () => {
@@ -151,7 +151,7 @@ describe('the vehicles over the map', () => {
     liveAircraft.update(atFetch(aircraft))
     liveAircraft.update(atFetch({ ...aircraft, fetched: aircraft.fetched + 1 }))
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    expect(container.dataset.aircraft).toBe('27')
+    expect(container.dataset.aircraft).toBe('9')
     expect(rendered.times - before).toBe(1)
   })
 
@@ -170,7 +170,7 @@ describe('the vehicles over the map', () => {
     overlay = vehicleOverlay(map, container)
     liveSnapshot.update({ snapshot: minute6 })
     liveAircraft.update(atFetch(aircraft))
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     mapView.update({ aircraftHidden: true })
     await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
     expect(rendered.ids).toEqual(['vehicle-halos', 'vehicles'])
@@ -179,7 +179,7 @@ describe('the vehicles over the map', () => {
     await new Promise((resolve) => requestAnimationFrame(resolve))
     expect(container.dataset.aircraft).toBeUndefined()
     mapView.update({ aircraftHidden: false })
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     expect(rendered.ids).toContain('aircraft')
   })
 
@@ -190,7 +190,7 @@ describe('the vehicles over the map', () => {
     const [turning, ...rest] = aircraft.aircraft
     const soon = { ...turning, age: 19.8, source: 'broadcast', state: 'live' } as const
     liveAircraft.update(atFetch({ ...aircraft, aircraft: [soon, ...rest] }))
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     mapView.update({ aircraftHidden: true })
     await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
     await new Promise((resolve) => requestAnimationFrame(resolve))
@@ -198,14 +198,14 @@ describe('the vehicles over the map', () => {
     await new Promise((resolve) => setTimeout(resolve, 1_300))
     expect(rendered.times).toBe(before)
     mapView.update({ aircraftHidden: false })
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
   })
 
   it('takes the aircraft off the canvas with the Planes filter when no vehicles are drawn', async () => {
     const container = document.createElement('div')
     overlay = vehicleOverlay(map, container)
     liveAircraft.update(atFetch(aircraft))
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     expect(container.dataset.vehicles).toBeUndefined()
     mapView.update({ aircraftHidden: true })
     await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
@@ -263,7 +263,7 @@ describe('the vehicles over the map', () => {
     const container = document.createElement('div')
     overlay = vehicleOverlay(overStops, container)
     liveAircraft.update(atFetch(aircraft))
-    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
     await new Promise((resolve) => requestAnimationFrame(resolve))
     const onPlane = { picked: true, index: 3, layer: { id: 'aircraft' }, x: 5, y: 5 }
     hovering.onHover!(onPlane)

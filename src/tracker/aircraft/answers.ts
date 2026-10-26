@@ -1,7 +1,8 @@
 // The answer adsb.lol and adsb.fi both give to a circle query (docs/aircraft.md, "The feed"):
 // readsb's aircraft list, as its `README-json.md` documents it, with the fields Mylder reads. One
-// schema for both, decoded by every source; any other field is left alone. Its hand-made
-// contract fixture is in `fixtures/`, corrected from the real recording (#135).
+// schema for both, decoded by every source; any other field, such as the answer's `msg`, `total`,
+// `ctime` and `ptime` or an aircraft's `r`, `squawk` and `rssi`, is left alone. Its contract
+// fixture in `fixtures/` is a real adsb.lol answer, the weekday recording's first (#135).
 import 'server-only'
 import { Schema } from 'effect'
 
@@ -19,7 +20,7 @@ export const LastPosition = Schema.Struct({
 export const ReadsbAircraft = Schema.Struct({
   /** The ICAO address; a hex that starts with `~` is not one, such as a TIS-B track's. */
   hex: Schema.String,
-  /** The callsign, padded with spaces to eight characters. */
+  /** The callsign, padded with spaces to eight characters; `@@@@@@@@` while it isn't known. */
   flight: optional(Schema.String),
   /** The type code from the feed's database, such as `A20N`. */
   t: optional(Schema.String),
@@ -34,7 +35,7 @@ export const ReadsbAircraft = Schema.Struct({
   track: optional(Schema.Number),
   /** Seconds since the position, at the answer's `now`. */
   seen_pos: optional(Schema.Number),
-  /** How the latest message came: `adsb_icao`, `mlat`, `tisb_other` and the rest. */
+  /** How the latest message came: `adsb_icao`, `adsb_icao_nt`, `mlat`, `tisb_other` and the rest. */
   type: optional(Schema.String),
   /** The emitter category, such as `A3`; `C1` to `C3` are surface vehicles and obstacles. */
   category: optional(Schema.String),

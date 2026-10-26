@@ -32,6 +32,20 @@ export const savedAircraft = (): unknown[] => {
     .map((name) => readJson(join(dir, name)))
 }
 
+/**
+ * Serves the aircraft snapshot of one of the recording's aircraft calls, from 0, whenever the
+ * page polls, dated when it was fetched, to the second, as the server dates it.
+ */
+export async function serveAircraft(page: Page, call: number) {
+  const snapshot = savedAircraft()[call] as { fetched: number }
+  await page.route('**/api/aircraft', (route) =>
+    route.fulfill({
+      json: snapshot,
+      headers: { date: new Date(snapshot.fetched).toUTCString(), 'cache-control': 'no-store' },
+    }),
+  )
+}
+
 /** The server on the recording, and a second one on the same build on the simulation. */
 export const PORT = 4173
 export const SIMULATED_PORT = 4174

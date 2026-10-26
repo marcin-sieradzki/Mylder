@@ -10,20 +10,21 @@ const saved = (name: string): AircraftSnapshot =>
     readFileSync(join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', name), 'utf8'),
   ) as AircraftSnapshot
 
-// The sixth aircraft snapshot: SAS1426 broadcast its position 1 s before the fetch, and EDW62L
-// has had only its last position for 124.3 s.
-const sixth = saved('0006.json')
-const SAS1426 = '45ac2d'
-const EDW62L = '4b1a07'
+// The fourth aircraft snapshot: SAS506 broadcast its position 0.1 s before the fetch, and
+// GRL1762, on the apron at Kastrup, last broadcast its own 60.3 s before it. The states tick on
+// the server's whole seconds, which fall half a second after this fetch.
+const fourth = saved('0004.json')
+const SAS506 = '4caf7e'
+const GRL1762 = '45ab23'
 /** The aircraft's server runs 30 s ahead of this device. */
 const AHEAD = 30_000
-const serverAt = (seconds: number) => sixth.fetched + seconds * 1000
+const serverAt = (seconds: number) => fourth.fetched + seconds * 1000
 
 /** The page opened `seconds` after the fetch, by the server's clock, with no poll after. */
 function openAt(seconds: number) {
   vi.setSystemTime(serverAt(seconds) - AHEAD)
   const live = liveStore<AircraftSnapshot>()
-  live.update({ snapshot: sixth, clockOffset: AHEAD })
+  live.update({ snapshot: fourth, clockOffset: AHEAD })
   const store = aircraftStatesStore(live)
   store.subscribe(() => {})
   return store
@@ -54,21 +55,23 @@ describe("each aircraft's data state, by the clock", () => {
 
   it('turns a Live plane Ageing when its position is 20 s old, with no poll', () => {
     const store = openAt(5)
-    expect(store.get().get(SAS1426)).toBe('live')
-    waitUntil(18)
-    expect(store.get().get(SAS1426)).toBe('live')
+    expect(store.get().get(SAS506)).toBe('live')
     waitUntil(19)
-    expect(store.get().get(SAS1426)).toBe('ageing')
+    expect(store.get().get(SAS506)).toBe('live')
+    waitUntil(21)
+    expect(store.get().get(SAS506)).toBe('ageing')
     waitUntil(59)
-    expect(store.get().get(SAS1426)).toBe('no-signal')
+    expect(store.get().get(SAS506)).toBe('ageing')
+    waitUntil(61)
+    expect(store.get().get(SAS506)).toBe('no-signal')
   })
 
   it('drops a plane once its position is 5 min old', () => {
     const store = openAt(5)
-    expect(store.get().get(EDW62L)).toBe('no-signal')
-    waitUntil(175)
-    expect(store.get().has(EDW62L)).toBe(true)
-    waitUntil(176)
-    expect(store.get().has(EDW62L)).toBe(false)
+    expect(store.get().get(GRL1762)).toBe('no-signal')
+    waitUntil(239)
+    expect(store.get().has(GRL1762)).toBe(true)
+    waitUntil(241)
+    expect(store.get().has(GRL1762)).toBe(false)
   })
 })

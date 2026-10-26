@@ -101,10 +101,13 @@ describe('a frozen recording', () => {
       )
       expect(snapshots.length).toBeGreaterThanOrEqual(12)
       expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
-      for (const snapshot of snapshots) {
-        expect(snapshot.aircraft.length).toBeGreaterThanOrEqual(20)
-        expect(snapshot.aircraft.length).toBeLessThanOrEqual(40)
-      }
+      // An evening over Copenhagen from one receiver's reach: a handful of planes at a time,
+      // and every data state somewhere in the three minutes.
+      for (const snapshot of snapshots) expect(snapshot.aircraft.length).toBeGreaterThanOrEqual(5)
+      const states = new Set(
+        snapshots.flatMap(({ aircraft }) => aircraft.map((each) => each.state)),
+      )
+      expect([...states].sort()).toEqual(['ageing', 'estimated', 'live', 'no-signal'])
     }),
   )
 
@@ -131,21 +134,19 @@ describe('a frozen recording', () => {
   it('shows what the aircraft snapshot drops in every weekday aircraft answer', async () => {
     interface Answered {
       hex: string
-      lon?: number
+      lat: number
+      lon: number
       type?: string
-      dbFlags?: number
-      lat?: number
-      rr_lat?: number
     }
     const dir = join(recordingDir('weekday'), 'aircraft')
-    const files = (await readdir(dir)).sort()
+    const files = (await readdir(dir)).filter((file) => /^\d+\.json$/.test(file)).sort()
     expect(files.length).toBeGreaterThanOrEqual(12)
     for (const file of files) {
+      // Real answers: the planes east of the box, over Øresund and Malmö, and the transponders
+      // on Kastrup's apron. PIA, LADD and rough positions are the route tests' hand-made cases.
       const { ac } = (await readJson(join(dir, file))) as { ac: Answered[] }
-      expect(ac.some((each) => (each.lon ?? 0) > 12.7)).toBe(true)
-      expect(ac.some((each) => ((each.dbFlags ?? 0) & 4) !== 0)).toBe(true)
+      expect(ac.some((each) => each.lon > 12.7)).toBe(true)
       expect(ac.some((each) => each.type === 'adsb_icao_nt')).toBe(true)
-      expect(ac.some((each) => each.lat === undefined && each.rr_lat !== undefined)).toBe(true)
     }
   })
 })

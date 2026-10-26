@@ -229,9 +229,7 @@ describe('GET /api/aircraft', () => {
       ])
     }).pipe(
       Effect.provide(
-        replaying(
-          answer(plane('aaa001'), plane('511196', { type: 'mlat', flight: '@@@@@@@@' })),
-        ),
+        replaying(answer(plane('aaa001'), plane('511196', { type: 'mlat', flight: '@@@@@@@@' }))),
       ),
     ),
   )
@@ -350,7 +348,8 @@ describe('GET /api/aircraft', () => {
       Effect.gen(function* () {
         const dir = recordingDir('weekday')
         const read = (path: string): unknown => JSON.parse(readFileSync(join(dir, path), 'utf8'))
-        const { start } = read('clock.json') as { start: string }
+        // The aircraft answers were recorded on a day of their own, kept in their folder.
+        const { start } = read('aircraft/clock.json') as { start: string }
         yield* TestClock.setTime(Date.parse(start))
         expect((yield* request).snapshot).toEqual(read('answers/aircraft/0001.json'))
       }).pipe(Effect.provide(aircraftLayer({ source: readAircraftSource('recording:weekday') }))),

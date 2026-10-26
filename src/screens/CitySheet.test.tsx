@@ -117,7 +117,7 @@ describe('the sheet beside the map', () => {
 describe('the planes beside the sheet', () => {
   it('leave City pulse and the Vehicles list the same with the Planes filter on and off', () => {
     land('0006.json')
-    // 27 aircraft over Copenhagen at the same time.
+    // 9 aircraft over Copenhagen at the same time.
     const aircraft = JSON.parse(
       readFileSync(
         join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', '0006.json'),
@@ -145,7 +145,7 @@ describe('the planes beside the sheet', () => {
         list: table.textContent,
       }
     }
-    const planes = within(screen.getByRole('banner')).getByRole('button', { name: 'Planes 27' })
+    const planes = within(screen.getByRole('banner')).getByRole('button', { name: 'Planes 9' })
     const on = figures()
     expect(on.vehicles).toBe('Vehicles 18')
     expect(on.rows).toBe(18)
