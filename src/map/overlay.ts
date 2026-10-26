@@ -14,11 +14,13 @@ import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Network } from '../timetable/network.ts'
+import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import {
   aircraftDrawn,
   aircraftOf,
   aircraftPaint,
+  restyled,
   type DrawnAircraft,
 } from './AircraftGlyphLayer.ts'
 import { liveAircraft, pollAircraft } from './aircraft.ts'
@@ -29,7 +31,7 @@ import { frameDriver } from './frames.ts'
 import { radiusScaleAt } from './glyphs.ts'
 import { liveSnapshot, pollSnapshot, serverNow } from './live.ts'
 import { vehicleLoop } from './loop.ts'
-import { readPaint } from './paint.ts'
+import { readPaint, type Paint } from './paint.ts'
 import { dotPicking, TAP_RADIUS, type DrawnKind } from './picking.ts'
 import { dataStates } from './states.ts'
 import { timetables } from './timetable.ts'
@@ -155,14 +157,22 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   }
 
   // The aircraft, drawn again when an answer lands or a state turns by the clock, unless the
-  // Planes filter keeps them off the map.
+  // Planes filter keeps them off the map. Their paint is read once per theme; a state turning
+  // makes only the glyphs again, and leaves each aircraft's motion as it was.
   let aircraftShown = mapView.get().aircraftHidden !== true
+  let paintOfAircraft: Paint | undefined
+  let aircraftDrawnFrom: AircraftSnapshot | undefined
   const drawAircraft = () => {
     const { snapshot } = liveAircraft.get()
-    aircraft =
-      snapshot && aircraftShown
-        ? aircraftOf(snapshot, readPaint(root, aircraftPaint()), aircraftStates.get())
-        : undefined
+    if (!snapshot || !aircraftShown) {
+      aircraft = aircraftDrawnFrom = undefined
+      return aircraftMotion.show(undefined)
+    }
+    const paint = (paintOfAircraft ??= readPaint(root, aircraftPaint()))
+    const states = aircraftStates.get()
+    const again = aircraft && aircraftDrawnFrom === snapshot ? aircraft : undefined
+    aircraft = (again && restyled(again, paint, states)) ?? aircraftOf(snapshot, paint, states)
+    aircraftDrawnFrom = snapshot
     aircraftMotion.show(aircraft, snapshot)
   }
   // An answer landing turns its aircraft's states too: both draw once.
@@ -205,14 +215,23 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const stopPolling = pollSnapshot()
   drawnFrom = liveSnapshot.get().snapshot
   void draw()
+  // While the Planes filter shows them, the aircraft are drawn again as their answers land and
+  // their states turn; hidden, neither is watched.
   let aircraftFrom = liveAircraft.get().snapshot
-  const stopAircraft = liveAircraft.subscribe(() => {
-    const { snapshot } = liveAircraft.get()
-    if (snapshot === aircraftFrom) return
-    aircraftFrom = snapshot
-    redrawAircraft()
-  })
-  const stopAgeingAircraft = aircraftStates.subscribe(redrawAircraft)
+  const watchAircraft = () => {
+    const stopLanding = liveAircraft.subscribe(() => {
+      const { snapshot } = liveAircraft.get()
+      if (snapshot === aircraftFrom) return
+      aircraftFrom = snapshot
+      redrawAircraft()
+    })
+    const stopTurning = aircraftStates.subscribe(redrawAircraft)
+    return () => {
+      stopLanding()
+      stopTurning()
+    }
+  }
+  let stopWatchingAircraft = aircraftShown ? watchAircraft() : undefined
   // The Planes filter turned off stops the aircraft's poll too; turned on, the poll starts again,
   // asking at once if one fell due meanwhile.
   let stopPollingAircraft = aircraftShown ? pollAircraft() : undefined
@@ -220,8 +239,11 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     const shown = mapView.get().aircraftHidden !== true
     if (shown === aircraftShown) return
     aircraftShown = shown
+    stopWatchingAircraft?.()
     stopPollingAircraft?.()
+    stopWatchingAircraft = shown ? watchAircraft() : undefined
     stopPollingAircraft = shown ? pollAircraft() : undefined
+    aircraftFrom = liveAircraft.get().snapshot
     drawAircraft()
   })
   drawAircraft()
@@ -245,6 +267,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
 
   return {
     repaint() {
+      paintOfAircraft = undefined
       drawAircraft()
       void draw()
     },
@@ -254,8 +277,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopAgeing()
       stopFiltering()
       stopPolling()
-      stopAircraft()
-      stopAgeingAircraft()
+      stopWatchingAircraft?.()
       stopAircraftFilter()
       stopPollingAircraft?.()
       loop.stop()

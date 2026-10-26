@@ -2,7 +2,8 @@
 // where its motion (aircraft-motion.ts) has it now and writes the point into the aircraft's
 // positions, for the canvas to draw with the vehicles (docs/aircraft.md, "The browser"). While
 // the driver holds the motion still, the aircraft step to their new places once per answer and
-// stand still between.
+// stand still between. The same answer drawn again, its states turned by the clock, keeps each
+// aircraft's motion, glide and all, unless its new state changes its way.
 import 'client-only'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import {
@@ -25,7 +26,8 @@ export interface AircraftLoopOptions {
 export interface AircraftLoop {
   /**
    * Moves `drawn`, drawn from `snapshot`, each aircraft from where it was last drawn; none
-   * clears them. The same snapshot shown again, with new glyphs or states, keeps each one's way.
+   * clears them. The same snapshot shown again, with new glyphs or states, keeps each one's
+   * motion, unless its state now changes its way, as turning No signal stands it at its fix.
    */
   show(drawn: DrawnAircraft | undefined, snapshot?: AircraftSnapshot): void
   stop(): void
@@ -43,6 +45,10 @@ const pointOf = (drawn: DrawnAircraft, i: number): LonLat => [
   drawn.positions[i * 2],
   drawn.positions[i * 2 + 1],
 ]
+
+/** Whether two motions of one aircraft from one snapshot take the same way, glides aside. */
+const sameWay = (a: AircraftMotion, b: AircraftMotion) =>
+  a.step[0] === b.step[0] && a.step[1] === b.step[1]
 
 /** The aircraft's motion, in the frames `frames` runs while an aircraft moves. */
 export function aircraftLoop({ now, frames }: AircraftLoopOptions): AircraftLoop {
@@ -70,6 +76,19 @@ export function aircraftLoop({ now, frames }: AircraftLoopOptions): AircraftLoop
     })
   }
 
+  /**
+   * The motions of the same snapshot's aircraft in their states now: each keeps the one it has,
+   * gliding on as it was, unless its state changes its way, when it glides to the new one.
+   */
+  const motionsKept = (drawn: DrawnAircraft, snapshot: AircraftSnapshot, at: number) => {
+    const had = new Map(shown?.drawn.keys.map((hex, i) => [hex, shown!.motions[i]]))
+    const fresh = motionsOf(drawn, snapshot, at)
+    return fresh.map((motion, i) => {
+      const kept = had.get(drawn.keys[i])
+      return kept && sameWay(kept, motion) ? kept : motion
+    })
+  }
+
   const stopDriving = frames.drive({
     moving() {
       const at = now()
@@ -91,10 +110,12 @@ export function aircraftLoop({ now, frames }: AircraftLoopOptions): AircraftLoop
         return frames.request()
       }
       const at = now()
+      const again = shown?.snapshot === snapshot
       // Stilled, the same snapshot drawn again, with new states, keeps each where it stands.
-      const stands = frames.still() && shown?.snapshot === snapshot
+      const stands = frames.still() && again
       const before = drawnPoints()
-      shown = { drawn, snapshot, motions: motionsOf(drawn, snapshot, at) }
+      const motions = again ? motionsKept(drawn, snapshot, at) : motionsOf(drawn, snapshot, at)
+      shown = { drawn, snapshot, motions }
       place(at)
       if (stands) {
         drawn.keys.forEach((hex, i) => {

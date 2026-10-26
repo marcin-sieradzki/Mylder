@@ -183,6 +183,24 @@ describe('the vehicles over the map', () => {
     expect(rendered.ids).toContain('aircraft')
   })
 
+  it('renders nothing for a state turning by the clock while the Planes filter is off', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    // One aircraft's own position is 19.8 s old at the fetch: it turns Ageing within a second.
+    const [turning, ...rest] = aircraft.aircraft
+    const soon = { ...turning, age: 19.8, source: 'broadcast', state: 'live' } as const
+    liveAircraft.update(atFetch({ ...aircraft, aircraft: [soon, ...rest] }))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    mapView.update({ aircraftHidden: true })
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    const before = rendered.times
+    await new Promise((resolve) => setTimeout(resolve, 1_300))
+    expect(rendered.times).toBe(before)
+    mapView.update({ aircraftHidden: false })
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+  })
+
   it('takes the aircraft off the canvas with the Planes filter when no vehicles are drawn', async () => {
     const container = document.createElement('div')
     overlay = vehicleOverlay(map, container)

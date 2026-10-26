@@ -65,28 +65,22 @@ const TICK_MAPPING = {
   tick: { x: 0, y: 0, width: TICK_SIZE, height: TICK_SIZE, anchorY: TICK_SIZE / 2, mask: true },
 }
 
-/**
- * The aircraft of a snapshot on the map, each in its state from `states`, the states by the
- * clock, in the paint read now. An aircraft `states` leaves out has been dropped and isn't drawn.
- * Each stands at its fix until its motion moves it.
- */
-export function aircraftOf(
-  snapshot: AircraftSnapshot,
+/** What of the drawn aircraft their states and the paint decide: all but where they are. */
+type Glyphs = Omit<DrawnAircraft, 'length' | 'aircraft' | 'keys' | 'positions'>
+
+/** The glyphs of `aircraft`, each in its state from `states`, in `paint`. */
+function glyphsOf(
+  aircraft: readonly SnapshotAircraft[],
+  states: readonly AircraftState[],
   paint: Paint,
-  states: AircraftStates,
-): DrawnAircraft {
+): Glyphs {
   const look = lookOf(paint)
   const colour = parseColour(paint.get(COLOUR) ?? '') ?? INK
   const airborne = numberOf(paint, RADIUS)
   const grounded = numberOf(paint, GROUND_RADIUS)
-  const drawn = snapshot.aircraft.filter((each) => states.has(each.hex))
-  const n = drawn.length
-  const aircraft = {
-    length: n,
-    aircraft: drawn,
-    keys: drawn.map((each) => each.hex),
-    states: drawn.map((each) => states.get(each.hex)!),
-    positions: new Float64Array(n * 2),
+  const n = aircraft.length
+  const glyphs = {
+    states,
     radius: new Float32Array(n),
     lineWidth: new Float32Array(n),
     fill: new Uint8ClampedArray(n * 4),
@@ -97,21 +91,67 @@ export function aircraftOf(
     tickAngle: new Float32Array(n),
     tickSize: new Float32Array(n),
   }
-  drawn.forEach((each, i) => {
-    aircraft.positions.set([each.lon, each.lat], i * 2)
+  aircraft.forEach((each, i) => {
     const r = each.altitude === 'ground' ? grounded : airborne
-    const glyph = sizedGlyph(aircraft.states[i], r, colour, look)
-    aircraft.radius[i] = glyph.radius
-    aircraft.lineWidth[i] = glyph.lineWidth
-    aircraft.fill.set(glyph.fill, i * 4)
-    aircraft.line.set(glyph.line, i * 4)
-    aircraft.cut[i] = glyph.cut
-    aircraft.haloRadius[i] = r + look.halo.width
+    const glyph = sizedGlyph(states[i], r, colour, look)
+    glyphs.radius[i] = glyph.radius
+    glyphs.lineWidth[i] = glyph.lineWidth
+    glyphs.fill.set(glyph.fill, i * 4)
+    glyphs.line.set(glyph.line, i * 4)
+    glyphs.cut[i] = glyph.cut
+    glyphs.haloRadius[i] = r + look.halo.width
     // deck.gl turns an icon anticlockwise; a track runs clockwise from north.
-    aircraft.tickAngle[i] = -(each.track ?? 0)
-    aircraft.tickSize[i] = each.track === undefined ? 0 : (TICK_SIZE * r) / airborne
+    glyphs.tickAngle[i] = -(each.track ?? 0)
+    glyphs.tickSize[i] = each.track === undefined ? 0 : (TICK_SIZE * r) / airborne
   })
-  return aircraft
+  return glyphs
+}
+
+/**
+ * The aircraft of a snapshot on the map, each in its state from `states`, the states by the
+ * clock, in the paint read now. An aircraft `states` leaves out has been dropped and isn't drawn.
+ * Each stands at its fix until its motion moves it.
+ */
+export function aircraftOf(
+  snapshot: AircraftSnapshot,
+  paint: Paint,
+  states: AircraftStates,
+): DrawnAircraft {
+  const drawn = snapshot.aircraft.filter((each) => states.has(each.hex))
+  const positions = new Float64Array(drawn.length * 2)
+  drawn.forEach((each, i) => positions.set([each.lon, each.lat], i * 2))
+  return {
+    length: drawn.length,
+    aircraft: drawn,
+    keys: drawn.map((each) => each.hex),
+    positions,
+    ...glyphsOf(
+      drawn,
+      drawn.map((each) => states.get(each.hex)!),
+      paint,
+    ),
+  }
+}
+
+/**
+ * The aircraft `drawn` in their `states` now, in `paint`: only their glyphs made again, their
+ * positions the same, which their motion goes on writing into. None when `states` has dropped
+ * one of them, which changes what is drawn.
+ */
+export function restyled(
+  drawn: DrawnAircraft,
+  paint: Paint,
+  states: AircraftStates,
+): DrawnAircraft | undefined {
+  if (states.size !== drawn.length || !drawn.keys.every((hex) => states.has(hex))) return undefined
+  return {
+    ...drawn,
+    ...glyphsOf(
+      drawn.aircraft,
+      drawn.keys.map((hex) => states.get(hex)!),
+      paint,
+    ),
+  }
 }
 
 /**

@@ -117,6 +117,21 @@ describe('the aircraft between polls', () => {
     expect(off(fromFix(next, KLM1271, seventh), 399.7)).toBeLessThan(2)
   })
 
+  it('keeps each aircraft gliding from where it was when a state turns by the clock', () => {
+    vi.setSystemTime(s(0))
+    start()
+    loop!.show(drawnFrom(sixth, s(0)), sixth)
+    wait(10_500)
+    loop!.show(drawnFrom(seventh, s(10.5)), seventh)
+    // Mid-glide, the same answer drawn again in its states now leaves each on its glide.
+    wait(300)
+    const again = drawnFrom(seventh, s(10.8))
+    loop!.show(again, seventh)
+    // The glide ends a second after the answer landed, on its way: at 11.5 s, 3.2 s on.
+    wait(700)
+    expect(off(fromFix(again, KLM1271, seventh), 345.7)).toBeLessThan(2)
+  })
+
   it('stands the aircraft while paused, steps them per answer, and moves them again after', () => {
     vi.setSystemTime(s(0))
     start()
