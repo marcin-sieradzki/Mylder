@@ -1,18 +1,20 @@
 {
-  "fetched": 1781587200000,
+  "fetched": 1781587260000,
   "nextDue": 1781587320000,
   "pollInterval": 60,
   "serviceDay": "2026-06-16",
   "timetableVersion": "2026-06-02-4f2b8119",
   "positionMode": "alternating",
+  "answerMode": "REPORT_ONLY",
   "api": {
     "status": "spent",
     "since": 1781587200000,
     "kind": "refused"
   },
   "budget": {
-    "level": "normal",
-    "calls": 2
+    "level": "spent",
+    "calls": 2,
+    "resumes": "2026-07-01"
   },
   "store": "ok",
   "disruptions": null,
@@ -45,16 +47,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.668370436960345,
-        12.583999148704258
+        55.6691,
+        12.58139
       ],
-      "progress": 3346,
+      "progress": 3530,
       "next": [
-        {
-          "index": 9,
-          "stop": "807",
-          "time": 1781587260000
-        },
         {
           "index": 10,
           "stop": "30091",
@@ -64,6 +61,11 @@
           "index": 11,
           "stop": "3005",
           "time": 1781587500000
+        },
+        {
+          "index": 12,
+          "stop": "10844",
+          "time": 1781587680000
         }
       ]
     },
@@ -77,16 +79,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.656485784786874,
-        12.609243678087202
+        55.65794,
+        12.60806
       ],
-      "progress": 1140,
+      "progress": 1319,
       "next": [
-        {
-          "index": 3,
-          "stop": "664",
-          "time": 1781587260000
-        },
         {
           "index": 4,
           "stop": "27539",
@@ -96,6 +93,11 @@
           "index": 5,
           "stop": "27526",
           "time": 1781587440000
+        },
+        {
+          "index": 6,
+          "stop": "3001",
+          "time": 1781587500000
         }
       ]
     },
@@ -109,10 +111,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.70449,
-        12.49893
+        55.70485376301448,
+        12.502609332637638
       ],
-      "progress": 1963,
+      "progress": 2198,
       "next": [
         {
           "index": 6,
@@ -141,16 +143,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.706379303045665,
-        12.513507573302817
+        55.70664,
+        12.51715
       ],
-      "progress": 6287,
+      "progress": 6519,
       "next": [
-        {
-          "index": 11,
-          "stop": "2149",
-          "time": 1781587260000
-        },
         {
           "index": 12,
           "stop": "2150",
@@ -160,6 +157,11 @@
           "index": 13,
           "stop": "1968",
           "time": 1781587440000
+        },
+        {
+          "index": 14,
+          "stop": "2151",
+          "time": 1781587620000
         }
       ]
     },
@@ -173,16 +175,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.72211,
-        12.44395
+        55.71983,
+        12.44967
       ],
-      "progress": 1328,
+      "progress": 1767,
       "next": [
-        {
-          "index": 2,
-          "stop": "2143",
-          "time": 1781587260000
-        },
         {
           "index": 3,
           "stop": "2146",
@@ -192,6 +189,11 @@
           "index": 4,
           "stop": "2148",
           "time": 1781587620000
+        },
+        {
+          "index": 5,
+          "stop": "2275",
+          "time": 1781587680000
         }
       ]
     },
@@ -237,16 +239,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.650489026475945,
-        12.587768173198784
+        55.6452,
+        12.58571
       ],
-      "progress": 10198,
+      "progress": 10800,
       "next": [
-        {
-          "index": 11,
-          "stop": "8603312",
-          "time": 1781587260000
-        },
         {
           "index": 12,
           "stop": "8603313",
@@ -256,6 +253,11 @@
           "index": 13,
           "stop": "8603315",
           "time": 1781587500000
+        },
+        {
+          "index": 14,
+          "stop": "8603317",
+          "time": 1781587560000
         }
       ]
     },
@@ -269,10 +271,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.67206,
-        12.5914
+        55.66342,
+        12.58521
       ],
-      "progress": 7415,
+      "progress": 8648,
       "next": [
         {
           "index": 9,
@@ -301,16 +303,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.68119,
-        12.53172
+        55.68168,
+        12.52311
       ],
-      "progress": 11127,
+      "progress": 11674,
       "next": [
-        {
-          "index": 11,
-          "stop": "8603304",
-          "time": 1781587260000
-        },
         {
           "index": 12,
           "stop": "8603303",
@@ -320,6 +317,11 @@
           "index": 13,
           "stop": "8603302",
           "time": 1781587440000
+        },
+        {
+          "index": 14,
+          "stop": "8603301",
+          "time": 1781587560000
         }
       ]
     },
@@ -333,10 +335,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.68386,
-        12.57106
+        55.6843266178017,
+        12.561230506444769
       ],
-      "progress": 8341,
+      "progress": 9055,
       "next": [
         {
           "index": 9,
@@ -365,16 +367,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.63345526877692,
-        12.49302682577261
+        55.63996,
+        12.5
       ],
-      "progress": 11703,
+      "progress": 12550,
       "next": [
-        {
-          "index": 6,
-          "stop": "8600763",
-          "time": 1781587260000
-        },
         {
           "index": 7,
           "stop": "8600783",
@@ -384,6 +381,11 @@
           "index": 8,
           "stop": "8600761",
           "time": 1781587500000
+        },
+        {
+          "index": 9,
+          "stop": "8600760",
+          "time": 1781587620000
         }
       ]
     },
@@ -397,10 +399,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.61928240069852,
-        12.364961102161526
+        55.62266059827756,
+        12.375878676487535
       ],
-      "progress": 3152,
+      "progress": 3945,
       "next": [
         {
           "index": 2,
@@ -429,16 +431,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.80769,
-        12.46866
+        55.79559,
+        12.47327
       ],
-      "progress": 17619,
+      "progress": 19021,
       "next": [
-        {
-          "index": 5,
-          "stop": "8600676",
-          "time": 1781587260000
-        },
         {
           "index": 6,
           "stop": "8600636",
@@ -448,6 +445,11 @@
           "index": 7,
           "stop": "8600675",
           "time": 1781587500000
+        },
+        {
+          "index": 8,
+          "stop": "8600674",
+          "time": 1781587560000
         }
       ]
     },
@@ -461,16 +463,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.88171107481406,
-        12.347273941831808
+        55.87097,
+        12.35699
       ],
-      "progress": 5933,
+      "progress": 7273,
       "next": [
-        {
-          "index": 2,
-          "stop": "8600681",
-          "time": 1781587260000
-        },
         {
           "index": 3,
           "stop": "8600678",
@@ -480,6 +477,11 @@
           "index": 4,
           "stop": "8600677",
           "time": 1781587800000
+        },
+        {
+          "index": 5,
+          "stop": "8600676",
+          "time": 1781587860000
         }
       ]
     },
@@ -493,10 +495,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.56993135455262,
-        12.279854092534434
+        55.57615627456035,
+        12.286450025352618
       ],
-      "progress": 15804,
+      "progress": 16615,
       "next": [
         {
           "index": 6,
@@ -525,16 +527,11 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.71993571091959,
-        12.571939679466963
+        55.7158,
+        12.57835
       ],
-      "progress": 12377,
+      "progress": 13010,
       "next": [
-        {
-          "index": 8,
-          "stop": "8600654",
-          "time": 1781587260000
-        },
         {
           "index": 9,
           "stop": "8600653",
@@ -544,6 +541,11 @@
           "index": 10,
           "stop": "8600650",
           "time": 1781587500000
+        },
+        {
+          "index": 11,
+          "stop": "8600646",
+          "time": 1781587620000
         }
       ]
     },
@@ -557,10 +559,10 @@
       "source": "timetable",
       "hadRealtime": false,
       "position": [
-        55.653155404456385,
-        12.533666003070332
+        55.65234,
+        12.51679
       ],
-      "progress": 3376,
+      "progress": 4501,
       "next": [
         {
           "index": 1,

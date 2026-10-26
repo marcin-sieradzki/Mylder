@@ -5,14 +5,16 @@
   "serviceDay": "2026-06-16",
   "timetableVersion": "2026-06-02-4f2b8119",
   "positionMode": "alternating",
+  "answerMode": "CALC_REPORT",
   "api": {
     "status": "spent",
     "since": 1781587200000,
     "kind": "refused"
   },
   "budget": {
-    "level": "normal",
-    "calls": 1
+    "level": "spent",
+    "calls": 1,
+    "resumes": "2026-07-01"
   },
   "store": "ok",
   "disruptions": null,
