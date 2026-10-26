@@ -165,6 +165,7 @@
       "disruptions": "Disruptions",
       "checked": "Checked {time}",
       "checkFailed": "Last checked {time}; the latest check failed.",
+      "firstCheckFailed": "The latest check failed",
       "notChecked": "Not checked yet"
     },
     "keys": {
@@ -233,5 +234,20 @@
     "showing": "Showing: {label}",
     "line": "line {line}",
     "clear": "Clear"
+  },
+  "disruptions": {
+    "active": "Active now",
+    "later": "Later",
+    "more": "More",
+    "inDanish": "From Rejseplanen, in Danish",
+    "runningNormally": "Running normally, checked {time}",
+    "loading": "Loading messages from Rejseplanen…",
+    "checked": "Messages from Rejseplanen, checked {time}.",
+    "notChecked": "Messages from Rejseplanen, not checked yet.",
+    "every": "Checked every {minutes} min while the map is open.",
+    "lastChecked": "Last checked {time}; the latest check failed.",
+    "failed": "Messages from Rejseplanen: the latest check failed.",
+    "outOfDate": "May be out of date.",
+    "incomplete": "Rejseplanen sends at most 100 messages, so the list may be incomplete."
   }
 }

@@ -50,6 +50,7 @@ function fromDetail(): TripDetail {
   const answer = saved(A_LIVE)
   const message: TripMessage = {
     fieldsKind: 'delays',
+    modes: ['s-tog'],
     from: minute2.fetched - 3600_000,
     to: minute2.fetched + 3600_000,
     message: { id: 'slow', head: 'Langsom kørsel', lead: 'Togene kører langsomt ved Sydhavn.' },

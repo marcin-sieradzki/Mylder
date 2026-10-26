@@ -102,6 +102,20 @@ export function useClockOffset(store: SnapshotStore = liveSnapshot): number {
 }
 
 /**
+ * The server's clock when the latest poll that answered landed, for a component that reads a
+ * moment once a minute or so: it renders again only when a poll lands. None before the first.
+ */
+export function usePollMoment(store: SnapshotStore = liveSnapshot): number | undefined {
+  const moment = ({ lastGoodPoll, clockOffset }: LiveSnapshot) =>
+    lastGoodPoll === undefined ? undefined : lastGoodPoll + clockOffset
+  return useSyncExternalStore(
+    store.subscribe,
+    () => moment(store.get()),
+    () => undefined,
+  )
+}
+
+/**
  * The latest snapshot alone, for a component that shows nothing of how the poll is going: it
  * renders again only when a snapshot lands.
  */

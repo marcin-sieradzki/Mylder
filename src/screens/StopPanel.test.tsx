@@ -292,6 +292,7 @@ const HOUR = 3600_000
 /** A message as the stop's answer carries it: Rejseplanen's, in Danish, with its validity. */
 const message = (id: string, head: string, from: number, to: number): Disruption => ({
   fieldsKind: 'service-notice',
+  modes: ['bus'],
   from,
   to,
   message: {

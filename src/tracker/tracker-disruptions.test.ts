@@ -124,6 +124,7 @@ describe('the tracker’s disruption list', () => {
       const fault = list.messages.find(({ message }) => message.id === 'simulated-2')!
       expect(fault.message.head).toBe('Færre S-tog mellem København H og Hellerup')
       expect(fault.fieldsKind).toBe('service-notice')
+      expect(fault.modes).toEqual(['s-tog'])
       expect(fault.from).toBe(Date.UTC(2026, 5, 16, 3, 0))
       expect(fault.to).toBe(Date.UTC(2026, 5, 16, 21, 30))
       expect(disruptionPhase(fault, MOMENT)).toBe('active')
