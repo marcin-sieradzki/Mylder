@@ -126,11 +126,76 @@ describe('a stop’s departures', () => {
     )
   })
 
+  it('lists a No signal trip by its timetabled time, which its row shows', () => {
+    // Forty minutes late by its last delay, which would take it past the half hour.
+    const lost = snapshot([{ key: late.key, delay: 40 * 60, state: 'no-signal' }])
+    const rows = stopDeparturesFrom(timetable, lost, stop.id)!.departures
+    const row = rows.find((each) => each.trip === late.key)
+    expect(row).toMatchObject({ scheduled: late.calls[ahead].departure, state: 'no-signal' })
+    const times = rows.map((each) =>
+      each.trip === late.key ? each.scheduled : (each.expected ?? each.scheduled),
+    )
+    expect(times).toEqual([...times].sort((a, b) => a - b))
+  })
+
   it('finds a stop by a platform’s id', () => {
     expect(stopDeparturesFrom(timetable, delayed, platform.id)?.stop.id).toBe(stop.id)
   })
 
   it('has no answer for a stop the timetable doesn’t know', () => {
     expect(stopDeparturesFrom(timetable, delayed, 'no such stop')).toBeUndefined()
+  })
+})
+
+describe('a Metro platform’s departures', () => {
+  // The fixture's M1 leaves each of its stations every 4 minutes each way in the hour from 07:00.
+  const BELLA_CENTER = '8603313'
+  const NORREPORT = '27532'
+  /** 07:05, when M1 leaves Nørreport both ways in the next half hour, among buses and S-tog. */
+  const EARLY = Date.UTC(2026, 5, 16, 5, 5)
+  const at = (moment: number, trips: readonly Partial<SnapshotTrip>[] = []): SnapshotDelays => ({
+    fetched: moment,
+    nextDue: moment + 60_000,
+    trips: trips as SnapshotTrip[],
+  })
+  const metroTrip = timetable
+    .tripsOn(today)
+    .find((trip) => trip.line.mode === 'metro' && trip.headsign.startsWith('Vestamager'))!
+
+  it('reads as an interval for each direction leaving in the next half hour, with no times', () => {
+    const answer = stopDeparturesFrom(timetable, at(MOMENT), BELLA_CENTER)!
+    expect(answer.departures).toEqual([])
+    expect(answer.intervals).toEqual([
+      {
+        line: 'M1',
+        mode: 'metro',
+        colour: 'perron-color-transit-line-m1',
+        headsign: 'Vestamager St. (Metro)',
+        platform: BELLA_CENTER,
+        every: { from: 4, to: 4 },
+      },
+    ])
+  })
+
+  it('gives the Metro intervals and the buses and S-tog departures at a stop with both', () => {
+    const answer = stopDeparturesFrom(timetable, at(EARLY), NORREPORT)!
+    expect(answer.intervals.map(({ headsign, every }) => [headsign, every])).toEqual([
+      ['Vanløse St. (Metro)', { from: 4, to: 4 }],
+      ['Vestamager St. (Metro)', { from: 4, to: 4 }],
+    ])
+    expect(answer.departures.length).toBeGreaterThan(0)
+    expect(answer.departures.some((row) => row.mode === 'metro')).toBe(false)
+  })
+
+  it('lists a Metro line’s departures as any line’s once the snapshot carried its realtime', () => {
+    const live = at(MOMENT, [
+      { key: metroTrip.key, line: 'M1', mode: 'metro', state: 'live', hadRealtime: true },
+    ])
+    const answer = stopDeparturesFrom(timetable, live, BELLA_CENTER)!
+    expect(answer.intervals).toEqual([])
+    expect(answer.departures.map((row) => [row.line, row.headsign])).toEqual([
+      ['M1', 'Vestamager St. (Metro)'],
+      ['M1', 'Vestamager St. (Metro)'],
+    ])
   })
 })

@@ -4,6 +4,7 @@ import { Button } from '@mylder/perron'
 import dynamic from 'next/dynamic'
 import { useRef, useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
+import { usePanel } from '../map/view'
 import { AboutDialog } from './AboutDialog'
 import { CitySheet } from './CitySheet'
 import { DetailPanels } from './DetailPanels'
@@ -26,6 +27,7 @@ export function MapScreen() {
   const [sheet, setSheet] = useState<'open' | 'closed' | 'reopened'>('open')
   const opener = useRef<HTMLButtonElement>(null)
   const open = sheet !== 'closed'
+  const panel = usePanel()
   return (
     <div className={styles.screen}>
       <main className={styles.map}>
@@ -34,6 +36,7 @@ export function MapScreen() {
       <TopBar />
       <MapFoot
         besideSheet={open}
+        besidePanel={panel !== undefined}
         opener={
           open ? null : (
             <Button ref={opener} onClick={() => setSheet('reopened')}>

@@ -60,8 +60,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const root = document.documentElement
   const canvas = map.getCanvas()
   const picking = vehiclePicking(container, undefined, {
-    onPointer(onDot) {
-      canvas.style.cursor = onDot ? 'pointer' : ''
+    onPointer(onDot, x, y) {
+      canvas.style.cursor = onDot || stopAt(map, x, y) !== undefined ? 'pointer' : ''
     },
     onMiss(x, y) {
       const stop = stopAt(map, x, y)

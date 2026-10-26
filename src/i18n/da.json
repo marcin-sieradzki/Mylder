@@ -59,7 +59,15 @@
     "unknown": "Ukendt",
     "note": "Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.",
     "fromTimetable": "Fra køreplanen",
-    "timetableAndPositions": "Køreplan og positioner"
+    "timetableAndPositions": "Køreplan og positioner",
+    "track": "Spor {track}",
+    "stand": "Perron {track}",
+    "intervalNote": "Metro: planlagte tider",
+    "departuresAt": "afgange {time}",
+    "departuresOutOfDate": "afgange {time}, måske forældet",
+    "messages": "Meddelelser",
+    "later": "Senere",
+    "messagesSource": "Fra Rejseplanen"
   },
   "about": {
     "title": "Om Mylder",

@@ -3,12 +3,15 @@
 // state. Live and Ageing show the expected time, Estimated the expected time marked "~",
 // Timetable only the timetabled time, and No signal "Unknown" beside the timetabled time; the
 // timetabled time is struck beside an expected one a minute or more away from it. The delay is
-// Rejseplanen's own, expected minus timetabled.
+// Rejseplanen's own, expected minus timetabled, where the state shows the expected time. A row's
+// state is its trip's on the map, aged by the clock, and Estimated where the board's own realtime
+// for it is newer than anything the map has.
 import type { DataState } from '../domain/data-state.ts'
+import { followsExpected, shownAt, updatedState } from '../domain/departure.ts'
 import type { LineBadgeProps } from '@mylder/perron'
 import type { Mode } from '../timetable/format.ts'
 import { clockTime } from '../timetable/time.ts'
-import type { StopDeparture } from '../tracker/index.ts'
+import type { AnswerSource, StopDeparture } from '../tracker/index.ts'
 
 /** The struck timetabled time shows from a minute's difference. */
 const STRIKE_FROM = 60_000
@@ -23,7 +26,7 @@ export interface DepartureTimes {
   readonly struck?: string
   /** "Unknown" stands beside the time: No signal's. */
   readonly unknown: boolean
-  /** Whole minutes late, negative early; none without an expected time. */
+  /** Whole minutes late, negative early; none without an expected time the state shows. */
   readonly delay?: number
 }
 
@@ -34,22 +37,32 @@ export function departureTimes(
   now: number,
   timezone: string,
 ): DepartureTimes {
-  const followsExpected = state === 'live' || state === 'ageing' || state === 'estimated'
-  const shown = followsExpected ? (row.expected ?? row.scheduled) : row.scheduled
-  const strike =
-    followsExpected &&
-    row.expected !== undefined &&
-    Math.abs(row.expected - row.scheduled) >= STRIKE_FROM
+  const expected = followsExpected(state) ? row.expected : undefined
+  const shown = shownAt(row, state)
+  const strike = expected !== undefined && Math.abs(expected - row.scheduled) >= STRIKE_FROM
   return {
     countdown: (shown - now) / 1000,
     time: clockTime(shown, timezone),
     estimate: state === 'estimated',
     ...(strike ? { struck: clockTime(row.scheduled, timezone) } : {}),
     unknown: state === 'no-signal',
-    ...(row.expected === undefined
-      ? {}
-      : { delay: Math.round((row.expected - row.scheduled) / 60_000) }),
+    ...(expected === undefined ? {} : { delay: Math.round((expected - row.scheduled) / 60_000) }),
   }
+}
+
+/**
+ * A departure's state now: its trip's on the map (`onMap`), aged by the clock, where the page's
+ * snapshot carries it, else the answer's; but a row the board gave realtime keeps it, Estimated
+ * where the map has no current realtime for the trip.
+ */
+export function departureState(
+  row: StopDeparture,
+  source: AnswerSource,
+  onMap: DataState | undefined,
+): DataState {
+  if (onMap === undefined) return row.state
+  const boardRealtime = source.kind === 'rejseplanen' && row.expected !== undefined
+  return boardRealtime && !row.cancelled ? updatedState(onMap) : onMap
 }
 
 /** The Perron S-tog and Metro lines a badge has colours for, by the token's last word. */

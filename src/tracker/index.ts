@@ -14,6 +14,7 @@ export type {
   AnswerSource,
   StopDepartures,
   StopDeparture,
+  StopInterval,
   TripCall,
   TripDetail,
 } from './answers.ts'

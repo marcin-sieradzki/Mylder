@@ -80,8 +80,11 @@ export interface VehiclePicking {
 type Project = (lonLat: [number, number]) => { x: number; y: number }
 
 export interface PickingListeners {
-  /** Hears whether the pointer rests on a dot, for its cursor. */
-  readonly onPointer?: (onDot: boolean) => void
+  /**
+   * Hears whether the pointer rests on a dot, and where it rests, at its pixels from the canvas's
+   * top left, for its cursor: off a dot, a stop under it takes one too.
+   */
+  readonly onPointer?: (onDot: boolean, x: number, y: number) => void
   /**
    * Hears a tap that found no dot, at its pixels from the canvas's top left, so that a stop under
    * it can open: a dot wins over a stop.
@@ -128,7 +131,7 @@ export function vehiclePicking(
       pickingRadius: TAP_RADIUS,
       onHover(info) {
         const key = keyOf(info)
-        onPointer(key !== undefined)
+        onPointer(key !== undefined, info.x, info.y)
         const now = store.get()
         if (now?.pinned) return
         if (key === undefined) store.clear()

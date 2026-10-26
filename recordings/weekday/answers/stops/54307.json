@@ -27,5 +27,6 @@
       "state": "timetable-only"
     }
   ],
+  "intervals": [],
   "messages": []
 }

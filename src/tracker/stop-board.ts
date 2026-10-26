@@ -1,18 +1,19 @@
 // A stop's departures from its board (docs/screens.md, "Stop departures"): one
 // `multiDepartureBoard` answer for every platform of the stop, each departure joined back to its
-// trip in the timetable, by its journey reference or else by its line and planned time, so a row
-// keeps its trip's key and takes its data state from the snapshot. The expected time, the track
-// and a cancellation are the board's own. A row whose trip carries realtime on the board but has
-// none on the map is Estimated. A departure that joins no trip, such as an Extra trip, is left
+// trip in the timetable, by its journey reference or else by its line, way, platform and planned
+// time, each trip's call once, so a row keeps its trip's key and takes its data state from the
+// snapshot. The expected time, the track and a cancellation are the board's own. A row whose trip
+// carries realtime on the board but has no current realtime on the map is Estimated. A departure that joins no trip, such as an Extra trip, is left
 // out, as the map leaves it out. When no call can be made, or it fails, the stop answers from
 // the timetable plus the snapshot's delays, as before.
 import 'server-only'
 import { Clock, Effect } from 'effect'
+import { shownAt, updatedState } from '../domain/departure.ts'
+import { platformId } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import {
   DEPARTURES_AHEAD,
-  MAX_DEPARTURES,
   stopDeparturesFrom,
   stopIndexOf,
   stopOf,
@@ -20,6 +21,7 @@ import {
   type SnapshotDelays,
   type StopDeparture,
   type StopDepartures,
+  listed,
 } from './answers.ts'
 import { disruptionOf, namesStop, type Disruption, type DisruptionList } from './disruptions.ts'
 import { joinJourney } from './join.ts'
@@ -37,11 +39,11 @@ export function boardQuery(timetable: Timetable, stopIndex: number): DepartureBo
 }
 
 /**
- * Whether a stop's timetable answer is worth a call: some departure is on a line that isn't an
- * interval line. The Metro's rows never spend one (ADR 0006).
+ * Whether a stop is worth a call: some line that calls at it isn't an interval line. The Metro's
+ * rows never spend one (ADR 0006).
  */
-export const worthACall = (answer: StopDepartures) =>
-  answer.departures.some((departure) => departure.mode !== 'metro')
+export const worthACall = (stop: StopDepartures['stop']) =>
+  stop.lines.some((line) => line.mode !== 'metro')
 
 /** One call of a trip at the stop, by the trip and the call's index. */
 interface StopCall {
@@ -71,26 +73,42 @@ const lineOf = (departure: Departure) =>
   departure.ProductAtStop?.displayNumber ??
   departure.Product?.[0]?.line
 
+/** A call's key among the stop's calls: its trip's and its index. */
+const callKey = (call: StopCall) => `${call.trip.key} ${call.index}`
+
 /**
- * The stop's call a departure is: by its reference's trip and planned time, else by its line and
- * planned time among the stop's calls.
+ * The stop's call a departure is, of those no earlier departure of the board has taken: by its
+ * reference's trip, else by its line, its way and its platform, at its planned time either way.
+ * Joined, the call is taken.
  */
 function joinDeparture(
   timetable: Timetable,
   calls: readonly StopCall[],
   departure: Departure,
   planned: number,
+  taken: Set<string>,
 ): StopCall | undefined {
-  const joined = joinJourney(timetable, departure)?.trip
-  const at = (call: StopCall) => call.trip.calls[call.index].departure === planned
-  if (joined) {
-    const call = calls.find((each) => each.trip.key === joined.key && at(each))
-    if (call) return call
-  }
+  const { platforms } = timetable.stops
+  const free = calls.filter(
+    (call) => call.trip.calls[call.index].departure === planned && !taken.has(callKey(call)),
+  )
+  // A trip is taken for the join when its call at this time is: an exact duplicate goes next.
+  const joined = joinJourney(timetable, departure, {
+    has: (key) => !free.some((call) => call.trip.key === key),
+  })?.trip
   const line = lineOf(departure)
-  return line === undefined
-    ? undefined
-    : calls.find((each) => each.trip.line.name === line && at(each))
+  const call =
+    (joined && free.find((each) => each.trip.key === joined.key)) ||
+    (line === undefined
+      ? undefined
+      : free.find(
+          (each) =>
+            each.trip.line.name === line &&
+            (departure.direction === undefined || each.trip.headsign === departure.direction) &&
+            platforms[each.trip.calls[each.index].platform].id === platformId(departure.stopExtId),
+        ))
+  if (call) taken.add(callKey(call))
+  return call
 }
 
 /**
@@ -111,10 +129,11 @@ export function departuresFromBoard(
   const calls = callsAt(timetable, stopIndex, now)
   const onMap = tripsByKey(snapshot)
   const rows: StopDeparture[] = []
+  const taken = new Set<string>()
   for (const departure of board.answer.Departure ?? []) {
     const planned = clockMoment(departure.date, departure.time, timezone)
     if (planned === undefined) continue
-    const call = joinDeparture(timetable, calls, departure, planned)
+    const call = joinDeparture(timetable, calls, departure, planned, taken)
     if (!call) continue
     const { trip, index } = call
     const cancelled = departure.cancelled === true
@@ -129,15 +148,12 @@ export function departuresFromBoard(
           timezone,
         )
       : undefined
-    const leaves = expected ?? planned
+    // The board's realtime is an update newer than any position: Estimated where the map has no
+    // current realtime for the trip, or doesn't have it at all.
+    const onTheMap = onMap.get(trip.key)?.state ?? 'timetable-only'
+    const state = realtime ? updatedState(onTheMap) : onTheMap
+    const leaves = shownAt({ scheduled: planned, expected }, state)
     if (leaves < now || leaves > now + DEPARTURES_AHEAD) continue
-    const live = onMap.get(trip.key)
-    const state =
-      live && !(realtime && live.state === 'timetable-only')
-        ? live.state
-        : realtime
-          ? 'estimated'
-          : 'timetable-only'
     const track = departure.rtTrack ?? departure.track
     rows.push({
       trip: trip.key,
@@ -153,14 +169,14 @@ export function departuresFromBoard(
       state,
     })
   }
-  rows.sort((a, b) => (a.expected ?? a.scheduled) - (b.expected ?? b.scheduled))
+  const stop = stopOf(timetable, stopIndex)
   return {
-    stop: stopOf(timetable, stopIndex),
+    stop,
     fetched: snapshot.fetched,
     // Due again when the snapshot is, or sooner when the board's minute runs out first.
     nextDue: Math.min(snapshot.nextDue, board.at + 60_000),
     source: { kind: 'rejseplanen', at: board.at },
-    departures: rows.slice(0, MAX_DEPARTURES),
+    ...listed(timetable, snapshot, stop, rows, now),
     messages: [],
   }
 }
@@ -213,14 +229,16 @@ export const stopAnswer = (
   stopId: string,
 ): Effect.Effect<StopDepartures | undefined> =>
   Effect.gen(function* () {
-    const planned = stopDeparturesFrom(timetable, snapshot, stopId)
-    if (!planned) return undefined
     const stopIndex = stopIndexOf(timetable, stopId)
-    const called = worthACall(planned)
-      ? yield* ask(`stop:${planned.stop.id}`, board(boardQuery(timetable, stopIndex)))
+    if (stopIndex < 0) return undefined
+    const stop = stopOf(timetable, stopIndex)
+    const called = worthACall(stop)
+      ? yield* ask(`stop:${stop.id}`, board(boardQuery(timetable, stopIndex)))
       : undefined
     const now = yield* Clock.currentTimeMillis
+    // The timetable's answer only when the board's is missing.
     const answer =
-      (called && departuresFromBoard(timetable, snapshot, stopId, called, now)) || planned
-    return { ...answer, messages: stopMessages(timetable, planned.stop.id, called?.answer, list) }
+      (called && departuresFromBoard(timetable, snapshot, stopId, called, now)) ||
+      stopDeparturesFrom(timetable, snapshot, stopId)!
+    return { ...answer, messages: stopMessages(timetable, stop.id, called?.answer, list) }
   })

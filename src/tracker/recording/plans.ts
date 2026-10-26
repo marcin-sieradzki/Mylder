@@ -39,8 +39,9 @@ export const RECORDINGS: readonly RecordingPlan[] = [
     start: RECORDING_START,
     minutes: 10,
     // Nørreport, with Live and Estimated departures by bus and S-tog; Orientkaj St., Timetable only;
-    // Hillerød St., with none in the next 30 minutes.
-    answers: { minute: 1, stops: ['27532', '54307', '8600683'] },
+    // Hillerød St., with none in the next 30 minutes; Bella Center St., where the Metro runs to an
+    // interval.
+    answers: { minute: 1, stops: ['27532', '54307', '8600683', '8603313'] },
   },
   { name: 'empty', scenario: failingAll('empty'), start: RECORDING_START, minutes: 3 },
   { name: 'refused-key', scenario: failingAll('refused-key'), start: RECORDING_START, minutes: 3 },

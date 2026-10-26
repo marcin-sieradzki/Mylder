@@ -16,6 +16,12 @@ export const ON_DEMAND_PER_MINUTE = 10
 /** How long an on-demand answer is kept and shared. */
 export const ON_DEMAND_SECONDS = 60
 
+/**
+ * How long one request holds a name's call while it is under way, so a second viewer asking at
+ * once answers from the timetable rather than making the same call.
+ */
+const LEASE_SECONDS = 15
+
 /** An on-demand call's answer, and the moment it was asked for. */
 export interface Called<A> {
   readonly answer: A
@@ -35,8 +41,9 @@ export interface OnDemandSettings {
 /**
  * Asks for something on demand, by a name that keys its cache (`stop:<id>`, `trip:<key>`): the
  * kept answer while it is fresh, else a new call's when the budget and the limit allow one, else
- * undefined. A call is counted against the limit before it is sent; one that fails is not kept,
- * so the next viewer may ask again.
+ * undefined, as it is while another request's call for the same name is under way. A call is
+ * counted against the limit before it is sent; one that fails is not kept, so a viewer may ask
+ * again once its lease runs out.
  */
 export type OnDemand = <A>(
   name: string,
@@ -53,6 +60,9 @@ export function onDemand({ store, key, pace, failed }: OnDemandSettings): OnDema
       const now = yield* Clock.currentTimeMillis
       const pacing = yield* pace(now)
       if (!pacing.onDemand) return undefined
+      if (!(yield* store.setIfAbsent(key(`on-demand:lease:${name}`), now, LEASE_SECONDS))) {
+        return undefined
+      }
       const minute = Math.floor(now / 60_000)
       // Kept past its minute, so a request on the boundary still finds its count.
       const used = yield* store.increment(key(`on-demand:minute:${minute}`), 2 * ON_DEMAND_SECONDS)

@@ -59,7 +59,15 @@
     "unknown": "Unknown",
     "note": "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
     "fromTimetable": "From the timetable",
-    "timetableAndPositions": "Timetable and positions"
+    "timetableAndPositions": "Timetable and positions",
+    "track": "Track {track}",
+    "stand": "Platform {track}",
+    "intervalNote": "Metro: planned times",
+    "departuresAt": "departures {time}",
+    "departuresOutOfDate": "departures {time}, may be out of date",
+    "messages": "Messages",
+    "later": "Later",
+    "messagesSource": "From Rejseplanen, in Danish"
   },
   "about": {
     "title": "About Mylder",
