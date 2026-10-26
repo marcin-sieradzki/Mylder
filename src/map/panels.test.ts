@@ -110,6 +110,28 @@ describe("the open panel's answer", () => {
     expect(asked).toHaveLength(1)
   })
 
+  it('waits out a slow answer, as the route may make the minute’s run before its own call', async () => {
+    window.history.replaceState(null, '', '/en?stop=27532')
+    const slow: PanelDeps = {
+      ...deps(),
+      fetch: (url, { signal }) =>
+        new Promise((resolve, reject) => {
+          asked.push({ url, at: Date.now() })
+          const answering = setTimeout(() => resolve(Response.json(NORREPORT)), 45 * S)
+          signal.addEventListener('abort', () => {
+            clearTimeout(answering)
+            reject(new DOMException('The ask was aborted', 'AbortError'))
+          })
+        }),
+    }
+    const store = panelAnswers(addressView(), slow)
+    store.subscribe(() => {})
+    await vi.advanceTimersByTimeAsync(45 * S)
+    await landed()
+    expect(store.get()).toMatchObject({ status: 'ok', answer: NORREPORT })
+    expect(asked).toHaveLength(1)
+  })
+
   it('says it failed when the first ask fails, and tries again', async () => {
     answers = [503, NORREPORT]
     const { store } = open('?stop=27532')
