@@ -132,6 +132,11 @@ describe("a stop's departures", () => {
     // The countdown's figure sits in the countdown, which the row strikes.
     const countdown = within(koge).getByText('8').parentElement!
     expect(getComputedStyle(countdown).textDecorationLine).toBe('line-through')
+    // Its timetabled time, struck, and not the expected one it won't keep.
+    expect(getComputedStyle(within(koge).getByText('07:27')).textDecorationLine).toBe(
+      'line-through',
+    )
+    expect(within(koge).queryByText('07:29')).not.toBeInTheDocument()
     expect(within(stop).getByRole('list', { name: 'Departures' }).children).toHaveLength(10)
   })
 

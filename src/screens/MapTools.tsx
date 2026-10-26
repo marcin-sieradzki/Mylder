@@ -32,9 +32,9 @@ function MapScale() {
 /**
  * The map's controls (docs/screens.md, "The moving map"): zoom in, zoom out, reset view and the
  * pause that stops the dots moving, with the scale bar beside them, and the map's keys. Until the
- * map attaches the zoom buttons are dimmed but the pause is not, as before: a pause pressed then
- * holds once the dots draw. MapControls' `disabled` would dim the pause too, so the bar leaves it
- * out, and its reset does nothing with no map to move.
+ * map attaches the zoom buttons are dimmed but the pause is not: a pause pressed then holds once
+ * the dots draw. MapControls' `disabled` would dim the pause too, so the bar leaves it out, and
+ * its reset does nothing with no map to move.
  */
 export function MapTools() {
   const hasMap = useCameraView(attached)

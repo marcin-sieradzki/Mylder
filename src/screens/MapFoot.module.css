@@ -63,13 +63,13 @@
 /* Beside the open side sheet on a desktop, past its width and the gaps either side of it. Up to
    Perron's breakpoint.tablet (1180px) and a little past it, what is left is too narrow for the
    credit beside the legend, so the credit takes a row of its own, as on a phone. */
-@media (min-width: 760px) {
+@media (width > 759.98px) {
   .foot[data-sheet='open'] {
     inset-inline-start: calc(var(--perron-size-sheet-width) + 2 * var(--perron-size-panel-gap));
   }
 }
 
-@media (min-width: 760px) and (max-width: 1280px) {
+@media (width > 759.98px) and (max-width: 1280px) {
   .foot[data-sheet='open'] {
     grid-template-areas:
       'legend tools'
@@ -85,13 +85,13 @@
 /* Before the open detail panel on a desktop, short of its width and the gaps either side of it.
    What is left is as narrow beside the panel as beside the sheet, so the credit takes a row of
    its own up to the same width, and with both open up to that width and the sheet's. */
-@media (min-width: 760px) {
+@media (width > 759.98px) {
   .foot[data-panel='open'] {
     inset-inline-end: calc(var(--perron-size-detail-width) + 2 * var(--perron-size-panel-gap));
   }
 }
 
-@media (min-width: 760px) and (max-width: 1280px) {
+@media (width > 759.98px) and (max-width: 1280px) {
   .foot[data-panel='open'] {
     grid-template-areas:
       'legend tools'
@@ -104,7 +104,7 @@
   }
 }
 
-@media (min-width: 760px) and (max-width: 1660px) {
+@media (width > 759.98px) and (max-width: 1660px) {
   .foot[data-sheet='open'][data-panel='open'] {
     grid-template-areas:
       'legend tools'

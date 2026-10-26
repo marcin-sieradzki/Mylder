@@ -1,11 +1,12 @@
 // What one departure row says (docs/screens.md, "Stop departures"; docs/data-states.md, "The
 // states"): the countdown, the time beside it and the delay, each following the trip's data
 // state. Live and Ageing show the expected time, Estimated the expected time marked "~",
-// Timetable only and No signal the timetabled time and an unknown delay; the timetabled time is
-// struck beside an expected one a minute or more away from it. Perron's DepartureRow draws them. The delay is
-// Rejseplanen's own, expected minus timetabled, where the state shows the expected time. A row's
-// state is its trip's on the map, aged by the clock, and Estimated where the board's own realtime
-// for it is newer than anything the map has.
+// Timetable only and No signal the timetabled time and an unknown delay, and a cancelled
+// departure its timetabled time; the timetabled time is struck beside an expected one a minute or
+// more away from it. The delay is Rejseplanen's own, expected minus timetabled, where the state
+// shows the expected time. A row's state is its trip's on the map, aged by the clock, and
+// Estimated where the board's own realtime for it is newer than anything the map has. Perron's
+// DepartureRow draws them.
 import type { DataState } from '../domain/data-state.ts'
 import { followsExpected, shownAt, updatedState } from '../domain/departure.ts'
 import type { LineBadgeProps } from '@mylder/perron'
@@ -22,7 +23,8 @@ export interface DepartureTimes {
   readonly countdown: number
   /**
    * The row's timetabled time, `HH:MM`: the timetable's where an expected time a minute or more
-   * from it strikes it, else the time the state shows, so a smaller difference strikes nothing.
+   * from it strikes it, or the row is cancelled, else the time the state shows, so a smaller
+   * difference strikes nothing.
    */
   readonly time: string
   /**
@@ -46,7 +48,7 @@ export function departureTimes(
   const strike = expected !== undefined && Math.abs(expected - row.scheduled) >= STRIKE_FROM
   return {
     countdown: (shown - now) / 1000,
-    time: clockTime(strike ? row.scheduled : shown, timezone),
+    time: clockTime(strike || row.cancelled === true ? row.scheduled : shown, timezone),
     ...(followsExpected(state) ? { expected: clockTime(shown, timezone) } : {}),
     ...(expected === undefined ? {} : { delay: Math.round((expected - row.scheduled) / 60_000) }),
   }
