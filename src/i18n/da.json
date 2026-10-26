@@ -54,6 +54,33 @@
   "pulse": {
     "onTheMove": "I bevægelse",
     "inService": "af {total} i drift",
+    "reported": "Meldt i dette minut",
+    "reportedSub": "køretøjer, der meldte deres position",
+    "averageDelay": "Gennemsnitlig forsinkelse",
+    "averageDelaySub": "min, køretøjer med kendt forsinkelse, Metro udeladt",
+    "reportingLive": "Melder live",
+    "reportingLiveSub": "{count} af {total} køretøjer, der kunne melde",
+    "byMode": "Melder live, efter transportform",
+    "modeShare": "{count}/{total} · {operator}",
+    "unknown": {
+      "computed-only": "Rejseplanen sender kun beregnede positioner",
+      "paused": "Positionerne er sat på pause",
+      "none-underway": "Ingen køretøjer undervejs",
+      "metro": "Ingen realtid fra Metroen; placeret ud fra køreplanen",
+      "computed-meters": "Alle positioner er beregnet af Rejseplanen"
+    },
+    "budget": "Opdaterer med {interval} mellemrum for at holde sig inden for databudgettet.",
+    "seconds": "{seconds} s",
+    "minutes": "{minutes} min",
+    "now": "På kortet nu",
+    "howSure": "Hvor sikre er vi?",
+    "states": {
+      "live": "Meldt af køretøjet i de seneste svar.",
+      "ageing": "Sidst meldt for få minutter siden; kører siden videre ad sin rute.",
+      "estimated": "Placeret ud fra køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.",
+      "timetableOnly": "Ingen realtid for denne tur i dag; placeret ud fra køreplanen.",
+      "noSignal": "Havde realtid, mangler i 5 min; kører videre efter køreplanen og sin seneste forsinkelse."
+    },
     "dayProfile": "Køretøjer i drift i dag",
     "planned": "Planlagt, ud fra dagens køreplan",
     "peak": "Højest {count} kl. {time}",

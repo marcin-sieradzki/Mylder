@@ -73,7 +73,9 @@ describe("City pulse's day profile", () => {
     land('0006.json', { serviceDay: '2026-09-01' })
     renderScreen('en')
     expect(await within(pulse()).findByText("Could not load today's timetable")).toBeInTheDocument()
-    expect(within(pulse()).queryByRole('list')).not.toBeInTheDocument()
+    expect(
+      within(pulse()).queryByRole('group', { name: /^Vehicles in service today/ }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows the error state in Danish when the day profiles will not load', async () => {
@@ -84,7 +86,10 @@ describe("City pulse's day profile", () => {
     expect(await within(pulse()).findByText('Kunne ikke hente dagens køreplan')).toBeInTheDocument()
   })
 
-  it('says it is loading before the first snapshot lands', () => {
+  it('says it is loading while the day profiles are on their way', () => {
+    vi.stubGlobal('fetch', () => new Promise(() => {}))
+    // A version no other test has loaded, which the page's loader would otherwise keep.
+    land('0006.json', { timetableVersion: '2026-10-26-00c0ffee' })
     renderScreen('en')
     expect(within(pulse()).getByText('Loading')).toBeInTheDocument()
   })
