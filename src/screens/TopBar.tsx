@@ -1,6 +1,7 @@
 'use client'
 
-import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
+import { FilterChip, IconButton } from '@mylder/perron'
+import { TopBar as PerronTopBar } from '@mylder/perron/patterns'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useLastAnswer, useSnapshot } from '../map/live'
@@ -13,14 +14,14 @@ import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
-import styles from './TopBar.module.css'
+import { usePhone } from './usePhone'
 
 const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
 
-/** Perron's `info` icon, "About and help", drawn on the top bar's 18 px grid. */
+/** Perron's `info` icon, "About and help", on its 18 px grid. */
 const INFO_ICON = (
   <svg
-    className={styles.icon}
+    className="perron-icon"
     viewBox="0 0 18 18"
     fill="none"
     stroke="currentColor"
@@ -52,9 +53,9 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
 }
 
 /**
- * The moving map's top bar (docs/screens.md, "The moving map"): the brand, the Updated line, the
- * mode filters, the language switch and the About button, composed from Perron until its TopBar
- * pattern ships.
+ * The moving map's top bar (docs/screens.md, "The moving map"): Perron's TopBar with the brand,
+ * the Updated line, the mode filters, the language switch and the About button, in the page's
+ * header. Its phone layout follows the window's width, so the prerendered page has the desktop's.
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
@@ -64,6 +65,7 @@ export function TopBar() {
   // The time the server received the latest position answer; while Paused it holds and says so.
   const updatedAt = useLastAnswer()
   const paused = usePaused()
+  const phone = usePhone()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
 
@@ -75,37 +77,40 @@ export function TopBar() {
   }
 
   return (
-    <Surface variant="glass" render={<header />} className={styles.bar}>
-      <div className={styles.identity}>
-        {/* oxlint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label -- Brand fills the link with its name */}
-        <Brand render={<a href={`/${lang}`} />} />
-        <Text variant="data-sm" emphasis="secondary" className={styles.updated}>
-          {dictionary.topBar[paused ? 'updatedPaused' : 'updated'].replace(
-            '{time}',
-            updatedAt === undefined ? '—' : clockTime(updatedAt, timezone, { seconds: true }),
-          )}
-        </Text>
-      </div>
-      {network ? (
-        <fieldset aria-label={dictionary.topBar.modes} className={styles.modes}>
-          {modesOf(network).map((mode) => (
-            <FilterChip
-              key={mode}
-              selected={!hidden.has(mode)}
-              onChange={(_event, shown) => show(mode, shown)}
-              count={underway.get(mode) ?? 0}
-            >
-              {dictionary.modes[mode]}
-            </FilterChip>
-          ))}
-        </fieldset>
-      ) : null}
-      <div className={styles.tools}>
-        <LanguageSwitch />
-        <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
-          {INFO_ICON}
-        </IconButton>
-      </div>
-    </Surface>
+    <header>
+      <PerronTopBar
+        size={phone ? 'small' : 'medium'}
+        brandHref={`/${lang}`}
+        time={
+          updatedAt === undefined ? undefined : clockTime(updatedAt, timezone, { seconds: true })
+        }
+        // Mylder says a pause after the time, "Updated 07:20:00, paused", so it gives the whole
+        // phrase in its own words rather than Perron's "Paused ·" before it.
+        updatedLabel={dictionary.topBar[paused ? 'updatedPaused' : 'updated']}
+        filtersLabel={dictionary.topBar.modes}
+        filters={
+          network
+            ? modesOf(network).map((mode) => (
+                <FilterChip
+                  key={mode}
+                  selected={!hidden.has(mode)}
+                  onChange={(_event, shown) => show(mode, shown)}
+                  count={underway.get(mode) ?? 0}
+                >
+                  {dictionary.modes[mode]}
+                </FilterChip>
+              ))
+            : undefined
+        }
+        tools={
+          <>
+            <LanguageSwitch />
+            <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
+              {INFO_ICON}
+            </IconButton>
+          </>
+        }
+      />
+    </header>
   )
 }
