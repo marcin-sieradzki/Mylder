@@ -35,9 +35,12 @@ export interface DrawnAircraft {
   readonly positions: Float64Array
   /** Perron's outline, sizes and colours, which the glyphs below are drawn in. */
   readonly look: AircraftLook
-  /** Each glyph's box, its rim's width inside the outline and its No signal cut, in px. */
-  readonly size: Float32Array
-  readonly rim: Float32Array
+  /**
+   * Each glyph's box and its rim's width inside the outline, in px, exactly as the tokens give
+   * them, since they name its sprites in the atlas; and its No signal cut.
+   */
+  readonly size: Float64Array
+  readonly rim: Float64Array
   readonly cut: Float32Array
   /** Red, green, blue and alpha, four per aircraft. */
   readonly fill: Uint8ClampedArray
@@ -59,8 +62,8 @@ function glyphsOf(
   const glyphs = {
     states,
     look,
-    size: new Float32Array(n),
-    rim: new Float32Array(n),
+    size: new Float64Array(n),
+    rim: new Float64Array(n),
     cut: new Float32Array(n),
     fill: new Uint8ClampedArray(n * 4),
     line: new Uint8ClampedArray(n * 4),
