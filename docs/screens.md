@@ -115,7 +115,7 @@ Cancellations make no card. They are shown where they are seen: a cancelled row 
 
 **Footer:** "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open." After a failed check, "Last checked 07:45; the latest check failed." After an hour without a successful check the list stays, marked "May be out of date", and the data card above says so. The time is the server's receipt time of the last good answer.
 
-**Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, LinkButton, Accordion, Section, Separator, DataStatePanel, Text.
+**Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, Button, Accordion, Section, Separator, DataStatePanel, Text.
 
 ## The About dialog
 

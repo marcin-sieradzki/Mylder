@@ -9,6 +9,7 @@ import { useSyncExternalStore } from 'react'
 import type { LatLon } from '../domain/trip-motion.ts'
 import type { Mode } from '../timetable/format.ts'
 import type { Network } from '../timetable/network.ts'
+import type { Disruption } from '../tracker/index.ts'
 
 /** What the chip calls the highlight: a line by its name, or words of the raiser's own. */
 export type HighlightLabel =
@@ -28,6 +29,8 @@ export interface HighlightLine {
 
 /** A stop ringed in focus. */
 export interface HighlightStop {
+  /** The stop's id, so a tap on its ring opens its departures; none for a point that is no stop. */
+  readonly id?: string
   readonly point: LatLon
   /** The Perron colour token of its ring, such as a line's or a disruption's severity's. */
   readonly colour: string
@@ -49,9 +52,61 @@ export function patternHighlight(network: Network, pattern: number): Highlight {
     label: { kind: 'line', line: line.name },
     lines: [{ points: network.pathOf(pattern).points, mode: line.mode, colour: line.colour }],
     stops: record.stops.map((index) => ({
+      id: network.stops.stops[platforms[index].stop].id,
       point: [platforms[index].lat, platforms[index].lon],
       colour: line.colour,
     })),
+  }
+}
+
+/**
+ * A disruption's stretch and stops, in its severity's colour, named by its heading: each stop it
+ * names that the timetable knows, ringed, and the stretch between its two end stops along every
+ * pattern that runs through both, each stretch once.
+ */
+export function disruptionHighlight(
+  network: Network,
+  { message }: Disruption,
+  colour: string,
+): Highlight {
+  const { stops, platforms } = network.stops
+  const stopOf = (extId: string | undefined) =>
+    extId === undefined ? undefined : network.stops.stopForPlatform(extId)
+  const named = [
+    ...(message.affectedStops?.StopLocation ?? []),
+    ...(message.validFromStop ? [message.validFromStop] : []),
+    ...(message.validToStop ? [message.validToStop] : []),
+  ]
+  const ringed = new Map<string, HighlightStop>()
+  for (const { extId } of named) {
+    const stop = stopOf(extId)
+    if (stop && !ringed.has(stop.id)) {
+      ringed.set(stop.id, { id: stop.id, point: [stop.lat, stop.lon], colour })
+    }
+  }
+
+  const from = stopOf(message.validFromStop?.extId)
+  const to = stopOf(message.validToStop?.extId)
+  const lines = new Map<string, HighlightLine>()
+  if (from && to && from !== to) {
+    for (const pattern of network.patterns.patterns) {
+      const calls = pattern.stops.map((platform) => stops[platforms[platform].stop])
+      const [a, b] = [calls.indexOf(from), calls.indexOf(to)]
+      if (a < 0 || b < 0) continue
+      const segments = pattern.segments.slice(Math.min(a, b), Math.max(a, b))
+      const key = segments.join(' ')
+      if (lines.has(key)) continue
+      lines.set(key, {
+        points: segments.flatMap((segment) => network.paths.points(segment)),
+        mode: network.patterns.lines[pattern.line].mode,
+        colour,
+      })
+    }
+  }
+  return {
+    label: { kind: 'text', text: message.head },
+    lines: [...lines.values()],
+    stops: [...ringed.values()],
   }
 }
 

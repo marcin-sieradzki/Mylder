@@ -164,8 +164,11 @@ const HIGHLIGHT_STOPS = 'mylder-highlight-stops'
 const BUS_STOPS = 'mylder-stops-bus'
 const RAIL_STOPS = 'mylder-stops-rail'
 
-/** The layers the stops are drawn in, whose features carry each stop's `id`, for a tap to open. */
-export const STOP_LAYERS: readonly string[] = [RAIL_STOPS, BUS_STOPS]
+/**
+ * The layers the stops are drawn in, whose features carry each stop's `id`, for a tap to open:
+ * a highlight's ringed stops too, drawn at any zoom.
+ */
+export const STOP_LAYERS: readonly string[] = [HIGHLIGHT_STOPS, RAIL_STOPS, BUS_STOPS]
 
 function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
   const stationOpacity = dimmed ? numberOf(paint, DIM_STATION) : 1
@@ -322,7 +325,7 @@ function highlightFeatures(paint: Paint, highlight: Highlight | undefined) {
   }))
   const stops: Feature<Point>[] = (highlight?.stops ?? []).map((stop) => ({
     type: 'Feature',
-    properties: { colour: paint.get(stop.colour) ?? '' },
+    properties: { colour: paint.get(stop.colour) ?? '', ...(stop.id ? { id: stop.id } : {}) },
     geometry: { type: 'Point', coordinates: [stop.point[1], stop.point[0]] },
   }))
   return {

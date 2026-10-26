@@ -7,7 +7,9 @@ import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
 import { disruptionListStore } from '../map/disruptions'
+import { mapHighlight } from '../map/highlight'
 import { liveSnapshot } from '../map/live'
+import { timetableRoutes } from '../test/timetableRoutes'
 import type { Disruption, Disruptions, Snapshot } from '../tracker/index'
 import { DisruptionList } from './DisruptionList'
 import { MapScreen } from './MapScreen'
@@ -68,11 +70,12 @@ const titlesIn = (list: HTMLElement) =>
     .map((card) => card.querySelector('.pn-DisruptionCard-title')?.textContent)
 
 beforeEach(() => {
-  // jsdom has no server: the timetable stays on its way, and the zone is Copenhagen's.
-  vi.stubGlobal('fetch', () => new Promise(() => {}))
+  // jsdom has no server: the timetable comes from the recording's files.
+  vi.stubGlobal('fetch', timetableRoutes)
 })
 
 afterEach(() => {
+  mapHighlight.clear()
   liveSnapshot.update({ snapshot: undefined, lastGoodPoll: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
 })
@@ -267,5 +270,65 @@ describe('the Disruptions tab', () => {
     const tab = await screen.findByRole('tab', { name: /^Disruptions/ })
     await vi.waitFor(() => expect(tab).toHaveTextContent('Disruptions 3'))
     expect(screen.queryByRole('list', { name: 'Active now' })).not.toBeInTheDocument()
+  })
+})
+
+describe('Show on map', () => {
+  /** The timetable's routes and the disruption route, as the server answers them. */
+  const routes = (input: RequestInfo | URL) =>
+    String(input) === '/api/disruptions'
+      ? Promise.resolve(Response.json(weekday))
+      : timetableRoutes(input)
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', routes)
+  })
+
+  it('rings the stops a card affects and draws its stretch, named by its heading', async () => {
+    const user = userEvent.setup()
+    await show('en', answer({ messages: [signalFault] }))
+    const button = screen.getByRole('button', { name: 'Show on map' })
+    await vi.waitFor(() => expect(button).toBeEnabled())
+    await user.click(button)
+    const shown = mapHighlight.get()
+    expect(shown?.label).toEqual({ kind: 'text', text: signalFault.message.head })
+    expect(shown?.stops.map(({ id }) => id)).toEqual(['8600626', '8600655'])
+    expect(shown?.stops[0]?.colour).toBe('perron-color-transit-severity-notice')
+    expect(shown?.lines.length).toBeGreaterThan(0)
+  })
+
+  it('is not offered on a message that names no stops', async () => {
+    const {
+      affectedStops: _,
+      validFromStop: __,
+      validToStop: ___,
+      ...noStops
+    } = signalFault.message
+    await show('en', answer({ messages: [{ ...signalFault, message: noStops }] }))
+    expect(screen.queryByRole('button', { name: 'Show on map' })).not.toBeInTheDocument()
+  })
+
+  it('raises the chip over the map, in Danish, and Clear takes it down', async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, '', '/da?tab=disruptions')
+    liveSnapshot.update({ snapshot, lastGoodPoll: NOW, clockOffset: 0 })
+    render(
+      <Providers lang="da" dictionary={da}>
+        <MapScreen />
+      </Providers>,
+    )
+    const active = await screen.findByRole('list', { name: 'Aktuelle nu' })
+    const [fault] = within(active)
+      .getAllByRole('listitem')
+      .filter((item) => item.classList.contains('pn-DisruptionCard'))
+    const button = within(fault!).getByRole('button', { name: 'Vis på kortet' })
+    await vi.waitFor(() => expect(button).toBeEnabled())
+    await user.click(button)
+    const chip = screen.getByRole('button', {
+      name: `Viser: ${signalFault.message.head} · Ryd`,
+    })
+    await user.click(chip)
+    expect(mapHighlight.get()).toBeUndefined()
+    expect(chip).not.toBeInTheDocument()
   })
 })

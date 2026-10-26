@@ -239,6 +239,7 @@
     "active": "Active now",
     "later": "Later",
     "more": "More",
+    "showOnMap": "Show on map",
     "inDanish": "From Rejseplanen, in Danish",
     "runningNormally": "Running normally, checked {time}",
     "loading": "Loading messages from Rejseplanen…",

@@ -3,6 +3,7 @@
 import {
   Accordion,
   AccordionItem,
+  Button,
   NormalService,
   Section,
   Tag,
@@ -21,8 +22,10 @@ import {
   type DisruptionListStore,
   type ListedDisruptions,
 } from '../map/disruptions'
+import { disruptionHighlight, mapHighlight } from '../map/highlight'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
+import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
 import type { Disruption, Snapshot } from '../tracker/index'
 import styles from './DisruptionList.module.css'
@@ -110,25 +113,46 @@ interface MessageCardProps {
   readonly disruption: Disruption
   readonly kind: DisruptionKind
   readonly clock: Clock
+  /** The timetable's network, which Show on map draws on; none until it has loaded. */
+  readonly network: Network | undefined
 }
 
 /**
  * One of Rejseplanen's messages as a card, in Rejseplanen's own words, which are Danish: its
  * heading, its lead, and its full text behind "More" when it says more.
  */
-function MessageCard({ disruption, kind, clock }: MessageCardProps) {
+function MessageCard({ disruption, kind, clock, network }: MessageCardProps) {
   const { dictionary } = useI18n()
   const words = dictionary.disruptions
   const { head, lead, text } = disruption.message
   const sentence = lead ?? text
   const more = lead !== undefined && text !== undefined && text.length > lead.length
+  const stops = stopsOf(disruption)
+  const severity = SEVERITY[kind]
+  // A message that names no stops has no Show on map.
+  const showOnMap =
+    stops && ('from' in stops || stops.length > 0) ? (
+      <Button
+        variant="outline"
+        size="small"
+        disabled={!network}
+        onClick={() => {
+          if (!network) return
+          const colour = `perron-color-transit-severity-${severity}`
+          mapHighlight.show(disruptionHighlight(network, disruption, colour))
+        }}
+      >
+        {words.showOnMap}
+      </Button>
+    ) : undefined
   return (
     <DisruptionCard
       render={<li />}
-      severity={SEVERITY[kind]}
+      severity={severity}
       title={head}
-      stops={stopsOf(disruption)}
+      stops={stops}
       time={timeOfMessage(disruption, clock)}
+      action={showOnMap}
       slotProps={{ title: { lang: 'da' } }}
     >
       {sentence === undefined ? null : <p lang="da">{sentence}</p>}
@@ -190,7 +214,8 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
   const words = dictionary.disruptions
   const listed = useListedDisruptions(store)
   const snapshot = useSnapshot()
-  const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
+  const network = useNetwork(snapshot?.timetableVersion)
+  const timezone = timezoneOf(network)
   const laterHeading = useId()
 
   if (!listed) {
@@ -221,6 +246,7 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
               disruption={disruption}
               kind={kind}
               clock={clock}
+              network={network}
             />
           ))}
         </ul>
@@ -238,6 +264,7 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
                 disruption={disruption}
                 kind={kind}
                 clock={clock}
+                network={network}
               />
             ))}
           </ul>

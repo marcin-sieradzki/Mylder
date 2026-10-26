@@ -28,3 +28,18 @@ test('in Danish, on a phone', async ({ page }) => {
   )
   await expect(sheet.getByText('Fra Rejseplanen, på dansk')).toHaveCount(0)
 })
+
+test('Show on map on a card raises the chip, and Clear takes it down', async ({ page }) => {
+  await page.goto('/en?tab=disruptions')
+  const card = page
+    .getByRole('list', { name: 'Active now' })
+    .getByRole('listitem')
+    .filter({ hasText: 'Færre S-tog mellem København H og Hellerup' })
+  await card.getByRole('button', { name: 'Show on map' }).click()
+  const chip = page.getByRole('button', {
+    name: 'Showing: Færre S-tog mellem København H og Hellerup · Clear',
+  })
+  await expect(chip).toBeVisible()
+  await chip.click()
+  await expect(chip).toBeHidden()
+})
