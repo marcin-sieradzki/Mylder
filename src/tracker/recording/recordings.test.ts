@@ -2,10 +2,10 @@ import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from '@effect/vitest'
-import { Clock, Effect, Fiber, Layer } from 'effect'
+import { Cause, Clock, Effect, Exit, Fiber, Layer } from 'effect'
 import { TestClock } from 'effect/testing'
 import * as Http from '../http'
-import { RECORDED_REJSEPLANEN } from '../rejseplanen/answers'
+import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
@@ -14,6 +14,7 @@ import { disruptionsFile, replay, savedAnswers } from './freeze'
 import {
   callFile,
   layer,
+  readCalls,
   readJson,
   readRecorded,
   recordedClient,
@@ -177,6 +178,23 @@ describe('the recorded layer for another API', () => {
       return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(Effect.orDie)
     })
 
+  /** A recording folder made for one test, holding `files` by their paths, removed after it. */
+  async function madeRecording<A>(
+    files: Record<string, unknown>,
+    within: (dir: string) => Promise<A>,
+  ): Promise<A> {
+    const dir = await mkdtemp(join(tmpdir(), 'recording-'))
+    try {
+      for (const [path, content] of Object.entries(files)) {
+        await mkdir(join(dir, path, '..'), { recursive: true })
+        await writeFile(join(dir, path), JSON.stringify(content))
+      }
+      return await within(dir)
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  }
+
   it.effect(
     'replays its folder in call order, failures too, and answers an unknown call its own way',
     () =>
@@ -210,6 +228,30 @@ describe('the recorded layer for another API', () => {
         ])
       }).pipe(Effect.scoped),
   )
+
+  it.effect('fails loudly when its URL rule names a folder it does not list', () =>
+    Effect.gen(function* () {
+      const misnamed: RecordedApi = { ...radar, folderOf: () => 'planes' }
+      const exit = yield* Effect.exit(
+        call('/v2/point/55.75/12.38/25').pipe(
+          Effect.provideService(Http.HttpClient.HttpClient, recordedClient(misnamed, new Map())),
+        ),
+      )
+      expect(Exit.isFailure(exit) && Cause.pretty(exit.cause)).toContain(
+        'files /v2/point/55.75/12.38/25 under planes, which is not one of its folders: aircraft',
+      )
+    }),
+  )
+
+  it("fails loudly when a folder can't be read, and reads a missing one as no calls", async () => {
+    // A file where the folder should be.
+    await madeRecording({ aircraft: { ac: [] } }, async (dir) => {
+      await expect(readCalls(radar, dir)).rejects.toThrow('ENOTDIR')
+    })
+    await madeRecording({}, async (dir) => {
+      expect(await readCalls(radar, dir)).toEqual(new Map())
+    })
+  })
 })
 
 describe("a recording's clock", () => {

@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cdnAnswer } from './routes.ts'
+import { cdnAnswer, unavailable } from './cdn-answer.ts'
 
 // The route answers' core, fed by a plain producer rather than the tracker: what it answers for a
 // value, for none, and for a producer that fails.
 const now = Date.UTC(2026, 5, 16, 5, 20, 30)
-const policy = { whileRevalidating: 10, ifError: 60 }
+const policy = { whileRevalidating: 10, ifError: 60, retryAfter: 10 }
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -30,9 +30,21 @@ describe('cdnAnswer', () => {
     expect(await response.json()).toEqual({ error: 'unknown aircraft' })
   })
 
-  it('answers 503, to be asked again in 30 s, when the producer fails', async () => {
+  it('answers 503, to be asked again when the policy says, and logs what failed', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const offline = new Error('offline')
+    const response = await cdnAnswer('aircraft', () => Promise.reject(offline), policy)
+    expect(response.status).toBe(503)
+    expect(response.headers.get('Retry-After')).toBe('10')
+    expect(response.headers.get('Cache-Control')).toBe('no-store')
+    expect(log).toHaveBeenCalledWith('Could not answer the aircraft', offline)
+  })
+})
+
+describe('unavailable', () => {
+  it('answers 503, to be asked again in 30 s when no policy says otherwise', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    const response = await cdnAnswer('aircraft', () => Promise.reject(new Error('offline')), policy)
+    const response = unavailable(new Error('unreadable'), 'timetable manifest')
     expect(response.status).toBe(503)
     expect(response.headers.get('Retry-After')).toBe('30')
     expect(response.headers.get('Cache-Control')).toBe('no-store')

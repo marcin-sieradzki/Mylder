@@ -4,8 +4,8 @@ import { TestClock } from 'effect/testing'
 import { COPENHAGEN_BOX } from '../../timetable/format'
 import * as Http from '../http'
 import { memoryLayer, Store } from '../store'
-import { error } from './answers'
 import { layer as rejseplanenLayer, Rejseplanen, type CallError } from './client'
+import { errorAnswer } from './responses'
 
 const KEY = 'secret-key-123'
 
@@ -158,8 +158,8 @@ describe('the Rejseplanen client', () => {
 
   it.effect('never retries a 4xx, and reads a refused key and a spent month', () => {
     const { layer } = answering([
-      (request) => Effect.succeed(error(request, 401, 'API_AUTH', 'bad key')),
-      (request) => Effect.succeed(error(request, 403, 'API_QUOTA', 'spent')),
+      (request) => Effect.succeed(errorAnswer(request, 401, 'API_AUTH', 'bad key')),
+      (request) => Effect.succeed(errorAnswer(request, 403, 'API_QUOTA', 'spent')),
       status(400),
     ])
     return Effect.gen(function* () {

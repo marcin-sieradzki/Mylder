@@ -11,11 +11,11 @@ import {
   HimSearchAnswer,
   JourneyDetailAnswer,
   JourneyPosAnswer,
-  error,
   QUOTA_SPENT,
   REFUSED_KEY,
   serviceOf,
 } from '../rejseplanen/answers.ts'
+import { errorAnswer, svcParam } from '../rejseplanen/responses.ts'
 import type { Timetable } from '../timetable.ts'
 import { departureBoard, readDepartureBoardRequest } from './departures.ts'
 import { journeyPos, readJourneyPosRequest } from './journey-pos.ts'
@@ -51,9 +51,9 @@ function failure(request: Http.Request, kind: Exclude<FailureKind, 'empty'>) {
     case 'timeout':
       return Http.gatewayTimeout(request)
     case 'refused-key':
-      return Effect.succeed(error(request, 401, REFUSED_KEY, 'access denied for accessId'))
+      return Effect.succeed(errorAnswer(request, 401, REFUSED_KEY, 'access denied for accessId'))
     case 'quota':
-      return Effect.succeed(error(request, 403, QUOTA_SPENT, 'quota exceeded'))
+      return Effect.succeed(errorAnswer(request, 403, QUOTA_SPENT, 'quota exceeded'))
   }
 }
 
@@ -97,7 +97,7 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
           const detail = journeyDetail(settings, query.get('id') ?? '', now)
           return detail
             ? Http.json(request, 200, encode.journeyDetail(detail))
-            : error(request, 400, 'SVC_PARAM', 'Unknown journey reference')
+            : svcParam(request, 'Unknown journey reference')
         }
         case 'himsearch': {
           const messages = empty ? [] : messagesAt(settings, now)
@@ -108,7 +108,7 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
           return Http.json(request, 200, encode.himsearch(answer))
         }
         default:
-          return error(request, 400, 'SVC_PARAM', `Rejseplanen has no service ${url.pathname}`)
+          return svcParam(request, `Rejseplanen has no service ${url.pathname}`)
       }
     }),
   )

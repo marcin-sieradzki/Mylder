@@ -4,7 +4,8 @@
 import 'server-only'
 import { Effect, type Layer } from 'effect'
 import * as Http from './http.ts'
-import { error, RECORDED_REJSEPLANEN, REFUSED_KEY } from './rejseplanen/answers.ts'
+import { REFUSED_KEY } from './rejseplanen/answers.ts'
+import { errorAnswer, RECORDED_REJSEPLANEN } from './rejseplanen/responses.ts'
 import * as RecordedHttpClient from './recording/layer.ts'
 import { recordingDir } from './recording/layer.ts'
 import * as SimulatedRejseplanen from './simulation/layer.ts'
@@ -44,7 +45,7 @@ export function readSource(value: string | undefined): Source {
  */
 const missingKey = Http.client((request) =>
   Effect.logError(`MYLDER_SOURCE=rejseplanen needs ${KEY_VARIABLE}; the call is refused`).pipe(
-    Effect.as(error(request, 401, REFUSED_KEY, `No ${KEY_VARIABLE} is set`)),
+    Effect.as(errorAnswer(request, 401, REFUSED_KEY, `No ${KEY_VARIABLE} is set`)),
   ),
 )
 

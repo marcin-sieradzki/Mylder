@@ -3,7 +3,7 @@ import { Effect, Layer, Logger } from 'effect'
 import { TestClock } from 'effect/testing'
 import { addDays } from '../timetable/dates'
 import * as Http from './http'
-import { error } from './rejseplanen/answers'
+import { errorAnswer } from './rejseplanen/responses'
 import { CpuClock } from './report'
 import { trackerLayer } from './runtime'
 import type { Snapshot } from './snapshot'
@@ -124,7 +124,7 @@ describe('a tracker run’s report', () => {
     // The refusal echoes the URL it was sent, key and all, as a server might.
     const refused = Http.layer(
       Http.client((request, url) =>
-        Effect.succeed(error(request, 401, 'API_AUTH', `refused ${url.href}`)),
+        Effect.succeed(errorAnswer(request, 401, 'API_AUTH', `refused ${url.href}`)),
       ),
     )
     return Effect.gen(function* () {

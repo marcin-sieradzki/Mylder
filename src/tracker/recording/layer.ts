@@ -75,12 +75,23 @@ export function answer(request: Http.Request, recorded: Recorded): Effect.Effect
   )
 }
 
-/** An `HttpClient` that replays calls: each folder's next one, and its last once none are left. */
+/**
+ * An `HttpClient` that replays calls: each folder's next one, and its last once none are left. A
+ * call the API files under a folder it doesn't list is the API's mistake, and dies.
+ */
 export function recordedClient(api: RecordedApi, calls: Calls): Http.HttpClient.HttpClient {
   const made = new Map<string, number>()
   return Http.client((request, url) =>
     Effect.suspend(() => {
       const folder = api.folderOf(url)
+      if (folder !== undefined && !api.folders.includes(folder)) {
+        return Effect.die(
+          new Error(
+            `The recorded API files ${url.pathname} under ${folder}, which is not one of its ` +
+              `folders: ${api.folders.join(', ')}`,
+          ),
+        )
+      }
       const recorded = folder ? (calls.get(folder) ?? []) : []
       if (!folder || recorded.length === 0) return Effect.succeed(api.unknown(request, url))
       const index = made.get(folder) ?? 0
@@ -104,12 +115,18 @@ export const callFile = (index: number) => `${String(index + 1).padStart(4, '0')
 export const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(/* turbopackIgnore: true */ path, 'utf8'))
 
-/** A recording folder's calls to an API, each folder's files in the order their names sort. */
+/**
+ * A recording folder's calls to an API, each folder's files in the order their names sort. A
+ * folder that isn't there has no calls; one that can't be read fails.
+ */
 export async function readCalls(api: RecordedApi, dir: string): Promise<Calls> {
   const calls = new Map<string, Recorded[]>()
   for (const name of api.folders) {
     const folder = join(/* turbopackIgnore: true */ dir, name)
-    const names = await readdir(/* turbopackIgnore: true */ folder).catch(() => [])
+    const names = await readdir(/* turbopackIgnore: true */ folder).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+      throw error
+    })
     const files = names.filter((file) => file.endsWith('.json')).sort()
     if (files.length === 0) continue
     calls.set(
