@@ -260,7 +260,7 @@
     "incomplete": "Rejseplanen sender højst 100 meddelelser, så listen kan være ufuldstændig.",
     "dataCards": {
       "title": "Fra Mylder",
-      "mine": "Fra Mylder, om dens egne data",
+      "mine": "Fra Mylder, om Mylders egne data",
       "paused": "Livedata er sat på pause indtil {date}",
       "pausedNoDate": "Livedata er sat på pause",
       "noAnswer": "Intet svar fra Rejseplanen siden {time}",

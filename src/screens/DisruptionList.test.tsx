@@ -23,13 +23,13 @@ const snapshot = JSON.parse(
 ) as Snapshot
 const NOW = snapshot.fetched
 
-/** A saved answer of the disruption route, from a recording's minute. */
 /** A saved snapshot of a recording's minute. */
 const savedSnapshot = (name: string, recording: string): Snapshot =>
   JSON.parse(
     readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
   ) as Snapshot
 
+/** A saved answer of the disruption route, from a recording's minute. */
 const savedList = (name: string, recording = 'weekday'): Disruptions =>
   JSON.parse(
     readFileSync(
@@ -265,19 +265,23 @@ describe('the Disruptions tab', () => {
   })
 
   it('counts its cards on the tab, loaded with the page before the tab opens', async () => {
+    // Mylder's own card at once, from a spent month's snapshot, then Rejseplanen's once they come.
+    let comes: (response: Response) => void = () => {}
+    const list = new Promise<Response>((resolve) => (comes = resolve))
     vi.stubGlobal('fetch', (input: RequestInfo | URL) =>
-      String(input) === '/api/disruptions'
-        ? Promise.resolve(Response.json(weekday))
-        : new Promise(() => {}),
+      String(input) === '/api/disruptions' ? list : new Promise(() => {}),
     )
-    liveSnapshot.update({ snapshot, lastGoodPoll: NOW, clockOffset: 0 })
+    const spent = savedSnapshot('0003.json', 'spent')
+    liveSnapshot.update({ snapshot: spent, lastGoodPoll: spent.fetched, clockOffset: 0 })
     render(
       <Providers lang="en" dictionary={en}>
         <MapScreen />
       </Providers>,
     )
     const tab = await screen.findByRole('tab', { name: /^Disruptions/ })
-    await vi.waitFor(() => expect(tab).toHaveTextContent('Disruptions 3'))
+    expect(tab).toHaveTextContent('Disruptions 1')
+    comes(Response.json(weekday))
+    await vi.waitFor(() => expect(tab).toHaveTextContent('Disruptions 4'))
     expect(screen.queryByRole('list', { name: 'Active now' })).not.toBeInTheDocument()
   })
 })
@@ -363,9 +367,12 @@ describe("Mylder's own data cards", () => {
   const titles = () => titlesIn(screen.getByRole('list', { name: 'From Mylder' }))
   const failing: Snapshot = { ...snapshot, api: { status: 'error', since: NOW } }
 
-  it('are none on a healthy snapshot', async () => {
+  it('are none on a healthy snapshot, in either language', async () => {
     await show('en', answer())
     expect(mine()).not.toBeInTheDocument()
+    cleanup()
+    await show('da', answer())
+    expect(screen.queryByRole('list', { name: 'Fra Mylder' })).not.toBeInTheDocument()
   })
 
   it('say live data is paused until the 1st while the month is spent, first in the list', async () => {

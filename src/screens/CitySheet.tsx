@@ -48,9 +48,12 @@ export function CitySheet({ open, onClose, asked, opener }: CitySheetProps) {
   const counts: Partial<Record<SheetTab, number>> = {
     // The trips on the map after the filters.
     vehicles: snapshot?.trips.filter((trip) => onMap(trip, hidden)).length,
-    // The cards listed: Mylder's own and Rejseplanen's.
+    // The cards listed: Mylder's own, shown at once, and Rejseplanen's once its list has come.
     disruptions:
-      disruptions && dataCards.length + disruptions.active.length + disruptions.later.length,
+      disruptions || dataCards.length > 0
+        ? dataCards.length +
+          (disruptions ? disruptions.active.length + disruptions.later.length : 0)
+        : undefined,
   }
 
   return (
