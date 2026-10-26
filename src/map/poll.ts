@@ -1,11 +1,13 @@
-// The browser's poll of the snapshot (docs/live-data.md, "Polling"): when the page opens, then
+// The browser's poll of a snapshot (docs/live-data.md, "Polling"): when the page opens, then
 // at each snapshot's next due plus a jitter drawn once per page load, only while the page is
 // visible. A failed poll keeps the snapshot and retries after 5, 10, 20 and then every 30 s; an
-// answer that isn't new yet is asked again after 5 s, three times. Everything outside Mylder
-// (the network, the timers, the clock, visibility, the random draw) comes in as a dependency.
+// answer that isn't new yet is asked again after 5 s, three times. Each kind of snapshot has its
+// route and its own poll, which lands its answers in its own store with its server's clock.
+// Everything outside Mylder (the network, the timers, the clock, visibility, the random draw)
+// comes in as a dependency.
 import 'client-only'
 import type { Snapshot } from '../tracker/index.ts'
-import type { SnapshotStore } from './live.ts'
+import type { LiveStore } from './live.ts'
 import { fetchRoute } from './routes.ts'
 
 type Timer = ReturnType<typeof setTimeout>
@@ -31,12 +33,25 @@ export interface Poller {
   stop(): void
 }
 
-const SNAPSHOT_ROUTE = '/api/snapshot'
+/** What any snapshot says of its poll: when it was made, and when the next is due. */
+export interface Polled {
+  /** On the server's clock, in ms since the epoch. */
+  readonly fetched: number
+  readonly nextDue: number
+  /** In seconds. */
+  readonly pollInterval: number
+}
+
+/** The route a poll asks, and which of its answers it takes. */
+export interface PollRoute<S extends Polled> {
+  readonly path: string
+  /** A poll with no answer by then, in ms, has failed. */
+  readonly timeout: number
+  /** Whether an answer's body is the route's snapshot; one that isn't is a failed poll. */
+  accepts(body: unknown): body is S
+}
 
 const S = 1000
-
-/** A poll with no answer by then has failed. */
-const TIMEOUT = 10 * S
 
 /** After the first, second, third and every later failure in a row. */
 const RETRIES = [5 * S, 10 * S, 20 * S, 30 * S]
@@ -62,17 +77,26 @@ const browser = (): PollerDeps => ({
   },
 })
 
-const isSnapshot = (body: unknown): body is Snapshot => {
-  const value = body as Partial<Snapshot> | null
-  return (
-    typeof value?.fetched === 'number' &&
-    typeof value.nextDue === 'number' &&
-    Array.isArray(value.trips)
-  )
+/** The transit snapshot's route. */
+export const snapshotRoute: PollRoute<Snapshot> = {
+  path: '/api/snapshot',
+  timeout: 10 * S,
+  accepts(body): body is Snapshot {
+    const value = body as Partial<Snapshot> | null
+    return (
+      typeof value?.fetched === 'number' &&
+      typeof value.nextDue === 'number' &&
+      Array.isArray(value.trips)
+    )
+  },
 }
 
-/** The poll that keeps `store` filled. */
-export function snapshotPoller(store: SnapshotStore, deps: PollerDeps = browser()): Poller {
+/** The poll of `route` that keeps `store` filled. */
+export function snapshotPoller<S extends Polled>(
+  store: LiveStore<S>,
+  route: PollRoute<S>,
+  deps: PollerDeps = browser(),
+): Poller {
   const { timers, now } = deps
   /** 1 to 4 s after each next due, the same for the whole page load. */
   const jitter = S + deps.random() * 3 * S
@@ -111,7 +135,7 @@ export function snapshotPoller(store: SnapshotStore, deps: PollerDeps = browser(
     failures += 1
   }
 
-  const landed = (snapshot: Snapshot, headers: Headers, sent: number) => {
+  const landed = (snapshot: S, headers: Headers, sent: number) => {
     const received = now()
     // The answer was made about halfway through the round trip, or, when the CDN kept it, its
     // age before that. The header counts whole seconds, so the server's clock reads up to a
@@ -144,14 +168,14 @@ export function snapshotPoller(store: SnapshotStore, deps: PollerDeps = browser(
     timer = undefined
     const controller = new AbortController()
     inFlight = controller
-    const timeout = timers.set(() => controller.abort(), TIMEOUT)
+    const timeout = timers.set(() => controller.abort(), route.timeout)
     const sent = now()
-    let answer: { snapshot: Snapshot; headers: Headers } | undefined
+    let answer: { snapshot: S; headers: Headers } | undefined
     try {
-      const response = await deps.fetch(SNAPSHOT_ROUTE, { signal: controller.signal })
+      const response = await deps.fetch(route.path, { signal: controller.signal })
       if (response.ok) {
         const body: unknown = await response.json()
-        if (isSnapshot(body)) answer = { snapshot: body, headers: response.headers }
+        if (route.accepts(body)) answer = { snapshot: body, headers: response.headers }
       }
     } catch {
       // A network error or the timeout: the same failed poll as a 5xx.
@@ -183,8 +207,28 @@ export function snapshotPoller(store: SnapshotStore, deps: PollerDeps = browser(
   }
 }
 
+/**
+ * A poll that runs while anything on the page needs it, made by `poller` when first needed, so
+ * its jitter is drawn once per page load. Each call starts it if it isn't running and returns
+ * the function that says the caller no longer needs it; it stops when nothing does.
+ */
+export function pagePoll(poller: () => Poller): () => () => void {
+  let made: Poller | undefined
+  let users = 0
+  return () => {
+    made ??= poller()
+    if (users++ === 0) made.start()
+    let stopped = false
+    return () => {
+      if (stopped) return
+      stopped = true
+      if (--users === 0) made?.stop()
+    }
+  }
+}
+
 /** The snapshot's next due on the server's clock, moved on by its interval once it has passed. */
-function nextDue(snapshot: Snapshot, serverNow: number): number {
+function nextDue(snapshot: Polled, serverNow: number): number {
   if (snapshot.nextDue > serverNow) return snapshot.nextDue
   const interval = Math.max(snapshot.pollInterval, 1) * S
   return snapshot.nextDue + Math.ceil((serverNow - snapshot.nextDue) / interval) * interval

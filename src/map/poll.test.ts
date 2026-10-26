@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Snapshot } from '../tracker/index.ts'
-import { snapshotStore } from './live.ts'
-import { snapshotPoller, type PollerDeps } from './poll.ts'
+import { liveStore, snapshotStore } from './live.ts'
+import { pagePoll, snapshotPoller, snapshotRoute, type PollerDeps, type PollRoute } from './poll.ts'
 
 // The browser's poll (docs/live-data.md, "Polling") against the weekday recording's saved
 // snapshots, on fake timers. Only what is outside Mylder is faked: the network, the timers, the
@@ -25,6 +25,20 @@ const saved = (minute: number): Snapshot =>
 const first = saved(1)
 const second = saved(2)
 
+/** A made-up second kind of snapshot, on a route of its own, due every 10 s. */
+interface Beacons {
+  readonly fetched: number
+  readonly nextDue: number
+  readonly pollInterval: number
+  readonly beacons: readonly string[]
+}
+
+const BEACONS: PollRoute<Beacons> = {
+  path: '/api/beacons',
+  timeout: 4_000,
+  accepts: (body): body is Beacons => Array.isArray((body as Partial<Beacons> | null)?.beacons),
+}
+
 /** What the network answers next: a snapshot, a 503, no connection, or no answer at all. */
 type Answer = Snapshot | 'unavailable' | 'offline' | 'silent'
 
@@ -32,14 +46,39 @@ const S = 1000
 
 let answers: Answer[]
 let polls: number[]
+let beaconPolls: number[]
+/** The snapshot polls on their way at once, and the most there have been. */
+let open: number
+let mostOpen: number
 let visible: boolean
-let onVisibility: (() => void) | undefined
+/** Every poll's watch on the page's visibility. */
+const onVisibility = new Set<() => void>()
 /** How far the server's clock runs ahead of this device's. */
 let serverAhead: number
 /** How long the CDN has kept the answer, in whole seconds. */
 let cacheAge: number
+/** How far the beacons' server clock runs ahead of this device's: they don't share the snapshot's. */
+let beaconsAhead: number
 
-const fetchFake: PollerDeps['fetch'] = (url, { signal }) => {
+/** The beacons' server makes a snapshot on each 10 s of its own clock. */
+const beaconsAnswer = () => {
+  const server = Date.now() + beaconsAhead
+  const fetched = first.fetched + Math.floor((server - first.fetched) / (10 * S)) * 10 * S
+  const beacons: Beacons = { fetched, nextDue: fetched + 10 * S, pollInterval: 10, beacons: [] }
+  return Response.json(beacons, { headers: { Date: new Date(server).toUTCString() } })
+}
+
+const fetchFake: PollerDeps['fetch'] = (url, init) => {
+  if (url === BEACONS.path) {
+    beaconPolls.push(Date.now())
+    return Promise.resolve(beaconsAnswer())
+  }
+  open += 1
+  mostOpen = Math.max(open, mostOpen)
+  return answerSnapshot(url, init).finally(() => (open -= 1))
+}
+
+const answerSnapshot: PollerDeps['fetch'] = (url, { signal }) => {
   expect(url).toBe('/api/snapshot')
   polls.push(Date.now())
   const answer = answers.length > 1 ? answers.shift()! : answers[0]
@@ -69,22 +108,22 @@ const deps = (draw = 0): PollerDeps => ({
   visibility: {
     visible: () => visible,
     watch: (onChange) => {
-      onVisibility = onChange
-      return () => (onVisibility = undefined)
+      onVisibility.add(onChange)
+      return () => onVisibility.delete(onChange)
     },
   },
 })
 
 const setVisible = (now: boolean) => {
   visible = now
-  onVisibility?.()
+  for (const onChange of onVisibility) onChange()
 }
 
 /** Polls since the start, as seconds after the first snapshot was fetched. */
-const pollTimes = () => polls.map((at) => (at - first.fetched) / S)
+const pollTimes = (times = polls) => times.map((at) => (at - first.fetched) / S)
 
 const start = (store = snapshotStore(), draw = 0) => {
-  const poller = snapshotPoller(store, deps(draw))
+  const poller = snapshotPoller(store, snapshotRoute, deps(draw))
   poller.start()
   return { store, poller }
 }
@@ -93,10 +132,15 @@ beforeEach(() => {
   // The page opens 10 s after the first snapshot was fetched, on a clock that agrees with the server's.
   vi.useFakeTimers({ now: first.fetched + 10 * S })
   answers = [first]
+  onVisibility.clear()
   polls = []
+  beaconPolls = []
+  open = 0
+  mostOpen = 0
   visible = true
   serverAhead = 0
   cacheAge = 0
+  beaconsAhead = 0
 })
 
 afterEach(() => {
@@ -221,5 +265,74 @@ describe("the browser's poll", () => {
     await vi.advanceTimersByTimeAsync(60 * S)
     expect(store.get().failingSince).toBeUndefined()
     expect(pollTimes()).toEqual([10])
+  })
+
+  it('can be stopped and started again, with never a second poll on its way', async () => {
+    answers = ['silent', first, second]
+    const { store, poller } = start()
+    await vi.advanceTimersByTimeAsync(1 * S)
+    poller.stop()
+    await vi.advanceTimersByTimeAsync(1 * S)
+    poller.start()
+    poller.start()
+    await vi.advanceTimersByTimeAsync(0)
+    // Nothing had landed, so it asks at once; the poll stopped on its way was dropped.
+    expect(pollTimes()).toEqual([10, 12])
+    expect(mostOpen).toBe(1)
+    expect(store.get().snapshot?.fetched).toBe(first.fetched)
+    // Stopped and started while the snapshot it holds is fresh, it waits for the next due.
+    poller.stop()
+    await vi.advanceTimersByTimeAsync(10 * S)
+    poller.start()
+    await vi.advanceTimersByTimeAsync(40 * S)
+    expect(pollTimes()).toEqual([10, 12, 61])
+    expect(mostOpen).toBe(1)
+  })
+})
+
+describe("the page's poll of a store", () => {
+  it('runs while anything on the page needs it, and starts again when something does', async () => {
+    answers = [first, second]
+    const use = pagePoll(() => snapshotPoller(snapshotStore(), snapshotRoute, deps()))
+    const done = use()
+    const alsoDone = use()
+    await vi.advanceTimersByTimeAsync(0)
+    done()
+    done()
+    await vi.advanceTimersByTimeAsync(60 * S)
+    expect(pollTimes()).toEqual([10, 61])
+    alsoDone()
+    await vi.advanceTimersByTimeAsync(100 * S)
+    expect(pollTimes()).toEqual([10, 61])
+    use()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(pollTimes()).toEqual([10, 61, 170])
+  })
+})
+
+describe('two polls on two routes', () => {
+  it('each polls on its own next due and keeps its own clock, and both stop while hidden', async () => {
+    answers = [first, second]
+    // The beacons' server runs 35 s ahead of this device, while the snapshot's agrees with it.
+    beaconsAhead = 35 * S
+    const snapshots = snapshotStore()
+    const beacons = liveStore<Beacons>()
+    snapshotPoller(snapshots, snapshotRoute, deps()).start()
+    snapshotPoller(beacons, BEACONS, deps()).start()
+    await vi.advanceTimersByTimeAsync(60 * S)
+    expect(pollTimes()).toEqual([10, 61])
+    // The page opens at the beacons' 0:45, so their next is due at 0:50, this device's 0:15.
+    expect(pollTimes(beaconPolls)).toEqual([10, 16, 26, 36, 46, 56, 66])
+    expect(snapshots.get().clockOffset).toBe(0)
+    expect(beacons.get().clockOffset).toBe(35 * S)
+    expect(beacons.get().snapshot?.fetched).toBe(first.fetched + 100 * S)
+    setVisible(false)
+    await vi.advanceTimersByTimeAsync(100 * S)
+    expect(pollTimes()).toEqual([10, 61])
+    expect(pollTimes(beaconPolls)).toHaveLength(7)
+    setVisible(true)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(pollTimes().at(-1)).toBe(170)
+    expect(pollTimes(beaconPolls).at(-1)).toBe(170)
   })
 })
