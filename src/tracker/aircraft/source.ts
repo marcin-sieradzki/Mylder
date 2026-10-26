@@ -34,6 +34,9 @@ export function readAircraftSource(value: string | undefined): AircraftSource {
 /** Where adsb.lol answers, and its circle query: 25 nm round 55.75 N, 12.38 E, over the box. */
 export const ADSB_LOL_POINT = 'https://api.adsb.lol/v2/point/55.75/12.38/25'
 
+/** Where adsb.fi answers the same circle query, in the same format: adsb.lol's fallback. */
+export const ADSB_FI_POINT = 'https://opendata.adsb.fi/api/v3/lat/55.75/lon/12.38/dist/25'
+
 /**
  * The feed as a recording keeps it: one folder, `aircraft/`, for adsb.lol's circle query and
  * adsb.fi's, which answer alike; any other call is not found.
@@ -53,6 +56,24 @@ export function feedLayer(
     : Http.fetchLayer
 }
 
-/** The provider a source names in the snapshot. */
-export const providerOf = (source: Exclude<AircraftSource, { kind: 'off' }>): AircraftProvider =>
-  source.kind === 'recording' ? 'recording' : 'adsb.lol'
+/** A feed the source calls: the provider the snapshot names when it answers, and its query. */
+export interface Feed {
+  readonly provider: AircraftProvider
+  readonly url: string
+}
+
+/**
+ * The feeds a source calls, adsb.lol and then adsb.fi, each named in the snapshot as it answers;
+ * a recording replays both from its one folder, named as the recording.
+ */
+export function feedsOf(source: Exclude<AircraftSource, { kind: 'off' }>): {
+  readonly feed: Feed
+  readonly fallback: Feed
+} {
+  const name = (provider: AircraftProvider) =>
+    source.kind === 'recording' ? 'recording' : provider
+  return {
+    feed: { provider: name('adsb.lol'), url: ADSB_LOL_POINT },
+    fallback: { provider: name('adsb.fi'), url: ADSB_FI_POINT },
+  }
+}

@@ -15,10 +15,9 @@ import {
   type AircraftShape,
 } from './aircraft.ts'
 import {
-  ADSB_LOL_POINT,
   AIRCRAFT_SOURCE_VARIABLE,
   feedLayer,
-  providerOf,
+  feedsOf,
   readAircraftSource,
   type AircraftSource,
 } from './source.ts'
@@ -32,10 +31,7 @@ export interface AircraftLayerOptions {
 /** The aircraft source with all it needs: the feed's client, or nothing when it is off. */
 export function aircraftLayer({ source, http }: AircraftLayerOptions): Layer.Layer<Aircraft> {
   if (source.kind === 'off') return offLayer
-  const config = Layer.succeed(AircraftConfig, {
-    provider: providerOf(source),
-    url: ADSB_LOL_POINT,
-  })
+  const config = Layer.succeed(AircraftConfig, feedsOf(source))
   return aircraftServiceLayer.pipe(Layer.provide(http ?? feedLayer(source)), Layer.provide(config))
 }
 

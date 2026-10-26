@@ -37,8 +37,14 @@ async function filesUnder(dir: string): Promise<string[]> {
 }
 
 /** A call to a service through a client, as its status and body. */
+/** An answer's status and body, as the tests compare them. */
+const statusAndText = ({ status, text }: Http.Answer) => ({ status, text })
+
 const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
-  Http.getText(client, `https://www.rejseplan.dk/api/${service}`, {}).pipe(Effect.orDie)
+  Http.getText(client, `https://www.rejseplan.dk/api/${service}`, {}).pipe(
+    Effect.map(statusAndText),
+    Effect.orDie,
+  )
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
@@ -209,9 +215,16 @@ describe('the recorded layer', () => {
 
   it('refuses a file shaped like a failure that isn\u2019t one', () => {
     expect(readRecorded({ status: 503 })).toEqual({ status: 503 })
+    expect(readRecorded({ status: 429, headers: { 'retry-after': '60' } })).toEqual({
+      status: 429,
+      headers: { 'retry-after': '60' },
+    })
     expect(readRecorded({ timeout: true })).toEqual({ timeout: true })
     expect(() => readRecorded({ status: '503' })).toThrow('Not a recorded failure')
     expect(() => readRecorded({ timeout: false })).toThrow('Not a recorded failure')
+    expect(() => readRecorded({ status: 429, headers: { 'retry-after': 60 } })).toThrow(
+      'Not a recorded failure',
+    )
   })
 
   it('keeps a recording inside the recordings folder', () => {
@@ -231,7 +244,10 @@ describe('the recorded layer for another API', () => {
   const call = (path: string) =>
     Effect.gen(function* () {
       const client = yield* Http.HttpClient.HttpClient
-      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(Effect.orDie)
+      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(
+        Effect.map(statusAndText),
+        Effect.orDie,
+      )
     })
 
   /** A recording folder made for one test, holding `files` by their paths, removed after it. */

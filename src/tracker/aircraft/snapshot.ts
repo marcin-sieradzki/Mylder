@@ -16,7 +16,7 @@ export const PositionSource = Schema.Literals(['broadcast', 'multilateration', '
 /** An aircraft's data state at `fetched`, by the domain's rule (src/domain/aircraft-state.ts). */
 export const AircraftState = Schema.Literals(['live', 'ageing', 'estimated', 'no-signal'])
 
-/** Where the aircraft come from: adsb.lol, its fallback adsb.fi (#132), or a recording. */
+/** Where the aircraft come from: adsb.lol, its fallback adsb.fi, or a recording. */
 export const AircraftProvider = Schema.Literals(['adsb.lol', 'adsb.fi', 'recording'])
 
 /** One aircraft, by its ICAO hex. */

@@ -5,7 +5,10 @@ import { afterEach, describe, expect, it } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { liveAircraft } from '../map/aircraft'
 import { liveSnapshot } from '../map/live'
+import { mapView } from '../map/view'
+import type { AircraftSnapshot } from '../tracker/aircraft/index'
 import type { Snapshot } from '../tracker/index'
 import { MapLegend } from './MapLegend'
 import { Providers } from './Providers'
@@ -30,8 +33,30 @@ function show(lang: Lang, snapshot?: Snapshot) {
   )
 }
 
+/** The weekday recording's first aircraft snapshot, as the aircraft route answers it. */
+const aircraft = JSON.parse(
+  readFileSync(
+    join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', '0001.json'),
+    'utf8',
+  ),
+) as AircraftSnapshot
+
+/** 15:42 in Copenhagen, summer time, when the feed last answered. */
+const LAST_ANSWER = Date.UTC(2026, 5, 16, 13, 42, 10)
+
+/** The aircraft feed failing since a minute after its last answer. */
+const failing: AircraftSnapshot = {
+  ...aircraft,
+  fetched: LAST_ANSWER + 90_000,
+  nextDue: LAST_ANSWER + 100_000,
+  health: { status: 'error', kind: 'timeout', since: LAST_ANSWER + 10_000 },
+  lastAnswer: LAST_ANSWER,
+}
+
 afterEach(() => {
   liveSnapshot.update({ snapshot: undefined })
+  liveAircraft.update({ snapshot: undefined })
+  mapView.update({ aircraftHidden: false })
 })
 
 const NO_LIVE_EN = 'No vehicle can be Live: Rejseplanen sends only estimated positions.'
@@ -77,5 +102,42 @@ describe("the map's legend", () => {
     }
     act(() => liveSnapshot.update({ snapshot: calcOnly }))
     expect(screen.getByText(NO_LIVE_EN)).toBeInTheDocument()
+  })
+
+  it("says since when the planes' feed has had no data while it fails, in English", () => {
+    liveAircraft.update({ snapshot: failing })
+    show('en', alternating)
+    expect(screen.getByText('Planes: no data since 15:42')).toBeInTheDocument()
+    act(() =>
+      liveAircraft.update({
+        snapshot: { ...aircraft, health: { status: 'ok', since: LAST_ANSWER + 100_000 } },
+      }),
+    )
+    expect(screen.queryByText(/no data since/)).not.toBeInTheDocument()
+  })
+
+  it('says it in Danish', () => {
+    liveAircraft.update({ snapshot: failing })
+    show('da', alternating)
+    expect(screen.getByText('Fly: ingen data siden 15:42')).toBeInTheDocument()
+  })
+
+  it('counts from the first failure when the feed has never answered', () => {
+    const { lastAnswer: _, ...never } = failing
+    liveAircraft.update({ snapshot: never })
+    show('en', alternating)
+    expect(screen.getByText('Planes: no data since 15:42')).toBeInTheDocument()
+  })
+
+  it('says nothing of the planes while their feed answers, they are off, or hidden', () => {
+    show('en', alternating)
+    expect(screen.queryByText(/Planes:/)).not.toBeInTheDocument()
+    act(() => liveAircraft.update({ snapshot: aircraft }))
+    expect(screen.queryByText(/Planes:/)).not.toBeInTheDocument()
+    act(() => {
+      liveAircraft.update({ snapshot: failing })
+      mapView.update({ aircraftHidden: true })
+    })
+    expect(screen.queryByText(/Planes:/)).not.toBeInTheDocument()
   })
 })

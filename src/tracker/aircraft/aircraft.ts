@@ -1,15 +1,17 @@
 // The aircraft source (docs/aircraft.md, "One call every 10 s"): whoever asks, at most one call
-// to the feed every 10 s within an instance, the requests that come meanwhile sharing it. An
-// answer becomes the snapshot of the aircraft it keeps; a failed call gives the last aircraft,
-// aged by the clock, with the health that says why. Each aircraft's data state is decided at
-// the snapshot's fetch. No store, lease or budget (ADR 0014): each
+// to the feed every 10 s within an instance, the requests that come meanwhile sharing it. A call
+// adsb.lol fails goes to adsb.fi, and after a 429 adsb.lol rests while adsb.fi answers ("Limits").
+// An answer becomes the snapshot of the aircraft it keeps, naming who gave it; a call both fail
+// gives the last aircraft, aged by the clock, with the health that says why. Each aircraft's data
+// state is decided at the snapshot's fetch. No store, lease or budget (ADR 0014): each
 // aircraft carries its own position's age, and the feed needs no key.
 import 'server-only'
 import { Cause, Clock, Context, Effect, Layer, Result, Schema, Semaphore } from 'effect'
 import * as Http from '../http.ts'
 import { ReadsbAnswer } from './answers.ts'
 import { aged, aircraftIn, withStates } from './build.ts'
-import type { AircraftHealth, AircraftProvider, AircraftSnapshot } from './snapshot.ts'
+import type { AircraftHealth, AircraftSnapshot } from './snapshot.ts'
+import type { Feed } from './source.ts'
 
 /** How often the feed is asked, in seconds, and so how long a snapshot holds. */
 export const POLL_SECONDS = 10
@@ -21,13 +23,29 @@ export const CALL_TIMEOUT = '4 seconds'
 export interface FeedError {
   readonly kind: NonNullable<AircraftHealth['kind']>
   readonly message: string
+  /** For a 429, too many calls: its `Retry-After` header, if it sent one. */
+  readonly limited?: { readonly retryAfter: string | undefined }
+}
+
+/**
+ * When a feed that answered 429 at `now` may be asked again: once its `Retry-After`, in seconds
+ * or as a date, has passed, or else at the next midnight UTC, when adsb.lol's daily allowance of
+ * calls from an address starts again (docs/aircraft.md, "Limits").
+ */
+function restsUntil(now: number, retryAfter: string | undefined): number {
+  const value = retryAfter?.trim() ?? ''
+  if (/^\d+$/.test(value)) return now + Number(value) * 1000
+  const date = Date.parse(value)
+  if (!Number.isNaN(date)) return date
+  const today = new Date(now)
+  return Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1)
 }
 
 export interface AircraftSettings {
-  /** The provider the snapshot names. */
-  readonly provider: AircraftProvider
-  /** The circle query's URL. */
-  readonly url: string
+  /** The feed asked first. */
+  readonly feed: Feed
+  /** The feed that answers a call the first one fails, and every call while it rests. */
+  readonly fallback: Feed
 }
 
 export class AircraftConfig extends Context.Service<AircraftConfig, AircraftSettings>()(
@@ -52,7 +70,7 @@ const ask = (client: Http.HttpClient.HttpClient, url: string) =>
   Effect.gen(function* () {
     const fail = (kind: FeedError['kind'], message: string) =>
       Effect.fail<FeedError>({ kind, message })
-    const { status, text } = yield* Http.getText(client, url, {}).pipe(
+    const { status, headers, text } = yield* Http.getText(client, url, {}).pipe(
       Effect.timeout(CALL_TIMEOUT),
       Effect.catch((error) =>
         Cause.isTimeoutError(error)
@@ -60,6 +78,13 @@ const ask = (client: Http.HttpClient.HttpClient, url: string) =>
           : fail(error.network ? 'network' : 'status', error.message),
       ),
     )
+    if (status === 429) {
+      return yield* Effect.fail<FeedError>({
+        kind: 'status',
+        message: 'the feed answered 429, too many calls',
+        limited: { retryAfter: headers['retry-after'] },
+      })
+    }
     if (status >= 400) return yield* fail('status', `the feed answered ${status}`)
     const body = yield* Effect.try({
       try: () => JSON.parse(text) as unknown,
@@ -76,13 +101,40 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
     Aircraft,
     Effect.gen(function* () {
       const client = yield* Http.HttpClient.HttpClient
-      const { provider, url } = yield* AircraftConfig
+      const { feed, fallback } = yield* AircraftConfig
       // One call at a time: a request that waits finds the snapshot the call before it made.
       const one = yield* Semaphore.make(1)
       let latest: AircraftSnapshot | undefined
 
+      // After a 429 the feed rests until then, and its fallback answers every call meanwhile.
+      let restingUntil = 0
+
+      /** A feed's answer, with who gave it; a failure is logged with who failed. */
+      const answered = (from: Feed) =>
+        ask(client, from.url).pipe(
+          Effect.tapError(({ message }) =>
+            Effect.logWarning(`Aircraft feed ${from.provider}: ${message}`),
+          ),
+          Effect.map((answer) => ({ answer, provider: from.provider })),
+        )
+
+      /** The feed's answer, or its fallback's for a call it fails or while it rests. */
+      const either = Effect.gen(function* () {
+        if ((yield* Clock.currentTimeMillis) < restingUntil) return yield* answered(fallback)
+        const first = yield* Effect.result(answered(feed))
+        if (Result.isSuccess(first)) return first.success
+        const { limited } = first.failure
+        if (limited) {
+          restingUntil = restsUntil(yield* Clock.currentTimeMillis, limited.retryAfter)
+          yield* Effect.logWarning(
+            `Aircraft feed ${feed.provider} rests until ${new Date(restingUntil).toISOString()}`,
+          )
+        }
+        return yield* answered(fallback)
+      })
+
       const call = Effect.gen(function* () {
-        const result = yield* Effect.result(ask(client, url))
+        const result = yield* Effect.result(either)
         const now = yield* Clock.currentTimeMillis
         const due = { fetched: now, nextDue: now + POLL_SECONDS * 1000, pollInterval: POLL_SECONDS }
         const decided = (health: AircraftHealth) => ({
@@ -98,14 +150,13 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
           }
           return {
             ...due,
-            provider,
+            provider: result.success.provider,
             health,
             lastAnswer: now,
-            aircraft: withStates(aircraftIn(result.success), decided(health)),
+            aircraft: withStates(aircraftIn(result.success.answer), decided(health)),
           } satisfies AircraftSnapshot
         }
-        const { kind, message } = result.failure
-        yield* Effect.logWarning(`Aircraft feed: ${message}`)
+        const { kind } = result.failure
         // The feed has failed since its first failure in a row, whatever each one's kind.
         const before = latest?.health
         const since = before?.status === 'error' ? before.since : now
@@ -113,7 +164,8 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
         const kept = latest ? aged(latest.aircraft, (now - latest.fetched) / 1000) : []
         return {
           ...due,
-          provider,
+          // The aircraft kept are the last answer's, so the snapshot names who gave them.
+          provider: latest?.provider ?? feed.provider,
           health,
           ...(latest?.lastAnswer === undefined ? {} : { lastAnswer: latest.lastAnswer }),
           aircraft: withStates(kept, decided(health)),

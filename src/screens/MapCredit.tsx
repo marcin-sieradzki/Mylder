@@ -55,7 +55,7 @@ export function MapCredit() {
                 licence: <a href={ODBL}>ODbL</a>,
               })
             : compose(words.aircraftFrom, {
-                source: <a href={aircraft.href}>{aircraft.name}</a>,
+                source: <a href={aircraft.href}>© {aircraft.name}</a>,
               })}
           {' · '}
         </>
