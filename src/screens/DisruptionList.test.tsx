@@ -24,7 +24,10 @@ const NOW = snapshot.fetched
 /** A saved answer of the disruption route, from a recording's minute. */
 const savedList = (name: string, recording = 'weekday'): Disruptions =>
   JSON.parse(
-    readFileSync(join(process.cwd(), 'recordings', recording, 'disruptions', name), 'utf8'),
+    readFileSync(
+      join(process.cwd(), 'recordings', recording, 'answers', 'disruptions', name),
+      'utf8',
+    ),
   ) as Disruptions
 
 /**

@@ -3,6 +3,7 @@
 // canvas subscribes to outside React (docs/live-data.md, "The browser").
 import 'client-only'
 import { useSyncExternalStore } from 'react'
+import { lastAnswer } from '../domain/pause.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { snapshotPoller } from './poll.ts'
 
@@ -15,17 +16,34 @@ export interface LiveSnapshot {
   readonly lastGoodPoll?: number
   /** Since when polls have failed, on this device's clock; unset once one answers. */
   readonly failingSince?: number
+  /**
+   * When the server received the latest position answer this page has seen, on the server's
+   * clock: the latest of each landed snapshot's last answer (src/domain/pause.ts), so it never
+   * counts up and holds through snapshots built from none. The store keeps it itself.
+   */
+  readonly lastAnswer?: number
 }
 
 export interface SnapshotStore {
   get(): LiveSnapshot
   /** Replaces what changed and tells every subscriber. */
-  update(change: Partial<LiveSnapshot>): void
+  update(change: Partial<Omit<LiveSnapshot, 'lastAnswer'>>): void
   /** Calls back on every change; returns the function that stops it. */
   subscribe(onChange: () => void): () => void
 }
 
 const NOTHING_YET: LiveSnapshot = { clockOffset: 0 }
+
+/** The server's time now, by this device's clock and the offset the latest answer gave. */
+export const serverNow = ({ clockOffset }: Pick<LiveSnapshot, 'clockOffset'>): number =>
+  Date.now() + clockOffset
+
+/** The latest answer time once `state`'s snapshot has landed; none once it is cleared. */
+function lastAnswerOf({ snapshot, lastAnswer: before }: LiveSnapshot): number | undefined {
+  if (!snapshot) return undefined
+  const its = lastAnswer(snapshot)
+  return its === undefined || (before !== undefined && before > its) ? before : its
+}
 
 /** A store holding nothing yet. Each change makes a new state, so React sees it changed. */
 export function snapshotStore(): SnapshotStore {
@@ -35,6 +53,7 @@ export function snapshotStore(): SnapshotStore {
     get: () => state,
     update(change) {
       state = { ...state, ...change }
+      if ('snapshot' in change) state = { ...state, lastAnswer: lastAnswerOf(state) }
       for (const listener of listeners) listener()
     },
     subscribe(onChange) {
@@ -104,6 +123,18 @@ export function useSnapshot(store: SnapshotStore = liveSnapshot): Snapshot | und
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().snapshot,
+    () => undefined,
+  )
+}
+
+/**
+ * When the server received the latest position answer this page has seen, for the Updated line:
+ * it renders again only when that moves.
+ */
+export function useLastAnswer(store: SnapshotStore = liveSnapshot): number | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().lastAnswer,
     () => undefined,
   )
 }

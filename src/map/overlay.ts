@@ -1,24 +1,55 @@
 // The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
 // the live snapshot's vehicles, less the modes the viewer's filters hide, where the motion loop
 // moves them each frame, with their glyphs made again when a snapshot lands, a data state turns
-// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover or
-// a tap picks a dot for its card (picking.ts). It polls the snapshot while the map is open. The
-// number of vehicles drawn is on the map's container as `data-vehicles`, for tests.
+// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover
+// picks a dot for its card (picking.ts), a tap on one opens its detail, and a tap that finds no
+// dot opens the stop under it, if any. Each frame drawn moves the camera onto the followed dot
+// (follow.ts). It polls the snapshot while the map is open. The number of vehicles drawn is on
+// the map's container as `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { followCamera } from './follow.ts'
 import { radiusScaleAt } from './glyphs.ts'
-import { liveSnapshot, pollSnapshot } from './live.ts'
+import { liveSnapshot, pollSnapshot, serverNow } from './live.ts'
 import { vehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
-import { vehiclePicking } from './picking.ts'
-import { dataStates, serverNow } from './states.ts'
+import { TAP_RADIUS, vehiclePicking } from './picking.ts'
+import { dataStates } from './states.ts'
 import { timetables } from './timetable.ts'
 import { vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf, type Vehicles } from './vehicles.ts'
-import { mapView } from './view.ts'
+import { STOP_LAYERS } from './style/basemap.ts'
+import { mapView, openPanel } from './view.ts'
+
+/**
+ * The stop drawn nearest a point on the canvas, within the dots' tap radius, by its id; none
+ * where no stop is drawn there, such as a bus stop at a zoom that hides it.
+ */
+function stopAt(map: MapLibreMap, x: number, y: number): string | undefined {
+  const layers = STOP_LAYERS.filter((id) => map.getLayer(id))
+  if (layers.length === 0) return undefined
+  const r = TAP_RADIUS
+  const found = map.queryRenderedFeatures(
+    [
+      [x - r, y - r],
+      [x + r, y + r],
+    ],
+    { layers },
+  )
+  let nearest: { id: string; away: number } | undefined
+  for (const feature of found) {
+    const id: unknown = feature.properties.id
+    if (typeof id !== 'string' || feature.geometry.type !== 'Point') continue
+    const [lon, lat] = feature.geometry.coordinates
+    const at = map.project([lon, lat])
+    const away = Math.hypot(at.x - x, at.y - y)
+    if (!nearest || away < nearest.away) nearest = { id, away }
+  }
+  return nearest?.id
+}
 
 export interface VehicleOverlay {
   /** Reads Perron's paint again, after the theme changed. */
@@ -30,8 +61,27 @@ export interface VehicleOverlay {
 export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): VehicleOverlay {
   const root = document.documentElement
   const canvas = map.getCanvas()
-  const picking = vehiclePicking(container, undefined, (onDot) => {
-    canvas.style.cursor = onDot ? 'pointer' : ''
+  // Off a dot, the stop under the pointer is looked up once a frame, where it rests by then, as
+  // pointer moves come faster than frames.
+  let resting: { x: number; y: number } | undefined
+  let cursorFrame: number | undefined
+  const cursorOverStops = () => {
+    cursorFrame = undefined
+    if (resting) canvas.style.cursor = stopAt(map, resting.x, resting.y) ? 'pointer' : ''
+  }
+  const picking = vehiclePicking(container, undefined, {
+    onTap(key) {
+      openPanel({ kind: 'trip', id: key })
+    },
+    onPointer(onDot, x, y) {
+      resting = onDot ? undefined : { x, y }
+      if (onDot) canvas.style.cursor = 'pointer'
+      else cursorFrame ??= requestAnimationFrame(cursorOverStops)
+    },
+    onMiss(x, y) {
+      const stop = stopAt(map, x, y)
+      if (stop) openPanel({ kind: 'stop', id: stop })
+    },
   })
   const project = (lonLat: [number, number]) => map.project(lonLat)
   const overlay = new MapLibreOverlay({ interleaved: false, layers: [], ...picking.props })
@@ -47,10 +97,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     container.dataset.vehicles = String(vehicles.length)
     picking.follow(vehicles, project)
   }
+  const follow = followCamera(map, container)
+  const along = (key: string) => loop.along(key)
   const loop = vehicleLoop({
     now: () => serverNow(liveSnapshot.get()),
     draw(moved) {
       vehicles = moved
+      follow.frame(moved, along)
       render()
     },
   })
@@ -135,6 +188,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopFiltering()
       stopPolling()
       loop.stop()
+      follow.remove()
+      if (cursorFrame !== undefined) cancelAnimationFrame(cursorFrame)
       map.off('zoom', onZoom)
       map.off('move', onMove)
       map.off('resize', onResize)

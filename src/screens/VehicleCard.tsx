@@ -1,13 +1,14 @@
 'use client'
 
 import { MapTooltip, VehicleDotLabel } from '@mylder/perron'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import { pickedVehicle, usePickedVehicle } from '../map/picking'
-import { serverNow, useDataState } from '../map/states'
+import { useDataState } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
+import { useServerSecond } from './useServerSecond'
 import styles from './VehicleCard.module.css'
 import { stateLabelOf, titleOf } from './vehicleLabel'
 
@@ -21,25 +22,9 @@ function tripOf(snapshot: Snapshot | undefined, key: string | undefined) {
   return trips.get(key)
 }
 
-/** The server's time, read again on each of its whole seconds while the card is open. */
-function useServerSecond(clockOffset: number): number {
-  const [now, setNow] = useState(() => serverNow({ clockOffset }))
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>
-    const tick = () => {
-      const at = serverNow({ clockOffset })
-      setNow(at)
-      timer = setTimeout(tick, 1000 - (at % 1000))
-    }
-    tick()
-    return () => clearTimeout(timer)
-  }, [clockOffset])
-  return now
-}
-
 const close = () => pickedVehicle.clear()
 
-/** A card a hover opened lets the pointer through to the map, so it never hides its dot. */
+/** The card lets the pointer through to the map, so it never hides its dot. */
 const PASSING = { positioner: { className: styles.passing } }
 
 /**
@@ -52,18 +37,17 @@ export function VehicleCard() {
   const trip = tripOf(snapshot, picked?.key)
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   if (!picked || !trip) return null
-  return <Card trip={trip} point={picked.point} pinned={picked.pinned} timezone={timezone} />
+  return <Card trip={trip} point={picked.point} timezone={timezone} />
 }
 
 interface CardProps {
   trip: SnapshotTrip
   point: readonly [number, number]
-  pinned: boolean
   /** The timetable's zone, whose clock the card's times read on. */
   timezone: string
 }
 
-function Card({ trip, point, pinned, timezone }: CardProps) {
+function Card({ trip, point, timezone }: CardProps) {
   const { dictionary } = useI18n()
   const words = dictionary.vehicle
   const state = useDataState(trip.key) ?? trip.state
@@ -82,7 +66,7 @@ function Card({ trip, point, pinned, timezone }: CardProps) {
       onClose={close}
       role="tooltip"
       className={styles.card}
-      slotProps={pinned ? undefined : PASSING}
+      slotProps={PASSING}
     >
       <span className={styles.title}>{titleOf(trip, dictionary)}</span>
       <span className={styles.state}>

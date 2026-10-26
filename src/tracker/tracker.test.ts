@@ -479,7 +479,7 @@ describe('the tracker', () => {
     ),
   )
 
-  it.effect('answers a stop’s departures and a trip’s calls from the timetable and its delay', () =>
+  it.effect('answers a stop’s departures and a trip’s calls at the trip’s delay', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
       const t = yield* Tracker

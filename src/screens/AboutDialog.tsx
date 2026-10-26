@@ -3,7 +3,7 @@
 import { Dialog, FactList, Kbd, Link, Section, Text, VehicleDotLabel } from '@mylder/perron'
 import { Fragment, type ReactNode } from 'react'
 import type { ClientDictionary } from '../i18n/dictionary'
-import { intlLocale, type Lang } from '../i18n/lang'
+import { intlLocale } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -21,6 +21,7 @@ import {
   OPENSTREETMAP,
   REJSEPLANEN,
 } from './credits'
+import { dayOf } from './wording'
 
 type Words = ClientDictionary['about']
 
@@ -44,23 +45,6 @@ function compose(template: string, parts: Record<string, ReactNode>): ReactNode[
   })
 }
 
-const days = new Map<Lang, Intl.DateTimeFormat>()
-
-/** A date such as `2026-10-12` as the language writes it: "12 October", "12. oktober". */
-function dayOf(date: string, lang: Lang): string {
-  let format = days.get(lang)
-  if (!format) {
-    format = new Intl.DateTimeFormat(intlLocale(lang), {
-      day: 'numeric',
-      month: 'long',
-      timeZone: 'UTC',
-    })
-    days.set(lang, format)
-  }
-  return format.format(Date.parse(`${date}T00:00:00Z`))
-}
-
-/** A poll interval in seconds as the budget line says it: "90 s", "2 min". */
 /** Where the page's vehicles come from. */
 function sourceOf({ source }: Snapshot, words: Words['status']): string {
   const name = source.name ?? ''
@@ -117,7 +101,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
             label: status.updates,
             value: status.every.replace(
               '{interval}',
-              intervalOf(snapshot.pollInterval, dictionary.vehicle),
+              intervalOf(snapshot.pollInterval, dictionary.interval),
             ),
           },
           { label: status.budget, value: status.budgetLevels[budget.level] },

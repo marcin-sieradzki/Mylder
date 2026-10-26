@@ -265,7 +265,7 @@ describe('the budget line', () => {
       budget: { level: 'tight', calls: 40_000 },
     })
     expect(
-      screen.getByText('Opdaterer hvert 2 min for at holde databudgettet.'),
+      screen.getByText('Kortet opdateres hvert 2. minut for at overholde databudgettet.'),
     ).toBeInTheDocument()
   })
 

@@ -1,0 +1,32 @@
+{
+  "stop": {
+    "id": "54307",
+    "name": "Orientkaj St.",
+    "lines": [
+      {
+        "name": "991",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      }
+    ]
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "departures": [
+    {
+      "trip": "bus.991.7ce514fd98.20260616.0730",
+      "line": "991",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Teglholmen",
+      "platform": "54307",
+      "scheduled": 1781587800000,
+      "state": "timetable-only"
+    }
+  ],
+  "intervals": [],
+  "messages": []
+}

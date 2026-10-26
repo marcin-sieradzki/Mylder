@@ -13,7 +13,8 @@
   "topBar": {
     "updated": "Updated {time}",
     "modes": "Modes",
-    "about": "About Mylder"
+    "about": "About Mylder",
+    "updatedPaused": "Updated {time}, paused"
   },
   "modes": {
     "bus": "Bus",
@@ -32,6 +33,48 @@
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
   },
+  "trip": {
+    "fallbackTitle": "Vehicle",
+    "to": "to {headsign}",
+    "loading": "Loading the trip…",
+    "notFound": "Trip not found",
+    "notFoundDetail": "Mylder's timetable has no trip with this key running today.",
+    "failed": "The trip could not be loaded",
+    "failedDetail": "Trying again shortly.",
+    "live": "Reported by the vehicle; seen {time}",
+    "ageing": "Last reported {time}; moving on the timetable since.",
+    "estimatedDelay": "Estimated from the timetable and a delay of {delay}",
+    "computed": "Position computed by Rejseplanen",
+    "timetableOnly": "No realtime for this trip today; placed from the timetable.",
+    "noSignal": "No signal since {time}; moving on the timetable and its last delay.",
+    "interval": "Runs to an interval",
+    "cancelled": "Cancelled",
+    "facts": "About this trip",
+    "delay": "Delay",
+    "lastSeen": "Last seen",
+    "nextStop": "Next stop",
+    "at": "At {stop}",
+    "between": "Between {from} and {to}",
+    "near": "Last seen near {stop}",
+    "waiting": "Waiting at {stop}, departs {time}",
+    "stops": "Stops",
+    "every": "Every {minutes} min",
+    "everyRange": "Every {from} to {to} min",
+    "delayUnknown": "Delay unknown",
+    "minutes": "{minutes} min",
+    "fromTimetable": "From the timetable",
+    "positionSource": "Rejseplanen position",
+    "timetableSource": "Timetable",
+    "callSource": "Rejseplanen times",
+    "messages": "Messages",
+    "later": "Later",
+    "messagesChecked": "From Rejseplanen, in Danish; checked {time}",
+    "rangeFrom": "{stop} — {head} from here",
+    "rangeTo": "{stop} — {head} to here",
+    "rangeAt": "{stop} — {head} here",
+    "follow": "Follow",
+    "showLine": "Show whole line"
+  },
   "legend": {
     "label": "Data states",
     "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
@@ -44,6 +87,30 @@
   "credit": {
     "transitData": "Transit data",
     "openStreetMap": "OpenStreetMap contributors"
+  },
+  "stop": {
+    "fallbackTitle": "Stop",
+    "lines": "Lines",
+    "departures": "Departures",
+    "loading": "Loading departures…",
+    "empty": "No departures in the next 30 minutes for the vehicle types shown.",
+    "notFound": "Stop not found",
+    "notFoundDetail": "Mylder's timetable has no stop with this id.",
+    "failed": "The departures could not be loaded",
+    "failedDetail": "Trying again shortly.",
+    "timetabled": "timetabled",
+    "unknown": "Unknown",
+    "note": "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
+    "fromTimetable": "From the timetable",
+    "timetableAndPositions": "Timetable and positions",
+    "track": "Track {track}",
+    "stand": "Platform {track}",
+    "intervalNote": "Metro: planned times",
+    "departuresAt": "departures {time}",
+    "departuresOutOfDate": "departures {time}, may be out of date",
+    "messages": "Messages",
+    "later": "Later",
+    "messagesSource": "From Rejseplanen, in Danish"
   },
   "about": {
     "title": "About Mylder",
@@ -146,6 +213,27 @@
     "planned": "Planned, from today's timetable",
     "peak": "Peak {count} at {time}",
     "profileMissing": "Could not load today's timetable"
+  },
+  "notices": {
+    "disconnected": "No connection since {since}. Vehicles move on the last data from {data}.",
+    "disconnectedNoData": "No connection since {since}.",
+    "noAnswer": "Rejseplanen hasn't answered since {since}.",
+    "spent": "Live data is paused until {date}: this month's calls are used up.",
+    "spentNoDate": "Live data is paused: this month's calls are used up.",
+    "budget": "Updating every {interval} to stay within the data budget.",
+    "timetableEnds": "The timetable ends on {date}. Without a new one, the map has no trips after that.",
+    "timetableEnded": "The timetable ended on {date}. Without a new one, the map has no trips to show.",
+    "simulated": "Simulated data: vehicles and times are made up from the timetable.",
+    "recorded": "Recorded data from {date}."
+  },
+  "interval": {
+    "seconds": "{n} s",
+    "minutes": "{n} min"
+  },
+  "highlight": {
+    "showing": "Showing: {label}",
+    "line": "line {line}",
+    "clear": "Clear"
   },
   "disruptions": {
     "active": "Active now",

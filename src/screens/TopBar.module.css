@@ -3,10 +3,6 @@
    line sits under the brand and the filters take a second row of their own, scrolling sideways if
    a timetable has more modes than fit. */
 .bar {
-  position: absolute;
-  inset-block-start: var(--perron-space-300);
-  inset-inline: var(--perron-space-300);
-  z-index: var(--perron-z-index-top-bar);
   display: flex;
   flex-wrap: wrap;
   align-items: center;

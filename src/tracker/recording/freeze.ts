@@ -1,10 +1,17 @@
 // Freezing and replaying recordings: the tracker runs over a plan's minutes on the test clock,
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
-// layer, and both give the same snapshots and disruption lists (docs/testing-seams.md).
+// layer, and both give the same snapshots and disruption lists (docs/testing-seams.md). The stop
+// and trip answers a plan saves for screen tests are worked out from those snapshots.
 import 'server-only'
 import { join } from 'node:path'
 import { Effect, References } from 'effect'
 import { TestClock } from 'effect/testing'
+import {
+  stopDeparturesFrom,
+  tripDetailFrom,
+  type StopDepartures,
+  type TripDetail,
+} from '../answers.ts'
 import type { Disruptions } from '../disruptions.ts'
 import { serviceOf, type Service } from '../rejseplanen/answers.ts'
 import * as Http from '../rejseplanen/http.ts'
@@ -21,7 +28,7 @@ import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
 
-/** What the tracker's routes served at each of a plan's minutes, as screen tests read them. */
+/** What the tracker's routes served at each of a plan's minutes. */
 export interface Served {
   readonly snapshots: readonly Snapshot[]
   /** The disruption list's route answer, after that minute's snapshot. */
@@ -31,6 +38,38 @@ export interface Served {
 /** A frozen recording: each service's calls in order, and what the routes served each minute. */
 export interface Frozen extends Served {
   readonly calls: Calls
+}
+
+/** Where a minute's disruption list is saved in a recording's folder, for screen tests. */
+export const disruptionsFile = (file: string) => join('answers', 'disruptions', file)
+
+/**
+ * The stop and trip answers a plan saves for screen tests, by their files' paths in its folder,
+ * such as `answers/stops/27532.json` and `answers/trips/<key>.json`: each as its route answers
+ * from the timetable and the snapshot of the plan's minute, at that snapshot's moment, with no
+ * call, so saving them spends none and leaves the snapshots as they are.
+ */
+export function savedAnswers(
+  plan: RecordingPlan,
+  timetable: Timetable,
+  snapshots: readonly Snapshot[],
+): ReadonlyMap<string, StopDepartures | TripDetail | undefined> {
+  const answers = new Map<string, StopDepartures | TripDetail | undefined>()
+  if (!plan.answers) return answers
+  const snapshot = snapshots[plan.answers.minute]
+  for (const stop of plan.answers.stops) {
+    answers.set(
+      join('answers', 'stops', `${stop}.json`),
+      stopDeparturesFrom(timetable, snapshot, stop),
+    )
+  }
+  for (const trip of plan.answers.trips ?? []) {
+    answers.set(
+      join('answers', 'trips', `${trip}.json`),
+      tripDetailFrom(timetable, snapshot, trip, snapshot.fetched),
+    )
+  }
+  return answers
 }
 
 const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: plan.name })

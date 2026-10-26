@@ -1,0 +1,332 @@
+{
+  "key": "bus.5C.32331e0e20.20260616.0707",
+  "line": "5C",
+  "mode": "bus",
+  "colour": "perron-color-transit-mode-bus",
+  "headsign": "Husum Torv",
+  "pattern": 0,
+  "state": "estimated",
+  "delay": 120,
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "3000",
+      "name": "Sundbyvester Plads (Amagerbrogade)",
+      "arrival": 1781586420000,
+      "departure": 1781586420000,
+      "expectedArrival": 1781586540000,
+      "expectedDeparture": 1781586540000
+    },
+    {
+      "index": 1,
+      "stop": "2754",
+      "name": "Smyrnavej (Amagerbrogade)",
+      "arrival": 1781586540000,
+      "departure": 1781586540000,
+      "expectedArrival": 1781586660000,
+      "expectedDeparture": 1781586660000
+    },
+    {
+      "index": 2,
+      "stop": "663",
+      "name": "Tycho Brahes Allé (Amagerbrogade)",
+      "arrival": 1781586600000,
+      "departure": 1781586600000,
+      "expectedArrival": 1781586720000,
+      "expectedDeparture": 1781586720000
+    },
+    {
+      "index": 3,
+      "stop": "664",
+      "name": "Øresundsvej (Amagerbrogade)",
+      "arrival": 1781586720000,
+      "departure": 1781586720000,
+      "expectedArrival": 1781586840000,
+      "expectedDeparture": 1781586840000
+    },
+    {
+      "index": 4,
+      "stop": "27539",
+      "name": "Tingvej (Amagerbrogade)",
+      "arrival": 1781586780000,
+      "departure": 1781586780000,
+      "expectedArrival": 1781586900000,
+      "expectedDeparture": 1781586900000
+    },
+    {
+      "index": 5,
+      "stop": "27526",
+      "name": "Amagerbro St. (Amagerbrogade)",
+      "arrival": 1781586900000,
+      "departure": 1781586900000,
+      "expectedArrival": 1781587020000,
+      "expectedDeparture": 1781587020000
+    },
+    {
+      "index": 6,
+      "stop": "3001",
+      "name": "Sønderport (Amager Boulevard)",
+      "arrival": 1781586960000,
+      "departure": 1781586960000,
+      "expectedArrival": 1781587080000,
+      "expectedDeparture": 1781587080000
+    },
+    {
+      "index": 7,
+      "stop": "3002",
+      "name": "Amagerfælledvej (Amager Boulevard)",
+      "arrival": 1781587020000,
+      "departure": 1781587020000,
+      "expectedArrival": 1781587140000,
+      "expectedDeparture": 1781587140000
+    },
+    {
+      "index": 8,
+      "stop": "806",
+      "name": "Ørestads Boulevard (Amager Boulevard)",
+      "arrival": 1781587140000,
+      "departure": 1781587140000,
+      "expectedArrival": 1781587260000,
+      "expectedDeparture": 1781587260000
+    },
+    {
+      "index": 9,
+      "stop": "807",
+      "name": "Klaksvigsgade (Langebro)",
+      "arrival": 1781587260000,
+      "departure": 1781587260000,
+      "expectedArrival": 1781587380000,
+      "expectedDeparture": 1781587380000
+    },
+    {
+      "index": 10,
+      "stop": "30091",
+      "name": "Otto Mønsteds Plads (Rysensteensgade)",
+      "arrival": 1781587440000,
+      "departure": 1781587440000,
+      "expectedArrival": 1781587560000,
+      "expectedDeparture": 1781587560000
+    },
+    {
+      "index": 11,
+      "stop": "3005",
+      "name": "Polititorvet",
+      "arrival": 1781587500000,
+      "departure": 1781587500000,
+      "expectedArrival": 1781587620000,
+      "expectedDeparture": 1781587620000
+    },
+    {
+      "index": 12,
+      "stop": "10844",
+      "name": "Hovedbanegården, Tivoli (Bernstorffsgade)",
+      "arrival": 1781587680000,
+      "departure": 1781587680000,
+      "expectedArrival": 1781587800000,
+      "expectedDeparture": 1781587800000
+    },
+    {
+      "index": 13,
+      "stop": "47029",
+      "name": "Rådhuspladsen St. (H.C. Andersens Boulevard)",
+      "arrival": 1781587860000,
+      "departure": 1781587860000,
+      "expectedArrival": 1781587980000,
+      "expectedDeparture": 1781587980000
+    },
+    {
+      "index": 14,
+      "stop": "52836",
+      "name": "Teglgårdstræde (Nørre Voldgade)",
+      "arrival": 1781587980000,
+      "departure": 1781587980000,
+      "expectedArrival": 1781588100000,
+      "expectedDeparture": 1781588100000
+    },
+    {
+      "index": 15,
+      "stop": "50461",
+      "name": "Nørreport St. (Nørre Voldgade)",
+      "arrival": 1781588160000,
+      "departure": 1781588160000,
+      "expectedArrival": 1781588280000,
+      "expectedDeparture": 1781588280000
+    },
+    {
+      "index": 16,
+      "stop": "2157",
+      "name": "Nørre Farimagsgade (Frederiksborggade)",
+      "arrival": 1781588220000,
+      "departure": 1781588220000,
+      "expectedArrival": 1781588340000,
+      "expectedDeparture": 1781588340000
+    },
+    {
+      "index": 17,
+      "stop": "1956",
+      "name": "Ravnsborggade (Nørrebrogade)",
+      "arrival": 1781588340000,
+      "departure": 1781588340000,
+      "expectedArrival": 1781588460000,
+      "expectedDeparture": 1781588460000
+    },
+    {
+      "index": 18,
+      "stop": "45739",
+      "name": "Elmegade (Nørrebrogade)",
+      "arrival": 1781588400000,
+      "departure": 1781588400000,
+      "expectedArrival": 1781588520000,
+      "expectedDeparture": 1781588520000
+    },
+    {
+      "index": 19,
+      "stop": "1957",
+      "name": "Kapelvej (Nørrebrogade)",
+      "arrival": 1781588520000,
+      "departure": 1781588520000,
+      "expectedArrival": 1781588640000,
+      "expectedDeparture": 1781588640000
+    },
+    {
+      "index": 20,
+      "stop": "1958",
+      "name": "Sjællandsgade (Nørrebrogade)",
+      "arrival": 1781588580000,
+      "departure": 1781588580000,
+      "expectedArrival": 1781588700000,
+      "expectedDeparture": 1781588700000
+    },
+    {
+      "index": 21,
+      "stop": "2159",
+      "name": "Nørrebros Runddel St. (Nørrebrogade)",
+      "arrival": 1781588640000,
+      "departure": 1781588640000,
+      "expectedArrival": 1781588760000,
+      "expectedDeparture": 1781588760000
+    },
+    {
+      "index": 22,
+      "stop": "1959",
+      "name": "Stefansgade (Nørrebrogade)",
+      "arrival": 1781588700000,
+      "departure": 1781588700000,
+      "expectedArrival": 1781588820000,
+      "expectedDeparture": 1781588820000
+    },
+    {
+      "index": 23,
+      "stop": "45741",
+      "name": "Nørrebrohallen (Nørrebrogade)",
+      "arrival": 1781588820000,
+      "departure": 1781588820000,
+      "expectedArrival": 1781588940000,
+      "expectedDeparture": 1781588940000
+    },
+    {
+      "index": 24,
+      "stop": "52657",
+      "name": "Nørrebro St. (Frederikssundsvej)",
+      "arrival": 1781588940000,
+      "departure": 1781588940000,
+      "expectedArrival": 1781589060000,
+      "expectedDeparture": 1781589060000
+    },
+    {
+      "index": 25,
+      "stop": "1962",
+      "name": "Glasvej (Frederikssundsvej)",
+      "arrival": 1781589060000,
+      "departure": 1781589060000,
+      "expectedArrival": 1781589180000,
+      "expectedDeparture": 1781589180000
+    },
+    {
+      "index": 26,
+      "stop": "2161",
+      "name": "Hulgårds Plads (Frederikssundsvej)",
+      "arrival": 1781589180000,
+      "departure": 1781589180000,
+      "expectedArrival": 1781589300000,
+      "expectedDeparture": 1781589300000
+    },
+    {
+      "index": 27,
+      "stop": "2162",
+      "name": "Bellahøj (Frederikssundsvej)",
+      "arrival": 1781589300000,
+      "departure": 1781589300000,
+      "expectedArrival": 1781589420000,
+      "expectedDeparture": 1781589420000
+    },
+    {
+      "index": 28,
+      "stop": "2020",
+      "name": "Hyrdevangen (Frederikssundsvej)",
+      "arrival": 1781589360000,
+      "departure": 1781589360000,
+      "expectedArrival": 1781589480000,
+      "expectedDeparture": 1781589480000
+    },
+    {
+      "index": 29,
+      "stop": "2022",
+      "name": "Brønshøj Torv (Frederikssundsvej)",
+      "arrival": 1781589480000,
+      "departure": 1781589480000,
+      "expectedArrival": 1781589600000,
+      "expectedDeparture": 1781589600000
+    },
+    {
+      "index": 30,
+      "stop": "2023",
+      "name": "Astrupvej (Frederikssundsvej)",
+      "arrival": 1781589600000,
+      "departure": 1781589600000,
+      "expectedArrival": 1781589720000,
+      "expectedDeparture": 1781589720000
+    },
+    {
+      "index": 31,
+      "stop": "2024",
+      "name": "Veksøvej (Frederikssundsvej)",
+      "arrival": 1781589660000,
+      "departure": 1781589660000,
+      "expectedArrival": 1781589780000,
+      "expectedDeparture": 1781589780000
+    },
+    {
+      "index": 32,
+      "stop": "1964",
+      "name": "Kobbelvænget (Frederikssundsvej)",
+      "arrival": 1781589720000,
+      "departure": 1781589720000,
+      "expectedArrival": 1781589840000,
+      "expectedDeparture": 1781589840000
+    },
+    {
+      "index": 33,
+      "stop": "2121",
+      "name": "Husumvej (Frederikssundsvej)",
+      "arrival": 1781589780000,
+      "departure": 1781589780000,
+      "expectedArrival": 1781589900000,
+      "expectedDeparture": 1781589900000
+    },
+    {
+      "index": 34,
+      "stop": "2219",
+      "name": "Husum Torv, Sløjfen (Sløjfen)",
+      "arrival": 1781589900000,
+      "departure": 1781589900000,
+      "expectedArrival": 1781590020000,
+      "expectedDeparture": 1781590020000
+    }
+  ]
+}

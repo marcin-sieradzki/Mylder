@@ -1,0 +1,15 @@
+/* The page notices, stacked under the top bar in the order the page ranks them, as wide as a
+   dialog on a desktop and the screen's width on a phone. The stack itself lets presses through
+   to the map; each notice takes its own. */
+.notices {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--perron-space-200);
+  pointer-events: none;
+}
+
+.notice {
+  inline-size: min(100%, var(--perron-size-dialog-width));
+  pointer-events: auto;
+}

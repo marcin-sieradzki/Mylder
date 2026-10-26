@@ -1,0 +1,26 @@
+/* The button that opens a departure's trip lies over its whole row and draws nothing of its own,
+   so a tap anywhere on the row opens the trip and the row reads as it did; the row takes the
+   hover, and the button the focus ring, inside the row. */
+*:has(> .open) {
+  position: relative;
+}
+
+*:has(> .open:hover) {
+  background: var(--perron-color-surface-hover);
+}
+
+.open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--perron-radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.open:focus-visible {
+  outline-offset: calc(-1 * var(--perron-focus-width));
+}

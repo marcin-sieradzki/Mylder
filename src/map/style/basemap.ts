@@ -1,7 +1,9 @@
 // The basemap's style: the forked Positron (positron.json, licence beside it) on OpenFreeMap's
 // tiles, repainted from Perron's map tokens, with the timetable's line paths and stops drawn
-// under the place names (docs/screens.md, "The moving map"; ADR 0003). Positron's layers,
-// filters, widths and zooms stay; only the paint changes, so light and dark are one map.
+// under the place names (docs/screens.md, "The moving map"; ADR 0003), and the map's highlight
+// over them, with everything outside it dimmed (Perron's map foundation, "Focus and dimming").
+// Positron's layers, filters, widths and zooms stay; only the paint changes, so light and dark
+// are one map.
 import 'client-only'
 import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
@@ -9,6 +11,7 @@ import { distance } from '../../domain/trip-motion.ts'
 import type { LineRecord, Mode } from '../../timetable/format.ts'
 import type { Network } from '../../timetable/network.ts'
 import type { LatLon } from '../../timetable/polyline.ts'
+import type { Highlight } from '../highlight.ts'
 import { modeColour, numberOf, type Paint } from '../paint.ts'
 import positron from './positron.json'
 
@@ -80,12 +83,22 @@ const RAIL: readonly { mode: Mode; layer: string; width: string; opacity: string
 const STOP_FILL = map('land')
 const STOP_RING = map('label')
 
+/** How much wider a line in focus is drawn than at rest; a bus route has a width of its own. */
+const FOCUS_EXTRA = 'perron-map-line-width-focus-extra'
+const BUS_FOCUS = 'perron-map-line-width-bus-focus'
+/** How opaque the lines and stations outside the focus are drawn. */
+const DIM_LINE = 'perron-opacity-map-dim-line'
+const DIM_STATION = 'perron-opacity-map-dim-station'
+
 /**
  * Every token the style reads, for `readPaint`: the map's colours, the line widths and
  * opacities, and the colour of each line the network draws.
  */
-export function paintTokens(network?: Network): string[] {
+export function paintTokens(network?: Network, highlight?: Highlight): string[] {
   const lines = network ? drawnLines(network).map(({ line }) => line.colour) : []
+  const focused = highlight
+    ? [...highlight.lines.map((line) => line.colour), ...highlight.stops.map((stop) => stop.colour)]
+    : []
   return [
     ...FILL.map(([, colour]) => map(colour)),
     ...LINE.map(([, colour]) => map(colour)),
@@ -95,11 +108,23 @@ export function paintTokens(network?: Network): string[] {
     modeColour('bus'),
     modeColour('train'),
     ...lines,
+    FOCUS_EXTRA,
+    BUS_FOCUS,
+    DIM_LINE,
+    DIM_STATION,
+    ...focused,
   ]
 }
 
-/** The style for the paint read now, with the network's lines and stops once it has loaded. */
-export function basemapStyle(paint: Paint, network?: Network): StyleSpecification {
+/**
+ * The style for the paint read now, with the network's lines and stops once it has loaded, and
+ * what is highlighted over them.
+ */
+export function basemapStyle(
+  paint: Paint,
+  network?: Network,
+  highlight?: Highlight,
+): StyleSpecification {
   const colour = (name: MapColour) => paint.get(map(name)) ?? ''
   const style = structuredClone(positron) as StyleSpecification
   for (const layer of style.layers) {
@@ -122,14 +147,28 @@ export function basemapStyle(paint: Paint, network?: Network): StyleSpecificatio
   }
   if (!network) return style
 
-  style.sources['mylder-lines'] = { type: 'geojson', data: lineFeatures(paint, network) }
+  const dimmed = highlight !== undefined
+  style.sources['mylder-lines'] = { type: 'geojson', data: lineFeatures(paint, network, dimmed) }
   style.sources['mylder-stops'] = { type: 'geojson', data: stopFeatures(network) }
+  const focus = highlightFeatures(paint, highlight)
+  style.sources[HIGHLIGHT_LINES] = { type: 'geojson', data: focus.lines }
+  style.sources[HIGHLIGHT_STOPS] = { type: 'geojson', data: focus.stops }
   const firstLabel = style.layers.findIndex((layer) => layer.type === 'symbol')
-  style.layers.splice(firstLabel, 0, ...networkLayers(paint))
+  style.layers.splice(firstLabel, 0, ...networkLayers(paint, dimmed), ...highlightLayers(paint))
   return style
 }
 
-function networkLayers(paint: Paint): LayerSpecification[] {
+const HIGHLIGHT_LINES = 'mylder-highlight-lines'
+const HIGHLIGHT_STOPS = 'mylder-highlight-stops'
+
+const BUS_STOPS = 'mylder-stops-bus'
+const RAIL_STOPS = 'mylder-stops-rail'
+
+/** The layers the stops are drawn in, whose features carry each stop's `id`, for a tap to open. */
+export const STOP_LAYERS: readonly string[] = [RAIL_STOPS, BUS_STOPS]
+
+function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
+  const stationOpacity = dimmed ? numberOf(paint, DIM_STATION) : 1
   const lines = RAIL.map(({ mode, layer }): LayerSpecification => ({
     id: layer,
     type: 'line',
@@ -158,10 +197,12 @@ function networkLayers(paint: Paint): LayerSpecification[] {
       'circle-color': paint.get(STOP_FILL) ?? '',
       'circle-stroke-color': paint.get(STOP_RING) ?? '',
       'circle-stroke-width': 1,
+      'circle-opacity': stationOpacity,
+      'circle-stroke-opacity': stationOpacity,
     },
   })
   // A bus stop shows only close in, where the streets it stands on can be told apart.
-  return [...lines, stops('mylder-stops-bus', false, 14, 2), stops('mylder-stops-rail', true, 9, 3)]
+  return [...lines, stops(BUS_STOPS, false, 14, 2), stops(RAIL_STOPS, true, 9, 3)]
 }
 
 /** The lines drawn at rest: every Metro, S-tog, train and light rail line with a pattern. */
@@ -223,7 +264,11 @@ function lineGeometries(network: Network): Map<LineRecord, MultiLineString> {
   return found
 }
 
-function lineFeatures(paint: Paint, network: Network): FeatureCollection<MultiLineString> {
+function lineFeatures(
+  paint: Paint,
+  network: Network,
+  dimmed: boolean,
+): FeatureCollection<MultiLineString> {
   const features: Feature<MultiLineString>[] = []
   for (const [line, geometry] of lineGeometries(network)) {
     const rail = RAIL.find(({ mode }) => mode === line.mode)!
@@ -234,7 +279,7 @@ function lineFeatures(paint: Paint, network: Network): FeatureCollection<MultiLi
         mode: line.mode,
         colour: paint.get(line.colour) || paint.get(modeColour(line.mode)),
         width: numberOf(paint, rail.width),
-        opacity: numberOf(paint, rail.opacity),
+        opacity: numberOf(paint, dimmed ? DIM_LINE : rail.opacity),
       },
       geometry,
     })
@@ -247,8 +292,65 @@ function stopFeatures(network: Network): FeatureCollection<Point> {
     type: 'FeatureCollection',
     features: network.stops.stops.map((stop) => ({
       type: 'Feature',
-      properties: { name: stop.name, rail: stop.modes.some((mode) => mode !== 'bus') },
+      properties: {
+        id: stop.id,
+        name: stop.name,
+        rail: stop.modes.some((mode) => mode !== 'bus'),
+      },
       geometry: { type: 'Point', coordinates: [stop.lon, stop.lat] },
     })),
   }
+}
+
+/** The width a mode's line is drawn at in focus: its width at rest and the focus's more. */
+function focusWidth(paint: Paint, mode: Mode): number {
+  const rail = RAIL.find((each) => each.mode === mode)
+  const width = rail
+    ? numberOf(paint, rail.width) + numberOf(paint, FOCUS_EXTRA)
+    : numberOf(paint, BUS_FOCUS)
+  // To a tenth of a pixel, past the sum's rounding.
+  return Math.round(width * 10) / 10
+}
+
+/** The highlight's lines and stops, in their colours, or nothing while the map is normal. */
+function highlightFeatures(paint: Paint, highlight: Highlight | undefined) {
+  const colour = (token: string, mode: Mode) => paint.get(token) || paint.get(modeColour(mode))
+  const lines: Feature<MultiLineString>[] = (highlight?.lines ?? []).map((line) => ({
+    type: 'Feature',
+    properties: { colour: colour(line.colour, line.mode), width: focusWidth(paint, line.mode) },
+    geometry: { type: 'MultiLineString', coordinates: drawnPieces(line.points) },
+  }))
+  const stops: Feature<Point>[] = (highlight?.stops ?? []).map((stop) => ({
+    type: 'Feature',
+    properties: { colour: paint.get(stop.colour) ?? '' },
+    geometry: { type: 'Point', coordinates: [stop.point[1], stop.point[0]] },
+  }))
+  return {
+    lines: { type: 'FeatureCollection', features: lines } satisfies FeatureCollection,
+    stops: { type: 'FeatureCollection', features: stops } satisfies FeatureCollection,
+  }
+}
+
+/** The highlight's line over the dimmed network, and its stops ringed in its colour over that. */
+function highlightLayers(paint: Paint): LayerSpecification[] {
+  return [
+    {
+      id: HIGHLIGHT_LINES,
+      type: 'line',
+      source: HIGHLIGHT_LINES,
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': ['get', 'colour'], 'line-width': ['get', 'width'] },
+    },
+    {
+      id: HIGHLIGHT_STOPS,
+      type: 'circle',
+      source: HIGHLIGHT_STOPS,
+      paint: {
+        'circle-radius': 3,
+        'circle-color': paint.get(STOP_FILL) ?? '',
+        'circle-stroke-color': ['get', 'colour'],
+        'circle-stroke-width': 2,
+      },
+    },
+  ]
 }

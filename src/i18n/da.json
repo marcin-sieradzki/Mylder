@@ -13,7 +13,8 @@
   "topBar": {
     "updated": "Opdateret {time}",
     "modes": "Transportformer",
-    "about": "Om Mylder"
+    "about": "Om Mylder",
+    "updatedPaused": "Opdateret {time}, sat på pause"
   },
   "modes": {
     "bus": "Bus",
@@ -32,6 +33,48 @@
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
   },
+  "trip": {
+    "fallbackTitle": "Køretøj",
+    "to": "mod {headsign}",
+    "loading": "Henter turen…",
+    "notFound": "Turen findes ikke",
+    "notFoundDetail": "Mylders køreplan har ingen tur med denne nøgle i dag.",
+    "failed": "Turen kunne ikke hentes",
+    "failedDetail": "Prøver igen om lidt.",
+    "live": "Meldt af køretøjet; set {time}",
+    "ageing": "Sidst meldt {time}; kører efter køreplanen siden.",
+    "estimatedDelay": "Beregnet ud fra køreplanen og en forsinkelse på {delay}",
+    "computed": "Position beregnet af Rejseplanen",
+    "timetableOnly": "Ingen realtid for denne tur i dag; placeret efter køreplanen.",
+    "noSignal": "Intet signal siden {time}; kører efter køreplanen og sin seneste forsinkelse.",
+    "interval": "Kører med fast interval",
+    "cancelled": "Aflyst",
+    "facts": "Om turen",
+    "delay": "Forsinkelse",
+    "lastSeen": "Sidst set",
+    "nextStop": "Næste stop",
+    "at": "Ved {stop}",
+    "between": "Mellem {from} og {to}",
+    "near": "Sidst set nær {stop}",
+    "waiting": "Venter ved {stop}, afgår {time}",
+    "stops": "Stop",
+    "every": "Hvert {minutes}. min",
+    "everyRange": "Hvert {from}.–{to}. min",
+    "delayUnknown": "Forsinkelse ukendt",
+    "minutes": "{minutes} min",
+    "fromTimetable": "Fra køreplanen",
+    "positionSource": "Rejseplanen-position",
+    "timetableSource": "Køreplan",
+    "callSource": "Rejseplanen-tider",
+    "messages": "Meddelelser",
+    "later": "Senere",
+    "messagesChecked": "Fra Rejseplanen; tjekket {time}",
+    "rangeFrom": "{stop} — {head} herfra",
+    "rangeTo": "{stop} — {head} hertil",
+    "rangeAt": "{stop} — {head} her",
+    "follow": "Følg",
+    "showLine": "Vis hele linjen"
+  },
   "legend": {
     "label": "Datatilstande",
     "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
@@ -44,6 +87,30 @@
   "credit": {
     "transitData": "Trafikdata",
     "openStreetMap": "OpenStreetMap-bidragydere"
+  },
+  "stop": {
+    "fallbackTitle": "Stoppested",
+    "lines": "Linjer",
+    "departures": "Afgange",
+    "loading": "Henter afgange…",
+    "empty": "Ingen afgange de næste 30 minutter for de viste transportformer.",
+    "notFound": "Stoppestedet findes ikke",
+    "notFoundDetail": "Mylders køreplan har intet stoppested med dette id.",
+    "failed": "Afgangene kunne ikke hentes",
+    "failedDetail": "Prøver igen om lidt.",
+    "timetabled": "køreplan",
+    "unknown": "Ukendt",
+    "note": "Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.",
+    "fromTimetable": "Fra køreplanen",
+    "timetableAndPositions": "Køreplan og positioner",
+    "track": "Spor {track}",
+    "stand": "Perron {track}",
+    "intervalNote": "Metro: planlagte tider",
+    "departuresAt": "afgange {time}",
+    "departuresOutOfDate": "afgange {time}, måske forældet",
+    "messages": "Meddelelser",
+    "later": "Senere",
+    "messagesSource": "Fra Rejseplanen"
   },
   "about": {
     "title": "Om Mylder",
@@ -146,6 +213,27 @@
     "planned": "Planlagt, ud fra dagens køreplan",
     "peak": "Højest {count} kl. {time}",
     "profileMissing": "Kunne ikke hente dagens køreplan"
+  },
+  "notices": {
+    "disconnected": "Ingen forbindelse siden {since}. Køretøjerne bevæger sig på de seneste data fra {data}.",
+    "disconnectedNoData": "Ingen forbindelse siden {since}.",
+    "noAnswer": "Rejseplanen har ikke svaret siden {since}.",
+    "spent": "Live-data er sat på pause indtil {date}: denne måneds kald er brugt op.",
+    "spentNoDate": "Live-data er sat på pause: denne måneds kald er brugt op.",
+    "budget": "Kortet opdateres hvert {interval} for at overholde databudgettet.",
+    "timetableEnds": "Køreplanen slutter {date}. Uden en ny har kortet ingen ture derefter.",
+    "timetableEnded": "Køreplanen sluttede {date}. Uden en ny har kortet ingen ture at vise.",
+    "simulated": "Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.",
+    "recorded": "Optagne data fra {date}."
+  },
+  "interval": {
+    "seconds": "{n}. sekund",
+    "minutes": "{n}. minut"
+  },
+  "highlight": {
+    "showing": "Viser: {label}",
+    "line": "linje {line}",
+    "clear": "Ryd"
   },
   "disruptions": {
     "active": "Aktuelle nu",
