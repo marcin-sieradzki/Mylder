@@ -49,14 +49,17 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   })
 
   // The snapshot's own timetable gives each line its colour; one that won't load leaves the
-  // vehicles in their modes' colours rather than off the map.
+  // vehicles in their modes' colours rather than off the map. The loader answers with the same
+  // failure for a while, and it is logged once.
+  let reported: unknown
   const draw = async () => {
     const { snapshot } = liveSnapshot.get()
     if (!snapshot) return
     const network: Network | undefined = await timetables
       .version(snapshot.timetableVersion)
       .catch((error: unknown) => {
-        console.error('The timetable could not load', error)
+        if (error !== reported) console.error('The timetable could not load', error)
+        reported = error
         return undefined
       })
     // A newer snapshot may have landed meanwhile: it draws itself.
