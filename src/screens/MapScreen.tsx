@@ -29,18 +29,20 @@ export function MapScreen() {
   const [sheet, setSheet] = useState<'open' | 'closed' | 'reopened'>('open')
   const opener = useRef<HTMLButtonElement>(null)
   const top = useRef<HTMLDivElement>(null)
+  const legend = useRef<HTMLDivElement>(null)
   const open = sheet !== 'closed'
   const panel = usePanel()
   return (
     <div className={styles.screen}>
       <main className={styles.map}>
-        <BaseMap label={dictionary.map.label} className={styles.canvas} />
+        <BaseMap label={dictionary.map.label} className={styles.canvas} top={top} foot={legend} />
       </main>
       <div ref={top} className={styles.top}>
         <TopBar />
         <PageNotices />
       </div>
       <MapFoot
+        legendRef={legend}
         besideSheet={open}
         besidePanel={panel !== undefined}
         opener={

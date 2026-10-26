@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { MapCredit } from './MapCredit'
 import styles from './MapFoot.module.css'
 import { MapLegend } from './MapLegend'
@@ -13,6 +13,11 @@ interface MapFootProps {
   besidePanel: boolean
   /** The button that opens the closed sheet again, above the legend. */
   opener?: ReactNode
+  /**
+   * The legend, with the opener over it: the part of the foot in the room beside the sheet, which
+   * a fit to a highlight keeps clear of. The controls stand where the detail panel does.
+   */
+  legendRef?: Ref<HTMLDivElement>
 }
 
 /**
@@ -22,14 +27,14 @@ interface MapFootProps {
  * panel; over a bottom sheet it stands on its peek, so the credit stays in view. A bottom panel
  * on a phone covers it, and the panel's own source line names the source there.
  */
-export function MapFoot({ besideSheet, besidePanel, opener }: MapFootProps) {
+export function MapFoot({ besideSheet, besidePanel, opener, legendRef }: MapFootProps) {
   return (
     <div
       className={styles.foot}
       data-sheet={besideSheet ? 'open' : undefined}
       data-panel={besidePanel ? 'open' : undefined}
     >
-      <div className={styles.legend}>
+      <div ref={legendRef} className={styles.legend}>
         {opener}
         <MapLegend />
       </div>

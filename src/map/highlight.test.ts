@@ -163,6 +163,38 @@ describe('the fit', () => {
     expect(fitPadding(390, 844)).toEqual({ top: 192, right: 24, bottom: 218, left: 24 })
   })
 
+  it('keeps the chip clear of page notices that push it down, and clear of the legend', () => {
+    // Two notices under the top bar reach 180px down; the legend reaches 260px up.
+    expect(fitPadding(1280, 800, { top: 180, bottom: 260 })).toEqual({
+      top: 246,
+      right: 400,
+      bottom: 284,
+      left: 412,
+    })
+  })
+
+  it('keeps its own padding where what floats is smaller, or not measured', () => {
+    expect(fitPadding(1280, 800, { top: 0, bottom: 0 })).toEqual(fitPadding(1280, 800))
+    expect(fitPadding(390, 844, { top: 100 })).toEqual(fitPadding(390, 844))
+  })
+
+  it('keeps the chip clear of a notice on a phone, where the peek already clears the legend', () => {
+    // The top bar's two rows and a notice under them reach 190px down.
+    expect(fitPadding(390, 844, { top: 190, bottom: 260 })).toEqual({
+      top: 256,
+      right: 24,
+      bottom: 218,
+      left: 24,
+    })
+  })
+
+  it('gives up the bottom first on a short window, so the chip stays clear longest', () => {
+    expect(fitPadding(1280, 600, { top: 180, bottom: 260 })).toMatchObject({
+      top: 246,
+      bottom: 154,
+    })
+  })
+
   it('pads less on a window too small for the full padding, so the fit still has room', () => {
     const padding = fitPadding(900, 400)
     expect(padding.left + padding.right).toBeLessThanOrEqual(900 - 200)

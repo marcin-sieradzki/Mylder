@@ -47,7 +47,8 @@ test('Show on map on a card raises the chip, and Clear takes it down', async ({ 
 test('a tap on a ringed stop opens its departures', async ({ page }) => {
   await page.goto('/en?tab=disruptions')
   // The 5C diversion names two platforms of one stop, Klaksvigsgade: one ring and no stretch, so
-  // the camera centres it in the room the sheet and the panel leave (fitPadding on a desktop).
+  // the camera centres it in the room the sheet, the panel, the recording's notice with the chip
+  // under it, and the legend leave (fitPadding on a desktop).
   await page
     .getByRole('listitem')
     .filter({ hasText: 'Linje 5C kører en anden rute ved Langebro' })
@@ -57,7 +58,17 @@ test('a tap on a ringed stop opens its departures', async ({ page }) => {
   // The camera has settled on the ring, at the fit's closest zoom, once the address says so.
   await expect(page).toHaveURL(/[?&]map=15\.00\//)
   const { width, height } = page.viewportSize()!
-  const centre = { x: 412 + (width - 412 - 400) / 2, y: 146 + (height - 146 - 48) / 2 }
+  const notice = (await page
+    .getByRole('status')
+    .filter({ hasText: 'Recorded data' })
+    .boundingBox())!
+  const legend = (await page
+    .getByRole('list', { name: 'Data states' })
+    .locator('..')
+    .boundingBox())!
+  const top = Math.max(146, notice.y + notice.height + 42 + 24)
+  const bottom = Math.max(48, height - legend.y + 24)
+  const centre = { x: 412 + (width - 412 - 400) / 2, y: top + (height - top - bottom) / 2 }
   const panel = page.getByRole('dialog', { name: 'Klaksvigsgade' })
   await expect(async () => {
     await page.mouse.click(centre.x, centre.y)
