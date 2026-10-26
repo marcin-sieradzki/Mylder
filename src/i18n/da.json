@@ -247,6 +247,7 @@
     "active": "Aktuelle nu",
     "later": "Senere",
     "more": "Mere",
+    "showOnMap": "Vis på kortet",
     "inDanish": "Fra Rejseplanen, på dansk",
     "runningNormally": "Kører normalt, tjekket {time}",
     "loading": "Henter meddelelser fra Rejseplanen …",

@@ -2,8 +2,10 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { readNetwork } from '../timetable/network.ts'
+import type { Disruptions } from '../tracker/index.ts'
 import {
   boundsOf,
+  disruptionHighlight,
   fitPadding,
   highlightStore,
   patternHighlight,
@@ -52,7 +54,7 @@ const stretch: Highlight = {
 }
 
 describe("a trip's whole line", () => {
-  it("is its pattern's path and stops, in its line's colour, named by its line", () => {
+  it("is its pattern's path and stops, in its line's colour, named by its line, each stop by its id", () => {
     const m1 = patternOf('M1', 'Vestamager St. (Metro)')
     const highlight = patternHighlight(network, m1)
     expect(highlight.label).toEqual({ kind: 'line', line: 'M1' })
@@ -65,9 +67,66 @@ describe("a trip's whole line", () => {
     ])
     expect(highlight.stops).toHaveLength(15)
     expect(highlight.stops[0]).toEqual({
+      id: network.stops.stops[network.stops.platforms[network.patterns.patterns[m1].stops[0]].stop]
+        .id,
       point: [expect.closeTo(55.6873, 3), expect.closeTo(12.4914, 3)],
       colour: 'perron-color-transit-line-m1',
     })
+  })
+})
+
+/** The weekday recording's messages, as the disruption route served them. */
+const [busDiversion, signalFault] = (read('answers/disruptions/0001.json') as Disruptions).messages
+const SEVERITY = 'perron-color-transit-severity-notice'
+
+describe("a disruption's stretch and stops", () => {
+  it('rings each stop it affects, in its severity colour, each with its id for a tap to open', () => {
+    const highlight = disruptionHighlight(network, signalFault!, 'notice')
+    expect(highlight.label).toEqual({
+      kind: 'text',
+      text: 'Færre S-tog mellem København H og Hellerup',
+    })
+    expect(highlight.stops.map(({ id, colour }) => [id, colour])).toEqual([
+      ['8600626', SEVERITY],
+      ['8600655', SEVERITY],
+    ])
+  })
+
+  it('draws the stretch between its two ends along every pattern that runs through both', () => {
+    const { lines } = disruptionHighlight(network, signalFault!, 'notice')
+    expect(lines.length).toBeGreaterThan(0)
+    for (const line of lines) {
+      expect(line).toMatchObject({ mode: 's-tog', colour: SEVERITY })
+      const [first, last] = [line.points[0]!, line.points.at(-1)!]
+      // From København H to Hellerup St., one way or the other.
+      const ends = [first, last].map(([lat]) => Math.round(lat * 100) / 100).sort()
+      expect(ends).toEqual([55.67, 55.73])
+    }
+    // Each stretch once, whichever way its patterns run along it.
+    const drawn = lines.map((line) => JSON.stringify(line.points))
+    const reversed = lines.map((line) => JSON.stringify(line.points.toReversed()))
+    expect(new Set([...drawn, ...reversed]).size).toBe(2 * drawn.length)
+  })
+
+  it('draws no stretch between two platforms of one stop, and rings that stop once', () => {
+    const highlight = disruptionHighlight(network, busDiversion!, 'notice')
+    expect(highlight.lines).toEqual([])
+    expect(highlight.stops.map(({ id }) => id)).toEqual(['807'])
+  })
+
+  it('leaves out the stops the timetable does not know', () => {
+    const outside = {
+      ...signalFault!,
+      message: {
+        ...signalFault!.message,
+        affectedStops: {
+          StopLocation: [{ name: 'Aarhus H', extId: '8600053', lon: 10.2, lat: 56.15 }],
+        },
+        validFromStop: undefined,
+        validToStop: undefined,
+      },
+    }
+    expect(disruptionHighlight(network, outside, 'notice')).toMatchObject({ lines: [], stops: [] })
   })
 })
 
