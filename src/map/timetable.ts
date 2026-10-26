@@ -124,28 +124,35 @@ export function useNetwork(
 
 /**
  * A version's day profiles for a component: "loading" until they have loaded, then the latest
- * loaded until the next one has; "failed" when they won't load and none have.
+ * loaded until the next one has; "failed" when they won't load and none have, until a try after
+ * `RETRY_AFTER` loads them.
  */
 export function useDayProfiles(
   version: string | undefined,
   loader: TimetableLoader = timetables,
 ): DayProfiles | 'loading' | 'failed' {
   const [loaded, setLoaded] = useState<DayProfiles | 'failed'>()
+  const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     if (!version) return
     let wanted = true
+    let retry: ReturnType<typeof setTimeout> | undefined
     loader.dayProfiles(version).then(
       (profiles) => {
         if (wanted) setLoaded(profiles)
       },
       (error: unknown) => {
         console.error('The day profiles could not load', error)
-        if (wanted) setLoaded((last) => (last && last !== 'failed' ? last : 'failed'))
+        if (!wanted) return
+        setLoaded((last) => (last && last !== 'failed' ? last : 'failed'))
+        // The loader forgets a failed load after RETRY_AFTER, so the next try calls again.
+        retry = setTimeout(() => setAttempt((count) => count + 1), RETRY_AFTER + 1)
       },
     )
     return () => {
       wanted = false
+      clearTimeout(retry)
     }
-  }, [version, loader])
+  }, [version, loader, attempt])
   return loaded ?? 'loading'
 }

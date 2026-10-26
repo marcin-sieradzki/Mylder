@@ -78,6 +78,18 @@ describe('Reported this minute', () => {
     )
   })
 
+  it('turns "—" once the API has failed past the Live limit, with no poll', () => {
+    // The API has failed since a minute before this snapshot's answer, so positions pause at the
+    // Live limit, 240 s, from then: 180 s after the answer, while every dot keeps its state.
+    const snapshot = saved(MINUTE_6)
+    renderPulse('en', { ...snapshot, api: { status: 'error', since: snapshot.fetched - 60_000 } })
+    expect(figure('Reported this minute')).toHaveTextContent(/^Reported this minute7/)
+    act(() => vi.advanceTimersByTime(150_000))
+    expect(figure('Reported this minute')).toHaveTextContent(/^Reported this minute7/)
+    act(() => vi.advanceTimersByTime(20_000))
+    expect(figure('Reported this minute')).toHaveTextContent('Positions are paused')
+  })
+
   it('shows "—" while positions are paused', () => {
     renderPulse('en', saved('0001.json', 'spent'))
     expect(figure('Reported this minute')).toHaveTextContent('—')
@@ -253,7 +265,7 @@ describe('the budget line', () => {
       budget: { level: 'tight', calls: 40_000 },
     })
     expect(
-      screen.getByText('Opdaterer med 2 min mellemrum for at holde sig inden for databudgettet.'),
+      screen.getByText('Opdaterer hvert 2 min for at holde databudgettet.'),
     ).toBeInTheDocument()
   })
 

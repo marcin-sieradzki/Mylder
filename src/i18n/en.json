@@ -132,9 +132,6 @@
       "metro": "No realtime from the Metro; placed from the timetable",
       "computed-meters": "Every position is computed by Rejseplanen"
     },
-    "budget": "Updating every {interval} to stay within the data budget.",
-    "seconds": "{seconds} s",
-    "minutes": "{minutes} min",
     "now": "On the map now",
     "howSure": "How sure are we?",
     "states": {

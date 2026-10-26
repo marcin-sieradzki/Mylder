@@ -2,16 +2,18 @@
 
 import { Meter, Section, Stat, Text } from '@mylder/perron'
 import { DataStateKey, ReportStrip } from '@mylder/perron/patterns'
-import { useId, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { liveSnapshot, useSnapshot } from '../map/live'
-import { serverNow, useDataStates } from '../map/states'
+import { useClockOffset, useSnapshot } from '../map/live'
+import { useDataStates } from '../map/states'
 import { useHiddenModes } from '../map/view'
 import type { Mode } from '../timetable/format'
+import type { Snapshot } from '../tracker/index'
+import { budgetLine } from './budget'
 import styles from './CityPulse.module.css'
 import { DayProfile } from './DayProfile'
 import { grouped } from './numbers'
-import { pulseOf, type ModeShare, type Share, type Unknown } from './pulse'
+import { pausedFrom, pulseOf, type ModeShare, type Share, type Unknown } from './pulse'
 
 /**
  * Each mode's operator or authority, the second line under its meter. The timetable doesn't name
@@ -54,6 +56,21 @@ function Figure({ label, value, children }: FigureProps) {
 }
 
 /**
+ * Whether positions are paused, for a component: at once when the month's calls are spent, and
+ * from the moment the latest good answer passes the Live limit, by the server's clock.
+ */
+function usePaused(snapshot: Snapshot | undefined, clockOffset: number): boolean {
+  const from = snapshot && pausedFrom(snapshot)
+  const [reached, setReached] = useState<number>()
+  useEffect(() => {
+    if (from === undefined || !Number.isFinite(from)) return
+    const timer = setTimeout(() => setReached(from), Math.max(0, from - clockOffset - Date.now()))
+    return () => clearTimeout(timer)
+  }, [from, clockOffset])
+  return from === -Infinity || (from !== undefined && reached === from)
+}
+
+/**
  * City pulse (docs/screens.md, "City pulse"): the key figures, a meter per mode and how sure the
  * map is, from the snapshot and the states by the clock alone, so they age with the dots. Each
  * follows the mode filters with the whole kept in view, and a figure the data can't back shows
@@ -65,29 +82,35 @@ export function CityPulse() {
   const snapshot = useSnapshot()
   const states = useDataStates()
   const hidden = useHiddenModes()
+  const clockOffset = useClockOffset()
   const sureId = useId()
-  // The states tick with the server's clock, so a render follows each moment a figure can change.
-  const pulse = snapshot && pulseOf(snapshot, states, hidden, serverNow(liveSnapshot.get()))
+  const paused = usePaused(snapshot, clockOffset)
+  const pulse = snapshot && pulseOf(snapshot, states, hidden, paused)
 
-  const percent = new Intl.NumberFormat(lang, { style: 'percent', maximumFractionDigits: 0 })
-  const minutes = new Intl.NumberFormat(lang, {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-    signDisplay: 'exceptZero',
-  })
+  const { percent, minutes } = useMemo(
+    () => ({
+      percent: new Intl.NumberFormat(lang, { style: 'percent', maximumFractionDigits: 0 }),
+      minutes: new Intl.NumberFormat(lang, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+        signDisplay: 'exceptZero',
+      }),
+    }),
+    [lang],
+  )
   const why = (unknown: Unknown | 'metro' | 'computed-meters') => words.unknown[unknown]
   const fill = (template: string, values: Record<string, string | number>) =>
     Object.entries(values).reduce(
       (text, [name, value]) => text.replace(`{${name}}`, String(value)),
       template,
     )
-  const interval = (seconds: number) =>
-    seconds < 120
-      ? fill(words.seconds, { seconds })
-      : fill(words.minutes, { minutes: Math.round(seconds / 60) })
   const meterLine = ({ mode, share, unknown }: ModeShare) =>
     share
-      ? fill(words.modeShare, { count: share.count, total: share.total, operator: OPERATORS[mode] })
+      ? fill(words.modeShare, {
+          count: grouped(share.count),
+          total: grouped(share.total),
+          operator: OPERATORS[mode],
+        })
       : why(unknown === 'computed-only' ? 'computed-meters' : unknown!)
 
   if (!pulse)
@@ -97,11 +120,12 @@ export function CityPulse() {
       </div>
     )
   const live = pulse.live
+  const budget = budgetLine(snapshot, dictionary)
   return (
     <div className={styles.pulse}>
-      {pulse.stretched !== undefined ? (
+      {budget ? (
         <Text variant="body-sm" render={<p />} className={styles.line}>
-          {fill(words.budget, { interval: interval(pulse.stretched) })}
+          {budget}
         </Text>
       ) : null}
       <div className={styles.figures}>
@@ -133,16 +157,7 @@ export function CityPulse() {
           </Figure>
         )}
       </div>
-      <ReportStrip
-        aria-label={words.now}
-        counts={{
-          live: pulse.states.live,
-          ageing: pulse.states.ageing,
-          estimated: pulse.states.estimated,
-          timetableOnly: pulse.states['timetable-only'],
-          noSignal: pulse.states['no-signal'],
-        }}
-      />
+      <ReportStrip aria-label={words.now} counts={pulse.states} />
       <Section title={words.byMode}>
         <div className={styles.meters}>
           {pulse.modes.map((each) => (
@@ -163,13 +178,7 @@ export function CityPulse() {
       <Section title={words.howSure} slotProps={{ title: { id: sureId } }}>
         <DataStateKey
           aria-labelledby={sureId}
-          counts={{
-            live: pulse.states.live,
-            ageing: pulse.states.ageing,
-            estimated: pulse.states.estimated,
-            timetableOnly: pulse.states['timetable-only'],
-            noSignal: pulse.states['no-signal'],
-          }}
+          counts={pulse.states}
           liveThreshold={pulse.thresholds.live}
           ageingThreshold={pulse.thresholds.ageing}
           liveDescriptionLabel={words.states.live}

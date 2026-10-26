@@ -23,20 +23,23 @@ interface PlannedDay {
 
 /**
  * A day's profile as the chart takes it, or undefined outside the timetable's window. The counts
- * run from the day's midnight a quarter hour apart, so a day the clocks change has a few more or
- * fewer, each at the time the clock reads then.
+ * run from the day's midnight a quarter hour apart, each at the time the clock reads then. The
+ * chart's axis is one day's clock, so on the day the clocks go back the hour they read twice is
+ * drawn once, its first time; on the day they go forward the hour they skip has no points.
  */
 function plannedDay(profiles: DayProfiles, day: IsoDate, timezone: string): PlannedDay | undefined {
   const counts = profiles.day(day)
   if (!counts?.length) return undefined
   const midnight = wallClock(day, 0, timezone)
-  const points = counts.map((count, i) => ({
-    time: clockTime(midnight + i * QUARTER, timezone),
-    count,
-  }))
-  let peak = 0
-  for (let i = 1; i < counts.length; i++) if (counts[i] > counts[peak]) peak = i
-  return { points, peak: { count: counts[peak], time: points[peak].time } }
+  const points: { time: string; count: number }[] = []
+  for (const [i, count] of counts.entries()) {
+    const time = clockTime(midnight + i * QUARTER, timezone)
+    // Clock times as "HH:MM" sort as text.
+    if (points.length === 0 || time > points[points.length - 1].time) points.push({ time, count })
+  }
+  let peak = points[0]
+  for (const point of points) if (point.count > peak.count) peak = point
+  return { points, peak }
 }
 
 /**

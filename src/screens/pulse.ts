@@ -23,6 +23,15 @@ export interface ModeShare {
   readonly unknown?: Unknown | 'metro'
 }
 
+/** How many trips are in each state, as Perron's ReportStrip and DataStateKey count them. */
+export interface StateCounts {
+  readonly live: number
+  readonly ageing: number
+  readonly estimated: number
+  readonly timetableOnly: number
+  readonly noSignal: number
+}
+
 export interface Pulse {
   /** Underway, not Waiting and not No signal, in the modes the filters show. */
   readonly moving: number
@@ -34,10 +43,8 @@ export interface Pulse {
   /** Live and Ageing over underway, the Metro left out: the sum of the meters. */
   readonly live: Share | Unknown
   readonly modes: readonly ModeShare[]
-  /** The trips on the map in each state, after the filters. */
-  readonly states: Readonly<Record<DataState, number>>
-  /** The poll's interval in seconds, when the budget has stretched it. */
-  readonly stretched?: number
+  /** The trips on the map in each state, after the filters, in the keys Perron's parts take. */
+  readonly states: StateCounts
   /** The Live limit and the end of Ageing, in ms, for the key's sentences. */
   readonly thresholds: { readonly live: number; readonly ageing: number }
 }
@@ -48,31 +55,36 @@ export const MIN_DELAYS = 20
 /** States whose position is realtime, so whose delay is the city's now. */
 const DELAY_STATES: ReadonlySet<DataState> = new Set(['live', 'ageing', 'estimated'])
 
+/** States a vehicle's own report gives. */
+const REPORTING: ReadonlySet<DataState> = new Set(['live', 'ageing'])
+
+const NO_FILTER: ReadonlySet<Mode> = new Set()
+
 /**
- * Whether Mylder's server gets no position answers: the month's calls are spent, or the latest
- * good answer is older than the Live limit (docs/data-states.md, "Paused").
+ * When positions are paused (docs/data-states.md, "Paused"): at once when the month's calls are
+ * spent, else the moment the latest good answer is older than the Live limit; none while the API
+ * answers well.
  */
-export function isPaused(snapshot: Snapshot, now: number): boolean {
-  if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return true
-  if (snapshot.api.status === 'ok') return false
+export function pausedFrom(snapshot: Snapshot): number | undefined {
+  if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return -Infinity
+  if (snapshot.api.status === 'ok') return undefined
   const answered = Math.min(snapshot.api.since, snapshot.fetched)
-  return now - answered >= liveLimit(snapshot.pollInterval, snapshot.positionMode)
+  return answered + liveLimit(snapshot.pollInterval, snapshot.positionMode)
 }
 
-/** The figures at `now`, with `states` the trips' states by the clock. */
+/** The figures, with `states` the trips' states by the clock and `paused` whether positions are. */
 export function pulseOf(
   snapshot: Snapshot,
   states: DataStates,
   hidden: ReadonlySet<Mode>,
-  now: number,
+  paused: boolean,
 ): Pulse {
   const stateOf = (trip: SnapshotTrip) => states.get(trip.key) ?? trip.state
-  const all = snapshot.trips.filter((trip) => onMap(trip, new Set()))
+  const all = snapshot.trips.filter((trip) => onMap(trip, NO_FILTER))
   const shown = all.filter((trip) => onMap(trip, hidden))
   const underway = shown.filter((trip) => !trip.waiting)
-  const reporting = (trip: SnapshotTrip) => ['live', 'ageing'].includes(stateOf(trip))
+  const reporting = (trip: SnapshotTrip) => REPORTING.has(stateOf(trip))
 
-  const paused = isPaused(snapshot, now)
   const computedOnly = snapshot.positionMode === 'CALC_REPORT'
   const why: Unknown | undefined = paused ? 'paused' : computedOnly ? 'computed-only' : undefined
 
@@ -117,6 +129,13 @@ export function pulseOf(
     'no-signal': 0,
   }
   for (const trip of shown) counts[stateOf(trip)]++
+  const byState: StateCounts = {
+    live: counts.live,
+    ageing: counts.ageing,
+    estimated: counts.estimated,
+    timetableOnly: counts['timetable-only'],
+    noSignal: counts['no-signal'],
+  }
 
   return {
     moving: underway.filter((trip) => stateOf(trip) !== 'no-signal').length,
@@ -125,10 +144,7 @@ export function pulseOf(
     ...(delay ? { delay } : {}),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
-    states: counts,
-    ...(['stretched', 'tight'].includes(snapshot.budget.level)
-      ? { stretched: snapshot.pollInterval }
-      : {}),
+    states: byState,
     thresholds: {
       live: liveLimit(snapshot.pollInterval, snapshot.positionMode),
       ageing: AGEING_ENDS,

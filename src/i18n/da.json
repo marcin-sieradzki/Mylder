@@ -132,9 +132,6 @@
       "metro": "Ingen realtid fra Metroen; placeret ud fra køreplanen",
       "computed-meters": "Alle positioner er beregnet af Rejseplanen"
     },
-    "budget": "Opdaterer med {interval} mellemrum for at holde sig inden for databudgettet.",
-    "seconds": "{seconds} s",
-    "minutes": "{minutes} min",
     "now": "På kortet nu",
     "howSure": "Hvor sikre er vi?",
     "states": {
