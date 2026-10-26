@@ -1,8 +1,9 @@
 // A recording's clock (docs/testing-seams.md, "Time"): under a recording in a production build,
 // the tracker's time starts at the moment in the recording's `clock.json` and runs on in real
 // time, so the recorded day is "today" for the timetable and the snapshot's ages are recorded.
-// Every runtime under the same recording in one process, the tracker's and the aircraft's, reads
-// the same time, whichever was built first.
+// Every runtime in one process that starts at the same moment reads the same time, whichever was
+// built first; the aircraft's starts at its own moment when its answers were recorded on another
+// day than the recording's (`aircraft/clock.json`), and runs on from that.
 import 'server-only'
 import { Clock, Effect, Layer } from 'effect'
 

@@ -2,8 +2,8 @@
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
 // layer, and both give the same snapshots and disruption lists (docs/testing-seams.md). The stop
 // and trip answers a plan saves for screen tests are worked out from those snapshots. A
-// recording's `aircraft/` folder is hand-made or recorded, never frozen: the aircraft snapshots
-// saved beside it are what the aircraft source makes of it, one call every 10 s.
+// recording's `aircraft/` folder is recorded from the feed, never frozen: the aircraft snapshots
+// saved beside it are what the aircraft source makes of it, one call every 10 s from its start.
 import 'server-only'
 import { join } from 'node:path'
 import { Effect, References } from 'effect'
@@ -57,12 +57,12 @@ export const UNFROZEN = RECORDED_AIRCRAFT.folders
 
 /**
  * The aircraft source's snapshot of each call in a recording's `aircraft/` folder, asked every
- * 10 s from the recording's start on the test clock; none when it has no such folder.
+ * 10 s on the test clock from the moment its answers start at; none when it has no such folder.
  */
 export const replayAircraft = (dir: string): Effect.Effect<readonly AircraftSnapshot[]> =>
   Effect.gen(function* () {
     const [calls, start] = yield* Effect.promise(() =>
-      Promise.all([readCalls(RECORDED_AIRCRAFT, dir), readStart(dir)]),
+      Promise.all([readCalls(RECORDED_AIRCRAFT, dir), readStart(dir, 'aircraft')]),
     )
     const count = calls.get('aircraft')?.length ?? 0
     const source = { kind: 'recording', folder: 'replayed' } as const

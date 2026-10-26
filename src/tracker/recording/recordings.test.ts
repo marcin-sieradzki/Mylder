@@ -18,6 +18,7 @@ import {
   readCalls,
   readJson,
   readRecorded,
+  readStart,
   recordedClient,
   recordingDir,
   RECORDINGS_DIR,
@@ -45,6 +46,23 @@ const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
     Effect.map(statusAndText),
     Effect.orDie,
   )
+
+/** A recording folder made for one test, holding `files` by their paths, removed after it. */
+async function madeRecording<A>(
+  files: Record<string, unknown>,
+  within: (dir: string) => Promise<A>,
+): Promise<A> {
+  const dir = await mkdtemp(join(tmpdir(), 'recording-'))
+  try {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(dir, path, '..'), { recursive: true })
+      await writeFile(join(dir, path), JSON.stringify(content))
+    }
+    return await within(dir)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+}
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
@@ -250,23 +268,6 @@ describe('the recorded layer for another API', () => {
       )
     })
 
-  /** A recording folder made for one test, holding `files` by their paths, removed after it. */
-  async function madeRecording<A>(
-    files: Record<string, unknown>,
-    within: (dir: string) => Promise<A>,
-  ): Promise<A> {
-    const dir = await mkdtemp(join(tmpdir(), 'recording-'))
-    try {
-      for (const [path, content] of Object.entries(files)) {
-        await mkdir(join(dir, path, '..'), { recursive: true })
-        await writeFile(join(dir, path), JSON.stringify(content))
-      }
-      return await within(dir)
-    } finally {
-      await rm(dir, { recursive: true, force: true })
-    }
-  }
-
   it.effect(
     'replays its folder in call order, failures too, and answers an unknown call its own way',
     () =>
@@ -325,12 +326,27 @@ describe('the recorded layer for another API', () => {
     })
   })
 
+  it('reads only the call files in a folder, not the clock its answers were recorded on', async () => {
+    await madeRecording(
+      {
+        'aircraft/0001.json': { now: 1, ac: [] },
+        'aircraft/clock.json': { start: '2026-10-26T18:53:13.500Z' },
+      },
+      async (dir) => {
+        expect(await readCalls(radar, dir)).toEqual(
+          new Map([['aircraft', [{ answer: { now: 1, ac: [] } }]]]),
+        )
+      },
+    )
+  })
+
   it('reads a recording bundled by its files’ paths as it reads one from its folder', async () => {
     const dir = '../../recordings/bundled'
     const bundle = {
       [`${dir}/aircraft/0002.json`]: { now: 2, ac: [] },
       [`${dir}/aircraft/0001.json`]: { status: 503 },
       [`${dir}/aircraft/notes.txt`]: 'not a call',
+      [`${dir}/aircraft/clock.json`]: { start: '2026-10-26T18:53:13.500Z' },
       [`${dir}/clock.json`]: { start: '2026-06-16T05:20:00.000Z' },
     }
     expect(await readCalls(radar, dir, bundledFiles(bundle))).toEqual(
@@ -358,6 +374,40 @@ describe("a recording's clock", () => {
       ])
     }).pipe(Effect.scoped),
   )
+
+  it.effect('reads each start’s own time in runtimes under recordings that start apart', () =>
+    Effect.gen(function* () {
+      // The transit answers and the aircraft answers, recorded on two days.
+      const transit = Date.UTC(2026, 5, 16, 5, 22)
+      const aircraft = Date.UTC(2026, 9, 26, 18, 53, 13, 500)
+      yield* TestClock.setTime(1_000)
+      const tracker = yield* Layer.build(sharedStartingAt(transit))
+      yield* TestClock.adjust('3 minutes')
+      const planes = yield* Layer.build(sharedStartingAt(aircraft))
+      yield* TestClock.adjust('1 minute')
+      const again = yield* Layer.build(sharedStartingAt(transit))
+      const now = (built: typeof tracker) => Effect.provide(Clock.currentTimeMillis, built)
+      expect([yield* now(tracker), yield* now(planes), yield* now(again)]).toEqual([
+        transit + 240_000,
+        aircraft + 60_000,
+        transit + 240_000,
+      ])
+    }).pipe(Effect.scoped),
+  )
+
+  it('starts the aircraft answers at their own folder’s moment, or else the recording’s', async () => {
+    const recording = { 'clock.json': { start: '2026-06-16T05:20:00.000Z' } }
+    await madeRecording(
+      { ...recording, 'aircraft/clock.json': { start: '2026-10-26T18:53:13.500Z' } },
+      async (dir) => {
+        expect(await readStart(dir)).toBe(Date.UTC(2026, 5, 16, 5, 20))
+        expect(await readStart(dir, 'aircraft')).toBe(Date.UTC(2026, 9, 26, 18, 53, 13, 500))
+      },
+    )
+    await madeRecording(recording, async (dir) => {
+      expect(await readStart(dir, 'aircraft')).toBe(Date.UTC(2026, 5, 16, 5, 20))
+    })
+  })
 
   it.effect('starts at the recording’s moment and runs on with the clock beneath', () =>
     Effect.gen(function* () {

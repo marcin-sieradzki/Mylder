@@ -37,12 +37,13 @@ export function aircraftLayer({ source, http }: AircraftLayerOptions): Layer.Lay
 
 /**
  * The aircraft source as the environment sets it up. Under a recording its clock starts at the
- * recording's moment, the same as the tracker's (docs/testing-seams.md, "Time").
+ * moment its answers were recorded: their folder's own, or else the recording's, the same as the
+ * tracker's (docs/testing-seams.md, "Time").
  */
 async function environmentLayer(): Promise<Layer.Layer<Aircraft>> {
   const source = readAircraftSource(process.env[AIRCRAFT_SOURCE_VARIABLE])
   if (source.kind !== 'recording') return aircraftLayer({ source })
-  const start = await readStart(recordingDir(source.folder))
+  const start = await readStart(recordingDir(source.folder), 'aircraft')
   return aircraftLayer({ source }).pipe(Layer.provideMerge(sharedStartingAt(start)))
 }
 
