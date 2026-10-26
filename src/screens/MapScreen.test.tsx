@@ -7,11 +7,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { liveAircraft } from '../map/aircraft'
 import { liveSnapshot } from '../map/live'
 import { readPaint } from '../map/paint'
 import { vehiclePaint, vehiclesOf } from '../map/vehicles'
 import { mapView } from '../map/view'
 import { timetableRoutes } from '../test/timetableRoutes'
+import type { AircraftSnapshot } from '../tracker/aircraft/index'
 import type { Snapshot } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
@@ -23,6 +25,12 @@ const saved = (name: string, recording = 'weekday'): Snapshot =>
   JSON.parse(
     readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
   ) as Snapshot
+
+/** The aircraft source's snapshot of a call in the weekday recording. */
+const savedAircraft = (name: string): AircraftSnapshot =>
+  JSON.parse(
+    readFileSync(join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', name), 'utf8'),
+  ) as AircraftSnapshot
 
 /** A snapshot landed, with the server's clock `after` ms past its fetch. */
 const land = (snapshot: Snapshot, after = 20_000) =>
@@ -42,6 +50,7 @@ beforeEach(() => {
 
 afterEach(() => {
   liveSnapshot.update({ snapshot: undefined, failingSince: undefined, clockOffset: 0 })
+  liveAircraft.update({ snapshot: undefined, off: undefined })
   vi.unstubAllGlobals()
 })
 
@@ -121,7 +130,7 @@ describe('the top bar', () => {
     // 6 S-trains and 1 regional train. The recording's timetable runs no light rail.
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
     renderScreen('en')
-    const modes = await screen.findByRole('group', { name: 'Modes' })
+    const modes = await screen.findByRole('group', { name: 'Filters' })
     const chips = within(modes).getAllByRole('button')
     expect(chips.map((chip) => chip.textContent)).toEqual([
       'Bus 6',
@@ -135,7 +144,7 @@ describe('the top bar', () => {
   it('names the modes in Danish', async () => {
     act(() => liveSnapshot.update({ snapshot: saved('0007.json') }))
     renderScreen('da')
-    const modes = await screen.findByRole('group', { name: 'Transportformer' })
+    const modes = await screen.findByRole('group', { name: 'Filtre' })
     expect(
       within(modes)
         .getAllByRole('button')
@@ -147,7 +156,7 @@ describe('the top bar', () => {
     const snapshot = saved('0006.json')
     act(() => liveSnapshot.update({ snapshot }))
     renderScreen('en')
-    const modes = await screen.findByRole('group', { name: 'Modes' })
+    const modes = await screen.findByRole('group', { name: 'Filters' })
     const drawn = () =>
       vehiclesOf(
         snapshot,
@@ -180,7 +189,7 @@ describe('the top bar', () => {
     window.history.replaceState(null, '', '/da?hide=metro,s-tog&line=5C')
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
     renderScreen('da')
-    const modes = await screen.findByRole('group', { name: 'Transportformer' })
+    const modes = await screen.findByRole('group', { name: 'Filtre' })
     const pressed = within(modes)
       .getAllByRole('button')
       .map((chip) => [chip.textContent, chip.getAttribute('aria-pressed')])
@@ -192,11 +201,90 @@ describe('the top bar', () => {
     ])
   })
 
+  it('has a Planes chip after the modes, counting the aircraft in the box', async () => {
+    // The sixth call holds 27 aircraft over Copenhagen.
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    renderScreen('en')
+    const filters = await screen.findByRole('group', { name: 'Filters' })
+    const chips = within(filters).getAllByRole('button')
+    expect(chips.map((chip) => chip.textContent)).toEqual([
+      'Bus 6',
+      'Metro 4',
+      'S-tog 6',
+      'Train 1',
+      'Planes 27',
+    ])
+    expect(within(filters).getByRole('button', { name: 'Planes 27' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+  })
+
+  it('names the Planes chip in Danish, and counts the aircraft of the latest answer', async () => {
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    act(() => liveAircraft.update({ snapshot: savedAircraft('0001.json') }))
+    renderScreen('da')
+    const filters = await screen.findByRole('group', { name: 'Filtre' })
+    expect(within(filters).getByRole('button', { name: 'Fly 26' })).toBeInTheDocument()
+    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    expect(within(filters).getByRole('button', { name: 'Fly 27' })).toBeInTheDocument()
+  })
+
+  it('has no Planes chip while the aircraft are off, or before their first answer', async () => {
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    renderScreen('en')
+    const filters = await screen.findByRole('group', { name: 'Filters' })
+    expect(within(filters).queryByRole('button', { name: /^Planes/ })).not.toBeInTheDocument()
+    act(() => liveAircraft.update({ off: true }))
+    expect(within(filters).getAllByRole('button')).toHaveLength(4)
+  })
+
+  it('has no Fly chip while the aircraft are off, though the address hides them', async () => {
+    window.history.replaceState(null, '', '/da?hide=aircraft')
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json'), off: true }))
+    renderScreen('da')
+    const filters = await screen.findByRole('group', { name: 'Filtre' })
+    expect(within(filters).queryByRole('button', { name: /^Fly/ })).not.toBeInTheDocument()
+  })
+
+  it('turns the planes off and on in the address, with no count while they are off', async () => {
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    renderScreen('en')
+    const filters = await screen.findByRole('group', { name: 'Filters' })
+    fireEvent.click(within(filters).getByRole('button', { name: 'Planes 27' }))
+    // Off, the page no longer asks for the aircraft, so the count it last had is no longer theirs.
+    const planes = within(filters).getByRole('button', { name: 'Planes' })
+    expect(planes).toHaveAttribute('aria-pressed', 'false')
+    expect(window.location.search).toBe('?hide=aircraft')
+    fireEvent.click(within(filters).getByRole('button', { name: 'Bus 6' }))
+    expect(window.location.search).toBe('?hide=bus,aircraft')
+    fireEvent.click(planes)
+    expect(within(filters).getByRole('button', { name: 'Planes 27' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(window.location.search).toBe('?hide=bus')
+  })
+
+  it('has the Fly chip off from the address before any answer, to turn them on again', async () => {
+    window.history.replaceState(null, '', '/da?hide=aircraft')
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    renderScreen('da')
+    const filters = await screen.findByRole('group', { name: 'Filtre' })
+    expect(within(filters).getByRole('button', { name: 'Fly' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
   it('names every control on the bar, the About button too', async () => {
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
     renderScreen('da')
     const banner = screen.getByRole('banner')
-    await within(banner).findByRole('group', { name: 'Transportformer' })
+    await within(banner).findByRole('group', { name: 'Filtre' })
     expect(within(banner).getByRole('button', { name: 'Om Mylder' })).toBeInTheDocument()
     const controls = [
       ...within(banner).getAllByRole('button'),

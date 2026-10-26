@@ -60,3 +60,24 @@ export function useAircraftProvider(
     () => undefined,
   )
 }
+
+/**
+ * How many aircraft are in the box by the latest snapshot, for the Planes filter's count: none
+ * until one lands. It renders again when the number changes, not with every answer.
+ */
+export function useAircraftCount(store: AircraftStore = liveAircraft): number | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().snapshot?.aircraft.length,
+    () => undefined,
+  )
+}
+
+/** Whether the server has the aircraft off, as its 404 said, for a component. */
+export function useAircraftOff(store: AircraftStore = liveAircraft): boolean {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().off === true,
+    () => false,
+  )
+}

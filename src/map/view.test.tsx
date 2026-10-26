@@ -1,6 +1,13 @@
 import { act, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { addressView, searchWith, useHiddenModes, usePanel, viewOf } from './view.ts'
+import {
+  addressView,
+  searchWith,
+  useAircraftHidden,
+  useHiddenModes,
+  usePanel,
+  viewOf,
+} from './view.ts'
 
 describe("the view an address's query names", () => {
   it('reads the zoom, latitude and longitude a map link gives', () => {
@@ -19,6 +26,22 @@ describe("the view an address's query names", () => {
     const view = viewOf(search)
     expect(view.centre).toBeUndefined()
     expect(view.zoom).toBeUndefined()
+  })
+})
+
+describe('the filters in the address', () => {
+  it('reads the aircraft beside the modes, and leaves them out of the modes hidden', () => {
+    const view = viewOf('?hide=bus,aircraft,boats')
+    expect([...view.hidden]).toEqual(['bus'])
+    expect(view.aircraftHidden).toBe(true)
+    expect(viewOf('?hide=bus').aircraftHidden).toBeFalsy()
+  })
+
+  it('writes the aircraft after the modes, and keeps every other parameter', () => {
+    expect(
+      searchWith('?line=5C', { hidden: new Set(['metro', 'bus']), aircraftHidden: true }),
+    ).toBe('?line=5C&hide=bus,metro,aircraft')
+    expect(searchWith('?hide=aircraft', { hidden: new Set(), aircraftHidden: false })).toBe('')
   })
 })
 
@@ -93,6 +116,22 @@ describe("the view kept in the page's address", () => {
     act(() => store.update({ centre: [12.5683, 55.6761], zoom: 12.5 }))
     expect(renders).toBe(1)
     act(() => store.update({ hidden: new Set(['bus']) }))
+    expect(renders).toBe(2)
+  })
+
+  it('renders a component that reads the Planes filter only when it turns', () => {
+    const store = addressView()
+    let renders = 0
+    function Planes() {
+      renders++
+      return <p>{useAircraftHidden(store) ? 'hidden' : 'shown'}</p>
+    }
+    const { container } = render(<Planes />)
+    act(() => store.update({ hidden: new Set(['bus']) }))
+    expect(renders).toBe(1)
+    act(() => store.update({ aircraftHidden: true }))
+    expect(container).toHaveTextContent('hidden')
+    expect(window.location.search).toBe('?hide=bus,aircraft')
     expect(renders).toBe(2)
   })
 })

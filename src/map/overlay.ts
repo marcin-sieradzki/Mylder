@@ -1,14 +1,15 @@
 // The overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing each kind of
 // thing on it, the live snapshot's vehicles and, above them, the live aircraft, in one render a
 // frame, which the frame driver (frames.ts) runs. The vehicles, less the modes the viewer's
-// filters hide, are where their motion (loop.ts) moves them each frame, and the aircraft where
-// theirs (aircraft-loop.ts) does, with each kind's glyphs made again when its snapshot lands, a
-// data state turns by the clock, a filter or the theme changes; every dot's size where the zoom
-// puts it. A hover picks a dot of either kind (picking.ts), a tap on a vehicle opens its detail,
-// and a tap that finds no dot opens the stop under it, if any. Each frame drawn moves the camera
-// onto the followed dot (follow.ts). It polls the snapshot and the aircraft while the map is
-// open. The numbers of vehicles and aircraft drawn are on the map's container as `data-vehicles`
-// and `data-aircraft`, for tests.
+// filters hide, are where their motion (loop.ts) moves them each frame, and the aircraft, unless
+// the Planes filter hides them, where theirs (aircraft-loop.ts) does, with each kind's glyphs made
+// again when its snapshot lands, a data state turns by the clock, a filter or the theme changes;
+// every dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap
+// on a vehicle opens its detail, and a tap that finds no dot opens the stop under it, if any.
+// Each frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot while
+// the map is open, and the aircraft while the Planes filter shows them too. The numbers of
+// vehicles and aircraft drawn are on the map's container as `data-vehicles` and `data-aircraft`,
+// for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
@@ -114,8 +115,9 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
 
   // One render a frame draws every kind, wherever their motion has placed them.
   const render = () => {
+    // With nothing left to draw, such as the aircraft alone with the Planes filter turned off,
+    // no layers clear what was drawn.
     const drawn = kinds()
-    if (drawn.length === 0) return
     overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale)) })
     if (vehicles) {
       container.dataset.vehicles = String(vehicles.length)
@@ -152,11 +154,15 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     loop.show(vehicles, snapshot, network)
   }
 
-  // The aircraft, drawn again when an answer lands or a state turns by the clock.
+  // The aircraft, drawn again when an answer lands or a state turns by the clock, unless the
+  // Planes filter keeps them off the map.
+  let aircraftShown = mapView.get().aircraftHidden !== true
   const drawAircraft = () => {
     const { snapshot } = liveAircraft.get()
     aircraft =
-      snapshot && aircraftOf(snapshot, readPaint(root, aircraftPaint()), aircraftStates.get())
+      snapshot && aircraftShown
+        ? aircraftOf(snapshot, readPaint(root, aircraftPaint()), aircraftStates.get())
+        : undefined
     aircraftMotion.show(aircraft, snapshot)
   }
   // An answer landing turns its aircraft's states too: both draw once.
@@ -207,7 +213,17 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     redrawAircraft()
   })
   const stopAgeingAircraft = aircraftStates.subscribe(redrawAircraft)
-  const stopPollingAircraft = pollAircraft()
+  // The Planes filter turned off stops the aircraft's poll too; turned on, the poll starts again,
+  // asking at once if one fell due meanwhile.
+  let stopPollingAircraft = aircraftShown ? pollAircraft() : undefined
+  const stopAircraftFilter = mapView.subscribe(() => {
+    const shown = mapView.get().aircraftHidden !== true
+    if (shown === aircraftShown) return
+    aircraftShown = shown
+    stopPollingAircraft?.()
+    stopPollingAircraft = shown ? pollAircraft() : undefined
+    drawAircraft()
+  })
   drawAircraft()
 
   const onZoom = () => {
@@ -240,7 +256,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopPolling()
       stopAircraft()
       stopAgeingAircraft()
-      stopPollingAircraft()
+      stopAircraftFilter()
+      stopPollingAircraft?.()
       loop.stop()
       aircraftMotion.stop()
       frames.stop()

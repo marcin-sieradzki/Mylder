@@ -46,8 +46,12 @@ const atFetch = (snapshot: AircraftSnapshot) => ({
   clockOffset: aircraft.fetched - Date.now(),
 })
 
+/** The paths the page asked for, in order. */
+let asked: string[] = []
+
 /** The timetable routes as the server answers them on the recording; the snapshot's is down. */
 const routes = async (input: RequestInfo | URL): Promise<Response> => {
+  asked.push(String(input))
   const manifest = JSON.parse(read('timetable/manifest.json')) as {
     version: string
     files: Record<string, string>
@@ -74,6 +78,7 @@ let overlay: VehicleOverlay | undefined
 
 beforeEach(() => {
   vi.stubGlobal('fetch', routes)
+  asked = []
   drawn.clear()
   rendered.ids = []
   rendered.times = 0
@@ -153,6 +158,55 @@ describe('the vehicles over the map', () => {
     await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
     expect(container.dataset.aircraft).toBeUndefined()
     expect(rendered.ids).not.toContain('aircraft')
+  })
+
+  it('takes the aircraft off the map while the Planes filter is off, and draws them again on', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    liveSnapshot.update({ snapshot: minute6 })
+    liveAircraft.update(atFetch(aircraft))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    mapView.update({ aircraftHidden: true })
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
+    expect(rendered.ids).toEqual(['vehicle-halos', 'vehicles'])
+    // An answer that lands while they are off stays off the map.
+    liveAircraft.update(atFetch({ ...aircraft, fetched: aircraft.fetched + 1 }))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(container.dataset.aircraft).toBeUndefined()
+    mapView.update({ aircraftHidden: false })
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    expect(rendered.ids).toContain('aircraft')
+  })
+
+  it('takes the aircraft off the canvas with the Planes filter when no vehicles are drawn', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    liveAircraft.update(atFetch(aircraft))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    expect(container.dataset.vehicles).toBeUndefined()
+    mapView.update({ aircraftHidden: true })
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
+    expect(rendered.ids).toEqual([])
+    mapView.update({ aircraftHidden: false })
+  })
+
+  it('asks for no aircraft while the Planes filter is off, and asks at once when it is on', async () => {
+    // A page of its own, whose aircraft poll has not run before.
+    vi.resetModules()
+    const fresh = {
+      overlay: await import('./overlay.ts'),
+      view: await import('./view.ts'),
+    }
+    window.history.replaceState(null, '', '/?hide=aircraft')
+    overlay = fresh.overlay.vehicleOverlay(map, document.createElement('div'))
+    await vi.waitFor(() => expect(asked).toContain('/api/snapshot'))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(asked).not.toContain('/api/aircraft')
+    fresh.view.mapView.update({ aircraftHidden: false })
+    expect(asked).toContain('/api/aircraft')
+    fresh.view.mapView.update({ aircraftHidden: true })
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(asked.filter((path) => path === '/api/aircraft')).toHaveLength(1)
   })
 
   it('looks for a stop under the pointer once a frame, however often it moves', async () => {

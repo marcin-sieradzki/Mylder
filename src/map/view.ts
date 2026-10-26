@@ -1,4 +1,4 @@
-// What the viewer has made of the map: its centre and zoom, the modes filtered out, the open
+// What the viewer has made of the map: its centre and zoom, what its filters keep off it, the open
 // panel (`?stop=<id>` or `?trip=<key>`, one at a time) and the sheet's open tab, kept in the address's query so a reload, a
 // shared link and the language switch keep them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
 // it back and writes it in place, without a new history entry, and leaves every other parameter
@@ -22,11 +22,25 @@ export interface MapView {
   readonly zoom?: number
   /** The modes a filter keeps off the map; none by default. */
   readonly hidden: ReadonlySet<Mode>
+  /** Whether the Planes filter keeps the aircraft off the map; it shows them by default. */
+  readonly aircraftHidden?: boolean
   /** The open panel, a stop's departures or a vehicle's detail; one at a time. */
   readonly panel?: Panel
   /** The sheet's open tab, when it isn't the first, City pulse. */
   readonly tab?: SheetTab
 }
+
+/**
+ * What a filter can keep off the map: a mode's vehicles, or the aircraft. The address's `hide=`
+ * names them in this order, `?hide=bus,aircraft`; the modes alone are what the screens that count
+ * vehicles filter by.
+ */
+export type MapFilter = Mode | 'aircraft'
+const MAP_FILTERS: readonly MapFilter[] = [...MODES, 'aircraft']
+
+/** Whether the view's filters keep `filter` off the map. */
+const hides = (view: MapView, filter: MapFilter): boolean =>
+  filter === 'aircraft' ? view.aircraftHidden === true : view.hidden.has(filter)
 
 /** The sheet's tabs, in their order; the first is open unless the address names another. */
 export const SHEET_TABS = ['pulse', 'vehicles', 'disruptions'] as const
@@ -61,14 +75,14 @@ export function viewOf(search: string): MapView {
     within(zoom, 0, MAX_ZOOM) &&
     within(lat, -90, 90) &&
     within(lon, -180, 180)
-  const hidden = new Set(
-    (query.get(HIDE) ?? '').split(',').filter((mode): mode is Mode => isMode(mode)),
-  )
+  const hide = (query.get(HIDE) ?? '').split(',')
+  const hidden = new Set(hide.filter((mode): mode is Mode => isMode(mode)))
   const panel = panelOf(query)
   const tab = query.get(TAB) ?? ''
   return {
     ...(placed ? { centre: [lon, lat] as const, zoom } : {}),
     hidden,
+    ...(hide.includes('aircraft') ? { aircraftHidden: true } : {}),
     ...(panel ? { panel } : {}),
     ...(isTab(tab) && tab !== SHEET_TABS[0] ? { tab } : {}),
   }
@@ -106,7 +120,7 @@ export function searchWith(search: string, view: MapView): string {
       ? `${view.zoom.toFixed(2)}/${view.centre[1].toFixed(5)}/${view.centre[0].toFixed(5)}`
       : undefined,
   )
-  put(HIDE, MODES.filter((mode) => view.hidden.has(mode)).join(','))
+  put(HIDE, MAP_FILTERS.filter((filter) => hides(view, filter)).join(','))
   for (const kind of KINDS) put(PANELS[kind], view.panel?.kind === kind ? view.panel.id : undefined)
   put(TAB, view.tab === SHEET_TABS[0] ? undefined : view.tab)
   const written = readableQuery(query)
@@ -180,6 +194,18 @@ export function useHiddenModes(store: ViewStore = mapView): ReadonlySet<Mode> {
     store.subscribe,
     () => store.get().hidden,
     () => NOTHING.hidden,
+  )
+}
+
+/**
+ * Whether the Planes filter keeps the aircraft off the map, for a component: it renders again when
+ * the filter turns, not when the map moves. The prerendered page shows them.
+ */
+export function useAircraftHidden(store: ViewStore = mapView): boolean {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().aircraftHidden === true,
+    () => false,
   )
 }
 

@@ -49,7 +49,7 @@ test('a mode filter takes its vehicles off the map, and its chip keeps the count
   await page.goto('/en')
   const map = page.locator('[data-vehicles]')
   const drawn = async () => Number(await map.getAttribute('data-vehicles'))
-  const bus = page.getByRole('group', { name: 'Modes' }).getByRole('button', { name: /^Bus/ })
+  const bus = page.getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ })
   await expect(bus).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(() => buses).toBeGreaterThan(0)
   await expect.poll(drawn).toBeGreaterThan(buses!)
@@ -73,9 +73,7 @@ test('switching language keeps the map where it was, its filters and the rest of
     .getByRole('link', { name: 'Dansk' })
     .click()
   await expect(page).toHaveURL('/da?map=13.00/55.67600/12.56800&hide=bus&line=5C')
-  const bus = page
-    .getByRole('group', { name: 'Transportformer' })
-    .getByRole('button', { name: /^Bus/ })
+  const bus = page.getByRole('group', { name: 'Filtre' }).getByRole('button', { name: /^Bus/ })
   await expect(bus).toHaveAttribute('aria-pressed', 'false')
 
   // The Danish map opened where the English one was: one step in from there keeps the centre.
