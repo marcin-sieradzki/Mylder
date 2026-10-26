@@ -1,7 +1,8 @@
 // How the CDN caches the answers (docs/live-data.md, "Caching"): until the answer's next run is
 // due, never under 5 s, then served stale for as long as the answer's policy says: the tracker's
-// for 30 s while a new one is fetched and for 5 min if the app fails, the aircraft's for 10 s and
-// 1 min (docs/aircraft.md); never by the browser itself.
+// for 30 s while a new one is fetched and for 5 min if the app fails, the aircraft's never while
+// a new one is fetched and for 1 min if the app fails (docs/aircraft.md); never by the browser
+// itself.
 // A 503 tells the client when to ask again, as the policy says too.
 import 'server-only'
 
@@ -32,12 +33,14 @@ export const TRACKER_CACHING: CachePolicy = {
 }
 
 /**
- * The aircraft's answer: stale for 10 s, one call's worth, while a new one is fetched and for a
- * minute if the app fails, when its positions would be No signal anyway; asked again 10 s after
- * a 503.
+ * The aircraft's answer: never stale while a new one is fetched, since a new one is made only
+ * when a poll asks for it (ADR 0014): served stale, the first poll past its next due would get
+ * the old one, see nothing new and ask again 5 s later, every snapshot costing two polls and
+ * coming 15 s apart. Stale for a minute if the app fails, when its positions would be No signal
+ * anyway; asked again 10 s after a 503.
  */
 export const AIRCRAFT_CACHING: CachePolicy = {
-  whileRevalidating: 10,
+  whileRevalidating: 0,
   ifError: 60,
   retryAfter: 10,
 }

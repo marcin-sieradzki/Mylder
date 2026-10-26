@@ -4,7 +4,7 @@ How the planes over Copenhagen get from adsb.lol to the map, beside the transit 
 
 ## The shape in one paragraph
 
-Browsers never call adsb.lol. Each browser polls `/api/aircraft`, which answers with one snapshot of every aircraft in the transit box. The CDN keeps that snapshot until the next one is due, 10 s after it was fetched, so a thousand browsers cost one call every 10 s, and nobody watching costs nothing. When a poll misses the CDN, the aircraft source asks adsb.lol once, or adsb.fi when adsb.lol fails or rests, keeps the aircraft it may show, and returns the snapshot. There is no store, lease or budget: each aircraft carries its own position's age, and the feed needs no key.
+Browsers never call adsb.lol. Each browser polls `/api/aircraft`, which answers with one snapshot of every aircraft in the transit box. The CDN keeps that snapshot until the next one is due, 10 s after it was fetched, and no longer, so a thousand browsers cost one call every 10 s, and nobody watching costs nothing. When a poll misses the CDN, the aircraft source asks adsb.lol once, or adsb.fi when adsb.lol fails or rests, keeps the aircraft it may show, and returns the snapshot. There is no store, lease or budget: each aircraft carries its own position's age, and the feed needs no key.
 
 ## The feed
 
@@ -45,7 +45,7 @@ Each aircraft: `hex` (the ICAO address, the key), `callsign`, `type` (the type c
 
 ## Caching
 
-The route's answer carries the transit answers' CDN header with the aircraft's policy, `AIRCRAFT_CACHING` in `src/tracker/caching.ts`: held until `nextDue`, never under 5 s, stale for 10 s while a new one is fetched and for 60 s if the app fails, and asked again 10 s after a 503. Its date header is the source's own clock, which a recording sets. Ages count from `fetched`, so a stale answer still shows true ages.
+The route's answer carries the transit answers' CDN header with the aircraft's policy, `AIRCRAFT_CACHING` in `src/tracker/caching.ts`: held until `nextDue`, never under 5 s, never served stale while a new one is fetched, stale for 60 s if the app fails, and asked again 10 s after a 503. The spec (#126) had it stale for 10 s while revalidating, as the tracker's answers are; that was put right on purpose. The aircraft snapshot is made only when a poll misses the CDN, so the first poll after `nextDue` would be served the old one stale while the CDN fetched the new: the browser sees nothing new, asks again 5 s later, and the planes update every 15 s or so at twice the polls. Its date header is the source's own clock, which a recording sets. Ages count from `fetched`, so a stale answer still shows true ages.
 
 ## The switch: `MYLDER_AIRCRAFT_SOURCE`
 

@@ -219,21 +219,23 @@ describe('GET /api/aircraft', () => {
       ),
   )
 
-  it.effect('holds the answer at the CDN until its next due, dated when it was fetched', () =>
-    Effect.gen(function* () {
-      yield* TestClock.setTime(MOMENT)
-      const first = yield* request
-      expect(first.headers.get('Vercel-CDN-Cache-Control')).toBe(
-        'max-age=10, stale-while-revalidate=10, stale-if-error=60',
-      )
-      expect(first.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
-      expect(first.headers.get('Date')).toBe('Tue, 16 Jun 2026 05:20:00 GMT')
-      yield* TestClock.adjust('4 seconds')
-      const later = yield* request
-      expect(later.headers.get('Vercel-CDN-Cache-Control')).toBe(
-        'max-age=6, stale-while-revalidate=10, stale-if-error=60',
-      )
-    }).pipe(Effect.provide(replaying(answer(plane('aaa001'))))),
+  it.effect(
+    'holds the answer at the CDN until its next due, never past it, dated when it was fetched',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        const first = yield* request
+        expect(first.headers.get('Vercel-CDN-Cache-Control')).toBe(
+          'max-age=10, stale-while-revalidate=0, stale-if-error=60',
+        )
+        expect(first.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
+        expect(first.headers.get('Date')).toBe('Tue, 16 Jun 2026 05:20:00 GMT')
+        yield* TestClock.adjust('4 seconds')
+        const later = yield* request
+        expect(later.headers.get('Vercel-CDN-Cache-Control')).toBe(
+          'max-age=6, stale-while-revalidate=0, stale-if-error=60',
+        )
+      }).pipe(Effect.provide(replaying(answer(plane('aaa001'))))),
   )
 
   it.effect(
