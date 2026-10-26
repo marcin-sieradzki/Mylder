@@ -1,25 +1,34 @@
-// The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
-// the live snapshot's vehicles, less the modes the viewer's filters hide, where the motion loop
-// moves them each frame, with their glyphs made again when a snapshot lands, a data state turns
-// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover
-// picks a dot for its card (picking.ts), a tap on one opens its detail, and a tap that finds no
-// dot opens the stop under it, if any. Each frame drawn moves the camera onto the followed dot
-// (follow.ts). It polls the snapshot while the map is open. The number of vehicles drawn is on
-// the map's container as `data-vehicles`, for tests.
+// The overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing each kind of
+// thing on it, the live snapshot's vehicles and, above them, the live aircraft, in one render a
+// frame. The vehicles, less the modes the viewer's filters hide, are where the motion loop moves
+// them each frame, with their glyphs made again when a snapshot lands, a data state turns by the
+// clock, a filter or the theme changes; the aircraft where their latest answer put them; every
+// dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap on a
+// vehicle opens its detail, and a tap that finds no dot opens the stop under it, if any. Each
+// frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot and the
+// aircraft while the map is open. The numbers of vehicles and aircraft drawn are on the map's
+// container as `data-vehicles` and `data-aircraft`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import {
+  aircraftDrawn,
+  aircraftOf,
+  aircraftPaint,
+  type DrawnAircraft,
+} from './AircraftGlyphLayer.ts'
+import { liveAircraft, pollAircraft } from './aircraft.ts'
 import { followCamera } from './follow.ts'
 import { radiusScaleAt } from './glyphs.ts'
 import { liveSnapshot, pollSnapshot, serverNow } from './live.ts'
 import { vehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
-import { TAP_RADIUS, vehiclePicking } from './picking.ts'
+import { dotPicking, TAP_RADIUS, type DrawnKind } from './picking.ts'
 import { dataStates } from './states.ts'
 import { timetables } from './timetable.ts'
-import { vehicleLayers } from './VehicleGlyphLayer.ts'
+import { tripsDrawn } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf, type Vehicles } from './vehicles.ts'
 import { STOP_LAYERS } from './style/basemap.ts'
 import { mapView, openPanel } from './view.ts'
@@ -57,7 +66,7 @@ export interface VehicleOverlay {
   remove(): void
 }
 
-/** Draws the live vehicles over `map`, whose container is `container`. */
+/** Draws the live vehicles and aircraft over `map`, whose container is `container`. */
 export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): VehicleOverlay {
   const root = document.documentElement
   const canvas = map.getCanvas()
@@ -69,13 +78,14 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     cursorFrame = undefined
     if (resting) canvas.style.cursor = stopAt(map, resting.x, resting.y) ? 'pointer' : ''
   }
-  const picking = vehiclePicking(container, undefined, {
-    onTap(key) {
-      openPanel({ kind: 'trip', id: key })
+  // An aircraft has no card or detail yet (#130): it is picked, and a tap on it opens nothing.
+  const picking = dotPicking(container, undefined, {
+    onTap(kind, key) {
+      if (kind === 'trip') openPanel({ kind: 'trip', id: key })
     },
-    onPointer(onDot, x, y) {
-      resting = onDot ? undefined : { x, y }
-      if (onDot) canvas.style.cursor = 'pointer'
+    onPointer(on, x, y) {
+      resting = on ? undefined : { x, y }
+      if (on) canvas.style.cursor = on === 'trip' ? 'pointer' : ''
       else cursorFrame ??= requestAnimationFrame(cursorOverStops)
     },
     onMiss(x, y) {
@@ -89,13 +99,31 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   let removed = false
   let drawnFrom: Snapshot | undefined
   let vehicles: Vehicles | undefined
+  let aircraft: DrawnAircraft | undefined
   let radiusScale = radiusScaleAt(map.getZoom())
 
+  /** What is drawn now, bottom to top. */
+  const kinds = (): DrawnKind[] => [
+    ...(vehicles ? [tripsDrawn(vehicles)] : []),
+    ...(aircraft ? [aircraftDrawn(aircraft)] : []),
+  ]
+
+  // One render a frame draws every kind: the loop's frame renders at once, and anything else
+  // asks for the next frame's, which the loop's own render meets if it comes first.
+  let frameAsked: number | undefined
   const render = () => {
-    if (!vehicles) return
-    overlay.setProps({ layers: vehicleLayers(vehicles, radiusScale) })
-    container.dataset.vehicles = String(vehicles.length)
-    picking.follow(vehicles, project)
+    if (frameAsked !== undefined) cancelAnimationFrame(frameAsked)
+    frameAsked = undefined
+    const drawn = kinds()
+    if (drawn.length === 0) return
+    overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale)) })
+    if (vehicles) container.dataset.vehicles = String(vehicles.length)
+    if (aircraft) container.dataset.aircraft = String(aircraft.aircraft.length)
+    else delete container.dataset.aircraft
+    picking.follow(drawn, project)
+  }
+  const renderNextFrame = () => {
+    frameAsked ??= requestAnimationFrame(render)
   }
   const follow = followCamera(map, container)
   const along = (key: string) => loop.along(key)
@@ -132,6 +160,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     )
   }
 
+  // The aircraft stand where their latest answer put them, drawn again when one lands.
+  const drawAircraft = () => {
+    const { snapshot } = liveAircraft.get()
+    aircraft = snapshot && aircraftOf(snapshot, readPaint(root, aircraftPaint()))
+    renderNextFrame()
+  }
+
   // A snapshot landing turns its trips' states too: everything asked for at once draws once.
   let asked = false
   const redraw = () => {
@@ -161,16 +196,25 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const stopPolling = pollSnapshot()
   drawnFrom = liveSnapshot.get().snapshot
   void draw()
+  let aircraftFrom = liveAircraft.get().snapshot
+  const stopAircraft = liveAircraft.subscribe(() => {
+    const { snapshot } = liveAircraft.get()
+    if (snapshot === aircraftFrom) return
+    aircraftFrom = snapshot
+    drawAircraft()
+  })
+  const stopPollingAircraft = pollAircraft()
+  drawAircraft()
 
   const onZoom = () => {
     const scale = radiusScaleAt(map.getZoom())
     if (scale === radiusScale) return
     radiusScale = scale
-    render()
+    renderNextFrame()
   }
   map.on('zoom', onZoom)
   // The picked dot's card follows it as the map pans, even while the dots stand still.
-  const onMove = () => vehicles && picking.follow(vehicles, project)
+  const onMove = () => picking.follow(kinds(), project)
   map.on('move', onMove)
   // A resized window moves the canvas on the page, which the card's point counts from.
   const onResize = () => {
@@ -180,13 +224,19 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   map.on('resize', onResize)
 
   return {
-    repaint: () => void draw(),
+    repaint() {
+      drawAircraft()
+      void draw()
+    },
     remove() {
       removed = true
       stopListening()
       stopAgeing()
       stopFiltering()
       stopPolling()
+      stopAircraft()
+      stopPollingAircraft()
+      if (frameAsked !== undefined) cancelAnimationFrame(frameAsked)
       loop.stop()
       follow.remove()
       if (cursorFrame !== undefined) cancelAnimationFrame(cursorFrame)
@@ -195,6 +245,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       map.off('resize', onResize)
       map.removeControl(overlay)
       delete container.dataset.vehicles
+      delete container.dataset.aircraft
     },
   }
 }

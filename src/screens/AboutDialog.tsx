@@ -1,10 +1,10 @@
 'use client'
 
 import { Dialog, FactList, Kbd, Link, Section, Text, VehicleDotLabel } from '@mylder/perron'
-import { Fragment, type ReactNode } from 'react'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
+import { useAircraftProvider } from '../map/aircraft'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
@@ -12,7 +12,9 @@ import type { Snapshot } from '../tracker/index'
 import { aboutDialog, useAboutOpen } from './about'
 import { budgetLine, intervalOf } from './budget'
 import styles from './AboutDialog.module.css'
+import { compose } from './compose'
 import {
+  aircraftCredit,
   CC_BY,
   MAP_STYLE_LICENCE,
   ODBL,
@@ -33,17 +35,6 @@ const STATES = [
   ['timetable-only', 'timetableOnly'],
   ['no-signal', 'noSignal'],
 ] as const
-
-const PLACEHOLDERS = /(\{\w+\})/
-const PLACEHOLDER = /^\{(\w+)\}$/
-
-/** Fills each `{name}` in `template` with its part, which may be an element such as a link. */
-function compose(template: string, parts: Record<string, ReactNode>): ReactNode[] {
-  return template.split(PLACEHOLDERS).map((piece, i) => {
-    const name = PLACEHOLDER.exec(piece)?.[1]
-    return name !== undefined && name in parts ? <Fragment key={i}>{parts[name]}</Fragment> : piece
-  })
-}
 
 /** Where the page's vehicles come from. */
 function sourceOf({ source }: Snapshot, words: Words['status']): string {
@@ -120,6 +111,27 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   )
 }
 
+/** The aircraft's credit for the provider that answered, beside the map's; none without any. */
+function AircraftCredit({ words }: { words: Words['credits'] }) {
+  const { dictionary } = useI18n()
+  const provider = useAircraftProvider()
+  if (!provider) return null
+  const credit = aircraftCredit(provider)
+  const contributors = dictionary.credit.contributors.replace('{name}', credit.name)
+  return (
+    <Text render={<p />}>
+      {credit.odbl
+        ? compose(words.aircraft, {
+            source: <Link href={credit.href}>{contributors}</Link>,
+            licence: <Link href={ODBL}>ODbL</Link>,
+          })
+        : compose(words.aircraftFrom, {
+            source: <Link href={credit.href}>{credit.name}</Link>,
+          })}
+    </Text>
+  )
+}
+
 /** On close, the focus goes back to what opened the dialog, the About button or the credit. */
 const returnFocus = () => aboutDialog.opener() ?? true
 
@@ -161,6 +173,7 @@ export function AboutDialog() {
               openFreeMap: <Link href={OPENFREEMAP}>OpenFreeMap</Link>,
             })}
           </Text>
+          <AircraftCredit words={words.credits} />
           <Text render={<p />} emphasis="secondary">
             {compose(words.credits.style, {
               licence: <Link href={MAP_STYLE_LICENCE}>{words.credits.styleLicence}</Link>,

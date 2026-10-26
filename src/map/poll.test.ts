@@ -59,6 +59,8 @@ let serverAhead: number
 let cacheAge: number
 /** How far the beacons' server clock runs ahead of this device's: they don't share the snapshot's. */
 let beaconsAhead: number
+/** Whether the beacons' route is off on the server, answering 404. */
+let beaconsOff: boolean
 
 /** The beacons' server makes a snapshot on each 10 s of its own clock. */
 const beaconsAnswer = () => {
@@ -71,6 +73,8 @@ const beaconsAnswer = () => {
 const fetchFake: PollerDeps['fetch'] = (url, init) => {
   if (url === BEACONS.path) {
     beaconPolls.push(Date.now())
+    if (beaconsOff)
+      return Promise.resolve(Response.json({ error: 'unknown beacons' }, { status: 404 }))
     return Promise.resolve(beaconsAnswer())
   }
   open += 1
@@ -141,6 +145,7 @@ beforeEach(() => {
   serverAhead = 0
   cacheAge = 0
   beaconsAhead = 0
+  beaconsOff = false
 })
 
 afterEach(() => {
@@ -334,5 +339,29 @@ describe('two polls on two routes', () => {
     await vi.advanceTimersByTimeAsync(0)
     expect(pollTimes().at(-1)).toBe(170)
     expect(pollTimes(beaconPolls).at(-1)).toBe(170)
+  })
+})
+
+describe('a route that may be off', () => {
+  const MAY_BE_OFF: PollRoute<Beacons> = { ...BEACONS, mayBeOff: true }
+
+  it('stops polling at its 404 and says so in its store, holding no snapshot', async () => {
+    beaconsOff = true
+    const beacons = liveStore<Beacons>()
+    snapshotPoller(beacons, MAY_BE_OFF, deps()).start()
+    await vi.advanceTimersByTimeAsync(5 * 60 * S)
+    expect(pollTimes(beaconPolls)).toEqual([10])
+    expect(beacons.get()).toMatchObject({ off: true })
+    expect(beacons.get().snapshot).toBeUndefined()
+    expect(beacons.get().failingSince).toBeUndefined()
+  })
+
+  it('counts a 404 as a failed poll on a route that is always on', async () => {
+    beaconsOff = true
+    const beacons = liveStore<Beacons>()
+    snapshotPoller(beacons, BEACONS, deps()).start()
+    await vi.advanceTimersByTimeAsync(16 * S)
+    expect(pollTimes(beaconPolls)).toEqual([10, 15, 25])
+    expect(beacons.get().off).toBeUndefined()
   })
 })

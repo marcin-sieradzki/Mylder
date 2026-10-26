@@ -19,6 +19,8 @@ export interface LiveState<S> {
   readonly lastGoodPoll?: number
   /** Since when polls have failed, on this device's clock; unset once one answers. */
   readonly failingSince?: number
+  /** Set when the route is off on the server, so no snapshot will come. */
+  readonly off?: true
 }
 
 /** A store of one kind of snapshot, whose state `L` may keep more than its poll gives it. */

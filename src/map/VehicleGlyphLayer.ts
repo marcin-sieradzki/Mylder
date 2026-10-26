@@ -7,7 +7,7 @@ import 'client-only'
 import type { Accessor, DefaultProps, Layer } from '@deck.gl/core'
 import { PathStyleExtension } from '@deck.gl/extensions'
 import { ScatterplotLayer, type ScatterplotLayerProps } from '@deck.gl/layers'
-import { PICKED_LAYER } from './picking.ts'
+import { PICKED_LAYER, type DrawnKind, type Project } from './picking.ts'
 import type { Vehicles } from './vehicles.ts'
 
 type CutProps<D> = {
@@ -124,4 +124,28 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
       pickable: true,
     }),
   ]
+}
+
+/** Where the `i`th vehicle is drawn in the canvas: its position, moved by its offset onto its strand. */
+function drawnAt(vehicles: Vehicles, i: number, project: Project): [number, number] {
+  const { x, y } = project([vehicles.positions[i * 2], vehicles.positions[i * 2 + 1]])
+  return [x + vehicles.offsets[i * 2], y - vehicles.offsets[i * 2 + 1]]
+}
+
+const tripKinds = new WeakMap<Vehicles, DrawnKind>()
+
+/** The vehicles as a drawn kind, the same one for each set of vehicles. */
+export function tripsDrawn(vehicles: Vehicles): DrawnKind {
+  let kind = tripKinds.get(vehicles)
+  if (!kind) {
+    kind = {
+      kind: 'trip',
+      keys: vehicles.keys,
+      picks: PICKED_LAYER,
+      at: (i, project) => drawnAt(vehicles, i, project),
+      layers: (radiusScale) => vehicleLayers(vehicles, radiusScale),
+    }
+    tripKinds.set(vehicles, kind)
+  }
+  return kind
 }

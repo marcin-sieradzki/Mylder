@@ -34,7 +34,8 @@ const PASSING = { positioner: { className: styles.passing } }
 export function VehicleCard() {
   const picked = usePickedVehicle()
   const snapshot = useSnapshot()
-  const trip = tripOf(snapshot, picked?.key)
+  // An aircraft's own card comes with #130.
+  const trip = picked?.kind === 'trip' ? tripOf(snapshot, picked.key) : undefined
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   if (!picked || !trip) return null
   return <Card trip={trip} point={picked.point} timezone={timezone} />

@@ -2,7 +2,8 @@
 // at each snapshot's next due plus a jitter drawn once per page load, only while the page is
 // visible. A failed poll keeps the snapshot and retries after 5, 10, 20 and then every 30 s; an
 // answer that isn't new yet is asked again after 5 s, three times. Each kind of snapshot has its
-// route and its own poll, which lands its answers in its own store with its server's clock.
+// route and its own poll, which lands its answers in its own store with its server's clock. A
+// route that may be off, such as the aircraft's, stops at its 404 for the page's life.
 // Everything outside Mylder (the network, the timers, the clock, visibility, the random draw)
 // comes in as a dependency.
 import 'client-only'
@@ -49,6 +50,12 @@ export interface PollRoute<S extends Polled> {
   readonly timeout: number
   /** Whether an answer's body is the route's snapshot; one that isn't is a failed poll. */
   accepts(body: unknown): body is S
+  /**
+   * Whether the server may have the route off, answering 404, as the aircraft's is under
+   * `MYLDER_AIRCRAFT_SOURCE=off` and in the demo: then the poll stops and its store says so.
+   * Elsewhere a 404 is a failed poll.
+   */
+  readonly mayBeOff?: boolean
 }
 
 const S = 1000
@@ -171,8 +178,10 @@ export function snapshotPoller<S extends Polled>(
     const timeout = timers.set(() => controller.abort(), route.timeout)
     const sent = now()
     let answer: { snapshot: S; headers: Headers } | undefined
+    let off = false
     try {
       const response = await deps.fetch(route.path, { signal: controller.signal })
+      off = response.status === 404 && route.mayBeOff === true
       if (response.ok) {
         const body: unknown = await response.json()
         if (route.accepts(body)) answer = { snapshot: body, headers: response.headers }
@@ -185,7 +194,12 @@ export function snapshotPoller<S extends Polled>(
     // Stopped while it was on its way: whatever came back is dropped.
     if (inFlight !== controller) return
     inFlight = undefined
-    if (answer) landed(answer.snapshot, answer.headers, sent)
+    if (off) {
+      running = false
+      stopWatching?.()
+      stopWatching = undefined
+      store.update({ off: true, failingSince: undefined })
+    } else if (answer) landed(answer.snapshot, answer.headers, sent)
     else failed()
   }
 

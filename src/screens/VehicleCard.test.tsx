@@ -29,7 +29,7 @@ const BUS_WAITING = 'bus.991.7ce514fd98.20260616.0730'
 function openCard(lang: Lang, key: string, seconds: number) {
   vi.setSystemTime(minute6.fetched + seconds * 1000)
   liveSnapshot.update({ snapshot: minute6, clockOffset: 0 })
-  pickedVehicle.pick({ key, point: [200, 200] })
+  pickedVehicle.pick({ kind: 'trip', key, point: [200, 200] })
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
       <VehicleCard />
@@ -107,7 +107,7 @@ describe("a dot's card", () => {
     openCard('da', BUS_ESTIMATED, 20)
     expect(card()).toHaveTextContent('Bus 5C mod Husum Torv')
     expect(card()).toHaveTextContent('Beregnet ud fra køreplanen')
-    act(() => pickedVehicle.pick({ key: BUS_WAITING, point: [200, 200] }))
+    act(() => pickedVehicle.pick({ kind: 'trip', key: BUS_WAITING, point: [200, 200] }))
     expect(card()).toHaveTextContent('Kun køreplan')
     expect(card()).toHaveTextContent('Afgår 07:30')
   })
@@ -118,6 +118,12 @@ describe("a dot's card", () => {
     // must still be over the map, or the map hears it leave and the card closes, and a tap must
     // still reach the dot to open its detail.
     expect(getComputedStyle(card()).pointerEvents).toBe('none')
+  })
+
+  it('opens on no aircraft, whose own card is to come', () => {
+    openCard('en', A_LIVE, 20)
+    act(() => pickedVehicle.pick({ kind: 'aircraft', key: A_LIVE, point: [200, 200] }))
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 
   it('closes on Esc', () => {

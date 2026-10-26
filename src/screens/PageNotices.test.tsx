@@ -6,7 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { liveAircraft } from '../map/aircraft'
 import { liveSnapshot } from '../map/live'
+import type { AircraftSnapshot } from '../tracker/aircraft/index'
 import type { Snapshot } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
@@ -69,8 +71,20 @@ beforeEach(() => {
   vi.stubGlobal('fetch', timetableRoutes)
 })
 
+/** The weekday recording's first aircraft snapshot, from `provider`. */
+const aircraft = (provider: AircraftSnapshot['provider']): AircraftSnapshot => ({
+  ...(JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', '0001.json'),
+      'utf8',
+    ),
+  ) as AircraftSnapshot),
+  provider,
+})
+
 afterEach(() => {
   liveSnapshot.update({ snapshot: undefined, failingSince: undefined, clockOffset: 0 })
+  liveAircraft.update({ snapshot: undefined })
   vi.unstubAllGlobals()
 })
 
@@ -102,6 +116,39 @@ describe('the source banner', () => {
     expect(notices()).toEqual([
       'Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.',
     ])
+  })
+
+  it('names the transit as simulated and the planes as live, in both languages', () => {
+    land({ ...saved('0004.json'), source: { kind: 'simulated', name: 'weekday' } })
+    act(() => liveAircraft.update({ snapshot: aircraft('adsb.lol') }))
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([
+      'Simulated data: vehicles and times are made up from the timetable. Planes: live from adsb.lol.',
+    ])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([
+      'Simulerede data: køretøjer og tider er digtet op ud fra køreplanen. Fly: live fra adsb.lol.',
+    ])
+  })
+
+  it('says the planes are recorded too, in both languages', () => {
+    land(saved('0004.json'))
+    act(() => liveAircraft.update({ snapshot: aircraft('recording') }))
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual(['Recorded data from 16 June 2026. Planes: recorded.'])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual(['Optagne data fra 16. juni 2026. Fly: optaget.'])
+  })
+
+  it('says recorded planes are recorded when the transit is Rejseplanen’s, and live ones nothing', () => {
+    land(live())
+    act(() => liveAircraft.update({ snapshot: aircraft('recording') }))
+    renderScreen('en')
+    expect(notices()).toEqual(['Planes: recorded.'])
+    act(() => liveAircraft.update({ snapshot: aircraft('adsb.lol') }))
+    expect(notices()).toEqual([])
   })
 
   it('is not there when the data is Rejseplanen’s', () => {

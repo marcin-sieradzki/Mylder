@@ -82,7 +82,10 @@
   },
   "credit": {
     "transitData": "Transit data",
-    "openStreetMap": "OpenStreetMap contributors"
+    "openStreetMap": "OpenStreetMap contributors",
+    "aircraft": "Aircraft: {source} under the {licence}",
+    "aircraftFrom": "Aircraft: {source}",
+    "contributors": "{name} contributors"
   },
   "stop": {
     "fallbackTitle": "Stop",
@@ -114,6 +117,8 @@
       "title": "Data and credits",
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "aircraft": "Aircraft: © {source} under the {licence}.",
+      "aircraftFrom": "Aircraft: {source}.",
       "style": "The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see {licence}.",
       "styleLicence": "its licence"
     },
@@ -225,7 +230,9 @@
     "timetableEnds": "The timetable ends on {date}. Without a new one, the map has no trips after that.",
     "timetableEnded": "The timetable ended on {date}. Without a new one, the map has no trips to show.",
     "simulated": "Simulated data: vehicles and times are made up from the timetable.",
-    "recorded": "Recorded data from {date}."
+    "recorded": "Recorded data from {date}.",
+    "aircraftLive": "Planes: live from {provider}.",
+    "aircraftRecorded": "Planes: recorded."
   },
   "interval": {
     "seconds": "{n} s",

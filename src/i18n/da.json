@@ -82,7 +82,10 @@
   },
   "credit": {
     "transitData": "Trafikdata",
-    "openStreetMap": "OpenStreetMap-bidragydere"
+    "openStreetMap": "OpenStreetMap-bidragydere",
+    "aircraft": "Fly: {source} under {licence}",
+    "aircraftFrom": "Fly: {source}",
+    "contributors": "{name}-bidragydere"
   },
   "stop": {
     "fallbackTitle": "Stoppested",
@@ -114,6 +117,8 @@
       "title": "Data og kreditering",
       "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "aircraft": "Fly: © {source} under {licence}.",
+      "aircraftFrom": "Fly: {source}.",
       "style": "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se {licence}.",
       "styleLicence": "licensen"
     },
@@ -225,7 +230,9 @@
     "timetableEnds": "Køreplanen slutter {date}. Uden en ny har kortet ingen ture derefter.",
     "timetableEnded": "Køreplanen sluttede {date}. Uden en ny har kortet ingen ture at vise.",
     "simulated": "Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.",
-    "recorded": "Optagne data fra {date}."
+    "recorded": "Optagne data fra {date}.",
+    "aircraftLive": "Fly: live fra {provider}.",
+    "aircraftRecorded": "Fly: optaget."
   },
   "interval": {
     "seconds": "{n}. sekund",

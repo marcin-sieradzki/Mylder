@@ -3,16 +3,23 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { liveAircraft } from './aircraft.ts'
 import { liveSnapshot } from './live.ts'
 import { vehicleOverlay, type VehicleOverlay } from './overlay.ts'
 import { mapView } from './view.ts'
 
 // deck.gl's overlay draws with WebGL, which jsdom lacks: a stand-in keeps each set of vehicles it
-// is given, by the positions the loop moves frame by frame.
+// is given, by the positions the loop moves frame by frame, and the layers of its latest render.
 const drawn = vi.hoisted(() => new Set<unknown>())
+const rendered = vi.hoisted(() => ({ ids: [] as string[], times: 0 }))
 interface Moving {
   readonly getPosition: { readonly value: unknown }
+}
+interface Drawn {
+  readonly id: string
+  readonly props: { readonly data: { readonly attributes?: Moving } }
 }
 const hovering = vi.hoisted(() => ({ onHover: undefined as ((info: unknown) => void) | undefined }))
 vi.mock('@deck.gl/maplibre', () => ({
@@ -20,8 +27,11 @@ vi.mock('@deck.gl/maplibre', () => ({
     constructor({ onHover }: { onHover: (info: unknown) => void }) {
       hovering.onHover = onHover
     }
-    setProps({ layers }: { layers: { props: { data: { attributes: Moving } } }[] }) {
-      drawn.add(layers[0].props.data.attributes.getPosition.value)
+    setProps({ layers }: { layers: Drawn[] }) {
+      rendered.ids = layers.map((layer) => layer.id)
+      rendered.times++
+      const vehicles = layers.find((layer) => layer.id === 'vehicles')
+      if (vehicles) drawn.add(vehicles.props.data.attributes!.getPosition.value)
     }
   },
 }))
@@ -29,6 +39,7 @@ vi.mock('@deck.gl/maplibre', () => ({
 const recording = join(process.cwd(), 'recordings', 'weekday')
 const read = (path: string): string => readFileSync(join(recording, path), 'utf8')
 const minute6 = JSON.parse(read('snapshots/0006.json')) as Snapshot
+const aircraft = JSON.parse(read('answers/aircraft/0006.json')) as AircraftSnapshot
 
 /** The timetable routes as the server answers them on the recording; the snapshot's is down. */
 const routes = async (input: RequestInfo | URL): Promise<Response> => {
@@ -59,12 +70,15 @@ let overlay: VehicleOverlay | undefined
 beforeEach(() => {
   vi.stubGlobal('fetch', routes)
   drawn.clear()
+  rendered.ids = []
+  rendered.times = 0
 })
 
 afterEach(() => {
   overlay?.remove()
   overlay = undefined
   liveSnapshot.update({ snapshot: undefined, failingSince: undefined })
+  liveAircraft.update({ snapshot: undefined, off: undefined })
   vi.unstubAllGlobals()
   window.history.replaceState(null, '', '/')
 })
@@ -91,6 +105,49 @@ describe('the vehicles over the map', () => {
     mapView.update({ hidden: new Set(['bus']) })
     await vi.waitFor(() => expect(container.dataset.vehicles).toBe('11'))
     expect(drawn.size).toBe(2)
+  })
+
+  it('draws the aircraft above the vehicles, as many as their snapshot holds', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    liveSnapshot.update({ snapshot: minute6 })
+    liveAircraft.update({ snapshot: aircraft })
+    await vi.waitFor(() =>
+      expect(container.dataset.aircraft).toBe(String(aircraft.aircraft.length)),
+    )
+    await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
+    expect(rendered.ids).toEqual([
+      'vehicle-halos',
+      'vehicles',
+      'aircraft-halos',
+      'aircraft-ticks',
+      'aircraft',
+    ])
+    expect(aircraft.aircraft.length).toBe(27)
+  })
+
+  it('renders both kinds once in a frame when both land at once', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    liveSnapshot.update({ snapshot: minute6 })
+    await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    const before = rendered.times
+    liveAircraft.update({ snapshot: aircraft })
+    liveAircraft.update({ snapshot: { ...aircraft, fetched: aircraft.fetched + 1 } })
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(container.dataset.aircraft).toBe('27')
+    expect(rendered.times - before).toBe(1)
+  })
+
+  it('draws no aircraft, and says none, while the aircraft are off', async () => {
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(map, container)
+    liveSnapshot.update({ snapshot: minute6 })
+    liveAircraft.update({ off: true })
+    await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
+    expect(container.dataset.aircraft).toBeUndefined()
+    expect(rendered.ids).not.toContain('aircraft')
   })
 
   it('looks for a stop under the pointer once a frame, however often it moves', async () => {

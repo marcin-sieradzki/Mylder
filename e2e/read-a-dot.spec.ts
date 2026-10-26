@@ -35,6 +35,8 @@ test('the legend, the controls and the credit show on a phone', async ({ page })
   for (const name of [
     'Rejseplanen',
     'CC BY 4.0',
+    '© adsb.lol contributors',
+    'ODbL',
     '© OpenStreetMap contributors',
     '© OpenMapTiles',
     'OpenFreeMap',

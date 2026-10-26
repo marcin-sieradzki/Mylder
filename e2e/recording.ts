@@ -24,6 +24,14 @@ export const savedSnapshots = (): unknown[] => {
     .map((name) => readJson(join(dir, name)))
 }
 
+/** The aircraft source's snapshot of each call in the recording's `aircraft/` folder, in order. */
+export const savedAircraft = (): unknown[] => {
+  const dir = join(RECORDING_DIR, 'answers', 'aircraft')
+  return readdirSync(dir)
+    .sort()
+    .map((name) => readJson(join(dir, name)))
+}
+
 /** The server on the recording, and a second one on the same build on the simulation. */
 export const PORT = 4173
 export const SIMULATED_PORT = 4174
