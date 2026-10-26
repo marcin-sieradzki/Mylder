@@ -1,7 +1,8 @@
 // A recorded API (docs/testing-seams.md, "The API"): an `HttpClient` that replays a recording
 // folder, for any API that says which folder a call's URL names. Each folder's files answer its
 // calls in order (`journeyPos/0001.json`, `0002.json`, ...), a file may describe a failure
-// instead of an answer, and a folder with no files left repeats its last one.
+// instead of an answer, and a folder with no files left repeats its last one, or, in the demo's
+// loop, starts again from its first.
 import 'server-only'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -76,10 +77,21 @@ export function answer(request: Http.Request, recorded: Recorded): Effect.Effect
 }
 
 /**
- * An `HttpClient` that replays calls: each folder's next one, and its last once none are left. A
- * call the API files under a folder it doesn't list is the API's mistake, and dies.
+ * What a folder answers once its calls have all been made: its last call again, as the server's
+ * recordings do, or its calls again from the first, as the demo's planes do (ADR 0013).
  */
-export function recordedClient(api: RecordedApi, calls: Calls): Http.HttpClient.HttpClient {
+export type WhenDone = 'repeat-last' | 'loop'
+
+/**
+ * An `HttpClient` that replays calls: each folder's next one, and once none are left, as
+ * `whenDone` says. A call the API files under a folder it doesn't list is the API's mistake, and
+ * dies.
+ */
+export function recordedClient(
+  api: RecordedApi,
+  calls: Calls,
+  whenDone: WhenDone = 'repeat-last',
+): Http.HttpClient.HttpClient {
   const made = new Map<string, number>()
   return Http.client((request, url) =>
     Effect.suspend(() => {
@@ -96,7 +108,9 @@ export function recordedClient(api: RecordedApi, calls: Calls): Http.HttpClient.
       if (!folder || recorded.length === 0) return Effect.succeed(api.unknown(request, url))
       const index = made.get(folder) ?? 0
       made.set(folder, index + 1)
-      return answer(request, recorded[Math.min(index, recorded.length - 1)])
+      const at =
+        whenDone === 'loop' ? index % recorded.length : Math.min(index, recorded.length - 1)
+      return answer(request, recorded[at])
     }),
   )
 }
@@ -116,23 +130,61 @@ export const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(/* turbopackIgnore: true */ path, 'utf8'))
 
 /**
- * A recording folder's calls to an API, each folder's files in the order their names sort. A
- * folder that isn't there has no calls; one that can't be read fails.
+ * How a recording's files are read: from its folder on the server, or, in the demo's worker,
+ * from the files bundled with it.
  */
-export async function readCalls(api: RecordedApi, dir: string): Promise<Calls> {
+export interface RecordingFiles {
+  /** The names of the files in a folder; none when there is no such folder. */
+  readonly list: (folder: string) => Promise<readonly string[]>
+  /** A file's content, parsed. */
+  readonly read: (path: string) => Promise<unknown>
+}
+
+/** A recording's files in its folder, through Node's file system. */
+export const filesOnDisk: RecordingFiles = {
+  list: (folder) =>
+    readdir(/* turbopackIgnore: true */ folder).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+      throw error
+    }),
+  read: readJson,
+}
+
+/**
+ * A recording's files bundled by their paths, as Vite's `import.meta.glob` gives them, each
+ * already parsed: what the demo's worker reads its planes from (ADR 0013).
+ */
+export const bundledFiles = (bundle: Readonly<Record<string, unknown>>): RecordingFiles => ({
+  list: async (folder) =>
+    Object.keys(bundle)
+      .filter((path) => path.startsWith(`${folder}/`))
+      .map((path) => path.slice(folder.length + 1))
+      .filter((name) => !name.includes('/')),
+  read: async (path) => {
+    if (!(path in bundle)) throw new Error(`The bundled recording has no ${path}`)
+    return bundle[path]
+  },
+})
+
+/**
+ * A recording folder's calls to an API, each folder's files in the order their names sort, read
+ * from its folder unless `files` says otherwise. A folder that isn't there has no calls; one that
+ * can't be read fails.
+ */
+export async function readCalls(
+  api: RecordedApi,
+  dir: string,
+  files: RecordingFiles = filesOnDisk,
+): Promise<Calls> {
   const calls = new Map<string, Recorded[]>()
   for (const name of api.folders) {
     const folder = join(/* turbopackIgnore: true */ dir, name)
-    const names = await readdir(/* turbopackIgnore: true */ folder).catch((error: unknown) => {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
-      throw error
-    })
-    const files = names.filter((file) => file.endsWith('.json')).sort()
-    if (files.length === 0) continue
+    const names = (await files.list(folder)).filter((file) => file.endsWith('.json')).sort()
+    if (names.length === 0) continue
     calls.set(
       name,
       await Promise.all(
-        files.map(async (file) => readRecorded(await readJson(join(folder, file)))),
+        names.map(async (file) => readRecorded(await files.read(join(folder, file)))),
       ),
     )
   }
@@ -147,10 +199,21 @@ export async function readStart(dir: string): Promise<number> {
   return moment
 }
 
+export interface RecordedLayerOptions {
+  /** How the folder's files are read: from disk unless given. */
+  readonly files?: RecordingFiles
+  /** What a folder answers once its calls are made: its last again unless given. */
+  readonly whenDone?: WhenDone
+}
+
 /** A recorded API for a folder, as the layer that provides the tracker's `HttpClient`. */
-export const layer = (api: RecordedApi, dir: string): Layer.Layer<Http.HttpClient.HttpClient> =>
+export const layer = (
+  api: RecordedApi,
+  dir: string,
+  { files, whenDone }: RecordedLayerOptions = {},
+): Layer.Layer<Http.HttpClient.HttpClient> =>
   Layer.effect(Http.HttpClient.HttpClient)(
-    Effect.promise(() => readCalls(api, dir)).pipe(
-      Effect.map((calls) => recordedClient(api, calls)),
+    Effect.promise(() => readCalls(api, dir, files)).pipe(
+      Effect.map((calls) => recordedClient(api, calls, whenDone)),
     ),
   )
