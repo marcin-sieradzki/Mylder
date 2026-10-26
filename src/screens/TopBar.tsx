@@ -15,7 +15,8 @@ import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PerronIcon } from './PerronIcon'
-import { usePhone } from './usePhone'
+import styles from './TopBar.module.css'
+import { usePhoneOnceStarted } from './usePhone'
 
 const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
 
@@ -38,7 +39,9 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
 /**
  * The moving map's top bar (docs/screens.md, "The moving map"): Perron's TopBar with the brand,
  * the Updated line, the mode filters, the language switch and the About button, in the page's
- * header. Its phone layout follows the window's width, so the prerendered page has the desktop's.
+ * header. Its phone layout follows the window's width: the prerendered page carries both layouts
+ * and its CSS shows the one for the width, so a phone paints its own bar first; once the page has
+ * started it renders that one only.
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
@@ -49,7 +52,7 @@ export function TopBar() {
   const updatedAt = useLastAnswer()
   const paused = usePaused()
   const outOfDate = useOutOfDate()
-  const phone = usePhone()
+  const phone = usePhoneOnceStarted()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
 
@@ -60,10 +63,10 @@ export function TopBar() {
     mapView.update({ hidden: next })
   }
 
-  return (
-    <header>
+  const bar = (size: 'small' | 'medium') => (
+    <div key={size} className={styles[size]}>
       <PerronTopBar
-        size={phone ? 'small' : 'medium'}
+        size={size}
         brandHref={`/${lang}`}
         time={
           updatedAt === undefined ? undefined : clockTime(updatedAt, timezone, { seconds: true })
@@ -97,6 +100,13 @@ export function TopBar() {
           </>
         }
       />
+    </div>
+  )
+
+  return (
+    <header>
+      {phone !== false && bar('small')}
+      {phone !== true && bar('medium')}
     </header>
   )
 }

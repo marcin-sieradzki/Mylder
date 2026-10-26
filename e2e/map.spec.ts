@@ -89,3 +89,34 @@ test('switching language keeps the map where it was, its filters and the rest of
     .click()
   await expect(page).toHaveURL('/en?map=14.00/55.67600/12.56800&hide=bus&line=5C')
 })
+
+test("a phone gets the phone's top bar from the first paint, before any script runs", async ({
+  browser,
+}) => {
+  // The prerendered page, as a phone paints it before the scripts load: the width alone picks
+  // the bar, and the other one is hidden from assistive technology too.
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 390, height: 844 },
+  })
+  const page = await context.newPage()
+  await page.goto('/en')
+  const banner = page.getByRole('banner')
+  await expect(banner.locator('.pn-TopBar[data-size="small"]')).toBeVisible()
+  await expect(banner.locator('.pn-TopBar[data-size="medium"]')).toBeHidden()
+  await expect(banner.getByRole('link', { name: 'Mylder' })).toHaveCount(1)
+  await context.close()
+})
+
+test('the top bar keeps its layout once the page has started, one bar for the width', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/en')
+  const bars = page.getByRole('banner').locator('.pn-TopBar')
+  await expect(page.locator('[data-vehicles]')).toBeAttached()
+  await expect(bars).toHaveCount(1)
+  await expect(bars).toHaveAttribute('data-size', 'small')
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await expect(bars).toHaveAttribute('data-size', 'medium')
+})

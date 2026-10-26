@@ -2,7 +2,10 @@
 
 import { useSyncExternalStore } from 'react'
 
-/** Perron's breakpoint.phone, 760px; a custom property can't sit in a media query. */
+/**
+ * Perron's breakpoint.phone, 760px; a custom property can't sit in a media query, so a module's
+ * CSS that lays out by it writes the same width.
+ */
 const PHONE = '(max-width: 760px)'
 
 let list: MediaQueryList | null | undefined
@@ -24,5 +27,18 @@ export function usePhone(): boolean {
     subscribe,
     () => query()?.matches ?? false,
     () => false,
+  )
+}
+
+/**
+ * Whether the page is as narrow as a phone, once the page has started; undefined in the
+ * prerendered page and while it hydrates, which can't know the width. A component whose first
+ * paint depends on the width renders both layouts while it is undefined, and its CSS shows one.
+ */
+export function usePhoneOnceStarted(): boolean | undefined {
+  return useSyncExternalStore(
+    subscribe,
+    () => query()?.matches ?? false,
+    () => undefined,
   )
 }
