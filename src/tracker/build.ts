@@ -24,7 +24,7 @@ import {
   type Call,
   type TimedCall,
 } from '../domain/trip-motion.ts'
-import { wallClock } from '../timetable/time.ts'
+import { clockMoment } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import { joinJourney } from './join.ts'
 import type { PositionJourney, Stop } from './rejseplanen/answers.ts'
@@ -77,13 +77,6 @@ export interface Built {
   readonly history: History
 }
 
-/** `HH:MM:SS` on `YYYY-MM-DD` in the timetable's zone, as a moment. */
-function moment(date: string | undefined, time: string | undefined, timezone: string) {
-  if (!date || !time) return undefined
-  const [h, m, s] = time.split(':').map(Number)
-  return wallClock(date, h * 3600 + m * 60 + (s || 0), timezone)
-}
-
 /**
  * The trip's calls with the expected times the journey's stops give. A stop with a prognosis and
  * no realtime time keeps its plan, as Rejseplanen leaves the time out when it equals the plan.
@@ -106,10 +99,10 @@ function callsWithStops(
     from = i + 1
     const planned = calls[i]
     const arrival =
-      moment(stop.rtArrDate, stop.rtArrTime, timezone) ??
+      clockMoment(stop.rtArrDate, stop.rtArrTime, timezone) ??
       (stop.arrPrognosisType ? planned.arrival : undefined)
     const departure =
-      moment(stop.rtDepDate, stop.rtDepTime, timezone) ??
+      clockMoment(stop.rtDepDate, stop.rtDepTime, timezone) ??
       (stop.depPrognosisType ? planned.departure : undefined)
     calls[i] = {
       ...planned,

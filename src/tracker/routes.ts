@@ -41,3 +41,5 @@ export const stopResponse = (stopId: string) =>
 
 export const tripResponse = (tripKey: string) =>
   answer('trip', (tracker) => tracker.getTripDetail(tripKey))
+
+export const disruptionsResponse = () => answer('disruptions', (tracker) => tracker.getDisruptions)

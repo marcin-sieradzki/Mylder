@@ -45,13 +45,13 @@ const withStranger = Http.layer(
   ),
 )
 
-/** The simulated Rejseplanen for the first `good` calls, then 503 for every call after. */
+/** The simulated Rejseplanen for the first `good` position calls, then 503 for every one after. */
 const failingAfter = (good: number) => {
   let calls = 0
   const simulation = simulatedClient({ timetable })
   return Http.layer(
-    Http.client((request) =>
-      calls++ < good
+    Http.client((request, url) =>
+      !url.pathname.endsWith('journeyPos') || calls++ < good
         ? simulation.execute(request).pipe(Effect.orDie)
         : Effect.succeed(Http.json(request, 503, {})),
     ),
@@ -160,13 +160,14 @@ describe('the tracker', () => {
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
       const first = yield* snapshot
-      expect(calls(first)).toBe(1)
+      // Its positions, and the run's first disruption list.
+      expect(calls(first)).toBe(2)
       yield* TestClock.adjust('10 seconds')
       const second = yield* snapshot
       expect(second).toEqual(first)
       yield* TestClock.adjust('50 seconds')
       const third = yield* snapshot
-      expect(calls(third)).toBe(2)
+      expect(calls(third)).toBe(3)
       expect(third.fetched).toBe(MOMENT + 60_000)
     }).pipe(Effect.provide(tracker())),
   )
@@ -337,8 +338,8 @@ describe('the tracker', () => {
       expect(failed.status.calls).toEqual([
         { service: 'journeyPos', outcome: 'status', attempts: 2, ms: 0 },
       ])
-      // Every attempt is counted: one good call, then a 503 tried twice.
-      expect(calls(failed)).toBe(3)
+      // Every attempt is counted: the first run's two calls, then a 503 tried twice.
+      expect(calls(failed)).toBe(4)
       const before = new Map(good.trips.map((trip) => [trip.key, trip]))
       const kept = failed.trips.filter((trip) => before.has(trip.key))
       expect(kept.length).toBeGreaterThan(0)
