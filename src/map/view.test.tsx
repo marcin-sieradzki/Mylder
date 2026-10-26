@@ -68,6 +68,20 @@ describe('the open panel in the address', () => {
     ).toBe('?stop=8600626')
     expect(searchWith('?stop=8600626', { hidden: new Set() })).toBe('')
   })
+
+  it("reads and writes an open aircraft's card by its hex, beside the Planes filter", () => {
+    expect(viewOf('?hide=aircraft&aircraft=4ab1e3')).toEqual({
+      hidden: new Set(),
+      aircraftHidden: true,
+      panel: { kind: 'aircraft', id: '4ab1e3' },
+    })
+    expect(
+      searchWith('?trip=bus.5C.32331e0e20.20260616.0707', {
+        hidden: new Set(),
+        panel: { kind: 'aircraft', id: '4ab1e3' },
+      }),
+    ).toBe('?aircraft=4ab1e3')
+  })
 })
 
 describe("the view kept in the page's address", () => {

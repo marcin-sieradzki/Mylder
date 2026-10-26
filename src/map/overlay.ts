@@ -5,7 +5,7 @@
 // the Planes filter hides them, where theirs (aircraft-loop.ts) does, with each kind's glyphs made
 // again when its snapshot lands, a data state turns by the clock, a filter or the theme changes;
 // every dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap
-// on a vehicle opens its detail, and a tap that finds no dot opens the stop under it, if any.
+// on one opens its panel, and a tap that finds no dot opens the stop under it, if any.
 // Each frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot while
 // the map is open, and the aircraft while the Planes filter shows them too. The numbers of
 // vehicles and aircraft drawn are on the map's container as `data-vehicles` and `data-aircraft`,
@@ -83,14 +83,14 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     cursorFrame = undefined
     if (resting) canvas.style.cursor = stopAt(map, resting.x, resting.y) ? 'pointer' : ''
   }
-  // An aircraft has no card or detail yet (#130): it is picked, and a tap on it opens nothing.
+  // A tap on a dot opens its panel, a trip's vehicle detail or an aircraft's card, over a stop.
   const picking = dotPicking(container, undefined, {
     onTap(kind, key) {
-      if (kind === 'trip') openPanel({ kind: 'trip', id: key })
+      openPanel({ kind, id: key })
     },
     onPointer(on, x, y) {
       resting = on ? undefined : { x, y }
-      if (on) canvas.style.cursor = on === 'trip' ? 'pointer' : ''
+      if (on) canvas.style.cursor = 'pointer'
       else cursorFrame ??= requestAnimationFrame(cursorOverStops)
     },
     onMiss(x, y) {

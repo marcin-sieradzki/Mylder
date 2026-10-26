@@ -34,6 +34,15 @@
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
   },
+  "aircraft": {
+    "altitude": "{metres} m",
+    "onGround": "På jorden",
+    "speed": "{speed} km/t",
+    "placed": "Placeret af modtagere på jorden for {age} siden",
+    "loading": "Henter flyet…",
+    "gone": "Flyet er ikke på kortet",
+    "goneDetail": "Flydata placerer det ikke længere over København."
+  },
   "trip": {
     "fallbackTitle": "Køretøj",
     "to": "mod {headsign}",

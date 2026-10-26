@@ -1,7 +1,7 @@
 'use client'
 
 import { MapTooltip, VehicleDotLabel } from '@mylder/perron'
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import { pickedVehicle, usePickedVehicle } from '../map/picking'
@@ -34,7 +34,7 @@ const PASSING = { positioner: { className: styles.passing } }
 export function VehicleCard() {
   const picked = usePickedVehicle()
   const snapshot = useSnapshot()
-  // An aircraft's own card comes with #130.
+  // An aircraft's card is its own (AircraftCard.tsx).
   const trip = picked?.kind === 'trip' ? tripOf(snapshot, picked.key) : undefined
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   if (!picked || !trip) return null
@@ -53,13 +53,32 @@ function Card({ trip, point, timezone }: CardProps) {
   const words = dictionary.vehicle
   const state = useDataState(trip.key) ?? trip.state
   const now = useServerSecond(useClockOffset())
+  const label = stateLabelOf(trip, state, now, timezone, words)
+  return (
+    <DotCard point={point}>
+      <span className={styles.title}>{titleOf(trip, dictionary)}</span>
+      <span className={styles.state}>
+        <VehicleDotLabel variant={state} />
+        {label === undefined ? null : <span>{label}</span>}
+      </span>
+    </DotCard>
+  )
+}
+
+export interface DotCardProps {
+  /** Where the dot is on the page, which the card sits against. */
+  point: readonly [number, number]
+  children: ReactNode
+}
+
+/** A picked dot's card against its dot, for a vehicle or an aircraft; Esc closes it. */
+export function DotCard({ point, children }: DotCardProps) {
   const [x, y] = point
   // A point on the page, which the card sits against; a new one when the dot moves.
   const anchor = useMemo(
     () => ({ getBoundingClientRect: () => DOMRect.fromRect({ x, y, width: 0, height: 0 }) }),
     [x, y],
   )
-  const label = stateLabelOf(trip, state, now, timezone, words)
   return (
     <MapTooltip
       open
@@ -69,11 +88,7 @@ function Card({ trip, point, timezone }: CardProps) {
       className={styles.card}
       slotProps={PASSING}
     >
-      <span className={styles.title}>{titleOf(trip, dictionary)}</span>
-      <span className={styles.state}>
-        <VehicleDotLabel variant={state} />
-        {label === undefined ? null : <span>{label}</span>}
-      </span>
+      {children}
     </MapTooltip>
   )
 }

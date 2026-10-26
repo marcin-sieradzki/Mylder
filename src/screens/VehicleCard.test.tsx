@@ -120,7 +120,7 @@ describe("a dot's card", () => {
     expect(getComputedStyle(card()).pointerEvents).toBe('none')
   })
 
-  it('opens on no aircraft, whose own card is to come', () => {
+  it('opens on no aircraft, whose card is its own', () => {
     openCard('en', A_LIVE, 20)
     act(() => pickedVehicle.pick({ kind: 'aircraft', key: A_LIVE, point: [200, 200] }))
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()

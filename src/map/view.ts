@@ -1,5 +1,5 @@
 // What the viewer has made of the map: its centre and zoom, what its filters keep off it, the open
-// panel (`?stop=<id>` or `?trip=<key>`, one at a time) and the sheet's open tab, kept in the address's query so a reload, a
+// panel (`?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`, one at a time) and the sheet's open tab, kept in the address's query so a reload, a
 // shared link and the language switch keep them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
 // it back and writes it in place, without a new history entry, and leaves every other parameter
 // as it was.
@@ -7,10 +7,13 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { MODES, type Mode } from '../timetable/format.ts'
 
-/** What a panel shows: a stop by its id, or a trip, a vehicle's detail, by its key. */
-export type PanelKind = 'stop' | 'trip'
+/**
+ * What a panel shows: a stop by its id, a trip, a vehicle's detail, by its key, or an aircraft's
+ * card by its hex.
+ */
+export type PanelKind = 'stop' | 'trip' | 'aircraft'
 
-/** An open panel, kept in the address as `?stop=<id>` or `?trip=<key>`. */
+/** An open panel, kept in the address as `?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`. */
 export interface Panel {
   readonly kind: PanelKind
   readonly id: string
@@ -24,7 +27,7 @@ export interface MapView {
   readonly hidden: ReadonlySet<Mode>
   /** Whether the Planes filter keeps the aircraft off the map; it shows them by default. */
   readonly aircraftHidden?: boolean
-  /** The open panel, a stop's departures or a vehicle's detail; one at a time. */
+  /** The open panel, a stop's departures, a vehicle's detail or an aircraft's card; one at a time. */
   readonly panel?: Panel
   /** The sheet's open tab, when it isn't the first, City pulse. */
   readonly tab?: SheetTab
@@ -59,7 +62,11 @@ const MAP = 'map'
 const HIDE = 'hide'
 const TAB = 'tab'
 /** Each panel's parameter, by what it shows. */
-const PANELS: Readonly<Record<PanelKind, string>> = { stop: 'stop', trip: 'trip' }
+const PANELS: Readonly<Record<PanelKind, string>> = {
+  stop: 'stop',
+  trip: 'trip',
+  aircraft: 'aircraft',
+}
 const KINDS = Object.keys(PANELS) as PanelKind[]
 
 const NOTHING: MapView = { hidden: new Set() }
@@ -88,7 +95,7 @@ export function viewOf(search: string): MapView {
   }
 }
 
-/** The panel a query opens: the first of `stop` and `trip` it names, when it names one. */
+/** The panel a query opens: the first of `stop`, `trip` and `aircraft` it names, if any. */
 function panelOf(query: URLSearchParams): Panel | undefined {
   for (const [name, value] of query) {
     const kind = KINDS.find((each) => PANELS[each] === name)

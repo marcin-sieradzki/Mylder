@@ -34,6 +34,15 @@
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
   },
+  "aircraft": {
+    "altitude": "{metres} m",
+    "onGround": "On the ground",
+    "speed": "{speed} km/h",
+    "placed": "Placed by ground receivers {age} ago",
+    "loading": "Loading the plane…",
+    "gone": "Plane not on the map",
+    "goneDetail": "The planes feed no longer places it over Copenhagen."
+  },
   "trip": {
     "fallbackTitle": "Vehicle",
     "to": "to {headsign}",

@@ -7,6 +7,12 @@ interface Served {
   readonly aircraft: readonly { readonly hex: string }[]
 }
 
+interface Placed {
+  readonly hex: string
+  readonly lat: number
+  readonly lon: number
+}
+
 test('the map draws as many aircraft as the recording’s aircraft snapshot', async ({ page }) => {
   let served: Served | undefined
   page.on('response', async (response) => {
@@ -59,6 +65,31 @@ test('the Planes filter takes every plane off the map and stops asking for them 
   await expect(planes).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(drawn).toBeGreaterThan(0)
   await expect(page).toHaveURL('/en')
+})
+
+test('a tap on a plane opens its card in a panel, named by its callsign', async ({ page }) => {
+  // SAS951, an A359 standing at Kastrup in every answer, at the middle of the map.
+  const { lat, lon } = (savedAircraft()[0] as { aircraft: Placed[] }).aircraft.find(
+    (each) => each.hex === '45ac9d',
+  )!
+  await page.goto(`/en?map=15.00/${lat}/${lon}`)
+  await expect
+    .poll(async () => Number(await page.locator('[data-aircraft]').getAttribute('data-aircraft')))
+    .toBeGreaterThan(0)
+  const { width, height } = page.viewportSize()!
+  const panel = page.getByRole('dialog', { name: 'SAS951' })
+  // A busy machine may draw the plane late; tap until it opens.
+  await expect(async () => {
+    await page.mouse.click(width / 2 + 4, height / 2 - 4)
+    await expect(panel).toBeVisible({ timeout: 1_000 })
+  }).toPass()
+  await expect(page).toHaveURL(/[?&]aircraft=45ac9d(&|$)/)
+  await expect(panel).toContainText('A359 · On the ground · 0 km/h')
+  await expect(panel).toContainText(/Reported \d+ s ago/)
+
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect(page).not.toHaveURL(/aircraft=/)
 })
 
 test('with the aircraft off, the route answers 404 and the map draws none', async ({ page }) => {

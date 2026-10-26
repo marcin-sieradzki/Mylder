@@ -16,6 +16,8 @@ The six screens are the moving map, vehicle detail, stop departures, City pulse,
 
 **The hover card** on a dot shows its line, its destination, its data state's word and its state label ("Reported 20 s ago", "Last seen 3 min ago", "Estimated from schedule", "Timetable only", "No signal since 10:42"), aged by the clock from the snapshot's times. A tap on a dot opens vehicle detail; a tap on a stop opens its departures.
 
+**The plane's card** is a plane's hover card, and a tap on the plane opens the same text in a small panel, kept in the address as `?aircraft=<hex>` and closed as every detail panel is: Esc, its close button, or another vehicle, stop or plane opened in its place. It reads the aircraft snapshot ([`aircraft.md`](aircraft.md)), so it asks no route. It shows the callsign, or the ICAO hex of a plane that sends none, then "A20N · 3 350 m · 593 km/h": the type code, the altitude in metres (the feed's feet × 0.3048, to the nearest 10 m) or "On the ground", and the ground speed in km/h (knots × 1.852, to the km/h), each left out where the feed gives none. Then its data state's word and label, aged by the clock from its position's time: "Reported 4 s ago" (Live), "Last seen 40 s ago" (Ageing), "Placed by ground receivers 6 s ago" (Estimated) or "No signal since 15:42" (No signal, the position's time on Copenhagen's clock). No route, origin or destination: the feed carries none. A tap on a plane wins over a stop under it. Once the plane has left the snapshot, or its position is old enough to drop, the panel says "Plane not on the map". Both are real text a screen reader reads, in English and Danish, which writes the speed in km/t.
+
 **The highlight chip** appears while something is highlighted, "Showing: Signal fault at Danshøj · Clear", from Show whole line in vehicle detail or Show on map on a disruption. Clearing it returns the map to normal.
 
 **The corner credit** reads "Transit data: Rejseplanen (CC BY 4.0) · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap", each a link, with "Aircraft: © adsb.lol contributors under the ODbL" after the transit data once the page has aircraft (`docs/aircraft.md`), at the bottom right on a desktop and above the sheet's peek on a phone, wrapping to two lines and never hidden behind a button. The Rejseplanen link leads to the About dialog, so a phone reader can read the full terms in one tap.
@@ -32,7 +34,7 @@ When both Disconnected and Paused hold, Disconnected is shown and the Paused not
 
 **Accessibility.** The canvas has an accessible name ("Live map of Copenhagen"). The dots themselves are not reachable by keyboard; the Vehicles list is the text alternative, and every vehicle on the map is a row there. Keys: + and − zoom, arrows pan, Esc closes panels; the About dialog lists them.
 
-**Built from:** the dots and paths on the canvas read Perron's tokens directly (no component); Brand, Surface (glass), FilterChip with Count, IconButton, VehicleDotLegend, MapControls, ScaleBar, Attribution, MapTooltip, HighlightChip, Alert, Toast, Text, Link, Dialog and Kbd, under PerronProvider.
+**Built from:** the dots and paths on the canvas read Perron's tokens directly (no component); Brand, Surface (glass), FilterChip with Count, IconButton, VehicleDotLegend, MapControls, ScaleBar, Attribution, MapTooltip, HighlightChip, Alert, Toast, Text, Link, Dialog and Kbd, under PerronProvider; the plane's panel, DetailPanel with VehicleDotLabel, Text and EmptyState.
 
 ## Vehicle detail
 

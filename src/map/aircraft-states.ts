@@ -5,6 +5,7 @@
 // that server's clock (./ticking.ts), apart from the transit snapshot's, and changes only when a
 // state does, so the canvas makes the glyphs again only then.
 import 'client-only'
+import { useSyncExternalStore } from 'react'
 import {
   aircraftState,
   type AircraftState,
@@ -51,3 +52,18 @@ export const aircraftStatesStore = (live: AircraftStore = liveAircraft): Aircraf
 
 /** The page's one store of the aircraft's states, from the page's live aircraft. */
 export const aircraftStates = aircraftStatesStore()
+
+/**
+ * One aircraft's data state now, for a component such as its card: it renders again only when
+ * that one changes. None for an aircraft the snapshot doesn't carry, or whose position is dropped.
+ */
+export function useAircraftState(
+  hex: string,
+  store: AircraftStatesStore = aircraftStates,
+): AircraftState | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().get(hex),
+    () => undefined,
+  )
+}

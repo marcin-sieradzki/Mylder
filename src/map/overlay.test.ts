@@ -7,6 +7,7 @@ import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveAircraft } from './aircraft.ts'
 import { liveSnapshot } from './live.ts'
+import { pickedVehicle } from './picking.ts'
 import { vehicleOverlay, type VehicleOverlay } from './overlay.ts'
 import { mapView } from './view.ts'
 
@@ -21,11 +22,15 @@ interface Drawn {
   readonly id: string
   readonly props: { readonly data: { readonly attributes?: Moving } }
 }
-const hovering = vi.hoisted(() => ({ onHover: undefined as ((info: unknown) => void) | undefined }))
+const hovering = vi.hoisted(() => ({
+  onHover: undefined as ((info: unknown) => void) | undefined,
+  onClick: undefined as ((info: unknown) => void) | undefined,
+}))
 vi.mock('@deck.gl/maplibre', () => ({
   MapLibreOverlay: class {
-    constructor({ onHover }: { onHover: (info: unknown) => void }) {
+    constructor({ onHover, onClick }: Record<'onHover' | 'onClick', (info: unknown) => void>) {
       hovering.onHover = onHover
+      hovering.onClick = onClick
     }
     setProps({ layers }: { layers: Drawn[] }) {
       rendered.ids = layers.map((layer) => layer.id)
@@ -226,5 +231,28 @@ describe('the vehicles over the map', () => {
     await new Promise((resolve) => requestAnimationFrame(resolve))
     expect(looked).toBe(1)
     expect(canvas.style.cursor).toBe('pointer')
+  })
+  it('opens the panel of a plane tapped, over a stop under it, with a pointer over it', async () => {
+    const canvas = document.createElement('canvas')
+    const overStops = {
+      ...map,
+      getCanvas: () => canvas,
+      getLayer: () => ({}),
+      queryRenderedFeatures: () => [
+        { properties: { id: '27532' }, geometry: { type: 'Point', coordinates: [5, 5] } },
+      ],
+    } as unknown as MapLibreMap
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(overStops, container)
+    liveAircraft.update(atFetch(aircraft))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('27'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    const onPlane = { picked: true, index: 3, layer: { id: 'aircraft' }, x: 5, y: 5 }
+    hovering.onHover!(onPlane)
+    const hex = pickedVehicle.get()?.key
+    expect(aircraft.aircraft.map((each) => each.hex)).toContain(hex)
+    expect(canvas.style.cursor).toBe('pointer')
+    hovering.onClick!(onPlane)
+    expect(mapView.get().panel).toEqual({ kind: 'aircraft', id: hex })
   })
 })

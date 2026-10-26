@@ -4,7 +4,11 @@
 // and in the demo until #133: the poll stops, and the page shows no aircraft and no word of them.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
-import type { AircraftProvider, AircraftSnapshot } from '../tracker/aircraft/index.ts'
+import type {
+  AircraftProvider,
+  AircraftSnapshot,
+  SnapshotAircraft,
+} from '../tracker/aircraft/index.ts'
 import { liveStore, type LiveStore } from './live.ts'
 import { pagePoll, snapshotPoller, type PollRoute } from './poll.ts'
 
@@ -36,6 +40,20 @@ export const liveAircraft: AircraftStore = liveStore<AircraftSnapshot>()
  */
 export const pollAircraft = pagePoll(() => snapshotPoller(liveAircraft, aircraftRoute))
 
+/** Each snapshot's aircraft by hex, found once per snapshot. */
+const byHex = new WeakMap<AircraftSnapshot, ReadonlyMap<string, SnapshotAircraft>>()
+
+/** The aircraft of `hex` in `snapshot`, for its card; none where the snapshot doesn't carry it. */
+export function aircraftIn(
+  snapshot: AircraftSnapshot | undefined,
+  hex: string,
+): SnapshotAircraft | undefined {
+  if (!snapshot) return undefined
+  let aircraft = byHex.get(snapshot)
+  if (!aircraft) byHex.set(snapshot, (aircraft = new Map(snapshot.aircraft.map((a) => [a.hex, a]))))
+  return aircraft.get(hex)
+}
+
 /** The latest aircraft snapshot, for a component: none until one lands, or while it is off. */
 export function useAircraftSnapshot(
   store: AircraftStore = liveAircraft,
@@ -44,6 +62,15 @@ export function useAircraftSnapshot(
     store.subscribe,
     () => store.get().snapshot,
     () => undefined,
+  )
+}
+
+/** How far the aircraft server's clock is ahead of this device's, for what ages by it. */
+export function useAircraftClockOffset(store: AircraftStore = liveAircraft): number {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().clockOffset,
+    () => 0,
   )
 }
 
