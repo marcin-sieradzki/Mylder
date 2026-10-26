@@ -12,6 +12,7 @@ import { timezoneOf, useNetwork } from '../map/timetable'
 import { useHiddenModes } from '../map/view'
 import { clockTime } from '../timetable/time'
 import type { StopDeparture, StopDepartures } from '../tracker/index'
+import type { PanelFrame } from './DetailPanels'
 import { badgeLine, departureTimes } from './departureRow'
 import styles from './StopPanel.module.css'
 import { useServerSecond } from './useServerSecond'
@@ -21,10 +22,8 @@ type Words = ClientDictionary['stop']
 export interface StopPanelProps {
   /** The open stop and its answer, as the panel answers give it. */
   state: PanelStateOf<'stop'>
-  /** The edge the panel slides from: right beside the map, bottom on a phone. */
-  anchor: 'right' | 'bottom'
-  /** Closes the panel, which takes it out of the address. */
-  onClose: () => void
+  /** Where the panel sits and how it closes, as every detail panel's. */
+  frame: PanelFrame
 }
 
 /**
@@ -32,7 +31,7 @@ export interface StopPanelProps {
  * minutes across its platforms in the modes the filters show, and where their times came from.
  * Its title names the stop from the timetable while the answer is on its way.
  */
-export function StopPanel({ state, anchor, onClose }: StopPanelProps) {
+export function StopPanel({ state, frame }: StopPanelProps) {
   const { dictionary } = useI18n()
   const words = dictionary.stop
   const network = useNetwork(useSnapshot()?.timetableVersion)
@@ -43,10 +42,9 @@ export function StopPanel({ state, anchor, onClose }: StopPanelProps) {
   const lines = answer?.stop.lines ?? []
   return (
     <DetailPanel
+      {...frame}
       open
       variant="stop"
-      anchor={anchor}
-      onClose={onClose}
       title={title}
       line={lines.length === 1 ? badgeLine(lines[0].colour, lines[0].mode) : undefined}
       subheader={

@@ -1,6 +1,6 @@
 // What the viewer has made of the map: its centre and zoom, the modes filtered out and the open
-// panel, kept in the address's query so a reload, a shared link and the language switch keep
-// them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
+// panel (`?stop=<id>` or `?trip=<key>`, one at a time), kept in the address's query so a reload, a
+// shared link and the language switch keep them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
 // it back and writes it in place, without a new history entry, and leaves every other parameter
 // as it was.
 import 'client-only'
