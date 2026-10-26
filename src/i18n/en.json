@@ -9,5 +9,17 @@
   "language": {
     "label": "Language",
     "switchTo": "Dansk"
+  },
+  "topBar": {
+    "updated": "Updated {time}",
+    "modes": "Modes",
+    "about": "About Mylder"
+  },
+  "modes": {
+    "bus": "Bus",
+    "metro": "Metro",
+    "s-tog": "S-tog",
+    "train": "Train",
+    "light-rail": "Light rail"
   }
 }

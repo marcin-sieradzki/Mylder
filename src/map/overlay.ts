@@ -1,7 +1,8 @@
 // The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
-// the live snapshot's vehicles each time a snapshot lands, the theme changes or the zoom moves a
-// dot's size. It polls the snapshot while the map is open. The number of vehicles drawn is on
-// the map's container as `data-vehicles`, for tests.
+// the live snapshot's vehicles, less the modes the viewer's filters hide, each time a snapshot
+// lands, a filter or the theme changes or the zoom moves a dot's size. It polls the snapshot
+// while the map is open. The number of vehicles drawn is on the map's container as
+// `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
@@ -13,6 +14,7 @@ import { readPaint } from './paint.ts'
 import { timetables } from './timetable.ts'
 import { vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf, type Vehicles } from './vehicles.ts'
+import { mapView } from './view.ts'
 
 export interface VehicleOverlay {
   /** Reads Perron's paint again, after the theme changed. */
@@ -49,7 +51,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       })
     // A newer snapshot may have landed meanwhile: it draws itself.
     if (removed || liveSnapshot.get().snapshot !== snapshot) return
-    vehicles = vehiclesOf(snapshot, network, readPaint(root, vehiclePaint(network)))
+    vehicles = vehiclesOf(snapshot, network, readPaint(root, vehiclePaint(network)), mapView.get())
     render()
   }
 
@@ -57,6 +59,14 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     const { snapshot } = liveSnapshot.get()
     if (snapshot === drawnFrom) return
     drawnFrom = snapshot
+    void draw()
+  })
+  // A mode filter turned on or off draws the same snapshot again without that mode.
+  let filteredBy = mapView.get().hidden
+  const stopFiltering = mapView.subscribe(() => {
+    const { hidden } = mapView.get()
+    if (hidden === filteredBy) return
+    filteredBy = hidden
     void draw()
   })
   const stopPolling = pollSnapshot()
@@ -76,6 +86,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     remove() {
       removed = true
       stopListening()
+      stopFiltering()
       stopPolling()
       map.off('zoom', onZoom)
       map.removeControl(overlay)

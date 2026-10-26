@@ -9,5 +9,17 @@
   "language": {
     "label": "Sprog",
     "switchTo": "English"
+  },
+  "topBar": {
+    "updated": "Opdateret {time}",
+    "modes": "Transportformer",
+    "about": "Om Mylder"
+  },
+  "modes": {
+    "bus": "Bus",
+    "metro": "Metro",
+    "s-tog": "S-tog",
+    "train": "Tog",
+    "light-rail": "Letbane"
   }
 }

@@ -1,7 +1,8 @@
 'use client'
 // The map's canvas: MapLibre with the basemap style, repainted when the theme changes and when
 // the timetable's network has loaded, and the live vehicles in deck.gl's canvas over it
-// (docs/screens.md, "The moving map"; ADR 0003). The map lives outside React: React only names
+// (docs/screens.md, "The moving map"; ADR 0003). It opens on the view the address names and keeps
+// where it was left in the address (`view.ts`). The map lives outside React: React only names
 // the canvas.
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -12,6 +13,7 @@ import { vehicleOverlay } from './overlay.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
 import { timetables } from './timetable.ts'
+import { mapView } from './view.ts'
 
 export interface BaseMapProps {
   /** The canvas's accessible name, such as "Live map of Copenhagen". */
@@ -36,14 +38,16 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     const root = document.documentElement
     let network: Network | undefined
     const style = () => basemapStyle(readPaint(root, paintTokens(network)), network)
+    // The address's view, such as one kept through a language switch, or Copenhagen's centre.
+    const view = mapView.get()
     let created: MapLibreMap
     try {
       setWorkerUrl(new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url).toString())
       created = new MapLibreMap({
         container: element,
         style: style(),
-        center: CENTRE,
-        zoom: zoomFor(element.clientWidth),
+        center: view.centre ? [view.centre[0], view.centre[1]] : CENTRE,
+        zoom: view.zoom ?? zoomFor(element.clientWidth),
         maxPitch: 0,
         dragRotate: false,
         pitchWithRotate: false,
@@ -59,6 +63,12 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     map.current = created
     created.getCanvas().setAttribute('aria-label', name.current)
     let disposed = false
+    // Where the viewer left the map goes into the address once it comes to rest.
+    const keepView = () => {
+      const { lng, lat } = created.getCenter()
+      mapView.update({ centre: [lng, lat], zoom: created.getZoom() })
+    }
+    created.on('moveend', keepView)
     const vehicles = vehicleOverlay(created, element)
     const repaint = () => created.setStyle(style(), { diff: true })
     const stopWatching = watchTheme(root, () => {
@@ -75,6 +85,7 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     )
     return () => {
       disposed = true
+      created.off('moveend', keepView)
       stopWatching()
       vehicles.remove()
       created.remove()
