@@ -424,11 +424,10 @@ export function stopDeparturesFrom(
 }
 
 /**
- * How often a Metro trip's line leaves the stop of its next call in the current hour, the trip's
- * direction only, as that stop's interval rows say.
+ * How often an interval trip's line leaves the stop of its next call in the current hour, the
+ * trip's direction only, as that stop's interval rows say.
  */
 function intervalAt(timetable: Timetable, trip: PlannedTrip, now: number): Interval | undefined {
-  if (trip.line.mode !== 'metro') return undefined
   const next = trip.calls.find((call) => call.departure >= now) ?? trip.calls[0]
   const stopIndex = timetable.stops.platforms[next.platform].stop
   const calls = callsAt(timetable, stopIndex, now)
@@ -449,6 +448,7 @@ export function tripDetailOf(
 ): TripDetail {
   const { platforms } = timetable.stops
   const expected = withDelay(trip, live?.delay)
+  // The rule its stops' interval rows follow, so the trip's panel and theirs agree.
   const toInterval = lineRunsToInterval(snapshot, [], trip.line)
   const interval = toInterval ? intervalAt(timetable, trip, now) : undefined
   return {
