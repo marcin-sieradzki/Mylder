@@ -32,6 +32,10 @@ const savedAircraft = (name: string): AircraftSnapshot =>
     readFileSync(join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', name), 'utf8'),
   ) as AircraftSnapshot
 
+/** An aircraft snapshot landed, with the aircraft server's clock `after` ms past its fetch. */
+const landAircraft = (snapshot: AircraftSnapshot, after = 2_000) =>
+  act(() => liveAircraft.update({ snapshot, clockOffset: snapshot.fetched + after - Date.now() }))
+
 /** A snapshot landed, with the server's clock `after` ms past its fetch. */
 const land = (snapshot: Snapshot, after = 20_000) =>
   act(() => liveSnapshot.update({ snapshot, clockOffset: snapshot.fetched + after - Date.now() }))
@@ -204,7 +208,7 @@ describe('the top bar', () => {
   it('has a Planes chip after the modes, counting the aircraft in the box', async () => {
     // The sixth call holds 27 aircraft over Copenhagen.
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
-    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    landAircraft(savedAircraft('0006.json'))
     renderScreen('en')
     const filters = await screen.findByRole('group', { name: 'Filters' })
     const chips = within(filters).getAllByRole('button')
@@ -223,12 +227,23 @@ describe('the top bar', () => {
 
   it('names the Planes chip in Danish, and counts the aircraft of the latest answer', async () => {
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
-    act(() => liveAircraft.update({ snapshot: savedAircraft('0001.json') }))
+    landAircraft(savedAircraft('0001.json'))
     renderScreen('da')
     const filters = await screen.findByRole('group', { name: 'Filtre' })
     expect(within(filters).getByRole('button', { name: 'Fly 26' })).toBeInTheDocument()
-    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    landAircraft(savedAircraft('0006.json'))
     expect(within(filters).getByRole('button', { name: 'Fly 27' })).toBeInTheDocument()
+  })
+
+  it('counts the aircraft the map draws, less one whose position the clock has dropped', async () => {
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    const sixth = savedAircraft('0006.json')
+    // One position 299 s old at the fetch is 5 min old 1 s later, and leaves the map.
+    const [old, ...rest] = sixth.aircraft
+    landAircraft({ ...sixth, aircraft: [{ ...old, age: 299 }, ...rest] })
+    renderScreen('en')
+    const filters = await screen.findByRole('group', { name: 'Filters' })
+    expect(within(filters).getByRole('button', { name: 'Planes 26' })).toBeInTheDocument()
   })
 
   it('has no Planes chip while the aircraft are off, or before their first answer', async () => {
@@ -251,7 +266,7 @@ describe('the top bar', () => {
 
   it('turns the planes off and on in the address, with no count while they are off', async () => {
     act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
-    act(() => liveAircraft.update({ snapshot: savedAircraft('0006.json') }))
+    landAircraft(savedAircraft('0006.json'))
     renderScreen('en')
     const filters = await screen.findByRole('group', { name: 'Filters' })
     fireEvent.click(within(filters).getByRole('button', { name: 'Planes 27' }))

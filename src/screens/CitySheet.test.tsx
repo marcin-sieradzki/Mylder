@@ -124,7 +124,13 @@ describe('the planes beside the sheet', () => {
         'utf8',
       ),
     ) as AircraftSnapshot
-    act(() => liveAircraft.update({ snapshot: aircraft }))
+    // On the aircraft server's clock 2 s after the fetch, so the map draws every one.
+    act(() =>
+      liveAircraft.update({
+        snapshot: aircraft,
+        clockOffset: aircraft.fetched + 2_000 - Date.now(),
+      }),
+    )
     renderScreen('en')
     const figures = () => {
       fireEvent.click(within(tabs('Overview')).getByRole('tab', { name: 'City pulse' }))

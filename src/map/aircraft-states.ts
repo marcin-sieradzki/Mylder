@@ -51,6 +51,28 @@ export const aircraftStatesStore = (live: AircraftStore = liveAircraft): Aircraf
 export const aircraftStates = aircraftStatesStore()
 
 /**
+ * How many aircraft the map draws now, for the Planes filter's count: the latest snapshot's, less
+ * those whose positions the clock has dropped since; none until a snapshot lands. It renders
+ * again when the number changes, not with every answer or tick.
+ */
+export function useAircraftCount(
+  store: AircraftStatesStore = aircraftStates,
+  live: AircraftStore = liveAircraft,
+): number | undefined {
+  const landed = useSyncExternalStore(
+    live.subscribe,
+    () => live.get().snapshot !== undefined,
+    () => false,
+  )
+  const drawn = useSyncExternalStore(
+    store.subscribe,
+    () => store.get().size,
+    () => 0,
+  )
+  return landed ? drawn : undefined
+}
+
+/**
  * One aircraft's data state now, for a component such as its card: it renders again only when
  * that one changes. None for an aircraft the snapshot doesn't carry, or whose position is dropped.
  */
