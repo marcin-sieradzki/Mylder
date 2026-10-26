@@ -33,6 +33,18 @@ export function hourStart(moment: number, timezone: string): number {
   return moment - (((wall % 3_600_000) + 3_600_000) % 3_600_000)
 }
 
+const calendars = new Map<string, Intl.DateTimeFormat>()
+
+/** The date the zone's calendar shows at a moment, as `YYYY-MM-DD`. */
+export function calendarDay(moment: number, timezone: string): IsoDate {
+  let calendar = calendars.get(timezone)
+  if (!calendar) {
+    calendar = new Intl.DateTimeFormat('en-CA', { timeZone: timezone })
+    calendars.set(timezone, calendar)
+  }
+  return calendar.format(moment)
+}
+
 /** The moment the zone's clock reads `seconds` after midnight on `day`. */
 export function wallClock(day: IsoDate, seconds: number, timezone: string): number {
   const extraDays = Math.floor(seconds / 86_400)

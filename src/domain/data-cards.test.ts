@@ -42,6 +42,17 @@ describe('Mylder’s own data cards', () => {
     ])
   })
 
+  it('times no answer from the last good answer, through a switch between failing and empty', () => {
+    // It failed from 08:04, then answered empty from 08:12: the last answer that carried a trip
+    // was 08:03's.
+    const flipped = {
+      ...healthy,
+      api: { status: 'empty' as const, since: NOW - 2 * MINUTE },
+      lastSeen: { bus: NOW - 11 * MINUTE, 's-tog': NOW - 12 * MINUTE },
+    }
+    expect(dataCards(flipped, NOW)).toEqual([{ kind: 'no-answer', since: NOW - 11 * MINUTE }])
+  })
+
   it('names a mode with trips in service whose positions stopped 5 min ago', () => {
     const quiet = { ...healthy, lastSeen: { bus: NOW - 5 * MINUTE, 's-tog': NOW - 4 * MINUTE } }
     expect(dataCards(quiet, NOW)).toEqual([
@@ -94,8 +105,9 @@ describe('Mylder’s own data cards', () => {
   it('holds the mode cards while Rejseplanen fails, before its own card shows', () => {
     const failing = {
       ...healthy,
+      // The buses went quiet 7 min ago; the last good answer, 3 min ago, carried S-tog.
       api: { status: 'error' as const, since: NOW - 2 * MINUTE },
-      lastSeen: { bus: NOW - 7 * MINUTE },
+      lastSeen: { bus: NOW - 7 * MINUTE, 's-tog': NOW - 3 * MINUTE },
     }
     expect(dataCards(failing, NOW)).toEqual([])
   })

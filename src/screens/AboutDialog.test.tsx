@@ -162,6 +162,15 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Disruptions')).toBe('Not checked yet')
   })
 
+  it('gives the budget line in Danish, in the page notice’s words', () => {
+    show('da', { ...weekday, pollInterval: 90, budget: { level: 'stretched', calls: 30_000 } })
+    const dialog = openDialog('Om Mylder')
+    expect(dialog).toHaveTextContent(
+      'Kortet opdateres hvert 90. sekund for at overholde databudgettet.',
+    )
+    expect(fact(dialog, 'Forespørgsel')).toBe('Hvert 90. sekund')
+  })
+
   it('opens from the corner credit’s Rejseplanen link, and Esc closes it and returns focus', async () => {
     const user = userEvent.setup()
     show('en', weekday)

@@ -1,13 +1,14 @@
 // The route handlers' answers, built here so the routes in `app/api/` stay one line each: each
 // carries the CDN header for its snapshot, read on the tracker's own clock, which a recording
 // sets. A snapshot that can't be built at all, because the timetable can't be read, is a 503.
-// The timetable's network files come from the tracker's own timetable, each version kept for good.
+// The timetable files the browser loads come from the tracker's own timetable, each version kept
+// for good.
 import 'server-only'
 import { Effect } from 'effect'
 import { cacheHeaders, RETRY_AFTER } from './caching.ts'
 import { runTracker, timetableDirOf } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
-import { isNetworkFile, readManifestFile, readNetworkFile } from './timetable.ts'
+import { isBrowserFile, readBrowserFile, readManifestFile } from './timetable.ts'
 
 const unavailable = (error: unknown) => {
   console.error('The tracker could not answer', error)
@@ -80,18 +81,18 @@ export async function timetableManifestResponse(source?: Source): Promise<Respon
 }
 
 /**
- * One of a version's network files (`manifest`, `stops`, `patterns` or `paths`); 404 for the
- * trips, any other name, or a version the tracker doesn't hold.
+ * One of the files of a version the browser loads (`manifest`, `stops`, `patterns`, `paths` or
+ * `dayProfiles`); 404 for the trips, any other name, or a version the tracker doesn't hold.
  */
 export async function timetableFileResponse(
   version: string,
   file: string,
   source?: Source,
 ): Promise<Response> {
-  if (!isNetworkFile(file)) return notFound('timetable file')
+  if (!isBrowserFile(file)) return notFound('timetable file')
   try {
     const dir = timetableDirOf(source ?? environmentSource())
-    const body = await readNetworkFile(dir, version, file)
+    const body = await readBrowserFile(dir, version, file)
     return body === undefined ? notFound('timetable version') : json(body, IMMUTABLE)
   } catch (error) {
     return unavailable(error)

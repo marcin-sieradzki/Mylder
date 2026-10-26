@@ -11,6 +11,7 @@ import { liveSnapshot } from '../map/live'
 import { readPaint } from '../map/paint'
 import { vehiclePaint, vehiclesOf } from '../map/vehicles'
 import { mapView } from '../map/view'
+import { timetableRoutes } from '../test/timetableRoutes'
 import type { Snapshot } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
@@ -29,25 +30,6 @@ const renderScreen = (lang: Lang) =>
       <MapScreen />
     </Providers>,
   )
-
-/**
- * The timetable routes as the server answers them on the recording: each version's files from its
- * `timetable/` folder. jsdom has no server to reach.
- */
-const timetableRoutes = async (input: RequestInfo | URL): Promise<Response> => {
-  const folder = join(process.cwd(), 'recordings', 'weekday', 'timetable')
-  const manifest = JSON.parse(readFileSync(join(folder, 'manifest.json'), 'utf8')) as {
-    version: string
-    files: Record<string, string>
-  }
-  const [, version, file] = /^\/api\/timetable\/([^/]+)\/(\w+)$/.exec(String(input)) ?? []
-  if (version !== manifest.version) return new Response(null, { status: 404 })
-  const body =
-    file === 'manifest'
-      ? JSON.stringify(manifest)
-      : readFileSync(join(folder, manifest.files[file]), 'utf8')
-  return new Response(body, { headers: { 'content-type': 'application/json' } })
-}
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/en')
@@ -102,11 +84,12 @@ describe('the top bar', () => {
     act(() => liveSnapshot.update({ snapshot: saved('0001.json') }))
     renderScreen('da')
     const banner = screen.getByRole('banner')
-    // The month's calls ran out a minute later: that snapshot was built from no answer.
+    // The month's calls ran out a minute later: that snapshot was built from no answer, and the
+    // page is Paused.
     act(() => liveSnapshot.update({ snapshot: saved('0002.json', 'spent') }))
-    expect(within(banner).getByText('Opdateret 07:20:00')).toBeInTheDocument()
+    expect(within(banner).getByText('Opdateret 07:20:00, sat på pause')).toBeInTheDocument()
     act(() => liveSnapshot.update({ failingSince: Date.parse('2026-06-16T05:23:00Z') }))
-    expect(within(banner).getByText('Opdateret 07:20:00')).toBeInTheDocument()
+    expect(within(banner).getByText('Opdateret 07:20:00, sat på pause')).toBeInTheDocument()
   })
 
   it("has a chip for each of the timetable's modes, counting the trips underway in it", async () => {
@@ -216,6 +199,6 @@ describe('the top bar', () => {
   it('shows no time before a snapshot built from an answer has landed', () => {
     act(() => liveSnapshot.update({ snapshot: saved('0001.json', 'spent') }))
     renderScreen('en')
-    expect(within(screen.getByRole('banner')).getByText('Updated —')).toBeInTheDocument()
+    expect(within(screen.getByRole('banner')).getByText('Updated —, paused')).toBeInTheDocument()
   })
 })
