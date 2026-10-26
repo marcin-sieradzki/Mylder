@@ -114,6 +114,14 @@ describe('the vehicles on the map', () => {
     expect(fillOf(draw(snapshot, null), BUS_LIVE)).toEqual([0xd9, 0x9a, 0x00, 255])
   })
 
+  it('draws each vehicle in the data state it has by the clock, where one is given', () => {
+    // Four minutes on, A's report has aged: it is drawn Ageing, its fill no longer solid.
+    const states = new Map([[A_LIVE, 'ageing' as const]])
+    const vehicles = vehiclesOf(snapshot, network, readPaint(root, vehiclePaint(network)), states)
+    expect(fillOf(vehicles, A_LIVE)[3]).toBeLessThan(255)
+    expect(fillOf(vehicles, RE_LIVE)).toEqual([0x23, 0x2c, 0x31, 255])
+  })
+
   it('repaints in the dark theme', () => {
     root.dataset.theme = 'dark'
     const vehicles = draw()

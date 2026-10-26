@@ -1,7 +1,8 @@
 // The vehicles' deck.gl layers, as the map-layer prototype (#14) settled them: a land-coloured
 // halo under every dot, then the glyph, a scatterplot whose Timetable only ring is dashed by the
-// path-style extension and whose No signal dot is cut by a few lines of shader. deck.gl draws
-// them over the map in its own canvas (ADR 0003). WebGL is not tested in jsdom.
+// path-style extension and whose No signal dot is cut by a few lines of shader. A few more fade
+// a dot, halo and all, while it jumps to a far new place. deck.gl draws them over the map in its
+// own canvas (ADR 0003). WebGL is not tested in jsdom.
 import 'client-only'
 import type { Accessor, DefaultProps, Layer } from '@deck.gl/core'
 import { PathStyleExtension } from '@deck.gl/extensions'
@@ -11,27 +12,35 @@ import type { Vehicles } from './vehicles.ts'
 type CutProps<D> = {
   /** The width in px of the No signal cut, a diagonal gap through the dot; 0 for none. */
   getCut?: Accessor<D, number>
+  /** How opaque the whole dot is drawn, 0 to 1. */
+  getOpacity?: Accessor<D, number>
 }
 
 const cutModule = {
   name: 'vehicleCut',
   inject: {
-    'vs:#decl': 'in float instanceCuts;\nout float vCut;\n',
-    'vs:#main-end': 'vCut = instanceCuts;\n',
-    'fs:#decl': 'in float vCut;\n',
+    'vs:#decl':
+      'in float instanceCuts;\nin float instanceOpacities;\nout float vCut;\nout float vOpacity;\n',
+    'vs:#main-end': 'vCut = instanceCuts;\nvOpacity = instanceOpacities;\n',
+    'fs:#decl': 'in float vCut;\nin float vOpacity;\n',
     // unitPosition runs -1 to 1 across the dot, y up, so x + y = 0 is the diagonal from top left
     // to bottom right; its distance in px is |x + y| / sqrt(2) times the outer radius.
     'fs:#main-start':
       'if (vCut > 0.0 && abs(unitPosition.x + unitPosition.y) * 0.70710678 * outerRadiusPixels < vCut * 0.5) discard;\n',
+    'fs:DECKGL_FILTER_COLOR': 'color.a *= vOpacity;\n',
   },
 }
 
-/** A scatterplot with one more attribute per vehicle: the width of its No signal cut. */
+/**
+ * A scatterplot with two more attributes per vehicle: the width of its No signal cut, and how
+ * opaque it is drawn.
+ */
 class VehicleGlyphLayer<D = unknown> extends ScatterplotLayer<D, CutProps<D>> {
   static override layerName = 'VehicleGlyphLayer'
   static override defaultProps = {
     ...ScatterplotLayer.defaultProps,
     getCut: { type: 'accessor', value: 0 },
+    getOpacity: { type: 'accessor', value: 1 },
   } as DefaultProps<ScatterplotLayerProps<unknown> & CutProps<unknown>>
 
   override getShaders() {
@@ -46,47 +55,51 @@ class VehicleGlyphLayer<D = unknown> extends ScatterplotLayer<D, CutProps<D>> {
     super.initializeState()
     this.getAttributeManager()?.addInstanced({
       instanceCuts: { size: 1, accessor: 'getCut' },
+      instanceOpacities: { size: 1, accessor: 'getOpacity' },
     })
   }
 }
 
 const dashed = [new PathStyleExtension({ dash: true })]
 
-/** Each vehicle set's attributes as deck.gl takes them, made once so a zoom uploads nothing. */
+/**
+ * Each vehicle set's glyph attributes as deck.gl takes them, made once, so a frame or a zoom
+ * uploads only the positions and opacities.
+ */
 const binary = new WeakMap<Vehicles, ReturnType<typeof attributesOf>>()
 
 function attributesOf(vehicles: Vehicles) {
-  const { length } = vehicles
-  const getPosition = { value: vehicles.positions, size: 2 }
   return {
     haloColour: [...vehicles.haloColour] as [number, number, number, number],
-    halos: {
-      length,
-      attributes: { getPosition, getRadius: { value: vehicles.haloRadius, size: 1 } },
-    },
+    halos: { getRadius: { value: vehicles.haloRadius, size: 1 } },
     glyphs: {
-      length,
-      attributes: {
-        getPosition,
-        getRadius: { value: vehicles.radius, size: 1 },
-        getLineWidth: { value: vehicles.lineWidth, size: 1 },
-        getFillColor: { value: vehicles.fill, size: 4 },
-        getLineColor: { value: vehicles.line, size: 4 },
-        getDashArray: { value: vehicles.dash, size: 2 },
-        getCut: { value: vehicles.cut, size: 1 },
-      },
+      getRadius: { value: vehicles.radius, size: 1 },
+      getLineWidth: { value: vehicles.lineWidth, size: 1 },
+      getFillColor: { value: vehicles.fill, size: 4 },
+      getLineColor: { value: vehicles.line, size: 4 },
+      getDashArray: { value: vehicles.dash, size: 2 },
+      getCut: { value: vehicles.cut, size: 1 },
     },
   }
 }
 
-/** The layers that draw the vehicles, each dot `radiusScale` times Perron's size. */
+/**
+ * The layers that draw the vehicles where their positions are now, each dot `radiusScale` times
+ * Perron's size. deck.gl uploads an attribute again only when it is handed a new one, so the
+ * moving ones are new on every call.
+ */
 export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] {
   let data = binary.get(vehicles)
   if (!data) binary.set(vehicles, (data = attributesOf(vehicles)))
+  const { length } = vehicles
+  const moving = {
+    getPosition: { value: vehicles.positions, size: 2 },
+    getOpacity: { value: vehicles.opacity, size: 1 },
+  }
   return [
-    new ScatterplotLayer({
+    new VehicleGlyphLayer({
       id: 'vehicle-halos',
-      data: data.halos,
+      data: { length, attributes: { ...data.halos, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
       filled: true,
@@ -96,7 +109,7 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
     }),
     new VehicleGlyphLayer({
       id: 'vehicles',
-      data: data.glyphs,
+      data: { length, attributes: { ...data.glyphs, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
       lineWidthUnits: 'pixels',
