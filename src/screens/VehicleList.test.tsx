@@ -100,6 +100,21 @@ describe('the Vehicles list', () => {
     )
   })
 
+  it('says the positions may be out of date once the snapshot is late', () => {
+    const snapshot = saved(MINUTE_6)
+    // A minute's poll, and the snapshot 90 s old: past its refresh and the poll's own lateness.
+    act(() =>
+      liveSnapshot.update({
+        snapshot: { ...snapshot, pollInterval: 60 },
+        clockOffset: snapshot.fetched + 90_000 - Date.now(),
+      }),
+    )
+    renderList('da')
+    expect(screen.getByText('Rejseplanen').closest('p')).toHaveTextContent(
+      /^Rejseplanen · positioner \d\d:\d\d:\d\d, måske forældet$/,
+    )
+  })
+
   it('waits for the first snapshot', () => {
     renderList('en')
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
@@ -214,7 +229,7 @@ describe('a row', () => {
     window.history.replaceState(null, '', '/en?tab=vehicles&hide=bus')
     land(saved(MINUTE_6))
     renderList('en')
-    const link = screen.getByRole('link', { name: 'Næstved St.' })
+    const link = screen.getByRole('link', { name: 'Train RE to Næstved St.' })
     expect(link).toHaveAttribute(
       'href',
       '?tab=vehicles&hide=bus&trip=train.RE.7c3e865b99.20260616.0717',
@@ -224,5 +239,11 @@ describe('a row', () => {
       'train.RE.7c3e865b99.20260616.0717',
     )
     expect(window.location.pathname).toBe('/en')
+  })
+
+  it('is named for its trip in Danish, since many rows share a destination', () => {
+    land(saved(MINUTE_6))
+    renderList('da')
+    expect(screen.getAllByRole('link', { name: 'Bus 5C mod Husum Torv' })).toHaveLength(2)
   })
 })

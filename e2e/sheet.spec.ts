@@ -65,7 +65,7 @@ test('the Vehicles list has a row for every vehicle the map draws', async ({ pag
   await expect.poll(async () => (await counts()).same).toBe(true)
 
   // A row's destination opens that vehicle's detail, in place.
-  await table.getByRole('link', { name: 'Næstved St.' }).click()
+  await table.getByRole('link', { name: 'Train RE to Næstved St.' }).first().click()
   await expect(page).toHaveURL(/[?&]trip=train\.RE\./)
   await expect(page.getByRole('dialog', { name: /to Næstved St\./ })).toBeVisible()
 })

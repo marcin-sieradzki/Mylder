@@ -7,10 +7,15 @@ import type { DataStates } from '../map/states'
 import { onMap } from '../map/vehicles'
 import type { Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
+import type { VehicleTableColumn } from '@mylder/perron/patterns'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
 
-/** A column the list sorts by, as Perron's VehicleTable names it. */
-export type ListColumn = 'line' | 'destination' | 'position' | 'delay'
+/** A column the list sorts by, as Perron's VehicleTable names it; the list shows no Last seen. */
+export type ListColumn = Exclude<VehicleTableColumn, 'last-seen'>
+
+/** Whether a header Perron's table asks to sort by is one of the list's. */
+export const isListColumn = (column: VehicleTableColumn): column is ListColumn =>
+  column !== 'last-seen'
 
 export interface ListSort {
   readonly column: ListColumn
@@ -28,6 +33,8 @@ export interface ListRow {
   readonly state: DataState
   /** Whole minutes late, negative early; none where the trip carries none or its state shows none. */
   readonly delay?: number
+  /** Its line and destination folded for search, once per row rather than once per keystroke. */
+  readonly words: string
 }
 
 /** The modes in the list's line order; the light rail sits with the trains. */
@@ -67,6 +74,7 @@ export function rowsOf(
       return {
         trip,
         state,
+        words: `${folded(trip.line)}\n${folded(trip.headsign)}`,
         ...(colour ? { colour } : {}),
         ...(delay === undefined ? {} : { delay }),
       }
@@ -88,9 +96,7 @@ const folded = (text: string) =>
 export function matching(rows: readonly ListRow[], query: string): readonly ListRow[] {
   const words = folded(query.trim())
   if (!words) return rows
-  return rows.filter(
-    (row) => folded(row.trip.line).includes(words) || folded(row.trip.headsign).includes(words),
-  )
+  return rows.filter((row) => row.words.includes(words))
 }
 
 type Compare = (a: ListRow, b: ListRow) => number
@@ -104,10 +110,10 @@ const byLine: Compare = (a, b) =>
 
 const byDestination: Compare = (a, b) => collator.compare(a.trip.headsign, b.trip.headsign)
 
-/** State order, then within a state the one seen most recently first. */
+/** State order, then within a state the one reported, or else seen, most recently first. */
 const byPosition: Compare = (a, b) =>
   STATE_ORDER.indexOf(a.state) - STATE_ORDER.indexOf(b.state) ||
-  (b.trip.reported ?? 0) - (a.trip.reported ?? 0)
+  (b.trip.reported ?? b.trip.seen ?? 0) - (a.trip.reported ?? a.trip.seen ?? 0)
 
 const COMPARE: Readonly<Record<Exclude<ListColumn, 'delay'>, Compare>> = {
   line: byLine,

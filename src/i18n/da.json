@@ -185,6 +185,7 @@
     "search": "Søg i linjer og destinationer",
     "placeholder": "Linje eller destination, fx 5C",
     "positionsAt": "positioner {time}",
+    "positionsOutOfDate": "positioner {time}, måske forældet",
     "noMatch": "Ingen køretøjer matcher.",
     "none": "Ingen køretøjer på kortet."
   },

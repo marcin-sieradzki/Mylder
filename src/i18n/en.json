@@ -185,6 +185,7 @@
     "search": "Search lines and destinations",
     "placeholder": "Line or destination, such as 5C",
     "positionsAt": "positions {time}",
+    "positionsOutOfDate": "positions {time}, may be out of date",
     "noMatch": "No vehicles match.",
     "none": "No vehicles on the map."
   },
