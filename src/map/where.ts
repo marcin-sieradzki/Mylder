@@ -3,6 +3,7 @@
 // last seen. Read from the trip's place on its pattern the way the map places its dot (motion.ts),
 // so the words and the dot agree. Stops are indexes in the pattern's calling order; the panel
 // names them.
+import 'client-only'
 import type { DataState } from '../domain/data-state.ts'
 import { progressAt, timelineOf, type MeasuredPath, type TimedCall } from '../domain/trip-motion.ts'
 import type { SnapshotTrip } from '../tracker/index.ts'
