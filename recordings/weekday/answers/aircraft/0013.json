@@ -19,7 +19,8 @@
       "speed": 260,
       "track": 270,
       "age": 1.5,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "3c4dd2",
@@ -31,7 +32,8 @@
       "speed": 410,
       "track": 50,
       "age": 1.5,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "3c66b0",
@@ -43,7 +45,8 @@
       "speed": 240,
       "track": 70,
       "age": 0.7,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "400a6e",
@@ -55,7 +58,8 @@
       "speed": 182.6,
       "track": 224,
       "age": 1.7,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45a91f",
@@ -67,7 +71,8 @@
       "speed": 98,
       "track": 80,
       "age": 0.4,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45ab12",
@@ -79,7 +84,8 @@
       "speed": 220,
       "track": 44,
       "age": 0.6,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45ab45",
@@ -91,7 +97,8 @@
       "speed": 14,
       "track": 224,
       "age": 1.7,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45ac2d",
@@ -103,7 +110,8 @@
       "speed": 18,
       "track": 314,
       "age": 0.6,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45ac51",
@@ -115,7 +123,8 @@
       "speed": 250,
       "track": 224,
       "age": 0.4,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45ac9d",
@@ -127,7 +136,8 @@
       "speed": 0,
       "track": 134,
       "age": 0.7,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45c8d4",
@@ -139,7 +149,8 @@
       "speed": 210,
       "track": 95,
       "age": 3.2,
-      "source": "multilateration"
+      "source": "multilateration",
+      "state": "estimated"
     },
     {
       "hex": "45cc32",
@@ -151,7 +162,8 @@
       "speed": 120,
       "track": 304,
       "age": 0.5,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "45d33b",
@@ -163,7 +175,8 @@
       "speed": 105,
       "track": 340,
       "age": 1.1,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "461f2c",
@@ -175,7 +188,8 @@
       "speed": 0,
       "track": 224,
       "age": 1,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "478f4a",
@@ -187,7 +201,8 @@
       "speed": 142,
       "track": 224,
       "age": 1.6,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "47a1b6",
@@ -199,7 +214,8 @@
       "speed": 290,
       "track": 205,
       "age": 0.1,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "47c0b9",
@@ -211,7 +227,8 @@
       "speed": 12,
       "track": 44,
       "age": 1.1,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "484cb6",
@@ -223,7 +240,8 @@
       "speed": 210,
       "track": 44,
       "age": 0.8,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4ac9e7",
@@ -235,7 +253,8 @@
       "speed": 0,
       "track": 134,
       "age": 0.5,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4aca12",
@@ -246,7 +265,8 @@
       "speed": 0,
       "track": 314,
       "age": 1.4,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4b1814",
@@ -258,7 +278,8 @@
       "speed": 236.6,
       "track": 289,
       "age": 0.2,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4b1a07",
@@ -268,7 +289,8 @@
       "lon": 12.3712,
       "altitude": 11750,
       "age": 194.3,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "no-signal"
     },
     {
       "hex": "4b8e1c",
@@ -280,7 +302,8 @@
       "speed": 455,
       "track": 352,
       "age": 0.8,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4ca8f1",
@@ -292,7 +315,8 @@
       "speed": 0,
       "track": 134,
       "age": 1.6,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "4cc2a7",
@@ -304,7 +328,8 @@
       "speed": 430,
       "track": 115,
       "age": 1.6,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "896431",
@@ -316,7 +341,8 @@
       "speed": 470,
       "track": 168,
       "age": 0.3,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "a6a3b1",
@@ -328,7 +354,8 @@
       "speed": 0,
       "track": 44,
       "age": 1.2,
-      "source": "broadcast"
+      "source": "broadcast",
+      "state": "live"
     },
     {
       "hex": "~2d01f3",
@@ -338,7 +365,8 @@
       "speed": 92,
       "track": 310,
       "age": 1.1,
-      "source": "tisb"
+      "source": "tisb",
+      "state": "estimated"
     }
   ]
 }

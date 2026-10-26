@@ -94,6 +94,26 @@ Rejseplanen lists the Metro as single trips with clock times, in departure board
 
 If the first calls with the key return Metro positions, or Metro departures with a prognosis, Metro trips get the normal states and departures, and Metro leaves the interval-line rule. The Metro's disruption messages from `himsearch` show as for any product.
 
+## Aircraft
+
+The aircraft over Copenhagen (`docs/aircraft.md`) carry the same words, but never Timetable only: an aircraft has no timetable. Each one arrives with its own position's age and how the position was found, so its state needs no history, and one pure rule, `aircraftState` in `src/domain/aircraft-state.ts`, decides it on the server at fetch time and again in the browser by the clock. Its thresholds are first guesses until the real recording (#135) measures the feed.
+
+| Data state | When                                                                       | Label                                | Map glyph           |
+| ---------- | -------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
+| Live       | A broadcast position younger than the Live limit: two poll intervals, 20 s | "Reported 4 s ago"                   | Solid dot           |
+| Ageing     | A broadcast position from 20 to 60 s old                                   | "Last seen 40 s ago"                 | Faint dot, outlined |
+| Estimated  | A position from multilateration, TIS-B or any other way, under 60 s old    | "Placed by ground receivers 6 s ago" | Hollow dot          |
+| No signal  | A position 60 s old or more, or the feed has failed for over 60 s          | "No signal since 15:42"              | Grey dot, cut       |
+
+A **broadcast** position is one the aircraft sent itself: ADS-B, ADS-R or ADS-C (`adsb_icao`, `adsb_other`, `adsr_icao`, `adsr_other`, `adsc`). A position the ground network worked out by multilateration (`mlat`), relayed as TIS-B (`tisb_icao`, `tisb_other`, `tisb_trackfile`) or found any other way (`other`, `mode_s`) is never Live, however fresh, as a computed position never is (ADR 0005). Check in this order and take the first that holds:
+
+1. The position is 5 min old: the aircraft is dropped, from the snapshot and from the map.
+2. The feed has failed for over 60 s, or the position is 60 s old: **No signal**, drawn at its last fix.
+3. The position was not broadcast: **Estimated**.
+4. It is younger than two poll intervals: **Live**; otherwise **Ageing**.
+
+A position's age is the feed's own (`seen_pos`) at the snapshot's fetch, counted on by the clock, so a stale answer from the CDN and a browser whose polls stop both age truly. _A plane that broadcast its position 12 s before a fetch is Live, turns Ageing 8 s later without a poll, No signal at 60 s, and leaves the map at 5 min. When adsb.lol stops answering, each plane keeps the state its age gives it for 60 s, and then every plane is No signal where it was last placed._
+
 ## When the answers stop
 
 Two conditions sit above the data states. Neither is a data state; both are notices on the page.

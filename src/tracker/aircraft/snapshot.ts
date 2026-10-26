@@ -13,6 +13,9 @@ const optional = Schema.optionalKey
  */
 export const PositionSource = Schema.Literals(['broadcast', 'multilateration', 'tisb', 'other'])
 
+/** An aircraft's data state at `fetched`, by the domain's rule (src/domain/aircraft-state.ts). */
+export const AircraftState = Schema.Literals(['live', 'ageing', 'estimated', 'no-signal'])
+
 /** Where the aircraft come from: adsb.lol, its fallback adsb.fi (#132), or a recording. */
 export const AircraftProvider = Schema.Literals(['adsb.lol', 'adsb.fi', 'recording'])
 
@@ -33,6 +36,7 @@ export const SnapshotAircraft = Schema.Struct({
   /** How old the position is at `fetched`, in seconds. */
   age: Schema.Number,
   source: PositionSource,
+  state: AircraftState,
 })
 
 export const AircraftHealth = Schema.Struct({

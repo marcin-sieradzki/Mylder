@@ -1,11 +1,16 @@
 // The aircraft the snapshot keeps from an answer (docs/aircraft.md, "Kept and dropped"): those
 // with a position of their own inside the transit box, its current one or, once that has gone,
 // its last. Rough positions from a receiver's own location, ground vehicles, surface categories
-// and aircraft whose owners asked not to be shown (PIA, LADD) are dropped.
+// and aircraft whose owners asked not to be shown (PIA, LADD) are dropped. Each kept aircraft
+// takes its data state by the domain's rule, and leaves once its position is 5 min old.
 import 'server-only'
+import { aircraftState, type AircraftStateContext } from '../../domain/aircraft-state.ts'
 import { COPENHAGEN_BOX } from '../../timetable/format.ts'
 import type { ReadsbAircraft, ReadsbAnswer } from './answers.ts'
 import type { SnapshotAircraft } from './snapshot.ts'
+
+/** An aircraft as an answer placed it, before its data state is decided. */
+export type Fix = Omit<SnapshotAircraft, 'state'>
 
 /** The feed's database flags for a privacy ICAO address (PIA) and the FAA's LADD list. */
 const PIA = 4
@@ -20,7 +25,7 @@ const GROUND_VEHICLE = 'adsb_icao_nt'
 const BROADCAST = new Set(['adsb_icao', 'adsb_other', 'adsr_icao', 'adsr_other', 'adsc'])
 
 /** How a position was found, from the feed's message type. */
-export function sourceOf(type: string | undefined): SnapshotAircraft['source'] {
+export function sourceOf(type: string | undefined): Fix['source'] {
   if (type && BROADCAST.has(type)) return 'broadcast'
   if (type === 'mlat') return 'multilateration'
   if (type?.startsWith('tisb_')) return 'tisb'
@@ -54,8 +59,8 @@ const shown = (aircraft: ReadsbAircraft) =>
  * answer's own `now`. The answer comes back within the call's 4 s timeout, and the gap is left
  * out, so a recording's ages are the recorded ones.
  */
-export function aircraftIn(answer: ReadsbAnswer): SnapshotAircraft[] {
-  const kept: SnapshotAircraft[] = []
+export function aircraftIn(answer: ReadsbAnswer): Fix[] {
+  const kept: Fix[] = []
   for (const aircraft of answer.ac) {
     const position = positionOf(aircraft)
     if (!position || !inBox(position.lat, position.lon) || !shown(aircraft)) continue
@@ -77,5 +82,16 @@ export function aircraftIn(answer: ReadsbAnswer): SnapshotAircraft[] {
 }
 
 /** The same aircraft, `seconds` older: kept from the last answer when a call fails. */
-export const aged = (aircraft: readonly SnapshotAircraft[], seconds: number): SnapshotAircraft[] =>
+export const aged = (aircraft: readonly Fix[], seconds: number): Fix[] =>
   aircraft.map((each) => ({ ...each, age: tenths(each.age + seconds) }))
+
+/** The aircraft, each with its data state at the snapshot's fetch; none whose position is dropped. */
+export function withStates(
+  aircraft: readonly Fix[],
+  context: AircraftStateContext,
+): SnapshotAircraft[] {
+  return aircraft.flatMap((each) => {
+    const state = aircraftState(each, context)
+    return state ? [{ ...each, state }] : []
+  })
+}

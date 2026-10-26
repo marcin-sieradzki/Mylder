@@ -17,7 +17,7 @@ Browsers never call adsb.lol. Each browser polls `/api/aircraft`, which answers 
 
 `Aircraft.getSnapshot` (`src/tracker/aircraft/aircraft.ts`) serves the latest snapshot while it holds, and otherwise calls the feed. Calls go one at a time within an instance, so the requests that come while one is on its way wait for it and are served the snapshot it made. Two instances may each call once in the same 10 s; the CDN in front of them makes that rare.
 
-A failed call (a timeout, a network error, a status of 400 or more, or an answer the schema rejects) still answers 200: a snapshot with health `error`, its kind and since when, the last answer's aircraft with their ages counted on to now, or none before the first answer. The route answers 503 only when the source can't be built at all.
+A failed call (a timeout, a network error, a status of 400 or more, or an answer the schema rejects) still answers 200: a snapshot with health `error`, its kind and since when, the last answer's aircraft with their ages counted on to now and their states decided again, or none before the first answer. Once the feed has failed for over 60 s, every aircraft is No signal at its last fix. The route answers 503 only when the source can't be built at all.
 
 ## The snapshot
 
@@ -33,7 +33,7 @@ Codes and numbers only, in the feed's units, which the browser converts. Its sch
 | `lastAnswer`   | When the feed last answered; absent until it has                                           |
 | `aircraft`     | Every aircraft kept, by hex                                                                |
 
-Each aircraft: `hex` (the ICAO address, the key), `callsign`, `type` (the type code), `lat`, `lon`, `altitude` (feet, or `ground`), `speed` (knots), `track` (degrees from north), `age` (seconds since the position at `fetched`, from the feed's `seen_pos`) and `source`, how the position was found: `broadcast` (`adsb_icao`, `adsb_other`, `adsr_icao`, `adsr_other`, `adsc`), `multilateration` (`mlat`), `tisb` (`tisb_icao`, `tisb_other`, `tisb_trackfile`) or `other` (`other`, `mode_s`, anything else). Each aircraft's data state comes with #129, from one pure rule the server and the browser share.
+Each aircraft: `hex` (the ICAO address, the key), `callsign`, `type` (the type code), `lat`, `lon`, `altitude` (feet, or `ground`), `speed` (knots), `track` (degrees from north), `age` (seconds since the position at `fetched`, from the feed's `seen_pos`), `source`, how the position was found: `broadcast` (`adsb_icao`, `adsb_other`, `adsr_icao`, `adsr_other`, `adsc`), `multilateration` (`mlat`), `tisb` (`tisb_icao`, `tisb_other`, `tisb_trackfile`) or `other` (`other`, `mode_s`, anything else); and `state`, its data state at `fetched`: `live`, `ageing`, `estimated` or `no-signal`, by the one pure rule the server and the browser share (`aircraftState` in `src/domain/aircraft-state.ts`; `docs/data-states.md`, "Aircraft"). An aircraft whose position is 5 min old is dropped, so a feed that stays down empties the snapshot 5 min after its last answer.
 
 ## Caching
 

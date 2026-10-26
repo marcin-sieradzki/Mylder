@@ -1,13 +1,14 @@
 // The aircraft source (docs/aircraft.md, "One call every 10 s"): whoever asks, at most one call
 // to the feed every 10 s within an instance, the requests that come meanwhile sharing it. An
 // answer becomes the snapshot of the aircraft it keeps; a failed call gives the last aircraft,
-// aged by the clock, with the health that says why. No store, lease or budget (ADR 0014): each
+// aged by the clock, with the health that says why. Each aircraft's data state is decided at
+// the snapshot's fetch. No store, lease or budget (ADR 0014): each
 // aircraft carries its own position's age, and the feed needs no key.
 import 'server-only'
 import { Cause, Clock, Context, Effect, Layer, Result, Schema, Semaphore } from 'effect'
 import * as Http from '../http.ts'
 import { ReadsbAnswer } from './answers.ts'
-import { aged, aircraftIn } from './build.ts'
+import { aged, aircraftIn, withStates } from './build.ts'
 import type { AircraftHealth, AircraftProvider, AircraftSnapshot } from './snapshot.ts'
 
 /** How often the feed is asked, in seconds, and so how long a snapshot holds. */
@@ -84,16 +85,23 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
         const result = yield* Effect.result(ask(client, url))
         const now = yield* Clock.currentTimeMillis
         const due = { fetched: now, nextDue: now + POLL_SECONDS * 1000, pollInterval: POLL_SECONDS }
+        const decided = (health: AircraftHealth) => ({
+          now,
+          fetched: now,
+          pollInterval: POLL_SECONDS,
+          health,
+        })
         if (Result.isSuccess(result)) {
+          const health: AircraftHealth = {
+            status: 'ok',
+            since: latest?.health.status === 'ok' ? latest.health.since : now,
+          }
           return {
             ...due,
             provider,
-            health: {
-              status: 'ok',
-              since: latest?.health.status === 'ok' ? latest.health.since : now,
-            },
+            health,
             lastAnswer: now,
-            aircraft: aircraftIn(result.success),
+            aircraft: withStates(aircraftIn(result.success), decided(health)),
           } satisfies AircraftSnapshot
         }
         const { kind, message } = result.failure
@@ -101,12 +109,14 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
         // The feed has failed since its first failure in a row, whatever each one's kind.
         const before = latest?.health
         const since = before?.status === 'error' ? before.since : now
+        const health: AircraftHealth = { status: 'error', kind, since }
+        const kept = latest ? aged(latest.aircraft, (now - latest.fetched) / 1000) : []
         return {
           ...due,
           provider,
-          health: { status: 'error', kind, since },
+          health,
           ...(latest?.lastAnswer === undefined ? {} : { lastAnswer: latest.lastAnswer }),
-          aircraft: latest ? aged(latest.aircraft, (now - latest.fetched) / 1000) : [],
+          aircraft: withStates(kept, decided(health)),
         } satisfies AircraftSnapshot
       })
 

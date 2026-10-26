@@ -125,63 +125,88 @@ describe('GET /api/aircraft', () => {
     ),
   )
 
-  it.effect('gives each aircraft as codes and numbers, its position’s kind and its age', () =>
-    Effect.gen(function* () {
-      yield* TestClock.setTime(MOMENT)
-      const { snapshot } = yield* request
-      expect(snapshot).toEqual({
-        fetched: MOMENT,
-        nextDue: MOMENT + 10_000,
-        pollInterval: 10,
-        provider: 'recording',
-        health: { status: 'ok', since: MOMENT },
-        lastAnswer: MOMENT,
-        aircraft: [
-          {
-            hex: 'aaa001',
-            callsign: 'SAS1426',
-            type: 'A20N',
-            lat: 55.6743,
-            lon: 12.6391,
-            altitude: 3175,
-            speed: 168.4,
-            track: 223.6,
-            age: 0.4,
-            source: 'broadcast',
-          },
-          {
-            hex: 'aaa002',
-            lat: 55.6743,
-            lon: 12.6391,
-            altitude: 'ground',
-            age: 2,
-            source: 'multilateration',
-          },
-          { hex: 'aaa003', lat: 55.6743, lon: 12.6391, age: 0.4, source: 'tisb' },
-          { hex: 'aaa004', lat: 55.6743, lon: 12.6391, age: 0.4, source: 'other' },
-          { hex: 'aaa005', lat: 55.6743, lon: 12.6391, age: 0.4, source: 'broadcast' },
-        ],
-      })
-    }).pipe(
-      Effect.provide(
-        replaying(
-          answer(
-            plane('aaa001'),
+  it.effect(
+    'gives each aircraft as codes and numbers, its position’s kind, its age and its state',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        const { snapshot } = yield* request
+        expect(snapshot).toEqual({
+          fetched: MOMENT,
+          nextDue: MOMENT + 10_000,
+          pollInterval: 10,
+          provider: 'recording',
+          health: { status: 'ok', since: MOMENT },
+          lastAnswer: MOMENT,
+          aircraft: [
             {
-              hex: 'aaa002',
-              type: 'mlat',
-              alt_baro: 'ground',
+              hex: 'aaa001',
+              callsign: 'SAS1426',
+              type: 'A20N',
               lat: 55.6743,
               lon: 12.6391,
-              seen_pos: 2,
+              altitude: 3175,
+              speed: 168.4,
+              track: 223.6,
+              age: 0.4,
+              source: 'broadcast',
+              state: 'live',
             },
-            { hex: 'aaa003', type: 'tisb_trackfile', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
-            { hex: 'aaa004', type: 'mode_s', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
-            { hex: 'aaa005', type: 'adsr_icao', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
+            {
+              hex: 'aaa002',
+              lat: 55.6743,
+              lon: 12.6391,
+              altitude: 'ground',
+              age: 2,
+              source: 'multilateration',
+              state: 'estimated',
+            },
+            {
+              hex: 'aaa003',
+              lat: 55.6743,
+              lon: 12.6391,
+              age: 0.4,
+              source: 'tisb',
+              state: 'estimated',
+            },
+            {
+              hex: 'aaa004',
+              lat: 55.6743,
+              lon: 12.6391,
+              age: 0.4,
+              source: 'other',
+              state: 'estimated',
+            },
+            {
+              hex: 'aaa005',
+              lat: 55.6743,
+              lon: 12.6391,
+              age: 0.4,
+              source: 'broadcast',
+              state: 'live',
+            },
+          ],
+        })
+      }).pipe(
+        Effect.provide(
+          replaying(
+            answer(
+              plane('aaa001'),
+              {
+                hex: 'aaa002',
+                type: 'mlat',
+                alt_baro: 'ground',
+                lat: 55.6743,
+                lon: 12.6391,
+                seen_pos: 2,
+              },
+              { hex: 'aaa003', type: 'tisb_trackfile', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
+              { hex: 'aaa004', type: 'mode_s', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
+              { hex: 'aaa005', type: 'adsr_icao', lat: 55.6743, lon: 12.6391, seen_pos: 0.4 },
+            ),
           ),
         ),
       ),
-    ),
   )
 
   it.effect('holds the answer at the CDN until its next due, dated when it was fetched', () =>
@@ -219,6 +244,53 @@ describe('GET /api/aircraft', () => {
           { hex: 'aaa001', age: 20.4 },
         ])
       }).pipe(Effect.provide(replaying(answer(plane('aaa001')), { status: 503 }))),
+  )
+
+  it.effect(
+    'makes every aircraft No signal at its last fix once the feed has failed for 70 s',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        const answered = yield* request
+        // The answer at 0 s, then a failure every 10 s from 10 s on.
+        for (let call = 1; call <= 8; call++) {
+          yield* TestClock.adjust('10 seconds')
+          yield* request
+        }
+        const { snapshot } = yield* request
+        const where = ({ hex, lat, lon }: { hex: string; lat: number; lon: number }) => ({
+          hex,
+          lat,
+          lon,
+        })
+        expect(snapshot?.health).toEqual({
+          status: 'error',
+          kind: 'status',
+          since: MOMENT + 10_000,
+        })
+        expect(snapshot?.aircraft.map((each) => ({ ...where(each), state: each.state }))).toEqual(
+          answered.snapshot?.aircraft.map((each) => ({ ...where(each), state: 'no-signal' })),
+        )
+        expect(answered.snapshot?.aircraft.map(({ state }) => state)).toEqual(['live', 'estimated'])
+      }).pipe(
+        Effect.provide(
+          replaying(
+            answer(plane('aaa001'), plane('aaa002', { type: 'mlat', lat: 55.62, lon: 12.65 })),
+            { status: 503 },
+          ),
+        ),
+      ),
+  )
+
+  it.effect('drops an aircraft once its position is 5 min old', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      yield* request
+      yield* TestClock.adjust('290 seconds')
+      expect(hexes(yield* request)).toEqual(['aaa001'])
+      yield* TestClock.adjust('10 seconds')
+      expect(hexes(yield* request)).toEqual([])
+    }).pipe(Effect.provide(replaying(answer(plane('aaa001')), { status: 503 }))),
   )
 
   it.effect('gives up on a call after 4 s, with none to show before the first answer', () =>
