@@ -1,8 +1,8 @@
 // Which dot the reader has picked, for its card (docs/screens.md, "The moving map"): a hover
-// picks one for as long as the pointer rests on it, a tap or click pins it until a tap elsewhere
-// or Esc. deck.gl picks on the GPU within `TAP_RADIUS` of the pointer, so every dot has a tap
-// target of at least 24 px (ADR 0003). The card opens on its dot, not at the pointer, and its point
-// follows the dot as the dot moves and the map pans.
+// picks one for as long as the pointer rests on it, and a tap or click on one hands it on to open
+// its detail, closing the card. deck.gl picks on the GPU within `TAP_RADIUS` of the pointer, so
+// every dot has a tap target of at least 24 px (ADR 0003). The card opens on its dot, not at the
+// pointer, and its point follows the dot as the dot moves and the map pans.
 import 'client-only'
 import type { PickingInfo } from '@deck.gl/core'
 import { useSyncExternalStore } from 'react'
@@ -17,8 +17,6 @@ export interface Picked {
   readonly key: string
   /** Where the dot is on the page, in CSS pixels from the viewport's top left. */
   readonly point: readonly [number, number]
-  /** Whether a tap pinned it, so that the pointer leaving it keeps the card open. */
-  readonly pinned: boolean
 }
 
 export interface PickedStore {
@@ -80,6 +78,8 @@ export interface VehiclePicking {
 type Project = (lonLat: [number, number]) => { x: number; y: number }
 
 export interface PickingListeners {
+  /** Hears a tap on a dot, by its trip's key, so that its detail can open. */
+  readonly onTap?: (key: string) => void
   /** Hears whether the pointer rests on a dot, for its cursor. */
   readonly onPointer?: (onDot: boolean) => void
   /**
@@ -93,7 +93,7 @@ export interface PickingListeners {
 export function vehiclePicking(
   canvas: HTMLElement,
   store: PickedStore = pickedVehicle,
-  { onPointer = () => {}, onMiss = () => {} }: PickingListeners = {},
+  { onTap = () => {}, onPointer = () => {}, onMiss = () => {} }: PickingListeners = {},
 ): VehiclePicking {
   let vehicles: Vehicles | undefined
   let project: Project | undefined
@@ -129,18 +129,14 @@ export function vehiclePicking(
       onHover(info) {
         const key = keyOf(info)
         onPointer(key !== undefined)
-        const now = store.get()
-        if (now?.pinned) return
         if (key === undefined) store.clear()
-        else if (key !== now?.key)
-          store.pick({ key, point: dotAt(info.index, info), pinned: false })
+        else if (key !== store.get()?.key) store.pick({ key, point: dotAt(info.index, info) })
       },
       onClick(info) {
         const key = keyOf(info)
-        if (key !== undefined)
-          return store.pick({ key, point: dotAt(info.index, info), pinned: true })
         store.clear()
-        onMiss(info.x, info.y)
+        if (key !== undefined) onTap(key)
+        else onMiss(info.x, info.y)
       },
     },
     follow(drawn, projection) {

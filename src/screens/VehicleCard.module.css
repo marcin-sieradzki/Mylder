@@ -1,5 +1,5 @@
-/* A card a hover opened lets the pointer through to the map: it opens 8 px from its dot, which
-   picks from 12 px, and over the card the map would hear the pointer leave and close it. */
+/* The card lets the pointer through to the map: it opens 8 px from its dot, which picks from
+   12 px, and over the card the map would hear the pointer leave and close it. */
 .passing {
   pointer-events: none;
 }

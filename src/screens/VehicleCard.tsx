@@ -24,7 +24,7 @@ function tripOf(snapshot: Snapshot | undefined, key: string | undefined) {
 
 const close = () => pickedVehicle.clear()
 
-/** A card a hover opened lets the pointer through to the map, so it never hides its dot. */
+/** The card lets the pointer through to the map, so it never hides its dot. */
 const PASSING = { positioner: { className: styles.passing } }
 
 /**
@@ -37,18 +37,17 @@ export function VehicleCard() {
   const trip = tripOf(snapshot, picked?.key)
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   if (!picked || !trip) return null
-  return <Card trip={trip} point={picked.point} pinned={picked.pinned} timezone={timezone} />
+  return <Card trip={trip} point={picked.point} timezone={timezone} />
 }
 
 interface CardProps {
   trip: SnapshotTrip
   point: readonly [number, number]
-  pinned: boolean
   /** The timetable's zone, whose clock the card's times read on. */
   timezone: string
 }
 
-function Card({ trip, point, pinned, timezone }: CardProps) {
+function Card({ trip, point, timezone }: CardProps) {
   const { dictionary } = useI18n()
   const words = dictionary.vehicle
   const state = useDataState(trip.key) ?? trip.state
@@ -67,7 +66,7 @@ function Card({ trip, point, pinned, timezone }: CardProps) {
       onClose={close}
       role="tooltip"
       className={styles.card}
-      slotProps={pinned ? undefined : PASSING}
+      slotProps={PASSING}
     >
       <span className={styles.title}>{titleOf(trip, dictionary)}</span>
       <span className={styles.state}>
