@@ -1,9 +1,9 @@
 'use client'
 
 import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
-import { useState, type MouseEvent } from 'react'
+import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { useSnapshot } from '../map/live'
+import { useLastAnswer, useSnapshot } from '../map/live'
 import { usePaused } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, useHiddenModes } from '../map/view'
@@ -14,14 +14,6 @@ import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
 import styles from './TopBar.module.css'
-
-/**
- * When the snapshot's positions are from: the time the server received the position answer it
- * was built from. Only a healthy snapshot was built from one; a failed or spent call's snapshot
- * carries the last positions on, so it names no answer of its own.
- */
-const answeredAt = (snapshot: Snapshot): number | undefined =>
-  snapshot.api.status === 'ok' ? snapshot.fetched : undefined
 
 const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
 
@@ -42,17 +34,6 @@ const INFO_ICON = (
     <circle cx="9" cy="5.6" r=".4" fill="currentColor" />
   </svg>
 )
-
-/**
- * The latest answer time this page has seen. It never counts up: a snapshot without an answer of
- * its own keeps the one before.
- */
-function useUpdatedAt(snapshot: Snapshot | undefined): number | undefined {
-  const [last, setLast] = useState<number>()
-  const now = snapshot && answeredAt(snapshot)
-  if (now !== undefined && now !== last) setLast(now)
-  return now ?? last
-}
 
 /** The modes the timetable runs, in Mylder's order: Bus, Metro, S-tog, Train, Light rail. */
 const modesOf = (network: Network): Mode[] => {
@@ -80,8 +61,8 @@ export function TopBar() {
   const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
   const hidden = useHiddenModes()
-  const updatedAt = useUpdatedAt(snapshot)
-  // While Paused the line keeps the last answer's time and says so.
+  // The time the server received the latest position answer; while Paused it holds and says so.
+  const updatedAt = useLastAnswer()
   const paused = usePaused()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)

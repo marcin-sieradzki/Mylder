@@ -4,45 +4,12 @@ import { Alert, type AlertProps } from '@mylder/perron'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
+import { useSnapshot } from '../map/live'
 import { usePageNotices, type PageNotice } from '../map/notices'
+import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
 import styles from './PageNotices.module.css'
-
-const LOCALES: Record<Lang, string> = { en: 'en-GB', da: 'da-DK' }
-
-const dates = new Map<string, Intl.DateTimeFormat>()
-
-/** A moment's date as the zone reads it, in the page's language: `16 June 2026`, `16. juni 2026`. */
-function longDate(moment: number, lang: Lang, timezone: string): string {
-  const key = `${lang} ${timezone}`
-  let format = dates.get(key)
-  if (!format) {
-    format = new Intl.DateTimeFormat(LOCALES[lang], {
-      timeZone: timezone,
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-    dates.set(key, format)
-  }
-  return format.format(moment)
-}
-
-const daysAndMonths = new Map<Lang, Intl.DateTimeFormat>()
-
-/** A calendar date, `2026-11-01`, as the page's language says it: `1 November`, `1. november`. */
-function dayAndMonth(date: string, lang: Lang): string {
-  let format = daysAndMonths.get(lang)
-  if (!format) {
-    format = new Intl.DateTimeFormat(LOCALES[lang], {
-      timeZone: 'UTC',
-      day: 'numeric',
-      month: 'long',
-    })
-    daysAndMonths.set(lang, format)
-  }
-  return format.format(Date.parse(`${date}T00:00:00Z`))
-}
+import { dayOf, longDateOf, pollIntervalOf } from './wording'
 
 /** One notice's sentences. */
 function wordsOf(
@@ -66,24 +33,21 @@ function wordsOf(
       }
       return notice.resumes === undefined
         ? words.spentNoDate
-        : words.spent.replace('{date}', dayAndMonth(notice.resumes, lang))
-    case 'budget': {
-      const { pollInterval } = notice
-      const interval =
-        pollInterval % 60 === 0
-          ? words.minutes.replace('{n}', String(pollInterval / 60))
-          : words.seconds.replace('{n}', String(pollInterval))
-      return words.budget.replace('{interval}', interval)
-    }
+        : words.spent.replace('{date}', dayOf(notice.resumes, lang))
+    case 'budget':
+      return words.budget.replace(
+        '{interval}',
+        pollIntervalOf(notice.pollInterval, dictionary.interval),
+      )
     case 'timetable':
       return (notice.ended ? words.timetableEnded : words.timetableEnds).replace(
         '{date}',
-        dayAndMonth(notice.last, lang),
+        dayOf(notice.last, lang),
       )
     case 'source':
       return notice.source === 'simulated'
         ? words.simulated
-        : words.recorded.replace('{date}', longDate(notice.fetched, lang, timezone))
+        : words.recorded.replace('{date}', longDateOf(notice.fetched, lang, timezone))
   }
 }
 
@@ -106,7 +70,9 @@ const COLOURS: Record<PageNotice['kind'], AlertProps['color']> = {
  */
 export function PageNotices() {
   const i18n = useI18n()
-  const { timezone, list } = usePageNotices()
+  const list = usePageNotices()
+  // Every time reads on the timetable's clock, as the top bar's does.
+  const timezone = timezoneOf(useNetwork(useSnapshot()?.timetableVersion))
   if (list.length === 0) return null
   return (
     <div className={styles.notices}>

@@ -136,6 +136,18 @@ describe('the Disconnected notice', () => {
     expect(updatedLine()).toHaveTextContent('Opdateret 07:24:00')
   })
 
+  it('names the last answer’s time, as the Updated line does, not the last snapshot’s', () => {
+    land(live())
+    renderScreen('en')
+    // The next runs failed, so the snapshot of 07:25:00 carries the answer of 07:23:00 on.
+    land(failing(), '2026-06-16T05:25:31Z')
+    failingFrom('2026-06-16T05:26:34Z')
+    expect(notices()).toEqual([
+      'No connection since 07:26. Vehicles move on the last data from 07:23:00.',
+    ])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00')
+  })
+
   it('names only the time when no snapshot has landed yet', () => {
     act(() => liveSnapshot.update({ clockOffset: serverClockAt('2026-06-16T05:20:02Z') }))
     failingFrom('2026-06-16T05:20:02Z')
@@ -144,11 +156,18 @@ describe('the Disconnected notice', () => {
   })
 })
 
-/** The weekday's sixth minute, with Rejseplanen failing since the fourth's run at 07:23:00. */
-const failing = (): Snapshot => ({
+/**
+ * The weekday's sixth minute, with Rejseplanen failing since the fifth's run at 07:24:00: the
+ * last answer was the fourth's, at 07:23:00, the last that carried any trip.
+ */
+const failing = (
+  status: 'error' | 'empty' = 'error',
+  since = '2026-06-16T05:24:00Z',
+): Snapshot => ({
   ...saved('0006.json'),
   source: { kind: 'rejseplanen' },
-  api: { status: 'error', since: Date.parse('2026-06-16T05:23:00Z'), kind: 'status' },
+  api: { status, since: Date.parse(since), ...(status === 'error' ? { kind: 'status' } : {}) },
+  lastSeen: saved('0004.json').lastSeen,
 })
 
 describe('the Paused notice', () => {
@@ -178,6 +197,21 @@ describe('the Paused notice', () => {
     expect(notices()).toEqual([])
     expect(updatedLine()).toHaveTextContent('Updated 07:23:00')
     land(failing(), '2026-06-16T05:27:00Z')
+    expect(notices()).toEqual(["Rejseplanen hasn't answered since 07:23."])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00, paused')
+  })
+
+  it('keeps its time while Rejseplanen switches from failing to answering nothing', () => {
+    land(failing(), '2026-06-16T05:27:30Z')
+    renderScreen('en')
+    expect(notices()).toEqual(["Rejseplanen hasn't answered since 07:23."])
+    land(failing('empty', '2026-06-16T05:27:00Z'), '2026-06-16T05:28:00Z')
+    expect(notices()).toEqual(["Rejseplanen hasn't answered since 07:23."])
+  })
+
+  it('times a page opened mid-outage from the last answer the snapshot carries', () => {
+    land(failing(), '2026-06-16T05:27:00Z')
+    renderScreen('en')
     expect(notices()).toEqual(["Rejseplanen hasn't answered since 07:23."])
     expect(updatedLine()).toHaveTextContent('Updated 07:23:00, paused')
   })
@@ -224,29 +258,41 @@ describe('the budget line', () => {
 })
 
 describe('the timetable notice', () => {
-  // The recording's timetable covers service up to and including 26 August.
+  /** The weekday's fourth minute, with `daysLeft` of service left in its timetable. */
+  const runningOut = (daysLeft: number): Snapshot => {
+    const snapshot = live()
+    const { timetable } = snapshot.status
+    return {
+      ...snapshot,
+      timetableRunningOut: true,
+      status: { ...snapshot.status, timetable: { ...timetable, last: '2026-08-26', daysLeft } },
+    }
+  }
 
-  it('shows once the timetable has under 7 days of service left, by the server’s clock', async () => {
-    land(live(), '2026-08-20T10:00:00Z')
+  it('shows while the snapshot says the timetable is running out, before it has loaded', () => {
+    land(runningOut(6), '2026-08-21T10:00:00Z')
     renderScreen('en')
-    // Wait for the snapshot's timetable to load: the source of the window.
-    await screen.findByRole('group', { name: 'Modes' })
-    expect(notices()).toEqual([])
-    land(live(), '2026-08-21T10:00:00Z')
     expect(notices()).toEqual([
       'The timetable ends on 26 August. Without a new one, the map has no trips after that.',
     ])
   })
 
-  it('says it in Danish, and says when it has ended', async () => {
-    land(live(), '2026-08-26T21:59:00Z')
+  it('is not there while the snapshot doesn’t say so, whatever the page’s clock', async () => {
+    land(live(), '2026-08-21T10:00:00Z')
+    renderScreen('en')
+    // Wait for the snapshot's timetable to load.
+    await screen.findByRole('group', { name: 'Modes' })
+    expect(notices()).toEqual([])
+  })
+
+  it('says it in Danish, and says when it has ended', () => {
+    land(runningOut(1), '2026-08-26T21:59:00Z')
     renderScreen('da')
-    expect(await screen.findAllByRole('status')).toHaveLength(1)
     expect(notices()).toEqual([
       'Køreplanen slutter 26. august. Uden en ny har kortet ingen ture derefter.',
     ])
     // Midnight in Copenhagen: the last covered day is over.
-    land(live(), '2026-08-26T22:00:00Z')
+    land(runningOut(0), '2026-08-26T22:00:00Z')
     expect(notices()).toEqual([
       'Køreplanen sluttede 26. august. Uden en ny har kortet ingen ture at vise.',
     ])
@@ -255,11 +301,12 @@ describe('the timetable notice', () => {
 
 describe('Disconnected and Paused together', () => {
   it('shows Disconnected, with the last snapshot’s Paused notice kept beneath it', () => {
+    land(live())
     land({ ...saved('0002.json', 'spent'), source: { kind: 'rejseplanen' } })
     renderScreen('en')
     failingFrom('2026-06-16T05:23:04Z')
     expect(notices()).toEqual([
-      'No connection since 07:23. Vehicles move on the last data from 07:21:00.',
+      'No connection since 07:23. Vehicles move on the last data from 07:23:00.',
       "Live data is paused until 1 July: this month's calls are used up.",
     ])
   })
@@ -269,7 +316,7 @@ describe('Disconnected and Paused together', () => {
     renderScreen('da')
     failingFrom('2026-06-16T05:28:12Z')
     expect(notices()).toEqual([
-      'Ingen forbindelse siden 07:28. Køretøjerne bevæger sig på de seneste data fra 07:25:00.',
+      'Ingen forbindelse siden 07:28. Køretøjerne bevæger sig på de seneste data fra 07:23:00.',
       'Rejseplanen har ikke svaret siden 07:23.',
     ])
   })

@@ -53,12 +53,14 @@
     "spent": "Live-data er sat på pause indtil {date}: denne måneds kald er brugt op.",
     "spentNoDate": "Live-data er sat på pause: denne måneds kald er brugt op.",
     "budget": "Kortet opdateres hvert {interval} for at overholde databudgettet.",
-    "seconds": "{n}. sekund",
-    "minutes": "{n}. minut",
     "timetableEnds": "Køreplanen slutter {date}. Uden en ny har kortet ingen ture derefter.",
     "timetableEnded": "Køreplanen sluttede {date}. Uden en ny har kortet ingen ture at vise.",
     "simulated": "Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.",
     "recorded": "Optagne data fra {date}."
+  },
+  "interval": {
+    "seconds": "{n}. sekund",
+    "minutes": "{n}. minut"
   },
   "about": {
     "title": "Om Mylder",
@@ -106,7 +108,6 @@
       },
       "calls": "Kald denne måned",
       "paused": "Livedata er sat på pause indtil {date}: denne måneds kald er brugt op.",
-      "budgetLine": "Opdaterer hvert {interval} for at holde databudgettet.",
       "store": "Serverlager",
       "storeOk": "Tilgængeligt",
       "storeUnavailable": "Utilgængeligt: intet køretøj kan være Ældre eller Intet signal, før det er tilbage.",
