@@ -88,7 +88,8 @@
   },
   "legend": {
     "label": "Data states",
-    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
+    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions.",
+    "aircraftNoData": "Planes: no data since {time}"
   },
   "credit": {
     "transitData": "Transit data",
@@ -128,7 +129,7 @@
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
       "aircraft": "Aircraft: © {source} under the {licence}.",
-      "aircraftFrom": "Aircraft: {source}.",
+      "aircraftFrom": "Aircraft: © {source}.",
       "style": "The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see {licence}.",
       "styleLicence": "its licence"
     },

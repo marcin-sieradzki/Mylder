@@ -83,6 +83,18 @@ describe("the map's corner credit", () => {
     )
   })
 
+  it('credits adsb.fi with a link to its home page when it answered, in English and Danish', () => {
+    act(() => liveAircraft.update({ snapshot: { ...recordedAircraft, provider: 'adsb.fi' } }))
+    expect(show('en')).toHaveTextContent(
+      'Transit data: Rejseplanen (CC BY 4.0) · Aircraft: © adsb.fi · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap',
+    )
+    expect(links().slice(2, 3)).toEqual([['© adsb.fi', 'https://adsb.fi/']])
+    cleanup()
+    expect(show('da')).toHaveTextContent(
+      'Trafikdata: Rejseplanen (CC BY 4.0) · Fly: © adsb.fi · © OpenStreetMap-bidragydere · © OpenMapTiles · OpenFreeMap',
+    )
+  })
+
   it('credits adsb.lol for recorded aircraft too', () => {
     act(() => liveAircraft.update({ snapshot: recordedAircraft }))
     expect(show('en')).toHaveTextContent('Aircraft: © adsb.lol contributors under the ODbL')

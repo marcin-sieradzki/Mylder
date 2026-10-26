@@ -41,6 +41,16 @@ const replaying = (...calls: Recorded[]) =>
     http: Http.layer(recordedClient(RECORDED_AIRCRAFT, new Map([['aircraft', calls]]))),
   })
 
+/**
+ * The aircraft source on the real feeds, adsb.lol then adsb.fi, both answered from one recorded
+ * `aircraft/` folder in call order: a call each takes the next of `calls`.
+ */
+const feeds = (...calls: Recorded[]) =>
+  aircraftLayer({
+    source: readAircraftSource('adsblol'),
+    http: Http.layer(recordedClient(RECORDED_AIRCRAFT, new Map([['aircraft', calls]]))),
+  })
+
 interface Answered {
   readonly status: number
   readonly headers: Headers
@@ -293,13 +303,14 @@ describe('GET /api/aircraft', () => {
     }).pipe(Effect.provide(replaying(answer(plane('aaa001')), { status: 503 }))),
   )
 
-  it.effect('gives up on a call after 4 s, with none to show before the first answer', () =>
+  it.effect('gives up on each feed after 4 s, with none to show before the first answer', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
       const fiber = yield* Effect.forkChild(request)
       yield* TestClock.adjust('4 seconds')
+      yield* TestClock.adjust('4 seconds')
       const { snapshot } = yield* Fiber.join(fiber)
-      expect(snapshot?.health).toEqual({ status: 'error', kind: 'timeout', since: MOMENT + 4_000 })
+      expect(snapshot?.health).toEqual({ status: 'error', kind: 'timeout', since: MOMENT + 8_000 })
       expect(snapshot?.aircraft).toEqual([])
       expect(snapshot).not.toHaveProperty('lastAnswer')
     }).pipe(Effect.provide(replaying({ timeout: true }))),
@@ -322,6 +333,120 @@ describe('GET /api/aircraft', () => {
         yield* TestClock.setTime(Date.parse(start))
         expect((yield* request).snapshot).toEqual(read('answers/aircraft/0001.json'))
       }).pipe(Effect.provide(aircraftLayer({ source: readAircraftSource('recording:weekday') }))),
+  )
+
+  it.effect(
+    'answers from adsb.fi when adsb.lol answers 503, names it, and asks adsb.lol next',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        const fallen = (yield* request).snapshot
+        expect(fallen?.provider).toBe('adsb.fi')
+        expect(fallen?.health).toEqual({ status: 'ok', since: MOMENT })
+        expect(fallen?.lastAnswer).toBe(MOMENT)
+        expect(fallen?.aircraft.map(({ hex }) => hex)).toEqual(['fff001'])
+        yield* TestClock.adjust('10 seconds')
+        const next = (yield* request).snapshot
+        expect([next?.provider, next?.aircraft.map(({ hex }) => hex)]).toEqual([
+          'adsb.lol',
+          ['aaa001'],
+        ])
+      }).pipe(
+        Effect.provide(feeds({ status: 503 }, answer(plane('fff001')), answer(plane('aaa001')))),
+      ),
+  )
+
+  it.effect('answers from adsb.fi when adsb.lol answers 429, and names it', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const answered = yield* request
+      expect(answered.snapshot?.provider).toBe('adsb.fi')
+      expect(answered.snapshot?.health.status).toBe('ok')
+      expect(hexes(answered)).toEqual(['fff001'])
+    }).pipe(Effect.provide(feeds({ status: 429 }, answer(plane('fff001'))))),
+  )
+
+  it.effect('after a 429 asks adsb.fi alone for the rest of the UTC day, then adsb.lol again', () =>
+    Effect.gen(function* () {
+      const midnight = Date.UTC(2026, 5, 17)
+      // Each call takes the folder's next answer, so a call to adsb.lol would be named for it.
+      const providers: Array<string | undefined> = []
+      yield* TestClock.setTime(MOMENT)
+      providers.push((yield* request).snapshot?.provider)
+      yield* TestClock.adjust('10 seconds')
+      providers.push((yield* request).snapshot?.provider)
+      yield* TestClock.setTime(midnight - 10_000)
+      providers.push((yield* request).snapshot?.provider)
+      yield* TestClock.setTime(midnight)
+      const next = yield* request
+      providers.push(next.snapshot?.provider)
+      expect(providers).toEqual(['adsb.fi', 'adsb.fi', 'adsb.fi', 'adsb.lol'])
+      expect(hexes(next)).toEqual(['ddd004'])
+    }).pipe(
+      Effect.provide(
+        feeds(
+          { status: 429 },
+          answer(plane('aaa001')),
+          answer(plane('bbb002')),
+          answer(plane('ccc003')),
+          answer(plane('ddd004')),
+        ),
+      ),
+    ),
+  )
+
+  for (const [as, retryAfter] of [
+    ['in seconds', '120'],
+    ['as a date', 'Tue, 16 Jun 2026 05:22:00 GMT'],
+  ]) {
+    it.effect(`after a 429 with Retry-After ${as} asks adsb.lol again once it has passed`, () =>
+      Effect.gen(function* () {
+        const providers: Array<string | undefined> = []
+        yield* TestClock.setTime(MOMENT)
+        providers.push((yield* request).snapshot?.provider)
+        yield* TestClock.setTime(MOMENT + 110_000)
+        providers.push((yield* request).snapshot?.provider)
+        yield* TestClock.setTime(MOMENT + 120_000)
+        providers.push((yield* request).snapshot?.provider)
+        expect(providers).toEqual(['adsb.fi', 'adsb.fi', 'adsb.lol'])
+      }).pipe(
+        Effect.provide(
+          feeds(
+            { status: 429, headers: { 'retry-after': retryAfter } },
+            answer(plane('aaa001')),
+            answer(plane('bbb002')),
+            answer(plane('ccc003')),
+          ),
+        ),
+      ),
+    )
+  }
+
+  it.effect('answers from adsb.fi within adsb.lol’s 4 s timeout and its own call', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const fiber = yield* Effect.forkChild(request)
+      yield* TestClock.adjust('4 seconds')
+      const { snapshot } = yield* Fiber.join(fiber)
+      expect(snapshot?.provider).toBe('adsb.fi')
+      expect(snapshot?.fetched).toBe(MOMENT + 4_000)
+      expect(snapshot?.health).toEqual({ status: 'ok', since: MOMENT + 4_000 })
+      expect(snapshot?.aircraft.map(({ hex }) => hex)).toEqual(['fff001'])
+    }).pipe(Effect.provide(feeds({ timeout: true }, answer(plane('fff001'))))),
+  )
+
+  it.effect('gives health error when both fail, naming who gave the aircraft it keeps', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      yield* request
+      yield* TestClock.adjust('10 seconds')
+      const { status, snapshot } = yield* request
+      expect(status).toBe(200)
+      expect(snapshot?.health).toEqual({ status: 'error', kind: 'status', since: MOMENT + 10_000 })
+      expect(snapshot?.provider).toBe('adsb.lol')
+      expect(snapshot?.lastAnswer).toBe(MOMENT)
+      expect(snapshot?.aircraft.map(({ hex }) => hex)).toEqual(['aaa001'])
+    }).pipe(Effect.provide(feeds(answer(plane('aaa001')), { status: 503 }, { status: 502 }))),
   )
 
   it.effect('answers 404 when MYLDER_AIRCRAFT_SOURCE is off', () =>
