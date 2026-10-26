@@ -1,5 +1,5 @@
-import { Home } from '../../src/screens/Home'
+import { MapScreen } from '../../src/screens/MapScreen'
 
 export default function Page() {
-  return <Home />
+  return <MapScreen />
 }
