@@ -6,7 +6,7 @@
 // carried realtime for it (ADR 0006).
 import 'server-only'
 import { shownAt } from '../domain/departure.ts'
-import { intervalOf, type Interval } from '../domain/interval.ts'
+import { intervalOf, runsToInterval, type Interval } from '../domain/interval.ts'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { MODES, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
@@ -145,6 +145,11 @@ export interface TripDetail {
   /** The whole trip is called off, by its detail or the snapshot; its calls stay, and so does its panel. */
   readonly cancelled?: true
   /**
+   * The trip's line runs to an interval now, by the rule its stops' departures follow (ADR 0006):
+   * its panel lists its calls without times.
+   */
+  readonly runsToInterval?: true
+  /**
    * An interval line's interval at the trip's next stop this hour, which its panel shows in place
    * of times (ADR 0006); none for any other line, or an hour with under two departures.
    */
@@ -203,25 +208,18 @@ function linesAt(timetable: Timetable, stopIndex: number): AnswerLine[] {
 }
 
 /**
- * Whether a line runs to an interval at this moment: a Metro line, unless the snapshot has
- * carried realtime for one of its trips, or one of the answer's rows has realtime of its own.
+ * Whether a line runs to an interval at this moment, by the domain's rule: a Metro line, unless
+ * the snapshot has carried realtime for one of its trips, or one of `rows` has realtime of its own.
  */
-function runsToInterval(
+const lineRunsToInterval = (
   snapshot: SnapshotDelays,
-  rows: readonly StopDeparture[],
-  line: AnswerLine,
-): boolean {
-  if (line.mode !== 'metro') return false
-  const hadRealtime = snapshot.trips.some(
-    (trip) => trip.mode === 'metro' && trip.line === line.name && trip.hadRealtime,
-  )
-  return (
-    !hadRealtime &&
-    !rows.some(
-      (row) => row.mode === 'metro' && row.line === line.name && row.state !== 'timetable-only',
-    )
-  )
-}
+  rows: readonly { mode: Mode; line: string; state: SnapshotTrip['state'] }[],
+  line: Pick<AnswerLine, 'name' | 'mode'>,
+): boolean =>
+  runsToInterval(line, [
+    ...snapshot.trips.map((trip) => ({ ...trip, realtime: trip.hadRealtime })),
+    ...rows.map((row) => ({ ...row, realtime: row.state !== 'timetable-only' })),
+  ])
 
 /**
  * A stop's rows as its answer lists them: its interval lines' departures taken out and read as
@@ -237,7 +235,7 @@ export function listed(
   now: number,
 ): Pick<StopDepartures, 'departures' | 'intervals'> {
   const intervalLines = new Set(
-    stop.lines.filter((line) => runsToInterval(snapshot, rows, line)).map((line) => line.name),
+    stop.lines.filter((line) => lineRunsToInterval(snapshot, rows, line)).map((line) => line.name),
   )
   const perMode = new Map<Mode, number>()
   const departures = rows
@@ -397,7 +395,8 @@ export function tripDetailOf(
 ): TripDetail {
   const { platforms } = timetable.stops
   const expected = withDelay(trip, live?.delay)
-  const interval = intervalAt(timetable, trip, now)
+  const toInterval = lineRunsToInterval(snapshot, [], trip.line)
+  const interval = toInterval ? intervalAt(timetable, trip, now) : undefined
   return {
     key: trip.key,
     line: trip.line.name,
@@ -408,6 +407,7 @@ export function tripDetailOf(
     state: live?.state ?? 'timetable-only',
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
     ...(live?.cancelled ? { cancelled: true as const } : {}),
+    ...(toInterval ? { runsToInterval: true as const } : {}),
     ...(interval ? { interval } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,

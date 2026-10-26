@@ -27,9 +27,9 @@ const trip = timetable
 
 const time = (moment: number) => clockTime(moment, ZONE, { seconds: true })
 
-/** The trip's calls as the detail's stops, on time. */
-const stops = (): Stop[] =>
-  trip.calls.map((call, i) => {
+/** A trip's calls as the detail's stops, on time; the bus's unless another is named. */
+const stops = (planned = trip): Stop[] =>
+  planned.calls.map((call, i) => {
     const { name, id, lat, lon } = platforms[call.platform]
     return {
       name,
@@ -38,7 +38,7 @@ const stops = (): Stop[] =>
       lon,
       routeIdx: i,
       ...(i > 0 && { arrTime: time(call.arrival), arrDate: today, arrPrognosisType: 'PROGNOSED' }),
-      ...(i < trip.calls.length - 1 && {
+      ...(i < planned.calls.length - 1 && {
         depTime: time(call.departure),
         depDate: today,
         depPrognosisType: 'PROGNOSED',
@@ -112,5 +112,28 @@ describe('a trip’s answer from its detail', () => {
   it('has no answer from a detail whose calls fit no trip', () => {
     const detail = stops().map((stop) => ({ ...stop, depTime: '03:03:03', arrTime: '03:03:03' }))
     expect(fromDetail({ Stops: { Stop: detail } })).toBeUndefined()
+  })
+
+  it('lifts the interval rule for a Metro trip whose detail has realtime, as a board row does', () => {
+    const metro = timetable
+      .tripsOn(today)
+      .find((each) => each.line.mode === 'metro' && each.calls.at(-1)!.arrival > MOMENT)!
+    // Its planned times alone, or each departure with a prognosis.
+    const detail = (realtime: boolean) =>
+      stops(metro).map(({ arrPrognosisType: _a, depPrognosisType: _d, ...stop }) =>
+        realtime && stop.depTime ? { ...stop, rtDepTime: stop.depTime, rtDepDate: today } : stop,
+      )
+    const answerOf = (realtime: boolean) =>
+      tripFromDetail(
+        timetable,
+        snapshot,
+        metro,
+        { answer: { Stops: { Stop: detail(realtime) } }, at: MOMENT },
+        MOMENT,
+      )!
+    expect(answerOf(false).runsToInterval).toBe(true)
+    const live = answerOf(true)
+    expect(live.runsToInterval).toBeUndefined()
+    expect(live.interval).toBeUndefined()
   })
 })

@@ -119,7 +119,7 @@ function Detail({ answer, trip, network, words }: DetailProps) {
   const state: DataState = useDataState(answer.key) ?? answer.state
   const timezone = timezoneOf(network)
   const cancelled = answer.cancelled === true
-  const interval = runsToInterval(answer, state)
+  const interval = runsToInterval(answer)
   const sentence = stateSentence({ detail: answer, trip, state, timezone, words })
   const next = nextCallOf(answer, trip, now)
   const live = state === 'live' || state === 'ageing'

@@ -206,6 +206,17 @@ describe("a vehicle's detail", () => {
     expect(stops).not.toHaveTextContent(/\d\d:\d\d/)
   })
 
+  it('lists a Metro trip’s times once its line has realtime, as its stops’ departures do', async () => {
+    // The answer says the line left the interval rule: another M1 trip carried realtime.
+    const { runsToInterval: _rule, interval: _interval, ...timed } = saved(M1)
+    answers.set(M1, timed)
+    openTrip('en', M1)
+    const trip = await panel(/to Vestamager St\./, /Vanløse St\./)
+    expect(trip).not.toHaveTextContent('Runs to an interval')
+    const stops = within(trip).getByRole('list', { name: 'Stops' })
+    expect(within(stops).getAllByRole('listitem')[0]).toHaveTextContent(/\d\d:\d\d/)
+  })
+
   it('says a cancelled trip is cancelled, and keeps its stops, marked', async () => {
     answers.set(BUS_ESTIMATED, { ...saved(BUS_ESTIMATED), cancelled: true })
     openTrip('en', BUS_ESTIMATED, withTrip(minute2, BUS_ESTIMATED, { cancelled: true }))

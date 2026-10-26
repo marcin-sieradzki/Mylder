@@ -65,6 +65,22 @@ describe('where a vehicle is', () => {
     expect(where(arriving, s(60))).toEqual({ kind: 'at', stop: last })
   })
 
+  it('is at its first or last stop while its position is short of the one or past the other', () => {
+    // A path that runs 100 m before its first stop and 500 m past its last.
+    const longer = { points: [], distances: [], stops: [100, 1000, 2000], length: 2500 }
+    const at = (progress: number) =>
+      whereOf({
+        trip: placed({ progress, next: [] }),
+        state: 'live',
+        fetched: FETCHED,
+        path: longer,
+        calls: [],
+        now: FETCHED,
+      })
+    expect(at(0)).toEqual({ kind: 'at', stop: 0 })
+    expect(at(2400)).toEqual({ kind: 'at', stop: 2 })
+  })
+
   it('is Waiting at its first stop, with its departure, never at it', () => {
     const waiting = minute6.trips.find((trip) => trip.key === 'bus.991.7ce514fd98.20260616.0730')!
     expect(

@@ -73,6 +73,21 @@ describe('a trip’s calls', () => {
     expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.interval).toBeUndefined()
   })
 
+  it('reads a Metro trip as its stops’ departures do: to an interval until its line has realtime', () => {
+    const metro = 'metro.M1.7f21f99145.20260616.0707'
+    const planned = tripDetailFrom(timetable, delayed, metro, MOMENT)!
+    expect(planned.runsToInterval).toBe(true)
+    // Another M1 trip carried realtime: the line, and so this trip, leaves the interval rule.
+    const other = timetable
+      .tripsOn(today)
+      .find((trip) => trip.line.name === 'M1' && trip.key !== metro)!
+    const live = snapshot([{ key: other.key, line: 'M1', mode: 'metro', hadRealtime: true }])
+    const detail = tripDetailFrom(timetable, live, metro, MOMENT)!
+    expect(detail.runsToInterval).toBeUndefined()
+    expect(detail.interval).toBeUndefined()
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.runsToInterval).toBeUndefined()
+  })
+
   it('has no answer for a trip not running today', () => {
     expect(tripDetailFrom(timetable, delayed, 'bus.5C.nothing.20260616.0700', MOMENT)).toBe(
       undefined,

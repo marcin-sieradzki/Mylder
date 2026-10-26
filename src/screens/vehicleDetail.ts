@@ -16,11 +16,10 @@ type Words = ClientDictionary['trip']
 const EXPECTED_FROM = 60_000
 
 /**
- * Whether the trip runs to an interval rather than its clock times: a Metro trip with no realtime
- * (ADR 0006). One an answer carries realtime for reads as any other trip.
+ * Whether the trip runs to an interval rather than its clock times, as its answer says by the rule
+ * its stops' departures follow (ADR 0006): a Metro line until any of its trips has realtime.
  */
-export const runsToInterval = (detail: TripDetail, state: DataState): boolean =>
-  detail.mode === 'metro' && state === 'timetable-only'
+export const runsToInterval = (detail: TripDetail): boolean => detail.runsToInterval === true
 
 /** The times the trip keeps at each call: the expected ones where it has them, else the plan's. */
 export const timedCallsOf = (detail: TripDetail): TimedCall[] =>
@@ -51,7 +50,7 @@ export interface StateInput {
  */
 export function stateSentence({ detail, trip, state, timezone, words }: StateInput) {
   if (detail.cancelled) return words.cancelled
-  if (runsToInterval(detail, state)) return words.interval
+  if (runsToInterval(detail)) return words.interval
   const at = (moment: number | undefined, seconds = false) =>
     moment === undefined ? undefined : clockTime(moment, timezone, { seconds })
   switch (state) {
@@ -146,7 +145,7 @@ export function timelineStops(
   state: DataState,
   timezone: string,
 ): TimelineStop[] {
-  const interval = runsToInterval(detail, state)
+  const interval = runsToInterval(detail)
   const last = detail.calls.length - 1
   return detail.calls.map((call, i) => {
     const cancelled = detail.cancelled === true || call.cancelled === true

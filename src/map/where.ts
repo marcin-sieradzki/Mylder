@@ -61,5 +61,7 @@ export function whereOf(input: WhereInput): Where {
   const stop = nearest(path, progress)
   if (Math.abs(path.stops[stop] - progress) <= AT_STOP) return { kind: 'at', stop }
   const from = progress > path.stops[stop] ? stop : stop - 1
+  // Short of its first stop or past its last, where the path runs on, it is at that stop.
+  if (from < 0 || from + 1 >= path.stops.length) return { kind: 'at', stop }
   return { kind: 'between', from, to: from + 1 }
 }

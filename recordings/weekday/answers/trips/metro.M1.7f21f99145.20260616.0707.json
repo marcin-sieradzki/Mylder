@@ -6,6 +6,7 @@
   "headsign": "Vestamager St. (Metro)",
   "pattern": 4,
   "state": "timetable-only",
+  "runsToInterval": true,
   "interval": {
     "from": 4,
     "to": 4

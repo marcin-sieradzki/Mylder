@@ -250,8 +250,15 @@ export function tripFromDetail(
     const covered = coveredCalls(timetable, trip, detail, matched, message)
     messages.push({ ...disruptionOf(message, timezone), ...(covered ? { calls: covered } : {}) })
   }
+  // Times of its own lift the interval rule for its line, as a board row's do (ADR 0006).
+  const realtime = calls.some(
+    (call) =>
+      stopAt.has(call.index) &&
+      (call.expectedArrival !== undefined || call.expectedDeparture !== undefined),
+  )
+  const { runsToInterval: _rule, interval: _interval, ...timed } = base
   return {
-    ...base,
+    ...(realtime ? timed : base),
     ...(expectedNext === undefined ? {} : { nextCallDelay: Math.round(expectedNext / 1000) }),
     ...(tripCancelled ? { cancelled: true as const } : {}),
     // Due again when the snapshot is, or sooner when the detail's minute runs out first.
