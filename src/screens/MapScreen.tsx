@@ -1,7 +1,11 @@
 'use client'
 
+import { Button } from '@mylder/perron'
 import dynamic from 'next/dynamic'
+import { useRef, useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
+import { AboutDialog } from './AboutDialog'
+import { CitySheet } from './CitySheet'
 import { DetailPanels } from './DetailPanels'
 import { MapFoot } from './MapFoot'
 import styles from './MapScreen.module.css'
@@ -13,19 +17,40 @@ const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
 
 /**
  * The moving map (docs/screens.md): the map fills the window, with the top bar over it, the
- * legend, the controls and the credit at its foot, the picked dot's card, and the open panel.
+ * legend, the controls and the credit at its foot, the sheet beside it, the picked dot's card, the
+ * open panel and the About dialog. The sheet starts open; closed, a button at the foot opens it
+ * again.
  */
 export function MapScreen() {
   const { dictionary } = useI18n()
+  const [sheet, setSheet] = useState<'open' | 'closed' | 'reopened'>('open')
+  const opener = useRef<HTMLButtonElement>(null)
+  const open = sheet !== 'closed'
   return (
     <div className={styles.screen}>
       <main className={styles.map}>
         <BaseMap label={dictionary.map.label} className={styles.canvas} />
       </main>
       <TopBar />
-      <MapFoot />
+      <MapFoot
+        besideSheet={open}
+        opener={
+          open ? null : (
+            <Button ref={opener} onClick={() => setSheet('reopened')}>
+              {dictionary.sheet.title}
+            </Button>
+          )
+        }
+      />
+      <CitySheet
+        open={open}
+        onClose={() => setSheet('closed')}
+        asked={sheet === 'reopened'}
+        opener={opener}
+      />
       <VehicleCard />
       <DetailPanels />
+      <AboutDialog />
     </div>
   )
 }

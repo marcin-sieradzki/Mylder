@@ -6,6 +6,7 @@
 // theme.
 import 'client-only'
 import type { DataState } from '../domain/data-state.ts'
+import type { Mode } from '../timetable/format.ts'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot, SnapshotTrip } from '../tracker/index.ts'
 import { glyphOf, lookOf, parseColour, vehicleTokens, type RGBA } from './glyphs.ts'
@@ -50,6 +51,13 @@ export function vehiclePaint(network?: Network): string[] {
 const INK: RGBA = [0, 0, 0, 255]
 
 /**
+ * Whether a trip is on the map with the filters `hidden`: not cancelled, and in a mode the
+ * filters show. The canvas draws these, and every count of the trips on the map counts these.
+ */
+export const onMap = (trip: SnapshotTrip, hidden: ReadonlySet<Mode>): boolean =>
+  !trip.cancelled && !hidden.has(trip.mode)
+
+/**
  * The vehicles of a snapshot, on its timetable's network once that has loaded, in the paint
  * read now. Until then, and for a line Perron has no colour for, a vehicle takes its mode's.
  * Each takes its data state from `states`, the states by the clock, else the snapshot's own.
@@ -76,7 +84,7 @@ export function vehiclesOf(
     return own ? colour(line.colour) : colour(modeColour(trip.mode))
   }
 
-  const drawn = snapshot.trips.filter((trip) => !trip.cancelled && !filter.hidden.has(trip.mode))
+  const drawn = snapshot.trips.filter((trip) => onMap(trip, filter.hidden))
   const n = drawn.length
   const vehicles = {
     length: n,

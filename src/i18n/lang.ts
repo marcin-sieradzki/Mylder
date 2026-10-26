@@ -8,6 +8,9 @@ export const langs = ['en', 'da'] as const satisfies readonly Lang[]
 /** The language for a request that names none it can serve. */
 export const defaultLang: Lang = 'en'
 
+/** The Intl locale a language's dates and numbers are written in. */
+export const intlLocale = (lang: Lang): string => (lang === 'da' ? 'da-DK' : 'en-GB')
+
 export function isLang(value: string): value is Lang {
   return (langs as readonly string[]).includes(value)
 }

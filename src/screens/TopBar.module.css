@@ -6,7 +6,7 @@
   position: absolute;
   inset-block-start: var(--perron-space-300);
   inset-inline: var(--perron-space-300);
-  z-index: var(--perron-z-index-map-controls);
+  z-index: var(--perron-z-index-top-bar);
   display: flex;
   flex-wrap: wrap;
   align-items: center;

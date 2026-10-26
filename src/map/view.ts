@@ -1,5 +1,5 @@
-// What the viewer has made of the map: its centre and zoom, the modes filtered out and the open
-// panel (`?stop=<id>` or `?trip=<key>`, one at a time), kept in the address's query so a reload, a
+// What the viewer has made of the map: its centre and zoom, the modes filtered out, the open
+// panel (`?stop=<id>` or `?trip=<key>`, one at a time) and the sheet's open tab, kept in the address's query so a reload, a
 // shared link and the language switch keep them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
 // it back and writes it in place, without a new history entry, and leaves every other parameter
 // as it was.
@@ -24,7 +24,13 @@ export interface MapView {
   readonly hidden: ReadonlySet<Mode>
   /** The open panel, a stop's departures or a vehicle's detail; one at a time. */
   readonly panel?: Panel
+  /** The sheet's open tab, when it isn't the first, City pulse. */
+  readonly tab?: SheetTab
 }
+
+/** The sheet's tabs, in their order; the first is open unless the address names another. */
+export const SHEET_TABS = ['pulse', 'vehicles', 'disruptions'] as const
+export type SheetTab = (typeof SHEET_TABS)[number]
 
 export interface ViewStore {
   get(): MapView
@@ -37,6 +43,7 @@ export interface ViewStore {
 // `map=11.20/55.68000/12.56500`: zoom, latitude and longitude, in the order map links use.
 const MAP = 'map'
 const HIDE = 'hide'
+const TAB = 'tab'
 /** Each panel's parameter, by what it shows. */
 const PANELS: Readonly<Record<PanelKind, string>> = { stop: 'stop', trip: 'trip' }
 const KINDS = Object.keys(PANELS) as PanelKind[]
@@ -58,10 +65,12 @@ export function viewOf(search: string): MapView {
     (query.get(HIDE) ?? '').split(',').filter((mode): mode is Mode => isMode(mode)),
   )
   const panel = panelOf(query)
+  const tab = query.get(TAB) ?? ''
   return {
     ...(placed ? { centre: [lon, lat] as const, zoom } : {}),
     hidden,
     ...(panel ? { panel } : {}),
+    ...(isTab(tab) && tab !== SHEET_TABS[0] ? { tab } : {}),
   }
 }
 
@@ -82,6 +91,10 @@ const within = (value: number, low: number, high: number) => value >= low && val
 
 const isMode = (value: string): value is Mode => (MODES as readonly string[]).includes(value)
 
+/** Whether `value` names one of the sheet's tabs. */
+export const isTab = (value: string | null): value is SheetTab =>
+  (SHEET_TABS as readonly (string | null)[]).includes(value)
+
 /** `search` with the view written into it, every other parameter kept in its place. */
 export function searchWith(search: string, view: MapView): string {
   const query = new URLSearchParams(search)
@@ -95,6 +108,7 @@ export function searchWith(search: string, view: MapView): string {
   )
   put(HIDE, MODES.filter((mode) => view.hidden.has(mode)).join(','))
   for (const kind of KINDS) put(PANELS[kind], view.panel?.kind === kind ? view.panel.id : undefined)
+  put(TAB, view.tab === SHEET_TABS[0] ? undefined : view.tab)
   const written = readableQuery(query)
   return written ? `?${written}` : ''
 }
@@ -184,3 +198,12 @@ export function usePanel(store: ViewStore = mapView): Panel | undefined {
 /** Opens a panel in the address, closing whichever was open; none closes it. */
 export const openPanel = (panel: Panel | undefined, store: ViewStore = mapView): void =>
   store.update({ panel })
+
+/** The sheet's open tab, for a component: it renders again when the tab changes. */
+export function useSheetTab(store: ViewStore = mapView): SheetTab {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().tab ?? SHEET_TABS[0],
+    () => SHEET_TABS[0],
+  )
+}

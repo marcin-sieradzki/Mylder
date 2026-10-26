@@ -1,7 +1,7 @@
 'use client'
 
 import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -10,6 +10,7 @@ import { MODES, type Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
+import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
 import styles from './TopBar.module.css'
 
@@ -20,6 +21,8 @@ import styles from './TopBar.module.css'
  */
 const answeredAt = (snapshot: Snapshot): number | undefined =>
   snapshot.api.status === 'ok' ? snapshot.fetched : undefined
+
+const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
 
 /** Perron's `info` icon, "About and help", drawn on the top bar's 18 px grid. */
 const INFO_ICON = (
@@ -115,8 +118,7 @@ export function TopBar() {
       ) : null}
       <div className={styles.tools}>
         <LanguageSwitch />
-        {/* The About dialog is Disruptions and About's (#34); until it lands the button opens nothing. */}
-        <IconButton label={dictionary.topBar.about} size="large">
+        <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
           {INFO_ICON}
         </IconButton>
       </div>
