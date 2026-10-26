@@ -71,7 +71,9 @@
     "messagesChecked": "Fra Rejseplanen; tjekket {time}",
     "rangeFrom": "{stop} — {head} herfra",
     "rangeTo": "{stop} — {head} hertil",
-    "rangeAt": "{stop} — {head} her"
+    "rangeAt": "{stop} — {head} her",
+    "follow": "Følg",
+    "showLine": "Vis hele linjen"
   },
   "legend": {
     "label": "Datatilstande",
@@ -226,5 +228,10 @@
   "interval": {
     "seconds": "{n}. sekund",
     "minutes": "{n}. minut"
+  },
+  "highlight": {
+    "showing": "Viser: {label}",
+    "line": "linje {line}",
+    "clear": "Ryd"
   }
 }

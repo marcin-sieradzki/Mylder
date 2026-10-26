@@ -71,7 +71,9 @@
     "messagesChecked": "From Rejseplanen, in Danish; checked {time}",
     "rangeFrom": "{stop} — {head} from here",
     "rangeTo": "{stop} — {head} to here",
-    "rangeAt": "{stop} — {head} here"
+    "rangeAt": "{stop} — {head} here",
+    "follow": "Follow",
+    "showLine": "Show whole line"
   },
   "legend": {
     "label": "Data states",
@@ -226,5 +228,10 @@
   "interval": {
     "seconds": "{n} s",
     "minutes": "{n} min"
+  },
+  "highlight": {
+    "showing": "Showing: {label}",
+    "line": "line {line}",
+    "clear": "Clear"
   }
 }

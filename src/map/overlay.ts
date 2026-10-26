@@ -3,13 +3,15 @@
 // moves them each frame, with their glyphs made again when a snapshot lands, a data state turns
 // by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover
 // picks a dot for its card (picking.ts), a tap on one opens its detail, and a tap that finds no
-// dot opens the stop under it, if any. It polls the snapshot while the map is open. The number of vehicles drawn is on the
-// map's container as `data-vehicles`, for tests.
+// dot opens the stop under it, if any. Each frame drawn moves the camera onto the followed dot
+// (follow.ts). It polls the snapshot while the map is open. The number of vehicles drawn is on
+// the map's container as `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { followCamera } from './follow.ts'
 import { radiusScaleAt } from './glyphs.ts'
 import { liveSnapshot, pollSnapshot, serverNow } from './live.ts'
 import { vehicleLoop } from './loop.ts'
@@ -95,10 +97,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     container.dataset.vehicles = String(vehicles.length)
     picking.follow(vehicles, project)
   }
+  const follow = followCamera(map, container)
+  const along = (key: string) => loop.along(key)
   const loop = vehicleLoop({
     now: () => serverNow(liveSnapshot.get()),
     draw(moved) {
       vehicles = moved
+      follow.frame(moved, along)
       render()
     },
   })
@@ -183,6 +188,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopFiltering()
       stopPolling()
       loop.stop()
+      follow.remove()
       if (cursorFrame !== undefined) cancelAnimationFrame(cursorFrame)
       map.off('zoom', onZoom)
       map.off('move', onMove)

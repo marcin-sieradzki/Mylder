@@ -16,8 +16,9 @@ import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import type { PanelStateOf } from '../map/panels'
 import { useDataState } from '../map/states'
+import { openPanel, useHiddenModes } from '../map/view'
+import { onMap } from '../map/vehicles'
 import { timezoneOf, useNetwork } from '../map/timetable'
-import { openPanel } from '../map/view'
 import { whereOf } from '../map/where'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
@@ -26,6 +27,7 @@ import type { PanelFrame } from './DetailPanels'
 import { badgeLine } from './departureRow'
 import { Messages } from './Messages'
 import { useServerSecond } from './useServerSecond'
+import { VehicleActions } from './VehicleActions'
 import {
   intervalWords,
   nextCallOf,
@@ -51,8 +53,8 @@ export interface VehiclePanelProps {
  * Vehicle detail (docs/screens.md): the trip's line, destination and mode, what its data state
  * means, its facts, where it is, its stops, its own messages and where their times came from.
  * Its header names the trip from the snapshot while the answer is on its way. The header's action
- * row is where Follow and Show whole line go. An answer for another trip than the address's, the
- * one the trip's detail corrected the join to, takes over the address.
+ * row holds Follow and Show whole line. An answer for another trip than the address's, the one
+ * the trip's detail corrected the join to, takes over the address.
  */
 export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const { dictionary, lang } = useI18n()
@@ -65,6 +67,7 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
     if (corrected !== undefined) openPanel({ kind: 'trip', id: corrected })
   }, [corrected])
   const trip = snapshot?.trips.find((each) => each.key === state.panel.id)
+  const hidden = useHiddenModes()
   const named = answer ?? trip
   // The line's colour from the answer, or from the timetable's pattern before the answer lands.
   const pattern = trip && network?.patterns.patterns[trip.pattern]
@@ -86,6 +89,14 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
             line: badgeLine(colour ?? '', named.mode),
             lineName: named.line,
             subheader: dictionary.modes[named.mode],
+            action: (
+              <VehicleActions
+                tripKey={state.panel.id}
+                pattern={answer?.pattern ?? trip?.pattern}
+                onMap={trip !== undefined && onMap(trip, hidden)}
+                network={network}
+              />
+            ),
           }
         : {})}
     >

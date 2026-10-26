@@ -6,17 +6,17 @@ import 'client-only'
 import { mapCamera, type Camera } from './camera.ts'
 import { pickedVehicle, type PickedStore } from './picking.ts'
 
-type Move = (camera: Camera) => void
+type Move = (camera: Camera, input: KeyboardEvent) => void
 
 const MOVES: Record<string, Move> = {
   '+': (camera) => camera.zoomIn(),
   '=': (camera) => camera.zoomIn(),
   '-': (camera) => camera.zoomOut(),
   '−': (camera) => camera.zoomOut(),
-  ArrowLeft: (camera) => camera.pan(-1, 0),
-  ArrowRight: (camera) => camera.pan(1, 0),
-  ArrowUp: (camera) => camera.pan(0, -1),
-  ArrowDown: (camera) => camera.pan(0, 1),
+  ArrowLeft: (camera, input) => camera.pan(-1, 0, input),
+  ArrowRight: (camera, input) => camera.pan(1, 0, input),
+  ArrowUp: (camera, input) => camera.pan(0, -1, input),
+  ArrowDown: (camera, input) => camera.pan(0, 1, input),
 }
 
 /** Whether the focus is on the page itself rather than on a control. */
@@ -41,7 +41,7 @@ export function listenForMapKeys(
     const target = event.target
     if (!move || !(onPage(target) || (target instanceof Element && camera.holds(target)))) return
     event.preventDefault()
-    move(camera)
+    move(camera, event)
   }
   document.addEventListener('keydown', onKey)
   return () => document.removeEventListener('keydown', onKey)
