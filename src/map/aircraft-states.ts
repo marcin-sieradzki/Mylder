@@ -12,7 +12,7 @@ import {
   type AircraftStateContext,
 } from '../domain/aircraft-state.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
-import { liveAircraft, type AircraftStore } from './aircraft.ts'
+import { liveAircraft, useAircraftLanded, type AircraftStore } from './aircraft.ts'
 import { sameByKey, tickingStore, type TickingStore } from './ticking.ts'
 
 /** Each aircraft on the map's data state, by its hex; one whose position is dropped is left out. */
@@ -59,11 +59,7 @@ export function useAircraftCount(
   store: AircraftStatesStore = aircraftStates,
   live: AircraftStore = liveAircraft,
 ): number | undefined {
-  const landed = useSyncExternalStore(
-    live.subscribe,
-    () => live.get().snapshot !== undefined,
-    () => false,
-  )
+  const landed = useAircraftLanded(live)
   const drawn = useSyncExternalStore(
     store.subscribe,
     () => store.get().size,

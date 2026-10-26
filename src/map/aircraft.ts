@@ -87,6 +87,18 @@ export function useAircraftNoDataSince(store: AircraftStore = liveAircraft): num
   )
 }
 
+/**
+ * Whether an aircraft snapshot has landed, for a component: none has while the server has the
+ * aircraft off. It renders again when one first lands, not with every answer.
+ */
+export function useAircraftLanded(store: AircraftStore = liveAircraft): boolean {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().snapshot !== undefined,
+    () => false,
+  )
+}
+
 /** Whether the server has the aircraft off, as its 404 said, for a component. */
 export function useAircraftOff(store: AircraftStore = liveAircraft): boolean {
   return useSyncExternalStore(

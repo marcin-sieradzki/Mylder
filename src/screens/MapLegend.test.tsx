@@ -83,6 +83,34 @@ describe("the map's legend", () => {
     ).toEqual(['Live', 'Ældre', 'Beregnet', 'Kun køreplan', 'Intet signal'])
   })
 
+  it('names the planes after the five states while the planes are on the map, in English', () => {
+    liveAircraft.update({ snapshot: aircraft })
+    show('en', alternating)
+    const legend = screen.getByRole('list', { name: 'Data states' })
+    expect(
+      within(legend)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Live', 'Ageing', 'Estimated', 'Timetable only', 'No signal', 'Planes'])
+  })
+
+  it('names them in Danish', () => {
+    liveAircraft.update({ snapshot: aircraft })
+    show('da', alternating)
+    const legend = screen.getByRole('list', { name: 'Datatilstande' })
+    expect(within(legend).getAllByRole('listitem').at(-1)).toHaveTextContent('Fly')
+  })
+
+  it('leaves the planes out before their feed answers, and while the Planes filter hides them', () => {
+    show('en', alternating)
+    const legend = screen.getByRole('list', { name: 'Data states' })
+    expect(within(legend).queryByText('Planes')).not.toBeInTheDocument()
+    act(() => liveAircraft.update({ snapshot: aircraft }))
+    expect(within(legend).getByText('Planes')).toBeInTheDocument()
+    act(() => mapView.update({ aircraftHidden: true }))
+    expect(within(legend).queryByText('Planes')).not.toBeInTheDocument()
+  })
+
   it('says once that no vehicle can be Live while Mylder asks for CALC_REPORT alone', () => {
     show('en', calcOnly)
     expect(screen.getAllByText(NO_LIVE_EN)).toHaveLength(1)
