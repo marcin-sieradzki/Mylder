@@ -116,6 +116,34 @@
   },
   "pulse": {
     "onTheMove": "On the move",
-    "inService": "of {total} in service"
+    "inService": "of {total} in service",
+    "reported": "Reported this minute",
+    "reportedSub": "vehicles that reported their position",
+    "averageDelay": "Average delay",
+    "averageDelaySub": "min, vehicles with a known delay, Metro left out",
+    "reportingLive": "Reporting live",
+    "reportingLiveSub": "{count} of {total} vehicles that could report",
+    "byMode": "Reporting live, by mode",
+    "modeShare": "{count}/{total} · {operator}",
+    "unknown": {
+      "computed-only": "Rejseplanen sends computed positions only",
+      "paused": "Positions are paused",
+      "none-underway": "No vehicles underway",
+      "metro": "No realtime from the Metro; placed from the timetable",
+      "computed-meters": "Every position is computed by Rejseplanen"
+    },
+    "now": "On the map now",
+    "howSure": "How sure are we?",
+    "states": {
+      "live": "Reported by the vehicle in the latest answers.",
+      "ageing": "Last reported a few minutes ago; moving on along its path since.",
+      "estimated": "Placed from the timetable and a known delay, or computed by Rejseplanen.",
+      "timetableOnly": "No realtime for this trip today; placed from the timetable.",
+      "noSignal": "Had realtime, missing for 5 min; moving on the timetable and its last delay."
+    },
+    "dayProfile": "Vehicles in service today",
+    "planned": "Planned, from today's timetable",
+    "peak": "Peak {count} at {time}",
+    "profileMissing": "Could not load today's timetable"
   }
 }

@@ -10,6 +10,7 @@ import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog, useAboutOpen } from './about'
+import { budgetLine, intervalOf } from './budget'
 import styles from './AboutDialog.module.css'
 import {
   CC_BY,
@@ -60,11 +61,6 @@ function dayOf(date: string, lang: Lang): string {
 }
 
 /** A poll interval in seconds as the budget line says it: "90 s", "2 min". */
-const intervalOf = (seconds: number, words: ClientDictionary['vehicle']) =>
-  seconds >= 120 && seconds % 60 === 0
-    ? words.minutes.replace('{minutes}', String(seconds / 60))
-    : words.seconds.replace('{seconds}', String(seconds))
-
 /** Where the page's vehicles come from. */
 function sourceOf({ source }: Snapshot, words: Words['status']): string {
   const name = source.name ?? ''
@@ -94,13 +90,9 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   if (snapshot.source.kind !== 'rejseplanen') notes.push(status.notReal)
   if (budget.level === 'spent' && budget.resumes) {
     notes.push(status.paused.replace('{date}', dayOf(budget.resumes, lang)))
-  } else if (snapshot.pollInterval > 60) {
-    notes.push(
-      status.budgetLine.replace(
-        '{interval}',
-        intervalOf(snapshot.pollInterval, dictionary.vehicle),
-      ),
-    )
+  } else {
+    const line = budgetLine(snapshot, dictionary)
+    if (line) notes.push(line)
   }
   return (
     <>
