@@ -104,6 +104,7 @@ afterEach(() => {
   liveAircraft.update({ snapshot: undefined, off: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
+  vi.useRealTimers()
   window.history.replaceState(null, '', '/')
 })
 
@@ -193,6 +194,8 @@ describe('the vehicles over the map', () => {
   })
 
   it('renders nothing for a state turning by the clock while the Planes filter is off', async () => {
+    // The states tick on the clock's timers, which the test moves on.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
     const container = document.createElement('div')
     overlay = vehicleOverlay(map, container)
     // One aircraft's own position is 19.8 s old at the fetch: it turns Ageing within a second.
@@ -204,7 +207,8 @@ describe('the vehicles over the map', () => {
     await vi.waitFor(() => expect(container.dataset.aircraft).toBeUndefined())
     await new Promise((resolve) => requestAnimationFrame(resolve))
     const before = rendered.times
-    await new Promise((resolve) => setTimeout(resolve, 1_300))
+    await vi.advanceTimersByTimeAsync(1_300)
+    await new Promise((resolve) => requestAnimationFrame(resolve))
     expect(rendered.times).toBe(before)
     mapView.update({ aircraftHidden: false })
     await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
