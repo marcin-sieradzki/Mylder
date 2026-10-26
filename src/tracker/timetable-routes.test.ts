@@ -42,8 +42,17 @@ describe('the timetable routes', () => {
     expect(patterns.lines.map((line) => line.name)).toEqual(['5C', '991', 'M1', 'A', 'E', 'RE'])
   })
 
+  it("answer a version's day profiles, which City pulse draws", async () => {
+    const response = await timetableFileResponse(VERSION, 'dayProfiles', recording)
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Cache-Control')).toBe('public, max-age=31536000, immutable')
+    const profiles = (await response.json()) as { first: string; days: number[][] }
+    expect(profiles.first).toBe('2026-06-01')
+    expect(profiles.days).toHaveLength(87)
+  })
+
   it('answer 404 for the trips, which the browser never loads, and for any other file', async () => {
-    for (const file of ['trips', 'day-profiles', 'dayProfiles', '../manifest.json']) {
+    for (const file of ['trips', 'day-profiles', '../manifest.json']) {
       expect((await timetableFileResponse(VERSION, file, recording)).status).toBe(404)
     }
   })

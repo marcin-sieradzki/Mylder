@@ -11,6 +11,7 @@ import { liveSnapshot } from '../map/live'
 import { readPaint } from '../map/paint'
 import { vehiclePaint, vehiclesOf } from '../map/vehicles'
 import { mapView } from '../map/view'
+import { timetableRoutes } from '../test/timetableRoutes'
 import type { Snapshot } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
@@ -29,25 +30,6 @@ const renderScreen = (lang: Lang) =>
       <MapScreen />
     </Providers>,
   )
-
-/**
- * The timetable routes as the server answers them on the recording: each version's files from its
- * `timetable/` folder. jsdom has no server to reach.
- */
-const timetableRoutes = async (input: RequestInfo | URL): Promise<Response> => {
-  const folder = join(process.cwd(), 'recordings', 'weekday', 'timetable')
-  const manifest = JSON.parse(readFileSync(join(folder, 'manifest.json'), 'utf8')) as {
-    version: string
-    files: Record<string, string>
-  }
-  const [, version, file] = /^\/api\/timetable\/([^/]+)\/(\w+)$/.exec(String(input)) ?? []
-  if (version !== manifest.version) return new Response(null, { status: 404 })
-  const body =
-    file === 'manifest'
-      ? JSON.stringify(manifest)
-      : readFileSync(join(folder, manifest.files[file]), 'utf8')
-  return new Response(body, { headers: { 'content-type': 'application/json' } })
-}
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/en')
