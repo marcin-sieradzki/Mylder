@@ -70,3 +70,32 @@ export async function loadTimetable(dir: string = TIMETABLE_DIR): Promise<Timeta
   )
   return timetableFrom({ manifest, stops, patterns, paths, trips })
 }
+
+/** The files the browser loads, by the names its route takes; never the trips. */
+export const NETWORK_FILES = ['manifest', 'stops', 'patterns', 'paths'] as const
+
+export type NetworkFileName = (typeof NETWORK_FILES)[number]
+
+export const isNetworkFile = (name: string): name is NetworkFileName =>
+  (NETWORK_FILES as readonly string[]).includes(name)
+
+const readText = (dir: string, file: string) =>
+  readFile(/* turbopackIgnore: true */ join(/* turbopackIgnore: true */ dir, file), 'utf8')
+
+/** The current manifest as it is on disk. */
+export const readManifestFile = (dir: string): Promise<string> => readText(dir, 'manifest.json')
+
+/**
+ * One of a timetable's network files as it is on disk, or undefined when the folder holds
+ * another version.
+ */
+export async function readNetworkFile(
+  dir: string,
+  version: string,
+  name: NetworkFileName,
+): Promise<string | undefined> {
+  const manifestText = await readManifestFile(dir)
+  const manifest = readManifest(JSON.parse(manifestText))
+  if (manifest.version !== version) return undefined
+  return name === 'manifest' ? manifestText : readText(dir, manifest.files[name])
+}
