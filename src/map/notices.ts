@@ -157,7 +157,6 @@ export function pageNoticesStore(
     return notices
   }
   const check = () => {
-    load(live.get().snapshot?.timetableVersion)
     const before = notices
     if (get() !== before) for (const listener of listeners) listener()
   }
@@ -172,7 +171,12 @@ export function pageNoticesStore(
     subscribe(onChange) {
       listeners.add(onChange)
       if (!stopListening) {
-        stopListening = live.subscribe(check)
+        const landed = () => {
+          load(live.get().snapshot?.timetableVersion)
+          check()
+        }
+        stopListening = live.subscribe(landed)
+        load(live.get().snapshot?.timetableVersion)
         tick()
       }
       return () => {
