@@ -18,7 +18,7 @@ The six screens are the moving map, vehicle detail, stop departures, City pulse,
 
 **The highlight chip** appears while something is highlighted, "Showing: Signal fault at Danshøj · Clear", from Show whole line in vehicle detail or Show on map on a disruption. Clearing it returns the map to normal.
 
-**The corner credit** reads "Transit data: Rejseplanen (CC BY 4.0) · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap", each a link, at the bottom right on a desktop and above the sheet's peek on a phone, wrapping to two lines and never hidden behind a button. The Rejseplanen link leads to the About dialog, so a phone reader can read the full terms in one tap.
+**The corner credit** reads "Transit data: Rejseplanen (CC BY 4.0) · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap", each a link, with "Aircraft: © adsb.lol contributors under the ODbL" after the transit data once the page has aircraft (`docs/aircraft.md`), at the bottom right on a desktop and above the sheet's peek on a phone, wrapping to two lines and never hidden behind a button. The Rejseplanen link leads to the About dialog, so a phone reader can read the full terms in one tap.
 
 **Page notices**, as alerts at the top of the map, above every panel:
 
@@ -26,6 +26,7 @@ The six screens are the moving map, vehicle detail, stop departures, City pulse,
 - **Paused**, when Mylder's server gets no position answers from Rejseplanen: "Rejseplanen hasn't answered since 08:09." when calls fail or answer nothing, shown once the latest answer is older than the Live limit; or "Live data is paused until 1 November: this month's calls are used up." when the month's budget is spent, shown at once, since the server knows. Dots keep moving; states age by the rules in [`data-states.md`](data-states.md).
 - **The budget line**, when the poll has stretched: "Updating every 90 s to stay within the data budget." (or "2 min"), in the About dialog and at the head of City pulse, never on a dot.
 - **The timetable notice**, when the prepared timetable has under 7 days of service left, and the recorded-data banner on a preview deployment.
+- **The source banner**, whenever the transit isn't Rejseplanen's own: "Simulated data: vehicles and times are made up from the timetable." or "Recorded data from 16 June 2026.", followed, once the page has aircraft, by where they come from: "Planes: live from adsb.lol." or "Planes: recorded.". Recorded planes beside Rejseplanen's transit get a banner of their own.
 
 When both Disconnected and Paused hold, Disconnected is shown and the Paused notice from the last snapshot is kept beneath it.
 
@@ -122,7 +123,7 @@ Cancellations make no card. They are shown where they are seen: a cancelled row 
 Opened from the top bar's About button and from the corner credit. It holds the full terms and the page's status:
 
 - Rejseplanen as the source of the realtime data and the timetable, under CC BY 4.0, with the link; the timetable's version date.
-- The map credits: OpenStreetMap contributors under ODbL, OpenMapTiles, OpenFreeMap, and the forked style's notice, each linked.
+- The map credits: OpenStreetMap contributors under ODbL, OpenMapTiles, OpenFreeMap, and the forked style's notice, each linked; and, once the page has aircraft, "Aircraft: © adsb.lol contributors under the ODbL.", linked.
 - "Mylder shows the data as Rejseplanen sends it, in its own words and language, and marks every figure it works out itself." and the non-commercial statement: no advertising, no paid tier, no sale of the data or of anything built on it.
 - The five data states with their sentences, and, when the position mode leaves no trip Live, one line saying so.
 - The page's status, from the snapshot: the position mode, Rejseplanen's own realtime time (`planRtTs`, shown here and used nowhere else), the budget level and the calls used this month, whether the server store is available (and when not, that no trip can be Ageing or No signal until it returns), the disruption list's last check, and the budget line when the poll has stretched.

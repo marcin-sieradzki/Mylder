@@ -1,6 +1,6 @@
 # Live data
 
-How Mylder gets positions from Rejseplanen API 2.0 to the browser on a free key, and what the browser receives. The data states themselves are defined in [`data-states.md`](data-states.md); this page covers the plumbing: the one call a minute, the snapshot every browser polls, the caches between them, the small server store and the call budget. The words are in [`GLOSSARY.md`](../GLOSSARY.md).
+How Mylder gets positions from Rejseplanen API 2.0 to the browser on a free key, and what the browser receives. The data states themselves are defined in [`data-states.md`](data-states.md), and the planes' own feed and snapshot in [`aircraft.md`](aircraft.md); this page covers the plumbing: the one call a minute, the snapshot every browser polls, the caches between them, the small server store and the call budget. The words are in [`GLOSSARY.md`](../GLOSSARY.md).
 
 Every number here is a starting value. The first day with the key settles the ones marked "first day", and a month of running settles the rest.
 
