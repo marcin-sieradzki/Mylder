@@ -12,12 +12,12 @@ import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, openPanel, searchWith, useHiddenModes } from '../map/view'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
+import { carriesDelays } from './delays'
 import { badgeLine } from './departureRow'
 import { useServerSecond } from './useServerSecond'
 import { titleOf } from './vehicleLabel'
 import styles from './VehicleList.module.css'
 import {
-  carriesDelays,
   FIRST_SORT,
   isListColumn,
   matching,

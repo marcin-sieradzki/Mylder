@@ -9,6 +9,7 @@ import type { Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
 import type { VehicleTableColumn } from '@mylder/perron/patterns'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
+import { DELAY_KNOWN } from './delays'
 
 /** A column the list sorts by, as Perron's VehicleTable names it; the list shows no Last seen. */
 export type ListColumn = Exclude<VehicleTableColumn, 'last-seen'>
@@ -49,13 +50,6 @@ const STATE_ORDER: readonly DataState[] = [
   'no-signal',
 ]
 
-/** States whose delay is shown: a Timetable only or No signal trip's is unknown. */
-const DELAY_SHOWN: ReadonlySet<DataState> = new Set(['live', 'ageing', 'estimated'])
-
-/** Whether the snapshot carries delays for the city: one trip with one is enough. */
-export const carriesDelays = (snapshot: Snapshot): boolean =>
-  snapshot.trips.some((trip) => trip.delay !== undefined)
-
 /** The rows of the trips on the map with the filters `hidden`, each in its state by the clock. */
 export function rowsOf(
   snapshot: Snapshot,
@@ -70,7 +64,7 @@ export function rowsOf(
       const pattern = network?.patterns.patterns[trip.pattern]
       const colour = pattern && network.patterns.lines[pattern.line]?.colour
       const delay =
-        trip.delay !== undefined && DELAY_SHOWN.has(state) ? Math.round(trip.delay / 60) : undefined
+        trip.delay !== undefined && DELAY_KNOWN.has(state) ? Math.round(trip.delay / 60) : undefined
       return {
         trip,
         state,

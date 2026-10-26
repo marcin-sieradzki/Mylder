@@ -23,6 +23,12 @@ const saved = (name: string, recording = 'weekday'): Snapshot =>
 // delay, under the 20 an average needs.
 const MINUTE_6 = '0006.json'
 
+/** `snapshot` as answers that carry no delay would make it. */
+const withoutDelays = (snapshot: Snapshot): Snapshot => ({
+  ...snapshot,
+  trips: snapshot.trips.map((trip) => ({ ...trip, delay: undefined })),
+})
+
 /** Lands `snapshot` with the server's clock `seconds` past its fetch, and renders City pulse. */
 function renderPulse(lang: Lang, snapshot: Snapshot, seconds = 20) {
   vi.setSystemTime(snapshot.fetched + seconds * 1000)
@@ -98,19 +104,25 @@ describe('Reported this minute', () => {
 })
 
 describe('the third figure', () => {
-  it('is Reporting live while under 20 vehicles carry a delay', () => {
+  it('is Average delay, "—", while under 20 vehicles carry a delay', () => {
     renderPulse('en', saved(MINUTE_6))
-    expect(screen.queryByRole('group', { name: 'Average delay' })).not.toBeInTheDocument()
-    expect(figure('Reporting live')).toHaveTextContent(
-      /^Reporting live54%7 of 13 vehicles that could report$/,
+    expect(screen.queryByRole('group', { name: 'Reporting live' })).not.toBeInTheDocument()
+    expect(figure('Average delay')).toHaveTextContent(
+      /^Average delay—Unknown\s*Too few vehicles with a known delay$/,
     )
   })
 
   it('says it in Danish', () => {
     renderPulse('da', saved(MINUTE_6))
-    expect(figure('Melder live')).toHaveTextContent(
-      /^Melder live54\s%7 af 13 køretøjer, der kunne melde$/,
+    expect(figure('Gennemsnitlig forsinkelse')).toHaveTextContent(
+      'For få køretøjer med kendt forsinkelse',
     )
+  })
+
+  it('stays Average delay when a filter leaves no vehicle with a delay', () => {
+    window.history.replaceState(null, '', '/en?hide=bus,s-tog,train')
+    renderPulse('en', saved(MINUTE_6))
+    expect(figure('Average delay')).toHaveTextContent('Too few vehicles with a known delay')
   })
 
   it('is the average delay once 20 or more vehicles carry one, the Metro left out', () => {
@@ -146,8 +158,31 @@ describe('the third figure', () => {
     expect(figure('Gennemsnitlig forsinkelse')).toHaveTextContent('−1,5')
   })
 
-  it('shows "—" and says why when Rejseplanen sends computed positions only', () => {
-    renderPulse('en', { ...saved('0001.json'), positionMode: 'CALC_REPORT' })
+  it('shows "—" for the average delay while positions are paused', () => {
+    const snapshot = saved(MINUTE_6)
+    renderPulse('en', { ...snapshot, budget: { level: 'spent', calls: 50_000 } })
+    expect(figure('Average delay')).toHaveTextContent(
+      /^Average delay—Unknown\s*Positions are paused$/,
+    )
+  })
+
+  it('is Reporting live when the answers carry no delay', () => {
+    renderPulse('en', withoutDelays(saved(MINUTE_6)))
+    expect(screen.queryByRole('group', { name: 'Average delay' })).not.toBeInTheDocument()
+    expect(figure('Reporting live')).toHaveTextContent(
+      /^Reporting live54%7 of 13 vehicles that could report$/,
+    )
+  })
+
+  it('says Reporting live in Danish', () => {
+    renderPulse('da', withoutDelays(saved(MINUTE_6)))
+    expect(figure('Melder live')).toHaveTextContent(
+      /^Melder live54\s%7 af 13 køretøjer, der kunne melde$/,
+    )
+  })
+
+  it('shows "—" for Reporting live and says why when Rejseplanen sends computed positions only', () => {
+    renderPulse('en', { ...withoutDelays(saved('0001.json')), positionMode: 'CALC_REPORT' })
     expect(figure('Reporting live')).toHaveTextContent('—')
     expect(figure('Reporting live')).toHaveTextContent('Rejseplanen sends computed positions only')
   })
@@ -203,6 +238,12 @@ describe('Reporting live, by mode', () => {
     const modes = screen.getByRole('region', { name: 'Reporting live, by mode' })
     expect(within(modes).getAllByRole('meter').map(read)).toEqual(['S-tog 83%', 'Train 100%'])
     expect(figure('Reported this minute')).toHaveTextContent('6')
+    expect(figure('Average delay')).toHaveTextContent('Too few vehicles with a known delay')
+  })
+
+  it('follows the mode filters in Reporting live, when it holds the third slot', () => {
+    window.history.replaceState(null, '', '/en?hide=bus,metro')
+    renderPulse('en', withoutDelays(saved(MINUTE_6)))
     expect(figure('Reporting live')).toHaveTextContent('6 of 7 vehicles that could report')
   })
 })

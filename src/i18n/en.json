@@ -205,6 +205,7 @@
       "computed-only": "Rejseplanen sends computed positions only",
       "paused": "Positions are paused",
       "none-underway": "No vehicles underway",
+      "too-few": "Too few vehicles with a known delay",
       "metro": "No realtime from the Metro; placed from the timetable",
       "computed-meters": "Every position is computed by Rejseplanen"
     },
