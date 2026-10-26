@@ -4,21 +4,17 @@ import { Attribution } from '@mylder/perron'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { aboutDialog } from './about'
-
-const REJSEPLANEN = 'https://www.rejseplanen.dk/'
-const CC_BY = 'https://creativecommons.org/licenses/by/4.0/'
-const OPENSTREETMAP = 'https://www.openstreetmap.org/copyright'
-const OPENMAPTILES = 'https://openmaptiles.org/'
-const OPENFREEMAP = 'https://openfreemap.org/'
+import { CC_BY, OPENFREEMAP, OPENMAPTILES, OPENSTREETMAP, REJSEPLANEN } from './credits'
 
 /**
  * The Rejseplanen link opens the About dialog, with the full terms, so a phone reader reaches them
  * in one tap; opened in a new tab or without a script, it still leads to Rejseplanen.
  */
-const openAbout = (event: MouseEvent<HTMLAnchorElement>) => {
-  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+const openAboutFromCredit = (event: MouseEvent<HTMLAnchorElement>) => {
+  const plain = event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey
+  if (event.defaultPrevented || !plain || event.altKey) return
   event.preventDefault()
-  aboutDialog.open()
+  aboutDialog.open(event.currentTarget)
 }
 
 /**
@@ -31,7 +27,7 @@ export function MapCredit() {
   return (
     <Attribution>
       {words.transitData}:{' '}
-      <a href={REJSEPLANEN} onClick={openAbout}>
+      <a href={REJSEPLANEN} onClick={openAboutFromCredit} aria-haspopup="dialog">
         Rejseplanen
       </a>{' '}
       (<a href={CC_BY}>CC BY 4.0</a>){' · '}

@@ -3,7 +3,7 @@
 import { Dialog, FactList, Kbd, Link, Section, Text, VehicleDotLabel } from '@mylder/perron'
 import { Fragment, type ReactNode } from 'react'
 import type { ClientDictionary } from '../i18n/dictionary'
-import type { Lang } from '../i18n/lang'
+import { intlLocale, type Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -11,13 +11,15 @@ import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog, useAboutOpen } from './about'
 import styles from './AboutDialog.module.css'
-
-const REJSEPLANEN = 'https://www.rejseplanen.dk/'
-const CC_BY = 'https://creativecommons.org/licenses/by/4.0/'
-const OPENSTREETMAP = 'https://www.openstreetmap.org/copyright'
-const ODBL = 'https://opendatacommons.org/licenses/odbl/'
-const OPENMAPTILES = 'https://openmaptiles.org/'
-const OPENFREEMAP = 'https://openfreemap.org/'
+import {
+  CC_BY,
+  MAP_STYLE_LICENCE,
+  ODBL,
+  OPENFREEMAP,
+  OPENMAPTILES,
+  OPENSTREETMAP,
+  REJSEPLANEN,
+} from './credits'
 
 type Words = ClientDictionary['about']
 
@@ -30,25 +32,38 @@ const STATES = [
   ['no-signal', 'noSignal'],
 ] as const
 
+const PLACEHOLDERS = /(\{\w+\})/
+const PLACEHOLDER = /^\{(\w+)\}$/
+
 /** Fills each `{name}` in `template` with its part, which may be an element such as a link. */
 function compose(template: string, parts: Record<string, ReactNode>): ReactNode[] {
-  return template.split(/(\{\w+\})/).map((piece, i) => {
-    const name = /^\{(\w+)\}$/.exec(piece)?.[1]
+  return template.split(PLACEHOLDERS).map((piece, i) => {
+    const name = PLACEHOLDER.exec(piece)?.[1]
     return name !== undefined && name in parts ? <Fragment key={i}>{parts[name]}</Fragment> : piece
   })
 }
 
+const days = new Map<Lang, Intl.DateTimeFormat>()
+
 /** A date such as `2026-10-12` as the language writes it: "12 October", "12. oktober". */
-const dayOf = (date: string, lang: Lang) =>
-  new Intl.DateTimeFormat(lang === 'da' ? 'da-DK' : 'en-GB', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-  }).format(Date.parse(`${date}T00:00:00Z`))
+function dayOf(date: string, lang: Lang): string {
+  let format = days.get(lang)
+  if (!format) {
+    format = new Intl.DateTimeFormat(intlLocale(lang), {
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'UTC',
+    })
+    days.set(lang, format)
+  }
+  return format.format(Date.parse(`${date}T00:00:00Z`))
+}
 
 /** A poll interval in seconds as the budget line says it: "90 s", "2 min". */
-const intervalOf = (seconds: number) =>
-  seconds >= 120 && seconds % 60 === 0 ? `${seconds / 60} min` : `${seconds} s`
+const intervalOf = (seconds: number, words: ClientDictionary['vehicle']) =>
+  seconds >= 120 && seconds % 60 === 0
+    ? words.minutes.replace('{minutes}', String(seconds / 60))
+    : words.seconds.replace('{seconds}', String(seconds))
 
 /** Where the page's vehicles come from. */
 function sourceOf({ source }: Snapshot, words: Words['status']): string {
@@ -67,8 +82,9 @@ function disruptionsOf(snapshot: Snapshot, timezone: string, words: Words['statu
 }
 
 /** The page's status from the snapshot (docs/screens.md, "The About dialog"). */
-function PageStatus({ snapshot, words }: { snapshot: Snapshot | undefined; words: Words }) {
-  const { lang } = useI18n()
+function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
+  const { lang, dictionary } = useI18n()
+  const words = dictionary.about
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   const status = words.status
   if (!snapshot) return <FactList items={[{ label: status.source }]} />
@@ -79,7 +95,12 @@ function PageStatus({ snapshot, words }: { snapshot: Snapshot | undefined; words
   if (budget.level === 'spent' && budget.resumes) {
     notes.push(status.paused.replace('{date}', dayOf(budget.resumes, lang)))
   } else if (snapshot.pollInterval > 60) {
-    notes.push(status.budgetLine.replace('{interval}', intervalOf(snapshot.pollInterval)))
+    notes.push(
+      status.budgetLine.replace(
+        '{interval}',
+        intervalOf(snapshot.pollInterval, dictionary.vehicle),
+      ),
+    )
   }
   return (
     <>
@@ -91,7 +112,7 @@ function PageStatus({ snapshot, words }: { snapshot: Snapshot | undefined; words
       <FactList
         items={[
           { label: status.source, value: sourceOf(snapshot, status) },
-          { label: status.positions, value: status[snapshot.positionMode] },
+          { label: status.positions, value: status.positionModes[snapshot.positionMode] },
           {
             label: status.apiTime,
             value: Number.isNaN(apiTime)
@@ -100,12 +121,15 @@ function PageStatus({ snapshot, words }: { snapshot: Snapshot | undefined; words
           },
           {
             label: status.updates,
-            value: status.every.replace('{interval}', intervalOf(snapshot.pollInterval)),
+            value: status.every.replace(
+              '{interval}',
+              intervalOf(snapshot.pollInterval, dictionary.vehicle),
+            ),
           },
-          { label: status.budget, value: status[budget.level] },
+          { label: status.budget, value: status.budgetLevels[budget.level] },
           {
             label: status.calls,
-            value: budget.calls.toLocaleString(lang === 'da' ? 'da-DK' : 'en-GB'),
+            value: budget.calls.toLocaleString(intlLocale(lang)),
           },
           {
             label: status.store,
@@ -117,6 +141,9 @@ function PageStatus({ snapshot, words }: { snapshot: Snapshot | undefined; words
     </>
   )
 }
+
+/** On close, the focus goes back to what opened the dialog, the About button or the credit. */
+const returnFocus = () => aboutDialog.opener() ?? true
 
 /**
  * The About dialog (docs/screens.md, "The About dialog"), opened from the top bar's About button
@@ -135,6 +162,7 @@ export function AboutDialog() {
       description={words.description}
       open={open}
       onClose={() => aboutDialog.close()}
+      finalFocus={returnFocus}
     >
       <div className={styles.body}>
         <Text render={<p />}>{words.honest}</Text>
@@ -156,7 +184,9 @@ export function AboutDialog() {
             })}
           </Text>
           <Text render={<p />} emphasis="secondary">
-            {words.credits.style}
+            {compose(words.credits.style, {
+              licence: <Link href={MAP_STYLE_LICENCE}>{words.credits.styleLicence}</Link>,
+            })}
           </Text>
         </Section>
         <Section title={words.states.title}>
@@ -172,7 +202,7 @@ export function AboutDialog() {
           ) : null}
         </Section>
         <Section title={words.status.title}>
-          <PageStatus snapshot={snapshot} words={words} />
+          <PageStatus snapshot={snapshot} />
         </Section>
         <Section title={words.keys.title}>
           <ul className={styles.keys}>

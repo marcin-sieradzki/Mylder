@@ -54,11 +54,12 @@
       "title": "Data and credits",
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
-      "style": "The map's style is a fork of OpenFreeMap's Positron, under the MIT licence."
+      "style": "The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see {licence}.",
+      "styleLicence": "its licence"
     },
     "states": {
       "title": "Data states",
-      "live": "The vehicle itself reported this position within about the last two updates.",
+      "live": "The vehicle itself reported this position within about the last two polls.",
       "ageing": "The vehicle's last report is older than that but under 5 minutes; the dot moves on from it along the line.",
       "estimated": "No recent report, but Rejseplanen still has the trip: a position it computed, or expected times.",
       "timetableOnly": "No realtime for this trip today, so it is placed from the timetable. Every Metro train is.",
@@ -72,19 +73,23 @@
       "rejseplanen": "Rejseplanen",
       "notReal": "The vehicles on this page are not real.",
       "positions": "Positions",
-      "REPORT_ONLY": "Reports from the vehicles only",
-      "CALC_REPORT": "Positions computed by Rejseplanen",
-      "alternating": "Reports and computed positions, by turns",
-      "none": "No position calls",
+      "positionModes": {
+        "REPORT_ONLY": "Reports from the vehicles only",
+        "CALC_REPORT": "Positions computed by Rejseplanen",
+        "alternating": "Reports and computed positions, by turns",
+        "none": "No position calls"
+      },
       "apiTime": "Rejseplanen's realtime",
-      "updates": "Updates",
+      "updates": "Poll",
       "every": "Every {interval}",
       "budget": "Data budget",
+      "budgetLevels": {
+        "normal": "Normal",
+        "stretched": "Stretched",
+        "tight": "Tight",
+        "spent": "Used up"
+      },
       "calls": "Calls this month",
-      "normal": "Normal",
-      "stretched": "Stretched",
-      "tight": "Tight",
-      "spent": "Used up",
       "paused": "Live data is paused until {date}: this month's calls are used up.",
       "budgetLine": "Updating every {interval} to stay within the data budget.",
       "store": "Server store",

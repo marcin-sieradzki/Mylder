@@ -1,9 +1,7 @@
-/* The dialog's body scrolls within the window: the terms, the states, the status and the keys. */
+/* The terms, the states, the status and the keys; the dialog itself scrolls when they overflow. */
 .body {
   display: grid;
   gap: var(--perron-space-300);
-  max-block-size: 60vh;
-  overflow-y: auto;
 }
 
 .body p {

@@ -32,6 +32,14 @@ function show(lang: Lang, snapshot?: Snapshot) {
   )
 }
 
+/** The keys the dialog names, as their Kbd elements read. */
+const keysIn = (dialog: HTMLElement) =>
+  within(dialog)
+    .getAllByText((_, element) => element?.tagName === 'KBD')
+    .map((key) => key.textContent)
+
+const STATE_KEYS = ['live', 'ageing', 'estimated', 'timetableOnly', 'noSignal'] as const
+
 const openDialog = (name: string) => {
   act(() => aboutDialog.open())
   return screen.getByRole('dialog', { name })
@@ -67,21 +75,22 @@ describe('the About dialog', () => {
       'href',
       'https://opendatacommons.org/licenses/odbl/',
     )
-    for (const sentence of Object.values(en.about.states).slice(1)) {
+    for (const sentence of STATE_KEYS.map((key) => en.about.states[key])) {
       expect(dialog).toHaveTextContent(sentence)
     }
     expect(fact(dialog, 'Source')).toBe('A recording, weekday')
     expect(dialog).toHaveTextContent('The vehicles on this page are not real.')
     expect(fact(dialog, 'Positions')).toBe('Reports and computed positions, by turns')
     expect(fact(dialog, "Rejseplanen's realtime")).toBe('07:25:00')
-    expect(fact(dialog, 'Updates')).toBe('Every 60 s')
+    expect(fact(dialog, 'Poll')).toBe('Every 60 s')
+    expect(within(dialog).getByRole('link', { name: 'its licence' })).toHaveAttribute(
+      'href',
+      'https://github.com/marcin-sieradzki/mylder/blob/main/src/map/style/LICENSE.md',
+    )
     expect(fact(dialog, 'Data budget')).toBe('Normal')
     expect(fact(dialog, 'Calls this month')).toBe('7')
     expect(fact(dialog, 'Disruptions')).toBe('Checked 07:20')
-    const keys = within(dialog)
-      .getAllByText((_, element) => element?.tagName === 'KBD')
-      .map((key) => key.textContent)
-    expect(keys).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
+    expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
     expect(dialog).toHaveTextContent('Pause, beside the zoom buttons, stops the vehicles moving')
   })
 
@@ -91,7 +100,7 @@ describe('the About dialog', () => {
     expect(dialog).toHaveTextContent(
       'Realtidsdata og køreplan: Rejseplanen, under CC BY 4.0. Køreplan fra 2. juni.',
     )
-    for (const sentence of Object.values(da.about.states).slice(1)) {
+    for (const sentence of STATE_KEYS.map((key) => da.about.states[key])) {
       expect(dialog).toHaveTextContent(sentence)
     }
     expect(fact(dialog, 'Kilde')).toBe('En optagelse, weekday')
@@ -99,6 +108,23 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Databudget')).toBe('Normalt')
     expect(fact(dialog, 'Kald denne måned')).toBe('7')
     expect(dialog).toHaveTextContent('lukker køretøjets kort eller panel')
+    expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
+    act(() => {
+      liveSnapshot.update({
+        snapshot: {
+          ...weekday,
+          source: { kind: 'simulated', name: 'patchy' },
+          positionMode: 'CALC_REPORT',
+        },
+      })
+    })
+    expect(fact(dialog, 'Kilde')).toBe('Simulerede køretøjer, scenarie patchy')
+    expect(fact(dialog, 'Positioner')).toBe('Positioner beregnet af Rejseplanen')
+    expect(dialog).toHaveTextContent(da.legend.noLive)
+    act(() => {
+      liveSnapshot.update({ snapshot: { ...weekday, source: { kind: 'rejseplanen' } } })
+    })
+    expect(fact(dialog, 'Kilde')).toBe('Rejseplanen')
   })
 
   it('names the simulation and Rejseplanen as sources, and says when no vehicle can be Live', () => {

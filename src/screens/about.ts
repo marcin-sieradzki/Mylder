@@ -5,8 +5,11 @@ import { useSyncExternalStore } from 'react'
 
 export interface AboutStore {
   isOpen(): boolean
-  open(): void
+  /** Opens it from `opener`, which takes the focus back when it closes. */
+  open(opener?: HTMLElement): void
   close(): void
+  /** What opened it last, if anything did. */
+  opener(): HTMLElement | undefined
   /** Calls back whenever it opens or closes; returns the function that stops it. */
   subscribe(onChange: () => void): () => void
 }
@@ -14,6 +17,7 @@ export interface AboutStore {
 /** A store with the dialog closed. */
 export function aboutStore(): AboutStore {
   let opened = false
+  let opener: HTMLElement | undefined
   const listeners = new Set<() => void>()
   const set = (to: boolean) => {
     if (to === opened) return
@@ -22,8 +26,12 @@ export function aboutStore(): AboutStore {
   }
   return {
     isOpen: () => opened,
-    open: () => set(true),
+    open(from) {
+      opener = from
+      set(true)
+    },
     close: () => set(false),
+    opener: () => opener,
     subscribe(onChange) {
       listeners.add(onChange)
       return () => listeners.delete(onChange)

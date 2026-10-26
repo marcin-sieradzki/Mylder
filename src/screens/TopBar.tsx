@@ -1,7 +1,7 @@
 'use client'
 
 import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -22,7 +22,7 @@ import styles from './TopBar.module.css'
 const answeredAt = (snapshot: Snapshot): number | undefined =>
   snapshot.api.status === 'ok' ? snapshot.fetched : undefined
 
-const openAbout = () => aboutDialog.open()
+const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
 
 /** Perron's `info` icon, "About and help", drawn on the top bar's 18 px grid. */
 const INFO_ICON = (
