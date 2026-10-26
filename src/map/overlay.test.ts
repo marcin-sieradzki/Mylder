@@ -46,6 +46,8 @@ const map = {
   on() {},
   off() {},
   getZoom: () => 12,
+  getCanvas: () => document.createElement('canvas'),
+  project: ([x, y]: [number, number]) => ({ x, y }),
 } as unknown as MapLibreMap
 
 let overlay: VehicleOverlay | undefined

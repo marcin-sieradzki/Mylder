@@ -91,7 +91,7 @@ describe("each vehicle's data state, by the clock", () => {
     const live = snapshotStore()
     live.update({ snapshot: minute6, clockOffset: SLOW })
     const store = dataStatesStore(live)
-    const changes = vi.fn()
+    const changes = vi.fn<() => void>()
     store.subscribe(changes)
     changes.mockClear()
     // Read at 240 s, before the second's tick: A has turned Ageing.

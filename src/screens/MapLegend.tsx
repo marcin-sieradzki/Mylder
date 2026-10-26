@@ -2,7 +2,7 @@
 
 import { Surface, Text, VehicleDotLegend } from '@mylder/perron'
 import { useI18n } from '../i18n/useI18n'
-import { useLiveSnapshot } from '../map/live'
+import { useSnapshot } from '../map/live'
 import styles from './MapLegend.module.css'
 
 /**
@@ -12,7 +12,7 @@ import styles from './MapLegend.module.css'
  */
 export function MapLegend() {
   const { dictionary } = useI18n()
-  const calcOnly = useLiveSnapshot().snapshot?.positionMode === 'CALC_REPORT'
+  const calcOnly = useSnapshot()?.positionMode === 'CALC_REPORT'
   return (
     <Surface variant="glass" className={styles.legend}>
       <VehicleDotLegend aria-label={dictionary.legend.label} />
