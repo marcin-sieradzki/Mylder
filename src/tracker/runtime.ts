@@ -87,7 +87,10 @@ async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
       loadTimetable(join(dir, 'timetable')),
       readStart(dir),
     ])
-    return Layer.merge(trackerLayer({ timetable, source, positionMode }), startingAt(start))
+    // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
+    return trackerLayer({ timetable, source, positionMode }).pipe(
+      Layer.provideMerge(startingAt(start)),
+    )
   }
   const timetable = await loadTimetable()
   return trackerLayer({ timetable, source, positionMode, key: process.env[KEY_VARIABLE] })

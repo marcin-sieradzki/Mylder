@@ -5,14 +5,17 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect } from 'effect'
-import { fileContent, recordingDir, type RecordingClock } from '../../src/tracker/recording/layer.ts'
+import {
+  callFile,
+  fileContent,
+  recordingDir,
+  type RecordingClock,
+} from '../../src/tracker/recording/layer.ts'
 import { freeze } from '../../src/tracker/recording/freeze.ts'
 import { RECORDINGS } from '../../src/tracker/recording/plans.ts'
 import { loadTimetable } from '../../src/tracker/timetable.ts'
 import { prepareTimetable } from '../timetable/prepare.ts'
 import { FIXTURE, FIXTURE_HASH } from '../timetable/testing.ts'
-
-const numbered = (index: number) => `${String(index + 1).padStart(4, '0')}.json`
 
 const writeJson = async (path: string, value: unknown) => {
   await mkdir(join(path, '..'), { recursive: true })
@@ -36,11 +39,11 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
   await writeJson(join(dir, 'clock.json'), clock)
   for (const [service, recorded] of calls) {
     for (const [i, call] of recorded.entries()) {
-      await writeJson(join(dir, service, numbered(i)), fileContent(call))
+      await writeJson(join(dir, service, callFile(i)), fileContent(call))
     }
   }
   for (const [i, snapshot] of snapshots.entries()) {
-    await writeJson(join(dir, 'snapshots', numbered(i)), snapshot)
+    await writeJson(join(dir, 'snapshots', callFile(i)), snapshot)
   }
   const answered = [...calls].map(([service, each]) => `${each.length} ${service}`).join(', ')
   console.log(`recordings/${plan.name}: ${answered}, ${snapshots.length} snapshots`)

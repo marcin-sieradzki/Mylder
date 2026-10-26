@@ -8,12 +8,18 @@ import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { startingAt } from './clock'
 import { replay } from './freeze'
-import { recordedClient, recordingDir, RECORDINGS_DIR, type Recorded } from './layer'
+import {
+  callFile,
+  readJson,
+  readRecorded,
+  recordedClient,
+  recordingDir,
+  RECORDINGS_DIR,
+  type Recorded,
+} from './layer'
 import { RECORDINGS } from './plans'
 
 const timetable = await fixtureTimetable()
-
-const readJson = async (path: string): Promise<unknown> => JSON.parse(await readFile(path, 'utf8'))
 
 /** Every file under a folder, by its path. */
 async function filesUnder(dir: string): Promise<string[]> {
@@ -35,11 +41,7 @@ describe('a frozen recording', () => {
         const dir = recordingDir(plan.name)
         const replayed = yield* replay(plan, dir)
         const saved = yield* Effect.promise(() =>
-          Promise.all(
-            replayed.map((_, i) =>
-              readJson(join(dir, 'snapshots', `${String(i + 1).padStart(4, '0')}.json`)),
-            ),
-          ),
+          Promise.all(replayed.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
         )
         expect(replayed).toHaveLength(plan.minutes)
         expect(JSON.parse(JSON.stringify(replayed))).toEqual(saved)
@@ -124,6 +126,13 @@ describe('the recorded layer', () => {
       expect(JSON.parse(text)).toEqual(saved)
     }).pipe(Effect.provide(apiLayer({ source: readSource('recording:weekday'), timetable }))),
   )
+
+  it('refuses a file shaped like a failure that isn\u2019t one', () => {
+    expect(readRecorded({ status: 503 })).toEqual({ status: 503 })
+    expect(readRecorded({ timeout: true })).toEqual({ timeout: true })
+    expect(() => readRecorded({ status: '503' })).toThrow('Not a recorded failure')
+    expect(() => readRecorded({ timeout: false })).toThrow('Not a recorded failure')
+  })
 
   it('keeps a recording inside the recordings folder', () => {
     expect(() => recordingDir('../public')).toThrow('lowercase letters, digits and dashes')

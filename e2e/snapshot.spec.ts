@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { firstSnapshot, RECORDING, SIMULATED_URL } from './recording'
+import { RECORDING, savedSnapshots, SIMULATED_URL } from './recording'
 
 interface SnapshotLike {
   readonly source: unknown
   readonly fetched: number
   readonly nextDue: number
   readonly positionMode: string
+  readonly budget: { readonly calls: number }
   readonly trips: readonly { readonly key: string }[]
 }
 
@@ -18,12 +19,14 @@ test('the snapshot route serves the recording, cached until the next one is due'
   expect(response.status()).toBe(200)
   expect(response.headers()['cache-control']).toMatch('public, max-age=0, must-revalidate')
   const snapshot = (await response.json()) as SnapshotLike
-  const saved = firstSnapshot() as SnapshotLike
   expect(snapshot.source).toEqual({ kind: 'recording', name: RECORDING })
   expect(snapshot.positionMode).toBe('alternating')
-  // The recording's clock starts at its moment, so the first run is its first minute's.
-  expect(snapshot.fetched - saved.fetched).toBeLessThan(60_000)
-  expect(keys(snapshot)).toEqual(keys(saved))
+  // Each run replays the next minute's answer, and the server's clock started at the
+  // recording's moment, so the snapshot is the frozen one for as many runs as it has made.
+  const saved = savedSnapshots() as SnapshotLike[]
+  const frozen = saved[Math.min(snapshot.budget.calls, saved.length) - 1]
+  expect(snapshot.fetched - frozen.fetched).toBeLessThan(60_000)
+  expect(keys(snapshot)).toEqual(keys(frozen))
   expect(snapshot.nextDue).toBeGreaterThan(snapshot.fetched)
 })
 

@@ -1,10 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import { PORT, RECORDING, SIMULATED_PORT } from './e2e/recording'
 
 // The production build serves the weekday recording, at the recording's moment, and a second
 // server on the same build serves the simulation, to prove the default source starts.
-// e2e/recording.ts names both.
-const PORT = 4173
-const SIMULATED_PORT = 4174
 
 export default defineConfig({
   testDir: './e2e',
@@ -24,7 +22,7 @@ export default defineConfig({
     {
       command: `npm run build && npm start -- --port ${PORT}`,
       port: PORT,
-      env: { MYLDER_SOURCE: 'recording:weekday' },
+      env: { MYLDER_SOURCE: `recording:${RECORDING}` },
       reuseExistingServer: !process.env.CI,
     },
     {

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test as base } from '@playwright/test'
 
@@ -16,11 +16,18 @@ export const RECORDING_START = Date.parse(
   (readJson(join(RECORDING_DIR, 'clock.json')) as { start: string }).start,
 )
 
-/** The snapshot the tracker gave at the recording's first minute, when it was frozen. */
-export const firstSnapshot = () => readJson(join(RECORDING_DIR, 'snapshots', '0001.json'))
+/** The frozen snapshots, one a minute, in order. */
+export const savedSnapshots = (): unknown[] => {
+  const dir = join(RECORDING_DIR, 'snapshots')
+  return readdirSync(dir)
+    .sort()
+    .map((name) => readJson(join(dir, name)))
+}
 
-/** The second server on the same build, on the simulation. */
-export const SIMULATED_URL = 'http://localhost:4174'
+/** The server on the recording, and a second one on the same build on the simulation. */
+export const PORT = 4173
+export const SIMULATED_PORT = 4174
+export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 
 export const test = base.extend({
   page: async ({ page }, provide) => {

@@ -31,21 +31,23 @@ export interface RecordingClock {
 
 const FAILURE_KEYS = new Set(['status', 'body', 'timeout'])
 
-/** A file's content as a recorded call: a failure when it has only a failure's keys. */
+/**
+ * A file's content as a recorded call: a failure when it has only a failure's keys, and an error
+ * when those don't make one, rather than a mistyped failure served as a 200.
+ */
 export function readRecorded(content: unknown): Recorded {
-  if (typeof content === 'object' && content !== null && !Array.isArray(content)) {
-    const keys = Object.keys(content)
-    if (keys.length > 0 && keys.every((key) => FAILURE_KEYS.has(key))) {
-      const failure = content as { status?: unknown; body?: unknown; timeout?: unknown }
-      if (failure.timeout === true) return { timeout: true }
-      if (typeof failure.status === 'number') {
-        return 'body' in failure
-          ? { status: failure.status, body: failure.body }
-          : { status: failure.status }
-      }
-    }
+  if (typeof content !== 'object' || content === null || Array.isArray(content)) {
+    return { answer: content }
   }
-  return { answer: content }
+  const keys = Object.keys(content)
+  if (keys.length === 0 || !keys.every((key) => FAILURE_KEYS.has(key))) return { answer: content }
+  const failure = content as { status?: unknown; body?: unknown; timeout?: unknown }
+  if (failure.timeout === true && keys.length === 1) return { timeout: true }
+  if (Number.isInteger(failure.status) && failure.timeout === undefined) {
+    const status = failure.status as number
+    return 'body' in failure ? { status, body: failure.body } : { status }
+  }
+  throw new Error(`Not a recorded failure: ${JSON.stringify(content)}`)
 }
 
 /** A recorded call as its file holds it: the inverse of `readRecorded`. */
@@ -84,14 +86,17 @@ export function recordedClient(calls: Calls): Http.HttpClient.HttpClient {
 }
 
 /** A recording's folder by its name, which can't climb out of the recordings. */
-export function recordingDir(name: string, root: string = process.cwd()): string {
+export function recordingDir(name: string): string {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
     throw new Error(`A recording's name is lowercase letters, digits and dashes, not "${name}"`)
   }
-  return join(/* turbopackIgnore: true */ root, RECORDINGS_DIR, name)
+  return join(/* turbopackIgnore: true */ process.cwd(), RECORDINGS_DIR, name)
 }
 
-const readJson = async (path: string): Promise<unknown> =>
+/** A call's file in its service's folder, by its place in call order from 0: `0001.json` first. */
+export const callFile = (index: number) => `${String(index + 1).padStart(4, '0')}.json`
+
+export const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(/* turbopackIgnore: true */ path, 'utf8'))
 
 /** A recording folder's calls, each service's files in the order their names sort. */

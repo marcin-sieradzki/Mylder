@@ -14,14 +14,14 @@ import type { Source } from '../source.ts'
 import { loadTimetable, type Timetable } from '../timetable.ts'
 import { Tracker } from '../tracker.ts'
 import * as RecordedHttpClient from './layer.ts'
-import type { Recorded } from './layer.ts'
+import type { Calls, Recorded } from './layer.ts'
 import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
 
 /** A frozen recording: each service's calls in order, and the snapshot of every minute. */
 export interface Frozen {
-  readonly calls: ReadonlyMap<Service, readonly Recorded[]>
+  readonly calls: Calls
   readonly snapshots: readonly Snapshot[]
 }
 
@@ -80,6 +80,12 @@ const recordedOf = (status: number, text: string): Recorded => {
 
 /** Runs the tracker over a plan against the simulation, keeping every answer it is given. */
 export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect<Frozen> {
+  // The clock only jumps from minute to minute here, so a call that hangs would hang for good.
+  if (plan.scenario.failures.some((failure) => failure.kind === 'timeout')) {
+    throw new Error(
+      `${plan.name}: a timeout can't be frozen; write its { "timeout": true } file by hand`,
+    )
+  }
   const calls = new Map<Service, Recorded[]>()
   const simulation = simulatedClient({ timetable, scenario: plan.scenario })
   const taped = Http.client((request, url) =>
