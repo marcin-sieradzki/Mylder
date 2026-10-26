@@ -23,7 +23,11 @@ const notFound = (what: string) =>
     { status: 404, headers: { 'Cache-Control': 'no-store' } },
   )
 
-/** Answers with a value due again at its `nextDue`, or 404 when there is none. */
+/**
+ * Answers with a value due again at its `nextDue`, or 404 when there is none. Its date header is
+ * the tracker's clock, which the browser takes as the server's: under a recording, the
+ * recording's moment.
+ */
 async function answer<A extends { readonly nextDue: number }>(
   what: string,
   get: Parameters<typeof runTracker<A | undefined>>[0],
@@ -31,7 +35,9 @@ async function answer<A extends { readonly nextDue: number }>(
   try {
     const [value, now] = await runTracker((tracker) => Effect.all([get(tracker), tracker.now]))
     if (!value) return notFound(what)
-    return Response.json(value, { headers: cacheHeaders(value.nextDue, now) })
+    return Response.json(value, {
+      headers: { ...cacheHeaders(value.nextDue, now), Date: new Date(now).toUTCString() },
+    })
   } catch (error) {
     return unavailable(error)
   }

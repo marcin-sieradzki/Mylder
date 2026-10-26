@@ -7,7 +7,8 @@ import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import type { LineRecord, Mode } from '../../timetable/format.ts'
 import type { Network } from '../../timetable/network.ts'
-import { numberOf, type Paint } from '../paint.ts'
+import type { LatLon } from '../../timetable/polyline.ts'
+import { modeColour, numberOf, type Paint } from '../paint.ts'
 import positron from './positron.json'
 
 type MapColour =
@@ -74,10 +75,6 @@ const RAIL: readonly { mode: Mode; layer: string; width: string; opacity: string
     opacity: 'perron-opacity-map-line',
   },
 ]
-
-/** A line whose token Perron lacks takes its mode's colour, as the vehicles do. */
-const modeColour = (mode: Mode) =>
-  mode === 'bus' ? 'perron-color-transit-mode-bus' : 'perron-color-transit-mode-regional'
 
 const STOP_FILL = map('land')
 const STOP_RING = map('label')
@@ -179,6 +176,38 @@ function drawnLines(network: Network) {
     .filter(({ line }) => line.mode !== 'bus')
 }
 
+/**
+ * A straight step longer than this is a segment without a shape, such as line 083's stops in
+ * Hamburg and Copenhagen joined by one line across the sea, not a track worth drawing.
+ */
+const UNSHAPED_STEP = 20_000
+
+const EARTH_RADIUS = 6_371_000
+
+const metres = ([lat1, lon1]: LatLon, [lat2, lon2]: LatLon) => {
+  const rad = Math.PI / 180
+  const x = (lon2 - lon1) * rad * Math.cos(((lat1 + lat2) / 2) * rad)
+  return Math.hypot(x, (lat2 - lat1) * rad) * EARTH_RADIUS
+}
+
+/**
+ * A segment's points as the lines it is drawn in, [lon, lat], broken at every unshaped step.
+ * Only the drawing leaves them out: vehicles still move along the whole path.
+ */
+function drawnPieces(points: readonly LatLon[]): [number, number][][] {
+  const pieces: [number, number][][] = []
+  let piece: [number, number][] = []
+  points.forEach((point, i) => {
+    if (i > 0 && metres(points[i - 1], point) > UNSHAPED_STEP) {
+      if (piece.length > 1) pieces.push(piece)
+      piece = []
+    }
+    piece.push([point[1], point[0]])
+  })
+  if (piece.length > 1) pieces.push(piece)
+  return pieces
+}
+
 const geometries = new WeakMap<Network, Map<LineRecord, MultiLineString>>()
 
 /** Each line's path as one multi-line of its patterns' segments, decoded once per network. */
@@ -190,8 +219,8 @@ function lineGeometries(network: Network): Map<LineRecord, MultiLineString> {
         line,
         {
           type: 'MultiLineString',
-          coordinates: [...lineSegments].map((segment) =>
-            network.paths.points(segment).map(([lat, lon]) => [lon, lat]),
+          coordinates: [...lineSegments].flatMap((segment) =>
+            drawnPieces(network.paths.points(segment)),
           ),
         },
       ]),

@@ -20,6 +20,10 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },
   "dependencies": {
+    "@deck.gl/core": "9.4.0",
+    "@deck.gl/extensions": "9.4.0",
+    "@deck.gl/layers": "9.4.0",
+    "@deck.gl/maplibre": "9.4.0",
     "@mylder/perron": "0.4.0",
     "client-only": "0.0.1",
     "effect": "4.0.6",

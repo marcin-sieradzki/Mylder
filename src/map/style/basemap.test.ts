@@ -9,6 +9,7 @@ import type {
 } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork } from '../../timetable/network.ts'
+import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
 import { readPaint } from '../paint.ts'
 import { basemapStyle, paintTokens } from './basemap.ts'
 
@@ -42,6 +43,10 @@ const lineColours = (style: StyleSpecification) =>
   Object.fromEntries(
     features(style, 'mylder-lines').map((f) => [f.properties!.line, f.properties!.colour]),
   )
+
+/** The distance between two [lon, lat] points in km, near enough at Copenhagen's latitude. */
+const kilometres = ([lon1, lat1]: number[], [lon2, lat2]: number[]) =>
+  Math.hypot((lon2 - lon1) * 111.32 * Math.cos((55.7 * Math.PI) / 180), (lat2 - lat1) * 110.57)
 
 afterEach(() => {
   delete document.documentElement.dataset.theme
@@ -100,6 +105,42 @@ describe('the basemap', () => {
     expect(
       points.some(([lon, lat]) => Math.abs(lon - 12.585) < 0.003 && Math.abs(lat - 55.68) < 0.003),
     ).toBe(true)
+  })
+
+  it('leaves out the straight steps of an unshaped segment, which would cross the country', () => {
+    // Line 083 to Hamburg has segments without a shape: two stops joined by a straight step
+    // hundreds of km long, or a short shape and then such a step. Given RE a pattern like that:
+    const patterns = read(manifest.files.patterns) as {
+      patterns: { segments: number[]; line: number }[]
+    }
+    const paths = read(manifest.files.paths) as { segments: string[] }
+    const copenhagen: LatLon = [55.67306, 12.56556]
+    const hamburg: LatLon = [53.5525, 10.00666]
+    const valby: LatLon = [55.65263, 12.51685]
+    const first = paths.segments.push(encodePolyline([copenhagen, hamburg])) - 1
+    const second =
+      paths.segments.push(encodePolyline([copenhagen, [55.66, 12.54], valby, hamburg])) - 1
+    const re = patterns.patterns.find((pattern) => pattern.line === 5)!
+    patterns.patterns.push({ ...re, segments: [first, second] })
+    const withHamburg = readNetwork({
+      manifest,
+      stops: read(manifest.files.stops),
+      patterns,
+      paths,
+    })
+    const style = basemapStyle(
+      readPaint(document.documentElement, paintTokens(withHamburg)),
+      withHamburg,
+    )
+    const lines = features(style, 'mylder-lines').find((f) => f.properties!.line === 'RE')!
+    const steps = (lines.geometry as MultiLineString).coordinates.flatMap((line) =>
+      line.slice(1).map((point, i) => kilometres(line[i], point)),
+    )
+    expect(Math.max(...steps)).toBeLessThan(20)
+    // The shaped part of the same segment, and RE's own route to Næstved, are still drawn.
+    const points = (lines.geometry as MultiLineString).coordinates.flat()
+    expect(points).toContainEqual([12.54, 55.66])
+    expect(points.some(([, lat]) => lat < 55.3)).toBe(true)
   })
 
   it('leaves the bus routes out at rest, as Perron draws a bus route only in focus', () => {

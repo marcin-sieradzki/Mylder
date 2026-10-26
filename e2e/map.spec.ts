@@ -18,3 +18,20 @@ test('the canvas has its Danish name at /da', async ({ page }) => {
   await page.goto('/da')
   await expect(page.getByRole('region', { name: 'Livekort over København' })).toBeVisible()
 })
+
+test('the map draws as many vehicles as the snapshot it was served', async ({ page }) => {
+  // Every vehicle that isn't cancelled is drawn, the latest snapshot's.
+  let served: number | undefined
+  page.on('response', async (response) => {
+    if (new URL(response.url()).pathname !== '/api/snapshot' || !response.ok()) return
+    const snapshot = (await response.json()) as { trips: { cancelled?: true }[] }
+    served = snapshot.trips.filter((trip) => !trip.cancelled).length
+  })
+  await page.goto('/en')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toBeAttached()
+  await expect
+    .poll(async () => [Number(await map.getAttribute('data-vehicles')), served])
+    .toEqual([served, served])
+  expect(served).toBeGreaterThan(0)
+})
