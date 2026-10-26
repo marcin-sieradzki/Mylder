@@ -181,6 +181,13 @@
     "vehicles": "Køretøjer",
     "disruptions": "Driftsforstyrrelser"
   },
+  "vehicleList": {
+    "search": "Søg i linjer og destinationer",
+    "placeholder": "Linje eller destination, fx 5C",
+    "positionsAt": "positioner {time}",
+    "noMatch": "Ingen køretøjer matcher.",
+    "none": "Ingen køretøjer på kortet."
+  },
   "pulse": {
     "onTheMove": "I bevægelse",
     "inService": "af {total} i drift",
