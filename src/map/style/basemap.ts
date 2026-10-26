@@ -5,6 +5,7 @@
 import 'client-only'
 import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import { distance } from '../../domain/trip-motion.ts'
 import type { LineRecord, Mode } from '../../timetable/format.ts'
 import type { Network } from '../../timetable/network.ts'
 import type { LatLon } from '../../timetable/polyline.ts'
@@ -182,14 +183,6 @@ function drawnLines(network: Network) {
  */
 const UNSHAPED_STEP = 20_000
 
-const EARTH_RADIUS = 6_371_000
-
-const metres = ([lat1, lon1]: LatLon, [lat2, lon2]: LatLon) => {
-  const rad = Math.PI / 180
-  const x = (lon2 - lon1) * rad * Math.cos(((lat1 + lat2) / 2) * rad)
-  return Math.hypot(x, (lat2 - lat1) * rad) * EARTH_RADIUS
-}
-
 /**
  * A segment's points as the lines it is drawn in, [lon, lat], broken at every unshaped step.
  * Only the drawing leaves them out: vehicles still move along the whole path.
@@ -198,7 +191,7 @@ function drawnPieces(points: readonly LatLon[]): [number, number][][] {
   const pieces: [number, number][][] = []
   let piece: [number, number][] = []
   points.forEach((point, i) => {
-    if (i > 0 && metres(points[i - 1], point) > UNSHAPED_STEP) {
+    if (i > 0 && distance(points[i - 1], point) > UNSHAPED_STEP) {
       if (piece.length > 1) pieces.push(piece)
       piece = []
     }
