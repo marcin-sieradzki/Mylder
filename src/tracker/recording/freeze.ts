@@ -3,10 +3,11 @@
 // layer, and both give the same snapshots (docs/testing-seams.md).
 import 'server-only'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, References } from 'effect'
 import { TestClock } from 'effect/testing'
 import { serviceOf, type Service } from '../rejseplanen/answers.ts'
 import * as Http from '../rejseplanen/http.ts'
+import { stoppedCpu } from '../report.ts'
 import { trackerLayer } from '../runtime.ts'
 import { simulatedClient } from '../simulation/layer.ts'
 import type { Snapshot } from '../snapshot.ts'
@@ -37,7 +38,10 @@ const play = (plan: RecordingPlan) =>
       snapshots.push(yield* tracker.getSnapshot)
     }
     return snapshots
-  })
+  }).pipe(
+    // Each run's report line is noise here; warnings still show.
+    Effect.provideService(References.MinimumLogLevel, 'Warn'),
+  )
 
 interface PositionLike {
   readonly JourneyDetailRef: { readonly ref: string }
@@ -102,7 +106,9 @@ export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect
     }),
   )
   return play(plan).pipe(
-    Effect.provide(trackerLayer({ timetable, source: sourceOf(plan), http: Http.layer(taped) })),
+    Effect.provide(
+      trackerLayer({ timetable, source: sourceOf(plan), http: Http.layer(taped), cpu: stoppedCpu }),
+    ),
     Effect.provide(TestClock.layer()),
     Effect.map((snapshots) => ({ calls, snapshots })),
   )
@@ -114,7 +120,12 @@ export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<readonly
     const timetable = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
     return yield* play(plan).pipe(
       Effect.provide(
-        trackerLayer({ timetable, source: sourceOf(plan), http: RecordedHttpClient.layer(dir) }),
+        trackerLayer({
+          timetable,
+          source: sourceOf(plan),
+          http: RecordedHttpClient.layer(dir),
+          cpu: stoppedCpu,
+        }),
       ),
     )
   }).pipe(Effect.provide(TestClock.layer()))

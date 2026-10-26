@@ -166,6 +166,11 @@ describe('the tracker’s budget', () => {
       expect(countWhenSent).toBe(1)
       expect(s.api).toEqual({ status: 'error', since: MOMENT, kind: 'timeout' })
       expect(s.budget.calls).toBe(2)
+      // Each failed call reports how long it ran.
+      expect(s.status.calls.map(({ outcome, ms }) => [outcome, ms])).toEqual([
+        ['timeout', 8_000],
+        ['timeout', 8_000],
+      ])
     }).pipe(Effect.provide(tracker(hanging)))
   })
 
