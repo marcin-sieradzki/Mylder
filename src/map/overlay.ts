@@ -162,6 +162,15 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   // as it was.
   let aircraftShown = mapView.get().aircraftHidden !== true
   let outline: string | undefined
+  // A load that fails is logged, and asked for again when the next answer lands.
+  const loadOutline = () =>
+    aircraftOutline().then(
+      (loaded) => {
+        outline = loaded
+        if (!removed) drawAircraft()
+      },
+      (error: unknown) => console.error("Perron's aircraft glyph could not load", error),
+    )
   let lookOfAircraft: AircraftLook | undefined
   let aircraftDrawnFrom: AircraftSnapshot | undefined
   const drawAircraft = () => {
@@ -225,6 +234,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       const { snapshot } = liveAircraft.get()
       if (snapshot === aircraftFrom) return
       aircraftFrom = snapshot
+      // An answer landing with no outline yet, its load having failed, asks for it again.
+      if (snapshot && outline === undefined) loadOutline()
       redrawAircraft()
     })
     const stopTurning = aircraftStates.subscribe(redrawAircraft)
@@ -249,13 +260,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     drawAircraft()
   })
   drawAircraft()
-  aircraftOutline().then(
-    (loaded) => {
-      outline = loaded
-      if (!removed) drawAircraft()
-    },
-    (error: unknown) => console.error("Perron's aircraft glyph could not load", error),
-  )
+  loadOutline()
 
   const onZoom = () => {
     const scale = radiusScaleAt(map.getZoom())

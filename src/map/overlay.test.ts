@@ -103,6 +103,7 @@ afterEach(() => {
   liveSnapshot.update({ snapshot: undefined, failingSince: undefined })
   liveAircraft.update({ snapshot: undefined, off: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
   window.history.replaceState(null, '', '/')
 })
 
@@ -238,6 +239,28 @@ describe('the vehicles over the map', () => {
     fresh.view.mapView.update({ aircraftHidden: true })
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(asked.filter((path) => path === '/api/aircraft')).toHaveLength(1)
+  })
+
+  it("asks for Perron's aircraft outline again when an answer lands after its load failed", async () => {
+    // A page of its own, which has not loaded the outline before.
+    vi.resetModules()
+    const fresh = {
+      overlay: await import('./overlay.ts'),
+      aircraft: await import('./aircraft.ts'),
+    }
+    const failing = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let iconAsked = 0
+    vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {
+      if (!String(input).startsWith('data:')) return routes(input)
+      return iconAsked++ === 0 ? new Response(null, { status: 503 }) : fetchData(input)
+    })
+    const container = document.createElement('div')
+    fresh.aircraft.liveAircraft.update(atFetch(aircraft))
+    overlay = fresh.overlay.vehicleOverlay(map, container)
+    await vi.waitFor(() => expect(failing).toHaveBeenCalled())
+    expect(container.dataset.aircraft).toBeUndefined()
+    fresh.aircraft.liveAircraft.update(atFetch({ ...aircraft, fetched: aircraft.fetched + 1 }))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
   })
 
   it('looks for a stop under the pointer once a frame, however often it moves', async () => {
