@@ -72,20 +72,31 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     )
   }
 
+  // A snapshot landing turns its trips' states too: everything asked for at once draws once.
+  let asked = false
+  const redraw = () => {
+    if (asked) return
+    asked = true
+    queueMicrotask(() => {
+      asked = false
+      void draw()
+    })
+  }
+
   const stopListening = liveSnapshot.subscribe(() => {
     const { snapshot } = liveSnapshot.get()
     if (snapshot === drawnFrom) return
     drawnFrom = snapshot
-    void draw()
+    redraw()
   })
-  const stopAgeing = dataStates.subscribe(() => void draw())
+  const stopAgeing = dataStates.subscribe(redraw)
   // A mode filter turned on or off draws the same snapshot again without that mode.
   let filteredBy = mapView.get().hidden
   const stopFiltering = mapView.subscribe(() => {
     const { hidden } = mapView.get()
     if (hidden === filteredBy) return
     filteredBy = hidden
-    void draw()
+    redraw()
   })
   const stopPolling = pollSnapshot()
   drawnFrom = liveSnapshot.get().snapshot
