@@ -26,7 +26,7 @@ import {
 } from '../domain/trip-motion.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
-import { joinJourney } from './join.ts'
+import { joinJourney, type Corrections } from './join.ts'
 import type { PositionJourney, Stop } from './rejseplanen/answers.ts'
 import type { NextCall, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
@@ -57,6 +57,8 @@ export interface TripHistory {
   readonly delay?: number
   /** Rejseplanen's journey, `ZI@DA`. */
   readonly journey?: string
+  /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
+  readonly ref?: string
 }
 
 /** Each trip's history, by trip key. */
@@ -67,6 +69,8 @@ export interface BuildInput {
   readonly now: number
   readonly answer?: PositionAnswer
   readonly history?: History
+  /** The join's corrections, from the `journeyDetail` calls opened trips made. */
+  readonly corrections?: Corrections
   readonly context: Omit<DataStateContext, 'now' | 'fetched'> & { readonly health: ApiHealth }
 }
 
@@ -164,18 +168,43 @@ function positionToDraw(
 }
 
 /**
+ * The history with each corrected journey's entry under the trip the correction names: what an
+ * earlier run saw of a journey was that trip's, whatever the first guess was.
+ */
+function correctedHistory(history: History, corrections: Corrections): History {
+  const moved = Object.entries(history).filter(
+    ([key, entry]) => entry.journey !== undefined && (corrections[entry.journey] ?? key) !== key,
+  )
+  if (moved.length === 0) return history
+  const corrected: Record<string, TripHistory> = { ...history }
+  for (const [key] of moved) delete corrected[key]
+  for (const [, entry] of moved) corrected[corrections[entry.journey!]] ??= entry
+  return corrected
+}
+
+/**
  * The snapshot's trips: every trip the timetable puts on the map at the moment, and every
  * journey of the answer joined to its trip, with what earlier runs saw of them. A trip the
  * answer leaves out keeps its history and ages by the clock; a journey no trip fits is counted,
  * not drawn.
  */
-export function buildTrips({ timetable, now, answer, history = {}, context }: BuildInput): Built {
-  const joined = new Map<string, { journey: PositionJourney; ref: string }>()
+export function buildTrips({
+  timetable,
+  now,
+  answer,
+  history: stored = {},
+  corrections = {},
+  context,
+}: BuildInput): Built {
+  const history = correctedHistory(stored, corrections)
+  const joined = new Map<string, { journey: PositionJourney; id: string; ref: string }>()
   let unmatched = 0
   for (const journey of answer?.journeys ?? []) {
-    const match = joinJourney(timetable, journey, joined)
-    if (match) joined.set(match.trip.key, { journey, ref: match.ref.journey })
-    else unmatched++
+    const match = joinJourney(timetable, journey, joined, corrections)
+    if (match) {
+      const ref = journey.JourneyDetailRef.ref
+      joined.set(match.trip.key, { journey, id: match.ref.journey, ref })
+    } else unmatched++
   }
   const ctx: DataStateContext = { ...context, now, fetched: now }
   const trips: SnapshotTrip[] = []
@@ -204,7 +233,8 @@ export function buildTrips({ timetable, now, answer, history = {}, context }: Bu
         position = { time: now, progress: atFirstStop ? 0 : snapToPath(path, point, hint) }
       }
       const reportedNow = position && answer?.mode === 'REPORT_ONLY'
-      const journey = realtime?.ref ?? before?.journey
+      const journey = realtime?.id ?? before?.journey
+      const ref = realtime?.ref ?? before?.ref
       const seen = position ?? before?.seen
       const reported = reportedNow ? position : before?.reported
       const remembered: TripHistory = {
@@ -212,6 +242,7 @@ export function buildTrips({ timetable, now, answer, history = {}, context }: Bu
         ...(reported ? { reported } : {}),
         ...(delay === undefined ? {} : { delay }),
         ...(journey ? { journey } : {}),
+        ...(ref ? { ref } : {}),
       }
       const hadRealtime = realtime !== undefined || before !== undefined
       if (hadRealtime) kept[trip.key] = remembered

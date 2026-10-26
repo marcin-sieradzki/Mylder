@@ -2,7 +2,7 @@
 // departures and a trip's calls from the timetable plus the snapshot's delay for each trip. They
 // share nothing with the run but the snapshot, so they are pure functions of the two; the tracker
 // reads the snapshot and calls them. The on-demand calls (`on-demand.ts`, `stop-board.ts`) fall
-// back to them. A Metro line reads as an interval, not as departures, until the snapshot has
+// back to them, and the trip's on-demand detail (`trip-detail.ts`) builds on them. A Metro line reads as an interval, not as departures, until the snapshot has
 // carried realtime for it (ADR 0006).
 import 'server-only'
 import { shownAt } from '../domain/departure.ts'
@@ -104,8 +104,26 @@ export interface TripCall {
   readonly name: string
   readonly arrival: number
   readonly departure: number
+  /**
+   * From the trip's detail when the answer came from one, else the timetabled times shifted by
+   * the snapshot's delay. None where neither says.
+   */
   readonly expectedArrival?: number
   readonly expectedDeparture?: number
+  /**
+   * The trip won't call here: the detail cancels every side of the call it has (the arrival at
+   * the last stop, the departure at the first, both between), or the trip is cancelled, or the
+   * snapshot has it so. The call stays, marked.
+   */
+  readonly cancelled?: true
+}
+
+/**
+ * One of the trip's own messages, from its detail: the disruption as received, and the first and
+ * last of the trip's calls it covers, by `TripCall.index`, when it says which.
+ */
+export interface TripMessage extends Disruption {
+  readonly calls?: { readonly first: number; readonly last: number }
 }
 
 export interface TripDetail {
@@ -115,11 +133,21 @@ export interface TripDetail {
   readonly headsign: string
   readonly pattern: number
   readonly state: SnapshotTrip['state']
+  /** The snapshot's delay for the trip, in seconds. */
   readonly delay?: number
+  /**
+   * Rejseplanen's own delay at the trip's next call, in seconds: the detail's expected time there
+   * minus the timetabled one. Only in an answer from the detail, where it has an expected time.
+   */
+  readonly nextCallDelay?: number
+  /** The whole trip is cancelled, by its detail or the snapshot. */
+  readonly cancelled?: true
   readonly fetched: number
   readonly nextDue: number
   readonly source: AnswerSource
   readonly calls: readonly TripCall[]
+  /** The trip's own messages, in an answer from its detail; none from the timetable. */
+  readonly messages?: readonly TripMessage[]
 }
 
 /** What the answers read from a snapshot. */
@@ -327,19 +355,16 @@ export function stopDeparturesFrom(
 }
 
 /**
- * A trip's calls at a moment, at their timetabled times and, when the snapshot has a delay for
- * it, those times shifted by the delay; undefined for a trip not running today.
+ * A trip's calls at their timetabled times and, when the snapshot's entry `live` has a delay,
+ * those times shifted by it, with its state and cancellations.
  */
-export function tripDetailFrom(
+export function tripDetailOf(
   timetable: Timetable,
   snapshot: SnapshotDelays,
-  tripKey: string,
-  now: number,
-): TripDetail | undefined {
-  const trip = plannedTrip(timetable, tripKey, now)
-  if (!trip) return undefined
+  trip: PlannedTrip,
+  live: SnapshotTrip | undefined,
+): TripDetail {
   const { platforms } = timetable.stops
-  const live = tripsByKey(snapshot).get(trip.key)
   const expected = withDelay(trip, live?.delay)
   return {
     key: trip.key,
@@ -349,6 +374,7 @@ export function tripDetailFrom(
     pattern: trip.pattern,
     state: live?.state ?? 'timetable-only',
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
+    ...(live?.cancelled ? { cancelled: true as const } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
@@ -364,6 +390,24 @@ export function tripDetailFrom(
             expectedDeparture: expected[index].departure,
           }
         : {}),
+      ...(live?.cancelled || live?.cancelledCalls?.includes(index)
+        ? { cancelled: true as const }
+        : {}),
     })),
   }
+}
+
+/**
+ * A trip's calls at a moment, at their timetabled times and, when the snapshot has a delay for
+ * it, those times shifted by the delay; undefined for a trip not running today.
+ */
+export function tripDetailFrom(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  tripKey: string,
+  now: number,
+): TripDetail | undefined {
+  const trip = plannedTrip(timetable, tripKey, now)
+  if (!trip) return undefined
+  return tripDetailOf(timetable, snapshot, trip, tripsByKey(snapshot).get(trip.key))
 }
