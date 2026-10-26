@@ -11,9 +11,16 @@ import { Clock, Context, Effect, Layer, Result } from 'effect'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { COPENHAGEN_BOX, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
+import { serviceDayStart } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
-import { buildTrips, expectedUnderway, type History, type PositionAnswer } from './build.ts'
+import {
+  buildTrips,
+  expectedUnderway,
+  lastSeenByMode,
+  type History,
+  type PositionAnswer,
+} from './build.ts'
 import { disruptionsEvery, monthOf, pacing, type Pacing } from './budget.ts'
 import {
   failedList,
@@ -262,6 +269,11 @@ export const layer: Layer.Layer<
             ...(pace.resumes ? { resumes: pace.resumes } : {}),
           },
           store: 'ok',
+          lastSeen: lastSeenByMode(
+            trips,
+            previous?.lastSeen,
+            serviceDayStart(timetable.serviceDaysAt(now)[0], timezone),
+          ),
           disruptions: summaryOf(yield* storedDisruptions),
           source: describeSource(config.source),
           status: {

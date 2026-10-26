@@ -16,6 +16,7 @@
     "resumes": "2026-07-01"
   },
   "store": "ok",
+  "lastSeen": {},
   "disruptions": null,
   "source": {
     "kind": "recording",
