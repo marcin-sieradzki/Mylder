@@ -257,6 +257,22 @@
     "lastChecked": "Sidst tjekket {time}; det seneste tjek mislykkedes.",
     "failed": "Meddelelser fra Rejseplanen: det seneste tjek mislykkedes.",
     "outOfDate": "Kan være forældet.",
-    "incomplete": "Rejseplanen sender højst 100 meddelelser, så listen kan være ufuldstændig."
+    "incomplete": "Rejseplanen sender højst 100 meddelelser, så listen kan være ufuldstændig.",
+    "dataCards": {
+      "title": "Fra Mylder",
+      "mine": "Fra Mylder, om dens egne data",
+      "paused": "Livedata er sat på pause indtil {date}",
+      "pausedNoDate": "Livedata er sat på pause",
+      "noAnswer": "Intet svar fra Rejseplanen siden {time}",
+      "modeQuiet": {
+        "bus": "Ingen buspositioner siden {time}",
+        "metro": "Ingen metropositioner siden {time}",
+        "s-tog": "Ingen S-togspositioner siden {time}",
+        "train": "Ingen togpositioner siden {time}",
+        "light-rail": "Ingen letbanepositioner siden {time}"
+      },
+      "messagesStale": "Driftsmeddelelser ikke opdateret siden {time}",
+      "messagesNever": "Driftsmeddelelser endnu ikke hentet"
+    }
   }
 }

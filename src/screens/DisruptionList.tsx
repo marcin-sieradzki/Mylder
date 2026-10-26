@@ -12,12 +12,14 @@ import {
 } from '@mylder/perron'
 import { DisruptionCard, type DisruptionCardProps } from '@mylder/perron/patterns'
 import { useId } from 'react'
+import type { DataCard } from '../domain/data-cards'
 import { checkedEvery, type DisruptionKind } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale, type Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import {
   disruptionList,
+  useDataCards,
   useListedDisruptions,
   type DisruptionListStore,
   type ListedDisruptions,
@@ -25,8 +27,10 @@ import {
 import { disruptionHighlight, disruptionStops, mapHighlight } from '../map/highlight'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
+import type { Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
+import { dayOf } from './wording'
 import type { Disruption, Snapshot } from '../tracker/index'
 import styles from './DisruptionList.module.css'
 
@@ -180,6 +184,53 @@ function MessageCard({ disruption, kind, clock, network }: MessageCardProps) {
   )
 }
 
+/** A data card's sentence, with its time on the timetable's clock or its date in the language. */
+function sentenceOf(card: DataCard, words: Words['dataCards'], lang: Lang, timezone: string) {
+  const at = (moment: number) => clockTime(moment, timezone)
+  switch (card.kind) {
+    case 'paused':
+      return card.resumes === undefined
+        ? words.pausedNoDate
+        : words.paused.replace('{date}', dayOf(card.resumes, lang))
+    case 'no-answer':
+      return words.noAnswer.replace('{time}', at(card.since))
+    case 'mode-quiet':
+      // The snapshot's modes are the timetable's.
+      return words.modeQuiet[card.mode as Mode].replace('{time}', at(card.since))
+    case 'messages-stale':
+      return card.since === undefined
+        ? words.messagesNever
+        : words.messagesStale.replace('{time}', at(card.since))
+  }
+}
+
+/**
+ * Mylder's own data cards (docs/screens.md, "Disruptions"), first in the list and marked as
+ * Mylder's: each a data feed card whose title says what is missing and since when.
+ */
+function DataCards({ timezone }: { timezone: string }) {
+  const { lang, dictionary } = useI18n()
+  const words = dictionary.disruptions.dataCards
+  const cards = useDataCards()
+  if (cards.length === 0) return null
+  return (
+    <ul aria-label={words.title} className={styles.cards}>
+      {cards.map((card) => (
+        <DisruptionCard
+          key={card.kind === 'mode-quiet' ? `${card.kind}-${card.mode}` : card.kind}
+          render={<li />}
+          severity="data"
+          title={sentenceOf(card, words, lang, timezone)}
+        >
+          <Text variant="caption" emphasis="secondary" render={<p />}>
+            {words.mine}
+          </Text>
+        </DisruptionCard>
+      ))}
+    </ul>
+  )
+}
+
 /**
  * The footer's lines (docs/screens.md, "Footer"): when the list was last checked, the time of its
  * last good answer, how often it is checked, and whether it may be out of date or incomplete.
@@ -204,9 +255,9 @@ function footerOf(
 }
 
 /**
- * The Disruptions tab (docs/screens.md, "Disruptions"): Rejseplanen's messages active now, then
- * those starting within the week under "Later", "Running normally" once when nothing is active,
- * and a footer that says when the list was checked.
+ * The Disruptions tab (docs/screens.md, "Disruptions"): Mylder's own data cards, Rejseplanen's
+ * messages active now, then those starting within the week under "Later", "Running normally"
+ * once when nothing is active, and a footer that says when the list was checked.
  */
 export function DisruptionList({ store = disruptionList }: { store?: DisruptionListStore }) {
   const { lang, dictionary } = useI18n()
@@ -219,9 +270,12 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
 
   if (!listed) {
     return (
-      <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.loading}>
-        {words.loading}
-      </Text>
+      <div className={styles.list}>
+        <DataCards timezone={timezone} />
+        <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.loading}>
+          {words.loading}
+        </Text>
+      </div>
     )
   }
 
@@ -229,6 +283,7 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
   const clock: Clock = { lang, timezone, now }
   return (
     <div className={styles.list}>
+      <DataCards timezone={timezone} />
       {reading.runningNormally && list.checked !== null ? (
         <NormalService
           runningNormallyLabel={words.runningNormally.replace(

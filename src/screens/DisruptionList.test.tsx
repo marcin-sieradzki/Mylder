@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -24,6 +24,12 @@ const snapshot = JSON.parse(
 const NOW = snapshot.fetched
 
 /** A saved answer of the disruption route, from a recording's minute. */
+/** A saved snapshot of a recording's minute. */
+const savedSnapshot = (name: string, recording: string): Snapshot =>
+  JSON.parse(
+    readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
+  ) as Snapshot
+
 const savedList = (name: string, recording = 'weekday'): Disruptions =>
   JSON.parse(
     readFileSync(
@@ -46,14 +52,17 @@ const [busDiversion, signalFault, weekendWorks] = weekday.messages as [
 /** The route's answer, changed. */
 const answer = (change: Partial<Disruptions> = {}): Disruptions => ({ ...weekday, ...change })
 
-/** Shows the tab with `list` as the route's answer, once it has landed. */
-async function show(lang: Lang, list: Disruptions, budget: Snapshot['budget'] = snapshot.budget) {
+/**
+ * Shows the tab with `list` as the route's answer, once it has landed, and `live` as the snapshot
+ * the latest poll brought, at the server's moment `polled`.
+ */
+async function show(
+  lang: Lang,
+  list: Disruptions,
+  { live = snapshot, polled = NOW }: { live?: Snapshot; polled?: number } = {},
+) {
   const store = disruptionListStore(() => Promise.resolve(list))
-  liveSnapshot.update({
-    snapshot: { ...snapshot, budget },
-    lastGoodPoll: NOW - 20_000,
-    clockOffset: 20_000,
-  })
+  liveSnapshot.update({ snapshot: live, lastGoodPoll: polled - 20_000, clockOffset: 20_000 })
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
       <DisruptionList store={store} />
@@ -147,12 +156,12 @@ describe('the Disruptions tab', () => {
   })
 
   it('checks every 30 minutes at the tight level', async () => {
-    await show('en', answer(), { level: 'tight', calls: 46_000 })
+    await show('en', answer(), { live: { ...snapshot, budget: { level: 'tight', calls: 46_000 } } })
     expect(screen.getByText('Checked every 30 min while the map is open.')).toBeInTheDocument()
   })
 
   it('says nothing of how often once the month is spent', async () => {
-    await show('en', answer(), { level: 'spent', calls: 49_500 })
+    await show('en', answer(), { live: { ...snapshot, budget: { level: 'spent', calls: 49_500 } } })
     expect(screen.queryByText(/^Checked every/)).not.toBeInTheDocument()
   })
 
@@ -346,5 +355,79 @@ describe('Show on map', () => {
     await user.click(chip)
     expect(mapHighlight.get()).toBeUndefined()
     expect(chip).not.toBeInTheDocument()
+  })
+})
+
+describe("Mylder's own data cards", () => {
+  const mine = () => screen.queryByRole('list', { name: 'From Mylder' })
+  const titles = () => titlesIn(screen.getByRole('list', { name: 'From Mylder' }))
+  const failing: Snapshot = { ...snapshot, api: { status: 'error', since: NOW } }
+
+  it('are none on a healthy snapshot', async () => {
+    await show('en', answer())
+    expect(mine()).not.toBeInTheDocument()
+  })
+
+  it('say live data is paused until the 1st while the month is spent, first in the list', async () => {
+    await show('en', answer(), { live: savedSnapshot('0003.json', 'spent') })
+    expect(titles()).toEqual(['Live data paused until 1 July'])
+    const [card] = within(mine()!).getAllByRole('listitem')
+    expect(card).toHaveTextContent('Data feed problems')
+    expect(card).toHaveTextContent('From Mylder, about its own data')
+    const lists = screen
+      .getAllByRole('list')
+      .filter((list) => list.parentElement?.tagName === 'DIV')
+    expect(lists[0]).toBe(mine())
+  })
+
+  it('say so in Danish', async () => {
+    await show('da', answer(), { live: savedSnapshot('0003.json', 'spent') })
+    expect(titlesIn(screen.getByRole('list', { name: 'Fra Mylder' }))).toEqual([
+      'Livedata er sat på pause indtil 1. juli',
+    ])
+  })
+
+  it('say Rejseplanen has not answered once it has answered nothing for 5 minutes', async () => {
+    // Rejseplanen failing since 07:20, the minute its last answer carried every mode.
+    await show('en', answer(), { live: failing, polled: NOW + 4 * MINUTE })
+    expect(mine()).not.toBeInTheDocument()
+    cleanup()
+    await show('en', answer(), { live: failing, polled: NOW + 5 * MINUTE })
+    expect(titles()).toEqual(['No answer from Rejseplanen since 07:20'])
+  })
+
+  it('say Intet svar fra Rejseplanen in Danish', async () => {
+    await show('da', answer(), { live: failing, polled: NOW + 6 * MINUTE })
+    expect(titlesIn(screen.getByRole('list', { name: 'Fra Mylder' }))).toEqual([
+      'Intet svar fra Rejseplanen siden 07:20',
+    ])
+  })
+
+  it('name a mode whose positions stopped 5 minutes ago while its trips run', async () => {
+    const quietBuses = {
+      ...snapshot,
+      lastSeen: { ...snapshot.lastSeen, bus: NOW - 6 * MINUTE },
+    }
+    await show('en', answer(), { live: quietBuses })
+    expect(titles()).toEqual(['No bus positions since 07:14'])
+    cleanup()
+    await show('da', answer(), { live: quietBuses })
+    expect(titlesIn(screen.getByRole('list', { name: 'Fra Mylder' }))).toEqual([
+      'Ingen buspositioner siden 07:14',
+    ])
+  })
+
+  it('say the messages are not updated a while after a failed check', async () => {
+    const failed = {
+      ...snapshot,
+      disruptions: { ...snapshot.disruptions!, fetched: NOW - 20 * MINUTE, ok: false },
+    }
+    await show('en', answer(), { live: failed })
+    expect(titles()).toEqual(['Disruption messages not updated since 07:00'])
+    cleanup()
+    await show('da', answer(), { live: failed })
+    expect(titlesIn(screen.getByRole('list', { name: 'Fra Mylder' }))).toEqual([
+      'Driftsmeddelelser ikke opdateret siden 07:00',
+    ])
   })
 })

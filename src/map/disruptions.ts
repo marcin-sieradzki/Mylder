@@ -3,6 +3,7 @@
 // that React reads through `useSyncExternalStore`.
 import 'client-only'
 import { useEffect, useSyncExternalStore } from 'react'
+import { dataCards, type DataCard } from '../domain/data-cards.ts'
 import { readList, type ListReading } from '../domain/disruption.ts'
 import type { Disruption, Disruptions } from '../tracker/index.ts'
 import { usePollMoment, useSnapshot } from './live.ts'
@@ -127,4 +128,15 @@ export function useListedDisruptions(
   if (!list) return undefined
   const now = polled ?? list.checked ?? list.fetched ?? 0
   return { list, reading: readList(list, now), now }
+}
+
+/**
+ * Mylder's own data cards (src/domain/data-cards.ts), read from the live snapshot at the server's
+ * clock when the latest poll landed, so a card appears and clears with the polls; before the
+ * first poll, at the snapshot's own moment. None before a snapshot has landed.
+ */
+export function useDataCards(): readonly DataCard[] {
+  const snapshot = useSnapshot()
+  const polled = usePollMoment()
+  return snapshot ? dataCards(snapshot, polled ?? snapshot.fetched) : []
 }
