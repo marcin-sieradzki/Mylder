@@ -1,7 +1,0 @@
-{
-  "status": 403,
-  "body": {
-    "errorCode": "API_QUOTA",
-    "errorText": "quota exceeded"
-  }
-}

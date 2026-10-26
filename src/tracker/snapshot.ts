@@ -107,7 +107,7 @@ export const Snapshot = Schema.Struct({
   serviceDay: Schema.String,
   timetableVersion: Schema.String,
   positionMode: PositionMode,
-  /** In alternating mode, which mode this snapshot's answer used. */
+  /** In alternating mode, which mode this run asked in, or the last run that called. */
   answerMode: optional(Schema.Literals(['REPORT_ONLY', 'CALC_REPORT'])),
   /** The answer's own `planRtTs`. */
   apiTime: optional(Schema.String),
