@@ -6,6 +6,7 @@ import 'client-only'
 import { useEffect, useState } from 'react'
 import { readDayProfiles, type DayProfiles } from '../timetable/day-profiles.ts'
 import { readNetwork, type Network } from '../timetable/network.ts'
+import { fetchRoute } from './routes.ts'
 
 /** Reads one route's JSON; rejects on a network failure or an answer other than a 2xx. */
 export type FetchJson = (path: string) => Promise<unknown>
@@ -21,7 +22,7 @@ export interface TimetableLoader {
 
 /** Reads a route's JSON from the page's own server. */
 export const fetchFromServer: FetchJson = async (path) => {
-  const response = await fetch(path)
+  const response = await fetchRoute(path)
   if (!response.ok) throw new Error(`${response.status} for ${path}`)
   return response.json()
 }

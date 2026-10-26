@@ -8,6 +8,7 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { StopDepartures, TripDetail } from '../tracker/index.ts'
 import { liveSnapshot, serverNow } from './live.ts'
+import { fetchRoute } from './routes.ts'
 import { mapView, type Panel, type PanelKind, type ViewStore } from './view.ts'
 
 /** Each panel's answer, by what it shows. */
@@ -80,7 +81,7 @@ const isAnswer = (body: unknown): body is { readonly nextDue: number } =>
   typeof (body as { nextDue?: unknown } | null)?.nextDue === 'number'
 
 const browser = (): PanelDeps => ({
-  fetch: (url, init) => fetch(url, init),
+  fetch: fetchRoute,
   timers: {
     set: (run, ms) => setTimeout(run, ms),
     clear: (handle) => clearTimeout(handle),

@@ -6,6 +6,7 @@
 import 'client-only'
 import type { Snapshot } from '../tracker/index.ts'
 import type { SnapshotStore } from './live.ts'
+import { fetchRoute } from './routes.ts'
 
 type Timer = ReturnType<typeof setTimeout>
 
@@ -45,7 +46,7 @@ const NOT_NEW_RETRY = 5 * S
 const NOT_NEW_TRIES = 3
 
 const browser = (): PollerDeps => ({
-  fetch: (url, init) => fetch(url, { ...init, cache: 'no-store' }),
+  fetch: (url, init) => fetchRoute(url, { ...init, cache: 'no-store' }),
   timers: {
     set: (run, ms) => setTimeout(run, ms),
     clear: (handle) => clearTimeout(handle),
