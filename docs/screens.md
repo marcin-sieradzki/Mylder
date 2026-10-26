@@ -144,7 +144,7 @@ Each source has its own clock, and the screens never blend them. A time is alway
 | Disruptions     | "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open.", and the 100-message footer when it applies |
 | About           | Everything above, with the full terms                                                                                               |
 
-The positions' time is shown with seconds in the top bar and to the minute elsewhere. When an answer is older than its refresh (a snapshot older than the poll interval, a board older than a minute, messages older than 15 minutes), the source line adds "may be out of date", and the page notice takes over when Disconnected or Paused applies. On a phone a sheet or panel can cover the map and its corner credit, so each panel's own source line is what keeps the terms met there, and the About dialog is one tap away. Every panel says it the same way: the same words, the same order, source then time.
+The positions' time is shown with seconds in the top bar and to the minute elsewhere. When an answer is older than its refresh (a snapshot older than the poll interval and the few seconds the poll takes to bring the next, by the server's clock, a board older than a minute, messages older than 15 minutes), the source line adds "may be out of date", and the page notice takes over when Disconnected or Paused applies. On a phone a sheet or panel can cover the map and its corner credit, so each panel's own source line is what keeps the terms met there, and the About dialog is one tap away. Every panel says it the same way: the same words, the same order, source then time.
 
 ## Not altering the data
 

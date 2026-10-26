@@ -5,7 +5,7 @@ import { TopBar as PerronTopBar } from '@mylder/perron/patterns'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useLastAnswer, useSnapshot } from '../map/live'
-import { usePaused } from '../map/notices'
+import { useOutOfDate, usePaused } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
@@ -48,6 +48,7 @@ export function TopBar() {
   // The time the server received the latest position answer; while Paused it holds and says so.
   const updatedAt = useLastAnswer()
   const paused = usePaused()
+  const outOfDate = useOutOfDate()
   const phone = usePhone()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
@@ -70,6 +71,8 @@ export function TopBar() {
         // Mylder says a pause after the time, "Updated 07:20:00, paused", so it gives the whole
         // phrase in its own words rather than Perron's "Paused ·" before it.
         updatedLabel={dictionary.topBar[paused ? 'updatedPaused' : 'updated']}
+        // Perron's own phrase, "Updated 07:20:00, may be out of date", in the page's language.
+        outOfDate={outOfDate}
         filtersLabel={dictionary.topBar.modes}
         filters={
           network

@@ -118,6 +118,32 @@ export const pageNoticesStore = (live: SnapshotStore = liveSnapshot): PageNotice
 /** The page's one store of notices, from the page's live snapshot. */
 export const pageNotices = pageNoticesStore()
 
+/**
+ * How long past its poll interval the snapshot may be before the Updated line says so: the
+ * browser asks for the next one up to 4 s after it is due, and again 5 s later while the server's
+ * isn't new yet (poll.ts), so the line doesn't blink at every poll.
+ */
+export const OUT_OF_DATE_GRACE = 10_000
+
+/**
+ * Whether the snapshot `live` holds may be out of date at `now` (docs/screens.md, "Source
+ * lines"): older than its poll interval, by the server's clock. While the page is Disconnected or
+ * Paused its page notice says so instead.
+ */
+export function outOfDateAt(live: LiveSnapshot, now: number): boolean {
+  const { snapshot, failingSince } = live
+  if (!snapshot || failingSince !== undefined || pausedNotice(snapshot, now)) return false
+  return now - snapshot.fetched > snapshot.pollInterval * 1000 + OUT_OF_DATE_GRACE
+}
+
+/** Whether the snapshot may be out of date now, ticking by the server's clock. */
+export const outOfDate: TickingStore<boolean> = tickingStore(outOfDateAt, Object.is)
+
+/** Whether the snapshot may be out of date now, for the Updated line. */
+export function useOutOfDate(store: TickingStore<boolean> = outOfDate): boolean {
+  return useSyncExternalStore(store.subscribe, store.get, () => false)
+}
+
 const isPaused = (notices: PageNotices): boolean =>
   notices.some((notice) => notice.kind === 'paused')
 
