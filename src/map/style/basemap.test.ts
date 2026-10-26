@@ -143,6 +143,71 @@ describe('the basemap', () => {
     expect(points.some(([, lat]) => lat < 55.3)).toBe(true)
   })
 
+  it('draws lines that share a track side by side, a track spacing apart, centred, each keeping its side', () => {
+    // A and E run together from Hundige to Holte, and A alone on to Hillerød. Two lines alone on
+    // a track sit half an S-tog track spacing (2.8 px) either side of its centre, in their
+    // strands' order: A (strand −2) on one side, E (+1) on the other, all the way along.
+    const style = styleNow()
+    expect(layer(style, 'mylder-lines-s-tog').paint['line-offset']).toEqual(['get', 'offset'])
+    // Which way each drawn piece runs: the segment it is, along the line's direction 0 or against.
+    const segmentAt = new Map<string, number>()
+    network.paths.segments.forEach((_, segment) => {
+      const points = network.paths.points(segment).map(([lat, lon]) => [lon, lat])
+      segmentAt.set(JSON.stringify([points[0], points.at(-1)]), segment)
+    })
+    const along = (name: string, segment: number) => {
+      const line = network.patterns.lines.findIndex((each) => each.name === name)
+      const ways = network.patterns.patterns
+        .filter((pattern) => pattern.line === line && pattern.segments.includes(segment))
+        .map((pattern) => (pattern.direction === 0 ? 1 : -1))
+      expect(new Set(ways).size).toBe(1)
+      return ways[0]
+    }
+    const drawn = (name: string) =>
+      features(style, 'mylder-lines')
+        .filter((f) => f.properties!.line === name)
+        .flatMap((f) =>
+          (f.geometry as MultiLineString).coordinates.map((piece) => ({
+            offset: f.properties!.offset as number,
+            segment: segmentAt.get(JSON.stringify([piece[0], piece.at(-1)]))!,
+          })),
+        )
+    const sides = (name: string) =>
+      new Set(
+        drawn(name)
+          .filter(({ offset }) => offset !== 0)
+          .map(({ offset, segment }) => Math.sign(offset) * along(name, segment)),
+      )
+
+    for (const name of ['A', 'E']) {
+      expect(new Set(drawn(name).map(({ offset }) => Math.abs(offset)))).toEqual(
+        new Set(name === 'A' ? [0, 1.4] : [1.4, 0]),
+      )
+      expect(sides(name).size).toBe(1)
+    }
+    expect([...sides('A'), ...sides('E')].sort()).toEqual([-1, 1])
+    // Each stretch once per line: the way back is the same strand, not a mirror of it.
+    const a = drawn('A').map(({ segment }) => segment)
+    expect(new Set(a).size).toBe(a.length)
+    expect(a.length).toBeLessThan(
+      new Set(
+        network.patterns.patterns
+          .filter((pattern) => network.patterns.lines[pattern.line].name === 'A')
+          .flatMap((pattern) => pattern.segments),
+      ).size,
+    )
+  })
+
+  it("keeps a line alone on its track on the centre, beside another mode's line too", () => {
+    // M1 is the only metro line, and RE meets E only between Køge Nord and Køge, on its own track.
+    const offsets = new Set(
+      features(styleNow(), 'mylder-lines')
+        .filter((f) => ['M1', 'RE'].includes(f.properties!.line))
+        .map((f) => f.properties!.offset),
+    )
+    expect(offsets).toEqual(new Set([0]))
+  })
+
   it('leaves the bus routes out at rest, as Perron draws a bus route only in focus', () => {
     expect(Object.keys(lineColours(styleNow()))).not.toContain('5C')
   })
