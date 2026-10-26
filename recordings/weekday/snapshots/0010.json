@@ -32,8 +32,9 @@
     ],
     "unmatched": 0,
     "states": {
-      "timetable-only": 8,
-      "live": 8
+      "estimated": 6,
+      "live": 8,
+      "timetable-only": 2
     }
   },
   "trips": [
@@ -43,31 +44,34 @@
       "mode": "bus",
       "pattern": 0,
       "headsign": "Husum Torv",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": 120,
       "position": [
-        55.674280845730294,
-        12.56481206586331
+        55.671771221942954,
+        12.567685152026264
       ],
-      "progress": 5102,
+      "progress": 4756,
       "next": [
+        {
+          "index": 12,
+          "stop": "10844",
+          "time": 1781587800000
+        },
         {
           "index": 13,
           "stop": "47029",
-          "time": 1781587860000
+          "time": 1781587980000
         },
         {
           "index": 14,
           "stop": "52836",
-          "time": 1781587980000
-        },
-        {
-          "index": 15,
-          "stop": "50461",
-          "time": 1781588160000
+          "time": 1781588100000
         }
-      ]
+      ],
+      "journey": "215225@160626"
     },
     {
       "key": "bus.5C.32331e0e20.20260616.0716",
@@ -75,9 +79,11 @@
       "mode": "bus",
       "pattern": 0,
       "headsign": "Husum Torv",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": 0,
       "position": [
         55.668370436960345,
         12.583999148704258
@@ -99,7 +105,8 @@
           "stop": "3005",
           "time": 1781588040000
         }
-      ]
+      ],
+      "journey": "164078@160626"
     },
     {
       "key": "bus.5C.a74214d87d.20260616.0714",
@@ -143,31 +150,34 @@
       "mode": "bus",
       "pattern": 2,
       "headsign": "Sundbyvester Plads",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": -60,
       "position": [
-        55.69639,
-        12.54574
+        55.695125000000004,
+        12.54764
       ],
-      "progress": 8697,
+      "progress": 8882,
       "next": [
         {
           "index": 17,
           "stop": "2152",
-          "time": 1781587860000
+          "time": 1781587800000
         },
         {
           "index": 18,
           "stop": "1971",
-          "time": 1781587920000
+          "time": 1781587860000
         },
         {
           "index": 19,
           "stop": "1972",
-          "time": 1781587980000
+          "time": 1781587920000
         }
-      ]
+      ],
+      "journey": "520052@160626"
     },
     {
       "key": "bus.5C.b4936c5f43.20260616.0716",
@@ -175,31 +185,34 @@
       "mode": "bus",
       "pattern": 2,
       "headsign": "Sundbyvester Plads",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": 60,
       "position": [
-        55.70903,
-        12.48184
+        55.71028,
+        12.47818
       ],
-      "progress": 4136,
+      "progress": 3850,
       "next": [
+        {
+          "index": 6,
+          "stop": "1966",
+          "time": 1781587800000
+        },
         {
           "index": 7,
           "stop": "2008",
-          "time": 1781587800000
+          "time": 1781587860000
         },
         {
           "index": 8,
           "stop": "2009",
-          "time": 1781587920000
-        },
-        {
-          "index": 9,
-          "stop": "2010",
           "time": 1781587980000
         }
-      ]
+      ],
+      "journey": "206120@160626"
     },
     {
       "key": "bus.991.7ce514fd98.20260616.0700",
@@ -207,9 +220,11 @@
       "mode": "bus",
       "pattern": 3,
       "headsign": "Teglholmen",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": 0,
       "position": [
         55.68706256665133,
         12.599472708810497
@@ -231,7 +246,8 @@
           "stop": "10761",
           "time": 1781588760000
         }
-      ]
+      ],
+      "journey": "877702@160626"
     },
     {
       "key": "bus.991.7ce514fd98.20260616.0730",
@@ -468,31 +484,34 @@
       "mode": "s-tog",
       "pattern": 9,
       "headsign": "Holte St.",
-      "state": "timetable-only",
-      "source": "timetable",
-      "hadRealtime": false,
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587680000,
+      "hadRealtime": true,
+      "delay": 60,
       "position": [
-        55.62345,
-        12.38841
+        55.6214054778539,
+        12.370000080966149
       ],
-      "progress": 25254,
+      "progress": 24065,
       "next": [
+        {
+          "index": 9,
+          "stop": "8600767",
+          "time": 1781587800000
+        },
         {
           "index": 10,
           "stop": "8600766",
-          "time": 1781587860000
+          "time": 1781587920000
         },
         {
           "index": 11,
           "stop": "8600765",
-          "time": 1781587920000
-        },
-        {
-          "index": 12,
-          "stop": "8600764",
           "time": 1781587980000
         }
-      ]
+      ],
+      "journey": "559566@160626"
     },
     {
       "key": "s-tog.E.e8dc141a28.20260616.0702",

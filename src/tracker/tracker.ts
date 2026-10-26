@@ -1,6 +1,7 @@
 // The tracker run (docs/live-data.md, "One call a minute"): whoever asks, at most once a poll
-// interval, take the lease for the slot or serve the stored snapshot; call `journeyPos` for the
-// city box in the configured position mode; join the answer to the timetable and the stored
+// interval, take the lease for the run or serve the stored snapshot; set the budget level and,
+// unless the month is spent, call `journeyPos` for the city box in the configured position mode;
+// join the answer to the timetable and the stored
 // history, run the domain rules for every trip on the map, store the snapshot and the history,
 // and return the snapshot. A failed or empty call keeps every trip's history, so trips age by the
 // clock. The stop and trip answers come from the timetable plus the snapshot's delays until
@@ -13,6 +14,7 @@ import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import { buildTrips, expectedUnderway, type History, type PositionAnswer } from './build.ts'
+import { monthOf, pacing, type Pacing } from './budget.ts'
 import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
@@ -25,9 +27,6 @@ export const PRODUCTS = 3839
 
 /** The most journeys one answer may hold. */
 export const MAX_JOURNEYS = 1000
-
-/** The poll interval, in seconds, until the budget paces it (#55). */
-export const POLL_INTERVAL = 60
 
 /** How long a stop's departures look ahead. */
 export const DEPARTURES_AHEAD = 60 * 60_000
@@ -113,20 +112,23 @@ export interface TrackerShape {
 
 export class Tracker extends Context.Service<Tracker, TrackerShape>()('mylder/tracker/Tracker') {}
 
-/** The mode an alternating tracker asks in for a slot: reports on odd slots, computed on even. */
-export const alternatingMode = (slot: number) => (slot % 2 === 1 ? 'REPORT_ONLY' : 'CALC_REPORT')
+/**
+ * The mode an alternating tracker asks in: the other one from the previous run's, so each comes
+ * every other run at any poll interval. With no previous run, reports on odd minutes, computed
+ * on even.
+ */
+export function alternatingMode(previous: Snapshot['answerMode'], now: number) {
+  if (previous) return previous === 'REPORT_ONLY' ? 'CALC_REPORT' : 'REPORT_ONLY'
+  return Math.floor(now / 60_000) % 2 === 1 ? 'REPORT_ONLY' : 'CALC_REPORT'
+}
 
 const SNAPSHOT_SECONDS = 86_400
 
-/** The month a moment falls in, as `YYYY-MM`, in a zone. */
-export function monthIn(timezone: string): (now: number) => string {
-  const format = new Intl.DateTimeFormat('en-CA', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-  })
-  return (now) => format.format(now).slice(0, 7)
-}
+/** How long a run's lease holds: past any run, which a call's two 8 s attempts bound. */
+const LEASE_SECONDS = 60
+
+/** How long a quota error is kept: past the end of any month it falls in. */
+const QUOTA_SECONDS = 32 * 86_400
 
 /** A source as the snapshot names it. */
 export const describeSource = (source: Source): Snapshot['source'] =>
@@ -148,7 +150,7 @@ export const layer: Layer.Layer<
     const store = yield* Store
     const rejseplanen = yield* Rejseplanen
     const key = (name: string) => `${config.keyPrefix}:${name}`
-    const month = monthIn(timetable.manifest.timezone)
+    const { timezone } = timetable.manifest
 
     // The in-memory store keeps the snapshot and history as built; the Redis adapter (#56)
     // decodes them on the way back.
@@ -159,14 +161,26 @@ export const layer: Layer.Layer<
       .get(key('history'))
       .pipe(Effect.map((value) => value as History | undefined))
 
-    /** The month's budget as the snapshot shows it; levels arrive with the pacing (#55). */
-    const budget = (now: number) =>
-      store.get(callsKey(config.keyPrefix, month(now))).pipe(
-        Effect.map((calls): Snapshot['budget'] => ({
-          level: 'normal',
-          calls: typeof calls === 'number' ? calls : 0,
-        })),
-      )
+    /** The month's calls so far. */
+    const callsIn = (month: string) =>
+      store
+        .get(callsKey(config.keyPrefix, month))
+        .pipe(Effect.map((calls) => (typeof calls === 'number' ? calls : 0)))
+
+    /** Where a quota error is remembered, so the month stays spent until the 1st. */
+    const quotaKey = (month: string) => key(`quota:${month}`)
+
+    /** The month's pacing from its counter and any quota error this month. */
+    const paceAt = (now: number) =>
+      Effect.gen(function* () {
+        const month = monthOf(now, timezone).key
+        return pacing({
+          calls: yield* callsIn(month),
+          now,
+          timezone,
+          quotaGone: (yield* store.get(quotaKey(month))) === true,
+        })
+      })
 
     /**
      * Builds a snapshot at a moment from the history and, when a call made one, an answer, and
@@ -175,7 +189,9 @@ export const layer: Layer.Layer<
     const snapshotAt = (
       now: number,
       previous: Snapshot | undefined,
+      before: Pacing,
       outcome: {
+        mode?: PositionAnswer['mode']
         answer?: PositionAnswer
         health: Outcome
         apiTime?: string
@@ -184,28 +200,41 @@ export const layer: Layer.Layer<
     ) =>
       Effect.gen(function* () {
         const api = healthAfter(previous?.api, outcome.health, now)
+        // The level set before the call holds, unless Rejseplanen has just called the month spent.
+        const pace =
+          outcome.health.status === 'spent' && before.level !== 'spent'
+            ? pacing({ calls: before.calls, now, timezone, quotaGone: true })
+            : before
         const { trips, unmatched, history } = buildTrips({
           timetable,
           now,
           answer: outcome.answer,
           history: yield* storedHistory,
-          context: { pollInterval: POLL_INTERVAL, positionMode: config.positionMode, health: api },
+          context: {
+            pollInterval: pace.pollInterval,
+            positionMode: config.positionMode,
+            health: api,
+          },
         })
         const states: Record<string, number> = {}
         for (const trip of trips) states[trip.state] = (states[trip.state] ?? 0) + 1
         const snapshot: Snapshot = {
           fetched: now,
-          nextDue: now + POLL_INTERVAL * 1000,
-          pollInterval: POLL_INTERVAL,
+          nextDue: now + pace.pollInterval * 1000,
+          pollInterval: pace.pollInterval,
           serviceDay: timetable.serviceDaysAt(now).at(-1)!,
           timetableVersion: timetable.manifest.version,
           positionMode: config.positionMode,
-          ...(config.positionMode === 'alternating' && outcome.answer
-            ? { answerMode: outcome.answer.mode }
+          ...(config.positionMode === 'alternating' && outcome.mode
+            ? { answerMode: outcome.mode }
             : {}),
           ...(outcome.apiTime ? { apiTime: outcome.apiTime } : {}),
           api,
-          budget: yield* budget(now),
+          budget: {
+            level: pace.level,
+            calls: yield* callsIn(pace.month.key),
+            ...(pace.resumes ? { resumes: pace.resumes } : {}),
+          },
           store: 'ok',
           disruptions: null,
           source: describeSource(config.source),
@@ -215,13 +244,25 @@ export const layer: Layer.Layer<
         return { snapshot, history }
       })
 
-    /** One run: the call, the build, the store. */
-    const run = (now: number, slot: number, previous: Snapshot | undefined) =>
+    /** One run: the budget, the call, the build. */
+    const run = (now: number, previous: Snapshot | undefined) =>
       Effect.gen(function* () {
+        const pace = yield* paceAt(now)
+        // A spent month makes no call: the trips move on and age from their history alone, and
+        // the modes take turns again from where they stopped.
+        if (pace.level === 'spent') {
+          return yield* snapshotAt(now, previous, pace, {
+            ...(previous?.answerMode ? { mode: previous.answerMode } : {}),
+            health: { status: 'spent' },
+            calls: [],
+          })
+        }
         const mode =
-          config.positionMode === 'alternating' ? alternatingMode(slot) : config.positionMode
+          config.positionMode === 'alternating'
+            ? alternatingMode(previous?.answerMode, now)
+            : config.positionMode
         if (mode === 'none') {
-          return yield* snapshotAt(now, previous, { health: { status: 'ok' }, calls: [] })
+          return yield* snapshotAt(now, previous, pace, { health: { status: 'ok' }, calls: [] })
         }
         const result = yield* Effect.result(
           rejseplanen.journeyPos({
@@ -235,7 +276,8 @@ export const layer: Layer.Layer<
           const { answer, attempts, ms } = result.success
           const journeys = answer.Journey ?? []
           const health = answerOutcome(journeys.length, expectedUnderway(timetable, now))
-          return yield* snapshotAt(now, previous, {
+          return yield* snapshotAt(now, previous, pace, {
+            mode,
             answer: { journeys, mode },
             health,
             ...(answer.planRtTs ? { apiTime: answer.planRtTs } : {}),
@@ -246,7 +288,10 @@ export const layer: Layer.Layer<
         // and ages by the rules (docs/live-data.md, "What can go wrong"). The message carries no key.
         const error: CallError = result.failure
         yield* Effect.logWarning(`Tracker run: ${error.message}`)
-        return yield* snapshotAt(now, previous, {
+        // A quota error holds until the 1st; a refused key is tried again at the next run.
+        if (error.kind === 'quota') yield* store.set(quotaKey(pace.month.key), true, QUOTA_SECONDS)
+        return yield* snapshotAt(now, previous, pace, {
+          mode,
           health: failureOutcome(error),
           calls: [{ service: 'journeyPos', outcome: error.kind, attempts: error.attempts, ms: 0 }],
         })
@@ -256,19 +301,21 @@ export const layer: Layer.Layer<
       const now = yield* Clock.currentTimeMillis
       const previous = yield* stored
       if (previous && now < previous.nextDue) return previous
-      const slot = Math.floor(now / (POLL_INTERVAL * 1000))
-      const leased = yield* store.setIfAbsent(key(`lease:${slot}`), now, POLL_INTERVAL)
+      // One lease for each run, named by the moment it falls due, so whatever the poll interval
+      // only one request makes it.
+      const lease = key(`lease:${previous?.nextDue ?? 'first'}`)
+      const leased = yield* store.setIfAbsent(lease, now, LEASE_SECONDS)
       if (!leased) {
-        // Another request holds this slot's run: serve what is stored, or the timetable alone,
-        // due again in a few seconds so the CDN asks soon.
+        // Another request holds this run: serve what is stored, or the timetable alone, due
+        // again in a few seconds so the CDN asks soon.
         if (previous) return previous
-        const { snapshot } = yield* snapshotAt(now, previous, {
+        const { snapshot } = yield* snapshotAt(now, previous, yield* paceAt(now), {
           health: { status: 'ok' },
           calls: [],
         })
         return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }
       }
-      const { snapshot, history } = yield* run(now, slot, previous)
+      const { snapshot, history } = yield* run(now, previous)
       yield* store.set(key('snapshot'), snapshot, SNAPSHOT_SECONDS)
       yield* store.set(key('history'), history, SNAPSHOT_SECONDS)
       return snapshot
@@ -390,5 +437,5 @@ export const layer: Layer.Layer<
 export const clientSettings = (settings: TrackerSettings, timetable: Timetable, key?: string) => ({
   ...(key ? { key } : {}),
   counterPrefix: settings.keyPrefix,
-  monthOf: monthIn(timetable.manifest.timezone),
+  monthOf: (now: number) => monthOf(now, timetable.manifest.timezone).key,
 })

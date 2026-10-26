@@ -32,7 +32,8 @@
     ],
     "unmatched": 0,
     "states": {
-      "estimated": 13,
+      "estimated": 6,
+      "live": 7,
       "timetable-only": 4
     }
   },
@@ -113,9 +114,10 @@
       "mode": "bus",
       "pattern": 1,
       "headsign": "Sundbyvester Plads",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 120,
       "position": [
@@ -381,16 +383,17 @@
       "mode": "s-tog",
       "pattern": 6,
       "headsign": "Hillerød St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 240,
       "position": [
-        55.62696249396802,
-        12.46826813906675
+        55.6269670783957,
+        12.468390451597212
       ],
-      "progress": 9930,
+      "progress": 9938,
       "next": [
         {
           "index": 5,
@@ -417,16 +420,17 @@
       "mode": "s-tog",
       "pattern": 6,
       "headsign": "Hillerød St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 60,
       "position": [
-        55.622671471362466,
-        12.375966011911443
+        55.62266711792907,
+        12.375931044010922
       ],
-      "progress": 3950,
+      "progress": 3948,
       "next": [
         {
           "index": 2,
@@ -453,9 +457,10 @@
       "mode": "s-tog",
       "pattern": 7,
       "headsign": "Hundige St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 120,
       "position": [
@@ -489,16 +494,17 @@
       "mode": "s-tog",
       "pattern": 7,
       "headsign": "Hundige St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 120,
       "position": [
-        55.88173797242508,
-        12.347249611049488
+        55.88170541595904,
+        12.347279060664475
       ],
-      "progress": 5930,
+      "progress": 5934,
       "next": [
         {
           "index": 2,
@@ -561,14 +567,15 @@
       "mode": "s-tog",
       "pattern": 10,
       "headsign": "Køge St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 120,
       "position": [
-        55.719939233846674,
-        12.57193770393667
+        55.71993255683827,
+        12.57194144816187
       ],
       "progress": 12377,
       "next": [
@@ -597,9 +604,10 @@
       "mode": "train",
       "pattern": 11,
       "headsign": "Næstved St.",
-      "state": "estimated",
-      "source": "computed",
+      "state": "live",
+      "source": "reported",
       "seen": 1781587320000,
+      "reported": 1781587260000,
       "hadRealtime": true,
       "delay": 60,
       "position": [
