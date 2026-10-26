@@ -87,6 +87,56 @@ describe('the Rejseplanen client', () => {
     }).pipe(Effect.provide(layer))
   })
 
+  it.effect(
+    'asks multiDepartureBoard for every platform at once, counted under its service',
+    () => {
+      const departure = {
+        JourneyDetailRef: { ref: '2|#ZI#1#' },
+        name: 'Bus 5C',
+        stop: 'Nørreport St.',
+        stopExtId: '8603307',
+        time: '07:24:00',
+        date: '2026-06-16',
+        rtTime: '07:26:00',
+      }
+      const { layer, urls } = answering([
+        (request) => Effect.succeed(Http.json(request, 200, { Departure: [departure] })),
+      ])
+      return Effect.gen(function* () {
+        const { answer } = yield* (yield* Rejseplanen).multiDepartureBoard({
+          ids: ['8603307', '8603308'],
+          duration: 30,
+        })
+        expect(answer.Departure).toEqual([departure])
+        const url = new URL(urls[0])
+        expect(url.pathname).toBe('/api/multiDepartureBoard')
+        expect(Object.fromEntries(url.searchParams)).toMatchObject({
+          accessId: KEY,
+          format: 'json',
+          idList: '8603307|8603308',
+          duration: '30',
+        })
+        expect(yield* (yield* Store).get('test:calls:2026-10:multiDepartureBoard')).toBe(1)
+      }).pipe(Effect.provide(layer))
+    },
+  )
+
+  it.effect('asks journeyDetail for a reference, counted under its service', () => {
+    const stop = { name: 'Nørreport St.', extId: '8603307', lon: 12.57, lat: 55.68 }
+    const { layer, urls } = answering([
+      (request) => Effect.succeed(Http.json(request, 200, { Stops: { Stop: [stop] } })),
+    ])
+    return Effect.gen(function* () {
+      const { answer } = yield* (yield* Rejseplanen).journeyDetail({ ref: '2|#ZI#1#' })
+      expect(answer.Stops.Stop).toEqual([stop])
+      const url = new URL(urls[0])
+      expect(url.pathname).toBe('/api/journeyDetail')
+      expect(url.searchParams.get('id')).toBe('2|#ZI#1#')
+      expect(yield* (yield* Store).get('test:calls:2026-10:journeyDetail')).toBe(1)
+      expect(yield* callCount).toBe(1)
+    }).pipe(Effect.provide(layer))
+  })
+
   it.effect('tries a 503 once more and counts both calls', () => {
     const { layer } = answering([status(503), ok])
     return Effect.gen(function* () {

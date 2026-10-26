@@ -11,13 +11,14 @@ import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
 import {
   plannedTrip,
-  stopDeparturesFrom,
   stopIndexOf,
   tripDetailFrom,
   type StopDepartures,
   type TripDetail,
 } from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
+import { onDemand } from './on-demand.ts'
+import { stopAnswer } from './stop-board.ts'
 import {
   buildTrips,
   expectedUnderway,
@@ -286,9 +287,9 @@ export const layer: Layer.Layer<
      * Logs a failed call, whose message carries no key. A quota error holds until the 1st; a
      * refused key is tried again at the next run.
      */
-    const noteFailure = (error: CallError, pace: Pacing) =>
+    const noteFailure = (error: CallError, pace: Pacing, what = 'Tracker run') =>
       Effect.gen(function* () {
-        yield* Effect.logWarning(`Tracker run: ${error.message}`)
+        yield* Effect.logWarning(`${what}: ${error.message}`)
         if (error.kind === 'quota') yield* store.set(quotaKey(pace.month.key), true, QUOTA_SECONDS)
         return error
       })
@@ -380,11 +381,22 @@ export const layer: Layer.Layer<
       return snapshot
     })
 
+    /** The on-demand calls opened stops and trips make, cached and limited in the store. */
+    const ask = onDemand({
+      store,
+      key,
+      pace: paceAt,
+      failed: (error, pace) => noteFailure(error, pace, 'On-demand call'),
+    })
+
     // An unknown stop or trip answers without a run.
     const getStopDepartures = (stopId: string) =>
       Effect.gen(function* () {
         if (stopIndexOf(timetable, stopId) < 0) return undefined
-        return stopDeparturesFrom(timetable, yield* getSnapshot, stopId)
+        const snapshot = yield* getSnapshot
+        const list = yield* storedDisruptions
+        const board = rejseplanen.multiDepartureBoard
+        return yield* stopAnswer({ timetable, snapshot, list, ask, board }, stopId)
       })
 
     const getTripDetail = (tripKey: string) =>
