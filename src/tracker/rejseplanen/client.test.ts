@@ -67,6 +67,26 @@ describe('the Rejseplanen client', () => {
     }).pipe(Effect.provide(layer))
   })
 
+  it.effect('asks himsearch for the products with the key, counted under its own service', () => {
+    const message = { id: 'm1', head: 'Signalfejl ved Østerport', category: '1' }
+    const { layer, urls } = answering([
+      (request) => Effect.succeed(Http.json(request, 200, { Message: [message] })),
+    ])
+    return Effect.gen(function* () {
+      const { answer } = yield* (yield* Rejseplanen).himsearch({ products: 3839 })
+      expect(answer.Message).toEqual([message])
+      const url = new URL(urls[0])
+      expect(url.pathname).toBe('/api/himsearch')
+      expect(Object.fromEntries(url.searchParams)).toMatchObject({
+        accessId: KEY,
+        format: 'json',
+        products: '3839',
+      })
+      expect(yield* callCount).toBe(1)
+      expect(yield* (yield* Store).get('test:calls:2026-10:himsearch')).toBe(1)
+    }).pipe(Effect.provide(layer))
+  })
+
   it.effect('tries a 503 once more and counts both calls', () => {
     const { layer } = answering([status(503), ok])
     return Effect.gen(function* () {

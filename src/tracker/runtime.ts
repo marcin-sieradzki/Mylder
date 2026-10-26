@@ -1,10 +1,11 @@
 // The tracker's runtime: its layers composed once per instance, from the settings read at the
 // first request (docs/testing-seams.md, "The switch"), so one build serves every source.
 import 'server-only'
-import { Effect, Layer, ManagedRuntime, Schema } from 'effect'
+import { Effect, Layer, Logger, ManagedRuntime, Schema } from 'effect'
 import { join } from 'node:path'
 import { startingAt } from './recording/clock.ts'
 import { readStart, recordingDir } from './recording/layer.ts'
+import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
 import type * as Http from './rejseplanen/http.ts'
@@ -51,6 +52,8 @@ export interface TrackerLayerOptions {
   /** The `HttpClient` the API answers through; the source's own when left out. */
   readonly http?: Layer.Layer<Http.HttpClient.HttpClient>
   readonly key?: string
+  /** The CPU clock runs measure themselves by; the process's own when left out. */
+  readonly cpu?: Layer.Layer<CpuClock>
 }
 
 /** The tracker with all it needs: the store in memory, the timetable, the source's client. */
@@ -70,6 +73,7 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
     memoryLayer,
     Layer.succeed(TimetableService, options.timetable),
     Layer.succeed(TrackerConfig, settings),
+    options.cpu ?? processCpu,
   )
   return trackerServiceLayer.pipe(Layer.provide(client), Layer.provideMerge(base))
 }
@@ -112,7 +116,10 @@ let runtime: Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> | un
  */
 export function trackerRuntime(): Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> {
   if (runtime) return runtime
-  runtime = environmentLayer().then((layer) => ManagedRuntime.make(layer))
+  // One JSON line per log, which the host's log search reads field by field.
+  runtime = environmentLayer().then((layer) =>
+    ManagedRuntime.make(layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson])))),
+  )
   runtime.catch(() => {
     runtime = undefined
   })

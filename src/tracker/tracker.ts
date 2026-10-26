@@ -14,8 +14,18 @@ import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import { buildTrips, expectedUnderway, type History, type PositionAnswer } from './build.ts'
-import { monthOf, pacing, type Pacing } from './budget.ts'
+import { disruptionsEvery, monthOf, pacing, type Pacing } from './budget.ts'
+import {
+  failedList,
+  fetchDue,
+  fetchedList,
+  servedList,
+  summaryOf,
+  type DisruptionList,
+  type Disruptions,
+} from './disruptions.ts'
 import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
+import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Source } from './source.ts'
@@ -94,11 +104,23 @@ export interface TripDetail {
   readonly calls: readonly TripCall[]
 }
 
-export interface Disruptions {
-  /** When the list was last fetched; null until the first `himsearch` (#57). */
-  readonly fetched: number | null
-  readonly ok: boolean
-  readonly messages: readonly unknown[]
+/** A failed call as the status section lists it. */
+const callFailed = (error: CallError): Snapshot['status']['calls'][number] => ({
+  service: error.service,
+  outcome: error.kind,
+  attempts: error.attempts,
+  ms: error.ms ?? 0,
+  ...(error.status === undefined ? {} : { status: error.status }),
+})
+
+/** How a run's calls went, for the snapshot it builds. */
+interface RunOutcome {
+  /** The mode the run asked in, for alternating mode's turns. */
+  readonly mode?: PositionAnswer['mode']
+  readonly answer?: PositionAnswer
+  readonly health: Outcome
+  readonly apiTime?: string
+  readonly calls: Snapshot['status']['calls']
 }
 
 export interface TrackerShape {
@@ -127,6 +149,9 @@ const SNAPSHOT_SECONDS = 86_400
 /** How long a run's lease holds: past any run, which a call's two 8 s attempts bound. */
 const LEASE_SECONDS = 60
 
+/** How long the disruption list is kept: a spent month's screen still shows its last list. */
+const DISRUPTIONS_SECONDS = 32 * 86_400
+
 /** How long a quota error is kept: past the end of any month it falls in. */
 const QUOTA_SECONDS = 32 * 86_400
 
@@ -141,7 +166,7 @@ export const describeSource = (source: Source): Snapshot['source'] =>
 export const layer: Layer.Layer<
   Tracker,
   never,
-  TrackerConfig | TimetableService | Store | Rejseplanen
+  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock
 > = Layer.effect(
   Tracker,
   Effect.gen(function* () {
@@ -149,8 +174,10 @@ export const layer: Layer.Layer<
     const timetable = yield* TimetableService
     const store = yield* Store
     const rejseplanen = yield* Rejseplanen
+    const cpu = yield* CpuClock
     const key = (name: string) => `${config.keyPrefix}:${name}`
     const { timezone } = timetable.manifest
+    const area = { stops: timetable.stops, products: PRODUCTS, timezone }
 
     // The in-memory store keeps the snapshot and history as built; the Redis adapter (#56)
     // decodes them on the way back.
@@ -160,6 +187,9 @@ export const layer: Layer.Layer<
     const storedHistory = store
       .get(key('history'))
       .pipe(Effect.map((value) => value as History | undefined))
+    const storedDisruptions = store
+      .get(key('disruptions'))
+      .pipe(Effect.map((value) => value as DisruptionList | undefined))
 
     /** The month's calls so far. */
     const callsIn = (month: string) =>
@@ -184,19 +214,14 @@ export const layer: Layer.Layer<
 
     /**
      * Builds a snapshot at a moment from the history and, when a call made one, an answer, and
-     * the history to keep.
+     * the history to keep. `cpuFrom` is the CPU clock when the run began.
      */
     const snapshotAt = (
       now: number,
       previous: Snapshot | undefined,
       before: Pacing,
-      outcome: {
-        mode?: PositionAnswer['mode']
-        answer?: PositionAnswer
-        health: Outcome
-        apiTime?: string
-        calls: Snapshot['status']['calls']
-      },
+      outcome: RunOutcome,
+      cpuFrom: number,
     ) =>
       Effect.gen(function* () {
         const api = healthAfter(previous?.api, outcome.health, now)
@@ -216,14 +241,15 @@ export const layer: Layer.Layer<
             health: api,
           },
         })
-        const states: Record<string, number> = {}
-        for (const trip of trips) states[trip.state] = (states[trip.state] ?? 0) + 1
+        const serviceDay = timetable.serviceDaysAt(now).at(-1)!
+        const age = timetableAge(timetable.manifest, serviceDay)
         const snapshot: Snapshot = {
           fetched: now,
           nextDue: now + pace.pollInterval * 1000,
           pollInterval: pace.pollInterval,
-          serviceDay: timetable.serviceDaysAt(now).at(-1)!,
+          serviceDay,
           timetableVersion: timetable.manifest.version,
+          ...(age.daysLeft < RUNNING_OUT_DAYS ? { timetableRunningOut: true as const } : {}),
           positionMode: config.positionMode,
           ...(config.positionMode === 'alternating' && outcome.mode
             ? { answerMode: outcome.mode }
@@ -236,34 +262,29 @@ export const layer: Layer.Layer<
             ...(pace.resumes ? { resumes: pace.resumes } : {}),
           },
           store: 'ok',
-          disruptions: null,
+          disruptions: summaryOf(yield* storedDisruptions),
           source: describeSource(config.source),
-          status: { calls: outcome.calls, unmatched, states },
+          status: {
+            calls: outcome.calls,
+            unmatched,
+            modes: countBy(trips, 'mode'),
+            states: countBy(trips, 'state'),
+            cpuMs: Math.round((yield* cpu) - cpuFrom),
+            timetable: age,
+          },
           trips,
         }
         return { snapshot, history }
       })
 
-    /** One run: the budget, the call, the build. */
-    const run = (now: number, previous: Snapshot | undefined) =>
-      Effect.gen(function* () {
-        const pace = yield* paceAt(now)
-        // A spent month makes no call: the trips move on and age from their history alone, and
-        // the modes take turns again from where they stopped.
-        if (pace.level === 'spent') {
-          return yield* snapshotAt(now, previous, pace, {
-            ...(previous?.answerMode ? { mode: previous.answerMode } : {}),
-            health: { status: 'spent' },
-            calls: [],
-          })
-        }
+    /** The positions call in the run's mode, and how it went. */
+    const askPositions = (now: number, previous: Snapshot | undefined, pace: Pacing) =>
+      Effect.gen(function* (): Effect.fn.Return<RunOutcome> {
         const mode =
           config.positionMode === 'alternating'
             ? alternatingMode(previous?.answerMode, now)
             : config.positionMode
-        if (mode === 'none') {
-          return yield* snapshotAt(now, previous, pace, { health: { status: 'ok' }, calls: [] })
-        }
+        if (mode === 'none') return { health: { status: 'ok' }, calls: [] }
         const result = yield* Effect.result(
           rejseplanen.journeyPos({
             box: COPENHAGEN_BOX,
@@ -276,25 +297,86 @@ export const layer: Layer.Layer<
           const { answer, attempts, ms } = result.success
           const journeys = answer.Journey ?? []
           const health = answerOutcome(journeys.length, expectedUnderway(timetable, now))
-          return yield* snapshotAt(now, previous, pace, {
+          return {
             mode,
             answer: { journeys, mode },
             health,
             ...(answer.planRtTs ? { apiTime: answer.planRtTs } : {}),
             calls: [{ service: 'journeyPos', outcome: health.status, attempts, ms }],
-          })
+          }
         }
         // A failed run builds from the history alone, so every trip keeps moving on its timeline
-        // and ages by the rules (docs/live-data.md, "What can go wrong"). The message carries no key.
-        const error: CallError = result.failure
-        yield* Effect.logWarning(`Tracker run: ${error.message}`)
-        // A quota error holds until the 1st; a refused key is tried again at the next run.
-        if (error.kind === 'quota') yield* store.set(quotaKey(pace.month.key), true, QUOTA_SECONDS)
-        return yield* snapshotAt(now, previous, pace, {
+        // and ages by the rules (docs/live-data.md, "What can go wrong").
+        const error = yield* noteFailure(result.failure, pace)
+        return {
           mode,
           health: failureOutcome(error),
-          calls: [{ service: 'journeyPos', outcome: error.kind, attempts: error.attempts, ms: 0 }],
-        })
+          calls: [callFailed(error)],
+        }
+      })
+
+    /**
+     * Logs a failed call, whose message carries no key. A quota error holds until the 1st; a
+     * refused key is tried again at the next run.
+     */
+    const noteFailure = (error: CallError, pace: Pacing) =>
+      Effect.gen(function* () {
+        yield* Effect.logWarning(`Tracker run: ${error.message}`)
+        if (error.kind === 'quota') yield* store.set(quotaKey(pace.month.key), true, QUOTA_SECONDS)
+        return error
+      })
+
+    /** Fetches the disruption list when it is due, keeping the last one if the fetch fails. */
+    const refreshDisruptions = (now: number, pace: Pacing) =>
+      Effect.gen(function* (): Effect.fn.Return<RunOutcome['calls']> {
+        const list = yield* storedDisruptions
+        if (!fetchDue(list, now, pace.disruptionsEvery)) return []
+        const result = yield* Effect.result(rejseplanen.himsearch({ products: PRODUCTS }))
+        if (Result.isSuccess(result)) {
+          const { answer, attempts, ms } = result.success
+          yield* store.set(
+            key('disruptions'),
+            fetchedList(answer.Message ?? [], now, area),
+            DISRUPTIONS_SECONDS,
+          )
+          return [{ service: 'himsearch', outcome: 'ok', attempts, ms }]
+        }
+        const error = yield* noteFailure(result.failure, pace)
+        yield* store.set(key('disruptions'), failedList(list, now), DISRUPTIONS_SECONDS)
+        return [callFailed(error)]
+      })
+
+    /** One run: the budget, the calls, the build. */
+    const run = (now: number, previous: Snapshot | undefined) =>
+      Effect.gen(function* () {
+        const cpuFrom = yield* cpu
+        const pace = yield* paceAt(now)
+        // A spent month makes no call: the trips move on and age from their history alone, and
+        // the modes take turns again from where they stopped.
+        if (pace.level === 'spent') {
+          return yield* snapshotAt(
+            now,
+            previous,
+            pace,
+            {
+              ...(previous?.answerMode ? { mode: previous.answerMode } : {}),
+              health: { status: 'spent' },
+              calls: [],
+            },
+            cpuFrom,
+          )
+        }
+        const positions = yield* askPositions(now, previous, pace)
+        // A refused key or a spent month refuses the disruption call too, so it isn't made.
+        const disruptions =
+          positions.health.status === 'spent' ? [] : yield* refreshDisruptions(now, pace)
+        return yield* snapshotAt(
+          now,
+          previous,
+          pace,
+          { ...positions, calls: [...positions.calls, ...disruptions] },
+          cpuFrom,
+        )
       })
 
     const getSnapshot = Effect.gen(function* () {
@@ -309,15 +391,25 @@ export const layer: Layer.Layer<
         // Another request holds this run: serve what is stored, or the timetable alone, due
         // again in a few seconds so the CDN asks soon.
         if (previous) return previous
-        const { snapshot } = yield* snapshotAt(now, previous, yield* paceAt(now), {
-          health: { status: 'ok' },
-          calls: [],
-        })
+        const { snapshot } = yield* snapshotAt(
+          now,
+          previous,
+          yield* paceAt(now),
+          { health: { status: 'ok' }, calls: [] },
+          yield* cpu,
+        )
         return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }
       }
       const { snapshot, history } = yield* run(now, previous)
       yield* store.set(key('snapshot'), snapshot, SNAPSHOT_SECONDS)
       yield* store.set(key('history'), history, SNAPSHOT_SECONDS)
+      yield* Effect.logInfo('Tracker run', runLine(snapshot))
+      const { prepared, daysOld } = snapshot.status.timetable
+      if (daysOld > STALE_DAYS) {
+        yield* Effect.logWarning(
+          `Tracker run: the timetable was prepared ${daysOld} days ago, on ${prepared}; its job may have stopped`,
+        )
+      }
       return snapshot
     })
 
@@ -423,11 +515,18 @@ export const layer: Layer.Layer<
         }
       })
 
+    /** The disruption list, due again at the next fetch its budget level allows. */
+    const getDisruptions = Effect.gen(function* () {
+      const snapshot = yield* getSnapshot
+      const list = yield* storedDisruptions
+      return servedList(list, disruptionsEvery(snapshot.budget.level), snapshot.nextDue)
+    })
+
     return {
       getSnapshot,
       getStopDepartures,
       getTripDetail,
-      getDisruptions: Effect.succeed({ fetched: null, ok: false, messages: [] }),
+      getDisruptions,
       now: Clock.currentTimeMillis,
     }
   }),

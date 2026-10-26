@@ -72,10 +72,15 @@ export const Budget = Schema.Struct({
   resumes: optional(Schema.String),
 })
 
+/** The disruption list's state; the list itself has its own route. */
 export const DisruptionsSummary = Schema.Struct({
-  fetched: Schema.Number,
+  /** When the list was last fetched, or null when no fetch has worked yet. */
+  fetched: Schema.NullOr(Schema.Number),
+  /** When it was last asked for, and whether that worked. */
+  checked: Schema.Number,
   ok: Schema.Boolean,
   count: Schema.Number,
+  /** Changes whenever the list does, so the browser fetches it again. */
   version: Schema.String,
 })
 
@@ -93,11 +98,27 @@ export const Status = Schema.Struct({
       outcome: Schema.String,
       attempts: Schema.Number,
       ms: Schema.Number,
+      /** The HTTP status of a call that failed with one. */
+      status: optional(Schema.Number),
     }),
   ),
   /** Journeys in the answer that no trip of the timetable fits; counted, not drawn. */
   unmatched: Schema.Number,
+  /** The snapshot's trips by mode and by data state. */
+  modes: Schema.Record(Schema.String, Schema.Number),
   states: Schema.Record(Schema.String, Schema.Number),
+  /**
+   * The instance's CPU time over the run, in milliseconds: an upper bound, as it counts any other
+   * request the instance served meanwhile.
+   */
+  cpuMs: Schema.Number,
+  /** The timetable's prepared date, its last covered day, and days left and old, today counted. */
+  timetable: Schema.Struct({
+    prepared: Schema.String,
+    last: Schema.String,
+    daysLeft: Schema.Number,
+    daysOld: Schema.Number,
+  }),
 })
 
 export const Snapshot = Schema.Struct({
@@ -106,6 +127,8 @@ export const Snapshot = Schema.Struct({
   pollInterval: Schema.Number,
   serviceDay: Schema.String,
   timetableVersion: Schema.String,
+  /** Set when the timetable has under 7 days of service left, for the page's notice. */
+  timetableRunningOut: optional(Schema.Literal(true)),
   positionMode: PositionMode,
   /** In alternating mode, which mode this run asked in, or the last run that called. */
   answerMode: optional(Schema.Literals(['REPORT_ONLY', 'CALC_REPORT'])),

@@ -16,6 +16,8 @@ A recording is one folder in `recordings/`: the API answers, a `timetable/` fold
 
 Every time check in the tracker reads `Clock.currentTimeMillis`, never `Date.now()`. In Vitest, `@effect/vitest`'s `it.effect` provides `TestClock`, so `TestClock.adjust('5 minutes')` moves the tracker's clock without waiting. Under a recording in a production build, the runtime provides a clock that starts at `clock.json`'s moment and advances in real time, so the recorded day is "today" for the timetable and the snapshot's ages are the recorded ones. The browser's clock in Playwright is set with `page.clock.install({ time })` to the same moment.
 
+A run's CPU time comes the same way, from the tracker's `CpuClock` (`src/tracker/report.ts`), never from `process.cpuUsage()` directly: the server provides the process's own, frozen recordings `stoppedCpu` so their snapshots come out the same every time, and a test whatever clock its figure needs.
+
 ### The switch: `MYLDER_SOURCE`
 
 One environment variable picks where the tracker's answers come from (`src/tracker/source.ts`), and the tracker builds its runtime from it. It is read at request time, so one `next build` serves CI's Playwright run, previews and production.

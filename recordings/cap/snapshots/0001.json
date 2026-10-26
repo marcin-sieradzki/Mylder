@@ -13,10 +13,16 @@
   },
   "budget": {
     "level": "normal",
-    "calls": 1
+    "calls": 2
   },
   "store": "ok",
-  "disruptions": null,
+  "disruptions": {
+    "fetched": 1781587200000,
+    "checked": 1781587200000,
+    "ok": true,
+    "count": 3,
+    "version": "9e8b69b5dd3e"
+  },
   "source": {
     "kind": "recording",
     "name": "cap"
@@ -28,12 +34,31 @@
         "outcome": "ok",
         "attempts": 1,
         "ms": 0
+      },
+      {
+        "service": "himsearch",
+        "outcome": "ok",
+        "attempts": 1,
+        "ms": 0
       }
     ],
     "unmatched": 987,
+    "modes": {
+      "bus": 6,
+      "metro": 4,
+      "s-tog": 6,
+      "train": 1
+    },
     "states": {
       "estimated": 13,
       "timetable-only": 4
+    },
+    "cpuMs": 0,
+    "timetable": {
+      "prepared": "2026-06-02",
+      "last": "2026-08-26",
+      "daysLeft": 72,
+      "daysOld": 14
     }
   },
   "trips": [

@@ -37,6 +37,9 @@ const DISRUPTIONS_EVERY: Readonly<Record<BudgetLevel, number | undefined>> = {
   spent: undefined,
 }
 
+/** Minutes between disruption fetches at a level, or undefined when there are none. */
+export const disruptionsEvery = (level: BudgetLevel): number | undefined => DISRUPTIONS_EVERY[level]
+
 /** A calendar month in a zone: its key, `2026-10`, its bounds, and the date the next begins. */
 export interface Month {
   readonly key: string
@@ -115,7 +118,7 @@ export function pacing({ calls, now, timezone, quotaGone = false }: PacingInput)
         : gap > 0
           ? 'stretched'
           : 'normal'
-  const disruptionsEvery = DISRUPTIONS_EVERY[level]
+  const every = disruptionsEvery(level)
   return {
     month,
     level,
@@ -124,7 +127,7 @@ export function pacing({ calls, now, timezone, quotaGone = false }: PacingInput)
     gap,
     onDemand: level === 'normal' && gap <= -CUSHION,
     pollInterval: POLL_INTERVAL[level],
-    ...(disruptionsEvery === undefined ? {} : { disruptionsEvery }),
+    ...(every === undefined ? {} : { disruptionsEvery: every }),
     ...(level === 'spent' ? { resumes: month.next } : {}),
   }
 }

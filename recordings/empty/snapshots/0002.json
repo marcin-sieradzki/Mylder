@@ -13,10 +13,16 @@
   },
   "budget": {
     "level": "normal",
-    "calls": 2
+    "calls": 3
   },
   "store": "ok",
-  "disruptions": null,
+  "disruptions": {
+    "fetched": 1781587200000,
+    "checked": 1781587200000,
+    "ok": true,
+    "count": 0,
+    "version": "4f53cda18c2b"
+  },
   "source": {
     "kind": "recording",
     "name": "empty"
@@ -31,8 +37,21 @@
       }
     ],
     "unmatched": 0,
+    "modes": {
+      "bus": 6,
+      "metro": 4,
+      "s-tog": 6,
+      "train": 1
+    },
     "states": {
       "timetable-only": 17
+    },
+    "cpuMs": 0,
+    "timetable": {
+      "prepared": "2026-06-02",
+      "last": "2026-08-26",
+      "daysLeft": 72,
+      "daysOld": 14
     }
   },
   "trips": [

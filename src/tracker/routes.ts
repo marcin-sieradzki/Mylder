@@ -51,6 +51,8 @@ export const stopResponse = (stopId: string) =>
 export const tripResponse = (tripKey: string) =>
   answer('trip', (tracker) => tracker.getTripDetail(tripKey))
 
+export const disruptionsResponse = () => answer('disruptions', (tracker) => tracker.getDisruptions)
+
 /** The source the environment names, read at request time as the tracker's is. */
 const environmentSource = (): Source => readSource(process.env.MYLDER_SOURCE)
 

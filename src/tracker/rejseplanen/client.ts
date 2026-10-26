@@ -7,7 +7,14 @@ import 'server-only'
 import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
 import type { Box } from '../../timetable/format.ts'
 import { Store } from '../store.ts'
-import { ErrorAnswer, JourneyPosAnswer, QUOTA_SPENT, REFUSED_KEY, type Service } from './answers.ts'
+import {
+  ErrorAnswer,
+  HimSearchAnswer,
+  JourneyPosAnswer,
+  QUOTA_SPENT,
+  REFUSED_KEY,
+  type Service,
+} from './answers.ts'
 import * as Http from './http.ts'
 
 /** Where Rejseplanen API 2.0 answers. */
@@ -24,6 +31,8 @@ export interface CallError {
   readonly message: string
   /** How many attempts the call made before it gave up. */
   readonly attempts: number
+  /** How long it ran over all its attempts, once it has given up. */
+  readonly ms?: number
 }
 
 /** One call that answered, with how many attempts it took and how long it ran. */
@@ -40,10 +49,16 @@ export interface JourneyPosQuery {
   readonly maxJny: number
 }
 
+/** The disruption messages asked for: the products they concern, as a bitmask. */
+export interface HimSearchQuery {
+  readonly products: number
+}
+
 export interface RejseplanenShape {
   readonly journeyPos: (
     query: JourneyPosQuery,
   ) => Effect.Effect<Answered<JourneyPosAnswer>, CallError>
+  readonly himsearch: (query: HimSearchQuery) => Effect.Effect<Answered<HimSearchAnswer>, CallError>
 }
 
 export class Rejseplanen extends Context.Service<Rejseplanen, RejseplanenShape>()(
@@ -158,7 +173,14 @@ export const layer = (
         })
         return Effect.gen(function* () {
           const started = yield* Clock.currentTimeMillis
-          const answer = yield* attempt.pipe(Effect.retry({ times: 1, while: retryable }))
+          const answer = yield* attempt.pipe(
+            Effect.retry({ times: 1, while: retryable }),
+            Effect.catch((error) =>
+              Effect.flatMap(Clock.currentTimeMillis, (ended) =>
+                Effect.fail<CallError>({ ...error, ms: ended - started }),
+              ),
+            ),
+          )
           const ended = yield* Clock.currentTimeMillis
           return { answer, attempts, ms: ended - started }
         })
@@ -175,6 +197,9 @@ export const layer = (
             positionMode: query.positionMode,
             maxJny: query.maxJny,
           }),
+        // Which parameters narrow the messages to Copenhagen is a first-day fact; until then
+        // the products alone.
+        himsearch: (query) => call('himsearch', HimSearchAnswer, { products: query.products }),
       }
     }),
   )
