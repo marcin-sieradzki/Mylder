@@ -117,6 +117,21 @@ describe('the vehicles between polls', () => {
     expect(offA(withoutBuses, 13150)).toBeLessThan(1)
   })
 
+  it('keeps each stilled dot where it stands when a mode filter changes which trips are drawn', () => {
+    vi.setSystemTime(s(10))
+    start()
+    loop!.show(vehiclesFrom(minute6), minute6, network)
+    pause.set(true)
+    wait(20_000)
+    const paint = readPaint(document.documentElement, vehiclePaint(network))
+    const withoutBuses = vehiclesOf(minute6, network, paint, undefined, {
+      hidden: new Set(['bus']),
+    })
+    loop!.show(withoutBuses, minute6, network)
+    // Paused at 10 s, 300 m on from fetch: still there at 30 s.
+    expect(offA(withoutBuses, 12850)).toBeLessThan(1)
+  })
+
   it('keeps the dots where the snapshot puts them until its timetable has loaded', () => {
     vi.setSystemTime(s(10))
     start()

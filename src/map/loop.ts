@@ -120,12 +120,16 @@ export function vehicleLoop({
       const { keys } = shown.vehicles
       shown.movers.forEach((mover, i) => mover && before.set(keys[i], mover))
     }
+    const stilled = still()
+    // Stilled, the same snapshot drawn with other trips keeps each dot where it stands.
+    const again = shown?.snapshot === snapshot
     return vehicles.trips.map((trip) => {
       if (!network?.patterns.patterns[trip.pattern]) return undefined
       const path = network.pathOf(trip.pattern)
       const was = before.get(trip.key)
-      const drawn =
-        was && was.path === path && !still() ? { progress: was.progress, at } : undefined
+      const kept = was?.path === path ? was : undefined
+      if (kept && stilled && again) return kept
+      const drawn = kept && !stilled ? { progress: kept.progress, at } : undefined
       const motion = motionOf(trip, snapshot.fetched, path, drawn)
       return { motion, path, ...placeAt(motion, at) }
     })
@@ -157,15 +161,14 @@ export function vehicleLoop({
       const at = now()
       // A filter turned on or off shows the same snapshot with other trips: each moves on from
       // where it stands rather than taking another's motion.
-      const same =
-        shown &&
-        shown.snapshot === snapshot &&
-        shown.network === network &&
-        sameTrips(shown.vehicles, vehicles)
-      const movers = same ? shown!.movers : moversOf(vehicles, snapshot, network, at)
+      const again = shown && shown.snapshot === snapshot && shown.network === network
+      const movers =
+        again && sameTrips(shown!.vehicles, vehicles)
+          ? shown!.movers
+          : moversOf(vehicles, snapshot, network, at)
       shown = { vehicles, snapshot, network, movers }
-      // The same snapshot again brings new glyphs only: stilled dots stay where they stand.
-      if (same && still()) write()
+      // The same snapshot again brings new glyphs or filters only: stilled dots stay where they stand.
+      if (again && still()) write()
       else if (!movers.some(Boolean) || still()) {
         halt()
         place(at)
