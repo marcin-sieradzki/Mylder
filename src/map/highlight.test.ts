@@ -97,11 +97,11 @@ describe("the highlight's bounds", () => {
 
 describe('the fit', () => {
   it('keeps clear of the top bar, the chip, the sheet and the panel on a desktop', () => {
-    expect(fitPadding(1280, 800)).toEqual({ top: 148, right: 400, bottom: 48, left: 412 })
+    expect(fitPadding(1280, 800)).toEqual({ top: 146, right: 400, bottom: 48, left: 412 })
   })
 
   it('keeps clear of the top bar, the chip and the bottom sheet on a phone', () => {
-    expect(fitPadding(390, 844)).toEqual({ top: 194, right: 24, bottom: 218, left: 24 })
+    expect(fitPadding(390, 844)).toEqual({ top: 192, right: 24, bottom: 218, left: 24 })
   })
 
   it('pads less on a window too small for the full padding, so the fit still has room', () => {

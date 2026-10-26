@@ -28,6 +28,7 @@ export function MapScreen() {
   const { dictionary } = useI18n()
   const [sheet, setSheet] = useState<'open' | 'closed' | 'reopened'>('open')
   const opener = useRef<HTMLButtonElement>(null)
+  const top = useRef<HTMLDivElement>(null)
   const open = sheet !== 'closed'
   const panel = usePanel()
   return (
@@ -35,7 +36,7 @@ export function MapScreen() {
       <main className={styles.map}>
         <BaseMap label={dictionary.map.label} className={styles.canvas} />
       </main>
-      <div className={styles.top}>
+      <div ref={top} className={styles.top}>
         <TopBar />
         <PageNotices />
       </div>
@@ -56,7 +57,7 @@ export function MapScreen() {
         asked={sheet === 'reopened'}
         opener={opener}
       />
-      <MapHighlight />
+      <MapHighlight below={top} />
       <VehicleCard />
       <DetailPanels />
       <AboutDialog />

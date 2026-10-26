@@ -5,10 +5,10 @@
 // neither knows who raised it. It lasts until it is cleared or another takes its place, through a
 // panel closing, but not through a reload.
 import 'client-only'
+import { useSyncExternalStore } from 'react'
 import type { LatLon } from '../domain/trip-motion.ts'
 import type { Mode } from '../timetable/format.ts'
 import type { Network } from '../timetable/network.ts'
-import { useSyncExternalStore } from 'react'
 
 /** What the chip calls the highlight: a line by its name, or words of the raiser's own. */
 export type HighlightLabel =
@@ -104,7 +104,7 @@ const MARGIN = 24
  */
 export function fitPadding(width: number, height: number): Padding {
   const gap = 12 // size.panel-gap, and space.300 from the edge
-  const chip = 34 + 10 // size.control, and its gap under the top bar (MapHighlight.module.css)
+  const chip = 34 + 8 // size.control, and its gap under the top bar (MapHighlight.module.css)
   const padding: Padding =
     width > PHONE
       ? {

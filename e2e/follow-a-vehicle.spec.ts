@@ -36,6 +36,8 @@ async function cardAtCentre(page: Page, nudge: number) {
 }
 
 test('Follow keeps a Metro train under the centre until the viewer pans', async ({ page }) => {
+  // It watches the train for seconds of the page's own clock, while the map draws every frame.
+  test.slow()
   const panel = await openTheTrain(page)
   const follow = panel.getByRole('button', { name: 'Follow' })
   await follow.click()

@@ -112,10 +112,7 @@ export function useFollowed(store: FollowStore = followedVehicle): string | unde
 }
 
 /** The part of MapLibre's map Follow moves. */
-export type FollowMap = Pick<
-  MapLibreMap,
-  'jumpTo' | 'isMoving' | 'scrollZoom' | 'getCanvasContainer' | 'on' | 'off'
->
+export type FollowMap = Pick<MapLibreMap, 'jumpTo' | 'isMoving' | 'scrollZoom' | 'on' | 'off'>
 
 export interface FollowCamera {
   /**
@@ -128,10 +125,14 @@ export interface FollowCamera {
 
 /**
  * Keeps `map`'s camera on the dot `store` follows, and ends Follow on the viewer's pan. While a
- * pointer is down on the map the camera holds still, since a move of the camera's own would
- * cancel the drag about to start; a drag that starts then ends Follow.
+ * pointer is down on the map, in `container`, the camera holds still, since a move of the
+ * camera's own would cancel the drag about to start; a drag that starts then ends Follow.
  */
-export function followCamera(map: FollowMap, store: FollowStore = followedVehicle): FollowCamera {
+export function followCamera(
+  map: FollowMap,
+  container: HTMLElement,
+  store: FollowStore = followedVehicle,
+): FollowCamera {
   const onMoveStart = (event: MapLibreEvent) => {
     if (store.get() !== undefined && endsFollow(event as { originalEvent?: Event })) store.stop()
   }
@@ -139,7 +140,6 @@ export function followCamera(map: FollowMap, store: FollowStore = followedVehicl
   let held = false
   const hold = () => (held = true)
   const release = () => (held = false)
-  const container = map.getCanvasContainer()
   container.addEventListener('pointerdown', hold)
   window.addEventListener('pointerup', release)
   window.addEventListener('pointercancel', release)

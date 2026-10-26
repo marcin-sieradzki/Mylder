@@ -87,7 +87,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     container.dataset.vehicles = String(vehicles.length)
     picking.follow(vehicles, project)
   }
-  const follow = followCamera(map)
+  const follow = followCamera(map, container)
   const along = (key: string) => loop.along(key)
   const loop = vehicleLoop({
     now: () => serverNow(liveSnapshot.get()),
