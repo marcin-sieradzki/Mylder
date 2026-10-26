@@ -33,6 +33,13 @@ export const text = (request: Request, status: number, body: string): Response =
 export const error = (request: Request, status: number, errorCode: string, errorText: string) =>
   json(request, status, Schema.encodeSync(ErrorAnswer)({ errorCode, errorText }))
 
+/** How long a timed-out call hangs before the gateway gives up, past any client's timeout. */
+const TIMEOUT_AFTER = '30 seconds'
+
+/** Hangs as a call that never answers does, then answers as the gateway in front would. */
+export const gatewayTimeout = (request: Request): Effect.Effect<Response> =>
+  Effect.sleep(TIMEOUT_AFTER).pipe(Effect.as(text(request, 504, 'Gateway Timeout')))
+
 /** An `HttpClient` that answers every request itself, from the request and its URL. */
 export const client = (
   answer: (request: Request, url: URL) => Effect.Effect<Response, HttpClientError.HttpClientError>,

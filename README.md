@@ -73,19 +73,20 @@ The interface lives at `/en` and `/da`; `/` sends a visit to the language its br
 
 Before the first e2e run, install a browser with `npx playwright install chromium`.
 
-| Script                  | What it does                                  |
-| ----------------------- | --------------------------------------------- |
-| `npm run dev`           | Start the Next.js dev server                  |
-| `npm run build`         | Build for production into `.next/`            |
-| `npm start`             | Serve the production build                    |
-| `npm run check`         | Type-check, lint, format check and unit tests |
-| `npm run typecheck`     | Type-check with `tsc`                         |
-| `npm run test`          | Run unit tests once                           |
-| `npm run test:watch`    | Run unit tests in watch mode                  |
-| `npm run test:coverage` | Run unit tests with coverage                  |
-| `npm run test:e2e`      | Build, serve and run Playwright tests         |
-| `npm run lint`          | Lint with oxlint                              |
-| `npm run format`        | Format everything with Prettier               |
+| Script                  | What it does                                   |
+| ----------------------- | ---------------------------------------------- |
+| `npm run dev`           | Start the Next.js dev server                   |
+| `npm run build`         | Build for production into `.next/`             |
+| `npm start`             | Serve the production build                     |
+| `npm run check`         | Type-check, lint, format check and unit tests  |
+| `npm run typecheck`     | Type-check with `tsc`                          |
+| `npm run test`          | Run unit tests once                            |
+| `npm run test:watch`    | Run unit tests in watch mode                   |
+| `npm run test:coverage` | Run unit tests with coverage                   |
+| `npm run test:e2e`      | Build, serve and run Playwright tests          |
+| `npm run recordings`    | Freeze the test recordings from the simulation |
+| `npm run lint`          | Lint with oxlint                               |
+| `npm run format`        | Format everything with Prettier                |
 
 ## Folders
 

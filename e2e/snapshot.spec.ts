@@ -1,19 +1,41 @@
 import { expect, test } from '@playwright/test'
+import { firstSnapshot, RECORDING, SIMULATED_URL } from './recording'
 
-test('the snapshot route serves the simulated city, cached until the next one is due', async ({
+interface SnapshotLike {
+  readonly source: unknown
+  readonly fetched: number
+  readonly nextDue: number
+  readonly positionMode: string
+  readonly trips: readonly { readonly key: string }[]
+}
+
+const keys = (snapshot: SnapshotLike) => snapshot.trips.map((trip) => trip.key)
+
+test('the snapshot route serves the recording, cached until the next one is due', async ({
   request,
 }) => {
   const response = await request.get('/api/snapshot')
   expect(response.status()).toBe(200)
   expect(response.headers()['cache-control']).toMatch('public, max-age=0, must-revalidate')
-  const snapshot = await response.json()
-  expect(snapshot.source).toEqual({ kind: 'simulated', name: 'weekday' })
+  const snapshot = (await response.json()) as SnapshotLike
+  const saved = firstSnapshot() as SnapshotLike
+  expect(snapshot.source).toEqual({ kind: 'recording', name: RECORDING })
   expect(snapshot.positionMode).toBe('alternating')
-  expect(Array.isArray(snapshot.trips)).toBe(true)
+  // The recording's clock starts at its moment, so the first run is its first minute's.
+  expect(snapshot.fetched - saved.fetched).toBeLessThan(60_000)
+  expect(keys(snapshot)).toEqual(keys(saved))
   expect(snapshot.nextDue).toBeGreaterThan(snapshot.fetched)
 })
 
 test('the stop and trip routes answer 404 for an id they don’t know', async ({ request }) => {
   expect((await request.get('/api/stops/0')).status()).toBe(404)
   expect((await request.get('/api/trips/bus.5C.none.20260616.0700')).status()).toBe(404)
+})
+
+test('the default source, the simulation, starts', async ({ request }) => {
+  const response = await request.get(`${SIMULATED_URL}/api/snapshot`)
+  expect(response.status()).toBe(200)
+  const snapshot = (await response.json()) as SnapshotLike
+  expect(snapshot.source).toEqual({ kind: 'simulated', name: 'weekday' })
+  expect(Array.isArray(snapshot.trips)).toBe(true)
 })

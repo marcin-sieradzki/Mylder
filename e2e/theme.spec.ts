@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './recording'
 
 /** The page background's lightness, 0 (black) to 255 (white), from its computed colour. */
 async function backgroundLightness(page: import('@playwright/test').Page) {

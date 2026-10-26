@@ -5,6 +5,8 @@ import 'server-only'
 import { Effect, type Layer } from 'effect'
 import { REFUSED_KEY } from './rejseplanen/answers.ts'
 import * as Http from './rejseplanen/http.ts'
+import * as RecordedHttpClient from './recording/layer.ts'
+import { recordingDir } from './recording/layer.ts'
 import * as SimulatedRejseplanen from './simulation/layer.ts'
 import { DEFAULT_SCENARIO, scenarioNamed } from './simulation/scenarios.ts'
 import type { Timetable } from './timetable.ts'
@@ -66,8 +68,7 @@ export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.
         seed: settings.seed,
       })
     case 'recording':
-      // The recorded layer arrives with the recordings (#53).
-      throw new Error(`MYLDER_SOURCE=recording:${source.folder} isn't built yet`)
+      return RecordedHttpClient.layer(recordingDir(source.folder))
     case 'rejseplanen':
       return settings.key ? Http.fetchLayer : Http.layer(missingKey)
   }
