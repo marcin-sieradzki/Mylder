@@ -11,7 +11,7 @@ import * as Rejseplanen from './rejseplanen/client.ts'
 import type * as Http from './rejseplanen/http.ts'
 import { apiLayer, KEY_VARIABLE, readSource, type Source } from './source.ts'
 import { memoryLayer, type Store } from './store.ts'
-import { loadTimetable, type Timetable } from './timetable.ts'
+import { loadTimetable, TIMETABLE_DIR, type Timetable } from './timetable.ts'
 import {
   clientSettings,
   describeSource,
@@ -78,6 +78,13 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
   return trackerServiceLayer.pipe(Layer.provide(client), Layer.provideMerge(base))
 }
 
+/** Where a source's timetable lives: a recording brings its own, the rest use the deployed one. */
+export function timetableDirOf(source: Source): string {
+  return source.kind === 'recording'
+    ? join(recordingDir(source.folder), 'timetable')
+    : TIMETABLE_DIR
+}
+
 /**
  * The tracker as the environment sets it up. A recording brings its own timetable and its clock,
  * which starts at the recording's moment (docs/testing-seams.md, "The switch").
@@ -88,7 +95,7 @@ async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
   if (source.kind === 'recording') {
     const dir = recordingDir(source.folder)
     const [timetable, start] = await Promise.all([
-      loadTimetable(join(dir, 'timetable')),
+      loadTimetable(timetableDirOf(source)),
       readStart(dir),
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
@@ -96,7 +103,7 @@ async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
       Layer.provideMerge(startingAt(start)),
     )
   }
-  const timetable = await loadTimetable()
+  const timetable = await loadTimetable(timetableDirOf(source))
   return trackerLayer({ timetable, source, positionMode, key: process.env[KEY_VARIABLE] })
 }
 

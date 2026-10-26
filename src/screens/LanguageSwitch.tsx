@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { langs, pathInLang } from '../i18n/lang'
+import { readableQuery } from '../map/view'
 
 /**
  * A link to the same address in the other language. The query string is read on the client only,
@@ -22,8 +23,11 @@ export function LanguageSwitch() {
   )
 }
 
+// The query carries the map's view and filters (src/map/view.ts), so the other language opens
+// the map as it is now.
 function SwitchLinkWithQuery({ pathname }: { pathname: string }) {
-  const query = useSearchParams()?.toString()
+  const params = useSearchParams()
+  const query = params ? readableQuery(params) : ''
   return <SwitchLink pathname={pathname} search={query ? `?${query}` : ''} />
 }
 

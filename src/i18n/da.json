@@ -3,12 +3,46 @@
     "title": "Mylder: livekort over København",
     "description": "Københavns busser, S-tog, metro og tog på ét livekort, ærligt om hvor friske positionerne er."
   },
-  "home": {
-    "heading": "Hele København i bevægelse på ét kort",
-    "intro": "Et livekort over Københavns busser, S-tog, metro og tog, ærligt om hvor friske positionerne er. Kortet er næste skridt."
+  "map": {
+    "label": "Livekort over København"
   },
   "language": {
     "label": "Sprog",
     "switchTo": "English"
+  },
+  "topBar": {
+    "updated": "Opdateret {time}",
+    "modes": "Transportformer",
+    "about": "Om Mylder"
+  },
+  "modes": {
+    "bus": "Bus",
+    "metro": "Metro",
+    "s-tog": "S-tog",
+    "train": "Tog",
+    "light-rail": "Letbane"
+  },
+  "vehicle": {
+    "title": "{mode} {line} mod {headsign}",
+    "reported": "Meldt for {age} siden",
+    "lastSeen": "Sidst set for {age} siden",
+    "estimated": "Beregnet ud fra køreplanen",
+    "noSignalSince": "Intet signal siden {time}",
+    "departs": "Afgår {time}",
+    "seconds": "{seconds} s",
+    "minutes": "{minutes} min"
+  },
+  "legend": {
+    "label": "Datatilstande",
+    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
+  },
+  "controls": {
+    "motion": "Bevægelse",
+    "pause": "Pause",
+    "resume": "Fortsæt"
+  },
+  "credit": {
+    "transitData": "Trafikdata",
+    "openStreetMap": "OpenStreetMap-bidragydere"
   }
 }

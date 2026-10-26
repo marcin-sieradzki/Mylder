@@ -1,0 +1,19 @@
+/* The map fills the window; panels float over it. Water is the page behind the map (Perron's
+   map foundation), so the edges never flash white while tiles load. */
+.screen {
+  position: relative;
+  block-size: 100svh;
+  overflow: hidden;
+  background: var(--perron-color-map-water);
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* MapLibre makes its container position: relative, so it fills the map by size, not by inset. */
+.canvas {
+  inline-size: 100%;
+  block-size: 100%;
+}

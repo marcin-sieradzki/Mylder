@@ -9,3 +9,4 @@ prototypes
 next-env.d.ts
 public/timetable
 recordings
+src/map/style/LICENSE.md

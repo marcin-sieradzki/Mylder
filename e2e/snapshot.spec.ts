@@ -33,6 +33,10 @@ test('the snapshot route serves the recording, cached until the next one is due'
   expect(snapshot.fetched - frozen.fetched).toBeLessThan(60_000)
   expect(keys(snapshot)).toEqual(keys(frozen))
   expect(snapshot.nextDue).toBeGreaterThan(snapshot.fetched)
+  // The date header is the tracker's clock, the recording's, which the browser keeps.
+  const date = Date.parse(response.headers()['date'])
+  expect(date - snapshot.fetched).toBeGreaterThanOrEqual(-1000)
+  expect(date - snapshot.fetched).toBeLessThan(60_000)
 })
 
 test('the disruption route serves the recorded messages, cached for the CDN', async ({
