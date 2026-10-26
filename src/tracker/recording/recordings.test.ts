@@ -1,9 +1,11 @@
-import { readdir, readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from '@effect/vitest'
 import { Clock, Effect, Fiber, Layer } from 'effect'
 import { TestClock } from 'effect/testing'
-import * as Http from '../rejseplanen/http'
+import * as Http from '../http'
+import { RECORDED_REJSEPLANEN } from '../rejseplanen/answers'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
@@ -11,12 +13,14 @@ import { startingAt } from './clock'
 import { disruptionsFile, replay, savedAnswers } from './freeze'
 import {
   callFile,
+  layer,
   readJson,
   readRecorded,
   recordedClient,
   recordingDir,
   RECORDINGS_DIR,
   type Recorded,
+  type RecordedApi,
 } from './layer'
 import { RECORDINGS } from './plans'
 
@@ -89,6 +93,7 @@ describe('the recorded layer', () => {
   it.effect("answers each service's calls in order, then repeats the last", () =>
     Effect.gen(function* () {
       const client = recordedClient(
+        RECORDED_REJSEPLANEN,
         new Map([
           ['journeyPos', [answer(1), answer(2)]],
           ['himsearch', [answer(9)]],
@@ -105,6 +110,7 @@ describe('the recorded layer', () => {
   it.effect('answers a failure file with its status and body, and 400 for a service it lacks', () =>
     Effect.gen(function* () {
       const client = recordedClient(
+        RECORDED_REJSEPLANEN,
         new Map([
           ['journeyPos', [{ status: 503 }]],
           ['himsearch', [{ status: 401, body: { errorCode: 'API_AUTH' } }]],
@@ -120,7 +126,10 @@ describe('the recorded layer', () => {
 
   it.effect('hangs a timeout file past any client timeout, then answers 504', () =>
     Effect.gen(function* () {
-      const client = recordedClient(new Map([['journeyPos', [{ timeout: true }]]]))
+      const client = recordedClient(
+        RECORDED_REJSEPLANEN,
+        new Map([['journeyPos', [{ timeout: true }]]]),
+      )
       const fiber = yield* Effect.forkChild(callWith(client, 'journeyPos'))
       yield* Effect.yieldNow
       yield* TestClock.adjust('10 seconds')
@@ -152,6 +161,55 @@ describe('the recorded layer', () => {
     expect(() => recordingDir('../public')).toThrow('lowercase letters, digits and dashes')
     expect(() => recordingDir('Weekday')).toThrow('lowercase letters, digits and dashes')
   })
+})
+
+describe('the recorded layer for another API', () => {
+  /** A made-up API with one kind of call, named by how its path starts. */
+  const radar: RecordedApi = {
+    folders: ['aircraft'],
+    folderOf: (url) => (url.pathname.startsWith('/v2/point/') ? 'aircraft' : undefined),
+    unknown: (request) => Http.text(request, 404, 'Not Found'),
+  }
+
+  const call = (path: string) =>
+    Effect.gen(function* () {
+      const client = yield* Http.HttpClient.HttpClient
+      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(Effect.orDie)
+    })
+
+  it.effect(
+    'replays its folder in call order, failures too, and answers an unknown call its own way',
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* Effect.acquireRelease(
+          Effect.promise(() => mkdtemp(join(tmpdir(), 'recording-'))),
+          (made) => Effect.promise(() => rm(made, { recursive: true, force: true })),
+        )
+        const write = (path: string, content: unknown) =>
+          Effect.promise(async () => {
+            await mkdir(join(dir, path, '..'), { recursive: true })
+            await writeFile(join(dir, path), JSON.stringify(content))
+          })
+        yield* write('aircraft/0001.json', { ac: [{ hex: 'a' }] })
+        yield* write('aircraft/0002.json', { status: 503 })
+        yield* write('aircraft/0003.json', { ac: [{ hex: 'c' }] })
+        // Another API's folder in the same recording is none of this one's.
+        yield* write('journeyPos/0001.json', { Journey: [] })
+        const answers = yield* Effect.gen(function* () {
+          const made = []
+          for (let i = 0; i < 4; i++) made.push(yield* call('/v2/point/55.75/12.38/25'))
+          made.push(yield* call('/journeyPos'))
+          return made
+        }).pipe(Effect.provide(layer(radar, dir)))
+        expect(answers).toEqual([
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'a' }] }) },
+          { status: 503, text: '' },
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'c' }] }) },
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'c' }] }) },
+          { status: 404, text: 'Not Found' },
+        ])
+      }).pipe(Effect.scoped),
+  )
 })
 
 describe("a recording's clock", () => {

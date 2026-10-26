@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect, Schema } from 'effect'
-import { HttpClient } from '../rejseplanen/http'
+import { HttpClient } from '../http'
 import { TestClock } from 'effect/testing'
 import type { LatLon } from '../../domain/trip-motion'
 import { COPENHAGEN_BOX, type Box } from '../../timetable/format'

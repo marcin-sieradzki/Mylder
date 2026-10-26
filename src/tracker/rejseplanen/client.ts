@@ -6,6 +6,7 @@
 import 'server-only'
 import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
 import type { Box } from '../../timetable/format.ts'
+import * as Http from '../http.ts'
 import { Store } from '../store.ts'
 import {
   DepartureBoardAnswer,
@@ -17,7 +18,6 @@ import {
   REFUSED_KEY,
   type Service,
 } from './answers.ts'
-import * as Http from './http.ts'
 
 /** Where Rejseplanen API 2.0 answers. */
 export const BASE_URL = 'https://www.rejseplan.dk/api/'

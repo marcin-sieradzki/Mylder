@@ -2,7 +2,7 @@
 import 'server-only'
 import { Effect } from 'effect'
 import { TestClock } from 'effect/testing'
-import { HttpClient } from '../rejseplanen/http.ts'
+import { HttpClient } from '../http.ts'
 
 /** 07:20 in Copenhagen on Tuesday 2026-06-16, when the fixture has seventeen trips underway. */
 export const MOMENT = Date.UTC(2026, 5, 16, 5, 20, 30)
