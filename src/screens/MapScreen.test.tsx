@@ -1,5 +1,6 @@
 import '@mylder/perron/tokens.css'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -196,6 +197,18 @@ describe('the top bar', () => {
     ]
     expect(controls).toHaveLength(7)
     for (const control of controls) expect(control).toHaveAccessibleName()
+  })
+
+  it('opens the About dialog from the bar’s About button, and Esc gives it the focus back', async () => {
+    const user = userEvent.setup()
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    renderScreen('en')
+    const about = within(screen.getByRole('banner')).getByRole('button', { name: 'About Mylder' })
+    await user.click(about)
+    expect(await screen.findByRole('dialog', { name: 'About Mylder' })).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(about).toHaveFocus()
   })
 
   it('shows no time before a snapshot built from an answer has landed', () => {
