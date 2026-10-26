@@ -152,7 +152,7 @@ export function recordingDir(name: string): string {
 export const callFile = (index: number) => `${String(index + 1).padStart(4, '0')}.json`
 
 /** Whether a file in a folder is one of its calls, `0001.json` and on, rather than its clock. */
-const isCallFile = (name: string) => /^\d+\.json$/.test(name)
+export const isCallFile = (name: string) => /^\d+\.json$/.test(name)
 
 export const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(/* turbopackIgnore: true */ path, 'utf8'))
@@ -224,8 +224,9 @@ export async function readCalls(
  * `clock.json` when it has one, as `aircraft/` does for answers recorded on another day.
  */
 export async function readStart(dir: string, folder?: string): Promise<number> {
-  const names = folder === undefined ? [] : await filesOnDisk.list(join(dir, folder))
-  const path = join(dir, names.includes('clock.json') ? folder! : '', 'clock.json')
+  const ownClock =
+    folder !== undefined && (await filesOnDisk.list(join(dir, folder))).includes('clock.json')
+  const path = ownClock ? join(dir, folder, 'clock.json') : join(dir, 'clock.json')
   const { start } = (await readJson(path)) as RecordingClock
   const moment = Date.parse(start)
   if (Number.isNaN(moment)) throw new Error(`${path} has no start moment`)

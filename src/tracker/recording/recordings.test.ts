@@ -18,6 +18,7 @@ import {
   readCalls,
   readJson,
   readRecorded,
+  isCallFile,
   readStart,
   recordedClient,
   recordingDir,
@@ -139,7 +140,7 @@ describe('a frozen recording', () => {
       type?: string
     }
     const dir = join(recordingDir('weekday'), 'aircraft')
-    const files = (await readdir(dir)).filter((file) => /^\d+\.json$/.test(file)).sort()
+    const files = (await readdir(dir)).filter(isCallFile).sort()
     expect(files.length).toBeGreaterThanOrEqual(12)
     for (const file of files) {
       // Real answers: the planes east of the box, over Øresund and Malmö, and the transponders
@@ -384,11 +385,11 @@ describe("a recording's clock", () => {
       yield* TestClock.setTime(1_000)
       const tracker = yield* Layer.build(sharedStartingAt(transit))
       yield* TestClock.adjust('3 minutes')
-      const planes = yield* Layer.build(sharedStartingAt(aircraft))
+      const overhead = yield* Layer.build(sharedStartingAt(aircraft))
       yield* TestClock.adjust('1 minute')
       const again = yield* Layer.build(sharedStartingAt(transit))
       const now = (built: typeof tracker) => Effect.provide(Clock.currentTimeMillis, built)
-      expect([yield* now(tracker), yield* now(planes), yield* now(again)]).toEqual([
+      expect([yield* now(tracker), yield* now(overhead), yield* now(again)]).toEqual([
         transit + 240_000,
         aircraft + 60_000,
         transit + 240_000,
