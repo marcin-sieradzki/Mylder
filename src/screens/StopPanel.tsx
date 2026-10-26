@@ -168,12 +168,11 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
           sources={[
             {
               name: 'Rejseplanen',
+              label: words.departuresAt,
               time: clockTime(answer.source.at, timezone, { seconds: true }),
               outOfDate: now - answer.source.at > BOARD_FRESH_FOR,
             },
           ]}
-          sourceUpdatedLabel={words.departuresAt}
-          sourceOutOfDateLabel={words.departuresOutOfDate}
         />
       ) : (
         <SourceLine sources={[timetableSource(answer, timezone, words)]} />
@@ -182,13 +181,16 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
   )
 }
 
-/** The timetable's source: the positions' time of the snapshot its times were shifted by. */
+/**
+ * The timetable's source, named by its phrase alone: "Timetable and positions 08:14:05", the
+ * positions' time of the snapshot its times were shifted by.
+ */
 const timetableSource = (
   answer: StopDepartures,
   timezone: string,
   words: Words,
 ): SourceLineSource => ({
-  name: words.timetableAndPositions,
+  label: words.timetableAndPositions,
   time: clockTime(answer.fetched, timezone, { seconds: true }),
 })
 
@@ -211,7 +213,7 @@ function Interval({ row, words }: { row: StopInterval; words: Words }) {
               : [every.from, every.to]
         }
       />
-      <p className={styles.times}>{words.intervalNote}</p>
+      <p className={styles.note}>{words.intervalNote}</p>
     </li>
   )
 }
@@ -224,12 +226,12 @@ interface DepartureProps {
   words: Words
 }
 
-/** One departure: Perron's row, with the time the state shows under it until the row has one. */
+/** One departure: Perron's row, with the times its state shows. */
 function Departure({ row, state, now, timezone, words }: DepartureProps) {
   const times = departureTimes(row, state, now, timezone)
   const cancelled = row.cancelled === true
   return (
-    <li className={styles.departure} data-cancelled={cancelled ? '' : undefined}>
+    <li className={styles.departure}>
       <OpenTrip departure={row} />
       <DepartureRow
         variant={state}
@@ -237,6 +239,8 @@ function Departure({ row, state, now, timezone, words }: DepartureProps) {
         lineName={row.line}
         destination={row.headsign}
         countdown={times.countdown}
+        time={times.time}
+        {...(times.expected === undefined ? {} : { expected: times.expected })}
         cancelled={cancelled}
         {...(times.delay === undefined ? {} : { delay: times.delay })}
         {...(row.track === undefined
@@ -247,18 +251,6 @@ function Departure({ row, state, now, timezone, words }: DepartureProps) {
               }),
             })}
       />
-      <p className={styles.times}>
-        {times.struck === undefined ? null : (
-          <>
-            <span className={styles.hidden}>{words.timetabled} </span>
-            <time className={styles.struck} dateTime={times.struck}>
-              {times.struck}
-            </time>
-          </>
-        )}
-        <time dateTime={times.time}>{times.estimate ? `~${times.time}` : times.time}</time>
-        {times.unknown ? <span>{words.unknown}</span> : null}
-      </p>
     </li>
   )
 }

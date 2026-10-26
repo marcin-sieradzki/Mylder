@@ -1,8 +1,8 @@
 // What one departure row says (docs/screens.md, "Stop departures"; docs/data-states.md, "The
 // states"): the countdown, the time beside it and the delay, each following the trip's data
 // state. Live and Ageing show the expected time, Estimated the expected time marked "~",
-// Timetable only the timetabled time, and No signal "Unknown" beside the timetabled time; the
-// timetabled time is struck beside an expected one a minute or more away from it. The delay is
+// Timetable only and No signal the timetabled time and an unknown delay; the timetabled time is
+// struck beside an expected one a minute or more away from it. Perron's DepartureRow draws them. The delay is
 // Rejseplanen's own, expected minus timetabled, where the state shows the expected time. A row's
 // state is its trip's on the map, aged by the clock, and Estimated where the board's own realtime
 // for it is newer than anything the map has.
@@ -16,16 +16,20 @@ import type { AnswerSource, StopDeparture } from '../tracker/index.ts'
 /** The struck timetabled time shows from a minute's difference. */
 const STRIKE_FROM = 60_000
 
+/** A departure's times as DepartureRow takes them. */
 export interface DepartureTimes {
   /** Seconds until it leaves, from the time the state shows; negative once that has passed. */
   readonly countdown: number
-  /** The time the state shows, `HH:MM`, and "~" before it for an estimate. */
+  /**
+   * The row's timetabled time, `HH:MM`: the timetable's where an expected time a minute or more
+   * from it strikes it, else the time the state shows, so a smaller difference strikes nothing.
+   */
   readonly time: string
-  readonly estimate: boolean
-  /** The timetabled time, struck beside `time`, when the two differ by a minute or more. */
-  readonly struck?: string
-  /** "Unknown" stands beside the time: No signal's. */
-  readonly unknown: boolean
+  /**
+   * The expected time, `HH:MM`, where the state shows one: the row strikes `time` before it when
+   * the two differ, and marks it "~" for an estimate.
+   */
+  readonly expected?: string
   /** Whole minutes late, negative early; none without an expected time the state shows. */
   readonly delay?: number
 }
@@ -42,10 +46,8 @@ export function departureTimes(
   const strike = expected !== undefined && Math.abs(expected - row.scheduled) >= STRIKE_FROM
   return {
     countdown: (shown - now) / 1000,
-    time: clockTime(shown, timezone),
-    estimate: state === 'estimated',
-    ...(strike ? { struck: clockTime(row.scheduled, timezone) } : {}),
-    unknown: state === 'no-signal',
+    time: clockTime(strike ? row.scheduled : shown, timezone),
+    ...(followsExpected(state) ? { expected: clockTime(shown, timezone) } : {}),
     ...(expected === undefined ? {} : { delay: Math.round((expected - row.scheduled) / 60_000) }),
   }
 }

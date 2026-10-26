@@ -140,10 +140,8 @@ function ListSource({ snapshot, time, paused, words }: ListSourceProps) {
   const late = now - snapshot.fetched > snapshot.pollInterval * 1000 + LATE_AFTER
   return (
     <SourceLine
-      sources={[{ name: 'Rejseplanen', time, outOfDate: late }]}
+      sources={[{ name: 'Rejseplanen', label: words.positionsAt, time, outOfDate: late }]}
       paused={paused}
-      sourceUpdatedLabel={words.positionsAt}
-      sourceOutOfDateLabel={words.positionsOutOfDate}
     />
   )
 }

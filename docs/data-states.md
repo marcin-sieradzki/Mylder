@@ -40,7 +40,7 @@ Silence is judged per trip against the position answers, because every position 
 
 A cancelled trip has no data state on the map: it is not drawn. Its departures show Cancelled.
 
-A departure shows its trip's data state: the expected time when Live or Ageing (the scheduled time when no update gives one), the expected time marked "~" when Estimated, the scheduled time when Timetable only, and "Unknown" beside the scheduled time when No signal. A Metro departure shows an interval instead (see The Metro).
+A departure shows its trip's data state: the expected time when Live or Ageing (the scheduled time when no update gives one), the expected time marked "~" when Estimated, and the scheduled time with the delay unknown, "—", when Timetable only or No signal. A Metro departure shows an interval instead (see The Metro).
 
 ## Thresholds
 

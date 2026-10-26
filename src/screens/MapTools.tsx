@@ -1,19 +1,17 @@
 'use client'
 
-import { MapControls, Toolbar, ToolbarButton } from '@mylder/perron'
+import { MapControls } from '@mylder/perron'
 import { ScaleBar } from '@mylder/perron/patterns'
 import { useEffect } from 'react'
-import { useI18n } from '../i18n/useI18n'
 import { mapCamera, useCameraView, type CameraView } from '../map/camera'
 import { listenForMapKeys } from '../map/keys'
 import { motionPause, useMotionPaused } from '../map/pause'
 import styles from './MapTools.module.css'
-import { PerronIcon } from './PerronIcon'
 
 const zoomIn = () => mapCamera.zoomIn()
 const zoomOut = () => mapCamera.zoomOut()
 const reset = () => mapCamera.reset()
-const togglePause = () => motionPause.toggle()
+const setPaused = (_event: unknown, paused: boolean) => motionPause.set(paused)
 
 const attached = (view: CameraView | undefined) => view !== undefined
 const closest = (view: CameraView | undefined) => view?.closest ?? false
@@ -33,10 +31,12 @@ function MapScale() {
 
 /**
  * The map's controls (docs/screens.md, "The moving map"): zoom in, zoom out, reset view and the
- * pause that stops the dots moving, with the scale bar beside them, and the map's keys.
+ * pause that stops the dots moving, with the scale bar beside them, and the map's keys. Until the
+ * map attaches the zoom buttons are dimmed but the pause is not, as before: a pause pressed then
+ * holds once the dots draw. MapControls' `disabled` would dim the pause too, so the bar leaves it
+ * out, and its reset does nothing with no map to move.
  */
 export function MapTools() {
-  const { dictionary } = useI18n()
   const hasMap = useCameraView(attached)
   const atClosest = useCameraView(closest)
   const atFarthest = useCameraView(farthest)
@@ -45,25 +45,15 @@ export function MapTools() {
   return (
     <div className={styles.tools}>
       <MapScale />
-      <div className={styles.buttons}>
-        {/* MapControls holds only its own three buttons, so the pause has a bar of its own. */}
-        <Toolbar aria-label={dictionary.controls.motion}>
-          <ToolbarButton
-            color="neutral"
-            startIcon={<PerronIcon name={paused ? 'play' : 'pause'} />}
-            aria-label={paused ? dictionary.controls.resume : dictionary.controls.pause}
-            onClick={togglePause}
-          />
-        </Toolbar>
-        <MapControls
-          disabled={!hasMap}
-          zoomInDisabled={atClosest}
-          zoomOutDisabled={atFarthest}
-          onZoomIn={zoomIn}
-          onZoomOut={zoomOut}
-          onCenterMap={reset}
-        />
-      </div>
+      <MapControls
+        zoomInDisabled={!hasMap || atClosest}
+        zoomOutDisabled={!hasMap || atFarthest}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onCenterMap={reset}
+        paused={paused}
+        onPausedChange={setPaused}
+      />
     </div>
   )
 }

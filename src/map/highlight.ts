@@ -175,7 +175,7 @@ export interface Padding {
   readonly left: number
 }
 
-/** Perron's breakpoint.phone. */
+/** Perron's breakpoint.phone: narrower is a phone, as Perron's own CSS has it. */
 const PHONE = 760
 
 /** The room a fit keeps for the highlight itself, across and down, before it pads less. */
@@ -203,7 +203,7 @@ export interface Floating {
 export function fitPadding(width: number, height: number, floating: Floating = {}): Padding {
   const gap = 12 // size.panel-gap, and space.300 from the edge
   const chip = 34 + 8 // size.control, and its gap under the top bar (MapHighlight.module.css)
-  const desktop = width > PHONE
+  const desktop = width >= PHONE
   // The chip sits under the notices, however many there are. On a phone the legend stands on the
   // sheet's peek at the left only, so the peek's padding is enough there.
   const below = floating.top === undefined ? 0 : floating.top + chip + MARGIN

@@ -63,9 +63,10 @@
     "delayUnknown": "Delay unknown",
     "minutes": "{minutes} min",
     "fromTimetable": "From the timetable",
-    "positionSource": "Rejseplanen position",
+    "positionAt": "position {time}",
+    "timesAt": "times {time}",
+    "timesFromTimetable": "times from the timetable",
     "timetableSource": "Timetable",
-    "callSource": "Rejseplanen times",
     "messages": "Messages",
     "later": "Later",
     "messagesChecked": "From Rejseplanen, in Danish; checked {time}",
@@ -78,11 +79,6 @@
   "legend": {
     "label": "Data states",
     "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
-  },
-  "controls": {
-    "motion": "Motion",
-    "pause": "Pause",
-    "resume": "Resume"
   },
   "credit": {
     "transitData": "Transit data",
@@ -98,16 +94,13 @@
     "notFoundDetail": "Mylder's timetable has no stop with this id.",
     "failed": "The departures could not be loaded",
     "failedDetail": "Trying again shortly.",
-    "timetabled": "timetabled",
-    "unknown": "Unknown",
     "note": "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
     "fromTimetable": "From the timetable",
-    "timetableAndPositions": "Timetable and positions",
+    "timetableAndPositions": "Timetable and positions {time}",
     "track": "Track {track}",
     "stand": "Platform {track}",
     "intervalNote": "Metro: planned times",
     "departuresAt": "departures {time}",
-    "departuresOutOfDate": "departures {time}, may be out of date",
     "messages": "Messages",
     "later": "Later",
     "messagesSource": "From Rejseplanen, in Danish"
@@ -186,7 +179,6 @@
     "search": "Search lines and destinations",
     "placeholder": "Line or destination, such as 5C",
     "positionsAt": "positions {time}",
-    "positionsOutOfDate": "positions {time}, may be out of date",
     "noMatch": "No vehicles match.",
     "none": "No vehicles on the map."
   },

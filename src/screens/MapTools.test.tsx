@@ -1,7 +1,5 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import pauseFile from '@mylder/perron/icons/pause.svg'
-import playFile from '@mylder/perron/icons/play.svg'
 import { hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
@@ -18,9 +16,8 @@ import { Providers } from './Providers'
  * MapLibre's map, which needs WebGL that jsdom lacks: a camera that moves at once, as MapLibre
  * does under reduced motion, between zoom 6 and 18. Its pans are in pixels at the centre.
  */
-/** The file of the Perron icon a button draws, which the icon takes as its mask. */
-const iconOf = (button: HTMLElement) =>
-  button.querySelector<HTMLElement>('.perron-icon')?.style.getPropertyValue('--mylder-icon')
+/** The drawing of the Perron icon a button holds. */
+const iconOf = (button: HTMLElement) => button.querySelector('svg.perron-icon')?.innerHTML
 
 function fakeMap() {
   const container = document.createElement('div')
@@ -90,7 +87,7 @@ describe('the map controls', () => {
     expect(within(controls).getByRole('button', { name: 'Zoom in' })).toBeInTheDocument()
     expect(within(controls).getByRole('button', { name: 'Zoom out' })).toBeInTheDocument()
     expect(within(controls).getByRole('button', { name: 'Centre the map' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+    expect(within(controls).getByRole('button', { name: 'Pause' })).toBeInTheDocument()
     for (const button of screen.getAllByRole('button')) expect(button).toHaveAccessibleName()
     expect(screen.getByText('Scale')).toBeInTheDocument()
   })
@@ -101,7 +98,7 @@ describe('the map controls', () => {
     expect(within(controls).getByRole('button', { name: 'Zoom ind' })).toBeInTheDocument()
     expect(within(controls).getByRole('button', { name: 'Zoom ud' })).toBeInTheDocument()
     expect(within(controls).getByRole('button', { name: 'Centrér kortet' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+    expect(within(controls).getByRole('button', { name: 'Pause' })).toBeInTheDocument()
     for (const button of screen.getAllByRole('button')) expect(button).toHaveAccessibleName()
   })
 
@@ -127,11 +124,13 @@ describe('the map controls', () => {
     open('da')
     const pause = screen.getByRole('button', { name: 'Pause' })
     expect(pause).not.toHaveTextContent(/\S/)
-    expect(iconOf(pause)).toBe(`url("${pauseFile}")`)
+    const drawn = iconOf(pause)
+    expect(drawn).toBeTruthy()
     await user.click(pause)
     const resume = screen.getByRole('button', { name: 'Fortsæt' })
     expect(resume).not.toHaveTextContent(/\S/)
-    expect(iconOf(resume)).toBe(`url("${playFile}")`)
+    expect(iconOf(resume)).toBeTruthy()
+    expect(iconOf(resume)).not.toBe(drawn)
   })
 
   it('gives the scale bar the ground a pixel spans, and dims zoom in at the closest zoom', async () => {
@@ -144,6 +143,26 @@ describe('the map controls', () => {
     expect(state.zoom).toBe(18)
     expect(mapCamera.get()?.metersPerPixel).toBeCloseTo(0.17, 2)
     expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
+  })
+})
+
+describe('the controls before the map attaches', () => {
+  it('dim the zoom but keep the pause', async () => {
+    const user = userEvent.setup()
+    render(
+      <Providers lang="en" dictionary={en}>
+        <MapTools />
+      </Providers>,
+    )
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('button', { name: 'Zoom out' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+    const pause = screen.getByRole('button', { name: 'Pause' })
+    expect(pause).not.toHaveAttribute('aria-disabled', 'true')
+    await user.click(pause)
+    expect(motionPause.get()).toBe(true)
   })
 })
 

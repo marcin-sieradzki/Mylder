@@ -1,14 +1,8 @@
-/* The controls at the bottom right of the map, the pause above the zoom, and the scale bar beside
-   them. The screen sets where the column sits, above the corner credit. */
+/* The controls at the bottom right of the map, the pause after the zoom and the centre in
+   Perron's one bar, and the scale bar beside them. The screen sets where the column sits, above
+   the corner credit. */
 .tools {
   display: flex;
   align-items: flex-end;
   gap: var(--perron-size-panel-gap);
-}
-
-.buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--perron-space-200);
 }

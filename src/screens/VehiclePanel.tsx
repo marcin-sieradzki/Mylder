@@ -269,7 +269,9 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
 /**
  * Where the panel's figures came from, each with its own time: the position, from the answer that
  * last carried the trip, when Rejseplanen has carried it; then the times, from a `journeyDetail`
- * call or from the timetable shifted by the snapshot's delay.
+ * call or from the timetable shifted by the snapshot's delay. "Rejseplanen · position 08:14:05 ·
+ * times 08:14:20", the times reading as Rejseplanen's after the position; the timetable's alone
+ * keeps its own name and the snapshot's time.
  */
 function sourcesOf(
   answer: TripDetail,
@@ -278,11 +280,16 @@ function sourcesOf(
   words: Words,
 ): readonly [SourceLineSource] | readonly [SourceLineSource, SourceLineSource] {
   const at = (moment: number) => clockTime(moment, timezone, { seconds: true })
-  const times: SourceLineSource =
-    answer.source.kind === 'rejseplanen'
-      ? { name: words.callSource, time: at(answer.source.at) }
-      : { name: words.timetableSource, time: at(answer.fetched) }
-  return trip?.seen === undefined
-    ? [times]
-    : [{ name: words.positionSource, time: at(trip.seen) }, times]
+  const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
+  if (trip?.seen === undefined) {
+    return called === undefined
+      ? [{ name: words.timetableSource, time: at(answer.fetched) }]
+      : [{ name: 'Rejseplanen', label: words.timesAt, time: at(called) }]
+  }
+  return [
+    { name: 'Rejseplanen', label: words.positionAt, time: at(trip.seen) },
+    called === undefined
+      ? { label: words.timesFromTimetable }
+      : { label: words.timesAt, time: at(called) },
+  ]
 }
