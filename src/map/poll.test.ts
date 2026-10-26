@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { aircraftRoute } from './aircraft.ts'
 import { liveStore, snapshotStore } from './live.ts'
 import { pagePoll, snapshotPoller, snapshotRoute, type PollerDeps, type PollRoute } from './poll.ts'
 
@@ -356,6 +358,38 @@ describe('a route that may be off', () => {
     expect(beacons.get().failingSince).toBeUndefined()
   })
 
+  it('starts again after its 404, and an answer then says the route is on', async () => {
+    beaconsOff = true
+    const beacons = liveStore<Beacons>()
+    const poller = snapshotPoller(beacons, MAY_BE_OFF, deps())
+    poller.start()
+    await vi.advanceTimersByTimeAsync(20 * S)
+    expect(beacons.get().off).toBe(true)
+    beaconsOff = false
+    poller.start()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(pollTimes(beaconPolls)).toEqual([10, 30])
+    expect(beacons.get().off).toBeUndefined()
+    expect(beacons.get().snapshot).toBeDefined()
+    // It polls on from there, on the route's next due.
+    await vi.advanceTimersByTimeAsync(11 * S)
+    expect(pollTimes(beaconPolls)).toEqual([10, 30, 41])
+  })
+
+  it('starts again when anything on the page needs it after its 404, though something still does', async () => {
+    beaconsOff = true
+    const beacons = liveStore<Beacons>()
+    const use = pagePoll(() => snapshotPoller(beacons, MAY_BE_OFF, deps()))
+    use()
+    await vi.advanceTimersByTimeAsync(20 * S)
+    expect(beacons.get().off).toBe(true)
+    beaconsOff = false
+    use()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(pollTimes(beaconPolls)).toEqual([10, 30])
+    expect(beacons.get().off).toBeUndefined()
+  })
+
   it('counts a 404 as a failed poll on a route that is always on', async () => {
     beaconsOff = true
     const beacons = liveStore<Beacons>()
@@ -363,5 +397,33 @@ describe('a route that may be off', () => {
     await vi.advanceTimersByTimeAsync(16 * S)
     expect(pollTimes(beaconPolls)).toEqual([10, 15, 25])
     expect(beacons.get().off).toBeUndefined()
+  })
+})
+
+describe("the aircraft's route", () => {
+  it("waits out the server's two feeds' timeouts, so a snapshot of both failing still lands", async () => {
+    const fetched = Date.now() + 10 * S
+    const failed: AircraftSnapshot = {
+      fetched,
+      nextDue: fetched + 10 * S,
+      pollInterval: 10,
+      provider: 'adsb.lol',
+      health: { status: 'error', kind: 'timeout', since: fetched },
+      aircraft: [],
+    }
+    const aircraft = liveStore<AircraftSnapshot>()
+    // adsb.lol's 4 s, adsb.fi's 4 s and a wait for the call before it on the server.
+    const slow: PollerDeps['fetch'] = (_url, { signal }) =>
+      new Promise((resolve, reject) => {
+        const answer = setTimeout(() => resolve(Response.json(failed)), 10 * S)
+        signal.addEventListener('abort', () => {
+          clearTimeout(answer)
+          reject(new DOMException('aborted', 'AbortError'))
+        })
+      })
+    snapshotPoller(aircraft, aircraftRoute, { ...deps(), fetch: slow }).start()
+    await vi.advanceTimersByTimeAsync(10 * S)
+    expect(aircraft.get().snapshot).toEqual(failed)
+    expect(aircraft.get().failingSince).toBeUndefined()
   })
 })

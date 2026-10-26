@@ -18,7 +18,9 @@ export type AircraftStore = LiveStore<AircraftSnapshot>
 /** The aircraft snapshot's route, which the server may have off. */
 export const aircraftRoute: PollRoute<AircraftSnapshot> = {
   path: '/api/aircraft',
-  timeout: 8_000,
+  // Past the server's worst, adsb.lol's 4 s timeout and then adsb.fi's, which a request waiting
+  // for that call shares, so a snapshot of both failing lands before the poll gives up.
+  timeout: 12_000,
   mayBeOff: true,
   accepts(body): body is AircraftSnapshot {
     const value = body as Partial<AircraftSnapshot> | null
