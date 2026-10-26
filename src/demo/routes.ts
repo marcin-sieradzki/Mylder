@@ -2,7 +2,7 @@
 // timetable files the demo serves, and the aircraft source on a recording bundled with the demo,
 // answering each route the page asks for by its path with the server's own answers: the same
 // bodies, date header, 404s and 503s.
-import { Effect, Layer, ManagedRuntime } from 'effect'
+import { Effect, Layer } from 'effect'
 import type { Aircraft } from '../tracker/aircraft/aircraft.ts'
 import { aircraftAnswers } from '../tracker/aircraft/routes.ts'
 import { aircraftLayer, runAircraftOn } from '../tracker/aircraft/runtime.ts'
@@ -10,7 +10,7 @@ import { RECORDED_AIRCRAFT } from '../tracker/aircraft/source.ts'
 import { notFound } from '../tracker/cdn-answer.ts'
 import * as RecordedHttpClient from '../tracker/recording/layer.ts'
 import type { RecordingFiles } from '../tracker/recording/layer.ts'
-import { remember } from '../tracker/remember.ts'
+import { remember, rememberRuntime } from '../tracker/remember.ts'
 import { CpuClock } from '../tracker/report.ts'
 import { browserFileResponse, manifestResponse, trackerAnswers } from '../tracker/routes.ts'
 import { runOn, trackerLayer } from '../tracker/runtime.ts'
@@ -75,23 +75,19 @@ export function demoRoutes({ read: readFolder, aircraft, beneath = Layer.empty }
 
   // The tracker's runtime, built at the first ask for it; a build that fails, such as on a
   // dropped connection, is forgotten, so the next ask tries again, as the server's runtime does.
-  const runtime = remember(async () => {
+  const runtime = rememberRuntime(async () => {
     const timetable = await readTimetable(read)
     const source = { kind: 'simulated', scenario: DEFAULT_SCENARIO } as const
-    return ManagedRuntime.make(
-      trackerLayer({ timetable, source, cpu: workerCpu }).pipe(Layer.provideMerge(beneath)),
-    )
+    return trackerLayer({ timetable, source, cpu: workerCpu }).pipe(Layer.provideMerge(beneath))
   })
 
   const answers = trackerAnswers(runOn(runtime))
 
   // The aircraft's runtime, apart from the tracker's, as on the server: a timetable that can't be
-  // read never stops the planes.
+  // read never stops the planes, and a recording that can't be is read again on the next ask.
   const planes = aircraftAnswers(
     runAircraftOn(
-      remember(async () =>
-        ManagedRuntime.make(demoAircraftLayer(aircraft).pipe(Layer.provideMerge(beneath))),
-      ),
+      rememberRuntime(async () => demoAircraftLayer(aircraft).pipe(Layer.provideMerge(beneath))),
     ),
   )
 

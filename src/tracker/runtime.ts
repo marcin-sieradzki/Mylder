@@ -1,11 +1,11 @@
 // The tracker's runtime: its layers composed once per instance, from the settings read at the
 // first request (docs/testing-seams.md, "The switch"), so one build serves every source.
 import 'server-only'
-import { Effect, Layer, Logger, ManagedRuntime, Schema } from 'effect'
+import { Effect, Layer, Logger, type ManagedRuntime, Schema } from 'effect'
 import { join } from 'node:path'
 import { sharedStartingAt } from './recording/clock.ts'
 import { readStart, recordingDir } from './recording/layer.ts'
-import { remember } from './remember.ts'
+import { rememberRuntime } from './remember.ts'
 import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
@@ -115,10 +115,10 @@ async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
  * timetable that can't be read, is forgotten, so the next request tries again.
  */
 export const trackerRuntime: () => Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> =
-  remember(() =>
+  rememberRuntime(() =>
     // One JSON line per log, which the host's log search reads field by field.
     environmentLayer().then((layer) =>
-      ManagedRuntime.make(layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson])))),
+      layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson]))),
     ),
   )
 

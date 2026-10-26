@@ -57,7 +57,7 @@ Read at the first request, as `MYLDER_SOURCE` is, and independent of it, so the 
 | `recording:<folder>` | The recorded layer, replaying the recording's `aircraft/` folder            | Starts at `clock.json`'s moment, the same offset as the tracker's |
 | `off`                | None: the route answers 404, and the page shows no aircraft or word of them |                                                                   |
 
-The aircraft have their own runtime (`src/tracker/aircraft/runtime.ts`), built once per instance and forgotten when its build fails, apart from the tracker's, so a timetable that can't be read never stops the aircraft answering. Under a recording both runtimes take one clock offset per process (`sharedStartingAt` in `src/tracker/recording/clock.ts`), so they read the same time whichever was built first. The end-to-end tests run the recording server with `recording:weekday` and the simulated one with `off`, so no test calls adsb.lol.
+The aircraft have their own runtime (`src/tracker/aircraft/runtime.ts`), apart from the tracker's, so a timetable that can't be read never stops the aircraft answering. It is built once per instance, its layers with it, and forgotten when its build fails, such as on a recording that can't be read, so the next request builds it again (`rememberRuntime` in `src/tracker/remember.ts`). Under a recording both runtimes take one clock offset per process (`sharedStartingAt` in `src/tracker/recording/clock.ts`), so they read the same time whichever was built first. The end-to-end tests run the recording server with `recording:weekday` and the simulated one with `off`, so no test calls adsb.lol.
 
 ## The browser
 

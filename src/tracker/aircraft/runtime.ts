@@ -2,11 +2,11 @@
 // `MYLDER_AIRCRAFT_SOURCE`, read at the first request, apart from the tracker's runtime, so a
 // timetable that can't be read never stops the aircraft answering (docs/aircraft.md).
 import 'server-only'
-import { Effect, Layer, Logger, ManagedRuntime } from 'effect'
+import { Effect, Layer, Logger, type ManagedRuntime } from 'effect'
 import type * as Http from '../http.ts'
 import { sharedStartingAt } from '../recording/clock.ts'
 import { readStart, recordingDir } from '../recording/layer.ts'
-import { remember } from '../remember.ts'
+import { rememberRuntime } from '../remember.ts'
 import {
   Aircraft,
   AircraftConfig,
@@ -51,9 +51,9 @@ async function environmentLayer(): Promise<Layer.Layer<Aircraft>> {
  * that can't be read, is forgotten, so the next request tries again.
  */
 export const aircraftRuntime: () => Promise<ManagedRuntime.ManagedRuntime<Aircraft, never>> =
-  remember(() =>
+  rememberRuntime(() =>
     environmentLayer().then((layer) =>
-      ManagedRuntime.make(layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson])))),
+      layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson]))),
     ),
   )
 

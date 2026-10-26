@@ -6,7 +6,13 @@ import { TestClock } from 'effect/testing'
 import { Aircraft } from '../tracker/aircraft/aircraft.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/snapshot.ts'
 import { startingAt } from '../tracker/recording/clock.ts'
-import { readJson, readStart, recordingDir } from '../tracker/recording/layer.ts'
+import {
+  filesOnDisk,
+  readJson,
+  readStart,
+  recordingDir,
+  type RecordingFiles,
+} from '../tracker/recording/layer.ts'
 import type { Snapshot } from '../tracker/snapshot.ts'
 import { demoAircraftLayer, demoRoutes, type ReadTimetableFile } from './routes.ts'
 
@@ -96,6 +102,27 @@ describe("the demo's routes", () => {
         expect(served[2 * calls]).toEqual(later(saved[0], 2 * PASS))
       }).pipe(Effect.provide(demoAircraftLayer({ dir }))),
   )
+
+  it('answer 503 while the planes’ recording cannot be read, and read it again on the next ask', async () => {
+    let malformed = true
+    // The first aircraft file is a failure no recording can hold, until it is put right.
+    const files: RecordingFiles = {
+      list: filesOnDisk.list,
+      read: async (path) =>
+        malformed && path.endsWith('0001.json') ? { status: 'down' } : filesOnDisk.read(path),
+    }
+    const flaky = demoRoutes({
+      read: fromDisk,
+      aircraft: { dir, files },
+      beneath: startingAt(start),
+    })
+    const failed = await flaky('/api/aircraft')
+    expect(failed.status).toBe(503)
+    malformed = false
+    const answered = await flaky('/api/aircraft')
+    expect(answered.status).toBe(200)
+    expect(((await answered.json()) as AircraftSnapshot).aircraft).toEqual(saved[0].aircraft)
+  })
 
   it('answer 404 for any other path', async () => {
     expect((await route('/api/nothing')).status).toBe(404)
