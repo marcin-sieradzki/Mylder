@@ -8,6 +8,7 @@ import 'client-only'
 import { pointAt, type MeasuredPath } from '../domain/trip-motion.ts'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import type { Along } from './follow.ts'
 import { motionOf, placeAt, type Motion } from './motion.ts'
 import { writeOffset } from './offsets.ts'
 import { motionPause, type MotionPause } from './pause.ts'
@@ -37,6 +38,11 @@ export interface VehicleLoop {
    * dots' motion. Until the network has loaded the dots stand where the snapshot put them.
    */
   show(vehicles: Vehicles, snapshot: Snapshot, network: Network | undefined): void
+  /**
+   * How far along its path the dot of the trip `key` was last placed, and where the path's last
+   * stop lies; none for a trip not drawn, or one that stands where the snapshot put it.
+   */
+  along(key: string): Along | undefined
   stop(): void
 }
 
@@ -204,6 +210,12 @@ export function vehicleLoop({
         place(at)
       } else if (frame === undefined) run()
       else place(at)
+    },
+    along(key) {
+      if (!shown) return undefined
+      const mover = shown.movers[shown.vehicles.keys.indexOf(key)]
+      if (!mover) return undefined
+      return { progress: mover.progress, end: mover.path.stops.at(-1) ?? mover.path.length }
     },
     stop() {
       halt()

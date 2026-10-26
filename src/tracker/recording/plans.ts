@@ -15,6 +15,16 @@ export interface RecordingPlan {
   readonly minutes: number
   /** Fill every `journeyPos` answer to this many journeys, as a full box at a peak would be. */
   readonly fill?: number
+  /**
+   * Route answers saved beside the snapshots, for screen tests: these stops' departures and these
+   * trips' details as the stop and trip routes answer them from the timetable and the snapshot of
+   * the plan's `minute`, counted from 0.
+   */
+  readonly answers?: {
+    readonly minute: number
+    readonly stops: readonly string[]
+    readonly trips?: readonly string[]
+  }
 }
 
 /** 07:20 in Copenhagen on Tuesday 2026-06-16, when the fixture has trips underway. */
@@ -28,7 +38,26 @@ const failingAll = (kind: FailureKind): Scenario => ({
 })
 
 export const RECORDINGS: readonly RecordingPlan[] = [
-  { name: 'weekday', scenario: WEEKDAY, start: RECORDING_START, minutes: 10 },
+  {
+    name: 'weekday',
+    scenario: WEEKDAY,
+    start: RECORDING_START,
+    minutes: 10,
+    // Nørreport, with Live and Estimated departures by bus and S-tog; Orientkaj St., Timetable only;
+    // Hillerød St., with none in the next 30 minutes; Bella Center St., where the Metro runs to an
+    // interval. A Live S-tog, an Estimated bus, a Metro trip, and a bus that stands Waiting at
+    // Orientkaj St. from 07:25.
+    answers: {
+      minute: 1,
+      stops: ['27532', '54307', '8600683', '8603313'],
+      trips: [
+        's-tog.A.0bc307e3eb.20260616.0707',
+        'bus.5C.32331e0e20.20260616.0707',
+        'metro.M1.7f21f99145.20260616.0707',
+        'bus.991.7ce514fd98.20260616.0730',
+      ],
+    },
+  },
   { name: 'empty', scenario: failingAll('empty'), start: RECORDING_START, minutes: 3 },
   { name: 'refused-key', scenario: failingAll('refused-key'), start: RECORDING_START, minutes: 3 },
   { name: 'spent', scenario: SPENT, start: RECORDING_START, minutes: 3 },

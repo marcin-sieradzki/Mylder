@@ -6,9 +6,10 @@ import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork, type Network } from '../../timetable/network.ts'
 import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
+import { patternHighlight, type Highlight } from '../highlight.ts'
 import { readPaint } from '../paint.ts'
 import { drawnOf, features, sidesOf } from '../../test/drawnLines.ts'
-import { basemapStyle, paintTokens } from './basemap.ts'
+import { basemapStyle, paintTokens, STOP_LAYERS } from './basemap.ts'
 
 // The basemap as the page paints it: Perron's own token sheet on the document, and the weekday
 // recording's network (lines 5C, 991, M1, A, E and RE).
@@ -22,8 +23,12 @@ const network = readNetwork({
   paths: read(manifest.files.paths),
 })
 
-const styleNow = () =>
-  basemapStyle(readPaint(document.documentElement, paintTokens(network)), network)
+const styleNow = (highlight?: Highlight) =>
+  basemapStyle(
+    readPaint(document.documentElement, paintTokens(network, highlight)),
+    network,
+    highlight,
+  )
 
 const layer = (style: StyleSpecification, id: string) => {
   const found = style.layers.find((each) => each.id === id)
@@ -297,9 +302,75 @@ describe('the basemap', () => {
     expect(index('mylder-stops-rail')).toBeLessThan(firstLabel)
   })
 
+  it('gives each drawn stop its id, in the layers a tap on a stop reads', () => {
+    const style = styleNow()
+    const norreport = features(style, 'mylder-stops').find(
+      (f) => f.properties!.name === 'Nørreport St.',
+    )
+    expect(norreport?.properties).toMatchObject({ id: '27532', rail: true })
+    for (const id of STOP_LAYERS) expect(style.layers.some((each) => each.id === id)).toBe(true)
+  })
+
   it('draws the basemap alone until the network has loaded', () => {
     const style = basemapStyle(readPaint(document.documentElement, paintTokens()))
     expect(layer(style, 'background').paint['background-color']).toBe('#EDEFEB')
     expect(style.sources['mylder-lines']).toBeUndefined()
+  })
+})
+
+describe('a highlight on the basemap', () => {
+  const patternOf = (line: string, headsign: string) =>
+    network.patterns.patterns.findIndex(
+      (each) => network.patterns.lines[each.line].name === line && each.headsign === headsign,
+    )
+  const busLine = () => patternHighlight(network, patternOf('5C', 'Husum Torv'))
+  const index = (style: StyleSpecification, id: string) =>
+    style.layers.findIndex((each) => each.id === id)
+
+  it('draws the highlighted line in its colour, wider than at rest, and rings its stops', () => {
+    const m1 = patternHighlight(network, patternOf('M1', 'Vestamager St. (Metro)'))
+    const style = styleNow(m1)
+    const [line, ...others] = features(style, 'mylder-highlight-lines')
+    expect(others).toEqual([])
+    // Metro's 3.2 px and the focus's 1.6 px more, in M1's green.
+    expect(line.properties).toMatchObject({ colour: '#0B8A44', width: 4.8 })
+    expect((line.geometry as MultiLineString).coordinates.flat()).toHaveLength(
+      network.pathOf(patternOf('M1', 'Vestamager St. (Metro)')).points.length,
+    )
+    const stops = features(style, 'mylder-highlight-stops')
+    expect(stops).toHaveLength(15)
+    expect(stops[0].properties).toMatchObject({ colour: '#0B8A44' })
+  })
+
+  it("draws a bus route, which is never drawn at rest, at the bus's focus width", () => {
+    const [line] = features(styleNow(busLine()), 'mylder-highlight-lines')
+    expect(line.properties).toMatchObject({ width: 4 })
+  })
+
+  it('dims every line and stop outside the focus', () => {
+    const style = styleNow(busLine())
+    const opacities = features(style, 'mylder-lines').map((f) => f.properties!.opacity)
+    expect(new Set(opacities)).toEqual(new Set([0.16]))
+    expect(layer(style, 'mylder-stops-rail').paint['circle-opacity']).toBe(0.3)
+    expect(layer(style, 'mylder-stops-rail').paint['circle-stroke-opacity']).toBe(0.3)
+  })
+
+  it('draws the highlight over the lines and stops and under the place names', () => {
+    const style = styleNow(busLine())
+    const firstLabel = style.layers.findIndex((each) => each.type === 'symbol')
+    expect(index(style, 'mylder-highlight-lines')).toBeGreaterThan(
+      index(style, 'mylder-stops-rail'),
+    )
+    expect(index(style, 'mylder-highlight-stops')).toBeGreaterThan(
+      index(style, 'mylder-highlight-lines'),
+    )
+    expect(index(style, 'mylder-highlight-stops')).toBeLessThan(firstLabel)
+  })
+
+  it('draws nothing in focus, and dims nothing, while nothing is highlighted', () => {
+    const style = styleNow()
+    expect(features(style, 'mylder-highlight-lines')).toEqual([])
+    expect(features(style, 'mylder-highlight-stops')).toEqual([])
+    expect(layer(style, 'mylder-stops-rail').paint['circle-opacity']).toBe(1)
   })
 })

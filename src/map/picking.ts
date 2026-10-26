@@ -1,8 +1,8 @@
 // Which dot the reader has picked, for its card (docs/screens.md, "The moving map"): a hover
-// picks one for as long as the pointer rests on it, a tap or click pins it until a tap elsewhere
-// or Esc. deck.gl picks on the GPU within `TAP_RADIUS` of the pointer, so every dot has a tap
-// target of at least 24 px (ADR 0003). The card opens on its dot, not at the pointer, and its point
-// follows the dot as the dot moves and the map pans.
+// picks one for as long as the pointer rests on it, and a tap or click on one hands it on to open
+// its detail, closing the card. deck.gl picks on the GPU within `TAP_RADIUS` of the pointer, so
+// every dot has a tap target of at least 24 px (ADR 0003). The card opens on its dot, not at the
+// pointer, and its point follows the dot as the dot moves and the map pans.
 import 'client-only'
 import type { PickingInfo } from '@deck.gl/core'
 import { useSyncExternalStore } from 'react'
@@ -17,8 +17,6 @@ export interface Picked {
   readonly key: string
   /** Where the dot is on the page, in CSS pixels from the viewport's top left. */
   readonly point: readonly [number, number]
-  /** Whether a tap pinned it, so that the pointer leaving it keeps the card open. */
-  readonly pinned: boolean
 }
 
 export interface PickedStore {
@@ -85,14 +83,26 @@ function drawnAt(vehicles: Vehicles, i: number, project: Project): [number, numb
   return [x + vehicles.offsets[i * 2], y - vehicles.offsets[i * 2 + 1]]
 }
 
-/**
- * Picking for the dots drawn in `canvas`, the element deck.gl's pixels count from, into `store`.
- * `onPointer` hears whether the pointer rests on a dot, for its cursor.
- */
+export interface PickingListeners {
+  /** Hears a tap on a dot, by its trip's key, so that its detail can open. */
+  readonly onTap?: (key: string) => void
+  /**
+   * Hears whether the pointer rests on a dot, and where it rests, at its pixels from the canvas's
+   * top left, for its cursor: off a dot, a stop under it takes one too.
+   */
+  readonly onPointer?: (onDot: boolean, x: number, y: number) => void
+  /**
+   * Hears a tap that found no dot, at its pixels from the canvas's top left, so that a stop under
+   * it can open: a dot wins over a stop.
+   */
+  readonly onMiss?: (x: number, y: number) => void
+}
+
+/** Picking for the dots drawn in `canvas`, the element deck.gl's pixels count from, into `store`. */
 export function vehiclePicking(
   canvas: HTMLElement,
   store: PickedStore = pickedVehicle,
-  onPointer: (onDot: boolean) => void = () => {},
+  { onTap = () => {}, onPointer = () => {}, onMiss = () => {} }: PickingListeners = {},
 ): VehiclePicking {
   let vehicles: Vehicles | undefined
   let project: Project | undefined
@@ -126,17 +136,15 @@ export function vehiclePicking(
       pickingRadius: TAP_RADIUS,
       onHover(info) {
         const key = keyOf(info)
-        onPointer(key !== undefined)
-        const now = store.get()
-        if (now?.pinned) return
+        onPointer(key !== undefined, info.x, info.y)
         if (key === undefined) store.clear()
-        else if (key !== now?.key)
-          store.pick({ key, point: dotAt(info.index, info), pinned: false })
+        else if (key !== store.get()?.key) store.pick({ key, point: dotAt(info.index, info) })
       },
       onClick(info) {
         const key = keyOf(info)
-        if (key === undefined) store.clear()
-        else store.pick({ key, point: dotAt(info.index, info), pinned: true })
+        store.clear()
+        if (key !== undefined) onTap(key)
+        else onMiss(info.x, info.y)
       },
     },
     follow(drawn, projection) {

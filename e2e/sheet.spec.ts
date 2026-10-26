@@ -48,3 +48,24 @@ test.describe('on a phone', () => {
       .toEqual([true, true])
   })
 })
+
+test('the Vehicles list has a row for every vehicle the map draws', async ({ page }) => {
+  await page.goto('/en?tab=vehicles')
+  const map = page.locator('[data-vehicles]')
+  const table = page
+    .getByRole('dialog', { name: 'Overview' })
+    .getByRole('table', { name: 'Vehicles' })
+  await expect(table).toBeVisible()
+  // One row per vehicle drawn, the header row aside, both from the same snapshot.
+  const counts = async () => {
+    const drawn = Number(await map.getAttribute('data-vehicles'))
+    const rows = (await table.getByRole('row').count()) - 1
+    return { drawn, same: drawn > 0 && rows === drawn }
+  }
+  await expect.poll(async () => (await counts()).same).toBe(true)
+
+  // A row's destination opens that vehicle's detail, in place.
+  await table.getByRole('link', { name: 'Train RE to Næstved St.' }).first().click()
+  await expect(page).toHaveURL(/[?&]trip=train\.RE\./)
+  await expect(page.getByRole('dialog', { name: /to Næstved St\./ })).toBeVisible()
+})

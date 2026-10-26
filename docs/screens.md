@@ -43,7 +43,7 @@ When both Disconnected and Paused hold, Disconnected is shown and the Paused not
 - **Where:** "Between Nørreport and Kongens Nytorv" or "At Nørreport", read from the position's place on the pattern; "Last seen near Nørreport" for No signal; "Waiting at Hundige, departs 10:42" for a Waiting trip, never "At Hundige" unless a report puts it there.
 - **Next stops:** the calls ahead with their timetabled times and a delay per call from `journeyDetail`, or the snapshot's delay for every later call until the detail has loaded, the next stop marked. For a No signal trip the times are the timetable's with "Delay unknown". Cancelled calls are marked. A Metro trip lists its calls without times, with the interval instead.
 - **Follow** keeps the camera on the dot and ends when the trip reaches its last stop, when the viewer pans, or when the panel closes. **Show whole line** fits the trip's pattern and raises the highlight chip.
-- **Messages:** the trip's own messages from `journeyDetail`, as cards, with their stop range marked on the next-stops list. This is the one honest tie from a message to a trip, and it costs no extra call.
+- **Messages:** the trip's own messages from `journeyDetail`, as cards after the next stops, with their stop range marked on the next-stops list: the first and last stop it covers carry a note after the name, "Sydhavn — Langsom kørsel from here". This is the one honest tie from a message to a trip, and it costs no extra call.
 - **Source line:** "Rejseplanen · position 08:14:05 · times 08:14:20" when `journeyDetail` was called; "Rejseplanen · position 08:14:05 · times from the timetable" when not; the messages carry "checked 08:15".
 
 When on-demand calls are stopped by the budget, or the API is failing, the panel is served from the timetable plus the snapshot's delay and says "From the timetable".
@@ -58,7 +58,7 @@ When on-demand calls are stopped by the budget, or the API is failing, the panel
 - **The Metro:** an interval row, "every 3 min" or "every 3 to 4 min", worked out from the planned departures in the current hour in that direction, with no countdown and no clock time, and the note "Metro: planned times". If the first calls with the key show Metro realtime, Metro rows become ordinary rows.
 - **Cancelled** rows stay, marked Cancelled, with the countdown struck.
 - **Empty:** "No departures in the next 30 minutes for the vehicle types shown."
-- **Messages:** the cards from the disruption list already loaded whose stops include this one; no call.
+- **Messages:** the messages on the stop's board, and the disruption list's whose stops include this one, as cards; both come with the stop's answer, so no call of their own.
 - **Note:** "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so."
 - **Source line:** "Rejseplanen · departures 08:14:20" when the board was called; "Timetable and positions 08:14:05" when served from the timetable plus the snapshot's delays.
 
@@ -115,7 +115,7 @@ Cancellations make no card. They are shown where they are seen: a cancelled row 
 
 **Footer:** "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open." After a failed check, "Last checked 07:45; the latest check failed." After an hour without a successful check the list stays, marked "May be out of date", and the data card above says so. The time is the server's receipt time of the last good answer.
 
-**Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, LinkButton, Accordion, Separator, DataStatePanel, Text.
+**Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, LinkButton, Accordion, Section, Separator, DataStatePanel, Text.
 
 ## The About dialog
 

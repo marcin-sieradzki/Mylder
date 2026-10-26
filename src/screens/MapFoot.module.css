@@ -15,7 +15,7 @@
   gap: var(--perron-size-panel-gap);
   pointer-events: none;
   /* It moves with the sheet as the sheet opens and closes. */
-  transition-property: inset-inline-start, inset-block-end;
+  transition-property: inset-inline-start, inset-inline-end, inset-block-end;
   transition-duration: var(--perron-duration-sheet);
   transition-timing-function: var(--perron-easing-sheet);
 }
@@ -77,6 +77,41 @@
   }
 
   .foot[data-sheet='open'] .credit {
+    justify-self: stretch;
+    text-align: start;
+  }
+}
+
+/* Before the open detail panel on a desktop, short of its width and the gaps either side of it.
+   What is left is as narrow beside the panel as beside the sheet, so the credit takes a row of
+   its own up to the same width, and with both open up to that width and the sheet's. */
+@media (min-width: 761px) {
+  .foot[data-panel='open'] {
+    inset-inline-end: calc(var(--perron-size-detail-width) + 2 * var(--perron-size-panel-gap));
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1280px) {
+  .foot[data-panel='open'] {
+    grid-template-areas:
+      'legend tools'
+      'credit credit';
+  }
+
+  .foot[data-panel='open'] .credit {
+    justify-self: stretch;
+    text-align: start;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1660px) {
+  .foot[data-sheet='open'][data-panel='open'] {
+    grid-template-areas:
+      'legend tools'
+      'credit credit';
+  }
+
+  .foot[data-sheet='open'][data-panel='open'] .credit {
     justify-self: stretch;
     text-align: start;
   }

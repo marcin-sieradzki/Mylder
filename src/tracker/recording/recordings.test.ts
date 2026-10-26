@@ -6,8 +6,9 @@ import { TestClock } from 'effect/testing'
 import * as Http from '../rejseplanen/http'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
+import { loadTimetable } from '../timetable'
 import { startingAt } from './clock'
-import { replay } from './freeze'
+import { disruptionsFile, replay, savedAnswers } from './freeze'
 import {
   callFile,
   readJson,
@@ -35,16 +36,29 @@ const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
-    'replays %s through the tracker into the snapshots it was frozen with',
+    'replays %s through the tracker into the snapshots and route answers it was frozen with',
     ([, plan]) =>
       Effect.gen(function* () {
         const dir = recordingDir(plan.name)
-        const replayed = yield* replay(plan, dir)
-        const saved = yield* Effect.promise(() =>
-          Promise.all(replayed.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
+        const { snapshots, disruptions } = yield* replay(plan, dir)
+        const saved = (path: (file: string) => string) =>
+          Effect.promise(() =>
+            Promise.all(snapshots.map((_, i) => readJson(join(dir, path(callFile(i)))))),
+          )
+        expect(snapshots).toHaveLength(plan.minutes)
+        expect(JSON.parse(JSON.stringify(snapshots))).toEqual(
+          yield* saved((file) => join('snapshots', file)),
         )
-        expect(replayed).toHaveLength(plan.minutes)
-        expect(JSON.parse(JSON.stringify(replayed))).toEqual(saved)
+        expect(JSON.parse(JSON.stringify(disruptions))).toEqual(yield* saved(disruptionsFile))
+        const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
+        const answers = savedAnswers(plan, recorded, snapshots)
+        expect(answers.size).toBe(
+          (plan.answers?.stops.length ?? 0) + (plan.answers?.trips?.length ?? 0),
+        )
+        for (const [file, answer] of answers) {
+          const kept = yield* Effect.promise(() => readJson(join(dir, file)))
+          expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)
+        }
       }),
   )
 

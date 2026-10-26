@@ -1,12 +1,13 @@
 // The disruption list (docs/live-data.md, "One call a minute", step 4; docs/screens.md,
 // "Disruptions"): `himsearch`'s messages that belong to Copenhagen, as received, each with the
-// kind its fields say and its validity as moments, kept in the store between fetches with when it
+// kind its fields say, the modes it concerns and its validity as moments, kept in the store between fetches with when it
 // was fetched and last checked. The kind a card names and whether it is active or Later depend
 // on the clock, so the browser reads them with `src/domain/disruption.ts`. Plain functions; the
 // run in `tracker.ts` decides when to fetch.
 import 'server-only'
 import { createHash } from 'node:crypto'
 import type { DisruptionFacts, DisruptionKind } from '../domain/disruption.ts'
+import { MODES, type Mode } from '../timetable/format.ts'
 import type { Stops } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { Message } from './rejseplanen/answers.ts'
@@ -23,8 +24,10 @@ const KIND_RULES: readonly {
   readonly kind: DisruptionKind
 }[] = []
 
-/** One message as Rejseplanen sent it, with its fields' kind and its validity. */
+/** One message as Rejseplanen sent it, with its fields' kind, its modes and its validity. */
 export interface Disruption extends DisruptionFacts {
+  /** The modes it concerns, from its products, in the timetable's order. */
+  readonly modes: readonly Mode[]
   readonly message: Message
 }
 
@@ -53,14 +56,21 @@ export interface Area {
  * stops and its products overlap the ones Mylder asks for. One that gives no products is kept.
  */
 export function inArea(message: Message, { stops, products }: Area): boolean {
-  const named = [
-    ...(message.affectedStops?.StopLocation ?? []),
-    ...(message.validFromStop ? [message.validFromStop] : []),
-    ...(message.validToStop ? [message.validToStop] : []),
-  ]
+  const named = namedStops(message)
   if (named.length > 0) return named.some(({ extId }) => stops.stopForPlatform(extId) !== undefined)
   return message.products === undefined || (message.products & products) !== 0
 }
+
+/** The stops a message names: those it affects and where its stretch starts and ends. */
+export const namedStops = (message: Message) => [
+  ...(message.affectedStops?.StopLocation ?? []),
+  ...(message.validFromStop ? [message.validFromStop] : []),
+  ...(message.validToStop ? [message.validToStop] : []),
+]
+
+/** Whether a message names a stop, by the Stop's id, through any of its platforms. */
+export const namesStop = (message: Message, stops: Stops, stopId: string): boolean =>
+  namedStops(message).some(({ extId }) => stops.stopForPlatform(extId)?.id === stopId)
 
 /** A message's kind from its structured fields only: what the table says, else a service notice. */
 function fieldsKindOf(message: Message): DisruptionKind {
@@ -72,16 +82,33 @@ function fieldsKindOf(message: Message): DisruptionKind {
   return rule?.kind ?? 'service-notice'
 }
 
+/**
+ * Each mode's product classes (docs/live-data.md, "Products"): every train class is Train, and
+ * express, night and harbour buses are Bus.
+ */
+const MODE_PRODUCTS: Readonly<Record<Mode, number>> = {
+  bus: 32 | 64 | 128 | 512,
+  metro: 1024,
+  's-tog': 16,
+  train: 1 | 2 | 4 | 8,
+  'light-rail': 2048,
+}
+
+/** The modes a message's products concern, in the timetable's order: none when it gives none. */
+export const modesOf = (products: number | undefined): Mode[] =>
+  products === undefined ? [] : MODES.filter((mode) => (products & MODE_PRODUCTS[mode]) !== 0)
+
 /** A short fingerprint of the messages, which changes whenever any of them does. */
 const versionOf = (messages: readonly Message[]) =>
   createHash('sha256').update(JSON.stringify(messages)).digest('hex').slice(0, 12)
 
-/** A message with its fields' kind and its validity, read in the timetable's zone. */
-function disruptionOf(message: Message, timezone: string): Disruption {
+/** A message with its fields' kind, its modes and its validity, read in the timetable's zone. */
+export function disruptionOf(message: Message, timezone: string): Disruption {
   const from = clockMoment(message.sDate, message.sTime, timezone)
   const to = clockMoment(message.eDate, message.eTime, timezone)
   return {
     fieldsKind: fieldsKindOf(message),
+    modes: modesOf(message.products),
     ...(from === undefined ? {} : { from }),
     ...(to === undefined ? {} : { to }),
     ...(message.act === undefined ? {} : { act: message.act }),

@@ -9,6 +9,8 @@ import { MapTools } from './MapTools'
 interface MapFootProps {
   /** Whether the sheet is open, so the foot keeps clear of it. */
   besideSheet: boolean
+  /** Whether a detail panel is open, so the controls and the credit keep clear of it. */
+  besidePanel: boolean
   /** The button that opens the closed sheet again, above the legend. */
   opener?: ReactNode
 }
@@ -16,12 +18,17 @@ interface MapFootProps {
 /**
  * The map's foot (docs/screens.md, "The moving map"): the legend at the bottom left, the
  * controls and the scale bar at the bottom right, and the corner credit beneath them. Beside an
- * open side sheet it starts past the sheet; over a bottom sheet it stands on its peek, so the
- * credit stays in view.
+ * open side sheet it starts past the sheet, and beside an open detail panel it ends before the
+ * panel; over a bottom sheet it stands on its peek, so the credit stays in view. A bottom panel
+ * on a phone covers it, and the panel's own source line names the source there.
  */
-export function MapFoot({ besideSheet, opener }: MapFootProps) {
+export function MapFoot({ besideSheet, besidePanel, opener }: MapFootProps) {
   return (
-    <div className={styles.foot} data-sheet={besideSheet ? 'open' : undefined}>
+    <div
+      className={styles.foot}
+      data-sheet={besideSheet ? 'open' : undefined}
+      data-panel={besidePanel ? 'open' : undefined}
+    >
       <div className={styles.legend}>
         {opener}
         <MapLegend />

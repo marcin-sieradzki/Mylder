@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { test as base } from '@playwright/test'
+import { test as base, expect, type Page } from '@playwright/test'
 
 // The production build serves the weekday recording (playwright.config.ts); every page's clock
 // starts at the recording's moment, as the server's does.
@@ -36,4 +36,25 @@ export const test = base.extend({
   },
 })
 
-export { expect } from '@playwright/test'
+export { expect }
+
+/** Serves the first minute's snapshot whenever the page polls, dated when it was fetched. */
+export async function serveFirstMinute(page: Page) {
+  const first = savedSnapshots()[0] as { fetched: number }
+  expect(first.fetched).toBe(RECORDING_START)
+  await page.route('**/api/snapshot', (route) =>
+    route.fulfill({
+      json: first,
+      headers: { date: new Date(first.fetched).toUTCString(), 'cache-control': 'no-store' },
+    }),
+  )
+}
+
+/** Where a point is drawn at the map's opening view on a desktop: zoom 11.2 on the centre. */
+export function onScreen([lat, lon]: readonly [number, number], width: number, height: number) {
+  const world = 512 * 2 ** 11.2
+  const x = (longitude: number) => ((longitude + 180) / 360) * world
+  const y = (latitude: number) =>
+    ((1 - Math.log(Math.tan(Math.PI / 4 + (latitude * Math.PI) / 360)) / Math.PI) / 2) * world
+  return { x: x(lon) - x(12.565) + width / 2, y: y(lat) - y(55.68) + height / 2 }
+}

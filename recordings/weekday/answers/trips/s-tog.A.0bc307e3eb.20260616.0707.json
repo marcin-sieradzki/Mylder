@@ -1,0 +1,287 @@
+{
+  "key": "s-tog.A.0bc307e3eb.20260616.0707",
+  "line": "A",
+  "mode": "s-tog",
+  "colour": "perron-color-transit-line-a",
+  "headsign": "Hillerød St.",
+  "pattern": 6,
+  "state": "live",
+  "delay": 240,
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "8600769",
+      "name": "Hundige St.",
+      "arrival": 1781586420000,
+      "departure": 1781586420000,
+      "expectedArrival": 1781586660000,
+      "expectedDeparture": 1781586660000
+    },
+    {
+      "index": 1,
+      "stop": "8600768",
+      "name": "Ishøj St.",
+      "arrival": 1781586540000,
+      "departure": 1781586540000,
+      "expectedArrival": 1781586780000,
+      "expectedDeparture": 1781586780000
+    },
+    {
+      "index": 2,
+      "stop": "8600767",
+      "name": "Vallensbæk St.",
+      "arrival": 1781586720000,
+      "departure": 1781586720000,
+      "expectedArrival": 1781586960000,
+      "expectedDeparture": 1781586960000
+    },
+    {
+      "index": 3,
+      "stop": "8600766",
+      "name": "Brøndby Strand St.",
+      "arrival": 1781586840000,
+      "departure": 1781586840000,
+      "expectedArrival": 1781587080000,
+      "expectedDeparture": 1781587080000
+    },
+    {
+      "index": 4,
+      "stop": "8600765",
+      "name": "Avedøre St.",
+      "arrival": 1781587020000,
+      "departure": 1781587020000,
+      "expectedArrival": 1781587260000,
+      "expectedDeparture": 1781587260000
+    },
+    {
+      "index": 5,
+      "stop": "8600764",
+      "name": "Friheden St.",
+      "arrival": 1781587140000,
+      "departure": 1781587140000,
+      "expectedArrival": 1781587380000,
+      "expectedDeparture": 1781587380000
+    },
+    {
+      "index": 6,
+      "stop": "8600763",
+      "name": "Åmarken St.",
+      "arrival": 1781587260000,
+      "departure": 1781587260000,
+      "expectedArrival": 1781587500000,
+      "expectedDeparture": 1781587500000
+    },
+    {
+      "index": 7,
+      "stop": "8600783",
+      "name": "København Syd St.",
+      "arrival": 1781587380000,
+      "departure": 1781587380000,
+      "expectedArrival": 1781587620000,
+      "expectedDeparture": 1781587620000
+    },
+    {
+      "index": 8,
+      "stop": "8600761",
+      "name": "Sjælør St.",
+      "arrival": 1781587500000,
+      "departure": 1781587500000,
+      "expectedArrival": 1781587740000,
+      "expectedDeparture": 1781587740000
+    },
+    {
+      "index": 9,
+      "stop": "8600760",
+      "name": "Sydhavn St.",
+      "arrival": 1781587620000,
+      "departure": 1781587620000,
+      "expectedArrival": 1781587860000,
+      "expectedDeparture": 1781587860000
+    },
+    {
+      "index": 10,
+      "stop": "8600634",
+      "name": "Dybbølsbro St.",
+      "arrival": 1781587740000,
+      "departure": 1781587740000,
+      "expectedArrival": 1781587980000,
+      "expectedDeparture": 1781587980000
+    },
+    {
+      "index": 11,
+      "stop": "8600626",
+      "name": "København H",
+      "arrival": 1781587920000,
+      "departure": 1781587980000,
+      "expectedArrival": 1781588160000,
+      "expectedDeparture": 1781588220000
+    },
+    {
+      "index": 12,
+      "stop": "8600645",
+      "name": "Vesterport St.",
+      "arrival": 1781588040000,
+      "departure": 1781588040000,
+      "expectedArrival": 1781588280000,
+      "expectedDeparture": 1781588280000
+    },
+    {
+      "index": 13,
+      "stop": "8600646",
+      "name": "Nørreport St.",
+      "arrival": 1781588160000,
+      "departure": 1781588160000,
+      "expectedArrival": 1781588400000,
+      "expectedDeparture": 1781588400000
+    },
+    {
+      "index": 14,
+      "stop": "8600650",
+      "name": "Østerport St.",
+      "arrival": 1781588280000,
+      "departure": 1781588280000,
+      "expectedArrival": 1781588520000,
+      "expectedDeparture": 1781588520000
+    },
+    {
+      "index": 15,
+      "stop": "8600653",
+      "name": "Nordhavn St.",
+      "arrival": 1781588460000,
+      "departure": 1781588460000,
+      "expectedArrival": 1781588700000,
+      "expectedDeparture": 1781588700000
+    },
+    {
+      "index": 16,
+      "stop": "8600654",
+      "name": "Svanemøllen St.",
+      "arrival": 1781588580000,
+      "departure": 1781588580000,
+      "expectedArrival": 1781588820000,
+      "expectedDeparture": 1781588820000
+    },
+    {
+      "index": 17,
+      "stop": "8600655",
+      "name": "Hellerup St.",
+      "arrival": 1781588700000,
+      "departure": 1781588700000,
+      "expectedArrival": 1781588940000,
+      "expectedDeparture": 1781588940000
+    },
+    {
+      "index": 18,
+      "stop": "8600672",
+      "name": "Bernstorffsvej St.",
+      "arrival": 1781588820000,
+      "departure": 1781588820000,
+      "expectedArrival": 1781589060000,
+      "expectedDeparture": 1781589060000
+    },
+    {
+      "index": 19,
+      "stop": "8600673",
+      "name": "Gentofte St.",
+      "arrival": 1781588880000,
+      "departure": 1781588880000,
+      "expectedArrival": 1781589120000,
+      "expectedDeparture": 1781589120000
+    },
+    {
+      "index": 20,
+      "stop": "8600674",
+      "name": "Jægersborg St.",
+      "arrival": 1781588940000,
+      "departure": 1781588940000,
+      "expectedArrival": 1781589180000,
+      "expectedDeparture": 1781589180000
+    },
+    {
+      "index": 21,
+      "stop": "8600675",
+      "name": "Lyngby St.",
+      "arrival": 1781589060000,
+      "departure": 1781589060000,
+      "expectedArrival": 1781589300000,
+      "expectedDeparture": 1781589300000
+    },
+    {
+      "index": 22,
+      "stop": "8600636",
+      "name": "Sorgenfri St.",
+      "arrival": 1781589120000,
+      "departure": 1781589120000,
+      "expectedArrival": 1781589360000,
+      "expectedDeparture": 1781589360000
+    },
+    {
+      "index": 23,
+      "stop": "8600676",
+      "name": "Virum St.",
+      "arrival": 1781589240000,
+      "departure": 1781589240000,
+      "expectedArrival": 1781589480000,
+      "expectedDeparture": 1781589480000
+    },
+    {
+      "index": 24,
+      "stop": "8600677",
+      "name": "Holte St.",
+      "arrival": 1781589300000,
+      "departure": 1781589300000,
+      "expectedArrival": 1781589540000,
+      "expectedDeparture": 1781589540000
+    },
+    {
+      "index": 25,
+      "stop": "8600678",
+      "name": "Birkerød St.",
+      "arrival": 1781589600000,
+      "departure": 1781589600000,
+      "expectedArrival": 1781589840000,
+      "expectedDeparture": 1781589840000
+    },
+    {
+      "index": 26,
+      "stop": "8600909",
+      "name": "Høvelte St.",
+      "arrival": 1781589720000,
+      "departure": 1781589720000,
+      "expectedArrival": 1781589960000,
+      "expectedDeparture": 1781589960000
+    },
+    {
+      "index": 27,
+      "stop": "8600681",
+      "name": "Allerød St.",
+      "arrival": 1781589840000,
+      "departure": 1781589840000,
+      "expectedArrival": 1781590080000,
+      "expectedDeparture": 1781590080000
+    },
+    {
+      "index": 28,
+      "stop": "8600700",
+      "name": "Favrholm St.",
+      "arrival": 1781590080000,
+      "departure": 1781590080000,
+      "expectedArrival": 1781590320000,
+      "expectedDeparture": 1781590320000
+    },
+    {
+      "index": 29,
+      "stop": "8600683",
+      "name": "Hillerød St.",
+      "arrival": 1781590260000,
+      "departure": 1781590260000,
+      "expectedArrival": 1781590500000,
+      "expectedDeparture": 1781590500000
+    }
+  ]
+}
