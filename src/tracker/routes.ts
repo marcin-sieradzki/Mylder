@@ -1,11 +1,14 @@
 // The route handlers' answers, built here so the routes in `app/api/` stay one line each: each
 // carries the CDN header for its snapshot, read on the tracker's own clock, which a recording
 // sets. A snapshot that can't be built at all, because the timetable can't be read, is a 503.
+// Their core, `cdnAnswer` (`cdn-answer.ts`), takes any value with a next due, so another feed
+// answers the same way.
 // The timetable files the browser loads come from the folder the tracker's timetable is read
 // from, each version kept for good.
 import 'server-only'
 import { Effect } from 'effect'
-import { cacheHeaders, RETRY_AFTER } from './caching.ts'
+import { TRACKER_CACHING } from './caching.ts'
+import { cdnAnswer, notFound, unavailable } from './cdn-answer.ts'
 import { runTracker, timetableDirOf, type RunTracker } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
 import {
@@ -17,41 +20,21 @@ import {
 } from './timetable.ts'
 import type { TrackerShape } from './tracker.ts'
 
-export const unavailable = (error: unknown) => {
-  console.error('The tracker could not answer', error)
-  return new Response(null, {
-    status: 503,
-    headers: { 'Retry-After': String(RETRY_AFTER), 'Cache-Control': 'no-store' },
-  })
-}
-
-export const notFound = (what: string) =>
-  Response.json(
-    { error: `unknown ${what}` },
-    { status: 404, headers: { 'Cache-Control': 'no-store' } },
-  )
-
 /** The tracker's four answers, each run by `run`: this instance's runtime, or the demo's (ADR 0013). */
 export function trackerAnswers(run: RunTracker) {
   /**
-   * Answers with a value due again at its `nextDue`, or 404 when there is none. Its date header is
-   * the tracker's clock, which the browser takes as the server's: under a recording, the
-   * recording's moment.
+   * Answers with what `get` reads from the tracker, dated on the tracker's clock: under a
+   * recording, the recording's moment.
    */
-  async function answer<A extends { readonly nextDue: number }>(
+  const answer = <A extends { readonly nextDue: number }>(
     what: string,
     get: (tracker: TrackerShape) => Effect.Effect<A | undefined>,
-  ): Promise<Response> {
-    try {
-      const [value, now] = await run((tracker) => Effect.all([get(tracker), tracker.now]))
-      if (!value) return notFound(what)
-      return Response.json(value, {
-        headers: { ...cacheHeaders(value.nextDue, now), Date: new Date(now).toUTCString() },
-      })
-    } catch (error) {
-      return unavailable(error)
-    }
-  }
+  ): Promise<Response> =>
+    cdnAnswer(
+      what,
+      () => run((tracker) => Effect.all({ value: get(tracker), now: tracker.now })),
+      TRACKER_CACHING,
+    )
 
   return {
     snapshot: () => answer('snapshot', (tracker) => tracker.getSnapshot),
@@ -116,7 +99,7 @@ export async function manifestResponse(read: ReadTimetableFile): Promise<Respons
   try {
     return json(await readManifestFile(read), BRIEFLY)
   } catch (error) {
-    return unavailable(error)
+    return unavailable(error, 'timetable manifest')
   }
 }
 
@@ -131,6 +114,6 @@ export async function browserFileResponse(
     const body = await readBrowserFile(read, version, file)
     return body === undefined ? notFound('timetable version') : json(body, IMMUTABLE)
   } catch (error) {
-    return unavailable(error)
+    return unavailable(error, 'timetable file')
   }
 }

@@ -1,9 +1,11 @@
-import { readdir, readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from '@effect/vitest'
-import { Clock, Effect, Fiber, Layer } from 'effect'
+import { Cause, Clock, Effect, Exit, Fiber, Layer } from 'effect'
 import { TestClock } from 'effect/testing'
-import * as Http from '../rejseplanen/http'
+import * as Http from '../http'
+import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
@@ -11,12 +13,15 @@ import { startingAt } from './clock'
 import { disruptionsFile, replay, savedAnswers } from './freeze'
 import {
   callFile,
+  layer,
+  readCalls,
   readJson,
   readRecorded,
   recordedClient,
   recordingDir,
   RECORDINGS_DIR,
   type Recorded,
+  type RecordedApi,
 } from './layer'
 import { RECORDINGS } from './plans'
 
@@ -89,6 +94,7 @@ describe('the recorded layer', () => {
   it.effect("answers each service's calls in order, then repeats the last", () =>
     Effect.gen(function* () {
       const client = recordedClient(
+        RECORDED_REJSEPLANEN,
         new Map([
           ['journeyPos', [answer(1), answer(2)]],
           ['himsearch', [answer(9)]],
@@ -105,6 +111,7 @@ describe('the recorded layer', () => {
   it.effect('answers a failure file with its status and body, and 400 for a service it lacks', () =>
     Effect.gen(function* () {
       const client = recordedClient(
+        RECORDED_REJSEPLANEN,
         new Map([
           ['journeyPos', [{ status: 503 }]],
           ['himsearch', [{ status: 401, body: { errorCode: 'API_AUTH' } }]],
@@ -120,7 +127,10 @@ describe('the recorded layer', () => {
 
   it.effect('hangs a timeout file past any client timeout, then answers 504', () =>
     Effect.gen(function* () {
-      const client = recordedClient(new Map([['journeyPos', [{ timeout: true }]]]))
+      const client = recordedClient(
+        RECORDED_REJSEPLANEN,
+        new Map([['journeyPos', [{ timeout: true }]]]),
+      )
       const fiber = yield* Effect.forkChild(callWith(client, 'journeyPos'))
       yield* Effect.yieldNow
       yield* TestClock.adjust('10 seconds')
@@ -151,6 +161,96 @@ describe('the recorded layer', () => {
   it('keeps a recording inside the recordings folder', () => {
     expect(() => recordingDir('../public')).toThrow('lowercase letters, digits and dashes')
     expect(() => recordingDir('Weekday')).toThrow('lowercase letters, digits and dashes')
+  })
+})
+
+describe('the recorded layer for another API', () => {
+  /** A made-up API with one kind of call, named by how its path starts. */
+  const radar: RecordedApi = {
+    folders: ['aircraft'],
+    folderOf: (url) => (url.pathname.startsWith('/v2/point/') ? 'aircraft' : undefined),
+    unknown: (request) => Http.text(request, 404, 'Not Found'),
+  }
+
+  const call = (path: string) =>
+    Effect.gen(function* () {
+      const client = yield* Http.HttpClient.HttpClient
+      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(Effect.orDie)
+    })
+
+  /** A recording folder made for one test, holding `files` by their paths, removed after it. */
+  async function madeRecording<A>(
+    files: Record<string, unknown>,
+    within: (dir: string) => Promise<A>,
+  ): Promise<A> {
+    const dir = await mkdtemp(join(tmpdir(), 'recording-'))
+    try {
+      for (const [path, content] of Object.entries(files)) {
+        await mkdir(join(dir, path, '..'), { recursive: true })
+        await writeFile(join(dir, path), JSON.stringify(content))
+      }
+      return await within(dir)
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  }
+
+  it.effect(
+    'replays its folder in call order, failures too, and answers an unknown call its own way',
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* Effect.acquireRelease(
+          Effect.promise(() => mkdtemp(join(tmpdir(), 'recording-'))),
+          (made) => Effect.promise(() => rm(made, { recursive: true, force: true })),
+        )
+        const write = (path: string, content: unknown) =>
+          Effect.promise(async () => {
+            await mkdir(join(dir, path, '..'), { recursive: true })
+            await writeFile(join(dir, path), JSON.stringify(content))
+          })
+        yield* write('aircraft/0001.json', { ac: [{ hex: 'a' }] })
+        yield* write('aircraft/0002.json', { status: 503 })
+        yield* write('aircraft/0003.json', { ac: [{ hex: 'c' }] })
+        // Another API's folder in the same recording is none of this one's.
+        yield* write('journeyPos/0001.json', { Journey: [] })
+        const answers = yield* Effect.gen(function* () {
+          const made = []
+          for (let i = 0; i < 4; i++) made.push(yield* call('/v2/point/55.75/12.38/25'))
+          made.push(yield* call('/journeyPos'))
+          return made
+        }).pipe(Effect.provide(layer(radar, dir)))
+        expect(answers).toEqual([
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'a' }] }) },
+          { status: 503, text: '' },
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'c' }] }) },
+          { status: 200, text: JSON.stringify({ ac: [{ hex: 'c' }] }) },
+          { status: 404, text: 'Not Found' },
+        ])
+      }).pipe(Effect.scoped),
+  )
+
+  it.effect('fails loudly when its URL rule names a folder it does not list', () =>
+    Effect.gen(function* () {
+      const misnamed: RecordedApi = { ...radar, folderOf: () => 'planes' }
+      const exit = yield* Effect.exit(
+        call('/v2/point/55.75/12.38/25').pipe(
+          Effect.provideService(Http.HttpClient.HttpClient, recordedClient(misnamed, new Map())),
+        ),
+      )
+      expect(Exit.isFailure(exit) && Cause.pretty(exit.cause)).toContain(
+        'files /v2/point/55.75/12.38/25 under planes, which is not one of its folders: aircraft',
+      )
+    }),
+  )
+
+  it("fails loudly when a folder can't be read, and reads a missing one as no calls", async () => {
+    // A file where the folder should be.
+    await madeRecording({ aircraft: { ac: [] } }, async (dir) => {
+      await expect(readCalls(radar, dir)).rejects.toThrow('ENOTDIR')
+    })
+    await madeRecording({}, async (dir) => {
+      expect(await readCalls(radar, dir)).toEqual(new Map())
+    })
   })
 })
 

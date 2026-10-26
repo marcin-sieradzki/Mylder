@@ -2,9 +2,11 @@
 
 Runs on the server only. Every module here starts with `import 'server-only'`, so importing one from a client component fails `next build`. Callers go through `index.ts`.
 
+- `http.ts`: the tracker's one door to Effect's `unstable` HTTP module (ADR 0011), knowing no feed: the `HttpClient` service, a client that answers every request itself, the fetch layer, JSON and text answers, the gateway timeout, and a plain GET.
 - `rejseplanen/answers.ts`: the Rejseplanen API 2.0 answer schemas every source decodes or encodes with, and their contract fixtures in `rejseplanen/fixtures/`.
+- `rejseplanen/responses.ts`: Rejseplanen's answers built on the HTTP door, for every adapter that answers in its place: its error answer (`errorAnswer`), its `SVC_PARAM` refusal (`svcParam`), and how a recording keeps its calls (`RECORDED_REJSEPLANEN`).
 - `source.ts`: `MYLDER_SOURCE`, and the `HttpClient` layer each source answers through (`docs/testing-seams.md`).
-- `recording/`: the recorded Rejseplanen, an `HttpClient` adapter that replays a folder in `recordings/`, the clock that starts at the recording's moment, and the plans `npm run recordings` freezes the recordings from (`docs/testing-seams.md`).
+- `recording/`: the recorded layer, an `HttpClient` adapter that replays a folder in `recordings/` for any API described to it (Rejseplanen's is the one in use), the clock that starts at the recording's moment, and the plans `npm run recordings` freezes the recordings from (`docs/testing-seams.md`).
 - `simulation/`: the simulated Rejseplanen (#29), an `HttpClient` adapter that builds answers from the timetable at the runtime's clock, under a scenario.
 - `timetable.ts`: the deployed timetable, read once per instance, with service days expanded and pattern paths measured on first use. `testing.ts` holds the fixture timetable the same way for tests.
 - `index.ts`: the four plain functions the routes call (`getSnapshot`, `getStopDepartures`, `getTripDetail`, `getDisruptions`); no Effect type leaves the tracker.
@@ -15,4 +17,4 @@ Runs on the server only. Every module here starts with `import 'server-only'`, s
 - `disruptions.ts`: the disruption list between fetches, each message as received with its fields' kind, the modes its products concern and its validity as moments; `src/domain/disruption.ts` reads the kind its card names and whether it is active or Later.
 - `report.ts`: what each run reports, in its log line and the snapshot's status section, and the CPU clock it measures itself by.
 - `budget.ts`: the pacing rule: the month's line, the gap and the level, which sets the poll interval, the disruption fetches and whether on-demand calls are allowed.
-- `store.ts`: the store's four operations, in memory until the hosted Redis (#56); `caching.ts`: the CDN header.
+- `store.ts`: the store's four operations, in memory until the hosted Redis (#56); `caching.ts`: the CDN header and an answer's cache policy (the tracker's is `TRACKER_CACHING`); `cdn-answer.ts`: the answers any feed's routes build with it, knowing no feed (`cdnAnswer`, and its 404 and 503); `routes.ts`: the tracker's route answers, built with `cdnAnswer`, and the timetable files'.

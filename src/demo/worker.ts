@@ -1,7 +1,7 @@
 // The GitHub Pages demo's tracker (ADR 0013), in a Web Worker: the demo's routes, reading the
 // timetable from the folder the demo serves beside this script, answering the page's asks.
 import './shims/process.ts'
-import { unavailable } from '../tracker/routes.ts'
+import { unavailable } from '../tracker/cdn-answer.ts'
 import type { RouteAnswer, RouteAsk } from './protocol.ts'
 import { demoRoutes } from './routes.ts'
 
@@ -20,7 +20,7 @@ self.addEventListener('message', async (event: MessageEvent<RouteAsk>) => {
     response = await route(path)
   } catch (error) {
     // Every route answers its own failures; this is for one that slipped through.
-    response = unavailable(error)
+    response = unavailable(error, `route ${path}`)
   }
   const answer: RouteAnswer = {
     id,
