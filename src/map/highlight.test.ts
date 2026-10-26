@@ -81,7 +81,7 @@ const SEVERITY = 'perron-color-transit-severity-notice'
 
 describe("a disruption's stretch and stops", () => {
   it('rings each stop it affects, in its severity colour, each with its id for a tap to open', () => {
-    const highlight = disruptionHighlight(network, signalFault!, SEVERITY)
+    const highlight = disruptionHighlight(network, signalFault!, 'notice')
     expect(highlight.label).toEqual({
       kind: 'text',
       text: 'Færre S-tog mellem København H og Hellerup',
@@ -93,7 +93,7 @@ describe("a disruption's stretch and stops", () => {
   })
 
   it('draws the stretch between its two ends along every pattern that runs through both', () => {
-    const { lines } = disruptionHighlight(network, signalFault!, SEVERITY)
+    const { lines } = disruptionHighlight(network, signalFault!, 'notice')
     expect(lines.length).toBeGreaterThan(0)
     for (const line of lines) {
       expect(line).toMatchObject({ mode: 's-tog', colour: SEVERITY })
@@ -102,13 +102,14 @@ describe("a disruption's stretch and stops", () => {
       const ends = [first, last].map(([lat]) => Math.round(lat * 100) / 100).sort()
       expect(ends).toEqual([55.67, 55.73])
     }
-    // Each stretch once, however many patterns run along it.
+    // Each stretch once, whichever way its patterns run along it.
     const drawn = lines.map((line) => JSON.stringify(line.points))
-    expect(new Set(drawn).size).toBe(drawn.length)
+    const reversed = lines.map((line) => JSON.stringify(line.points.toReversed()))
+    expect(new Set([...drawn, ...reversed]).size).toBe(2 * drawn.length)
   })
 
   it('draws no stretch between two platforms of one stop, and rings that stop once', () => {
-    const highlight = disruptionHighlight(network, busDiversion!, SEVERITY)
+    const highlight = disruptionHighlight(network, busDiversion!, 'notice')
     expect(highlight.lines).toEqual([])
     expect(highlight.stops.map(({ id }) => id)).toEqual(['807'])
   })
@@ -125,7 +126,7 @@ describe("a disruption's stretch and stops", () => {
         validToStop: undefined,
       },
     }
-    expect(disruptionHighlight(network, outside, SEVERITY)).toMatchObject({ lines: [], stops: [] })
+    expect(disruptionHighlight(network, outside, 'notice')).toMatchObject({ lines: [], stops: [] })
   })
 })
 

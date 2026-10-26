@@ -308,6 +308,22 @@ describe('Show on map', () => {
     expect(screen.queryByRole('button', { name: 'Show on map' })).not.toBeInTheDocument()
   })
 
+  it('has nothing to show for a message whose stops the timetable does not know', async () => {
+    const aarhus = { name: 'Aarhus H', extId: '8600053', lon: 10.2, lat: 56.15 }
+    const { validFromStop: _, validToStop: __, ...elsewhere } = signalFault.message
+    await show(
+      'en',
+      answer({
+        messages: [
+          { ...signalFault, message: { ...elsewhere, affectedStops: { StopLocation: [aarhus] } } },
+        ],
+      }),
+    )
+    // Once the timetable has loaded, it knows none of them.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    expect(screen.getByRole('button', { name: 'Show on map' })).toBeDisabled()
+  })
+
   it('raises the chip over the map, in Danish, and Clear takes it down', async () => {
     const user = userEvent.setup()
     window.history.replaceState(null, '', '/da?tab=disruptions')

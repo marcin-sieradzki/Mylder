@@ -7,7 +7,7 @@
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { LatLon } from '../domain/trip-motion.ts'
-import type { Mode } from '../timetable/format.ts'
+import type { Mode, StopRecord } from '../timetable/format.ts'
 import type { Network } from '../timetable/network.ts'
 import type { Disruption } from '../tracker/index.ts'
 
@@ -59,54 +59,87 @@ export function patternHighlight(network: Network, pattern: number): Highlight {
   }
 }
 
-/**
- * A disruption's stretch and stops, in its severity's colour, named by its heading: each stop it
- * names that the timetable knows, ringed, and the stretch between its two end stops along every
- * pattern that runs through both, each stretch once.
- */
-export function disruptionHighlight(
-  network: Network,
-  { message }: Disruption,
-  colour: string,
-): Highlight {
-  const { stops, platforms } = network.stops
-  const stopOf = (extId: string | undefined) =>
-    extId === undefined ? undefined : network.stops.stopForPlatform(extId)
+/** A disruption's kind as the SeverityLabel names it, which gives its colour on the map. */
+export type Severity = 'delay' | 'data' | 'diversion' | 'planned' | 'notice'
+
+/** The Perron colour token a severity is drawn in. */
+const severityColour = (severity: Severity) => `perron-color-transit-severity-${severity}`
+
+/** The stops a disruption's message names that the timetable knows, each once, in its order. */
+export function disruptionStops(network: Network, { message }: Disruption): StopRecord[] {
   const named = [
     ...(message.affectedStops?.StopLocation ?? []),
     ...(message.validFromStop ? [message.validFromStop] : []),
     ...(message.validToStop ? [message.validToStop] : []),
   ]
-  const ringed = new Map<string, HighlightStop>()
+  const known = new Set<StopRecord>()
   for (const { extId } of named) {
-    const stop = stopOf(extId)
-    if (stop && !ringed.has(stop.id)) {
-      ringed.set(stop.id, { id: stop.id, point: [stop.lat, stop.lon], colour })
-    }
+    const stop = network.stops.stopForPlatform(extId)
+    if (stop) known.add(stop)
   }
+  return [...known]
+}
 
-  const from = stopOf(message.validFromStop?.extId)
-  const to = stopOf(message.validToStop?.extId)
+/**
+ * The stretch between two stops along a pattern's calls: from the call at one to the nearest call
+ * at the other, so a pattern that calls a stop twice takes the short way. None when the pattern
+ * misses either.
+ */
+function stretchOf(calls: readonly StopRecord[], from: StopRecord, to: StopRecord) {
+  let best: [number, number] | undefined
+  calls.forEach((stop, a) => {
+    if (stop !== from) return
+    calls.forEach((other, b) => {
+      if (other !== to) return
+      if (!best || Math.abs(b - a) < Math.abs(best[1] - best[0])) best = [a, b]
+    })
+  })
+  return best && [Math.min(...best), Math.max(...best)]
+}
+
+/**
+ * A disruption's stretch and stops, in its severity's colour, named by its heading: each stop it
+ * names that the timetable knows, ringed, and the stretch between its two end stops along every
+ * pattern that runs through both. A stretch through the same stops is drawn once, whichever way
+ * its patterns run.
+ */
+export function disruptionHighlight(
+  network: Network,
+  disruption: Disruption,
+  severity: Severity,
+): Highlight {
+  const colour = severityColour(severity)
+  const { stops, platforms } = network.stops
+  const { validFromStop, validToStop } = disruption.message
+  const from = validFromStop && network.stops.stopForPlatform(validFromStop.extId)
+  const to = validToStop && network.stops.stopForPlatform(validToStop.extId)
   const lines = new Map<string, HighlightLine>()
   if (from && to && from !== to) {
     for (const pattern of network.patterns.patterns) {
       const calls = pattern.stops.map((platform) => stops[platforms[platform].stop])
-      const [a, b] = [calls.indexOf(from), calls.indexOf(to)]
-      if (a < 0 || b < 0) continue
-      const segments = pattern.segments.slice(Math.min(a, b), Math.max(a, b))
-      const key = segments.join(' ')
+      const stretch = stretchOf(calls, from, to)
+      if (!stretch) continue
+      const [first, last] = stretch
+      const through = calls.slice(first, last + 1).map((stop) => stop.id)
+      const key = [through.join(' '), through.toReversed().join(' ')].sort()[0]
       if (lines.has(key)) continue
       lines.set(key, {
-        points: segments.flatMap((segment) => network.paths.points(segment)),
+        points: pattern.segments
+          .slice(first, last)
+          .flatMap((segment) => network.paths.points(segment)),
         mode: network.patterns.lines[pattern.line].mode,
         colour,
       })
     }
   }
   return {
-    label: { kind: 'text', text: message.head },
+    label: { kind: 'text', text: disruption.message.head },
     lines: [...lines.values()],
-    stops: [...ringed.values()],
+    stops: disruptionStops(network, disruption).map((stop) => ({
+      id: stop.id,
+      point: [stop.lat, stop.lon],
+      colour,
+    })),
   }
 }
 

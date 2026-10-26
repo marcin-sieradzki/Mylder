@@ -22,7 +22,7 @@ import {
   type DisruptionListStore,
   type ListedDisruptions,
 } from '../map/disruptions'
-import { disruptionHighlight, mapHighlight } from '../map/highlight'
+import { disruptionHighlight, disruptionStops, mapHighlight } from '../map/highlight'
 import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import type { Network } from '../timetable/network'
@@ -127,30 +127,29 @@ function MessageCard({ disruption, kind, clock, network }: MessageCardProps) {
   const { head, lead, text } = disruption.message
   const sentence = lead ?? text
   const more = lead !== undefined && text !== undefined && text.length > lead.length
-  const stops = stopsOf(disruption)
   const severity = SEVERITY[kind]
-  // A message that names no stops has no Show on map.
-  const showOnMap =
-    stops && ('from' in stops || stops.length > 0) ? (
-      <Button
-        variant="outline"
-        size="small"
-        disabled={!network}
-        onClick={() => {
-          if (!network) return
-          const colour = `perron-color-transit-severity-${severity}`
-          mapHighlight.show(disruptionHighlight(network, disruption, colour))
-        }}
-      >
-        {words.showOnMap}
-      </Button>
-    ) : undefined
+  const { affectedStops, validFromStop, validToStop } = disruption.message
+  // A message that names no stops has no Show on map; one naming none the timetable knows has
+  // nothing to show.
+  const namesStops = Boolean(affectedStops?.StopLocation.length || validFromStop || validToStop)
+  const showOnMap = namesStops ? (
+    <Button
+      variant="outline"
+      size="small"
+      disabled={!network || disruptionStops(network, disruption).length === 0}
+      onClick={() => {
+        if (network) mapHighlight.show(disruptionHighlight(network, disruption, severity))
+      }}
+    >
+      {words.showOnMap}
+    </Button>
+  ) : undefined
   return (
     <DisruptionCard
       render={<li />}
       severity={severity}
       title={head}
-      stops={stops}
+      stops={stopsOf(disruption)}
       time={timeOfMessage(disruption, clock)}
       action={showOnMap}
       slotProps={{ title: { lang: 'da' } }}
