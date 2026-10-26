@@ -48,6 +48,7 @@ beforeEach(() => {
 
 afterEach(() => {
   act(() => openPanel(undefined))
+  act(() => mapView.update({ aircraftHidden: false }))
   liveAircraft.update({ snapshot: undefined })
   vi.unstubAllGlobals()
   vi.useRealTimers()
@@ -122,5 +123,59 @@ describe("a plane's panel", () => {
     expect(screen.getByRole('dialog', { name: 'Flyet er ikke på kortet' })).toHaveTextContent(
       'Flydata placerer det ikke længere over København.',
     )
+  })
+})
+
+describe("a plane's panel while the planes are hidden", () => {
+  // The page's aircraft poll lasts as long as the page, so each test opens an hour after the one
+  // before, with the snapshots moved on as much, and finds its first poll due.
+  let hours = 0
+  let by = 0
+  const moved = (snapshot: AircraftSnapshot): AircraftSnapshot => ({
+    ...snapshot,
+    fetched: snapshot.fetched + by,
+    nextDue: snapshot.nextDue + by,
+    ...(snapshot.lastAnswer === undefined ? {} : { lastAnswer: snapshot.lastAnswer + by }),
+    health: { ...snapshot.health, since: snapshot.health.since + by },
+  })
+
+  /** The server answers the aircraft from `answers`, one a poll, the last again once they run out. */
+  const serving = (...answers: AircraftSnapshot[]) =>
+    vi.stubGlobal('fetch', (url: string) => {
+      if (url !== '/api/aircraft') return new Promise(() => {})
+      const answer = answers.length > 1 ? answers.shift()! : answers[0]
+      return Promise.resolve(
+        Response.json(moved(answer), { headers: { Date: new Date(Date.now()).toUTCString() } }),
+      )
+    })
+
+  /** Renders the map from `address`, with no aircraft snapshot yet, 4 s after the sixth's fetch. */
+  async function openFrom(address: string) {
+    by = ++hours * 3_600_000
+    vi.setSystemTime(sixth.fetched + by + 4_000)
+    window.history.replaceState(null, '', address)
+    render(
+      <Providers lang="en" dictionary={en}>
+        <MapScreen />
+      </Providers>,
+    )
+    await act(() => vi.advanceTimersByTimeAsync(0))
+  }
+
+  it('asks for the planes itself, opened from an address that hides them', async () => {
+    serving(sixth)
+    await openFrom(`/en?aircraft=${SAS9PU}&hide=aircraft`)
+    const panel = screen.getByRole('dialog', { name: 'SAS9PU' })
+    expect(panel).toHaveTextContent('Reported 4 s ago')
+  })
+
+  it('keeps asking for the planes once they are hidden, and says when its plane has left', async () => {
+    serving(sixth, { ...ninth, aircraft: [] })
+    await openFrom(`/en?aircraft=${SAS9PU}`)
+    expect(screen.getByRole('dialog', { name: 'SAS9PU' })).toBeInTheDocument()
+    act(() => mapView.update({ aircraftHidden: true }))
+    // The next answer is due 10 s after the sixth's fetch, plus the page's jitter of up to 4 s.
+    await act(() => vi.advanceTimersByTimeAsync(10_000))
+    expect(screen.getByRole('dialog', { name: 'Plane not on the map' })).toBeInTheDocument()
   })
 })

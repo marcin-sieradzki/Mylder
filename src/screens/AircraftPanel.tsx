@@ -2,8 +2,9 @@
 
 import { EmptyState, Text, VehicleDotLabel } from '@mylder/perron'
 import { DetailPanel } from '@mylder/perron/patterns'
+import { useEffect } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { aircraftIn, useAircraftOff, useAircraftSnapshot } from '../map/aircraft'
+import { aircraftIn, pollAircraft, useAircraftOff, useAircraftSnapshot } from '../map/aircraft'
 import { useAircraftState } from '../map/aircraft-states'
 import type { SnapshotAircraft } from '../tracker/aircraft/index'
 import styles from './AircraftPanel.module.css'
@@ -19,10 +20,12 @@ export interface AircraftPanelProps {
 
 /**
  * A plane's panel (docs/screens.md, "The plane's card"): what its hover card says, opened by a tap
- * and closed as every detail panel is. It reads the aircraft snapshot, so it asks no route, and
- * says so once the plane has left it.
+ * and closed as every detail panel is. It reads the aircraft snapshot, and keeps the aircraft's
+ * poll running while it is open, even with the Planes filter hiding them, since the plane is what
+ * the person asked to see; it says so once the plane has left the snapshot.
  */
 export function AircraftPanel({ hex, frame }: AircraftPanelProps) {
+  useEffect(() => pollAircraft(), [])
   const { dictionary } = useI18n()
   const words = dictionary.aircraft
   const snapshot = useAircraftSnapshot()
