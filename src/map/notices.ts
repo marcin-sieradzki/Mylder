@@ -191,9 +191,16 @@ export function pageNoticesStore(
 /** The page's one store of notices, from the page's live snapshot. */
 export const pageNotices = pageNoticesStore()
 
-/** Whether the page is Paused now, for the Updated line. */
-export const isPaused = ({ list }: PageNotices): boolean =>
-  list.some((notice) => notice.kind === 'paused')
+const isPaused = ({ list }: PageNotices): boolean => list.some((notice) => notice.kind === 'paused')
+
+/** Whether the page is Paused now, for the Updated line: it renders again only when that flips. */
+export function usePaused(store: PageNoticesStore = pageNotices): boolean {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => isPaused(store.get()),
+    () => false,
+  )
+}
 
 /** The page notices now, for a component: it renders again when one changes. */
 export function usePageNotices(store: PageNoticesStore = pageNotices): PageNotices {

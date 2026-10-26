@@ -4,7 +4,7 @@ import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
 import { useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
-import { isPaused, usePageNotices } from '../map/notices'
+import { usePaused } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
@@ -79,7 +79,7 @@ export function TopBar() {
   const hidden = useHiddenModes()
   const updatedAt = useUpdatedAt(snapshot)
   // While Paused the line keeps the last answer's time and says so.
-  const paused = isPaused(usePageNotices())
+  const paused = usePaused()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
 
