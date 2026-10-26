@@ -6,6 +6,8 @@ import { PORT, RECORDING, SIMULATED_PORT } from './e2e/recording'
 
 export default defineConfig({
   testDir: './e2e',
+  // The GitHub Pages demo's own tests run on its static build (playwright.demo.config.ts).
+  testIgnore: 'demo/**',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

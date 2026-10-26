@@ -7,6 +7,9 @@ import { useI18n } from '../i18n/useI18n'
 import { langs, pathInLang } from '../i18n/lang'
 import { readableQuery } from '../map/view'
 
+/** The path the pages sit under: the repository's in the GitHub Pages demo (ADR 0013), else none. */
+const BASE_PATH = process.env.NEXT_PUBLIC_MYLDER_BASE_PATH ?? ''
+
 /**
  * A link to the same address in the other language. The query string is read on the client only,
  * so until it is, and in the prerendered page, the link keeps the path alone.
@@ -36,7 +39,7 @@ function SwitchLink({ pathname, search }: { pathname: string; search: string }) 
   const other = langs.find((each) => each !== lang)!
   return (
     <LinkButton
-      href={pathInLang(pathname, search, other)}
+      href={`${BASE_PATH}${pathInLang(pathname, search, other)}`}
       hrefLang={other}
       lang={other}
       variant="outline"

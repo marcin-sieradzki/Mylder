@@ -126,12 +126,18 @@ export function trackerRuntime(): Promise<ManagedRuntime.ManagedRuntime<Tracker 
   return runtime
 }
 
+/** Runs one use of the tracker, as a plain promise. */
+export type RunTracker = <A>(use: (tracker: TrackerShape) => Effect.Effect<A>) => Promise<A>
+
+/** Runs one use of the tracker on the runtime `runtime` gives once it is built. */
+export const runOn =
+  (runtime: () => Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>>): RunTracker =>
+  async (use) =>
+    (await runtime()).runPromise(
+      Effect.gen(function* () {
+        return yield* use(yield* Tracker)
+      }),
+    )
+
 /** Runs one use of the tracker on this instance's runtime, as a plain promise. */
-export async function runTracker<A>(use: (tracker: TrackerShape) => Effect.Effect<A>): Promise<A> {
-  const ready = await trackerRuntime()
-  return ready.runPromise(
-    Effect.gen(function* () {
-      return yield* use(yield* Tracker)
-    }),
-  )
-}
+export const runTracker: RunTracker = runOn(trackerRuntime)

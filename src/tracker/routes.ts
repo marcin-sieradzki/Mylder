@@ -6,9 +6,10 @@
 import 'server-only'
 import { Effect } from 'effect'
 import { cacheHeaders, RETRY_AFTER } from './caching.ts'
-import { runTracker, timetableDirOf } from './runtime.ts'
+import { runTracker, timetableDirOf, type RunTracker } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
 import { isBrowserFile, readBrowserFile, readManifestFile } from './timetable.ts'
+import type { TrackerShape } from './tracker.ts'
 
 const unavailable = (error: unknown) => {
   console.error('The tracker could not answer', error)
@@ -24,35 +25,45 @@ const notFound = (what: string) =>
     { status: 404, headers: { 'Cache-Control': 'no-store' } },
   )
 
-/**
- * Answers with a value due again at its `nextDue`, or 404 when there is none. Its date header is
- * the tracker's clock, which the browser takes as the server's: under a recording, the
- * recording's moment.
- */
-async function answer<A extends { readonly nextDue: number }>(
-  what: string,
-  get: Parameters<typeof runTracker<A | undefined>>[0],
-): Promise<Response> {
-  try {
-    const [value, now] = await runTracker((tracker) => Effect.all([get(tracker), tracker.now]))
-    if (!value) return notFound(what)
-    return Response.json(value, {
-      headers: { ...cacheHeaders(value.nextDue, now), Date: new Date(now).toUTCString() },
-    })
-  } catch (error) {
-    return unavailable(error)
+/** The tracker's four answers, each run by `run`: this instance's runtime, or the demo's (ADR 0013). */
+export function trackerAnswers(run: RunTracker) {
+  /**
+   * Answers with a value due again at its `nextDue`, or 404 when there is none. Its date header is
+   * the tracker's clock, which the browser takes as the server's: under a recording, the
+   * recording's moment.
+   */
+  async function answer<A extends { readonly nextDue: number }>(
+    what: string,
+    get: (tracker: TrackerShape) => Effect.Effect<A | undefined>,
+  ): Promise<Response> {
+    try {
+      const [value, now] = await run((tracker) => Effect.all([get(tracker), tracker.now]))
+      if (!value) return notFound(what)
+      return Response.json(value, {
+        headers: { ...cacheHeaders(value.nextDue, now), Date: new Date(now).toUTCString() },
+      })
+    } catch (error) {
+      return unavailable(error)
+    }
+  }
+
+  return {
+    snapshot: () => answer('snapshot', (tracker) => tracker.getSnapshot),
+    stop: (stopId: string) => answer('stop', (tracker) => tracker.getStopDepartures(stopId)),
+    trip: (tripKey: string) => answer('trip', (tracker) => tracker.getTripDetail(tripKey)),
+    disruptions: () => answer('disruptions', (tracker) => tracker.getDisruptions),
   }
 }
 
-export const snapshotResponse = () => answer('snapshot', (tracker) => tracker.getSnapshot)
+const answers = trackerAnswers(runTracker)
 
-export const stopResponse = (stopId: string) =>
-  answer('stop', (tracker) => tracker.getStopDepartures(stopId))
+export const snapshotResponse = answers.snapshot
 
-export const tripResponse = (tripKey: string) =>
-  answer('trip', (tracker) => tracker.getTripDetail(tripKey))
+export const stopResponse = answers.stop
 
-export const disruptionsResponse = () => answer('disruptions', (tracker) => tracker.getDisruptions)
+export const tripResponse = answers.trip
+
+export const disruptionsResponse = answers.disruptions
 
 /**
  * The source the environment names, read at request time as the tracker's is; one it can't read

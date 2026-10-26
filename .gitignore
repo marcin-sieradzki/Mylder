@@ -33,3 +33,4 @@ blob-report
 .next
 next-env.d.ts
 *.tsbuildinfo
+out

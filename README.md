@@ -6,6 +6,8 @@ _Mylder_ is Danish for a teeming crowd, and it echoes _myldretid_, rush hour.
 
 > **Status: early.** The Next.js app shell, tests and CI are set up. The live map comes next, once the Rejseplanen API access arrives. See the [roadmap](#roadmap).
 
+**Demo:** [marcin-sieradzki.github.io/mylder](https://marcin-sieradzki.github.io/mylder/) runs Mylder on simulated data, with the tracker in your browser.
+
 <!-- Add a screenshot or GIF of the moving map here as soon as there is one. It's the first thing a visitor should see. -->
 
 ## Why
@@ -84,6 +86,9 @@ Before the first e2e run, install a browser with `npx playwright install chromiu
 | `npm run test:watch`    | Run unit tests in watch mode                   |
 | `npm run test:coverage` | Run unit tests with coverage                   |
 | `npm run test:e2e`      | Build, serve and run Playwright tests          |
+| `npm run demo`          | Build the GitHub Pages demo into `out/`        |
+| `npm run demo:serve`    | Serve the built demo as GitHub Pages does      |
+| `npm run test:e2e:demo` | Run the demo's Playwright tests on its build   |
 | `npm run recordings`    | Freeze the test recordings from the simulation |
 | `npm run lint`          | Lint with oxlint                               |
 | `npm run format`        | Format everything with Prettier                |
@@ -101,6 +106,7 @@ Each folder's name says where its code may run. Three are guarded, so a wrong im
 | `src/map/`       | Browser only               | MapLibre, the deck.gl layer and the animation loop    | `client-only`: `next build` fails in a server module   |
 | `src/screens/`   | Browser                    | Client components for the screens, built from Perron  |                                                        |
 | `src/i18n/`      | Both, loader on the server | English and Danish dictionaries and the language type |                                                        |
+| `src/demo/`      | Web Worker, demo only      | The simulated tracker of the GitHub Pages demo        |                                                        |
 
 Tests sit beside the code they test; Playwright journeys are in `e2e/`, and the timetable job in `scripts/timetable/`.
 
