@@ -13,8 +13,8 @@ import {
   type TripDetail,
 } from '../answers.ts'
 import type { Disruptions } from '../disruptions.ts'
-import { serviceOf, type Service } from '../rejseplanen/answers.ts'
-import * as Http from '../rejseplanen/http.ts'
+import * as Http from '../http.ts'
+import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses.ts'
 import { stoppedCpu } from '../report.ts'
 import { trackerLayer } from '../runtime.ts'
 import { simulatedClient } from '../simulation/layer.ts'
@@ -35,7 +35,7 @@ export interface Served {
   readonly disruptions: readonly Disruptions[]
 }
 
-/** A frozen recording: each service's calls in order, and what the routes served each minute. */
+/** A frozen recording: each folder's calls in order, and what the routes served each minute. */
 export interface Frozen extends Served {
   readonly calls: Calls
 }
@@ -138,18 +138,19 @@ export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect
       `${plan.name}: a timeout can't be frozen; write its { "timeout": true } file by hand`,
     )
   }
-  const calls = new Map<Service, Recorded[]>()
+  const calls = new Map<string, Recorded[]>()
   const simulation = simulatedClient({ timetable, scenario: plan.scenario })
   const taped = Http.client((request, url) =>
     Effect.gen(function* () {
       const response = yield* simulation.execute(request)
       const text = yield* Effect.orDie(response.text)
       let recorded = recordedOf(response.status, text)
-      const service = serviceOf(url)
-      if (service === 'journeyPos' && plan.fill && 'answer' in recorded) {
+      // Filed by the same rule the recorded layer replays them by.
+      const folder = RECORDED_REJSEPLANEN.folderOf(url)
+      if (folder === 'journeyPos' && plan.fill && 'answer' in recorded) {
         recorded = { answer: fillJourneys(recorded.answer, plan.fill) }
       }
-      if (service) calls.set(service, [...(calls.get(service) ?? []), recorded])
+      if (folder) calls.set(folder, [...(calls.get(folder) ?? []), recorded])
       return yield* RecordedHttpClient.answer(request, recorded)
     }),
   )
@@ -171,7 +172,7 @@ export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Served> 
         trackerLayer({
           timetable,
           source: sourceOf(plan),
-          http: RecordedHttpClient.layer(dir),
+          http: RecordedHttpClient.layer(RECORDED_REJSEPLANEN, dir),
           cpu: stoppedCpu,
         }),
       ),

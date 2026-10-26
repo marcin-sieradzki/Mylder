@@ -2,13 +2,9 @@
 // timetable files the demo serves, answering each route the page asks for by its path with the
 // server's own answers: the same bodies, date header, 404s and 503s.
 import { Effect, Layer, ManagedRuntime } from 'effect'
+import { notFound } from '../tracker/cdn-answer.ts'
 import { CpuClock } from '../tracker/report.ts'
-import {
-  browserFileResponse,
-  manifestResponse,
-  notFound,
-  trackerAnswers,
-} from '../tracker/routes.ts'
+import { browserFileResponse, manifestResponse, trackerAnswers } from '../tracker/routes.ts'
 import { runOn, trackerLayer } from '../tracker/runtime.ts'
 import { DEFAULT_SCENARIO } from '../tracker/simulation/scenarios.ts'
 import { readTimetable, type ReadTimetableFile } from '../tracker/timetable.ts'

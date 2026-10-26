@@ -1,13 +1,12 @@
-// The recorded Rejseplanen (docs/testing-seams.md, "The API"): an `HttpClient` that replays a
-// recording folder. Each service's files answer its calls in order (`journeyPos/0001.json`,
-// `0002.json`, ...), a file may describe a failure instead of an answer, and a service with no
-// files left repeats its last one.
+// A recorded API (docs/testing-seams.md, "The API"): an `HttpClient` that replays a recording
+// folder, for any API that says which folder a call's URL names. Each folder's files answer its
+// calls in order (`journeyPos/0001.json`, `0002.json`, ...), a file may describe a failure
+// instead of an answer, and a folder with no files left repeats its last one.
 import 'server-only'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect, Layer } from 'effect'
-import { SERVICES, serviceOf, type Service } from '../rejseplanen/answers.ts'
-import * as Http from '../rejseplanen/http.ts'
+import * as Http from '../http.ts'
 
 /** Where the recordings live, from the project's root. */
 export const RECORDINGS_DIR = 'recordings'
@@ -21,8 +20,18 @@ export type Recorded =
   | { readonly timeout: true }
   | { readonly answer: unknown }
 
-/** A recording's calls, each service's in the order they were made. */
-export type Calls = ReadonlyMap<Service, readonly Recorded[]>
+/** A recording's calls, by folder, each folder's in the order they were made. */
+export type Calls = ReadonlyMap<string, readonly Recorded[]>
+
+/** An API as a recording keeps it: Rejseplanen's is `RECORDED_REJSEPLANEN`. */
+export interface RecordedApi {
+  /** The folders its calls are kept in, one for each kind of call. */
+  readonly folders: readonly string[]
+  /** The folder a request's URL calls, if any. */
+  readonly folderOf: (url: URL) => string | undefined
+  /** Its answer to a call the recording has no folder for. */
+  readonly unknown: (request: Http.Request, url: URL) => Http.Response
+}
 
 /** What a recording starts at: `clock.json`'s moment. */
 export interface RecordingClock {
@@ -66,20 +75,27 @@ export function answer(request: Http.Request, recorded: Recorded): Effect.Effect
   )
 }
 
-/** An `HttpClient` that replays calls: each service's next one, and its last once none are left. */
-export function recordedClient(calls: Calls): Http.HttpClient.HttpClient {
-  const made = new Map<Service, number>()
+/**
+ * An `HttpClient` that replays calls: each folder's next one, and its last once none are left. A
+ * call the API files under a folder it doesn't list is the API's mistake, and dies.
+ */
+export function recordedClient(api: RecordedApi, calls: Calls): Http.HttpClient.HttpClient {
+  const made = new Map<string, number>()
   return Http.client((request, url) =>
     Effect.suspend(() => {
-      const service = serviceOf(url)
-      const recorded = service ? (calls.get(service) ?? []) : []
-      if (!service || recorded.length === 0) {
-        return Effect.succeed(
-          Http.error(request, 400, 'SVC_PARAM', `The recording has no ${url.pathname}`),
+      const folder = api.folderOf(url)
+      if (folder !== undefined && !api.folders.includes(folder)) {
+        return Effect.die(
+          new Error(
+            `The recorded API files ${url.pathname} under ${folder}, which is not one of its ` +
+              `folders: ${api.folders.join(', ')}`,
+          ),
         )
       }
-      const index = made.get(service) ?? 0
-      made.set(service, index + 1)
+      const recorded = folder ? (calls.get(folder) ?? []) : []
+      if (!folder || recorded.length === 0) return Effect.succeed(api.unknown(request, url))
+      const index = made.get(folder) ?? 0
+      made.set(folder, index + 1)
       return answer(request, recorded[Math.min(index, recorded.length - 1)])
     }),
   )
@@ -93,24 +109,30 @@ export function recordingDir(name: string): string {
   return join(/* turbopackIgnore: true */ process.cwd(), RECORDINGS_DIR, name)
 }
 
-/** A call's file in its service's folder, by its place in call order from 0: `0001.json` first. */
+/** A call's file in its folder, by its place in call order from 0: `0001.json` first. */
 export const callFile = (index: number) => `${String(index + 1).padStart(4, '0')}.json`
 
 export const readJson = async (path: string): Promise<unknown> =>
   JSON.parse(await readFile(/* turbopackIgnore: true */ path, 'utf8'))
 
-/** A recording folder's calls, each service's files in the order their names sort. */
-export async function readCalls(dir: string): Promise<Calls> {
-  const calls = new Map<Service, Recorded[]>()
-  for (const service of SERVICES) {
-    const folder = join(/* turbopackIgnore: true */ dir, service)
-    const names = await readdir(/* turbopackIgnore: true */ folder).catch(() => [])
-    const files = names.filter((name) => name.endsWith('.json')).sort()
+/**
+ * A recording folder's calls to an API, each folder's files in the order their names sort. A
+ * folder that isn't there has no calls; one that can't be read fails.
+ */
+export async function readCalls(api: RecordedApi, dir: string): Promise<Calls> {
+  const calls = new Map<string, Recorded[]>()
+  for (const name of api.folders) {
+    const folder = join(/* turbopackIgnore: true */ dir, name)
+    const names = await readdir(/* turbopackIgnore: true */ folder).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+      throw error
+    })
+    const files = names.filter((file) => file.endsWith('.json')).sort()
     if (files.length === 0) continue
     calls.set(
-      service,
+      name,
       await Promise.all(
-        files.map(async (name) => readRecorded(await readJson(join(folder, name)))),
+        files.map(async (file) => readRecorded(await readJson(join(folder, file)))),
       ),
     )
   }
@@ -125,8 +147,10 @@ export async function readStart(dir: string): Promise<number> {
   return moment
 }
 
-/** The recorded Rejseplanen for a folder, as the layer that provides the tracker's `HttpClient`. */
-export const layer = (dir: string): Layer.Layer<Http.HttpClient.HttpClient> =>
+/** A recorded API for a folder, as the layer that provides the tracker's `HttpClient`. */
+export const layer = (api: RecordedApi, dir: string): Layer.Layer<Http.HttpClient.HttpClient> =>
   Layer.effect(Http.HttpClient.HttpClient)(
-    Effect.promise(() => readCalls(dir)).pipe(Effect.map(recordedClient)),
+    Effect.promise(() => readCalls(api, dir)).pipe(
+      Effect.map((calls) => recordedClient(api, calls)),
+    ),
   )
