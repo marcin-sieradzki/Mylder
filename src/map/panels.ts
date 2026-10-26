@@ -7,8 +7,7 @@
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { StopDepartures, TripDetail } from '../tracker/index.ts'
-import { liveSnapshot } from './live.ts'
-import { serverNow } from './states.ts'
+import { liveSnapshot, serverNow } from './live.ts'
 import { mapView, type Panel, type PanelKind, type ViewStore } from './view.ts'
 
 /** Each panel's answer, by what it shows. */

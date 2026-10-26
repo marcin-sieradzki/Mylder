@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { serverNow } from '../map/states'
+import { serverNow } from '../map/live'
 
 /**
  * The server's time, read again on each of its whole seconds while the component is mounted, for

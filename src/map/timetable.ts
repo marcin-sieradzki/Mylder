@@ -1,9 +1,10 @@
-// The browser's timetable: the network files (manifest, stops, patterns, paths, never the trips)
-// loaded from the timetable routes once per version and kept in memory (docs/timetable.md, "How
-// they are served and loaded"). The routes mark each version's files immutable, so a reload
-// takes them from the browser's cache.
+// The browser's timetable: the network files (manifest, stops, patterns, paths, never the trips),
+// and the day profiles City pulse draws, loaded from the timetable routes once per version and
+// kept in memory (docs/timetable.md, "How they are served and loaded"). The routes mark each
+// version's files immutable, so a reload takes them from the browser's cache.
 import 'client-only'
 import { useEffect, useState } from 'react'
+import { readDayProfiles, type DayProfiles } from '../timetable/day-profiles.ts'
 import { readNetwork, type Network } from '../timetable/network.ts'
 
 /** Reads one route's JSON; rejects on a network failure or an answer other than a 2xx. */
@@ -14,6 +15,8 @@ export interface TimetableLoader {
   current(): Promise<Network>
   /** A version's network, such as the one a snapshot names, loaded once and then kept. */
   version(version: string): Promise<Network>
+  /** A version's day profiles, loaded once and then kept, apart from its network. */
+  dayProfiles(version: string): Promise<DayProfiles>
 }
 
 const fetchFromServer: FetchJson = async (path) => {
@@ -31,16 +34,19 @@ export const RETRY_AFTER = 30_000
  */
 export function timetableLoader(fetchJson: FetchJson = fetchFromServer): TimetableLoader {
   const versions = new Map<string, Promise<Network>>()
+  const profiles = new Map<string, Promise<DayProfiles>>()
   let current: Promise<Network> | undefined
   /** Calls `forget` a while after `load` fails. */
-  const onFailure = (load: Promise<Network>, forget: () => void) =>
+  const onFailure = (load: Promise<unknown>, forget: () => void) =>
     load.catch(() => setTimeout(forget, RETRY_AFTER))
+  /** One of a version's files from its route. */
+  const fileOf = (version: string, name: string) =>
+    fetchJson(`/api/timetable/${encodeURIComponent(version)}/${name}`)
 
   const load = (version: string, manifest?: unknown): Promise<Network> => {
     let network = versions.get(version)
     if (!network) {
-      const file = (name: string) =>
-        fetchJson(`/api/timetable/${encodeURIComponent(version)}/${name}`)
+      const file = (name: string) => fileOf(version, name)
       network = Promise.all([
         manifest ?? file('manifest'),
         file('stops'),
@@ -69,6 +75,15 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
       return current
     },
     version: (version) => load(version),
+    dayProfiles(version) {
+      let loading = profiles.get(version)
+      if (!loading) {
+        loading = fileOf(version, 'dayProfiles').then(readDayProfiles)
+        profiles.set(version, loading)
+        onFailure(loading, () => profiles.delete(version))
+      }
+      return loading
+    },
   }
 }
 
@@ -105,4 +120,39 @@ export function useNetwork(
     }
   }, [version, loader])
   return network
+}
+
+/**
+ * A version's day profiles for a component: "loading" until they have loaded, then the latest
+ * loaded until the next one has; "failed" when they won't load and none have, until a try after
+ * `RETRY_AFTER` loads them.
+ */
+export function useDayProfiles(
+  version: string | undefined,
+  loader: TimetableLoader = timetables,
+): DayProfiles | 'loading' | 'failed' {
+  const [loaded, setLoaded] = useState<DayProfiles | 'failed'>()
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    if (!version) return
+    let wanted = true
+    let retry: ReturnType<typeof setTimeout> | undefined
+    loader.dayProfiles(version).then(
+      (profiles) => {
+        if (wanted) setLoaded(profiles)
+      },
+      (error: unknown) => {
+        console.error('The day profiles could not load', error)
+        if (!wanted) return
+        setLoaded((last) => (last && last !== 'failed' ? last : 'failed'))
+        // The loader forgets a failed load after RETRY_AFTER, so the next try calls again.
+        retry = setTimeout(() => setAttempt((count) => count + 1), RETRY_AFTER + 1)
+      },
+    )
+    return () => {
+      wanted = false
+      clearTimeout(retry)
+    }
+  }, [version, loader, attempt])
+  return loaded ?? 'loading'
 }

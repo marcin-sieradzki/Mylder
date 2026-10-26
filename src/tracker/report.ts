@@ -4,12 +4,12 @@
 // measures and logs.
 import 'server-only'
 import { Context, Effect, Layer } from 'effect'
-import { daysBetween } from '../timetable/dates.ts'
+import { daysBetween, serviceDaysLeft } from '../timetable/dates.ts'
 import type { IsoDate, Manifest } from '../timetable/format.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 
 /** Under this many days of service left, the snapshot marks the timetable as running out. */
-export const RUNNING_OUT_DAYS = 7
+export { RUNNING_OUT_DAYS } from '../timetable/dates.ts'
 
 /** A timetable prepared longer ago than this is stale: its job may have stopped. */
 export const STALE_DAYS = 30
@@ -39,8 +39,7 @@ export function timetableAge(
   return {
     prepared: manifest.preparedDate,
     last: manifest.window.last,
-    // Today counts: on its last covered day, a timetable has one day left.
-    daysLeft: Math.max(daysBetween(serviceDay, manifest.window.last) + 1, 0),
+    daysLeft: serviceDaysLeft(manifest.window.last, serviceDay),
     daysOld: daysBetween(manifest.preparedDate, serviceDay),
   }
 }

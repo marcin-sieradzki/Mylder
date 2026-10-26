@@ -10,6 +10,7 @@ import { CitySheet } from './CitySheet'
 import { DetailPanels } from './DetailPanels'
 import { MapFoot } from './MapFoot'
 import styles from './MapScreen.module.css'
+import { PageNotices } from './PageNotices'
 import { TopBar } from './TopBar'
 import { VehicleCard } from './VehicleCard'
 
@@ -33,7 +34,10 @@ export function MapScreen() {
       <main className={styles.map}>
         <BaseMap label={dictionary.map.label} className={styles.canvas} />
       </main>
-      <TopBar />
+      <div className={styles.top}>
+        <TopBar />
+        <PageNotices />
+      </div>
       <MapFoot
         besideSheet={open}
         besidePanel={panel !== undefined}
