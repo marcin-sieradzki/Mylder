@@ -1,18 +1,17 @@
 // The tracker's one door to `effect/http`, Effect's `unstable` HTTP module (ADR 0011): every
-// adapter at the API seam, live, recorded or simulated, builds its client and its answers here,
-// so a minor release can break only this file.
+// feed's adapter at the API seam, live, recorded or simulated, builds its client and its answers
+// here, so a minor release can break only this file. It knows no feed.
 import 'server-only'
-import { Effect, Layer, Schema } from 'effect'
+import { Effect, Layer } from 'effect'
 import { FetchHttpClient, HttpClient, HttpClientError, HttpClientResponse } from 'effect/http'
 import type { HttpClientRequest } from 'effect/http'
-import { ErrorAnswer } from './answers.ts'
 
 export { HttpClient }
 
 export type Request = HttpClientRequest.HttpClientRequest
 export type Response = HttpClientResponse.HttpClientResponse
 
-/** Answers a request with a JSON body, as Rejseplanen does. */
+/** Answers a request with a JSON body. */
 export const json = (request: Request, status: number, body: unknown): Response =>
   HttpClientResponse.fromWeb(
     request,
@@ -22,16 +21,12 @@ export const json = (request: Request, status: number, body: unknown): Response 
     }),
   )
 
-/** Answers a request with a plain body, as a server in front of Rejseplanen might fail. */
+/** Answers a request with a plain body, as a server in front of an API might fail. */
 export const text = (request: Request, status: number, body: string): Response =>
   HttpClientResponse.fromWeb(
     request,
     new globalThis.Response(body, { status, headers: { 'content-type': 'text/plain' } }),
   )
-
-/** Answers a request with Rejseplanen's error answer. */
-export const error = (request: Request, status: number, errorCode: string, errorText: string) =>
-  json(request, status, Schema.encodeSync(ErrorAnswer)({ errorCode, errorText }))
 
 /** How long a timed-out call hangs before the gateway gives up, past any client's timeout. */
 const TIMEOUT_AFTER = '30 seconds'
@@ -49,7 +44,7 @@ export const client = (
 export const layer = (provided: HttpClient.HttpClient): Layer.Layer<HttpClient.HttpClient> =>
   Layer.succeed(HttpClient.HttpClient, provided)
 
-/** The real network, for the real Rejseplanen. */
+/** The real network, for the real APIs. */
 export const fetchLayer: Layer.Layer<HttpClient.HttpClient> = FetchHttpClient.layer
 
 /** A request that failed before an answer came back, and whether the network was to blame. */

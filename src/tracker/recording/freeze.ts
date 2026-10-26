@@ -13,8 +13,8 @@ import {
   type TripDetail,
 } from '../answers.ts'
 import type { Disruptions } from '../disruptions.ts'
-import { serviceOf, type Service } from '../rejseplanen/answers.ts'
-import * as Http from '../rejseplanen/http.ts'
+import * as Http from '../http.ts'
+import { RECORDED_REJSEPLANEN, serviceOf, type Service } from '../rejseplanen/answers.ts'
 import { stoppedCpu } from '../report.ts'
 import { trackerLayer } from '../runtime.ts'
 import { simulatedClient } from '../simulation/layer.ts'
@@ -171,7 +171,7 @@ export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Served> 
         trackerLayer({
           timetable,
           source: sourceOf(plan),
-          http: RecordedHttpClient.layer(dir),
+          http: RecordedHttpClient.layer(RECORDED_REJSEPLANEN, dir),
           cpu: stoppedCpu,
         }),
       ),

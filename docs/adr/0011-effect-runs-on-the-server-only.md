@@ -5,5 +5,5 @@ Mylder's tracker (the API client, the call budget, the state store, the timetabl
 ## Consequences
 
 - Effect appears in `package.json` but in no client module; `server-only` at the tracker's entry makes a wrong import fail the build.
-- The one `unstable` Effect module in use, `effect/http`, is confined to one file in the Rejseplanen adapter, so a minor release can break only there.
+- The one `unstable` Effect module in use, `effect/http`, is confined to one file at the tracker's root, `src/tracker/http.ts`, which every feed's adapter uses, so a minor release can break only there.
 - The tracker's tests run on `TestClock` through `@effect/vitest`; the browser's tests need no Effect at all.

@@ -3,8 +3,9 @@ import { Effect, type Layer } from 'effect'
 import { TestClock } from 'effect/testing'
 import { disruptionKind, disruptionPhase } from '../domain/disruption'
 import { pacing, SPENT_AT } from './budget'
+import * as Http from './http'
+import { error } from './rejseplanen/answers'
 import { callsKey } from './rejseplanen/client'
-import * as Http from './rejseplanen/http'
 import { keyPrefixOf, trackerLayer } from './runtime'
 import { simulatedClient } from './simulation/layer'
 import { readSource } from './source'
@@ -227,7 +228,7 @@ describe('the tracker’s disruption list', () => {
       expect(after.disruptions?.ok).toBe(false)
     }).pipe(
       Effect.provide(
-        tracker(himsearchAnswering((request) => Http.error(request, 403, 'API_QUOTA', 'spent'))),
+        tracker(himsearchAnswering((request) => error(request, 403, 'API_QUOTA', 'spent'))),
       ),
     ),
   )

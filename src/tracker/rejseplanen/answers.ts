@@ -1,6 +1,7 @@
 // What Rejseplanen API 2.0 answers to the four services Mylder calls, as Effect schemas. The live
 // client, the recordings and the simulation all decode or encode with these, so the tracker reads
-// one shape whichever source answered.
+// one shape whichever source answered. Its error answer and how a recording keeps its calls are
+// here too.
 //
 // Written from HaCon's HAFAS ReST specification and the saved Rejseplanen answers the API research
 // read (docs/researches/2026-10-25-rejseplanen-api-2.md on branch research/rejseplanen-api-2). A
@@ -11,6 +12,8 @@
 // the client turns them into moments. Unknown fields are dropped when decoding.
 import 'server-only'
 import { Schema } from 'effect'
+import * as Http from '../http.ts'
+import type { RecordedApi } from '../recording/layer.ts'
 
 const optional = Schema.optionalKey
 
@@ -299,6 +302,14 @@ export const REFUSED_KEY = 'API_AUTH'
 /** The error code a spent month gets. A guess. */
 export const QUOTA_SPENT = 'API_QUOTA'
 
+/** Answers a request with Rejseplanen's error answer. */
+export const error = (
+  request: Http.Request,
+  status: number,
+  errorCode: string,
+  errorText: string,
+) => Http.json(request, status, Schema.encodeSync(ErrorAnswer)({ errorCode, errorText }))
+
 /** The services Mylder calls, by the last segment of their URL path. */
 export const SERVICES = ['journeyPos', 'multiDepartureBoard', 'journeyDetail', 'himsearch'] as const
 
@@ -308,6 +319,17 @@ export type Service = (typeof SERVICES)[number]
 export function serviceOf(url: URL): Service | undefined {
   const last = url.pathname.split('/').at(-1)?.toLowerCase()
   return SERVICES.find((service) => service.toLowerCase() === last)
+}
+
+/**
+ * Rejseplanen as a recording keeps it: a folder per service, and a call the recording has no
+ * answer for refused as an unknown service would be.
+ */
+export const RECORDED_REJSEPLANEN: RecordedApi = {
+  folders: SERVICES,
+  folderOf: serviceOf,
+  unknown: (request, url) =>
+    error(request, 400, 'SVC_PARAM', `The recording has no ${url.pathname}`),
 }
 
 /** Each service's answer schema. */
