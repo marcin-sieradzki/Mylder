@@ -8,8 +8,9 @@ import { useSnapshot } from '../map/live'
 import { usePageNotices, type PageNotice } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
+import { intervalOf } from './budget'
 import styles from './PageNotices.module.css'
-import { dayOf, longDateOf, pollIntervalOf } from './wording'
+import { dayOf, longDateOf } from './wording'
 
 /** One notice's sentences. */
 function wordsOf(
@@ -37,7 +38,7 @@ function wordsOf(
     case 'budget':
       return words.budget.replace(
         '{interval}',
-        pollIntervalOf(notice.pollInterval, dictionary.interval),
+        intervalOf(notice.pollInterval, dictionary.interval),
       )
     case 'timetable':
       return (notice.ended ? words.timetableEnded : words.timetableEnds).replace(

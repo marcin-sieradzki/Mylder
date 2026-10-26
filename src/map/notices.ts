@@ -66,9 +66,12 @@ function pausedNotice(snapshot: Snapshot, now: number): PageNotice | undefined {
     : { kind: 'paused', reason: 'no-answer', since: pause.since }
 }
 
-/** The budget line, while the poll has stretched; a spent month says so in Paused instead. */
+/**
+ * The budget line, while the poll has stretched past a minute, as the screens' budget line
+ * (src/screens/budget.ts); a spent month says so in Paused instead.
+ */
 function budgetNotice({ budget, pollInterval }: Snapshot) {
-  if (budget.level === 'spent' || budget.level === 'normal') return undefined
+  if (budget.level === 'spent' || pollInterval <= 60) return undefined
   return { kind: 'budget', pollInterval } satisfies PageNotice
 }
 

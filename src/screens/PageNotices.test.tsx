@@ -52,8 +52,12 @@ const land = (snapshot: Snapshot, iso = '2026-06-16T05:23:10Z') =>
     liveSnapshot.update({ snapshot, clockOffset: serverClockAt(iso), failingSince: undefined }),
   )
 
-/** The notices' words, top to bottom. */
-const notices = () => screen.queryAllByRole('status').map((notice) => notice.textContent)
+/** The notices' words, top to bottom: the statuses outside the City sheet, which has its own. */
+const notices = () =>
+  screen
+    .queryAllByRole('status')
+    .filter((status) => !status.closest('[role="dialog"]'))
+    .map((notice) => notice.textContent)
 
 const updatedLine = () => within(screen.getByRole('banner')).getByText(/^(Updated|Opdateret) /)
 

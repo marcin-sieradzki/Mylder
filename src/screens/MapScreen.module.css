@@ -12,14 +12,13 @@
   inset: 0;
 }
 
-/* The top bar and, under it, the page notices. The column lets the map take presses between them
-   and makes no layer of its own, so each sits on its own: the bar with the map controls, the
-   notices above every panel. Perron has no layer for notices; the top bar's is the one above
-   every panel and under the hover card and dialogs. */
+/* The top bar and, under it, the page notices, over the map on the top bar's layer, above every
+   panel. The column lets the map take presses between them. */
 .top {
   position: absolute;
   inset-block-start: var(--perron-space-300);
   inset-inline: var(--perron-space-300);
+  z-index: var(--perron-z-index-top-bar);
   display: flex;
   flex-direction: column;
   gap: var(--perron-space-200);
@@ -27,14 +26,7 @@
 }
 
 .top > header {
-  position: relative;
-  z-index: var(--perron-z-index-map-controls);
   pointer-events: auto;
-}
-
-.top > :not(header) {
-  position: relative;
-  z-index: var(--perron-z-index-top-bar);
 }
 
 /* MapLibre makes its container position: relative, so it fills the map by size, not by inset. */

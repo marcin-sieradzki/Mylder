@@ -1,0 +1,14 @@
+/* The day profile: the chart, its caption's second line saying it is the plan, and the peak. */
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-100);
+}
+
+.planned {
+  display: block;
+}
+
+.peak {
+  margin: 0;
+}

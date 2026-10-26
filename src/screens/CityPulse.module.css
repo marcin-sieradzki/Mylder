@@ -1,0 +1,35 @@
+/* City pulse: the budget line when it applies, the key figures, the strip of states, the meters
+   and the key, one column in the sheet. */
+.pulse {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-500);
+}
+
+.figures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-400);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-100);
+}
+
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-300);
+}
+
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-050);
+}
+
+.line {
+  margin: 0;
+}

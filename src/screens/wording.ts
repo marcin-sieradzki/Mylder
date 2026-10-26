@@ -1,6 +1,5 @@
-// How the screens write dates and the poll's interval in the page's language, so the page notices
-// and the About dialog say them alike.
-import type { ClientDictionary } from '../i18n/dictionary.ts'
+// How the screens write dates in the page's language, so the page notices and the About dialog
+// say them alike.
 import { intlLocale, type Lang } from '../i18n/lang.ts'
 
 const days = new Map<Lang, Intl.DateTimeFormat>()
@@ -36,12 +35,3 @@ export function longDateOf(moment: number, lang: Lang, timezone: string): string
   }
   return format.format(moment)
 }
-
-/**
- * A poll interval in seconds, as "every" takes it: "90 s" and "2 min", "90. sekund" and
- * "2. minut". Whole minutes from 2 on; a minute stays "60 s", since "hvert 1. minut" isn't Danish.
- */
-export const pollIntervalOf = (seconds: number, words: ClientDictionary['interval']): string =>
-  seconds >= 120 && seconds % 60 === 0
-    ? words.minutes.replace('{n}', String(seconds / 60))
-    : words.seconds.replace('{n}', String(seconds))

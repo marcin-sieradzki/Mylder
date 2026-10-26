@@ -10,6 +10,7 @@ import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog, useAboutOpen } from './about'
+import { budgetLine, intervalOf } from './budget'
 import styles from './AboutDialog.module.css'
 import {
   CC_BY,
@@ -20,7 +21,7 @@ import {
   OPENSTREETMAP,
   REJSEPLANEN,
 } from './credits'
-import { dayOf, pollIntervalOf } from './wording'
+import { dayOf } from './wording'
 
 type Words = ClientDictionary['about']
 
@@ -73,13 +74,9 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   if (snapshot.source.kind !== 'rejseplanen') notes.push(status.notReal)
   if (budget.level === 'spent' && budget.resumes) {
     notes.push(status.paused.replace('{date}', dayOf(budget.resumes, lang)))
-  } else if (snapshot.pollInterval > 60) {
-    notes.push(
-      dictionary.notices.budget.replace(
-        '{interval}',
-        pollIntervalOf(snapshot.pollInterval, dictionary.interval),
-      ),
-    )
+  } else {
+    const line = budgetLine(snapshot, dictionary)
+    if (line) notes.push(line)
   }
   return (
     <>
@@ -102,7 +99,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
             label: status.updates,
             value: status.every.replace(
               '{interval}',
-              pollIntervalOf(snapshot.pollInterval, dictionary.interval),
+              intervalOf(snapshot.pollInterval, dictionary.interval),
             ),
           },
           { label: status.budget, value: status.budgetLevels[budget.level] },

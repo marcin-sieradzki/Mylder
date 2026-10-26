@@ -22,10 +22,12 @@ test('a page whose polls fail says so at once, and the Updated line keeps its ti
 })
 
 test('a recorded page says so, with the recording’s date', async ({ page }) => {
+  // The City sheet has statuses of its own; the banner is the one that names the data.
+  const banner = page.getByRole('status').filter({ hasText: /^(Recorded|Optagne)/ })
   await page.goto('/en')
-  await expect(page.getByRole('status')).toHaveText('Recorded data from 16 June 2026.')
+  await expect(banner).toHaveText('Recorded data from 16 June 2026.')
   await page.goto('/da')
-  await expect(page.getByRole('status')).toHaveText('Optagne data fra 16. juni 2026.')
+  await expect(banner).toHaveText('Optagne data fra 16. juni 2026.')
 })
 
 test('a simulated page says its vehicles are made up', async ({ page }) => {

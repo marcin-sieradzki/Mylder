@@ -17,6 +17,7 @@ function server() {
     [`/api/timetable/${VERSION}/stops`]: `${VERSION}/stops.json`,
     [`/api/timetable/${VERSION}/patterns`]: `${VERSION}/patterns.json`,
     [`/api/timetable/${VERSION}/paths`]: `${VERSION}/paths.json`,
+    [`/api/timetable/${VERSION}/dayProfiles`]: `${VERSION}/day-profiles.json`,
   }
   const fetchJson = async (path: string) => {
     requests.push(path)
@@ -60,6 +61,19 @@ describe('the timetable loader', () => {
     const network = await timetableLoader(fetchJson).version(VERSION)
     expect(network.manifest.version).toBe(VERSION)
     expect(requests).toContain(`/api/timetable/${VERSION}/manifest`)
+  })
+
+  it("loads a version's day profiles once, apart from its network", async () => {
+    const { fetchJson, requests } = server()
+    const loader = timetableLoader(fetchJson)
+    const [profiles, again] = await Promise.all([
+      loader.dayProfiles(VERSION),
+      loader.dayProfiles(VERSION),
+    ])
+    expect(again).toBe(profiles)
+    // The weekday recording's Tuesday: 14 trips underway at 07:30, the morning's most.
+    expect(profiles.day('2026-06-16')?.[30]).toBe(14)
+    expect(requests).toEqual([`/api/timetable/${VERSION}/dayProfiles`])
   })
 
   it('tries a failed version again only once a while has passed', async () => {
