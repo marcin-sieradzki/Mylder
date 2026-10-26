@@ -1,7 +1,7 @@
 // The page's live aircraft (docs/aircraft.md, "The browser"): the aircraft snapshot's own store,
 // filled by its own poll of `/api/aircraft` on its own server's clock, beside the transit
-// snapshot's. A 404 says the server has the aircraft off, as under `MYLDER_AIRCRAFT_SOURCE=off`
-// and in the demo until #133: the poll stops, and the page shows no aircraft and no word of them.
+// snapshot's. A 404 says the server has the aircraft off, as under `MYLDER_AIRCRAFT_SOURCE=off`:
+// the poll stops, and the page shows no aircraft and no word of them.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { AircraftProvider, AircraftSnapshot } from '../tracker/aircraft/index.ts'
