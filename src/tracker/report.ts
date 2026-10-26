@@ -64,20 +64,3 @@ export const runLine = ({ source, positionMode, answerMode, budget, store, statu
   store,
   ...status,
 })
-
-/**
- * By mode, when a position answer last carried one of its trips this service day: the latest of
- * the previous snapshot's record, on the same service day, and the trips' own `seen`.
- */
-export function lastSeenByMode(
-  trips: readonly SnapshotTrip[],
-  previous: Pick<Snapshot, 'serviceDay' | 'lastSeen'> | undefined,
-  serviceDay: string,
-): Record<string, number> {
-  const lastSeen: Record<string, number> =
-    previous?.serviceDay === serviceDay ? { ...previous.lastSeen } : {}
-  for (const { mode, seen } of trips) {
-    if (seen !== undefined && seen > (lastSeen[mode] ?? -Infinity)) lastSeen[mode] = seen
-  }
-  return lastSeen
-}

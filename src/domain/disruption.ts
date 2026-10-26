@@ -86,10 +86,10 @@ export interface ListReading<D extends DisruptionFacts> {
   readonly active: readonly Listed<D>[]
   /** Later ones, by start. */
   readonly later: readonly Listed<D>[]
-  /** Nothing is active and the last check worked: said once, for the network. */
+  /** Nothing is active, the last check worked and the list is up to date: said once. */
   readonly runningNormally: boolean
   readonly lastCheckFailed: boolean
-  /** An hour or more since the last good answer. */
+  /** More than an hour since the last good answer, as when a spent month makes no calls. */
   readonly outOfDate: boolean
   /** Rejseplanen sends at most this many, so a full answer may be cut short. */
   readonly mayBeIncomplete: boolean
@@ -113,22 +113,20 @@ export function readList<D extends DisruptionFacts>(
   const later: Listed<D>[] = []
   for (const disruption of list.messages) {
     const phase = disruptionPhase(disruption, now)
-    if (phase) {
-      ;(phase === 'active' ? active : later).push({
-        disruption,
-        kind: disruptionKind(disruption, now),
-      })
-    }
+    const listed = { disruption, kind: disruptionKind(disruption, now) }
+    if (phase === 'active') active.push(listed)
+    else if (phase === 'later') later.push(listed)
   }
   const start = ({ disruption }: Listed<D>) => disruption.from ?? -Infinity
   active.sort((a, b) => start(b) - start(a))
   later.sort((a, b) => start(a) - start(b))
+  const outOfDate = list.fetched !== null && now - list.fetched > UP_TO_DATE_FOR
   return {
     active,
     later,
-    runningNormally: active.length === 0 && list.ok && list.checked !== null,
+    runningNormally: active.length === 0 && list.ok && list.checked !== null && !outOfDate,
     lastCheckFailed: !list.ok,
-    outOfDate: list.fetched !== null && now - list.fetched > UP_TO_DATE_FOR,
+    outOfDate,
     mayBeIncomplete: list.received === MAX_MESSAGES,
   }
 }

@@ -70,6 +70,36 @@ describe('Mylder’s own data cards', () => {
     ])
   })
 
+  it('says the messages are not updated when the list is an hour old with no check failed', () => {
+    // A spent month makes no calls, so the last good list stays.
+    const spent = {
+      ...healthy,
+      api: { status: 'spent' as const, since: NOW - 3 * 60 * MINUTE },
+      budget: { level: 'spent' as const, resumes: '2026-11-01' },
+      disruptions: { fetched: NOW - 3 * 60 * MINUTE, ok: true },
+    }
+    expect(dataCards(spent, NOW)).toEqual([
+      { kind: 'paused', resumes: '2026-11-01' },
+      { kind: 'messages-stale', since: NOW - 3 * 60 * MINUTE },
+    ])
+    const hour = { ...healthy, disruptions: { fetched: NOW - 60 * MINUTE, ok: true } }
+    expect(dataCards(hour, NOW)).toEqual([])
+  })
+
+  it('says the messages are not updated, with no time, when no fetch has worked', () => {
+    const never = { ...healthy, disruptions: { fetched: null, ok: false } }
+    expect(dataCards(never, NOW)).toEqual([{ kind: 'messages-stale' }])
+  })
+
+  it('holds the mode cards while Rejseplanen fails, before its own card shows', () => {
+    const failing = {
+      ...healthy,
+      api: { status: 'error' as const, since: NOW - 2 * MINUTE },
+      lastSeen: { bus: NOW - 7 * MINUTE },
+    }
+    expect(dataCards(failing, NOW)).toEqual([])
+  })
+
   it('puts the cards in a fixed order, at most one each and one per mode', () => {
     const everything = {
       ...healthy,

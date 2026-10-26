@@ -138,9 +138,9 @@ export const Snapshot = Schema.Struct({
   budget: Budget,
   store: Schema.Literals(['ok', 'unavailable']),
   /**
-   * By mode, when a position answer last carried one of its trips this service day, kept after
-   * those trips have gone, for the "No bus positions since 08:09" card. A mode no answer has
-   * carried today is absent.
+   * By mode, when a position answer last carried one of its trips, kept after those trips have
+   * gone, for the "No bus positions since 08:09" card. Moments before the earliest service day
+   * still running are dropped, so a mode no answer has carried since then is absent.
    */
   lastSeen: Schema.Record(Schema.String, Schema.Number),
   /** Null until the first `himsearch` (#57). */

@@ -104,6 +104,10 @@ describe('the disruption list at a moment', () => {
     expect(list([startingAt(NOW + DAY)]).runningNormally).toBe(true)
   })
 
+  it('never says Running normally on a list out of date', () => {
+    expect(list([], { fetched: NOW - 2 * HOUR }).runningNormally).toBe(false)
+  })
+
   it('never says Running normally after a failed check, or before the first', () => {
     const failed = list([], { ok: false })
     expect(failed.runningNormally).toBe(false)
