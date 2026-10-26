@@ -53,7 +53,10 @@ export const tripResponse = (tripKey: string) =>
 
 export const disruptionsResponse = () => answer('disruptions', (tracker) => tracker.getDisruptions)
 
-/** The source the environment names, read at request time as the tracker's is. */
+/**
+ * The source the environment names, read at request time as the tracker's is; one it can't read
+ * throws, inside each route's try so it answers 503 as the tracker's routes do.
+ */
 const environmentSource = (): Source => readSource(process.env.MYLDER_SOURCE)
 
 /** A version's files never change, so anyone may keep them for good. */
@@ -68,11 +71,9 @@ const json = (body: string, cacheControl: string) =>
   })
 
 /** The current manifest, which the map starts from before its first snapshot. */
-export async function timetableManifestResponse(
-  source: Source = environmentSource(),
-): Promise<Response> {
+export async function timetableManifestResponse(source?: Source): Promise<Response> {
   try {
-    return json(await readManifestFile(timetableDirOf(source)), BRIEFLY)
+    return json(await readManifestFile(timetableDirOf(source ?? environmentSource())), BRIEFLY)
   } catch (error) {
     return unavailable(error)
   }
@@ -85,11 +86,12 @@ export async function timetableManifestResponse(
 export async function timetableFileResponse(
   version: string,
   file: string,
-  source: Source = environmentSource(),
+  source?: Source,
 ): Promise<Response> {
   if (!isNetworkFile(file)) return notFound('timetable file')
   try {
-    const body = await readNetworkFile(timetableDirOf(source), version, file)
+    const dir = timetableDirOf(source ?? environmentSource())
+    const body = await readNetworkFile(dir, version, file)
     return body === undefined ? notFound('timetable version') : json(body, IMMUTABLE)
   } catch (error) {
     return unavailable(error)
