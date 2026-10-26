@@ -58,8 +58,12 @@ export interface PanelDeps {
 
 const S = 1000
 
-/** An ask with no answer by then has failed. */
-const TIMEOUT = 10 * S
+/**
+ * An ask with no answer by then has failed: past the route's slowest, which may make the minute's
+ * run first (its positions and its disruption list) and then its own on-demand call, each up to
+ * two attempts of 8 s (`src/tracker/rejseplanen/client.ts`).
+ */
+const TIMEOUT = 50 * S
 
 /** After a failed ask, the next one. */
 const RETRY = 10 * S

@@ -11,7 +11,7 @@ import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
-import { plannedTrip, stopIndexOf, type StopDepartures, type TripDetail } from './answers.ts'
+import { findStop, plannedTrip, type StopDepartures, type TripDetail } from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import { onDemand } from './on-demand.ts'
 import { stopAnswer } from './stop-board.ts'
@@ -394,11 +394,12 @@ export const layer: Layer.Layer<
     // An unknown stop or trip answers without a run.
     const getStopDepartures = (stopId: string) =>
       Effect.gen(function* () {
-        if (stopIndexOf(timetable, stopId) < 0) return undefined
+        const found = findStop(timetable, stopId)
+        if (!found) return undefined
         const snapshot = yield* getSnapshot
         const list = yield* storedDisruptions
         const board = rejseplanen.multiDepartureBoard
-        return yield* stopAnswer({ timetable, snapshot, list, ask, board }, stopId)
+        return yield* stopAnswer({ timetable, snapshot, list, ask, board }, found)
       })
 
     /** A trip's journey reference, from the history, once an answer has carried it. */

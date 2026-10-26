@@ -108,8 +108,10 @@ export function departureBoard(
   const platforms = new Set(platformsOfStops(settings.timetable, request.ids))
   const until = request.from + request.duration * MINUTE
   const found: { at: number; departure: Departure }[] = []
-  const days = settings.timetable.serviceDaysAt(request.from)
-  for (const day of new Set([...days, ...settings.timetable.serviceDaysAt(now)])) {
+  const { timetable } = settings
+  // The window may pass midnight into the next service day, whose first trips leave before it ends.
+  const days = [request.from, until, now].flatMap((moment) => timetable.serviceDaysAt(moment))
+  for (const day of new Set(days)) {
     const calling = new Set(
       [...platforms].flatMap((p) => simulatedDay(settings, day).byPlatform.get(p) ?? []),
     )

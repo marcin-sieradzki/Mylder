@@ -22,8 +22,13 @@ import * as Http from './http.ts'
 /** Where Rejseplanen API 2.0 answers. */
 export const BASE_URL = 'https://www.rejseplan.dk/api/'
 
-/** How long one attempt may take before it counts as a timeout. */
-export const CALL_TIMEOUT = '8 seconds'
+/** How long one attempt may take before it counts as a timeout, in seconds. */
+export const CALL_TIMEOUT_SECONDS = 8
+
+const CALL_TIMEOUT = `${CALL_TIMEOUT_SECONDS} seconds` as const
+
+/** The most attempts one call makes: a network error or a 5xx is tried once more. */
+export const CALL_ATTEMPTS = 2
 
 /** How a call failed: the kinds the snapshot's API health names. */
 export interface CallError {
@@ -194,7 +199,7 @@ export const layer = (
         return Effect.gen(function* () {
           const started = yield* Clock.currentTimeMillis
           const answer = yield* attempt.pipe(
-            Effect.retry({ times: 1, while: retryable }),
+            Effect.retry({ times: CALL_ATTEMPTS - 1, while: retryable }),
             Effect.catch((error) =>
               Effect.flatMap(Clock.currentTimeMillis, (ended) =>
                 Effect.fail<CallError>({ ...error, ms: ended - started }),
