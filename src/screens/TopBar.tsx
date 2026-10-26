@@ -4,6 +4,7 @@ import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
 import { useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useLiveSnapshot } from '../map/live'
+import { isPaused, usePageNotices } from '../map/notices'
 import { useNetwork } from '../map/timetable'
 import { mapView, useMapView } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
@@ -97,6 +98,8 @@ export function TopBar() {
   const network = useNetwork(snapshot?.timetableVersion)
   const { hidden } = useMapView()
   const updatedAt = useUpdatedAt(snapshot)
+  // While Paused the line keeps the last answer's time and says so.
+  const paused = isPaused(usePageNotices())
   const underway = underwayByMode(snapshot)
   const timezone = network?.manifest.timezone ?? COPENHAGEN
 
@@ -113,7 +116,7 @@ export function TopBar() {
         {/* oxlint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label -- Brand fills the link with its name */}
         <Brand render={<a href={`/${lang}`} />} />
         <Text variant="data-sm" emphasis="secondary" className={styles.updated}>
-          {dictionary.topBar.updated.replace(
+          {dictionary.topBar[paused ? 'updatedPaused' : 'updated'].replace(
             '{time}',
             updatedAt === undefined ? '—' : clockTime(updatedAt, timezone),
           )}

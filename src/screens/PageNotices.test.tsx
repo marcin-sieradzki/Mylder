@@ -1,0 +1,276 @@
+import '@mylder/perron/tokens.css'
+import { act, render, screen, within } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import da from '../i18n/da.json'
+import en from '../i18n/en.json'
+import type { Lang } from '../i18n/lang'
+import { liveSnapshot } from '../map/live'
+import type { Snapshot } from '../tracker/index'
+import { MapScreen } from './MapScreen'
+import { Providers } from './Providers'
+
+// The page notices over the map (docs/screens.md, "Page notices"), from saved snapshots of the
+// recordings. The server's clock is set through the offset the poll would have read from the
+// answer's date header, so each notice is seen at a chosen moment of the recording.
+
+const saved = (name: string, recording = 'weekday'): Snapshot =>
+  JSON.parse(
+    readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
+  ) as Snapshot
+
+/** The timetable routes as the server answers them on the weekday recording. */
+const timetableRoutes = async (input: RequestInfo | URL): Promise<Response> => {
+  const folder = join(process.cwd(), 'recordings', 'weekday', 'timetable')
+  const manifest = JSON.parse(readFileSync(join(folder, 'manifest.json'), 'utf8')) as {
+    version: string
+    files: Record<string, string>
+  }
+  const [, version, file] = /^\/api\/timetable\/([^/]+)\/(\w+)$/.exec(String(input)) ?? []
+  if (version !== manifest.version) return new Response(null, { status: 404 })
+  const body =
+    file === 'manifest'
+      ? JSON.stringify(manifest)
+      : readFileSync(join(folder, manifest.files[file]), 'utf8')
+  return new Response(body, { headers: { 'content-type': 'application/json' } })
+}
+
+const renderScreen = (lang: Lang) =>
+  render(
+    <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
+      <MapScreen />
+    </Providers>,
+  )
+
+/** The offset that makes the server's clock read `iso` now. */
+const serverClockAt = (iso: string) => Date.parse(iso) - Date.now()
+
+/** A snapshot landed, read with the server's clock at `iso`. */
+const land = (snapshot: Snapshot, iso = '2026-06-16T05:23:10Z') =>
+  act(() =>
+    liveSnapshot.update({ snapshot, clockOffset: serverClockAt(iso), failingSince: undefined }),
+  )
+
+/** The notices' words, top to bottom. */
+const notices = () => screen.queryAllByRole('status').map((notice) => notice.textContent)
+
+const updatedLine = () => within(screen.getByRole('banner')).getByText(/^(Updated|Opdateret) /)
+
+/** The weekday's fourth minute, fetched at 07:23:00 in Copenhagen, as the live tracker serves it. */
+const live = (): Snapshot => ({ ...saved('0004.json'), source: { kind: 'rejseplanen' } })
+
+beforeEach(() => {
+  window.history.replaceState(null, '', '/en')
+  vi.stubGlobal('fetch', timetableRoutes)
+})
+
+afterEach(() => {
+  liveSnapshot.update({ snapshot: undefined, failingSince: undefined, clockOffset: 0 })
+  vi.unstubAllGlobals()
+})
+
+describe('the source banner', () => {
+  it('says the data is recorded, and from when', () => {
+    land(saved('0004.json'))
+    renderScreen('en')
+    expect(notices()).toEqual(['Recorded data from 16 June 2026.'])
+  })
+
+  it('says it in Danish', () => {
+    land(saved('0004.json'))
+    renderScreen('da')
+    expect(notices()).toEqual(['Optagne data fra 16. juni 2026.'])
+  })
+
+  it('says a simulated page is made up, in both languages', () => {
+    const simulated: Snapshot = {
+      ...saved('0004.json'),
+      source: { kind: 'simulated', name: 'weekday' },
+    }
+    land(simulated)
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([
+      'Simulated data: vehicles and times are made up from the timetable.',
+    ])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([
+      'Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.',
+    ])
+  })
+
+  it('is not there when the data is Rejseplanen’s', () => {
+    land(live())
+    renderScreen('en')
+    expect(notices()).toEqual([])
+  })
+})
+
+/** The browser's polls failing since `iso` on the server's clock. */
+const failingFrom = (iso: string) =>
+  act(() => liveSnapshot.update({ failingSince: Date.parse(iso) - liveSnapshot.get().clockOffset }))
+
+describe('the Disconnected notice', () => {
+  it('shows at once when a poll fails, naming the last data, and the Updated line keeps its time', () => {
+    land(live())
+    renderScreen('en')
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00')
+    // The next poll, due at 07:24:00 and a jitter, failed at 07:24:03 on the server's clock.
+    failingFrom('2026-06-16T05:24:03Z')
+    expect(notices()).toEqual([
+      'No connection since 07:24. Vehicles move on the last data from 07:23:00.',
+    ])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00')
+  })
+
+  it('says it in Danish, and clears on the next good poll', () => {
+    land(live())
+    renderScreen('da')
+    failingFrom('2026-06-16T05:24:03Z')
+    expect(notices()).toEqual([
+      'Ingen forbindelse siden 07:24. Køretøjerne bevæger sig på de seneste data fra 07:23:00.',
+    ])
+    land({ ...saved('0005.json'), source: { kind: 'rejseplanen' } }, '2026-06-16T05:24:31Z')
+    expect(notices()).toEqual([])
+    expect(updatedLine()).toHaveTextContent('Opdateret 07:24:00')
+  })
+
+  it('names only the time when no snapshot has landed yet', () => {
+    act(() => liveSnapshot.update({ clockOffset: serverClockAt('2026-06-16T05:20:02Z') }))
+    failingFrom('2026-06-16T05:20:02Z')
+    renderScreen('en')
+    expect(notices()).toEqual(['No connection since 07:20.'])
+  })
+})
+
+/** The weekday's sixth minute, with Rejseplanen failing since the fourth's run at 07:23:00. */
+const failing = (): Snapshot => ({
+  ...saved('0006.json'),
+  source: { kind: 'rejseplanen' },
+  api: { status: 'error', since: Date.parse('2026-06-16T05:23:00Z'), kind: 'status' },
+})
+
+describe('the Paused notice', () => {
+  it('says at once when the month is spent, naming the day live data resumes', () => {
+    land(live())
+    renderScreen('en')
+    // The month's calls ran out at the next run: Rejseplanen's quota error.
+    land({ ...saved('0002.json', 'spent'), source: { kind: 'rejseplanen' } })
+    expect(notices()).toEqual(["Live data is paused until 1 July: this month's calls are used up."])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00, paused')
+  })
+
+  it('says it in Danish, for a refused key too', () => {
+    land({ ...saved('0001.json', 'refused-key'), source: { kind: 'rejseplanen' } })
+    renderScreen('da')
+    expect(notices()).toEqual([
+      'Live-data er sat på pause indtil 1. juli: denne måneds kald er brugt op.',
+    ])
+    expect(updatedLine()).toHaveTextContent('Opdateret —, sat på pause')
+  })
+
+  it('names the time Rejseplanen stopped answering, once that is past the Live limit', () => {
+    // Alternating modes report every other minute: the Live limit is 4 min, so 07:27:00.
+    land(live())
+    renderScreen('en')
+    land(failing(), '2026-06-16T05:26:59Z')
+    expect(notices()).toEqual([])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00')
+    land(failing(), '2026-06-16T05:27:00Z')
+    expect(notices()).toEqual(["Rejseplanen hasn't answered since 07:23."])
+    expect(updatedLine()).toHaveTextContent('Updated 07:23:00, paused')
+  })
+
+  it('says it in Danish, and lifts on the first good answer', () => {
+    land(live())
+    renderScreen('da')
+    land(failing(), '2026-06-16T05:28:10Z')
+    expect(notices()).toEqual(['Rejseplanen har ikke svaret siden 07:23.'])
+    expect(updatedLine()).toHaveTextContent('Opdateret 07:23:00, sat på pause')
+    land({ ...saved('0009.json'), source: { kind: 'rejseplanen' } }, '2026-06-16T05:28:31Z')
+    expect(notices()).toEqual([])
+    expect(updatedLine()).toHaveTextContent('Opdateret 07:28:00')
+  })
+})
+
+describe('the budget line', () => {
+  /** The weekday's third minute, with the poll stretched to `seconds`. */
+  const stretched = (level: 'stretched' | 'tight', seconds: number): Snapshot => {
+    const snapshot = { ...saved('0003.json'), source: { kind: 'rejseplanen' } } as const
+    return {
+      ...snapshot,
+      pollInterval: seconds,
+      nextDue: snapshot.fetched + seconds * 1000,
+      budget: { ...snapshot.budget, level },
+    }
+  }
+
+  it('says how often the map updates while the poll has stretched', () => {
+    land(stretched('stretched', 90))
+    renderScreen('en')
+    expect(notices()).toEqual(['Updating every 90 s to stay within the data budget.'])
+    land(stretched('tight', 120))
+    expect(notices()).toEqual(['Updating every 2 min to stay within the data budget.'])
+  })
+
+  it('says it in Danish', () => {
+    land(stretched('stretched', 90))
+    renderScreen('da')
+    expect(notices()).toEqual(['Kortet opdateres hvert 90. sekund for at overholde databudgettet.'])
+    land(stretched('tight', 120))
+    expect(notices()).toEqual(['Kortet opdateres hvert 2. minut for at overholde databudgettet.'])
+  })
+})
+
+describe('the timetable notice', () => {
+  // The recording's timetable covers service up to and including 26 August.
+
+  it('shows once the timetable has under 7 days of service left, by the server’s clock', async () => {
+    land(live(), '2026-08-20T10:00:00Z')
+    renderScreen('en')
+    // Wait for the snapshot's timetable to load: the source of the window.
+    await screen.findByRole('group', { name: 'Modes' })
+    expect(notices()).toEqual([])
+    land(live(), '2026-08-21T10:00:00Z')
+    expect(notices()).toEqual([
+      'The timetable ends on 26 August. Without a new one, the map has no trips after that.',
+    ])
+  })
+
+  it('says it in Danish, and says when it has ended', async () => {
+    land(live(), '2026-08-26T21:59:00Z')
+    renderScreen('da')
+    expect(await screen.findAllByRole('status')).toHaveLength(1)
+    expect(notices()).toEqual([
+      'Køreplanen slutter 26. august. Uden en ny har kortet ingen ture derefter.',
+    ])
+    // Midnight in Copenhagen: the last covered day is over.
+    land(live(), '2026-08-26T22:00:00Z')
+    expect(notices()).toEqual([
+      'Køreplanen sluttede 26. august. Uden en ny har kortet ingen ture at vise.',
+    ])
+  })
+})
+
+describe('Disconnected and Paused together', () => {
+  it('shows Disconnected, with the last snapshot’s Paused notice kept beneath it', () => {
+    land({ ...saved('0002.json', 'spent'), source: { kind: 'rejseplanen' } })
+    renderScreen('en')
+    failingFrom('2026-06-16T05:23:04Z')
+    expect(notices()).toEqual([
+      'No connection since 07:23. Vehicles move on the last data from 07:21:00.',
+      "Live data is paused until 1 July: this month's calls are used up.",
+    ])
+  })
+
+  it('says both in Danish', () => {
+    land(failing(), '2026-06-16T05:28:10Z')
+    renderScreen('da')
+    failingFrom('2026-06-16T05:28:12Z')
+    expect(notices()).toEqual([
+      'Ingen forbindelse siden 07:28. Køretøjerne bevæger sig på de seneste data fra 07:25:00.',
+      'Rejseplanen har ikke svaret siden 07:23.',
+    ])
+  })
+})

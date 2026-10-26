@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useI18n } from '../i18n/useI18n'
 import styles from './MapScreen.module.css'
+import { PageNotices } from './PageNotices'
 import { TopBar } from './TopBar'
 
 // MapLibre needs the browser's window, so the map loads on the client only.
@@ -16,7 +17,10 @@ export function MapScreen() {
       <main className={styles.map}>
         <BaseMap label={dictionary.map.label} className={styles.canvas} />
       </main>
-      <TopBar />
+      <div className={styles.top}>
+        <TopBar />
+        <PageNotices />
+      </div>
     </div>
   )
 }
