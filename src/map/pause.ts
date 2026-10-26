@@ -7,7 +7,6 @@ import { useSyncExternalStore } from 'react'
 export interface MotionPause {
   get(): boolean
   set(paused: boolean): void
-  toggle(): void
   /** Calls back whenever it is paused or resumed; returns the function that stops it. */
   subscribe(onChange: () => void): () => void
 }
@@ -24,7 +23,6 @@ export function motionPauseStore(): MotionPause {
   return {
     get: () => paused,
     set,
-    toggle: () => set(!paused),
     subscribe(onChange) {
       listeners.add(onChange)
       return () => listeners.delete(onChange)

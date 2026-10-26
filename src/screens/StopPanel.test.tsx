@@ -119,7 +119,7 @@ describe("a stop's departures", () => {
     openStop('en', '?stop=27532')
     const husum = row(await panel('Nørreport St.'), 'Husum Torv')
     expect(husum).toHaveTextContent('Estimated')
-    expect(within(husum).getByText('~07:38')).toBeInTheDocument()
+    expect(within(husum).getByText('07:38')).toHaveTextContent(/^~07:38$/)
   })
 
   it('keeps a cancelled departure, marked Cancelled with its countdown struck', async () => {
@@ -132,10 +132,15 @@ describe("a stop's departures", () => {
     // The countdown's figure sits in the countdown, which the row strikes.
     const countdown = within(koge).getByText('8').parentElement!
     expect(getComputedStyle(countdown).textDecorationLine).toBe('line-through')
+    // Its timetabled time, struck, and not the expected one it won't keep.
+    expect(getComputedStyle(within(koge).getByText('07:27')).textDecorationLine).toBe(
+      'line-through',
+    )
+    expect(within(koge).queryByText('07:29')).not.toBeInTheDocument()
     expect(within(stop).getByRole('list', { name: 'Departures' }).children).toHaveLength(10)
   })
 
-  it('gives a Timetable only departure its timetabled time and no delay', async () => {
+  it('gives a Timetable only departure its timetabled time and an unknown delay', async () => {
     openStop('en', '?stop=54307')
     const teglholmen = row(await panel('Orientkaj St.'), 'Teglholmen')
     expect(teglholmen).toHaveTextContent('Timetable only')
@@ -143,14 +148,14 @@ describe("a stop's departures", () => {
     expect(teglholmen).toHaveTextContent('—')
   })
 
-  it('says Unknown beside a No signal departure’s timetabled time', async () => {
+  it('gives a No signal departure its timetabled time and an unknown delay', async () => {
     answers.set('27532', withRow(NORREPORT, BUS_TO_HUSUM, { state: 'no-signal' }))
     openStop('en', '?stop=27532')
     const husum = row(await panel('Nørreport St.'), 'Husum Torv')
     expect(husum).toHaveTextContent('No signal')
     expect(within(husum).getByText('07:36')).toBeInTheDocument()
-    expect(husum).toHaveTextContent('Unknown')
-    expect(within(husum).queryByText('~07:38')).not.toBeInTheDocument()
+    expect(husum).toHaveTextContent('—')
+    expect(within(husum).queryByText('07:38')).not.toBeInTheDocument()
     // Its delay is unknown too, not the last one it had.
     expect(husum).not.toHaveTextContent('+2')
   })
@@ -183,7 +188,7 @@ describe("a stop's departures", () => {
     openStop('en', '?stop=27532')
     const husum = row(await panel('Nørreport St.'), 'Husum Torv')
     expect(husum).toHaveTextContent('Estimated')
-    expect(within(husum).getByText('~07:38')).toBeInTheDocument()
+    expect(within(husum).getByText('07:38')).toHaveTextContent(/^~07:38$/)
   })
 
   it('says so when no departure leaves in the next 30 minutes', async () => {
@@ -208,7 +213,7 @@ describe("a stop's departures", () => {
     openStop('en', '?stop=27532')
     const stop = await panel('Nørreport St.')
     expect(stop).toHaveTextContent('From the timetable')
-    expect(stop).toHaveTextContent('Timetable and positions · updated 07:21:00')
+    expect(stop).toHaveTextContent('Timetable and positions 07:21:00')
   })
 
   it('names Rejseplanen and the time of its call when the answer came from the board', async () => {
@@ -233,9 +238,9 @@ describe("a stop's departures", () => {
     expect(row(stop, 'Køge St.')).toHaveTextContent('Aflyst')
     const husum = row(stop, 'Husum Torv')
     expect(husum).toHaveTextContent('Beregnet')
-    expect(within(husum).getByText('~07:38')).toBeInTheDocument()
+    expect(within(husum).getByText('07:38')).toHaveTextContent(/^~07:38$/)
     expect(stop).toHaveTextContent('Fra køreplanen')
-    expect(stop).toHaveTextContent('Køreplan og positioner · opdateret 07:21:00')
+    expect(stop).toHaveTextContent('Køreplan og positioner 07:21:00')
   })
 
   it('says when none leave, in Danish', async () => {
@@ -412,7 +417,7 @@ describe("a Metro platform's departures", () => {
     expect(metro).toHaveTextContent('Metro: planned times')
     const husum = row(stop, 'Husum Torv')
     expect(husum).toHaveTextContent('Estimated')
-    expect(within(husum).getByText('~07:38')).toBeInTheDocument()
+    expect(within(husum).getByText('07:38')).toHaveTextContent(/^~07:38$/)
   })
 
   it('shows ordinary Metro rows when the answer carried Metro realtime', async () => {

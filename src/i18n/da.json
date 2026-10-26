@@ -63,9 +63,10 @@
     "delayUnknown": "Forsinkelse ukendt",
     "minutes": "{minutes} min",
     "fromTimetable": "Fra køreplanen",
-    "positionSource": "Rejseplanen-position",
+    "positionAt": "position {time}",
+    "timesAt": "tider {time}",
+    "timesFromTimetable": "tider fra køreplanen",
     "timetableSource": "Køreplan",
-    "callSource": "Rejseplanen-tider",
     "messages": "Meddelelser",
     "later": "Senere",
     "messagesChecked": "Fra Rejseplanen; tjekket {time}",
@@ -78,11 +79,6 @@
   "legend": {
     "label": "Datatilstande",
     "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
-  },
-  "controls": {
-    "motion": "Bevægelse",
-    "pause": "Pause",
-    "resume": "Fortsæt"
   },
   "credit": {
     "transitData": "Trafikdata",
@@ -98,16 +94,13 @@
     "notFoundDetail": "Mylders køreplan har intet stoppested med dette id.",
     "failed": "Afgangene kunne ikke hentes",
     "failedDetail": "Prøver igen om lidt.",
-    "timetabled": "køreplan",
-    "unknown": "Ukendt",
     "note": "Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.",
     "fromTimetable": "Fra køreplanen",
-    "timetableAndPositions": "Køreplan og positioner",
+    "timetableAndPositions": "Køreplan og positioner {time}",
     "track": "Spor {track}",
     "stand": "Perron {track}",
     "intervalNote": "Metro: planlagte tider",
     "departuresAt": "afgange {time}",
-    "departuresOutOfDate": "afgange {time}, måske forældet",
     "messages": "Meddelelser",
     "later": "Senere",
     "messagesSource": "Fra Rejseplanen"
@@ -186,7 +179,6 @@
     "search": "Søg i linjer og destinationer",
     "placeholder": "Linje eller destination, fx 5C",
     "positionsAt": "positioner {time}",
-    "positionsOutOfDate": "positioner {time}, måske forældet",
     "noMatch": "Ingen køretøjer matcher.",
     "none": "Ingen køretøjer på kortet."
   },

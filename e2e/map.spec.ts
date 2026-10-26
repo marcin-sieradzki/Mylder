@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test'
 import { expect, test } from './recording'
 
 // The map on the weekday recording, whose timetable the routes serve.
@@ -90,11 +91,17 @@ test('switching language keeps the map where it was, its filters and the rest of
   await expect(page).toHaveURL('/en?map=14.00/55.67600/12.56800&hide=bus&line=5C')
 })
 
+/** How the top bar's brand and status line stack: `column` in the phone's layout, `row` above it. */
+const identityFlow = (banner: Locator) =>
+  banner
+    .locator('.pn-TopBar-identity')
+    .evaluate((element) => getComputedStyle(element).flexDirection)
+
 test("a phone gets the phone's top bar from the first paint, before any script runs", async ({
   browser,
 }) => {
-  // The prerendered page, as a phone paints it before the scripts load: the width alone picks
-  // the bar, and the other one is hidden from assistive technology too.
+  // The prerendered page, as a phone paints it before the scripts load: one bar, which the width
+  // alone lays out as the phone's.
   const context = await browser.newContext({
     javaScriptEnabled: false,
     viewport: { width: 390, height: 844 },
@@ -102,21 +109,21 @@ test("a phone gets the phone's top bar from the first paint, before any script r
   const page = await context.newPage()
   await page.goto('/en')
   const banner = page.getByRole('banner')
-  await expect(banner.locator('.pn-TopBar[data-size="small"]')).toBeVisible()
-  await expect(banner.locator('.pn-TopBar[data-size="medium"]')).toBeHidden()
+  await expect(banner.locator('.pn-TopBar')).toHaveCount(1)
+  expect(await identityFlow(banner)).toBe('column')
   await expect(banner.getByRole('link', { name: 'Mylder' })).toHaveCount(1)
   await context.close()
 })
 
-test('the top bar keeps its layout once the page has started, one bar for the width', async ({
+test('the top bar keeps one bar once the page has started, laid out for the width', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/en')
-  const bars = page.getByRole('banner').locator('.pn-TopBar')
+  const banner = page.getByRole('banner')
   await expect(page.locator('[data-vehicles]')).toBeAttached()
-  await expect(bars).toHaveCount(1)
-  await expect(bars).toHaveAttribute('data-size', 'small')
+  await expect(banner.locator('.pn-TopBar')).toHaveCount(1)
+  expect(await identityFlow(banner)).toBe('column')
   await page.setViewportSize({ width: 1280, height: 800 })
-  await expect(bars).toHaveAttribute('data-size', 'medium')
+  await expect.poll(() => identityFlow(banner)).toBe('row')
 })

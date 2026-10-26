@@ -12,7 +12,7 @@
   margin-inline: auto;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 759.98px) {
   .chip {
     inset-block-start: calc(var(--perron-space-300) + 114px);
   }

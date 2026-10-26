@@ -149,9 +149,7 @@ describe("a vehicle's detail", () => {
     expect(fact(trip, 'Last seen')).toHaveTextContent('07:21:00')
     expect(fact(trip, 'Next stop')).toHaveTextContent('Friheden St.')
     expect(trip).toHaveTextContent('Between Avedøre St. and Friheden St.')
-    expect(trip).toHaveTextContent(
-      'Rejseplanen position · updated 07:21:00 · Timetable · updated 07:21:00',
-    )
+    expect(trip).toHaveTextContent('Rejseplanen · position 07:21:00 · times from the timetable')
     expect(trip).toHaveTextContent('From the timetable')
   })
 
@@ -253,7 +251,7 @@ describe("a vehicle's detail", () => {
     expect(fact(trip, 'Next stop')).toHaveTextContent('Orientkaj St. (Orientkaj)')
     // No position from Rejseplanen: the source line names the timetable alone.
     expect(trip).toHaveTextContent('Timetable · updated 07:21:00')
-    expect(trip).not.toHaveTextContent('Rejseplanen position')
+    expect(trip).not.toHaveTextContent('position')
   })
 
   it('says a Metro trip runs to an interval, and lists its stops without times', async () => {
@@ -346,9 +344,7 @@ describe("a vehicle's detail from its trip's detail", () => {
     answers.set(A_LIVE, fromDetail())
     openTrip('en', A_LIVE, minute2, 60)
     const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
-    expect(trip).toHaveTextContent(
-      'Rejseplanen position · updated 07:21:00 · Rejseplanen times · updated 07:21:20',
-    )
+    expect(trip).toHaveTextContent('Rejseplanen · position 07:21:00 · times 07:21:20')
     expect(trip).not.toHaveTextContent('From the timetable')
   })
 
@@ -422,9 +418,7 @@ describe("a vehicle's detail from its trip's detail", () => {
     expect(items[11]).toHaveTextContent('København H — Langsom kørsel hertil')
     const cards = within(trip).getByRole('region', { name: 'Meddelelser' })
     expect(cards).toHaveTextContent('Fra Rejseplanen; tjekket 07:21')
-    expect(trip).toHaveTextContent(
-      'Rejseplanen-position · opdateret 07:21:00 · Rejseplanen-tider · opdateret 07:21:20',
-    )
+    expect(trip).toHaveTextContent('Rejseplanen · position 07:21:00 · tider 07:21:20')
     expect(trip).not.toHaveTextContent('Fra køreplanen')
   })
 })
@@ -439,7 +433,7 @@ describe("a vehicle's detail in Danish", () => {
     // Reported at Avedøre St., at the moment it reported.
     expect(trip).toHaveTextContent('Ved Avedøre St.')
     expect(trip).toHaveTextContent('Fra køreplanen')
-    expect(trip).toHaveTextContent('Rejseplanen-position · opdateret 07:21:00')
+    expect(trip).toHaveTextContent('Rejseplanen · position 07:21:00 · tider fra køreplanen')
   })
 
   it('says Ageing and No signal', async () => {

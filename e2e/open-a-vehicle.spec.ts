@@ -28,7 +28,7 @@ test("a tap on a dot opens its vehicle's detail, which the address keeps", async
   await expect(panel).toContainText('Bus')
   await expect(panel).toContainText('Estimated')
   await expect(panel.getByRole('list', { name: 'Stops' })).toBeVisible()
-  await expect(panel).toContainText('Timetable · updated')
+  await expect(panel).toContainText('times from the timetable')
 
   await page.reload()
   await expect(panel.getByRole('list', { name: 'Stops' })).toBeVisible()
