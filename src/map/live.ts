@@ -69,3 +69,15 @@ export function pollSnapshot(): () => void {
 export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapshot {
   return useSyncExternalStore(store.subscribe, store.get, () => NOTHING_YET)
 }
+
+/**
+ * The latest snapshot alone, for a component that shows nothing of how the poll is going: it
+ * renders again only when a snapshot lands.
+ */
+export function useSnapshot(store: SnapshotStore = liveSnapshot): Snapshot | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().snapshot,
+    () => undefined,
+  )
+}

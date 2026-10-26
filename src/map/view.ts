@@ -128,7 +128,14 @@ export function addressView(): ViewStore {
 /** The page's one view. */
 export const mapView = addressView()
 
-/** The map's view, for a component; the prerendered page shows the default view. */
-export function useMapView(store: ViewStore = mapView): MapView {
-  return useSyncExternalStore(store.subscribe, store.get, () => NOTHING)
+/**
+ * The modes the filters hide, for a component: it renders again when a filter changes, not when
+ * the map moves. The prerendered page hides none.
+ */
+export function useHiddenModes(store: ViewStore = mapView): ReadonlySet<Mode> {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().hidden,
+    () => NOTHING.hidden,
+  )
 }

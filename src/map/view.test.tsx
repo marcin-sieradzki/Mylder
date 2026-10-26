@@ -1,5 +1,6 @@
+import { act, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { addressView, viewOf } from './view.ts'
+import { addressView, useHiddenModes, viewOf } from './view.ts'
 
 describe("the view an address's query names", () => {
   it('reads the zoom, latitude and longitude a map link gives', () => {
@@ -34,5 +35,19 @@ describe("the view kept in the page's address", () => {
     expect(store.get().hidden).toBe(hidden)
     store.update({ hidden: new Set(['bus', 'metro']) })
     expect([...store.get().hidden]).toEqual(['bus', 'metro'])
+  })
+
+  it('renders a component that reads the filters only when they change, not when the map moves', () => {
+    const store = addressView()
+    let renders = 0
+    function Filters() {
+      renders++
+      return <p>{[...useHiddenModes(store)].join(', ')}</p>
+    }
+    render(<Filters />)
+    act(() => store.update({ centre: [12.5683, 55.6761], zoom: 12.5 }))
+    expect(renders).toBe(1)
+    act(() => store.update({ hidden: new Set(['bus']) }))
+    expect(renders).toBe(2)
   })
 })

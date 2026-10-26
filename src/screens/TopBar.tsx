@@ -3,9 +3,9 @@
 import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
 import { useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { useLiveSnapshot } from '../map/live'
+import { useSnapshot } from '../map/live'
 import { useNetwork } from '../map/timetable'
-import { mapView, useMapView } from '../map/view'
+import { mapView, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
 import type { Snapshot } from '../tracker/index'
@@ -93,9 +93,9 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
-  const { snapshot } = useLiveSnapshot()
+  const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
-  const { hidden } = useMapView()
+  const hidden = useHiddenModes()
   const updatedAt = useUpdatedAt(snapshot)
   const underway = underwayByMode(snapshot)
   const timezone = network?.manifest.timezone ?? COPENHAGEN
