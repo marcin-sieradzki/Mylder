@@ -9,5 +9,35 @@
   "language": {
     "label": "Language",
     "switchTo": "Dansk"
+  },
+  "vehicle": {
+    "title": "{mode} {line} to {headsign}",
+    "modes": {
+      "bus": "Bus",
+      "metro": "Metro",
+      "s-tog": "S-tog",
+      "train": "Train",
+      "light-rail": "Light rail"
+    },
+    "reported": "Reported {age} ago",
+    "lastSeen": "Last seen {age} ago",
+    "estimated": "Estimated from schedule",
+    "noSignalSince": "No signal since {time}",
+    "departs": "Departs {time}",
+    "seconds": "{seconds} s",
+    "minutes": "{minutes} min"
+  },
+  "legend": {
+    "label": "Data states",
+    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
+  },
+  "controls": {
+    "motion": "Motion",
+    "pause": "Pause",
+    "resume": "Resume"
+  },
+  "credit": {
+    "transitData": "Transit data",
+    "openStreetMap": "OpenStreetMap contributors"
   }
 }

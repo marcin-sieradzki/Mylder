@@ -1,8 +1,9 @@
 // The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
 // the live snapshot's vehicles where the motion loop moves them each frame, with their glyphs
 // made again when a snapshot lands, a data state turns by the clock or the theme changes, and
-// their size when the zoom moves it. It polls the snapshot while the map is open. The number of
-// vehicles drawn is on the map's container as `data-vehicles`, for tests.
+// their size when the zoom moves it. A hover or a tap picks a dot for its card (picking.ts). It
+// polls the snapshot while the map is open. The number of vehicles drawn is on the map's
+// container as `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
@@ -12,6 +13,7 @@ import { radiusScaleAt } from './glyphs.ts'
 import { liveSnapshot, pollSnapshot } from './live.ts'
 import { vehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
+import { vehiclePicking } from './picking.ts'
 import { dataStates, serverNow } from './states.ts'
 import { timetables } from './timetable.ts'
 import { vehicleLayers } from './VehicleGlyphLayer.ts'
@@ -26,7 +28,12 @@ export interface VehicleOverlay {
 /** Draws the live vehicles over `map`, whose container is `container`. */
 export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): VehicleOverlay {
   const root = document.documentElement
-  const overlay = new MapLibreOverlay({ interleaved: false, layers: [] })
+  const canvas = map.getCanvas()
+  const picking = vehiclePicking(container, undefined, (onDot) => {
+    canvas.style.cursor = onDot ? 'pointer' : ''
+  })
+  const project = (lonLat: [number, number]) => map.project(lonLat)
+  const overlay = new MapLibreOverlay({ interleaved: false, layers: [], ...picking.props })
   map.addControl(overlay)
   let removed = false
   let drawnFrom: Snapshot | undefined
@@ -37,6 +44,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     if (!vehicles) return
     overlay.setProps({ layers: vehicleLayers(vehicles, radiusScale) })
     container.dataset.vehicles = String(vehicles.length)
+    picking.follow(vehicles, project)
   }
   const loop = vehicleLoop({
     now: () => serverNow(liveSnapshot.get()),
@@ -81,6 +89,9 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     render()
   }
   map.on('zoom', onZoom)
+  // The picked dot's card follows it as the map pans, even while the dots stand still.
+  const onMove = () => vehicles && picking.follow(vehicles, project)
+  map.on('move', onMove)
 
   return {
     repaint: () => void draw(),
@@ -91,6 +102,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopPolling()
       loop.stop()
       map.off('zoom', onZoom)
+      map.off('move', onMove)
       map.removeControl(overlay)
       delete container.dataset.vehicles
     },

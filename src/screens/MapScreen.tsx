@@ -4,14 +4,17 @@ import { Brand, Surface } from '@mylder/perron'
 import dynamic from 'next/dynamic'
 import { useI18n } from '../i18n/useI18n'
 import { LanguageSwitch } from './LanguageSwitch'
+import { MapFoot } from './MapFoot'
 import styles from './MapScreen.module.css'
+import { VehicleCard } from './VehicleCard'
 
 // MapLibre needs the browser's window, so the map loads on the client only.
 const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
 
 /**
  * The moving map (docs/screens.md): the map fills the window, with the brand and the language
- * switch floating over it until the top bar arrives.
+ * switch floating over it until the top bar arrives, the legend, the controls and the credit at
+ * its foot, and the picked dot's card.
  */
 export function MapScreen() {
   const { lang, dictionary } = useI18n()
@@ -25,6 +28,8 @@ export function MapScreen() {
         <Brand render={<a href={`/${lang}`} />} />
         <LanguageSwitch />
       </Surface>
+      <MapFoot />
+      <VehicleCard />
     </div>
   )
 }

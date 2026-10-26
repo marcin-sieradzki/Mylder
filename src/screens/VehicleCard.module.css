@@ -1,0 +1,21 @@
+/* The hover card: the line and destination, then the state's word and its label on one line. */
+.card {
+  display: grid;
+  gap: var(--perron-space-050);
+}
+
+.title {
+  font-weight: var(--perron-font-weight-semibold);
+}
+
+.state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--perron-space-200);
+}
+
+/* The state's word takes the card's inverse ink, as the label beside it does. */
+.state > :first-child {
+  color: inherit;
+}
