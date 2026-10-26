@@ -79,7 +79,8 @@
   },
   "legend": {
     "label": "Datatilstande",
-    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
+    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner.",
+    "aircraftNoData": "Fly: ingen data siden {time}"
   },
   "credit": {
     "transitData": "Trafikdata",
@@ -119,7 +120,7 @@
       "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
       "aircraft": "Fly: © {source} under {licence}.",
-      "aircraftFrom": "Fly: {source}.",
+      "aircraftFrom": "Fly: © {source}.",
       "style": "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se {licence}.",
       "styleLicence": "licensen"
     },

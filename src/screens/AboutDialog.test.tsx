@@ -158,6 +158,22 @@ describe('the About dialog', () => {
     expect(openDialog('Om Mylder')).toHaveTextContent('Fly: © adsb.lol-bidragydere under ODbL.')
   })
 
+  it('credits adsb.fi with a link to its home page when it answered, in English and Danish', () => {
+    liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.fi' } })
+    show('en', weekday)
+    const dialog = openDialog('About Mylder')
+    expect(dialog).toHaveTextContent('OpenFreeMap.Aircraft: © adsb.fi.')
+    expect(dialog).not.toHaveTextContent('adsb.lol')
+    expect(within(dialog).getByRole('link', { name: 'adsb.fi' })).toHaveAttribute(
+      'href',
+      'https://adsb.fi/',
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', weekday)
+    expect(openDialog('Om Mylder')).toHaveTextContent('OpenFreeMap.Fly: © adsb.fi.')
+  })
+
   it('names no aircraft credit while the page has none', () => {
     show('en', weekday)
     expect(openDialog('About Mylder')).not.toHaveTextContent('Aircraft')

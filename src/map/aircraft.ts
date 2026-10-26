@@ -73,6 +73,22 @@ export function useAircraftCount(store: AircraftStore = liveAircraft): number | 
   )
 }
 
+/**
+ * Since when the aircraft feed has given no data, for the legend: its last answer, or its first
+ * failure when it has never answered; none while it answers, or before a snapshot lands.
+ */
+export function useAircraftNoDataSince(store: AircraftStore = liveAircraft): number | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => {
+      const snapshot = store.get().snapshot
+      if (snapshot?.health.status !== 'error') return undefined
+      return snapshot.lastAnswer ?? snapshot.health.since
+    },
+    () => undefined,
+  )
+}
+
 /** Whether the server has the aircraft off, as its 404 said, for a component. */
 export function useAircraftOff(store: AircraftStore = liveAircraft): boolean {
   return useSyncExternalStore(
