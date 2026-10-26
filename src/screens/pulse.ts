@@ -6,6 +6,7 @@ import type { DataStates } from '../map/states'
 import { onMap } from '../map/vehicles'
 import { MODES, type Mode } from '../timetable/format'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
+import { carriesDelays } from './vehicleList'
 
 /** Why a figure is "—". */
 export type Unknown = 'computed-only' | 'paused' | 'none-underway'
@@ -111,8 +112,7 @@ export function pulseOf(
     .map((trip) => trip.delay!)
   // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
   // figure for another: under the minimum it says so.
-  const carries = snapshot.trips.some((trip) => trip.delay !== undefined)
-  const delay: Pulse['delay'] = !carries
+  const delay: Pulse['delay'] = !carriesDelays(snapshot)
     ? undefined
     : paused
       ? 'paused'
