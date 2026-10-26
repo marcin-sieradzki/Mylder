@@ -258,6 +258,22 @@
     "lastChecked": "Last checked {time}; the latest check failed.",
     "failed": "Messages from Rejseplanen: the latest check failed.",
     "outOfDate": "May be out of date.",
-    "incomplete": "Rejseplanen sends at most 100 messages, so the list may be incomplete."
+    "incomplete": "Rejseplanen sends at most 100 messages, so the list may be incomplete.",
+    "dataCards": {
+      "title": "From Mylder",
+      "mine": "From Mylder, about its own data",
+      "paused": "Live data paused until {date}",
+      "pausedNoDate": "Live data paused",
+      "noAnswer": "No answer from Rejseplanen since {time}",
+      "modeQuiet": {
+        "bus": "No bus positions since {time}",
+        "metro": "No Metro positions since {time}",
+        "s-tog": "No S-tog positions since {time}",
+        "train": "No train positions since {time}",
+        "light-rail": "No light rail positions since {time}"
+      },
+      "messagesStale": "Disruption messages not updated since {time}",
+      "messagesNever": "Disruption messages not fetched yet"
+    }
   }
 }
