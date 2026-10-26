@@ -3,12 +3,13 @@
 // the timetable's network has loaded, and the live vehicles in deck.gl's canvas over it
 // (docs/screens.md, "The moving map"; ADR 0003). It opens on the view the address names and keeps
 // where it was left in the address (`view.ts`). The map lives outside React: React only names
-// the canvas.
+// the canvas, and the screen's controls move it through the camera (camera.ts).
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl'
 import { useEffect, useRef } from 'react'
 import type { Network } from '../timetable/network.ts'
+import { mapCamera } from './camera.ts'
 import { vehicleOverlay } from './overlay.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
@@ -52,8 +53,9 @@ export default function BaseMap({ label, className }: BaseMapProps) {
         dragRotate: false,
         pitchWithRotate: false,
         touchPitch: false,
-        // MapLibre's own credit until the map's corner credit arrives.
-        attributionControl: { compact: false },
+        // The screen's corner credit and its keys (keys.ts) stand in for MapLibre's own.
+        attributionControl: false,
+        keyboard: false,
       })
     } catch (error) {
       // No WebGL: the page keeps its top bar, and says nothing it cannot back.
@@ -69,6 +71,11 @@ export default function BaseMap({ label, className }: BaseMapProps) {
       mapView.update({ centre: [lng, lat], zoom: created.getZoom() })
     }
     created.on('moveend', keepView)
+    // Reset returns to the view the map opens on with no view in the address.
+    const detachCamera = mapCamera.attach(created, () => ({
+      center: CENTRE,
+      zoom: zoomFor(element.clientWidth),
+    }))
     const vehicles = vehicleOverlay(created, element)
     const repaint = () => created.setStyle(style(), { diff: true })
     const stopWatching = watchTheme(root, () => {
@@ -88,6 +95,7 @@ export default function BaseMap({ label, className }: BaseMapProps) {
       created.off('moveend', keepView)
       stopWatching()
       vehicles.remove()
+      detachCamera()
       created.remove()
       map.current = null
     }

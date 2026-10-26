@@ -1,0 +1,53 @@
+/* The map's foot: the legend at the bottom left, the controls at the bottom right with the
+   credit in the corner beneath them. The gaps between them pass the pointer to the map. */
+.foot {
+  position: absolute;
+  inset-block-end: var(--perron-size-panel-gap);
+  inset-inline: var(--perron-size-panel-gap);
+  z-index: var(--perron-z-index-map-controls);
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'legend tools'
+    'legend credit';
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--perron-size-panel-gap);
+  pointer-events: none;
+}
+
+.legend,
+.tools,
+.credit {
+  pointer-events: auto;
+}
+
+.legend {
+  grid-area: legend;
+}
+
+.tools {
+  grid-area: tools;
+  justify-self: end;
+}
+
+.credit {
+  grid-area: credit;
+  justify-self: end;
+  text-align: end;
+}
+
+/* On a phone, under Perron's breakpoint.phone (760px), the credit runs the map's width beneath
+   the rest, wrapping to two lines. */
+@media (max-width: 760px) {
+  .foot {
+    grid-template-areas:
+      'legend tools'
+      'credit credit';
+  }
+
+  .credit {
+    justify-self: stretch;
+    text-align: start;
+  }
+}
