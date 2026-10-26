@@ -53,6 +53,26 @@ describe('a trip’s calls', () => {
     expect(detail.calls[ahead].expectedDeparture).toBeUndefined()
   })
 
+  it('names the line’s colour', () => {
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.colour).toBe(late.line.colour)
+  })
+
+  it('marks a cancelled trip, and a call it skips', () => {
+    const whole = snapshot([{ key: late.key, state: 'estimated', cancelled: true }])
+    expect(tripDetailFrom(timetable, whole, late.key, MOMENT)?.cancelled).toBe(true)
+    const skips = snapshot([{ key: late.key, state: 'estimated', cancelledCalls: [ahead] }])
+    const detail = tripDetailFrom(timetable, skips, late.key, MOMENT)!
+    expect(detail.cancelled).toBeUndefined()
+    expect(detail.calls.filter((call) => call.cancelled).map((call) => call.index)).toEqual([ahead])
+  })
+
+  it('gives a Metro trip the interval its line keeps this hour, and other trips none', () => {
+    // M1 towards Vestamager leaves each platform at 07:03 and 07:07, the fixture's two trips.
+    const metro = 'metro.M1.7f21f99145.20260616.0707'
+    expect(tripDetailFrom(timetable, delayed, metro, MOMENT)?.interval).toEqual({ from: 4, to: 4 })
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.interval).toBeUndefined()
+  })
+
   it('has no answer for a trip not running today', () => {
     expect(tripDetailFrom(timetable, delayed, 'bus.5C.nothing.20260616.0700', MOMENT)).toBe(
       undefined,

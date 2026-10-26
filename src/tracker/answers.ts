@@ -4,6 +4,7 @@
 // reads the snapshot and calls them. The on-demand calls (`on-demand.ts`, `stop-board.ts`) fall
 // back to them.
 import 'server-only'
+import { intervalOf, type Interval } from '../domain/interval.ts'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { MODES, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
@@ -78,16 +79,27 @@ export interface TripCall {
   readonly departure: number
   readonly expectedArrival?: number
   readonly expectedDeparture?: number
+  /** The trip won't call here: the snapshot has the call cancelled. The call stays, marked. */
+  readonly cancelled?: true
 }
 
 export interface TripDetail {
   readonly key: string
   readonly line: string
   readonly mode: Mode
+  /** The line's Perron colour token, such as `perron-color-transit-line-a`. */
+  readonly colour: string
   readonly headsign: string
   readonly pattern: number
   readonly state: SnapshotTrip['state']
   readonly delay?: number
+  /** The whole trip is called off; its calls stay, and so does its panel. */
+  readonly cancelled?: true
+  /**
+   * An interval line's interval at the trip's next stop this hour, which its panel shows in place
+   * of times (ADR 0006); none for any other line, or an hour with under two departures.
+   */
+  readonly interval?: Interval
   readonly fetched: number
   readonly nextDue: number
   readonly source: AnswerSource
@@ -205,9 +217,34 @@ export function stopDeparturesFrom(
   }
 }
 
+const HOUR = 60 * 60_000
+
+/**
+ * How often a Metro trip's line leaves the platform of its next call in the clock hour of `now`,
+ * the trip's direction only, from the planned departures of the service days running then. The
+ * timetable's zone keeps whole-hour offsets, so its clock hours start on the epoch's.
+ */
+function intervalAt(timetable: Timetable, trip: PlannedTrip, now: number): Interval | undefined {
+  if (trip.line.mode !== 'metro') return undefined
+  const next = trip.calls.find((call) => call.departure >= now) ?? trip.calls[0]
+  const departures: number[] = []
+  for (const day of timetable.serviceDaysAt(now)) {
+    for (const each of timetable.tripsOn(day)) {
+      if (each.line.name !== trip.line.name || each.direction !== trip.direction) continue
+      each.calls.forEach((call, i) => {
+        if (i < each.calls.length - 1 && call.platform === next.platform)
+          departures.push(call.departure)
+      })
+    }
+  }
+  const hour = now - (now % HOUR)
+  return intervalOf(departures, hour, hour + HOUR)
+}
+
 /**
  * A trip's calls at a moment, at their timetabled times and, when the snapshot has a delay for
- * it, those times shifted by the delay; undefined for a trip not running today.
+ * it, those times shifted by the delay, with what the snapshot has cancelled marked, and a Metro
+ * trip's interval; undefined for a trip not running today.
  */
 export function tripDetailFrom(
   timetable: Timetable,
@@ -220,14 +257,18 @@ export function tripDetailFrom(
   const { platforms } = timetable.stops
   const live = tripsByKey(snapshot).get(trip.key)
   const expected = withDelay(trip, live?.delay)
+  const interval = intervalAt(timetable, trip, now)
   return {
     key: trip.key,
     line: trip.line.name,
     mode: trip.line.mode,
+    colour: trip.line.colour,
     headsign: trip.headsign,
     pattern: trip.pattern,
     state: live?.state ?? 'timetable-only',
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
+    ...(live?.cancelled ? { cancelled: true as const } : {}),
+    ...(interval ? { interval } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
@@ -243,6 +284,7 @@ export function tripDetailFrom(
             expectedDeparture: expected[index].departure,
           }
         : {}),
+      ...(live?.cancelledCalls?.includes(index) ? { cancelled: true as const } : {}),
     })),
   }
 }
