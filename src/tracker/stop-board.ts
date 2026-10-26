@@ -25,7 +25,7 @@ import {
 } from './answers.ts'
 import { disruptionOf, namesStop, type Disruption, type DisruptionList } from './disruptions.ts'
 import { joinJourney } from './join.ts'
-import type { Called, OnDemand } from './on-demand.ts'
+import { dueBy, type Called, type OnDemand } from './on-demand.ts'
 import type { Departure, DepartureBoardAnswer, Message } from './rejseplanen/answers.ts'
 import type { RejseplanenShape, DepartureBoardQuery } from './rejseplanen/client.ts'
 import type { Timetable } from './timetable.ts'
@@ -232,13 +232,13 @@ export const stopAnswer = (
     const stopIndex = stopIndexOf(timetable, stopId)
     if (stopIndex < 0) return undefined
     const stop = stopOf(timetable, stopIndex)
-    const called = worthACall(stop)
+    const { called, askAgain } = worthACall(stop)
       ? yield* ask(`stop:${stop.id}`, board(boardQuery(timetable, stopIndex)))
-      : undefined
+      : {}
     const now = yield* Clock.currentTimeMillis
     // The timetable's answer only when the board's is missing.
     const answer =
       (called && departuresFromBoard(timetable, snapshot, stopId, called, now)) ||
-      stopDeparturesFrom(timetable, snapshot, stopId)!
+      dueBy(stopDeparturesFrom(timetable, snapshot, stopId)!, askAgain)
     return { ...answer, messages: stopMessages(timetable, stop.id, called?.answer, list) }
   })

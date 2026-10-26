@@ -152,9 +152,13 @@ describe('a trip’s on-demand detail', () => {
       for (const stop of BUSY_STOPS) {
         sources.push((yield* (yield* Tracker).getStopDepartures(stop))?.source.kind)
       }
-      for (const trip of trips) sources.push((yield* detail(trip.key))?.source.kind)
+      const answers = []
+      for (const trip of trips) answers.push((yield* detail(trip.key))!)
+      sources.push(...answers.map((answer) => answer.source.kind))
       expect(sources).toEqual([...Array(10).fill('rejseplanen'), 'timetable'])
       expect(yield* callsOf('journeyDetail')).toBe(5)
+      // Due again when the next minute opens, 07:21, not with the snapshot.
+      expect(answers[5].nextDue).toBeLessThanOrEqual(Date.UTC(2026, 5, 16, 5, 21))
       // The next minute has room again.
       yield* TestClock.adjust('60 seconds')
       expect((yield* detail(trips[5].key))?.source.kind).toBe('rejseplanen')

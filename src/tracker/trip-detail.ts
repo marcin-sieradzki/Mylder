@@ -21,7 +21,7 @@ import {
 } from './answers.ts'
 import { disruptionOf } from './disruptions.ts'
 import { readRef } from './join.ts'
-import type { Called, OnDemand } from './on-demand.ts'
+import { dueBy, type Called, type OnDemand } from './on-demand.ts'
 import type { JourneyDetailAnswer, Message, Stop } from './rejseplanen/answers.ts'
 import type { RejseplanenShape } from './rejseplanen/client.ts'
 import type { Timetable } from './timetable.ts'
@@ -287,10 +287,13 @@ export const tripAnswer = (
     const guess = plannedTrip(timetable, tripKey, now)
     if (!guess) return undefined
     const ref = yield* refOf(guess.key)
-    const called = ref === undefined ? undefined : yield* ask(`trip:${guess.key}`, detail({ ref }))
+    const { called, askAgain } =
+      ref === undefined ? {} : yield* ask(`trip:${guess.key}`, detail({ ref }))
     const answer = called && tripFromDetail(timetable, snapshot, guess, called, now)
-    if (!answer)
-      return tripDetailOf(timetable, snapshot, guess, tripsByKey(snapshot).get(guess.key), now)
+    if (!answer) {
+      const live = tripsByKey(snapshot).get(guess.key)
+      return dueBy(tripDetailOf(timetable, snapshot, guess, live, now), askAgain)
+    }
     // Only a journey with a number can be told apart from the rest of its day.
     const journey = ref === undefined ? undefined : readRef(ref)?.journey
     if (answer.key !== guess.key && journey !== undefined && !journey.startsWith('@')) {
