@@ -40,6 +40,11 @@ const recording = join(process.cwd(), 'recordings', 'weekday')
 const read = (path: string): string => readFileSync(join(recording, path), 'utf8')
 const minute6 = JSON.parse(read('snapshots/0006.json')) as Snapshot
 const aircraft = JSON.parse(read('answers/aircraft/0006.json')) as AircraftSnapshot
+/** The aircraft's server reads the moment it fetched them, as its answer's date header says. */
+const atFetch = (snapshot: AircraftSnapshot) => ({
+  snapshot,
+  clockOffset: aircraft.fetched - Date.now(),
+})
 
 /** The timetable routes as the server answers them on the recording; the snapshot's is down. */
 const routes = async (input: RequestInfo | URL): Promise<Response> => {
@@ -78,7 +83,7 @@ afterEach(() => {
   overlay?.remove()
   overlay = undefined
   liveSnapshot.update({ snapshot: undefined, failingSince: undefined })
-  liveAircraft.update({ snapshot: undefined, off: undefined })
+  liveAircraft.update({ snapshot: undefined, off: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
   window.history.replaceState(null, '', '/')
 })
@@ -111,7 +116,7 @@ describe('the vehicles over the map', () => {
     const container = document.createElement('div')
     overlay = vehicleOverlay(map, container)
     liveSnapshot.update({ snapshot: minute6 })
-    liveAircraft.update({ snapshot: aircraft })
+    liveAircraft.update(atFetch(aircraft))
     await vi.waitFor(() =>
       expect(container.dataset.aircraft).toBe(String(aircraft.aircraft.length)),
     )
@@ -133,8 +138,8 @@ describe('the vehicles over the map', () => {
     await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
     await new Promise((resolve) => requestAnimationFrame(resolve))
     const before = rendered.times
-    liveAircraft.update({ snapshot: aircraft })
-    liveAircraft.update({ snapshot: { ...aircraft, fetched: aircraft.fetched + 1 } })
+    liveAircraft.update(atFetch(aircraft))
+    liveAircraft.update(atFetch({ ...aircraft, fetched: aircraft.fetched + 1 }))
     await new Promise((resolve) => requestAnimationFrame(resolve))
     expect(container.dataset.aircraft).toBe('27')
     expect(rendered.times - before).toBe(1)

@@ -119,7 +119,7 @@ The browser holds the pattern's path and the distance of each stop along it, fro
 
 When a new snapshot lands, each dot's target for the current moment comes from the new timeline. The dot eases from where it is drawn to that target over about one second, along the path when both points are on the same pattern and less than 500 metres apart, and with a short fade and a jump otherwise. A target that lies behind the drawn point by less than 150 metres is treated as jitter: the dot holds still until the new timeline catches up, so vehicles never visibly reverse at a bus stop.
 
-The animation loop runs outside React and feeds the map layer directly; React renders the panels from the snapshot at the poll's pace.
+The animation loop runs outside React and feeds the map layer directly, in the frames of the map's one frame driver (`src/map/frames.ts`), which moves the aircraft too (`docs/aircraft.md`); React renders the panels from the snapshot at the poll's pace.
 
 ### What ages where
 

@@ -1,50 +1,59 @@
-// The aircraft's deck.gl layers (docs/aircraft.md, "The glyph"), drawn above the vehicles in the
-// same overlay: until Perron has the plane glyph (#134), the stand-in is the vehicle dot in a
-// neutral colour, on the same land-coloured halo, with a short tick pointing along the track.
-// Every aircraft is drawn solid where the last answer put it; its data state and its motion
-// between answers come with #129. WebGL is not tested in jsdom.
+// The aircraft as the canvas draws them (docs/aircraft.md, "The browser"), above the vehicles in
+// the same overlay: until Perron has the plane glyph (#134), the stand-in is the vehicle dot in a
+// neutral colour, styled by its data state as a vehicle's is (glyphs.ts), on the same
+// land-coloured halo, with a short tick pointing along its track; an aircraft on the ground is the
+// size of a bus's dot. Laid out as one typed array per attribute, as the vehicles are: the
+// positions are their own array, which the aircraft's motion writes into each frame
+// (aircraft-loop.ts); the glyphs change only with a snapshot, a data state or a theme. WebGL is
+// not tested in jsdom.
 import 'client-only'
 import type { Layer } from '@deck.gl/core'
 import { IconLayer, ScatterplotLayer } from '@deck.gl/layers'
+import type { AircraftState } from '../domain/aircraft-state.ts'
 import type { AircraftSnapshot, SnapshotAircraft } from '../tracker/aircraft/index.ts'
-import { parseColour, type RGBA } from './glyphs.ts'
+import type { AircraftStates } from './aircraft-states.ts'
+import { lookOf, parseColour, sizedGlyph, vehicleTokens, type RGBA } from './glyphs.ts'
 import { numberOf, type Paint } from './paint.ts'
 import type { DrawnKind, Project } from './picking.ts'
+import { VehicleGlyphLayer } from './VehicleGlyphLayer.ts'
 
 /** The layer whose dots a pick finds. */
 export const AIRCRAFT_LAYER = 'aircraft'
 
 const COLOUR = 'perron-color-text-secondary'
 const RADIUS = 'perron-map-dot-radius-regional'
-const HALO = 'perron-vehicle-dot-halo'
-const HALO_COLOUR = 'perron-color-data-state-halo'
+/** On the ground, smaller: the size of a bus's dot. */
+const GROUND_RADIUS = 'perron-map-dot-radius-bus'
 
 /** Every token the aircraft read, for `readPaint`. */
-export const aircraftPaint = (): string[] => [COLOUR, RADIUS, HALO, HALO_COLOUR]
+export const aircraftPaint = (): string[] => [...vehicleTokens(), COLOUR, RADIUS, GROUND_RADIUS]
 
-/** The aircraft as the canvas draws them, in the paint read when they landed. */
+/** The aircraft on the map as the canvas draws them, in the paint read when they landed. */
 export interface DrawnAircraft {
+  readonly length: number
+  /** Each aircraft drawn, in drawing order. */
   readonly aircraft: readonly SnapshotAircraft[]
-  /** Those with a track, which their tick points along. */
-  readonly heading: readonly SnapshotAircraft[]
-  readonly colour: RGBA
-  readonly radius: number
-  readonly halo: { readonly width: number; readonly colour: RGBA }
+  /** The same aircraft by their hexes. */
+  readonly keys: readonly string[]
+  /** Each one's data state now. */
+  readonly states: readonly AircraftState[]
+  /** Longitude and latitude, two per aircraft. */
+  readonly positions: Float64Array
+  readonly radius: Float32Array
+  readonly lineWidth: Float32Array
+  /** Red, green, blue and alpha, four per aircraft. */
+  readonly fill: Uint8ClampedArray
+  readonly line: Uint8ClampedArray
+  readonly cut: Float32Array
+  /** The land-coloured disc under each aircraft. */
+  readonly haloRadius: Float32Array
+  readonly haloColour: RGBA
+  /** Each tick's turn from north, anticlockwise as deck.gl turns an icon, and its size: 0 for none. */
+  readonly tickAngle: Float32Array
+  readonly tickSize: Float32Array
 }
 
 const INK: RGBA = [0, 0, 0, 255]
-
-/** The aircraft of a snapshot, in the paint read now. */
-export function aircraftOf(snapshot: AircraftSnapshot, paint: Paint): DrawnAircraft {
-  const colour = (token: string) => parseColour(paint.get(token) ?? '') ?? INK
-  return {
-    aircraft: snapshot.aircraft,
-    heading: snapshot.aircraft.filter((each) => each.track !== undefined),
-    colour: colour(COLOUR),
-    radius: numberOf(paint, RADIUS),
-    halo: { width: numberOf(paint, HALO), colour: colour(HALO_COLOUR) },
-  }
-}
 
 /** The tick, pointing north from the dot's edge: deck.gl tints it, and turns it to the track. */
 const TICK_SIZE = 32
@@ -56,48 +65,128 @@ const TICK_MAPPING = {
   tick: { x: 0, y: 0, width: TICK_SIZE, height: TICK_SIZE, anchorY: TICK_SIZE / 2, mask: true },
 }
 
-const positionOf = (aircraft: SnapshotAircraft): [number, number] => [aircraft.lon, aircraft.lat]
+/**
+ * The aircraft of a snapshot on the map, each in its state from `states`, the states by the
+ * clock, in the paint read now. An aircraft `states` leaves out has been dropped and isn't drawn.
+ * Each stands at its fix until its motion moves it.
+ */
+export function aircraftOf(
+  snapshot: AircraftSnapshot,
+  paint: Paint,
+  states: AircraftStates,
+): DrawnAircraft {
+  const look = lookOf(paint)
+  const colour = parseColour(paint.get(COLOUR) ?? '') ?? INK
+  const airborne = numberOf(paint, RADIUS)
+  const grounded = numberOf(paint, GROUND_RADIUS)
+  const drawn = snapshot.aircraft.filter((each) => states.has(each.hex))
+  const n = drawn.length
+  const aircraft = {
+    length: n,
+    aircraft: drawn,
+    keys: drawn.map((each) => each.hex),
+    states: drawn.map((each) => states.get(each.hex)!),
+    positions: new Float64Array(n * 2),
+    radius: new Float32Array(n),
+    lineWidth: new Float32Array(n),
+    fill: new Uint8ClampedArray(n * 4),
+    line: new Uint8ClampedArray(n * 4),
+    cut: new Float32Array(n),
+    haloRadius: new Float32Array(n),
+    haloColour: look.halo.colour,
+    tickAngle: new Float32Array(n),
+    tickSize: new Float32Array(n),
+  }
+  drawn.forEach((each, i) => {
+    aircraft.positions.set([each.lon, each.lat], i * 2)
+    const r = each.altitude === 'ground' ? grounded : airborne
+    const glyph = sizedGlyph(aircraft.states[i], r, colour, look)
+    aircraft.radius[i] = glyph.radius
+    aircraft.lineWidth[i] = glyph.lineWidth
+    aircraft.fill.set(glyph.fill, i * 4)
+    aircraft.line.set(glyph.line, i * 4)
+    aircraft.cut[i] = glyph.cut
+    aircraft.haloRadius[i] = r + look.halo.width
+    // deck.gl turns an icon anticlockwise; a track runs clockwise from north.
+    aircraft.tickAngle[i] = -(each.track ?? 0)
+    aircraft.tickSize[i] = each.track === undefined ? 0 : (TICK_SIZE * r) / airborne
+  })
+  return aircraft
+}
 
-/** The layers that draw the aircraft, each dot `radiusScale` times Perron's size. */
+/**
+ * Each set of aircraft's glyph attributes as deck.gl takes them, made once, so a frame or a zoom
+ * uploads only the positions.
+ */
+const binary = new WeakMap<DrawnAircraft, ReturnType<typeof attributesOf>>()
+
+function attributesOf(drawn: DrawnAircraft) {
+  return {
+    haloColour: [...drawn.haloColour] as [number, number, number, number],
+    halos: { getRadius: { value: drawn.haloRadius, size: 1 } },
+    ticks: {
+      getAngle: { value: drawn.tickAngle, size: 1 },
+      getSize: { value: drawn.tickSize, size: 1 },
+      getColor: { value: drawn.line, size: 4 },
+    },
+    glyphs: {
+      getRadius: { value: drawn.radius, size: 1 },
+      getLineWidth: { value: drawn.lineWidth, size: 1 },
+      getFillColor: { value: drawn.fill, size: 4 },
+      getLineColor: { value: drawn.line, size: 4 },
+      getCut: { value: drawn.cut, size: 1 },
+    },
+  }
+}
+
+/**
+ * The layers that draw the aircraft where their positions are now, each dot `radiusScale` times
+ * Perron's size. deck.gl uploads an attribute again only when it is handed a new one, so the
+ * positions are new on every call.
+ */
 export function aircraftLayers(drawn: DrawnAircraft, radiusScale: number): Layer[] {
+  let data = binary.get(drawn)
+  if (!data) binary.set(drawn, (data = attributesOf(drawn)))
+  const { length } = drawn
+  const moving = { getPosition: { value: drawn.positions, size: 2 } }
   return [
-    new ScatterplotLayer<SnapshotAircraft>({
+    new ScatterplotLayer({
       id: 'aircraft-halos',
-      data: drawn.aircraft,
-      getPosition: positionOf,
+      data: { length, attributes: { ...data.halos, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
-      getRadius: drawn.radius + drawn.halo.width,
-      getFillColor: [...drawn.halo.colour],
+      getFillColor: data.haloColour,
       pickable: false,
     }),
-    new IconLayer<SnapshotAircraft>({
+    new IconLayer({
       id: 'aircraft-ticks',
-      data: drawn.heading,
+      data: { length, attributes: { ...data.ticks, ...moving } },
       iconAtlas: TICK,
       iconMapping: TICK_MAPPING,
       getIcon: () => 'tick',
-      getPosition: positionOf,
       sizeUnits: 'pixels',
       sizeScale: radiusScale,
-      getSize: TICK_SIZE,
-      // deck.gl turns an icon anticlockwise; a track runs clockwise from north.
-      getAngle: (aircraft) => -(aircraft.track ?? 0),
-      getColor: [...drawn.colour],
       pickable: false,
     }),
-    new ScatterplotLayer<SnapshotAircraft>({
+    new VehicleGlyphLayer({
       id: AIRCRAFT_LAYER,
-      data: drawn.aircraft,
-      getPosition: positionOf,
+      data: { length, attributes: { ...data.glyphs, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
-      getRadius: drawn.radius,
-      getFillColor: [...drawn.colour],
+      lineWidthUnits: 'pixels',
+      filled: true,
+      stroked: true,
+      antialiasing: true,
       // deck.gl picks within the overlay's picking radius of the pointer (picking.ts).
       pickable: true,
     }),
   ]
+}
+
+/** Where the `i`th aircraft is drawn in the canvas. */
+const drawnAt = (drawn: DrawnAircraft, i: number, project: Project): [number, number] => {
+  const { x, y } = project([drawn.positions[i * 2], drawn.positions[i * 2 + 1]])
+  return [x, y]
 }
 
 const aircraftKinds = new WeakMap<DrawnAircraft, DrawnKind>()
@@ -106,15 +195,11 @@ const aircraftKinds = new WeakMap<DrawnAircraft, DrawnKind>()
 export function aircraftDrawn(drawn: DrawnAircraft): DrawnKind {
   let kind = aircraftKinds.get(drawn)
   if (!kind) {
-    const keys = drawn.aircraft.map((each) => each.hex)
     kind = {
       kind: 'aircraft',
-      keys,
+      keys: drawn.keys,
       picks: AIRCRAFT_LAYER,
-      at: (i: number, project: Project) => {
-        const { x, y } = project(positionOf(drawn.aircraft[i]))
-        return [x, y]
-      },
+      at: (i, project) => drawnAt(drawn, i, project),
       layers: (radiusScale) => aircraftLayers(drawn, radiusScale),
     }
     aircraftKinds.set(drawn, kind)

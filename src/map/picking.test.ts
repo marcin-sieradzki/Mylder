@@ -7,6 +7,7 @@ import type { Snapshot } from '../tracker/index.ts'
 import { readPaint } from './paint.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import { aircraftDrawn, aircraftOf, aircraftPaint } from './AircraftGlyphLayer.ts'
+import { aircraftStatesAt } from './aircraft-states.ts'
 import { dotPicking, pickedStore } from './picking.ts'
 import { tripsDrawn, vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf } from './vehicles.ts'
@@ -27,7 +28,11 @@ const aircraftSnapshot = JSON.parse(
     'utf8',
   ),
 ) as AircraftSnapshot
-const aircraft = aircraftOf(aircraftSnapshot, readPaint(document.documentElement, aircraftPaint()))
+const aircraft = aircraftOf(
+  aircraftSnapshot,
+  readPaint(document.documentElement, aircraftPaint()),
+  aircraftStatesAt(aircraftSnapshot, aircraftSnapshot.fetched),
+)
 /** Both kinds as the overlay draws them, the aircraft above the vehicles. */
 const drawn = [tripsDrawn(vehicles), aircraftDrawn(aircraft)]
 const A_LIVE = 's-tog.A.0bc307e3eb.20260616.0707'
