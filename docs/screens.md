@@ -128,7 +128,7 @@ Opened from the top bar's About button and from the corner credit. It holds the 
 - The page's status, from the snapshot: the position mode, Rejseplanen's own realtime time (`planRtTs`, shown here and used nowhere else), the budget level and the calls used this month, whether the server store is available (and when not, that no trip can be Ageing or No signal until it returns), the disruption list's last check, and the budget line when the poll has stretched.
 - The keys: + and − zoom, arrows pan, Esc closes panels, with the pause control named.
 
-**Built from:** Dialog, Kbd, Link, Text.
+**Built from:** Dialog, Section, FactList, VehicleDotLabel, Kbd, Link, Text.
 
 ## Sources and times on every screen
 
