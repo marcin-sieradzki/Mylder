@@ -139,5 +139,5 @@ _Avoid_: Offline, No signal (for the page)
 ## Disruptions
 
 **Disruption**:
-One of Rejseplanen's messages about the network that belongs to Copenhagen, shown in its own words and language. Active from its start until its end; Later when it starts within the next 7 days. Its kind is Planned works when it starts later or spans more than a day, else what its fields say.
+One of Rejseplanen's messages about the network that belongs to Copenhagen, shown in its own words and language. It is active from its start until its end, and listed under Later when it starts within the next 7 days.
 _Avoid_: Alert, incident, notice

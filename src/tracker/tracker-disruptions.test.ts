@@ -172,6 +172,39 @@ describe('the tracker’s disruption list', () => {
     ),
   )
 
+  it.effect('keeps the same version for the same answer after a message starts', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const before = yield* (yield* Tracker).getDisruptions
+      // Past the message's 07:30 start, and past the next fetch.
+      yield* watch(16, 60)
+      const after = yield* (yield* Tracker).getDisruptions
+      expect(after.checked).toBeGreaterThan(before.checked!)
+      expect(after.version).toBe(before.version)
+      expect(after.messages).toEqual(before.messages)
+    }).pipe(
+      Effect.provide(
+        tracker(
+          himsearchAnswering((request) =>
+            Http.json(request, 200, {
+              serverVersion: '2.0',
+              dialectVersion: '2.0',
+              Message: [
+                message('starts-soon', {
+                  affectedStops: { StopLocation: [stop('8600626')] },
+                  sDate: '2026-06-16',
+                  sTime: '07:30:00',
+                  eDate: '2026-06-16',
+                  eTime: '09:00:00',
+                }),
+              ],
+            }),
+          ),
+        ),
+      ),
+    ),
+  )
+
   it.effect('serves an empty list before the first fetch, with no check failed', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)

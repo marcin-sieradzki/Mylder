@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { disruptionKind, disruptionPhase, type Disruption } from './disruption'
+import { disruptionKind, disruptionPhase, type DisruptionFacts } from './disruption'
 
 // 08:00 in Copenhagen on Monday 2026-10-26.
 const NOW = Date.UTC(2026, 9, 26, 7)
 const HOUR = 3600_000
 const DAY = 24 * HOUR
 
-const signalFault: Disruption = {
+const signalFault: DisruptionFacts = {
   fieldsKind: 'delays',
   from: NOW - HOUR,
   to: NOW + 2 * HOUR,
-  message: { act: true },
+  act: true,
 }
 
 describe('a disruption’s kind', () => {
@@ -31,9 +31,15 @@ describe('a disruption’s kind', () => {
   })
 
   it('is what its fields say when Rejseplanen gives no times', () => {
-    expect(disruptionKind({ fieldsKind: 'service-notice', message: {} }, NOW)).toBe(
-      'service-notice',
-    )
+    expect(disruptionKind({ fieldsKind: 'service-notice' }, NOW)).toBe('service-notice')
+  })
+
+  it('is Planned works when Rejseplanen gives no times and flags it inactive', () => {
+    expect(disruptionKind({ fieldsKind: 'delays', act: false }, NOW)).toBe('planned-works')
+  })
+
+  it('is what its fields say with only an end', () => {
+    expect(disruptionKind({ fieldsKind: 'delays', to: NOW + DAY * 3 }, NOW)).toBe('delays')
   })
 })
 
@@ -61,8 +67,8 @@ describe('a disruption’s phase', () => {
   })
 
   it('follows Rejseplanen’s own active flag when it gives no times', () => {
-    expect(disruptionPhase({ fieldsKind: 'delays', message: { act: true } }, NOW)).toBe('active')
-    expect(disruptionPhase({ fieldsKind: 'delays', message: {} }, NOW)).toBe('active')
-    expect(disruptionPhase({ fieldsKind: 'delays', message: { act: false } }, NOW)).toBe('later')
+    expect(disruptionPhase({ fieldsKind: 'delays', act: true }, NOW)).toBe('active')
+    expect(disruptionPhase({ fieldsKind: 'delays' }, NOW)).toBe('active')
+    expect(disruptionPhase({ fieldsKind: 'delays', act: false }, NOW)).toBe('later')
   })
 })

@@ -11,26 +11,32 @@ export type DisruptionKind =
 export type DisruptionPhase = 'active' | 'later'
 
 /** What the rule reads of one of Rejseplanen's messages. */
-export interface Disruption {
+export interface DisruptionFacts {
   /** The kind its structured fields say, or Service notice when they say none. */
   readonly fieldsKind: DisruptionKind
   /** Its validity, when Rejseplanen gives it. */
   readonly from?: number
   readonly to?: number
   /** Rejseplanen's own active flag, which decides only when it gives no times. */
-  readonly message: { readonly act?: boolean }
+  readonly act?: boolean
 }
 
+const DAY = 24 * 3600_000
+
 /** A message that runs longer than this is Planned works, whatever its fields say. */
-const PLANNED_LONGER_THAN = 24 * 3600_000
+const PLANNED_LONGER_THAN = DAY
 
 /** How far ahead "Later" looks. */
-const LATER_WITHIN = 7 * 24 * 3600_000
+const LATER_WITHIN = 7 * DAY
 
-/** The kind its card names: Planned works when it starts after now or spans more than a day. */
-export function disruptionKind(disruption: Disruption, now: number): DisruptionKind {
+/**
+ * The kind its card names: Planned works when it starts after now (or, with no times, when
+ * Rejseplanen flags it inactive) or spans more than a day.
+ */
+export function disruptionKind(disruption: DisruptionFacts, now: number): DisruptionKind {
   const { from, to } = disruption
   if (from !== undefined && from > now) return 'planned-works'
+  if (from === undefined && to === undefined && disruption.act === false) return 'planned-works'
   if (from !== undefined && to !== undefined && to - from > PLANNED_LONGER_THAN) {
     return 'planned-works'
   }
@@ -42,10 +48,13 @@ export function disruptionKind(disruption: Disruption, now: number): DisruptionK
  * within the next 7 days, else not at all. With no times, Rejseplanen's flag decides, and a
  * message it flags inactive goes under Later.
  */
-export function disruptionPhase(disruption: Disruption, now: number): DisruptionPhase | undefined {
+export function disruptionPhase(
+  disruption: DisruptionFacts,
+  now: number,
+): DisruptionPhase | undefined {
   const { from, to } = disruption
   if (from === undefined && to === undefined) {
-    return disruption.message.act === false ? 'later' : 'active'
+    return disruption.act === false ? 'later' : 'active'
   }
   if (to !== undefined && now >= to) return undefined
   if (from === undefined || from <= now) return 'active'

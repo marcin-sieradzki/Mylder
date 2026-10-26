@@ -6,7 +6,7 @@
 // run in `tracker.ts` decides when to fetch.
 import 'server-only'
 import { createHash } from 'node:crypto'
-import type { Disruption as DisruptionRule, DisruptionKind } from '../domain/disruption.ts'
+import type { DisruptionFacts, DisruptionKind } from '../domain/disruption.ts'
 import type { Stops } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { Message } from './rejseplanen/answers.ts'
@@ -24,7 +24,7 @@ const KIND_RULES: readonly {
 }[] = []
 
 /** One message as Rejseplanen sent it, with its fields' kind and its validity. */
-export interface Disruption extends DisruptionRule {
+export interface Disruption extends DisruptionFacts {
   readonly message: Message
 }
 
@@ -63,7 +63,7 @@ export function inArea(message: Message, { stops, products }: Area): boolean {
 }
 
 /** A message's kind from its structured fields only: what the table says, else a service notice. */
-export function fieldsKindOf(message: Message): DisruptionKind {
+function fieldsKindOf(message: Message): DisruptionKind {
   const rule = KIND_RULES.find(
     ({ category, priority }) =>
       (category === undefined || category === message.category) &&
@@ -84,6 +84,7 @@ function disruptionOf(message: Message, timezone: string): Disruption {
     fieldsKind: fieldsKindOf(message),
     ...(from === undefined ? {} : { from }),
     ...(to === undefined ? {} : { to }),
+    ...(message.act === undefined ? {} : { act: message.act }),
     message,
   }
 }
