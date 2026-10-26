@@ -3,8 +3,8 @@
 // carries its own position's age and how the position was found, so the rule needs no history.
 // The server runs it at fetch time to set each aircraft's state, and the browser runs it again
 // from the same fields and the clock. Times are milliseconds since the epoch; ages and the poll
-// interval are seconds, as the aircraft snapshot carries them. Every threshold is provisional
-// until the real recording (#135) measures the feed.
+// interval are seconds, as the aircraft snapshot carries them. The thresholds hold against the
+// feed as recorded on 26 October 2026 (docs/aircraft.md, "Measured").
 import type { DataState } from './data-state.ts'
 
 /** An aircraft's data state: the trips' states but Timetable only, which never applies to it. */

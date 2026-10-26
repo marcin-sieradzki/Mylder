@@ -96,7 +96,7 @@ If the first calls with the key return Metro positions, or Metro departures with
 
 ## Aircraft
 
-The aircraft over Copenhagen (`docs/aircraft.md`) carry the same words, but never Timetable only: an aircraft has no timetable. Each one arrives with its own position's age and how the position was found, so its state needs no history, and one pure rule, `aircraftState` in `src/domain/aircraft-state.ts`, decides it on the server at fetch time and again in the browser by the clock. Its thresholds are first guesses until the real recording (#135) measures the feed.
+The aircraft over Copenhagen (`docs/aircraft.md`) carry the same words, but never Timetable only: an aircraft has no timetable. Each one arrives with its own position's age and how the position was found, so its state needs no history, and one pure rule, `aircraftState` in `src/domain/aircraft-state.ts`, decides it on the server at fetch time and again in the browser by the clock. Its thresholds hold against the feed as recorded on 26 October 2026 (`docs/aircraft.md`, "Measured"): a tenth of broadcast positions were over 20 s old, and none over readsb's own 60 s.
 
 | Data state | When                                                                       | Label                                | Map glyph           |
 | ---------- | -------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
