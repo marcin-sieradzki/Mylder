@@ -1,11 +1,12 @@
 // The route handlers' answers, built here so the routes in `app/api/` stay one line each: each
 // carries the CDN header for its snapshot, read on the tracker's own clock, which a recording
 // sets. A snapshot that can't be built at all, because the timetable can't be read, is a 503.
+// Their core, `cdnAnswer`, takes any value with a next due, so another feed answers the same way.
 // The timetable files the browser loads come from the folder the tracker's timetable is read
 // from, each version kept for good.
 import 'server-only'
 import { Effect } from 'effect'
-import { cacheHeaders, RETRY_AFTER } from './caching.ts'
+import { cacheHeaders, RETRY_AFTER, TRACKER_STALE, type StalePolicy } from './caching.ts'
 import { runTracker, timetableDirOf, type RunTracker } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
 import {
@@ -31,27 +32,48 @@ export const notFound = (what: string) =>
     { status: 404, headers: { 'Cache-Control': 'no-store' } },
   )
 
+/** A value due again at its `nextDue`, or none, and the moment it was read on. */
+export interface Reading<A extends { readonly nextDue: number }> {
+  readonly value: A | undefined
+  readonly now: number
+}
+
+/**
+ * Answers with the value `produce` reads, held by the CDN until it is due and then served stale
+ * as `stale` says, or 404 when there is none, or 503 when `produce` fails. Its date header is
+ * the moment the value was read, which the browser takes as the server's clock.
+ */
+export async function cdnAnswer<A extends { readonly nextDue: number }>(
+  what: string,
+  produce: () => Promise<Reading<A>>,
+  stale: StalePolicy,
+): Promise<Response> {
+  try {
+    const { value, now } = await produce()
+    if (!value) return notFound(what)
+    return Response.json(value, {
+      headers: { ...cacheHeaders(value.nextDue, now, stale), Date: new Date(now).toUTCString() },
+    })
+  } catch (error) {
+    return unavailable(error)
+  }
+}
+
 /** The tracker's four answers, each run by `run`: this instance's runtime, or the demo's (ADR 0013). */
 export function trackerAnswers(run: RunTracker) {
   /**
-   * Answers with a value due again at its `nextDue`, or 404 when there is none. Its date header is
-   * the tracker's clock, which the browser takes as the server's: under a recording, the
-   * recording's moment.
+   * Answers with what `get` reads from the tracker, dated on the tracker's clock: under a
+   * recording, the recording's moment.
    */
-  async function answer<A extends { readonly nextDue: number }>(
+  const answer = <A extends { readonly nextDue: number }>(
     what: string,
     get: (tracker: TrackerShape) => Effect.Effect<A | undefined>,
-  ): Promise<Response> {
-    try {
-      const [value, now] = await run((tracker) => Effect.all([get(tracker), tracker.now]))
-      if (!value) return notFound(what)
-      return Response.json(value, {
-        headers: { ...cacheHeaders(value.nextDue, now), Date: new Date(now).toUTCString() },
-      })
-    } catch (error) {
-      return unavailable(error)
-    }
-  }
+  ): Promise<Response> =>
+    cdnAnswer(
+      what,
+      () => run((tracker) => Effect.all({ value: get(tracker), now: tracker.now })),
+      TRACKER_STALE,
+    )
 
   return {
     snapshot: () => answer('snapshot', (tracker) => tracker.getSnapshot),
