@@ -19,6 +19,15 @@ export function daysBetween(from: IsoDate, to: IsoDate): number {
   return Math.round((utc(to) - utc(from)) / DAY)
 }
 
+/** Under this many days of service left, a timetable is running out, and the page says so. */
+export const RUNNING_OUT_DAYS = 7
+
+/** The days of service a timetable covering up to `last` has left on `day`, that day counted. */
+export function serviceDaysLeft(last: IsoDate, day: IsoDate): number {
+  // On its last covered day, a timetable has one day left.
+  return Math.max(daysBetween(day, last) + 1, 0)
+}
+
 /** 0 for Monday to 6 for Sunday, as GTFS orders the week. */
 export function weekday(date: IsoDate): number {
   return (new Date(utc(date)).getUTCDay() + 6) % 7

@@ -12,6 +12,7 @@
   },
   "topBar": {
     "updated": "Updated {time}",
+    "updatedPaused": "Updated {time}, paused",
     "modes": "Modes",
     "about": "About Mylder"
   },
@@ -44,6 +45,22 @@
   "credit": {
     "transitData": "Transit data",
     "openStreetMap": "OpenStreetMap contributors"
+  },
+  "notices": {
+    "disconnected": "No connection since {since}. Vehicles move on the last data from {data}.",
+    "disconnectedNoData": "No connection since {since}.",
+    "noAnswer": "Rejseplanen hasn't answered since {since}.",
+    "spent": "Live data is paused until {date}: this month's calls are used up.",
+    "spentNoDate": "Live data is paused: this month's calls are used up.",
+    "budget": "Updating every {interval} to stay within the data budget.",
+    "timetableEnds": "The timetable ends on {date}. Without a new one, the map has no trips after that.",
+    "timetableEnded": "The timetable ended on {date}. Without a new one, the map has no trips to show.",
+    "simulated": "Simulated data: vehicles and times are made up from the timetable.",
+    "recorded": "Recorded data from {date}."
+  },
+  "interval": {
+    "seconds": "{n} s",
+    "minutes": "{n} min"
   },
   "about": {
     "title": "About Mylder",
@@ -91,7 +108,6 @@
       },
       "calls": "Calls this month",
       "paused": "Live data is paused until {date}: this month's calls are used up.",
-      "budgetLine": "Updating every {interval} to stay within the data budget.",
       "store": "Server store",
       "storeOk": "Available",
       "storeUnavailable": "Unavailable: no vehicle can be Ageing or No signal until it returns.",
