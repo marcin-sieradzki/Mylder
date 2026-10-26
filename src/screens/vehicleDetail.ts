@@ -30,10 +30,12 @@ export const timedCallsOf = (detail: TripDetail): TimedCall[] =>
 
 /**
  * The trip's delay in seconds, as its panel gives it: Rejseplanen's own at the next call, from the
- * trip's detail, else the snapshot's.
+ * trip's detail, else the answer's snapshot's, else the snapshot's now, which may be newer.
  */
-export const delayOf = (detail: TripDetail): number | undefined =>
-  detail.nextCallDelay ?? detail.delay
+export const shownDelayOf = (
+  detail: TripDetail,
+  trip: SnapshotTrip | undefined,
+): number | undefined => detail.nextCallDelay ?? detail.delay ?? trip?.delay
 
 /** A delay in seconds as whole minutes with their sign, "+3 min", "−1 min" or "0 min". */
 function signedMinutes(delay: number, words: Words): string {
@@ -71,7 +73,7 @@ export function stateSentence({ detail, trip, state, timezone, words }: StateInp
     }
     case 'estimated': {
       if (trip?.source === 'computed') return words.computed
-      const delay = delayOf(detail) ?? 0
+      const delay = shownDelayOf(detail, trip) ?? 0
       return fill(words.estimatedDelay, { delay: signedMinutes(delay, words) })
     }
     case 'timetable-only':

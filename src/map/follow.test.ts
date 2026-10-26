@@ -107,24 +107,24 @@ describe('the followed trip', () => {
   })
 })
 
+/** A map whose camera stands at Kastrup until Follow moves it. */
+const stillMap = () => {
+  const camera = { centre: [12.65, 55.62] as [number, number] }
+  const map: FollowMap = {
+    jumpTo: ({ center }) => {
+      camera.centre = center as [number, number]
+      return map as never
+    },
+    isMoving: () => false,
+    scrollZoom: { enable: () => undefined } as unknown as FollowMap['scrollZoom'],
+    on: () => map as never,
+    off: () => map as never,
+  }
+  return { map, camera }
+}
+
 describe('Follow on a map whose dots stand still', () => {
   afterEach(() => openPanel(undefined))
-
-  /** A map whose camera stands at Kastrup until Follow moves it. */
-  const stillMap = () => {
-    const camera = { centre: [12.65, 55.62] as [number, number] }
-    const map: FollowMap = {
-      jumpTo: ({ center }) => {
-        camera.centre = center as [number, number]
-        return map as never
-      },
-      isMoving: () => false,
-      scrollZoom: { enable: () => undefined } as unknown as FollowMap['scrollZoom'],
-      on: () => map as never,
-      off: () => map as never,
-    }
-    return { map, camera }
-  }
 
   it('moves the camera onto the dot as Follow starts, with no frame to come', () => {
     const { map, camera } = stillMap()
@@ -136,6 +136,50 @@ describe('Follow on a map whose dots stand still', () => {
     openPanel({ kind: 'trip', id: METRO })
     follow.start(METRO)
     expect(camera.centre).toEqual([12.5857, 55.6795])
+    followed.remove()
+  })
+})
+
+describe('Follow started on a trip the loop has not drawn yet', () => {
+  afterEach(() => openPanel(undefined))
+
+  /** The trip a corrected join files the followed vehicle under, in the next snapshot. */
+  const LATER = 's-tog.A.0bc307e3eb.20260616.0717'
+  /** The next snapshot's dots: the vehicle as `LATER`, at Østerport. */
+  const next = {
+    keys: [LATER, METRO],
+    positions: new Float64Array([12.5878, 55.6926, 12.586, 55.68]),
+  }
+
+  it('waits for the dots that carry it, then moves onto it', () => {
+    const { map, camera } = stillMap()
+    const follow = followStore(mapView)
+    const followed = followCamera(map, document.createElement('div'), follow)
+    followed.frame(drawn as never, () => undefined)
+    openPanel({ kind: 'trip', id: LATER })
+    follow.start(LATER)
+    // The loop draws the snapshot before, which lacks it, once more.
+    followed.frame(drawn as never, () => undefined)
+    expect(follow.get()).toBe(LATER)
+    expect(camera.centre).toEqual([12.65, 55.62])
+    followed.frame(next as never, () => undefined)
+    expect(follow.get()).toBe(LATER)
+    expect(camera.centre).toEqual([12.5878, 55.6926])
+    followed.remove()
+  })
+
+  it('ends once newer dots are drawn without it', () => {
+    const { map } = stillMap()
+    const follow = followStore(mapView)
+    const followed = followCamera(map, document.createElement('div'), follow)
+    followed.frame(drawn as never, () => undefined)
+    openPanel({ kind: 'trip', id: LATER })
+    follow.start(LATER)
+    followed.frame(
+      { keys: [METRO], positions: new Float64Array([12.586, 55.68]) } as never,
+      () => undefined,
+    )
+    expect(follow.get()).toBeUndefined()
     followed.remove()
   })
 })

@@ -52,20 +52,66 @@ describe('the join’s corrections', () => {
     }),
   )
 
-  it.effect('keeps a journey’s first correction, and a day’s for two days', () =>
+  it.effect('takes a journey’s latest correction, and keeps a day’s for two days', () =>
     Effect.gen(function* () {
       const corrections = correctionsIn(yield* memoryStore(), key)
       yield* corrections.keep('2026-06-16', '300@160626', 'bus.5C.a.20260616.0707')
       yield* corrections.keep('2026-06-16', '300@160626', 'bus.5C.b.20260616.0717')
       expect(yield* corrections.read(['2026-06-16'])).toEqual({
-        '300@160626': 'bus.5C.a.20260616.0707',
+        '300@160626': 'bus.5C.b.20260616.0717',
       })
       yield* TestClock.adjust('47 hours')
       expect(yield* corrections.read(['2026-06-16'])).toEqual({
-        '300@160626': 'bus.5C.a.20260616.0707',
+        '300@160626': 'bus.5C.b.20260616.0717',
       })
       yield* TestClock.adjust('1 hour')
       expect(yield* corrections.read(['2026-06-16'])).toEqual({})
+    }),
+  )
+
+  it.effect('keeps a correction the store failed to keep once, when it is made again', () =>
+    Effect.gen(function* () {
+      const memory = yield* memoryStore()
+      let failures = 1
+      const failingOnce: StoreShape = {
+        ...memory,
+        set: (k, value, seconds) =>
+          failures-- > 0 ? Effect.die(new Error('store down')) : memory.set(k, value, seconds),
+      }
+      const corrections = correctionsIn(failingOnce, key)
+      const keep = corrections.keep('2026-06-16', '400@160626', 'bus.5C.a.20260616.0707')
+      yield* Effect.exit(keep)
+      yield* keep
+      expect(yield* corrections.read(['2026-06-16'])).toEqual({
+        '400@160626': 'bus.5C.a.20260616.0707',
+      })
+    }),
+  )
+
+  it.effect('keeps at most 100 corrections a day', () =>
+    Effect.gen(function* () {
+      const corrections = correctionsIn(yield* memoryStore(), key)
+      for (let n = 1; n <= 101; n++) {
+        yield* corrections.keep('2026-06-16', `${n}@160626`, `bus.5C.${n}.20260616.0707`)
+      }
+      const read = yield* corrections.read(['2026-06-16'])
+      expect(Object.keys(read)).toHaveLength(100)
+      expect(read['100@160626']).toBe('bus.5C.100.20260616.0707')
+      expect(read['101@160626']).toBeUndefined()
+    }),
+  )
+
+  it.effect('keeps a trip opened again and again once, leaving room for the day’s others', () =>
+    Effect.gen(function* () {
+      const corrections = correctionsIn(yield* memoryStore(), key)
+      for (let n = 1; n <= 150; n++) {
+        yield* corrections.keep('2026-06-16', '500@160626', 'bus.5C.a.20260616.0707')
+      }
+      yield* corrections.keep('2026-06-16', '600@160626', 'bus.5C.b.20260616.0717')
+      expect(yield* corrections.read(['2026-06-16'])).toEqual({
+        '500@160626': 'bus.5C.a.20260616.0707',
+        '600@160626': 'bus.5C.b.20260616.0717',
+      })
     }),
   )
 })

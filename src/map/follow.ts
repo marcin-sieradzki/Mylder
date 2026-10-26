@@ -1,8 +1,8 @@
 // Follow, from vehicle detail (docs/screens.md, "Vehicle detail"): the camera stays on one trip's
 // dot, moved there as Follow starts and from the animation loop each frame it draws, outside
-// React, so the page renders again only when Follow starts or ends. It ends when the trip reaches its last stop or leaves
-// the map, when the viewer pans, and when the trip's panel closes. A zoom keeps it: the camera
-// zooms on the dot.
+// React, so the page renders again only when Follow starts or ends. It ends when the trip reaches
+// its last stop or leaves the map, when the viewer pans, and when the trip's panel closes. A zoom
+// keeps it: the camera zooms on the dot.
 import 'client-only'
 import type { Map as MapLibreMap, MapLibreEvent } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
@@ -145,18 +145,27 @@ export function followCamera(
   window.addEventListener('pointercancel', release)
   /** The dots as the loop last drew them, which a still map keeps until the next snapshot. */
   let last: { drawn: Vehicles; along: (key: string) => Along | undefined } | undefined
+  /**
+   * The dots drawn as Follow started, which may lack the followed trip: a panel that moves with
+   * its vehicle starts Follow on the trip a newer snapshot files it under, before the loop has
+   * drawn that snapshot. Frames of these dots don't end Follow; the first of newer dots does,
+   * when it lacks the trip.
+   */
+  let startedOn: Vehicles | undefined
   const onto = (drawn: Vehicles, along: (key: string) => Along | undefined) => {
     const key = store.get()
     // A zoom under way carries on about the centre, where the dot is.
     if (key === undefined || held || map.isMoving()) return
     const target = followTarget(drawn, key, along(key))
-    if (!target) return store.stop()
+    if (!target) return drawn === startedOn ? undefined : store.stop()
+    startedOn = undefined
     map.jumpTo({ center: target.centre })
     if (target.arrived) store.stop()
   }
   // While following, the wheel zooms on the dot at the centre rather than on the pointer. Follow
   // starts on the dot where it was last drawn, as dots that stand still draw no frame to come.
   const onFollow = () => {
+    startedOn = last?.drawn
     if (store.get() === undefined) return map.scrollZoom.enable()
     map.scrollZoom.enable({ around: 'center' })
     if (last) onto(last.drawn, last.along)

@@ -447,7 +447,8 @@ function intervalAt(timetable: Timetable, trip: PlannedTrip, now: number): Inter
   const last = trip.calls.length - 1
   if (trip.calls[last].arrival < now) return undefined
   const next = trip.calls.findIndex((call, i) => i < last && call.departure >= now)
-  const from = trip.calls[next < 0 ? last - 1 : next]
+  // The timetable's build refuses a pattern of fewer than two stops; a lone call is its own.
+  const from = trip.calls[next < 0 ? Math.max(last - 1, 0) : next]
   const stopIndex = timetable.stops.platforms[from.platform].stop
   const calls = callsAt(timetable, stopIndex, now)
   return intervalAtStop(timetable, calls, trip.line.name, trip.direction, now)

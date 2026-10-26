@@ -227,6 +227,20 @@ describe("a vehicle's detail", () => {
     expect(fact(trip, 'Delay')).toHaveTextContent('+5 min')
   })
 
+  it('gives the snapshot’s delay in its estimate and its facts while its answer has none', async () => {
+    const updated = withTrip(minute2, BUS_ESTIMATED, {
+      source: 'timetable',
+      updated: minute2.fetched,
+      delay: 180,
+    })
+    // An answer made against an earlier snapshot, which gave the trip no delay yet.
+    const { delay: _, ...undelayed } = saved(BUS_ESTIMATED)
+    answers.set(BUS_ESTIMATED, undelayed)
+    openTrip('en', BUS_ESTIMATED, updated)
+    const trip = await panel(/to Husum Torv/, 'Estimated from the timetable and a delay of +3 min')
+    expect(fact(trip, 'Delay')).toHaveTextContent('+3 min')
+  })
+
   it('says a Timetable only trip has no realtime, and where it waits to leave', async () => {
     openTrip('en', BUS_WAITING, minute6)
     const trip = await panel(
@@ -377,6 +391,23 @@ describe("a vehicle's detail from its trip's detail", () => {
       'aria-pressed',
       'true',
     )
+  })
+
+  it('keeps to the vehicle opened when its journey has no number, which another trip may share', async () => {
+    // A journey Rejseplanen gave no number tells its vehicle from none of its day's others.
+    const numberless = withTrip(withTrip(minute2, A_LIVE, { journey: '@160626' }), A_LATER, {
+      journey: '@160626',
+    })
+    openTrip('en', A_LIVE, numberless)
+    await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    // The next snapshot no longer carries the vehicle's journey; the other trip's is the same.
+    act(() =>
+      liveSnapshot.update({
+        snapshot: withTrip(numberless, A_LIVE, { journey: undefined }),
+        clockOffset: 0,
+      }),
+    )
+    expect(window.location.search).toBe(`?trip=${A_LIVE}`)
   })
 
   it('says the same in Danish', async () => {

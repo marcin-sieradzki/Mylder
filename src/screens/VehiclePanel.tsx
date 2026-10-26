@@ -30,10 +30,10 @@ import { Messages } from './Messages'
 import { useServerSecond } from './useServerSecond'
 import { VehicleActions } from './VehicleActions'
 import {
-  delayOf,
   intervalWords,
   nextCallOf,
   runsToInterval,
+  shownDelayOf,
   stateSentence,
   timedCallsOf,
   timelineStops,
@@ -112,13 +112,15 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
 /**
  * Keeps the open panel on the vehicle the viewer opened, by its journey: when a snapshot no longer
  * files that journey under the panel's trip but under another, the address, and Follow if it was
- * on, move to that trip.
+ * on, move to that trip. Only a journey with a number (`ZI@DA`, not `@DA`) is kept to, since only
+ * that one tells its vehicle from the rest of its day, as the server's corrections of the join do.
  */
 function useKeptVehicle(tripKey: string, snapshot: Snapshot | undefined) {
   const opened = useRef<{ readonly tripKey: string; readonly journey: string }>(undefined)
   useEffect(() => {
     const trips = snapshot?.trips ?? []
-    const journey = trips.find((each) => each.key === tripKey)?.journey
+    const filed = trips.find((each) => each.key === tripKey)?.journey
+    const journey = filed?.startsWith('@') ? undefined : filed
     const kept = opened.current?.tripKey === tripKey ? opened.current.journey : undefined
     const moved =
       kept === undefined || journey === kept
@@ -175,7 +177,7 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
   const along = answer.planned === undefined ? trip : undefined
   const next = nextCallOf(answer, along, now)
   const live = state === 'live' || state === 'ageing'
-  const delaySeconds = delayOf(answer)
+  const delaySeconds = shownDelayOf(answer, trip)
   // The messages listed now, from the trip's detail, and the moment it was called.
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   const messages =
