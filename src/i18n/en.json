@@ -117,5 +117,19 @@
   "pulse": {
     "onTheMove": "On the move",
     "inService": "of {total} in service"
+  },
+  "disruptions": {
+    "active": "Active now",
+    "later": "Later",
+    "more": "More",
+    "inDanish": "From Rejseplanen, in Danish",
+    "loading": "Loading messages from Rejseplanen…",
+    "checked": "Messages from Rejseplanen, checked {time}.",
+    "notChecked": "Messages from Rejseplanen, not checked yet.",
+    "every": "Checked every {minutes} min while the map is open.",
+    "lastChecked": "Last checked {time}; the latest check failed.",
+    "failed": "Messages from Rejseplanen: the latest check failed.",
+    "outOfDate": "May be out of date.",
+    "incomplete": "Rejseplanen sends at most 100 messages, so the list may be incomplete."
   }
 }

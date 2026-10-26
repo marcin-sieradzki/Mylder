@@ -8,6 +8,7 @@ import { onMap } from '../map/vehicles'
 import { isTab, mapView, SHEET_TABS, useHiddenModes, useSheetTab, type SheetTab } from '../map/view'
 import { CityPulse } from './CityPulse'
 import styles from './CitySheet.module.css'
+import { DisruptionList } from './DisruptionList'
 import { usePhone } from './usePhone'
 
 interface CitySheetProps {
@@ -21,11 +22,11 @@ interface CitySheetProps {
   opener: RefObject<HTMLButtonElement | null>
 }
 
-// The Vehicles list (#76) and Disruptions (#77) fill their tabs in their own tickets.
+// The Vehicles list (#76) fills its tab in its own ticket.
 const PANELS: Record<SheetTab, ReactNode> = {
   pulse: <CityPulse />,
   vehicles: null,
-  disruptions: null,
+  disruptions: <DisruptionList />,
 }
 
 /**

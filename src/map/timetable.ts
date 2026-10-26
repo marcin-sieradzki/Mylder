@@ -16,7 +16,8 @@ export interface TimetableLoader {
   version(version: string): Promise<Network>
 }
 
-const fetchFromServer: FetchJson = async (path) => {
+/** Reads a route's JSON from the page's own server. */
+export const fetchFromServer: FetchJson = async (path) => {
   const response = await fetch(path)
   if (!response.ok) throw new Error(`${response.status} for ${path}`)
   return response.json()

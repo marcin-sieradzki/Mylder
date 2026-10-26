@@ -1,0 +1,54 @@
+/* The Disruptions tab: Running normally, the cards active now, Later, then the footer. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-400);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-300);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cards p {
+  margin: 0;
+}
+
+.later {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-200);
+}
+
+.later h3 {
+  margin: 0;
+}
+
+/* The full text behind "More", and the modes as tags, under the lead. */
+.more {
+  margin-block: var(--perron-space-100);
+}
+
+.modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--perron-space-100);
+  margin: var(--perron-space-150) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-050);
+}
+
+.footer p,
+p.footer {
+  margin: 0;
+}
