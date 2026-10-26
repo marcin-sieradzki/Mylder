@@ -24,6 +24,7 @@ import { OpenTrip } from './OpenTrip'
 import { Messages } from './Messages'
 import styles from './StopPanel.module.css'
 import { useServerSecond } from './useServerSecond'
+import { fill } from './vehicleLabel'
 
 type Words = ClientDictionary['stop']
 
@@ -241,10 +242,9 @@ function Departure({ row, state, now, timezone, words }: DepartureProps) {
         {...(row.track === undefined
           ? {}
           : {
-              platform: (ON_TRACKS.has(row.mode) ? words.track : words.stand).replace(
-                '{track}',
-                row.track,
-              ),
+              platform: fill(ON_TRACKS.has(row.mode) ? words.track : words.stand, {
+                track: row.track,
+              }),
             })}
       />
       <p className={styles.times}>

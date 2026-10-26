@@ -258,28 +258,36 @@ describe('a trip’s on-demand detail', () => {
   )
 
   const misread = misreading()
-  it.effect('answers for the trip a detail’s calls fit, and the next run joins it so', () =>
-    Effect.gen(function* () {
-      yield* TestClock.setTime(MOMENT)
-      const first = new Map((yield* (yield* Tracker).getSnapshot).trips.map((t) => [t.key, t]))
-      const [guess, truth] = misread.picked()
-      // The first guess: the truth's journey is drawn as the guess.
-      expect(first.get(guess.key)?.hadRealtime).toBe(true)
-      expect(first.get(truth.key)?.hadRealtime).not.toBe(true)
-      const answer = (yield* detail(guess.key))!
-      expect(answer.source.kind).toBe('rejseplanen')
-      expect(answer.key).toBe(truth.key)
-      expect(answer.calls.map((call) => call.departure)).toEqual(
-        truth.calls.map((call) => call.departure),
-      )
-      // The vehicle the viewer opened keeps its state.
-      expect(answer.state).toBe(first.get(guess.key)!.state)
-      // The next run joins the journey to the trip it is, with what earlier runs saw of it.
-      yield* TestClock.adjust('60 seconds')
-      const next = new Map((yield* (yield* Tracker).getSnapshot).trips.map((t) => [t.key, t]))
-      expect(next.get(truth.key)).toMatchObject({ hadRealtime: true, seen: MOMENT + 60_000 })
-      expect(next.get(guess.key)?.hadRealtime ?? false).toBe(false)
-      expect((yield* detail(truth.key))?.key).toBe(truth.key)
-    }).pipe(Effect.provide(tracker(misread.layer))),
+  it.effect(
+    'answers for the vehicle opened with the calls of the trip its detail fits, and the next run joins it so',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        const first = new Map((yield* (yield* Tracker).getSnapshot).trips.map((t) => [t.key, t]))
+        const [guess, truth] = misread.picked()
+        // The first guess: the truth's journey is drawn as the guess.
+        expect(first.get(guess.key)?.hadRealtime).toBe(true)
+        expect(first.get(truth.key)?.hadRealtime).not.toBe(true)
+        const answer = (yield* detail(guess.key))!
+        expect(answer.source.kind).toBe('rejseplanen')
+        // The vehicle the viewer opened keeps its key and its state; its calls are the truth's.
+        expect(answer.key).toBe(guess.key)
+        expect(answer.planned).toBe(truth.key)
+        expect(answer.calls.map((call) => call.departure)).toEqual(
+          truth.calls.map((call) => call.departure),
+        )
+        expect(answer.state).toBe(first.get(guess.key)!.state)
+        // Asked again in the minute, it answers the same.
+        expect(yield* detail(guess.key)).toEqual(answer)
+        // The next run joins the journey to the trip it is, with what earlier runs saw of it.
+        yield* TestClock.adjust('60 seconds')
+        const next = new Map((yield* (yield* Tracker).getSnapshot).trips.map((t) => [t.key, t]))
+        expect(next.get(truth.key)).toMatchObject({ hadRealtime: true, seen: MOMENT + 60_000 })
+        expect(next.get(guess.key)?.hadRealtime ?? false).toBe(false)
+        const corrected = (yield* detail(truth.key))!
+        expect(corrected.key).toBe(truth.key)
+        expect(corrected.planned).toBeUndefined()
+        expect(corrected.state).toBe(next.get(truth.key)!.state)
+      }).pipe(Effect.provide(tracker(misread.layer))),
   )
 })

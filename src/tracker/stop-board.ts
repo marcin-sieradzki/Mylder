@@ -1,7 +1,7 @@
 // A stop's departures from its board (docs/screens.md, "Stop departures"): one
 // `multiDepartureBoard` answer for every platform of the stop, each departure joined back to its
-// trip in the timetable, by its journey reference or else by its line, way, platform and planned
-// time, each trip's call once, so a row keeps its trip's key and takes its data state from the
+// trip in the timetable, by its journey reference and the join's corrections, or else by its line,
+// way, platform and planned time, each trip's call once, so a row keeps its trip's key and takes its data state from the
 // snapshot. The expected time, the track and a cancellation are the board's own. A row whose trip
 // carries realtime on the board but has no current realtime on the map is Estimated. A departure
 // that joins no trip, such as an Extra trip, is left out, as the map leaves it out. The board's
@@ -31,7 +31,7 @@ import {
   type Disruption,
   type DisruptionList,
 } from './disruptions.ts'
-import { joinJourney } from './join.ts'
+import { joinJourney, type Corrections } from './join.ts'
 import { dueBy, type Called, type OnDemand } from './on-demand.ts'
 import type { Departure, DepartureBoardAnswer, Message } from './rejseplanen/answers.ts'
 import type { RejseplanenShape, DepartureBoardQuery } from './rejseplanen/client.ts'
@@ -82,13 +82,17 @@ function joinDeparture(
   departure: Departure,
   planned: number,
   taken: Set<string>,
+  corrections: Corrections,
 ): StopCall | undefined {
   const { platforms } = timetable.stops
   const free = (byTime.get(planned) ?? []).filter((call) => !taken.has(callKey(call)))
   // A trip is taken for the join when its call at this time is: an exact duplicate goes next.
-  const joined = joinJourney(timetable, departure, {
-    has: (key) => !free.some((call) => call.trip.key === key),
-  })?.trip
+  const joined = joinJourney(
+    timetable,
+    departure,
+    { has: (key) => !free.some((call) => call.trip.key === key) },
+    corrections,
+  )?.trip
   const line = lineOf(departure)
   const call =
     (joined && free.find((each) => each.trip.key === joined.key)) ||
@@ -126,7 +130,8 @@ function concerns(
 /**
  * A found stop's departures from its board, from `now` for the departures' window, soonest first,
  * with the board's messages that concern the stop, each once: those that name it on any
- * departure, and those that cover the call of a departure it lists.
+ * departure, and those that cover the call of a departure it lists. A departure joins its trip as
+ * a run's journey does, by the join's `corrections` too.
  */
 export function departuresFromBoard(
   timetable: Timetable,
@@ -134,6 +139,7 @@ export function departuresFromBoard(
   { index, stop }: FoundStop,
   board: Called<DepartureBoardAnswer>,
   now: number,
+  corrections: Corrections = {},
 ): StopDepartures {
   const { timezone } = timetable.manifest
   const { platforms } = timetable.stops
@@ -154,7 +160,7 @@ export function departuresFromBoard(
     const call =
       planned === undefined
         ? undefined
-        : joinDeparture(timetable, byTime, departure, planned, taken)
+        : joinDeparture(timetable, byTime, departure, planned, taken, corrections)
     if (planned === undefined || !call) {
       keep(departure, undefined)
       continue
@@ -233,6 +239,8 @@ export interface StopAnswerInput {
   readonly list: DisruptionList | undefined
   readonly ask: OnDemand
   readonly board: RejseplanenShape['multiDepartureBoard']
+  /** The join's corrections, read only when the board answers. */
+  readonly corrections: Effect.Effect<Corrections>
 }
 
 /**
@@ -240,7 +248,7 @@ export interface StopAnswerInput {
  * the timetable plus the snapshot's delays; with its messages either way.
  */
 export const stopAnswer = (
-  { timetable, snapshot, list, ask, board }: StopAnswerInput,
+  { timetable, snapshot, list, ask, board, corrections }: StopAnswerInput,
   found: FoundStop,
 ): Effect.Effect<StopDepartures> =>
   Effect.gen(function* () {
@@ -250,7 +258,7 @@ export const stopAnswer = (
       : {}
     const now = yield* Clock.currentTimeMillis
     const answer = called
-      ? departuresFromBoard(timetable, snapshot, found, called, now)
+      ? departuresFromBoard(timetable, snapshot, found, called, now, yield* corrections)
       : dueBy(departuresAt(timetable, snapshot, found), askAgain)
     return { ...answer, messages: stopMessages(timetable, stop.id, answer.messages, list) }
   })

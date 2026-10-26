@@ -210,6 +210,23 @@ describe("a vehicle's detail", () => {
     expect(fact(trip, 'Delay')).toHaveTextContent('+3 min')
   })
 
+  it('gives the same delay in its estimate as in its facts: Rejseplanen’s at its next call', async () => {
+    const updated = withTrip(minute2, BUS_ESTIMATED, {
+      source: 'timetable',
+      updated: minute2.fetched,
+      delay: 180,
+    })
+    answers.set(BUS_ESTIMATED, {
+      ...saved(BUS_ESTIMATED),
+      delay: 180,
+      nextCallDelay: 300,
+      source: { kind: 'rejseplanen', at: CALLED },
+    })
+    openTrip('en', BUS_ESTIMATED, updated)
+    const trip = await panel(/to Husum Torv/, 'Estimated from the timetable and a delay of +5 min')
+    expect(fact(trip, 'Delay')).toHaveTextContent('+5 min')
+  })
+
   it('says a Timetable only trip has no realtime, and where it waits to leave', async () => {
     openTrip('en', BUS_WAITING, minute6)
     const trip = await panel(
@@ -320,12 +337,46 @@ describe("a vehicle's detail from its trip's detail", () => {
     expect(trip).not.toHaveTextContent('From the timetable')
   })
 
-  it('opens the trip its detail corrects the join to', async () => {
-    answers.set(A_LIVE, { ...fromDetail(), key: A_LATER })
-    answers.set(A_LATER, { ...fromDetail(), key: A_LATER })
+  it('stays on the vehicle opened when its detail shows its calls another trip’s', async () => {
+    // The calls are another trip's, which leaves its first stop half an hour on.
+    const later = (at: number) => at + 1_800_000
+    answers.set(A_LIVE, {
+      ...fromDetail(),
+      planned: A_LATER,
+      calls: fromDetail().calls.map((call) => ({
+        ...call,
+        arrival: later(call.arrival),
+        departure: later(call.departure),
+        expectedArrival: later(call.expectedArrival ?? call.arrival),
+        expectedDeparture: later(call.expectedDeparture ?? call.departure),
+      })),
+    })
     openTrip('en', A_LIVE)
-    await panel(/to Hillerød St\./, 'Langsom kørsel')
+    const trip = await panel(/to Hillerød St\./, 'Langsom kørsel')
+    expect(window.location.search).toBe(`?trip=${A_LIVE}`)
+    expect(within(trip).getByRole('button', { name: 'Follow' })).toBeEnabled()
+    // Its next stop is where the calls' own times put it, not the snapshot's trip's.
+    const first = fromDetail().calls[0]
+    expect(fact(trip, 'Next stop')).toHaveTextContent(first.name)
+  })
+
+  it('moves with the vehicle opened once a snapshot files it under another trip, still followed', async () => {
+    answers.set(A_LATER, { ...saved(A_LIVE), key: A_LATER })
+    openTrip('en', A_LIVE)
+    const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    fireEvent.click(within(trip).getByRole('button', { name: 'Follow' }))
+    // The next run joins the vehicle's journey to the trip its detail showed it to be.
+    const journeyOf = (key: string) => minute2.trips.find((each) => each.key === key)!.journey
+    const refiled = withTrip(withTrip(minute2, A_LIVE, { journey: journeyOf(A_LATER) }), A_LATER, {
+      journey: journeyOf(A_LIVE),
+    })
+    act(() => liveSnapshot.update({ snapshot: { ...refiled }, clockOffset: 0 }))
     expect(window.location.search).toBe(`?trip=${A_LATER}`)
+    const moved = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    expect(within(moved).getByRole('button', { name: 'Follow' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
   })
 
   it('says the same in Danish', async () => {

@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { clockTime } from '../timetable/time'
+import type { PlannedTrip } from '../timetable/trips'
 import { findStop, type SnapshotDelays } from './answers'
 import type { Departure, Message } from './rejseplanen/answers'
 import type { SnapshotTrip } from './snapshot'
+import type { Corrections } from './join'
+import { journeyRef, referenceDay } from './simulation/journeys'
 import { departuresFromBoard } from './stop-board'
 import { fixtureTimetable, startingAtMidnight } from './testing'
 
@@ -100,6 +103,60 @@ describe('a stop’s departures from its board', () => {
 
   it('joins two departures alike in line, time and way to the trip once', () => {
     expect(fromBoard([departure(), departure()]).map((row) => row.trip)).toEqual([trip.key])
+  })
+})
+
+describe('a stop’s board after the join was corrected', () => {
+  /** A trip's call here, not its last, leaving in the board's window. */
+  const leaving = (each: PlannedTrip) =>
+    each.calls.flatMap((call, i) =>
+      i < each.calls.length - 1 && call.departure > MOMENT && call.departure < MOMENT + 20 * 60_000
+        ? [{ trip: each, index: i, stop: timetable.stops.platforms[call.platform].stop }]
+        : [],
+    )
+  const calls = timetable.tripsOn(today).flatMap(leaving)
+  // Two trips that leave one stop at the same time: the board's journey reads as the first, and
+  // a trip's detail showed it to be the second.
+  const [read, truth] = calls.flatMap((one) => {
+    const other = calls.find(
+      (each) =>
+        each.trip !== one.trip &&
+        each.stop === one.stop &&
+        each.trip.calls[each.index].departure === one.trip.calls[one.index].departure,
+    )
+    return other ? [one, other] : []
+  })
+  const here = timetable.stops.platforms[read.trip.calls[read.index].platform]
+  const time = clockTime(read.trip.calls[read.index].departure, ZONE, { seconds: true })
+  const board = (corrections?: Corrections) =>
+    departuresFromBoard(
+      timetable,
+      { fetched: MOMENT, nextDue: MOMENT + 60_000, trips: [] },
+      findStop(timetable, here.id)!,
+      {
+        answer: {
+          Departure: [
+            departure({
+              JourneyDetailRef: { ref: journeyRef(timetable, read.trip, 4711) },
+              name: read.trip.line.name,
+              stop: here.name,
+              stopExtId: here.id,
+              time,
+              rtTime: time,
+              direction: read.trip.headsign,
+              ProductAtStop: { line: read.trip.line.name },
+            }),
+          ],
+        },
+        at: MOMENT,
+      },
+      MOMENT,
+      corrections,
+    ).departures.map((row) => row.trip)
+
+  it('joins a corrected journey’s departure to the trip its correction names', () => {
+    expect(board()).toEqual([read.trip.key])
+    expect(board({ [`4711@${referenceDay(today)}`]: truth.trip.key })).toEqual([truth.trip.key])
   })
 })
 

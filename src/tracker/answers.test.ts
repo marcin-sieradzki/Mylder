@@ -32,6 +32,9 @@ const snapshot = (trips: readonly Partial<SnapshotTrip>[]): SnapshotDelays => ({
 })
 const delayed = snapshot([{ key: late.key, delay: 120, state: 'estimated' }])
 
+/** M1 towards Vestamager, leaving its first stop at 07:07. */
+const METRO_0707 = 'metro.M1.7f21f99145.20260616.0707'
+
 describe('a trip’s calls', () => {
   it('shifts each call by the snapshot’s delay', () => {
     const detail = tripDetailFrom(timetable, delayed, late.key, MOMENT)!
@@ -71,6 +74,23 @@ describe('a trip’s calls', () => {
     const metro = 'metro.M1.7f21f99145.20260616.0707'
     expect(tripDetailFrom(timetable, delayed, metro, MOMENT)?.interval).toEqual({ from: 4, to: 4 })
     expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.interval).toBeUndefined()
+  })
+
+  it('gives a Metro trip with only its last stop ahead the interval at the stop it left last', () => {
+    const metro = timetable.tripsOn(today).find((trip) => trip.key === METRO_0707)!
+    const left = metro.calls.at(-2)!.departure
+    const arrives = metro.calls.at(-1)!.arrival
+    const between = left + (arrives - left) / 2
+    expect(tripDetailFrom(timetable, snapshot([]), METRO_0707, between)?.interval).toEqual({
+      from: 4,
+      to: 4,
+    })
+  })
+
+  it('gives a Metro trip that has arrived no interval', () => {
+    const metro = timetable.tripsOn(today).find((trip) => trip.key === METRO_0707)!
+    const after = metro.calls.at(-1)!.arrival + 60_000
+    expect(tripDetailFrom(timetable, snapshot([]), METRO_0707, after)?.interval).toBeUndefined()
   })
 
   it('reads a Metro trip as its stops’ departures do: to an interval until its line has realtime', () => {

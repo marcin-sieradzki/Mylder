@@ -1,13 +1,15 @@
 // A trip's calls from its detail (docs/screens.md, "Vehicle detail"): one `journeyDetail` answer
 // for the trip's reference, its calls matched stop by stop on planned times onto the timetable's
 // trip (docs/timetable.md, "The join"). When they fit another trip of the day than the one the
-// join guessed, the answer is that trip's, and the correction is kept so the next run's join
-// takes it. The expected times, the cancellations, Rejseplanen's own delay at the next call and
-// the trip's own messages are the detail's; the state stays the snapshot's, for the vehicle the
-// viewer opened. When no call can be made, it fails, or the calls fit no trip, the trip answers
+// join guessed, the answer stays under the key asked for, the vehicle the viewer opened, with the
+// calls of the trip they fit, and the correction is kept so the next run's join and every stop's
+// board take it. The expected times, the cancellations, Rejseplanen's own delay at the next call
+// and the trip's own messages are the detail's; the state stays the snapshot's, for the vehicle
+// the viewer opened. When no call can be made, it fails, or the calls fit no trip, the trip answers
 // from the timetable plus the snapshot's delay, as before.
 import 'server-only'
 import { Clock, Effect } from 'effect'
+import type { IsoDate } from '../timetable/format.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import {
@@ -200,9 +202,10 @@ function coveredCalls(
 }
 
 /**
- * A trip's answer from its detail, at a moment, for the trip the join guessed: the trip the
- * detail's calls fit, with the snapshot's state and delay for the guess, the vehicle the viewer
- * opened, and the detail's times, cancellations and messages; undefined when they fit no trip.
+ * A trip's answer from its detail, at a moment, for the trip the join guessed: under the guess's
+ * key, with the snapshot's state and delay for it, the vehicle the viewer opened, the calls of the
+ * trip the detail's fit, named `planned` when it is another, and the detail's times,
+ * cancellations and messages; undefined when they fit no trip.
  */
 export function tripFromDetail(
   timetable: Timetable,
@@ -216,8 +219,7 @@ export function tripFromDetail(
   if (!found) return undefined
   const { trip, matched } = found
   const { timezone } = timetable.manifest
-  const onMap = tripsByKey(snapshot)
-  const live = onMap.get(guess.key) ?? onMap.get(trip.key)
+  const live = tripsByKey(snapshot).get(guess.key)
   const base = tripDetailOf(timetable, snapshot, trip, live, now)
   const tripCancelled = detail.cancelled === true
   const stopAt = new Map<number, Stop>()
@@ -259,6 +261,8 @@ export function tripFromDetail(
   const { runsToInterval: _rule, interval: _interval, ...timed } = base
   return {
     ...(realtime ? timed : base),
+    key: guess.key,
+    ...(trip.key === guess.key ? {} : { planned: trip.key }),
     ...(expectedNext === undefined ? {} : { nextCallDelay: Math.round(expectedNext / 1000) }),
     ...(tripCancelled ? { cancelled: true as const } : {}),
     // Due again when the snapshot is, or sooner when the detail's minute runs out first.
@@ -276,8 +280,8 @@ export interface TripAnswerInput {
   readonly detail: RejseplanenShape['journeyDetail']
   /** The trip's journey reference, from what the tracker remembers of it, if any answer had it. */
   readonly refOf: (tripKey: string) => Effect.Effect<string | undefined>
-  /** Keeps a correction of the join: Rejseplanen's journey, `ZI@DA`, is this trip. */
-  readonly correct: (journey: string, tripKey: string) => Effect.Effect<void>
+  /** Keeps a correction of the join: Rejseplanen's journey, `ZI@DA`, of a service day, is this trip. */
+  readonly correct: (day: IsoDate, journey: string, tripKey: string) => Effect.Effect<void>
 }
 
 /**
@@ -303,8 +307,8 @@ export const tripAnswer = (
     }
     // Only a journey with a number can be told apart from the rest of its day.
     const journey = ref === undefined ? undefined : readRef(ref)?.journey
-    if (answer.key !== guess.key && journey !== undefined && !journey.startsWith('@')) {
-      yield* correct(journey, answer.key)
+    if (answer.planned !== undefined && journey !== undefined && !journey.startsWith('@')) {
+      yield* correct(guess.serviceDay, journey, answer.planned)
     }
     return answer
   })

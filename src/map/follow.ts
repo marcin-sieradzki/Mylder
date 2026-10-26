@@ -1,6 +1,6 @@
 // Follow, from vehicle detail (docs/screens.md, "Vehicle detail"): the camera stays on one trip's
-// dot, moved from the animation loop each frame it draws, outside React, so the page renders
-// again only when Follow starts or ends. It ends when the trip reaches its last stop or leaves
+// dot, moved there as Follow starts and from the animation loop each frame it draws, outside
+// React, so the page renders again only when Follow starts or ends. It ends when the trip reaches its last stop or leaves
 // the map, when the viewer pans, and when the trip's panel closes. A zoom keeps it: the camera
 // zooms on the dot.
 import 'client-only'
@@ -143,21 +143,29 @@ export function followCamera(
   container.addEventListener('pointerdown', hold)
   window.addEventListener('pointerup', release)
   window.addEventListener('pointercancel', release)
-  // While following, the wheel zooms on the dot at the centre rather than on the pointer.
+  /** The dots as the loop last drew them, which a still map keeps until the next snapshot. */
+  let last: { drawn: Vehicles; along: (key: string) => Along | undefined } | undefined
+  const onto = (drawn: Vehicles, along: (key: string) => Along | undefined) => {
+    const key = store.get()
+    // A zoom under way carries on about the centre, where the dot is.
+    if (key === undefined || held || map.isMoving()) return
+    const target = followTarget(drawn, key, along(key))
+    if (!target) return store.stop()
+    map.jumpTo({ center: target.centre })
+    if (target.arrived) store.stop()
+  }
+  // While following, the wheel zooms on the dot at the centre rather than on the pointer. Follow
+  // starts on the dot where it was last drawn, as dots that stand still draw no frame to come.
   const onFollow = () => {
-    if (store.get() === undefined) map.scrollZoom.enable()
-    else map.scrollZoom.enable({ around: 'center' })
+    if (store.get() === undefined) return map.scrollZoom.enable()
+    map.scrollZoom.enable({ around: 'center' })
+    if (last) onto(last.drawn, last.along)
   }
   const stopListening = store.subscribe(onFollow)
   return {
     frame(drawn, along) {
-      const key = store.get()
-      // A zoom under way carries on about the centre, where the dot is.
-      if (key === undefined || held || map.isMoving()) return
-      const target = followTarget(drawn, key, along(key))
-      if (!target) return store.stop()
-      map.jumpTo({ center: target.centre })
-      if (target.arrived) store.stop()
+      last = { drawn, along }
+      onto(drawn, along)
     },
     remove() {
       map.off('movestart', onMoveStart)

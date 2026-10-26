@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { endsFollow, followStore, followTarget } from './follow.ts'
+import { endsFollow, followCamera, followStore, followTarget, type FollowMap } from './follow.ts'
 import { mapView, openPanel } from './view.ts'
 
 // Follow, as vehicle detail gives it (docs/screens.md): where the camera goes each frame for the
@@ -104,5 +104,38 @@ describe('the followed trip', () => {
     mapView.update({ centre: [12.57, 55.68], zoom: 13 })
     expect(follow.get()).toBe(BUS)
     follow.stop()
+  })
+})
+
+describe('Follow on a map whose dots stand still', () => {
+  afterEach(() => openPanel(undefined))
+
+  /** A map whose camera stands at Kastrup until Follow moves it. */
+  const stillMap = () => {
+    const camera = { centre: [12.65, 55.62] as [number, number] }
+    const map: FollowMap = {
+      jumpTo: ({ center }) => {
+        camera.centre = center as [number, number]
+        return map as never
+      },
+      isMoving: () => false,
+      scrollZoom: { enable: () => undefined } as unknown as FollowMap['scrollZoom'],
+      on: () => map as never,
+      off: () => map as never,
+    }
+    return { map, camera }
+  }
+
+  it('moves the camera onto the dot as Follow starts, with no frame to come', () => {
+    const { map, camera } = stillMap()
+    const follow = followStore(mapView)
+    const followed = followCamera(map, document.createElement('div'), follow)
+    // The loop drew the dots once, stilled, before Follow was pressed.
+    followed.frame(drawn as never, () => undefined)
+    expect(camera.centre).toEqual([12.65, 55.62])
+    openPanel({ kind: 'trip', id: METRO })
+    follow.start(METRO)
+    expect(camera.centre).toEqual([12.5857, 55.6795])
+    followed.remove()
   })
 })

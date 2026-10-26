@@ -5,18 +5,24 @@
 // history, run the domain rules for every trip on the map, store the snapshot and the history,
 // and return the snapshot. A failed or empty call keeps every trip's history, so trips age by the
 // clock. The stop and trip answers are answers.ts's, from the stored snapshot, or an on-demand
-// call's (`stop-board.ts`, `trip-detail.ts`); a trip's detail can correct the join, which the next
-// run reads.
+// call's (`stop-board.ts`, `trip-detail.ts`); a trip's detail can correct the join
+// (`corrections.ts`), which the next run and every stop's board read.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
-import { findStop, plannedTrip, type StopDepartures, type TripDetail } from './answers.ts'
+import {
+  findStop,
+  plannedTrip,
+  serviceDaysAhead,
+  type StopDepartures,
+  type TripDetail,
+} from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import { onDemand } from './on-demand.ts'
 import { stopAnswer } from './stop-board.ts'
 import { tripAnswer } from './trip-detail.ts'
-import type { Corrections } from './join.ts'
+import { correctionsIn } from './corrections.ts'
 import {
   buildTrips,
   expectedUnderway,
@@ -148,9 +154,7 @@ export const layer: Layer.Layer<
     const storedHistory = store
       .get(key('history'))
       .pipe(Effect.map((value) => value as History | undefined))
-    const storedCorrections = store
-      .get(key('corrections'))
-      .pipe(Effect.map((value) => (value as Corrections | undefined) ?? {}))
+    const corrections = correctionsIn(store, key)
     const storedDisruptions = store
       .get(key('disruptions'))
       .pipe(Effect.map((value) => value as DisruptionList | undefined))
@@ -199,7 +203,7 @@ export const layer: Layer.Layer<
           now,
           answer: outcome.answer,
           history: yield* storedHistory,
-          corrections: yield* storedCorrections,
+          corrections: yield* corrections.read(timetable.serviceDaysAt(now)),
           context: {
             pollInterval: pace.pollInterval,
             positionMode: config.positionMode,
@@ -399,23 +403,19 @@ export const layer: Layer.Layer<
         const snapshot = yield* getSnapshot
         const list = yield* storedDisruptions
         const board = rejseplanen.multiDepartureBoard
-        return yield* stopAnswer({ timetable, snapshot, list, ask, board }, found)
+        // The board's departures join as the run's journeys do, corrections and all.
+        const corrected = Clock.currentTimeMillis.pipe(
+          Effect.flatMap((now) => corrections.read(serviceDaysAhead(timetable, now))),
+        )
+        return yield* stopAnswer(
+          { timetable, snapshot, list, ask, board, corrections: corrected },
+          found,
+        )
       })
 
     /** A trip's journey reference, from the history, once an answer has carried it. */
     const refOf = (tripKey: string) =>
       storedHistory.pipe(Effect.map((history) => history?.[tripKey]?.ref))
-
-    /** Keeps a correction of the join for the rest of the day, for the next run. */
-    const correct = (journey: string, tripKey: string) =>
-      Effect.gen(function* () {
-        const corrections = yield* storedCorrections
-        yield* store.set(
-          key('corrections'),
-          { ...corrections, [journey]: tripKey },
-          SNAPSHOT_SECONDS,
-        )
-      })
 
     const getTripDetail = (tripKey: string) =>
       Effect.gen(function* () {
@@ -423,6 +423,7 @@ export const layer: Layer.Layer<
         if (!plannedTrip(timetable, tripKey, now)) return undefined
         const snapshot = yield* getSnapshot
         const detail = rejseplanen.journeyDetail
+        const correct = corrections.keep
         return yield* tripAnswer({ timetable, snapshot, ask, detail, refOf, correct }, tripKey)
       })
 

@@ -7,12 +7,13 @@ import {
   StopTimeline,
   type SourceLineSource,
 } from '@mylder/perron/patterns'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { DataState } from '../domain/data-state'
 import { disruptionPhase } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
+import { followedVehicle } from '../map/follow'
 import { useClockOffset, useSnapshot } from '../map/live'
 import type { PanelStateOf } from '../map/panels'
 import { useDataState } from '../map/states'
@@ -22,13 +23,14 @@ import { timezoneOf, useNetwork } from '../map/timetable'
 import { whereOf } from '../map/where'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
-import type { SnapshotTrip, TripDetail } from '../tracker/index'
+import type { Snapshot, SnapshotTrip, TripDetail } from '../tracker/index'
 import type { PanelFrame } from './DetailPanels'
 import { badgeLine } from './departureRow'
 import { Messages } from './Messages'
 import { useServerSecond } from './useServerSecond'
 import { VehicleActions } from './VehicleActions'
 import {
+  delayOf,
   intervalWords,
   nextCallOf,
   runsToInterval,
@@ -53,8 +55,9 @@ export interface VehiclePanelProps {
  * Vehicle detail (docs/screens.md): the trip's line, destination and mode, what its data state
  * means, its facts, where it is, its stops, its own messages and where their times came from.
  * Its header names the trip from the snapshot while the answer is on its way. The header's action
- * row holds Follow and Show whole line. An answer for another trip than the address's, the one
- * the trip's detail corrected the join to, takes over the address.
+ * row holds Follow and Show whole line. The panel keeps to the vehicle the viewer opened: when a
+ * snapshot files its journey under another trip, as the run does once a trip's detail has
+ * corrected the join, the address and Follow move to that trip.
  */
 export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const { dictionary, lang } = useI18n()
@@ -62,11 +65,8 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
   const { answer, status } = state
-  const corrected = answer && answer.key !== state.panel.id ? answer.key : undefined
-  useEffect(() => {
-    if (corrected !== undefined) openPanel({ kind: 'trip', id: corrected })
-  }, [corrected])
   const trip = snapshot?.trips.find((each) => each.key === state.panel.id)
+  useKeptVehicle(state.panel.id, snapshot)
   const hidden = useHiddenModes()
   const named = answer ?? trip
   // The line's colour from the answer, or from the timetable's pattern before the answer lands.
@@ -109,6 +109,30 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   )
 }
 
+/**
+ * Keeps the open panel on the vehicle the viewer opened, by its journey: when a snapshot no longer
+ * files that journey under the panel's trip but under another, the address, and Follow if it was
+ * on, move to that trip.
+ */
+function useKeptVehicle(tripKey: string, snapshot: Snapshot | undefined) {
+  const opened = useRef<{ readonly tripKey: string; readonly journey: string }>(undefined)
+  useEffect(() => {
+    const trips = snapshot?.trips ?? []
+    const journey = trips.find((each) => each.key === tripKey)?.journey
+    const kept = opened.current?.tripKey === tripKey ? opened.current.journey : undefined
+    const moved =
+      kept === undefined || journey === kept
+        ? undefined
+        : trips.find((each) => each.journey === kept)
+    if (kept !== undefined && moved) {
+      opened.current = { tripKey: moved.key, journey: kept }
+      const following = followedVehicle.get() === tripKey
+      openPanel({ kind: 'trip', id: moved.key })
+      if (following) followedVehicle.start(moved.key)
+    } else if (journey !== undefined) opened.current = { tripKey, journey }
+  }, [tripKey, snapshot])
+}
+
 /** What the panel shows before it has an answer: on its way, not found, or failed. */
 function Pending({ status, words }: { status: PanelStateOf<'trip'>['status']; words: Words }) {
   switch (status) {
@@ -146,10 +170,12 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
   const cancelled = answer.cancelled === true
   const interval = runsToInterval(answer)
   const sentence = stateSentence({ detail: answer, trip, state, timezone, words })
-  const next = nextCallOf(answer, trip, now)
+  // The snapshot's trip, where its place is along the answer's calls: not while the trip's detail
+  // shows them another planned trip's, until the run files the vehicle under it.
+  const along = answer.planned === undefined ? trip : undefined
+  const next = nextCallOf(answer, along, now)
   const live = state === 'live' || state === 'ageing'
-  // Rejseplanen's own delay at the next call, from the trip's detail, else the snapshot's.
-  const delaySeconds = answer.nextCallDelay ?? answer.delay
+  const delaySeconds = delayOf(answer)
   // The messages listed now, from the trip's detail, and the moment it was called.
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   const messages =
@@ -157,13 +183,13 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
       ? []
       : (answer.messages ?? []).filter((message) => disruptionPhase(message, now) !== undefined)
   const where =
-    trip && network && !cancelled && network.patterns.patterns[trip.pattern]
+    along && network && !cancelled && network.patterns.patterns[along.pattern]
       ? whereWords(
           whereOf({
-            trip,
+            trip: along,
             state,
             fetched: answer.fetched,
-            path: network.pathOf(trip.pattern),
+            path: network.pathOf(along.pattern),
             calls: timedCallsOf(answer),
             now,
           }),

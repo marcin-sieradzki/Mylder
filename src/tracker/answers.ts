@@ -9,13 +9,14 @@
 // and an interval trip's panel share one reading of it (`intervalAtStop`).
 import 'server-only'
 import { shownAt } from '../domain/departure.ts'
-import { intervalOf, runsToInterval, type Interval } from '../domain/interval.ts'
+import { intervalOf, runsToInterval, type Interval, type LineTrip } from '../domain/interval.ts'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { MODES, type IsoDate, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import { hourStart } from '../timetable/time.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import type { Disruption } from './disruptions.ts'
+import { tripOn } from './join.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
 
@@ -130,7 +131,14 @@ export interface TripMessage extends Disruption {
 }
 
 export interface TripDetail {
+  /** The trip the snapshot files the vehicle under, the one the viewer opened. */
   readonly key: string
+  /**
+   * The planned trip the line, headsign, pattern and calls are, when the trip's detail showed the
+   * vehicle to be another than the one the snapshot files it under (docs/live-data.md, "The
+   * budget"); none while they are the same.
+   */
+  readonly planned?: string
   readonly line: string
   readonly mode: Mode
   /** The line's Perron colour token, such as `perron-color-transit-line-a`. */
@@ -287,11 +295,18 @@ const lineRunsToInterval = (
   snapshot: SnapshotDelays,
   rows: readonly { mode: Mode; line: string; state: SnapshotTrip['state'] }[],
   line: Pick<AnswerLine, 'name' | 'mode'>,
-): boolean =>
-  runsToInterval(line, [
-    ...snapshot.trips.map((trip) => ({ ...trip, realtime: trip.hadRealtime })),
-    ...rows.map((row) => ({ ...row, realtime: row.state !== 'timetable-only' })),
-  ])
+): boolean => runsToInterval(line, lineTrips(snapshot, rows))
+
+/** The snapshot's trips and `rows` as the rule reads them, one at a time, read only for a Metro line. */
+function* lineTrips(
+  snapshot: SnapshotDelays,
+  rows: readonly { mode: Mode; line: string; state: SnapshotTrip['state'] }[],
+): Generator<LineTrip> {
+  for (const { mode, line, hadRealtime } of snapshot.trips)
+    yield { mode, line, realtime: hadRealtime }
+  for (const { mode, line, state } of rows)
+    yield { mode, line, realtime: state !== 'timetable-only' }
+}
 
 /**
  * A stop's rows as its answer lists them: its interval lines' departures taken out and read as
@@ -354,7 +369,7 @@ export function plannedTrip(
   now: number,
 ): PlannedTrip | undefined {
   for (const day of serviceDaysAhead(timetable, now)) {
-    const trip = timetable.tripsOn(day).find((each) => each.key === tripKey)
+    const trip = tripOn(timetable, day, tripKey)
     if (trip) return trip
   }
   return undefined
@@ -424,12 +439,16 @@ export function stopDeparturesFrom(
 }
 
 /**
- * How often an interval trip's line leaves the stop of its next call in the current hour, the
- * trip's direction only, as that stop's interval rows say.
+ * How often an interval trip's line leaves the stop of its next departure in the current hour,
+ * the trip's direction only, as that stop's interval rows say: the stop it left last once only
+ * its last stop is ahead, and none once it has arrived.
  */
 function intervalAt(timetable: Timetable, trip: PlannedTrip, now: number): Interval | undefined {
-  const next = trip.calls.find((call) => call.departure >= now) ?? trip.calls[0]
-  const stopIndex = timetable.stops.platforms[next.platform].stop
+  const last = trip.calls.length - 1
+  if (trip.calls[last].arrival < now) return undefined
+  const next = trip.calls.findIndex((call, i) => i < last && call.departure >= now)
+  const from = trip.calls[next < 0 ? last - 1 : next]
+  const stopIndex = timetable.stops.platforms[from.platform].stop
   const calls = callsAt(timetable, stopIndex, now)
   return intervalAtStop(timetable, calls, trip.line.name, trip.direction, now)
 }
