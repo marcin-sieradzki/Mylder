@@ -120,6 +120,8 @@
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
       "aircraft": "Aircraft: © {source} under the {licence}.",
       "aircraftFrom": "Aircraft: {source}.",
+      "recording": "The planes are recorded adsb.lol data, open under the same licence in {recordings}.",
+      "recordings": "Mylder's repository",
       "style": "The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see {licence}.",
       "styleLicence": "its licence"
     },
@@ -233,7 +235,7 @@
     "simulated": "Simulated data: vehicles and times are made up from the timetable.",
     "recorded": "Recorded data from {date}.",
     "aircraftLive": "Planes: live from {provider}.",
-    "aircraftRecorded": "Planes: recorded."
+    "aircraftRecorded": "Planes: recorded adsb.lol data."
   },
   "interval": {
     "seconds": "{n} s",

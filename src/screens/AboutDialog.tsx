@@ -21,6 +21,7 @@ import {
   OPENFREEMAP,
   OPENMAPTILES,
   OPENSTREETMAP,
+  RECORDINGS,
   REJSEPLANEN,
 } from './credits'
 import { dayOf } from './wording'
@@ -132,6 +133,21 @@ function AircraftCredit({ words }: { words: Words['credits'] }) {
   )
 }
 
+/**
+ * For planes replayed from a recording, as in the demo: that they are recorded adsb.lol data, and
+ * where the recording is open under the same licence.
+ */
+function RecordedAircraft({ words }: { words: Words['credits'] }) {
+  if (useAircraftProvider() !== 'recording') return null
+  return (
+    <Text render={<p />}>
+      {compose(words.recording, {
+        recordings: <Link href={RECORDINGS}>{words.recordings}</Link>,
+      })}
+    </Text>
+  )
+}
+
 /** On close, the focus goes back to what opened the dialog, the About button or the credit. */
 const returnFocus = () => aboutDialog.opener() ?? true
 
@@ -174,6 +190,7 @@ export function AboutDialog() {
             })}
           </Text>
           <AircraftCredit words={words.credits} />
+          <RecordedAircraft words={words.credits} />
           <Text render={<p />} emphasis="secondary">
             {compose(words.credits.style, {
               licence: <Link href={MAP_STYLE_LICENCE}>{words.credits.styleLicence}</Link>,

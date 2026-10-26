@@ -27,9 +27,11 @@ test('a recorded page says so, with the recording’s date, and that its planes 
   // The City sheet has statuses of its own; the banner is the one that names the data.
   const banner = page.getByRole('status').filter({ hasText: /^(Recorded|Optagne)/ })
   await page.goto('/en')
-  await expect(banner).toHaveText('Recorded data from 16 June 2026. Planes: recorded.')
+  await expect(banner).toHaveText(
+    'Recorded data from 16 June 2026. Planes: recorded adsb.lol data.',
+  )
   await page.goto('/da')
-  await expect(banner).toHaveText('Optagne data fra 16. juni 2026. Fly: optaget.')
+  await expect(banner).toHaveText('Optagne data fra 16. juni 2026. Fly: optagne data fra adsb.lol.')
 })
 
 test('a simulated page says its vehicles are made up, and nothing of planes it has off', async ({
