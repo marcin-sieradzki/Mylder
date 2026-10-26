@@ -8,7 +8,7 @@ import type {
   StyleSpecification,
 } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
-import { readNetwork } from '../../timetable/network.ts'
+import { readNetwork, type Network } from '../../timetable/network.ts'
 import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
 import { readPaint } from '../paint.ts'
 import { basemapStyle, paintTokens } from './basemap.ts'
@@ -47,6 +47,110 @@ const lineColours = (style: StyleSpecification) =>
 /** The distance between two [lon, lat] points in km, near enough at Copenhagen's latitude. */
 const kilometres = ([lon1, lat1]: number[], [lon2, lat2]: number[]) =>
   Math.hypot((lon2 - lon1) * 111.32 * Math.cos((55.7 * Math.PI) / 180), (lat2 - lat1) * 110.57)
+
+/** Each drawn piece of a line's path: the segment it is, and the offset it is drawn at. */
+function drawnOf(style: StyleSpecification, on: Network, name: string) {
+  const segmentAt = new Map<string, number>()
+  on.paths.segments.forEach((_, segment) => {
+    const points = on.paths.points(segment).map(([lat, lon]) => [lon, lat])
+    segmentAt.set(JSON.stringify([points[0], points.at(-1)]), segment)
+  })
+  return features(style, 'mylder-lines')
+    .filter((f) => f.properties!.line === name)
+    .flatMap((f) =>
+      (f.geometry as MultiLineString).coordinates.map((piece) => ({
+        offset: f.properties!.offset as number,
+        segment: segmentAt.get(JSON.stringify([piece[0], piece.at(-1)]))!,
+      })),
+    )
+}
+
+/** Which way a line's patterns run a segment: 1 along the line's direction 0, -1 against. */
+function wayOf(on: Network, name: string, segment: number) {
+  const line = on.patterns.lines.findIndex((each) => each.name === name)
+  const ways = on.patterns.patterns
+    .filter((pattern) => pattern.line === line && pattern.segments.includes(segment))
+    .map((pattern) => (pattern.direction === 0 ? 1 : -1))
+  expect(new Set(ways).size).toBe(1)
+  return ways[0]
+}
+
+/**
+ * The sides of the track a line is drawn on off its centre, facing its direction 0: 1 for the
+ * right, -1 for the left.
+ */
+const sidesOf = (style: StyleSpecification, on: Network, name: string) =>
+  new Set(
+    drawnOf(style, on, name)
+      .filter(({ offset }) => offset !== 0)
+      .map(({ offset, segment }) => Math.sign(offset) * wayOf(on, name, segment)),
+  )
+
+/** The stretch a step between two stops runs, keyed by both stops, lower first. */
+const stretchKey = (from: number, to: number) => (from < to ? `${from}-${to}` : `${to}-${from}`)
+
+/**
+ * Each line's offset on each stretch it is drawn on, keyed `line|stretch`, as px to the right
+ * facing away from the stop `facing` gives for the stretch, by default its lower-numbered: one
+ * frame for every line on it, whichever way each runs.
+ */
+function placesOf(
+  style: StyleSpecification,
+  on: Network,
+  facing: (stretch: string) => number | undefined = (stretch) => Number(stretch.split('-')[0]),
+): Map<string, number> {
+  const stopOf = (platform: number) => on.stops.platforms[platform].stop
+  const runs = new Map<number, { stretch: string; from: number }>()
+  for (const pattern of on.patterns.patterns) {
+    pattern.segments.forEach((segment, i) => {
+      const [from, to] = [stopOf(pattern.stops[i]), stopOf(pattern.stops[i + 1])]
+      runs.set(segment, { stretch: stretchKey(from, to), from })
+    })
+  }
+  const places = new Map<string, number>()
+  for (const line of new Set(on.patterns.lines.map((each) => each.name))) {
+    for (const { offset, segment } of drawnOf(style, on, line)) {
+      const { stretch, from } = runs.get(segment)!
+      const start = facing(stretch)
+      if (start === undefined) continue
+      places.set(`${line}|${stretch}`, (from === start ? offset : -offset) || 0)
+    }
+  }
+  return places
+}
+
+/**
+ * The lines on each stretch of a `line`'s first pattern in its direction 0 where all of `names`
+ * run, ordered across the track from left to right as that pattern runs.
+ */
+function acrossOf(
+  style: StyleSpecification,
+  on: Network,
+  line: string,
+  names: readonly string[],
+): string[][] {
+  const stopOf = (platform: number) => on.stops.platforms[platform].stop
+  const index = on.patterns.lines.findIndex((each) => each.name === line)
+  const reference = on.patterns.patterns.find(
+    (pattern) => pattern.line === index && pattern.direction === 0,
+  )!
+  const starts = new Map(
+    reference.stops.slice(1).map((stop, i) => {
+      const from = stopOf(reference.stops[i])
+      return [stretchKey(from, stopOf(stop)), from]
+    }),
+  )
+  const byStretch = new Map<string, Map<string, number>>()
+  for (const [id, place] of placesOf(style, on, (stretch) => starts.get(stretch))) {
+    const [name, stretch] = id.split('|')
+    if (!names.includes(name)) continue
+    if (!byStretch.has(stretch)) byStretch.set(stretch, new Map())
+    byStretch.get(stretch)!.set(name, place)
+  }
+  return [...byStretch.values()]
+    .filter((lines) => lines.size === names.length)
+    .map((lines) => [...lines].sort((a, b) => a[1] - b[1]).map(([name]) => name))
+}
 
 afterEach(() => {
   delete document.documentElement.dataset.theme
@@ -149,35 +253,8 @@ describe('the basemap', () => {
     // strands' order: A (strand −2) on one side, E (+1) on the other, all the way along.
     const style = styleNow()
     expect(layer(style, 'mylder-lines-s-tog').paint['line-offset']).toEqual(['get', 'offset'])
-    // Which way each drawn piece runs: the segment it is, along the line's direction 0 or against.
-    const segmentAt = new Map<string, number>()
-    network.paths.segments.forEach((_, segment) => {
-      const points = network.paths.points(segment).map(([lat, lon]) => [lon, lat])
-      segmentAt.set(JSON.stringify([points[0], points.at(-1)]), segment)
-    })
-    const along = (name: string, segment: number) => {
-      const line = network.patterns.lines.findIndex((each) => each.name === name)
-      const ways = network.patterns.patterns
-        .filter((pattern) => pattern.line === line && pattern.segments.includes(segment))
-        .map((pattern) => (pattern.direction === 0 ? 1 : -1))
-      expect(new Set(ways).size).toBe(1)
-      return ways[0]
-    }
-    const drawn = (name: string) =>
-      features(style, 'mylder-lines')
-        .filter((f) => f.properties!.line === name)
-        .flatMap((f) =>
-          (f.geometry as MultiLineString).coordinates.map((piece) => ({
-            offset: f.properties!.offset as number,
-            segment: segmentAt.get(JSON.stringify([piece[0], piece.at(-1)]))!,
-          })),
-        )
-    const sides = (name: string) =>
-      new Set(
-        drawn(name)
-          .filter(({ offset }) => offset !== 0)
-          .map(({ offset, segment }) => Math.sign(offset) * along(name, segment)),
-      )
+    const sides = (name: string) => sidesOf(style, network, name)
+    const drawn = (name: string) => drawnOf(style, network, name)
 
     for (const name of ['A', 'E']) {
       expect(new Set(drawn(name).map(({ offset }) => Math.abs(offset)))).toEqual(
@@ -196,6 +273,50 @@ describe('the basemap', () => {
           .flatMap((pattern) => pattern.segments),
       ).size,
     )
+  })
+
+  it('puts each line on the same side whatever order the timetable lists its patterns in', () => {
+    const patterns = read(manifest.files.patterns) as { patterns: unknown[] }
+    const reordered = readNetwork({
+      manifest,
+      stops: read(manifest.files.stops),
+      patterns: { ...patterns, patterns: patterns.patterns.toReversed() },
+      paths: read(manifest.files.paths),
+    })
+    const paint = readPaint(document.documentElement, paintTokens(network))
+    const places = placesOf(basemapStyle(paint, network), network)
+    expect([...places.values()].some((place) => place !== 0)).toBe(true)
+    expect(placesOf(basemapStyle(paint, reordered), reordered)).toEqual(places)
+  })
+
+  it("places a line without a strand of its own by its parent line's, or else outside the others", () => {
+    // Given E's patterns to two more S-tog lines without a colour of their own: Ex, an express
+    // of E, takes E's strand and sits beside it; Q has no parent and goes beyond every line with
+    // a strand, rather than between A and E.
+    const file = read(manifest.files.patterns) as {
+      lines: { name: string; mode: string; colour: string }[]
+      patterns: { line: number }[]
+    }
+    const e = file.lines.findIndex((line) => line.name === 'E')
+    const extra = ['Ex', 'Q'].map((name) => {
+      const line =
+        file.lines.push({ name, mode: 's-tog', colour: 'perron-color-transit-mode-regional' }) - 1
+      return file.patterns
+        .filter((pattern) => pattern.line === e)
+        .map((pattern) => ({ ...pattern, line }))
+    })
+    file.patterns.push(...extra.flat())
+    const withMore = readNetwork({
+      manifest,
+      stops: read(manifest.files.stops),
+      patterns: file,
+      paths: read(manifest.files.paths),
+    })
+    const style = basemapStyle(readPaint(document.documentElement, paintTokens(withMore)), withMore)
+    const orders = acrossOf(style, withMore, 'E', ['A', 'E', 'Ex', 'Q'])
+    expect(orders.length).toBeGreaterThan(0)
+    const order = orders[0][0] === 'A' ? ['A', 'E', 'Ex', 'Q'] : ['Q', 'Ex', 'E', 'A']
+    for (const each of orders) expect(each).toEqual(order)
   })
 
   it("keeps a line alone on its track on the centre, beside another mode's line too", () => {

@@ -11,7 +11,7 @@ import type { Network } from '../../timetable/network.ts'
 import type { LatLon } from '../../timetable/polyline.ts'
 import { modeColour, numberOf, type Paint } from '../paint.ts'
 import positron from './positron.json'
-import { strandsOf } from './strands.ts'
+import { patternPlaces, strandsOf, type StrandOf } from './strands.ts'
 
 type MapColour =
   | 'water'
@@ -102,6 +102,64 @@ const strandToken = (line: LineRecord): string | undefined =>
     ? `perron-map-strand-${line.colour.slice(LINE_COLOUR.length)}`
     : undefined
 
+/** The rail lines of the network with a strand token of their own. */
+const strandedLines = (network: Network): LineRecord[] =>
+  network.patterns.lines.filter((line) => line.mode !== 'bus' && strandToken(line))
+
+/**
+ * Each line's strand from its token, or, for a line without one, its parent's: the line of its
+ * mode with a token whose name its own starts with, the longest, so Bx rides beside B. A line with
+ * neither has none, and goes beyond the lines that have one.
+ */
+function strandsByToken(paint: Paint, network: Network): StrandOf {
+  const stranded = strandedLines(network).sort((a, b) => b.name.length - a.name.length)
+  const own = (line: LineRecord) => numberOf(paint, strandToken(line)!)
+  return (line) => {
+    if (strandToken(line)) return own(line)
+    const parent = stranded.find(
+      (each) => each.mode === line.mode && line.name.startsWith(each.name),
+    )
+    return parent && own(parent)
+  }
+}
+
+/** The tokens a line's offset reads: each rail mode's track spacing and each line's strand. */
+export const strandTokens = (network?: Network): string[] => [
+  ...RAIL.map(({ spacing }) => spacing),
+  ...(network ? strandedLines(network).map((line) => strandToken(line)!) : []),
+]
+
+/** A line's offset in px for its `place` in track spacings, as the style draws it. */
+function offsetOf(paint: Paint, line: LineRecord, place: number): number {
+  const spacing = numberOf(paint, RAIL.find(({ mode }) => mode === line.mode)!.spacing)
+  return Math.round(place * spacing * 100) / 100 || 0
+}
+
+const offsetsBuilt = new WeakMap<Network, { readonly paint: string; readonly offsets: Offsets }>()
+
+type Offsets = readonly (Float32Array | undefined)[]
+
+/**
+ * Each pattern's offset on each of its steps, in px to the right of the way it runs: its line's
+ * strand there, so a vehicle on the step rides on the strand its line is drawn on. None for a bus
+ * route's. Worked out once per network and paint.
+ */
+export function vehicleOffsets(paint: Paint, network: Network): Offsets {
+  const read = strandTokens(network)
+    .map((token) => paint.get(token))
+    .join()
+  const found = offsetsBuilt.get(network)
+  if (found?.paint === read) return found.offsets
+  const { lines, patterns } = network.patterns
+  const offsets = patternPlaces(network, strandsByToken(paint, network)).map((places, index) => {
+    if (!places) return undefined
+    const line = lines[patterns[index].line]
+    return Float32Array.from(places, (place) => offsetOf(paint, line, place))
+  })
+  offsetsBuilt.set(network, { paint: read, offsets })
+  return offsets
+}
+
 const STOP_FILL = map('land')
 const STOP_RING = map('label')
 
@@ -116,11 +174,11 @@ export function paintTokens(network?: Network): string[] {
     ...LINE.map(([, colour]) => map(colour)),
     map('label'),
     map('water-label'),
-    ...RAIL.flatMap(({ width, opacity, spacing }) => [width, opacity, spacing]),
+    ...RAIL.flatMap(({ width, opacity }) => [width, opacity]),
     modeColour('bus'),
     modeColour('train'),
     ...lines.map((line) => line.colour),
-    ...lines.flatMap((line) => strandToken(line) ?? []),
+    ...strandTokens(network),
   ]
 }
 
@@ -237,14 +295,9 @@ function piecesOf(network: Network, segment: number): [number, number][][] {
  * strand on each stretch times its mode's track spacing, in px, to the right of the way it runs.
  */
 function lineFeatures(paint: Paint, network: Network): FeatureCollection<MultiLineString> {
-  const strandOf = (line: LineRecord) => {
-    const token = strandToken(line)
-    return token ? numberOf(paint, token) : 0
-  }
   const byLine = new Map<LineRecord, Map<number, [number, number][][]>>()
-  for (const { line, segments, place } of strandsOf(network, strandOf)) {
-    const spacing = numberOf(paint, RAIL.find(({ mode }) => mode === line.mode)!.spacing)
-    const offset = Math.round(place * spacing * 100) / 100 || 0
+  for (const { line, segments, place } of strandsOf(network, strandsByToken(paint, network))) {
+    const offset = offsetOf(paint, line, place)
     let offsets = byLine.get(line)
     if (!offsets) byLine.set(line, (offsets = new Map()))
     const pieces = offsets.get(offset) ?? []
