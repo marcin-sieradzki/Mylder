@@ -1,7 +1,7 @@
 // Freezing and replaying recordings: the tracker runs over a plan's minutes on the test clock,
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
-// layer, and both give the same snapshots (docs/testing-seams.md). The stop and trip answers a
-// plan saves for screen tests are worked out from those snapshots.
+// layer, and both give the same snapshots and disruption lists (docs/testing-seams.md). The stop
+// and trip answers a plan saves for screen tests are worked out from those snapshots.
 import 'server-only'
 import { join } from 'node:path'
 import { Effect, References } from 'effect'
@@ -12,6 +12,7 @@ import {
   type StopDepartures,
   type TripDetail,
 } from '../answers.ts'
+import type { Disruptions } from '../disruptions.ts'
 import { serviceOf, type Service } from '../rejseplanen/answers.ts'
 import * as Http from '../rejseplanen/http.ts'
 import { stoppedCpu } from '../report.ts'
@@ -27,11 +28,20 @@ import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
 
-/** A frozen recording: each service's calls in order, and the snapshot of every minute. */
-export interface Frozen {
-  readonly calls: Calls
+/** What the tracker's routes served at each of a plan's minutes. */
+export interface Served {
   readonly snapshots: readonly Snapshot[]
+  /** The disruption list's route answer, after that minute's snapshot. */
+  readonly disruptions: readonly Disruptions[]
 }
+
+/** A frozen recording: each service's calls in order, and what the routes served each minute. */
+export interface Frozen extends Served {
+  readonly calls: Calls
+}
+
+/** Where a minute's disruption list is saved in a recording's folder, for screen tests. */
+export const disruptionsFile = (file: string) => join('answers', 'disruptions', file)
 
 /**
  * The stop and trip answers a plan saves for screen tests, by their files' paths in its folder,
@@ -64,16 +74,18 @@ export function savedAnswers(
 
 const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: plan.name })
 
-/** The tracker's snapshot at the start of each of a plan's minutes. */
-const play = (plan: RecordingPlan) =>
+/** The tracker's snapshot at the start of each of a plan's minutes, and its disruption list. */
+const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
   Effect.gen(function* () {
     const tracker = yield* Tracker
     const snapshots: Snapshot[] = []
+    const disruptions: Disruptions[] = []
     for (let minute = 0; minute < plan.minutes; minute++) {
       yield* TestClock.setTime(plan.start + minute * MINUTE)
       snapshots.push(yield* tracker.getSnapshot)
+      disruptions.push(yield* tracker.getDisruptions)
     }
-    return snapshots
+    return { snapshots, disruptions }
   }).pipe(
     // Each run's report line is noise here; warnings still show.
     Effect.provideService(References.MinimumLogLevel, 'Warn'),
@@ -146,12 +158,12 @@ export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect
       trackerLayer({ timetable, source: sourceOf(plan), http: Http.layer(taped), cpu: stoppedCpu }),
     ),
     Effect.provide(TestClock.layer()),
-    Effect.map((snapshots) => ({ calls, snapshots })),
+    Effect.map((served) => ({ calls, ...served })),
   )
 }
 
 /** Runs the tracker over a plan against its recording folder, as it ran when it was frozen. */
-export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<readonly Snapshot[]> =>
+export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Served> =>
   Effect.gen(function* () {
     const timetable = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
     return yield* play(plan).pipe(

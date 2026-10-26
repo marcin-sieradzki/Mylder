@@ -95,6 +95,13 @@ export interface ListReading<D extends DisruptionFacts> {
   readonly mayBeIncomplete: boolean
 }
 
+/** Minutes between the list's checks at each budget level; none once the month is spent. */
+const CHECKED_EVERY = { normal: 15, stretched: 15, tight: 30, spent: undefined } as const
+
+/** How often the list is checked at a budget level, in minutes, or undefined when it is not. */
+export const checkedEvery = (level: keyof typeof CHECKED_EVERY): number | undefined =>
+  CHECKED_EVERY[level]
+
 /** The most messages one `himsearch` answer holds. */
 export const MAX_MESSAGES = 100
 

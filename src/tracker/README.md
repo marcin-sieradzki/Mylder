@@ -12,7 +12,7 @@ Runs on the server only. Every module here starts with `import 'server-only'`, s
 - `rejseplanen/client.ts`: the Rejseplanen client, one function per service (`journeyPos`, `himsearch`, `multiDepartureBoard`, `journeyDetail`), every attempt counted before it is sent.
 - `join.ts` joins a journey to its trip, taking the corrections opened trips' details made; `build.ts` builds the snapshot's trips with the domain rules from the answer and each trip's history between runs; `snapshot.ts` is the snapshot's schema, whose types the browser imports.
 - `health.ts`: the API's health (ok, empty, error, spent) and when it began.
-- `disruptions.ts`: the disruption list between fetches, each message as received with its fields' kind and its validity as moments; `src/domain/disruption.ts` reads the kind its card names and whether it is active or Later.
+- `disruptions.ts`: the disruption list between fetches, each message as received with its fields' kind, the modes its products concern and its validity as moments; `src/domain/disruption.ts` reads the kind its card names and whether it is active or Later.
 - `report.ts`: what each run reports, in its log line and the snapshot's status section, and the CPU clock it measures itself by.
 - `budget.ts`: the pacing rule: the month's line, the gap and the level, which sets the poll interval, the disruption fetches and whether on-demand calls are allowed.
 - `store.ts`: the store's four operations, in memory until the hosted Redis (#56); `caching.ts`: the CDN header.

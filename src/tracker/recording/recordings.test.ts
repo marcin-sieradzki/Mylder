@@ -8,7 +8,7 @@ import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
 import { startingAt } from './clock'
-import { replay, savedAnswers } from './freeze'
+import { disruptionsFile, replay, savedAnswers } from './freeze'
 import {
   callFile,
   readJson,
@@ -40,14 +40,18 @@ describe('a frozen recording', () => {
     ([, plan]) =>
       Effect.gen(function* () {
         const dir = recordingDir(plan.name)
-        const replayed = yield* replay(plan, dir)
-        const saved = yield* Effect.promise(() =>
-          Promise.all(replayed.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
+        const { snapshots, disruptions } = yield* replay(plan, dir)
+        const saved = (path: (file: string) => string) =>
+          Effect.promise(() =>
+            Promise.all(snapshots.map((_, i) => readJson(join(dir, path(callFile(i)))))),
+          )
+        expect(snapshots).toHaveLength(plan.minutes)
+        expect(JSON.parse(JSON.stringify(snapshots))).toEqual(
+          yield* saved((file) => join('snapshots', file)),
         )
-        expect(replayed).toHaveLength(plan.minutes)
-        expect(JSON.parse(JSON.stringify(replayed))).toEqual(saved)
+        expect(JSON.parse(JSON.stringify(disruptions))).toEqual(yield* saved(disruptionsFile))
         const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
-        const answers = savedAnswers(plan, recorded, replayed)
+        const answers = savedAnswers(plan, recorded, snapshots)
         expect(answers.size).toBe(
           (plan.answers?.stops.length ?? 0) + (plan.answers?.trips?.length ?? 0),
         )

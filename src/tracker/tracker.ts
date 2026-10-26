@@ -9,6 +9,7 @@
 // (`corrections.ts`), which the next run and every stop's board read.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
+import { checkedEvery } from '../domain/disruption.ts'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
 import {
@@ -30,7 +31,7 @@ import {
   type History,
   type PositionAnswer,
 } from './build.ts'
-import { disruptionsEvery, monthOf, pacing, type Pacing } from './budget.ts'
+import { monthOf, pacing, type Pacing } from './budget.ts'
 import {
   failedList,
   fetchDue,
@@ -431,7 +432,7 @@ export const layer: Layer.Layer<
     const getDisruptions = Effect.gen(function* () {
       const snapshot = yield* getSnapshot
       const list = yield* storedDisruptions
-      return servedList(list, disruptionsEvery(snapshot.budget.level), snapshot.nextDue)
+      return servedList(list, checkedEvery(snapshot.budget.level), snapshot.nextDue)
     })
 
     return {
