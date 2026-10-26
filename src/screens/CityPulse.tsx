@@ -13,7 +13,14 @@ import { budgetLine } from './budget'
 import styles from './CityPulse.module.css'
 import { DayProfile } from './DayProfile'
 import { grouped } from './numbers'
-import { pausedFrom, pulseOf, type ModeShare, type Share, type Unknown } from './pulse'
+import {
+  pausedFrom,
+  pulseOf,
+  type DelayUnknown,
+  type ModeShare,
+  type Share,
+  type Unknown,
+} from './pulse'
 
 /**
  * Each mode's operator or authority, the second line under its meter. The timetable doesn't name
@@ -98,7 +105,8 @@ export function CityPulse() {
     }),
     [lang],
   )
-  const why = (unknown: Unknown | 'metro' | 'computed-meters') => words.unknown[unknown]
+  const why = (unknown: Unknown | DelayUnknown | 'metro' | 'computed-meters') =>
+    words.unknown[unknown]
   const fill = (template: string, values: Record<string, string | number>) =>
     Object.entries(values).reduce(
       (text, [name, value]) => text.replace(`{${name}}`, String(value)),
@@ -139,7 +147,9 @@ export function CityPulse() {
         ) : (
           <Figure label={words.reported}>{why(pulse.reported)}</Figure>
         )}
-        {pulse.delay ? (
+        {typeof pulse.delay === 'string' ? (
+          <Figure label={words.averageDelay}>{why(pulse.delay)}</Figure>
+        ) : pulse.delay ? (
           <Figure
             label={words.averageDelay}
             value={minutes.format(pulse.delay.mean / 60).replace('-', '−')}

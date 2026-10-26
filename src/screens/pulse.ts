@@ -10,6 +10,9 @@ import type { Snapshot, SnapshotTrip } from '../tracker/index'
 /** Why a figure is "—". */
 export type Unknown = 'computed-only' | 'paused' | 'none-underway'
 
+/** Why the average delay is "—": too few trips carry one for a mean, or positions are paused. */
+export type DelayUnknown = 'too-few' | 'paused'
+
 /** A share of the trips that could report: how many did, of how many. */
 export interface Share {
   readonly count: number
@@ -38,8 +41,11 @@ export interface Pulse {
   /** Every trip on the map, whatever the filters: the whole kept in view. */
   readonly inService: number
   readonly reported: number | Unknown
-  /** The mean delay in seconds, when at least `MIN_DELAYS` trips carry one; none otherwise. */
-  readonly delay?: { readonly mean: number; readonly count: number }
+  /**
+   * The mean delay in seconds, when at least `MIN_DELAYS` trips carry one, or why it can't be
+   * known; none when the snapshot carries no delays at all, and Reporting live takes its slot.
+   */
+  readonly delay?: { readonly mean: number; readonly count: number } | DelayUnknown
   /** Live and Ageing over underway, the Metro left out: the sum of the meters. */
   readonly live: Share | Unknown
   readonly modes: readonly ModeShare[]
@@ -103,10 +109,19 @@ export function pulseOf(
     .filter((trip) => trip.mode !== 'metro' && trip.delay !== undefined)
     .filter((trip) => DELAY_STATES.has(stateOf(trip)))
     .map((trip) => trip.delay!)
-  const delay =
-    !paused && delays.length >= MIN_DELAYS
-      ? { mean: delays.reduce((sum, each) => sum + each, 0) / delays.length, count: delays.length }
-      : undefined
+  // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
+  // figure for another: under the minimum it says so.
+  const carries = snapshot.trips.some((trip) => trip.delay !== undefined)
+  const delay: Pulse['delay'] = !carries
+    ? undefined
+    : paused
+      ? 'paused'
+      : delays.length < MIN_DELAYS
+        ? 'too-few'
+        : {
+            mean: delays.reduce((sum, each) => sum + each, 0) / delays.length,
+            count: delays.length,
+          }
 
   const shareOf = (trips: readonly SnapshotTrip[]): Share | Unknown =>
     why ??
@@ -141,7 +156,7 @@ export function pulseOf(
     moving: underway.filter((trip) => stateOf(trip) !== 'no-signal').length,
     inService: all.length,
     reported,
-    ...(delay ? { delay } : {}),
+    ...(delay === undefined ? {} : { delay }),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
     states: byState,
