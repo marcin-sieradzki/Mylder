@@ -169,7 +169,7 @@ export function vehicleLoop({
           ? shown!.movers
           : moversOf(vehicles, snapshot, network, at)
       shown = { vehicles, snapshot, network, movers }
-      // The same snapshot again brings new glyphs or filters only: stilled dots stay where they stand.
+      // The same snapshot again brings new glyphs or filters only: stilled dots stay put.
       if (again && still()) write()
       else if (!movers.some(Boolean) || still()) {
         halt()

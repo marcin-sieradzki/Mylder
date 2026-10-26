@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { viewOf } from './view.ts'
+import { afterEach, describe, expect, it } from 'vitest'
+import { addressView, viewOf } from './view.ts'
 
 describe("the view an address's query names", () => {
   it('reads the zoom, latitude and longitude a map link gives', () => {
@@ -18,5 +18,21 @@ describe("the view an address's query names", () => {
     const view = viewOf(search)
     expect(view.centre).toBeUndefined()
     expect(view.zoom).toBeUndefined()
+  })
+})
+
+describe("the view kept in the page's address", () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('keeps the same filters while the map moves, and new ones when a filter changes', () => {
+    window.history.replaceState(null, '', '/?hide=bus')
+    const store = addressView()
+    const { hidden } = store.get()
+    store.update({ centre: [12.5683, 55.6761], zoom: 12.5 })
+    expect(store.get().hidden).toBe(hidden)
+    store.update({ hidden: new Set(['bus', 'metro']) })
+    expect([...store.get().hidden]).toEqual(['bus', 'metro'])
   })
 })

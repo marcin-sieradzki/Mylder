@@ -93,9 +93,15 @@ export function addressView(): ViewStore {
   const notify = () => {
     for (const listener of listeners) listener()
   }
+  // The filters stay the same set while the map moves, so what follows them sees they didn't
+  // change.
   const get = (): MapView => {
     const search = window.location.search
-    if (read?.search !== search) read = { search, view: viewOf(search) }
+    if (read?.search === search) return read.view
+    const view = viewOf(search)
+    const was = read?.view.hidden
+    const same = was?.size === view.hidden.size && [...view.hidden].every((mode) => was.has(mode))
+    read = { search, view: same ? { ...view, hidden: was } : view }
     return read.view
   }
   return {
