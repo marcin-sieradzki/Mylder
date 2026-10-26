@@ -37,6 +37,20 @@ export function wallClock(day: IsoDate, seconds: number, timezone: string): numb
 }
 
 /**
+ * A date and an `HH:MM` or `HH:MM:SS` time as Rejseplanen writes them, read on the zone's clock,
+ * or undefined when either is missing.
+ */
+export function clockMoment(
+  date: string | undefined,
+  time: string | undefined,
+  timezone: string,
+): number | undefined {
+  if (!date || !time) return undefined
+  const [h, m, s] = time.split(':').map(Number)
+  return wallClock(date, h * 3600 + m * 60 + (s || 0), timezone)
+}
+
+/**
  * The moment a service day's GTFS times count from: noon minus twelve hours, which is midnight
  * on every day but the two the clocks change.
  */

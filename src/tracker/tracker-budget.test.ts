@@ -112,7 +112,8 @@ describe('the tracker’s budget', () => {
       // Midnight on 1 July in Copenhagen: a new month's counter, and calls again.
       yield* TestClock.setTime(Date.UTC(2026, 5, 30, 22, 0, 30))
       const first = yield* snapshot
-      expect(first.budget).toEqual({ level: 'normal', calls: 1 })
+      // Its positions and disruptions.
+      expect(first.budget).toEqual({ level: 'normal', calls: 2 })
       expect(first.api.status).toBe('ok')
     }).pipe(Effect.provide(tracker())),
   )
@@ -122,7 +123,7 @@ describe('the tracker’s budget', () => {
       yield* TestClock.setTime(MOMENT)
       const refused = yield* snapshot
       expect(refused.api).toEqual({ status: 'spent', since: MOMENT, kind: 'quota' })
-      // A 4xx is not tried again, so the month has one call.
+      // A 4xx is not tried again, and the disruption call isn't made, so the month has one call.
       expect(refused.budget).toEqual({ level: 'spent', calls: 1, resumes: '2026-07-01' })
       const after = yield* minuteLater
       expect(after.budget.calls).toBe(1)
@@ -150,7 +151,7 @@ describe('the tracker’s budget', () => {
     const hanging = Http.layer(
       Http.client(() =>
         Effect.gen(function* () {
-          countWhenSent = yield* store!.get(counter)
+          countWhenSent ??= yield* store!.get(counter)
           return yield* Effect.never
         }),
       ),
@@ -159,11 +160,12 @@ describe('the tracker’s budget', () => {
       yield* TestClock.setTime(MOMENT)
       store = yield* Store
       const fiber = yield* Effect.forkChild(snapshot)
-      yield* TestClock.adjust('8 seconds')
+      // The positions call and the disruptions call each time out at 8 s.
+      yield* TestClock.adjust('16 seconds')
       const s = yield* Fiber.join(fiber)
       expect(countWhenSent).toBe(1)
       expect(s.api).toEqual({ status: 'error', since: MOMENT, kind: 'timeout' })
-      expect(s.budget.calls).toBe(1)
+      expect(s.budget.calls).toBe(2)
     }).pipe(Effect.provide(tracker(hanging)))
   })
 
@@ -171,9 +173,9 @@ describe('the tracker’s budget', () => {
     let sent = 0
     const simulation = simulatedClient({ timetable })
     const secondFails = Http.layer(
-      Http.client((request) =>
-        // The second run's call and its retry.
-        [1, 2].includes(sent++)
+      Http.client((request, url) =>
+        // The second run's positions call and its retry.
+        url.pathname.endsWith('journeyPos') && [1, 2].includes(sent++)
           ? Effect.succeed(Http.json(request, 503, {}))
           : simulation.execute(request).pipe(Effect.orDie),
       ),

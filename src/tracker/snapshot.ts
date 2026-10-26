@@ -72,10 +72,15 @@ export const Budget = Schema.Struct({
   resumes: optional(Schema.String),
 })
 
+/** The disruption list's state; the list itself has its own route. */
 export const DisruptionsSummary = Schema.Struct({
-  fetched: Schema.Number,
+  /** When the list was last fetched, or null when no fetch has worked yet. */
+  fetched: Schema.NullOr(Schema.Number),
+  /** When it was last asked for, and whether that worked. */
+  checked: Schema.Number,
   ok: Schema.Boolean,
   count: Schema.Number,
+  /** Changes whenever the list does, so the browser fetches it again. */
   version: Schema.String,
 })
 

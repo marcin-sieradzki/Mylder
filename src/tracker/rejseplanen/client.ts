@@ -7,7 +7,14 @@ import 'server-only'
 import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
 import type { Box } from '../../timetable/format.ts'
 import { Store } from '../store.ts'
-import { ErrorAnswer, JourneyPosAnswer, QUOTA_SPENT, REFUSED_KEY, type Service } from './answers.ts'
+import {
+  ErrorAnswer,
+  HimSearchAnswer,
+  JourneyPosAnswer,
+  QUOTA_SPENT,
+  REFUSED_KEY,
+  type Service,
+} from './answers.ts'
 import * as Http from './http.ts'
 
 /** Where Rejseplanen API 2.0 answers. */
@@ -40,10 +47,16 @@ export interface JourneyPosQuery {
   readonly maxJny: number
 }
 
+/** The disruption messages asked for: the products they concern, as a bitmask. */
+export interface HimSearchQuery {
+  readonly products: number
+}
+
 export interface RejseplanenShape {
   readonly journeyPos: (
     query: JourneyPosQuery,
   ) => Effect.Effect<Answered<JourneyPosAnswer>, CallError>
+  readonly himsearch: (query: HimSearchQuery) => Effect.Effect<Answered<HimSearchAnswer>, CallError>
 }
 
 export class Rejseplanen extends Context.Service<Rejseplanen, RejseplanenShape>()(
@@ -175,6 +188,9 @@ export const layer = (
             positionMode: query.positionMode,
             maxJny: query.maxJny,
           }),
+        // Which parameters narrow the messages to Copenhagen is a first-day fact; until then
+        // the products alone.
+        himsearch: (query) => call('himsearch', HimSearchAnswer, { products: query.products }),
       }
     }),
   )
