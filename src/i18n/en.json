@@ -44,5 +44,63 @@
   "credit": {
     "transitData": "Transit data",
     "openStreetMap": "OpenStreetMap contributors"
+  },
+  "about": {
+    "title": "About Mylder",
+    "description": "A live map of Copenhagen's buses, S-tog, Metro and trains, honest about how fresh each position is.",
+    "honest": "Mylder shows the data as Rejseplanen sends it, in its own words and language, and marks every figure it works out itself.",
+    "nonCommercial": "Mylder is non-commercial: no advertising, no paid tier, and no sale of the data or of anything built on it.",
+    "credits": {
+      "title": "Data and credits",
+      "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
+      "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "style": "The map's style is a fork of OpenFreeMap's Positron, under the MIT licence."
+    },
+    "states": {
+      "title": "Data states",
+      "live": "The vehicle itself reported this position within about the last two updates.",
+      "ageing": "The vehicle's last report is older than that but under 5 minutes; the dot moves on from it along the line.",
+      "estimated": "No recent report, but Rejseplanen still has the trip: a position it computed, or expected times.",
+      "timetableOnly": "No realtime for this trip today, so it is placed from the timetable. Every Metro train is.",
+      "noSignal": "The trip had realtime, and it stopped 5 minutes ago or more; the dot moves on the timetable and its last delay."
+    },
+    "status": {
+      "title": "This page",
+      "source": "Source",
+      "simulated": "Simulated vehicles, scenario {name}",
+      "recording": "A recording, {name}",
+      "rejseplanen": "Rejseplanen",
+      "notReal": "The vehicles on this page are not real.",
+      "positions": "Positions",
+      "REPORT_ONLY": "Reports from the vehicles only",
+      "CALC_REPORT": "Positions computed by Rejseplanen",
+      "alternating": "Reports and computed positions, by turns",
+      "none": "No position calls",
+      "apiTime": "Rejseplanen's realtime",
+      "updates": "Updates",
+      "every": "Every {interval}",
+      "budget": "Data budget",
+      "calls": "Calls this month",
+      "normal": "Normal",
+      "stretched": "Stretched",
+      "tight": "Tight",
+      "spent": "Used up",
+      "paused": "Live data is paused until {date}: this month's calls are used up.",
+      "budgetLine": "Updating every {interval} to stay within the data budget.",
+      "store": "Server store",
+      "storeOk": "Available",
+      "storeUnavailable": "Unavailable: no vehicle can be Ageing or No signal until it returns.",
+      "disruptions": "Disruptions",
+      "checked": "Checked {time}",
+      "checkFailed": "Last checked {time}; the latest check failed.",
+      "notChecked": "Not checked yet"
+    },
+    "keys": {
+      "title": "Keys",
+      "zoom": "{plus} and {minus} zoom the map.",
+      "pan": "{left} {right} {up} {down} move it.",
+      "close": "{esc} closes the vehicle card or panel.",
+      "pause": "Pause, beside the zoom buttons, stops the vehicles moving, and Resume starts them again."
+    }
   }
 }

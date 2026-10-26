@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useI18n } from '../i18n/useI18n'
+import { AboutDialog } from './AboutDialog'
 import { MapFoot } from './MapFoot'
 import styles from './MapScreen.module.css'
 import { TopBar } from './TopBar'
@@ -12,7 +13,7 @@ const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
 
 /**
  * The moving map (docs/screens.md): the map fills the window, with the top bar over it, the
- * legend, the controls and the credit at its foot, and the picked dot's card.
+ * legend, the controls and the credit at its foot, the picked dot's card and the About dialog.
  */
 export function MapScreen() {
   const { dictionary } = useI18n()
@@ -24,6 +25,7 @@ export function MapScreen() {
       <TopBar />
       <MapFoot />
       <VehicleCard />
+      <AboutDialog />
     </div>
   )
 }

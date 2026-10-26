@@ -11,6 +11,7 @@ import { readPaint } from '../map/paint'
 import { vehiclePaint, vehiclesOf } from '../map/vehicles'
 import { mapView } from '../map/view'
 import type { Snapshot } from '../tracker/index'
+import { aboutDialog } from './about'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
 
@@ -196,6 +197,15 @@ describe('the top bar', () => {
     ]
     expect(controls).toHaveLength(7)
     for (const control of controls) expect(control).toHaveAccessibleName()
+  })
+
+  it('opens the About dialog from the bar’s About button', async () => {
+    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    renderScreen('en')
+    const about = within(screen.getByRole('banner')).getByRole('button', { name: 'About Mylder' })
+    act(() => about.click())
+    expect(await screen.findByRole('dialog', { name: 'About Mylder' })).toBeInTheDocument()
+    act(() => aboutDialog.close())
   })
 
   it('shows no time before a snapshot built from an answer has landed', () => {

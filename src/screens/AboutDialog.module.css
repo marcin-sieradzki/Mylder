@@ -1,0 +1,27 @@
+/* The dialog's body scrolls within the window: the terms, the states, the status and the keys. */
+.body {
+  display: grid;
+  gap: var(--perron-space-300);
+  max-block-size: 60vh;
+  overflow-y: auto;
+}
+
+.body p {
+  margin: 0;
+}
+
+.body p + p,
+.body p + ul,
+.body ul + p {
+  margin-block-start: var(--perron-space-150);
+}
+
+/* Each state's dot and word, then its sentence; each key line. */
+.states,
+.keys {
+  display: grid;
+  gap: var(--perron-space-150);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
