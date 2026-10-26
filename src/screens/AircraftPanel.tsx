@@ -4,8 +4,9 @@ import { EmptyState, Text, VehicleDotLabel } from '@mylder/perron'
 import { DetailPanel } from '@mylder/perron/patterns'
 import { useEffect } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { aircraftIn, pollAircraft, useAircraftOff, useAircraftSnapshot } from '../map/aircraft'
+import { aircraftIn, liveAircraft, pollAircraft, useAircraftOff } from '../map/aircraft'
 import { useAircraftState } from '../map/aircraft-states'
+import { useSnapshot } from '../map/live'
 import type { SnapshotAircraft } from '../tracker/aircraft/index'
 import styles from './AircraftPanel.module.css'
 import type { PanelFrame } from './DetailPanels'
@@ -28,7 +29,7 @@ export function AircraftPanel({ hex, frame }: AircraftPanelProps) {
   useEffect(() => pollAircraft(), [])
   const { dictionary } = useI18n()
   const words = dictionary.aircraft
-  const snapshot = useAircraftSnapshot()
+  const snapshot = useSnapshot(liveAircraft)
   const off = useAircraftOff()
   // Gone from the map once its position is old enough to drop, though no poll has said so yet.
   const dropped = useAircraftState(hex) === undefined

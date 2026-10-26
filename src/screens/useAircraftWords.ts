@@ -2,8 +2,9 @@
 
 import type { AircraftState } from '../domain/aircraft-state'
 import { useI18n } from '../i18n/useI18n'
-import { useAircraftClockOffset } from '../map/aircraft'
+import { liveAircraft } from '../map/aircraft'
 import { useAircraftState } from '../map/aircraft-states'
+import { useClockOffset } from '../map/live'
 import { COPENHAGEN } from '../map/timetable'
 import type { SnapshotAircraft } from '../tracker/aircraft/index'
 import { aircraftFigures, aircraftName, aircraftStateLabel } from './aircraftLabel'
@@ -26,7 +27,7 @@ export interface AircraftWords {
 export function useAircraftWords(aircraft: SnapshotAircraft, fetched: number): AircraftWords {
   const { dictionary } = useI18n()
   const state = useAircraftState(aircraft.hex) ?? aircraft.state
-  const now = useServerSecond(useAircraftClockOffset())
+  const now = useServerSecond(useClockOffset(liveAircraft))
   return {
     name: aircraftName(aircraft),
     figures: aircraftFigures(aircraft, dictionary),

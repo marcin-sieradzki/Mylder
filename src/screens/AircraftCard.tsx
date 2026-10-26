@@ -1,7 +1,8 @@
 'use client'
 
 import { VehicleDotLabel } from '@mylder/perron'
-import { aircraftIn, useAircraftSnapshot } from '../map/aircraft'
+import { aircraftIn, liveAircraft } from '../map/aircraft'
+import { useSnapshot } from '../map/live'
 import { usePickedVehicle } from '../map/picking'
 import type { SnapshotAircraft } from '../tracker/aircraft/index'
 import { useAircraftWords } from './useAircraftWords'
@@ -14,7 +15,7 @@ import { DotCard } from './VehicleCard'
  */
 export function AircraftCard() {
   const picked = usePickedVehicle()
-  const snapshot = useAircraftSnapshot()
+  const snapshot = useSnapshot(liveAircraft)
   const aircraft = picked?.kind === 'aircraft' ? aircraftIn(snapshot, picked.key) : undefined
   if (!picked || !snapshot || !aircraft) return null
   return <Card aircraft={aircraft} fetched={snapshot.fetched} point={picked.point} />

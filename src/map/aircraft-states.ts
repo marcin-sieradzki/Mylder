@@ -13,7 +13,7 @@ import {
 } from '../domain/aircraft-state.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import { liveAircraft, type AircraftStore } from './aircraft.ts'
-import { tickingStore, type TickingStore } from './ticking.ts'
+import { sameByKey, tickingStore, type TickingStore } from './ticking.ts'
 
 /** Each aircraft on the map's data state, by its hex; one whose position is dropped is left out. */
 export type AircraftStates = ReadonlyMap<string, AircraftState>
@@ -39,14 +39,11 @@ export function aircraftStatesAt(snapshot: AircraftSnapshot, now: number): Aircr
   return states
 }
 
-const same = (a: AircraftStates, b: AircraftStates) =>
-  a.size === b.size && [...a].every(([hex, state]) => b.get(hex) === state)
-
 /** The states of the aircraft snapshots `live` holds. */
 export const aircraftStatesStore = (live: AircraftStore = liveAircraft): AircraftStatesStore =>
   tickingStore(
     ({ snapshot }, now) => (snapshot ? aircraftStatesAt(snapshot, now) : NONE),
-    same,
+    sameByKey,
     live,
   )
 

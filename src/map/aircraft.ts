@@ -56,26 +56,6 @@ export function aircraftIn(
   return aircraft.get(hex)
 }
 
-/** The latest aircraft snapshot, for a component: none until one lands, or while it is off. */
-export function useAircraftSnapshot(
-  store: AircraftStore = liveAircraft,
-): AircraftSnapshot | undefined {
-  return useSyncExternalStore(
-    store.subscribe,
-    () => store.get().snapshot,
-    () => undefined,
-  )
-}
-
-/** How far the aircraft server's clock is ahead of this device's, for what ages by it. */
-export function useAircraftClockOffset(store: AircraftStore = liveAircraft): number {
-  return useSyncExternalStore(
-    store.subscribe,
-    () => store.get().clockOffset,
-    () => 0,
-  )
-}
-
 /**
  * Where the aircraft on the page come from, for the credits and the source banner: none until an
  * aircraft snapshot from a feed that answered has landed, so a page with the aircraft off, or

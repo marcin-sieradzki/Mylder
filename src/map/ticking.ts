@@ -18,6 +18,10 @@ export interface ClockedStore<L extends Pick<LiveState<unknown>, 'clockOffset'>>
   subscribe(onChange: () => void): () => void
 }
 
+/** Whether two maps hold the same values by the same keys, such as two moments' data states. */
+export const sameByKey = <K, V>(a: ReadonlyMap<K, V>, b: ReadonlyMap<K, V>): boolean =>
+  a.size === b.size && [...a].every(([key, value]) => b.has(key) && b.get(key) === value)
+
 /** The value `read` gives of what `live` holds, at its server's time. */
 export function tickingStore<T, L extends Pick<LiveState<unknown>, 'clockOffset'>>(
   read: (live: L, now: number) => T,

@@ -9,7 +9,7 @@ import { useSyncExternalStore } from 'react'
 import { dataState, type DataState, type DataStateContext } from '../domain/data-state.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveSnapshot, type SnapshotStore } from './live.ts'
-import { tickingStore, type TickingStore } from './ticking.ts'
+import { sameByKey, tickingStore, type TickingStore } from './ticking.ts'
 
 /** Each drawn trip's data state, by its key. */
 export type DataStates = ReadonlyMap<string, DataState>
@@ -31,12 +31,9 @@ export function statesAt(snapshot: Snapshot, now: number): DataStates {
   return new Map(snapshot.trips.map((trip) => [trip.key, dataState(trip, context)]))
 }
 
-const same = (a: DataStates, b: DataStates) =>
-  a.size === b.size && [...a].every(([key, state]) => b.get(key) === state)
-
 /** The states of the snapshots `live` holds. */
 export const dataStatesStore = (live: SnapshotStore = liveSnapshot): DataStatesStore =>
-  tickingStore(({ snapshot }, now) => (snapshot ? statesAt(snapshot, now) : NONE), same, live)
+  tickingStore(({ snapshot }, now) => (snapshot ? statesAt(snapshot, now) : NONE), sameByKey, live)
 
 /** The page's one store of states, from the page's live snapshot. */
 export const dataStates = dataStatesStore()

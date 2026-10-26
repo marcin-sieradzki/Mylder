@@ -99,10 +99,11 @@ export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapsh
 }
 
 /**
- * The server's clock minus this device's, for a component that reads the server's time: it
+ * The server's clock minus this device's, for a component that reads the server's time: the
+ * transit snapshot's server unless another kind's store is given, such as the aircraft's. It
  * renders again only when an answer moves it.
  */
-export function useClockOffset(store: SnapshotStore = liveSnapshot): number {
+export function useClockOffset(store: LiveStore<unknown> = liveSnapshot): number {
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().clockOffset,
@@ -125,10 +126,13 @@ export function usePollMoment(store: SnapshotStore = liveSnapshot): number | und
 }
 
 /**
- * The latest snapshot alone, for a component that shows nothing of how the poll is going: it
- * renders again only when a snapshot lands.
+ * The latest snapshot alone, for a component that shows nothing of how the poll is going: the
+ * transit snapshot unless another kind's store is given, such as the aircraft's. It renders
+ * again only when a snapshot lands; none until one has.
  */
-export function useSnapshot(store: SnapshotStore = liveSnapshot): Snapshot | undefined {
+export function useSnapshot(): Snapshot | undefined
+export function useSnapshot<S>(store: LiveStore<S>): S | undefined
+export function useSnapshot(store: LiveStore<unknown> = liveSnapshot): unknown {
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().snapshot,
