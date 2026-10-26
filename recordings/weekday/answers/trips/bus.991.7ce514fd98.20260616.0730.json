@@ -1,0 +1,93 @@
+{
+  "key": "bus.991.7ce514fd98.20260616.0730",
+  "line": "991",
+  "mode": "bus",
+  "colour": "perron-color-transit-mode-bus",
+  "headsign": "Teglholmen",
+  "pattern": 3,
+  "state": "timetable-only",
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "54307",
+      "name": "Orientkaj St. (Orientkaj)",
+      "arrival": 1781587800000,
+      "departure": 1781587800000
+    },
+    {
+      "index": 1,
+      "stop": "48645",
+      "name": "Refshaleøen (Refshalevej)",
+      "arrival": 1781588820000,
+      "departure": 1781589180000
+    },
+    {
+      "index": 2,
+      "stop": "10765",
+      "name": "Nordre Toldbod (Københavns Havn)",
+      "arrival": 1781589480000,
+      "departure": 1781589480000
+    },
+    {
+      "index": 3,
+      "stop": "29944",
+      "name": "Operaen (Københavns Havn)",
+      "arrival": 1781589840000,
+      "departure": 1781589840000
+    },
+    {
+      "index": 4,
+      "stop": "10762",
+      "name": "Nyhavn (Københavns Havn)",
+      "arrival": 1781590140000,
+      "departure": 1781590140000
+    },
+    {
+      "index": 5,
+      "stop": "10761",
+      "name": "Knippelsbro (Københavns Havn)",
+      "arrival": 1781590560000,
+      "departure": 1781590560000
+    },
+    {
+      "index": 6,
+      "stop": "10760",
+      "name": "Det Kongelige Bibliotek (Københavns Havn)",
+      "arrival": 1781590800000,
+      "departure": 1781590800000
+    },
+    {
+      "index": 7,
+      "stop": "46205",
+      "name": "Bryggebroen (Islands Brygge)",
+      "arrival": 1781591460000,
+      "departure": 1781591460000
+    },
+    {
+      "index": 8,
+      "stop": "54303",
+      "name": "Islands Brygge Syd (Islands Brygge)",
+      "arrival": 1781591880000,
+      "departure": 1781591880000
+    },
+    {
+      "index": 9,
+      "stop": "54304",
+      "name": "Enghave Brygge",
+      "arrival": 1781592060000,
+      "departure": 1781592060000
+    },
+    {
+      "index": 10,
+      "stop": "46206",
+      "name": "Teglholmen (Teglholmens Sydkaj)",
+      "arrival": 1781592540000,
+      "departure": 1781592540000
+    }
+  ]
+}

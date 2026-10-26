@@ -1,0 +1,8 @@
+/* A side panel opens under the top bar rather than over its end, where the language switch and
+   About sit: the bar's offset, its height on a desktop, then the panel's own gap. Doubled, to
+   outrank the Sheet's own padding whichever stylesheet loads last. */
+.side.side[data-anchor='right'] {
+  padding-block-start: calc(
+    var(--perron-space-300) + var(--perron-size-top-bar) + var(--perron-size-panel-gap)
+  );
+}

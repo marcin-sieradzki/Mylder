@@ -8,8 +8,10 @@ import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
 import type { Box } from '../../timetable/format.ts'
 import { Store } from '../store.ts'
 import {
+  DepartureBoardAnswer,
   ErrorAnswer,
   HimSearchAnswer,
+  JourneyDetailAnswer,
   JourneyPosAnswer,
   QUOTA_SPENT,
   REFUSED_KEY,
@@ -20,8 +22,13 @@ import * as Http from './http.ts'
 /** Where Rejseplanen API 2.0 answers. */
 export const BASE_URL = 'https://www.rejseplan.dk/api/'
 
-/** How long one attempt may take before it counts as a timeout. */
-export const CALL_TIMEOUT = '8 seconds'
+/** How long one attempt may take before it counts as a timeout, in seconds. */
+export const CALL_TIMEOUT_SECONDS = 8
+
+const CALL_TIMEOUT = `${CALL_TIMEOUT_SECONDS} seconds` as const
+
+/** The most attempts one call makes: a network error or a 5xx is tried once more. */
+export const CALL_ATTEMPTS = 2
 
 /** How a call failed: the kinds the snapshot's API health names. */
 export interface CallError {
@@ -54,11 +61,29 @@ export interface HimSearchQuery {
   readonly products: number
 }
 
+/** A stop's departures asked for: its platforms' ids, all in one call, for the next minutes. */
+export interface DepartureBoardQuery {
+  readonly ids: readonly string[]
+  /** Minutes from now. */
+  readonly duration: number
+}
+
+/** One journey's calls asked for, by the reference an answer gave it. */
+export interface JourneyDetailQuery {
+  readonly ref: string
+}
+
 export interface RejseplanenShape {
   readonly journeyPos: (
     query: JourneyPosQuery,
   ) => Effect.Effect<Answered<JourneyPosAnswer>, CallError>
   readonly himsearch: (query: HimSearchQuery) => Effect.Effect<Answered<HimSearchAnswer>, CallError>
+  readonly multiDepartureBoard: (
+    query: DepartureBoardQuery,
+  ) => Effect.Effect<Answered<DepartureBoardAnswer>, CallError>
+  readonly journeyDetail: (
+    query: JourneyDetailQuery,
+  ) => Effect.Effect<Answered<JourneyDetailAnswer>, CallError>
 }
 
 export class Rejseplanen extends Context.Service<Rejseplanen, RejseplanenShape>()(
@@ -174,7 +199,7 @@ export const layer = (
         return Effect.gen(function* () {
           const started = yield* Clock.currentTimeMillis
           const answer = yield* attempt.pipe(
-            Effect.retry({ times: 1, while: retryable }),
+            Effect.retry({ times: CALL_ATTEMPTS - 1, while: retryable }),
             Effect.catch((error) =>
               Effect.flatMap(Clock.currentTimeMillis, (ended) =>
                 Effect.fail<CallError>({ ...error, ms: ended - started }),
@@ -200,6 +225,13 @@ export const layer = (
         // Which parameters narrow the messages to Copenhagen is a first-day fact; until then
         // the products alone.
         himsearch: (query) => call('himsearch', HimSearchAnswer, { products: query.products }),
+        // How many ids one `idList` may hold is a first-day fact.
+        multiDepartureBoard: (query) =>
+          call('multiDepartureBoard', DepartureBoardAnswer, {
+            idList: query.ids.join('|'),
+            duration: query.duration,
+          }),
+        journeyDetail: (query) => call('journeyDetail', JourneyDetailAnswer, { id: query.ref }),
       }
     }),
   )

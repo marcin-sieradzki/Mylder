@@ -70,23 +70,39 @@ describe('picking a dot', () => {
     ])
   })
 
-  it('pins the card on the dot a tap found, on the page, not at the tap', () => {
-    const { store, picks } = picking()
-    // Up to 12 px from the dot, with no frame to move the card after: the dots stand still.
-    picks.props.onClick(pointer(30, 18, A_LIVE))
-    expect(store.get()).toEqual({ key: A_LIVE, point: [120, 60], pinned: true })
-    // The pointer leaving the dot keeps a pinned card open.
-    picks.props.onHover(pointer(400, 300))
+  it('hands on a tap on a dot, for its detail, and closes the hover card', () => {
+    const store = pickedStore()
+    const tapped: string[] = []
+    const picks = vehiclePicking(canvas().element, store, { onTap: (key) => tapped.push(key) })
+    picks.follow(vehicles, still)
+    picks.props.onHover(pointer(30, 18, A_LIVE))
     expect(store.get()?.key).toBe(A_LIVE)
-    // A tap where deck.gl finds no dot closes it.
-    picks.props.onClick(pointer(400, 300))
+    // Up to 12 px from the dot.
+    picks.props.onClick(pointer(30, 18, A_LIVE))
+    expect(tapped).toEqual([A_LIVE])
     expect(store.get()).toBeUndefined()
+    // A tap where deck.gl finds no dot opens nothing.
+    picks.props.onClick(pointer(400, 300))
+    expect(tapped).toEqual([A_LIVE])
+  })
+
+  it('hands on a tap that finds no dot, for the stop under it; a dot wins over a stop', () => {
+    const store = pickedStore()
+    const missed: [number, number][] = []
+    const picks = vehiclePicking(canvas().element, store, {
+      onMiss: (x, y) => missed.push([x, y]),
+    })
+    picks.follow(vehicles, still)
+    picks.props.onClick(pointer(30, 18, A_LIVE))
+    expect(missed).toEqual([])
+    picks.props.onClick(pointer(400, 300))
+    expect(missed).toEqual([[400, 300]])
   })
 
   it('shows a card while the pointer rests on a dot, and none once it leaves', () => {
     const { store, picks } = picking()
     picks.props.onHover(pointer(10, 4, BUS_LIVE))
-    expect(store.get()).toEqual({ key: BUS_LIVE, point: [120, 60], pinned: false })
+    expect(store.get()).toEqual({ key: BUS_LIVE, point: [120, 60] })
     picks.props.onHover(pointer(12, 12, A_LIVE))
     expect(store.get()?.key).toBe(A_LIVE)
     picks.props.onHover(pointer(400, 300))
@@ -95,7 +111,7 @@ describe('picking a dot', () => {
 
   it('moves the card with its dot, and closes it when the trip leaves the map', () => {
     const { store, picks } = picking()
-    picks.props.onClick(pointer(40, 30, A_LIVE))
+    picks.props.onHover(pointer(40, 30, A_LIVE))
     picks.follow(vehicles, () => ({ x: 60, y: 30 }))
     expect(store.get()?.point).toEqual([160, 80])
     const without = vehiclesOf(
@@ -109,7 +125,7 @@ describe('picking a dot', () => {
 
   it('measures the canvas once rather than each frame, and again when the map resizes', () => {
     const { store, picks, page } = picking()
-    picks.props.onClick(pointer(20, 10, A_LIVE))
+    picks.props.onHover(pointer(20, 10, A_LIVE))
     for (let x = 21; x < 30; x++) picks.follow(vehicles, () => ({ x, y: 10 }))
     expect(store.get()?.point).toEqual([129, 60])
     expect(page.at.measured).toBe(1)

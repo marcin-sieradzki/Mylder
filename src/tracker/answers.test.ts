@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { stopDeparturesFrom, tripDetailFrom, type SnapshotDelays } from './answers'
 import type { SnapshotTrip } from './snapshot'
-import { fixtureTimetable } from './testing'
+import { fixtureTimetable, startingAtMidnight } from './testing'
 
 // 07:20 in Copenhagen on Tuesday 2026-06-16, when the fixture has trips underway.
 const MOMENT = Date.UTC(2026, 5, 16, 5, 20, 30)
@@ -32,10 +32,18 @@ const snapshot = (trips: readonly Partial<SnapshotTrip>[]): SnapshotDelays => ({
 })
 const delayed = snapshot([{ key: late.key, delay: 120, state: 'estimated' }])
 
+/** M1 towards Vestamager, leaving its first stop at 07:07. */
+const METRO_0707 = 'metro.M1.7f21f99145.20260616.0707'
+
 describe('a trip’s calls', () => {
   it('shifts each call by the snapshot’s delay', () => {
     const detail = tripDetailFrom(timetable, delayed, late.key, MOMENT)!
-    expect(detail).toMatchObject({ key: late.key, delay: 120, state: 'estimated' })
+    expect(detail).toMatchObject({
+      key: late.key,
+      delay: 120,
+      state: 'estimated',
+      source: { kind: 'timetable' },
+    })
     const call = detail.calls[ahead]
     expect(call).toMatchObject({ stop: platform.id, name: platform.name })
     expect(call.expectedDeparture! - call.departure).toBe(120_000)
@@ -48,6 +56,58 @@ describe('a trip’s calls', () => {
     expect(detail.calls[ahead].expectedDeparture).toBeUndefined()
   })
 
+  it('names the line’s colour', () => {
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.colour).toBe(late.line.colour)
+  })
+
+  it('marks a cancelled trip, and a call it skips', () => {
+    const whole = snapshot([{ key: late.key, state: 'estimated', cancelled: true }])
+    expect(tripDetailFrom(timetable, whole, late.key, MOMENT)?.cancelled).toBe(true)
+    const skips = snapshot([{ key: late.key, state: 'estimated', cancelledCalls: [ahead] }])
+    const detail = tripDetailFrom(timetable, skips, late.key, MOMENT)!
+    expect(detail.cancelled).toBeUndefined()
+    expect(detail.calls.filter((call) => call.cancelled).map((call) => call.index)).toEqual([ahead])
+  })
+
+  it('gives a Metro trip the interval its line keeps this hour, and other trips none', () => {
+    // M1 towards Vestamager leaves each platform at 07:03 and 07:07, the fixture's two trips.
+    const metro = 'metro.M1.7f21f99145.20260616.0707'
+    expect(tripDetailFrom(timetable, delayed, metro, MOMENT)?.interval).toEqual({ from: 4, to: 4 })
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.interval).toBeUndefined()
+  })
+
+  it('gives a Metro trip with only its last stop ahead the interval at the stop it left last', () => {
+    const metro = timetable.tripsOn(today).find((trip) => trip.key === METRO_0707)!
+    const left = metro.calls.at(-2)!.departure
+    const arrives = metro.calls.at(-1)!.arrival
+    const between = left + (arrives - left) / 2
+    expect(tripDetailFrom(timetable, snapshot([]), METRO_0707, between)?.interval).toEqual({
+      from: 4,
+      to: 4,
+    })
+  })
+
+  it('gives a Metro trip that has arrived no interval', () => {
+    const metro = timetable.tripsOn(today).find((trip) => trip.key === METRO_0707)!
+    const after = metro.calls.at(-1)!.arrival + 60_000
+    expect(tripDetailFrom(timetable, snapshot([]), METRO_0707, after)?.interval).toBeUndefined()
+  })
+
+  it('reads a Metro trip as its stops’ departures do: to an interval until its line has realtime', () => {
+    const metro = 'metro.M1.7f21f99145.20260616.0707'
+    const planned = tripDetailFrom(timetable, delayed, metro, MOMENT)!
+    expect(planned.runsToInterval).toBe(true)
+    // Another M1 trip carried realtime: the line, and so this trip, leaves the interval rule.
+    const other = timetable
+      .tripsOn(today)
+      .find((trip) => trip.line.name === 'M1' && trip.key !== metro)!
+    const live = snapshot([{ key: other.key, line: 'M1', mode: 'metro', hadRealtime: true }])
+    const detail = tripDetailFrom(timetable, live, metro, MOMENT)!
+    expect(detail.runsToInterval).toBeUndefined()
+    expect(detail.interval).toBeUndefined()
+    expect(tripDetailFrom(timetable, delayed, late.key, MOMENT)?.runsToInterval).toBeUndefined()
+  })
+
   it('has no answer for a trip not running today', () => {
     expect(tripDetailFrom(timetable, delayed, 'bus.5C.nothing.20260616.0700', MOMENT)).toBe(
       undefined,
@@ -58,7 +118,7 @@ describe('a trip’s calls', () => {
 describe('a stop’s departures', () => {
   it('lists the trip at its delayed time, soonest first', () => {
     const board = stopDeparturesFrom(timetable, delayed, stop.id)!
-    expect(board.stop).toEqual({ id: stop.id, name: stop.name })
+    expect(board.stop).toMatchObject({ id: stop.id, name: stop.name })
     const row = board.departures.find((each) => each.trip === late.key)
     expect(row).toMatchObject({
       platform: platform.id,
@@ -73,11 +133,152 @@ describe('a stop’s departures', () => {
     ).toBe(true)
   })
 
+  it('says its times come from the timetable', () => {
+    expect(stopDeparturesFrom(timetable, delayed, stop.id)?.source).toEqual({ kind: 'timetable' })
+  })
+
+  it('names the lines that call at the stop, in their colours', () => {
+    const board = stopDeparturesFrom(timetable, delayed, stop.id)!
+    expect(board.stop.lines).toContainEqual({
+      name: late.line.name,
+      mode: late.line.mode,
+      colour: late.line.colour,
+    })
+    const row = board.departures.find((each) => each.trip === late.key)
+    expect(row?.colour).toBe(late.line.colour)
+  })
+
+  it('looks 30 minutes ahead', () => {
+    // The fixture's stop has a departure 30 to 60 minutes on, which the board leaves out.
+    const later = timetable
+      .tripsOn(today)
+      .flatMap((trip) => trip.calls.slice(0, -1))
+      .filter((call) => timetable.stops.platforms[call.platform].stop === platform.stop)
+      .some(
+        (call) => call.departure > MOMENT + 31 * 60_000 && call.departure < MOMENT + 60 * 60_000,
+      )
+    expect(later).toBe(true)
+    const board = stopDeparturesFrom(timetable, snapshot([]), stop.id)!
+    expect(board.departures.length).toBeGreaterThan(0)
+    for (const row of board.departures)
+      expect(row.scheduled).toBeLessThanOrEqual(MOMENT + 30 * 60_000)
+  })
+
+  it('keeps a cancelled trip’s departure, marked cancelled', () => {
+    const cancelled = snapshot([{ key: late.key, state: 'estimated', cancelled: true }])
+    const row = stopDeparturesFrom(timetable, cancelled, stop.id)!.departures.find(
+      (each) => each.trip === late.key,
+    )
+    expect(row?.cancelled).toBe(true)
+  })
+
+  it('marks a departure cancelled when its trip skips this call', () => {
+    const skips = snapshot([{ key: late.key, state: 'estimated', cancelledCalls: [ahead] }])
+    const rows = stopDeparturesFrom(timetable, skips, stop.id)!.departures
+    expect(rows.find((each) => each.trip === late.key)?.cancelled).toBe(true)
+    expect(rows.filter((each) => each.trip !== late.key).every((each) => !each.cancelled)).toBe(
+      true,
+    )
+  })
+
+  it('lists a No signal trip by its timetabled time, which its row shows', () => {
+    // Forty minutes late by its last delay, which would take it past the half hour.
+    const lost = snapshot([{ key: late.key, delay: 40 * 60, state: 'no-signal' }])
+    const rows = stopDeparturesFrom(timetable, lost, stop.id)!.departures
+    const row = rows.find((each) => each.trip === late.key)
+    expect(row).toMatchObject({ scheduled: late.calls[ahead].departure, state: 'no-signal' })
+    const times = rows.map((each) =>
+      each.trip === late.key ? each.scheduled : (each.expected ?? each.scheduled),
+    )
+    expect(times).toEqual([...times].sort((a, b) => a - b))
+  })
+
   it('finds a stop by a platform’s id', () => {
     expect(stopDeparturesFrom(timetable, delayed, platform.id)?.stop.id).toBe(stop.id)
   })
 
   it('has no answer for a stop the timetable doesn’t know', () => {
     expect(stopDeparturesFrom(timetable, delayed, 'no such stop')).toBeUndefined()
+  })
+})
+
+describe('a Metro platform’s departures', () => {
+  // The fixture's M1 leaves each of its stations every 4 minutes each way in the hour from 07:00.
+  const BELLA_CENTER = '8603313'
+  const NORREPORT = '27532'
+  /** 07:05, when M1 leaves Nørreport both ways in the next half hour, among buses and S-tog. */
+  const EARLY = Date.UTC(2026, 5, 16, 5, 5)
+  const at = (moment: number, trips: readonly Partial<SnapshotTrip>[] = []): SnapshotDelays => ({
+    fetched: moment,
+    nextDue: moment + 60_000,
+    trips: trips as SnapshotTrip[],
+  })
+  const metroTrip = timetable
+    .tripsOn(today)
+    .find((trip) => trip.line.mode === 'metro' && trip.headsign.startsWith('Vestamager'))!
+
+  it('reads as an interval for each direction leaving in the next half hour, with no times', () => {
+    const answer = stopDeparturesFrom(timetable, at(MOMENT), BELLA_CENTER)!
+    expect(answer.departures).toEqual([])
+    expect(answer.intervals).toEqual([
+      {
+        line: 'M1',
+        mode: 'metro',
+        colour: 'perron-color-transit-line-m1',
+        headsign: 'Vestamager St. (Metro)',
+        platform: BELLA_CENTER,
+        every: { from: 4, to: 4 },
+      },
+    ])
+  })
+
+  it('gives the Metro intervals and the buses and S-tog departures at a stop with both', () => {
+    const answer = stopDeparturesFrom(timetable, at(EARLY), NORREPORT)!
+    expect(answer.intervals.map(({ headsign, every }) => [headsign, every])).toEqual([
+      ['Vanløse St. (Metro)', { from: 4, to: 4 }],
+      ['Vestamager St. (Metro)', { from: 4, to: 4 }],
+    ])
+    expect(answer.departures.length).toBeGreaterThan(0)
+    expect(answer.departures.some((row) => row.mode === 'metro')).toBe(false)
+  })
+
+  it('lists a Metro line’s departures as any line’s once the snapshot carried its realtime', () => {
+    const live = at(MOMENT, [
+      { key: metroTrip.key, line: 'M1', mode: 'metro', state: 'live', hadRealtime: true },
+    ])
+    const answer = stopDeparturesFrom(timetable, live, BELLA_CENTER)!
+    expect(answer.intervals).toEqual([])
+    expect(answer.departures.map((row) => [row.line, row.headsign])).toEqual([
+      ['M1', 'Vestamager St. (Metro)'],
+      ['M1', 'Vestamager St. (Metro)'],
+    ])
+  })
+})
+
+describe('the answers just before midnight', () => {
+  // 23:50 in Copenhagen on Tuesday 2026-06-16, with Wednesday's trips starting from midnight.
+  const NIGHT = Date.UTC(2026, 5, 16, 21, 50)
+  const night = startingAtMidnight(timetable, '2026-06-17')
+  const tomorrow = night
+    .tripsOn('2026-06-17')
+    .find((trip) => trip.line.mode !== 'metro' && trip.calls[0].departure < NIGHT + 20 * 60_000)!
+  const first = tomorrow.calls[0]
+  const at = (moment: number): SnapshotDelays => ({
+    fetched: moment,
+    nextDue: moment + 60_000,
+    trips: [],
+  })
+
+  it('lists the next service day’s departures in the half hour', () => {
+    const stopId = night.stops.stops[night.stops.platforms[first.platform].stop].id
+    const rows = stopDeparturesFrom(night, at(NIGHT), stopId)!.departures
+    expect(rows.map((row) => [row.trip, row.scheduled])).toContainEqual([
+      tomorrow.key,
+      first.departure,
+    ])
+  })
+
+  it('answers for a trip of the next service day', () => {
+    expect(tripDetailFrom(night, at(NIGHT), tomorrow.key, NIGHT)?.key).toBe(tomorrow.key)
   })
 })

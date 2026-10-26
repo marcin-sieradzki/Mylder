@@ -101,6 +101,17 @@ describe('the vehicles between polls', () => {
     expect(offA(vehicles, 13480)).toBeLessThan(1)
   })
 
+  it('says how far along its path each moving dot was last placed, and where its last stop is', () => {
+    vi.setSystemTime(s(10))
+    start()
+    loop!.show(vehiclesFrom(minute6), minute6, network)
+    wait(1000)
+    const along = loop!.along(A_LIVE)!
+    expect(along.progress).toBeCloseTo(12880, -1)
+    expect(along.end).toBe(network.pathOf(A_PATTERN).stops.at(-1))
+    expect(loop!.along('bus.nothing')).toBeUndefined()
+  })
+
   it('keeps each dot on its own path when a mode filter changes which trips are drawn', () => {
     vi.setSystemTime(s(10))
     start()

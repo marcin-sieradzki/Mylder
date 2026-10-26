@@ -53,14 +53,21 @@ export interface Area {
  * stops and its products overlap the ones Mylder asks for. One that gives no products is kept.
  */
 export function inArea(message: Message, { stops, products }: Area): boolean {
-  const named = [
-    ...(message.affectedStops?.StopLocation ?? []),
-    ...(message.validFromStop ? [message.validFromStop] : []),
-    ...(message.validToStop ? [message.validToStop] : []),
-  ]
+  const named = namedStops(message)
   if (named.length > 0) return named.some(({ extId }) => stops.stopForPlatform(extId) !== undefined)
   return message.products === undefined || (message.products & products) !== 0
 }
+
+/** The stops a message names: those it affects and where its stretch starts and ends. */
+export const namedStops = (message: Message) => [
+  ...(message.affectedStops?.StopLocation ?? []),
+  ...(message.validFromStop ? [message.validFromStop] : []),
+  ...(message.validToStop ? [message.validToStop] : []),
+]
+
+/** Whether a message names a stop, by the Stop's id, through any of its platforms. */
+export const namesStop = (message: Message, stops: Stops, stopId: string): boolean =>
+  namedStops(message).some(({ extId }) => stops.stopForPlatform(extId)?.id === stopId)
 
 /** A message's kind from its structured fields only: what the table says, else a service notice. */
 function fieldsKindOf(message: Message): DisruptionKind {
@@ -77,7 +84,7 @@ const versionOf = (messages: readonly Message[]) =>
   createHash('sha256').update(JSON.stringify(messages)).digest('hex').slice(0, 12)
 
 /** A message with its fields' kind and its validity, read in the timetable's zone. */
-function disruptionOf(message: Message, timezone: string): Disruption {
+export function disruptionOf(message: Message, timezone: string): Disruption {
   const from = clockMoment(message.sDate, message.sTime, timezone)
   const to = clockMoment(message.eDate, message.eTime, timezone)
   return {

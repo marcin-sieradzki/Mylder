@@ -14,8 +14,12 @@ const drawn = vi.hoisted(() => new Set<unknown>())
 interface Moving {
   readonly getPosition: { readonly value: unknown }
 }
+const hovering = vi.hoisted(() => ({ onHover: undefined as ((info: unknown) => void) | undefined }))
 vi.mock('@deck.gl/maplibre', () => ({
   MapLibreOverlay: class {
+    constructor({ onHover }: { onHover: (info: unknown) => void }) {
+      hovering.onHover = onHover
+    }
     setProps({ layers }: { layers: { props: { data: { attributes: Moving } } }[] }) {
       drawn.add(layers[0].props.data.attributes.getPosition.value)
     }
@@ -87,5 +91,24 @@ describe('the vehicles over the map', () => {
     mapView.update({ hidden: new Set(['bus']) })
     await vi.waitFor(() => expect(container.dataset.vehicles).toBe('11'))
     expect(drawn.size).toBe(2)
+  })
+
+  it('looks for a stop under the pointer once a frame, however often it moves', async () => {
+    const canvas = document.createElement('canvas')
+    let looked = 0
+    const overStops = {
+      ...map,
+      getCanvas: () => canvas,
+      getLayer: () => ({}),
+      queryRenderedFeatures() {
+        looked++
+        return [{ properties: { id: '27532' }, geometry: { type: 'Point', coordinates: [5, 5] } }]
+      },
+    } as unknown as MapLibreMap
+    overlay = vehicleOverlay(overStops, document.createElement('div'))
+    for (let x = 0; x < 5; x++) hovering.onHover!({ picked: false, index: -1, x, y: 5 })
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(looked).toBe(1)
+    expect(canvas.style.cursor).toBe('pointer')
   })
 })

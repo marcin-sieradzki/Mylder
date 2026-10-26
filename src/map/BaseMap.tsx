@@ -1,15 +1,19 @@
 'use client'
-// The map's canvas: MapLibre with the basemap style, repainted when the theme changes and when
-// the timetable's network has loaded, and the live vehicles in deck.gl's canvas over it
-// (docs/screens.md, "The moving map"; ADR 0003). It opens on the view the address names and keeps
-// where it was left in the address (`view.ts`). The map lives outside React: React only names
-// the canvas, and the screen's controls move it through the camera (camera.ts).
+// The map's canvas: MapLibre with the basemap style, repainted when the theme changes, when the
+// timetable's network has loaded and when the highlight changes, and the live vehicles in
+// deck.gl's canvas over it (docs/screens.md, "The moving map"; ADR 0003). It opens on the view
+// the address names and keeps where it was left in the address (`view.ts`), except while Follow
+// moves it each frame. A new highlight ends Follow and fits the camera to it. The map lives
+// outside React: React only names the canvas, and the screen's controls move it through the
+// camera (camera.ts).
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl'
 import { useEffect, useRef } from 'react'
 import type { Network } from '../timetable/network.ts'
 import { mapCamera } from './camera.ts'
+import { followedVehicle } from './follow.ts'
+import { boundsOf, fitPadding, mapHighlight } from './highlight.ts'
 import { vehicleOverlay } from './overlay.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
@@ -38,7 +42,10 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     if (!element) return
     const root = document.documentElement
     let network: Network | undefined
-    const style = () => basemapStyle(readPaint(root, paintTokens(network)), network)
+    const style = () => {
+      const highlight = mapHighlight.get()
+      return basemapStyle(readPaint(root, paintTokens(network, highlight)), network, highlight)
+    }
     // The address's view, such as one kept through a language switch, or Copenhagen's centre.
     const view = mapView.get()
     let created: MapLibreMap
@@ -65,12 +72,15 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     map.current = created
     created.getCanvas().setAttribute('aria-label', name.current)
     let disposed = false
-    // Where the viewer left the map goes into the address once it comes to rest.
+    // Where the viewer left the map goes into the address once it comes to rest; while Follow
+    // moves it each frame, once Follow ends.
     const keepView = () => {
+      if (followedVehicle.get() !== undefined) return
       const { lng, lat } = created.getCenter()
       mapView.update({ centre: [lng, lat], zoom: created.getZoom() })
     }
     created.on('moveend', keepView)
+    const stopFollowing = followedVehicle.subscribe(keepView)
     // Reset returns to the view the map opens on with no view in the address.
     const detachCamera = mapCamera.attach(created, () => ({
       center: CENTRE,
@@ -81,6 +91,16 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     const stopWatching = watchTheme(root, () => {
       repaint()
       vehicles.repaint()
+    })
+    // A new highlight is drawn, and the camera fits it, clear of what floats over the map.
+    const stopHighlighting = mapHighlight.subscribe(() => {
+      repaint()
+      const highlight = mapHighlight.get()
+      const bounds = highlight && boundsOf(highlight)
+      if (!bounds) return
+      followedVehicle.stop()
+      const { clientWidth, clientHeight } = element
+      created.fitBounds(bounds, { padding: fitPadding(clientWidth, clientHeight), maxZoom: 15 })
     })
     timetables.current().then(
       (loaded) => {
@@ -93,6 +113,8 @@ export default function BaseMap({ label, className }: BaseMapProps) {
     return () => {
       disposed = true
       created.off('moveend', keepView)
+      stopFollowing()
+      stopHighlighting()
       stopWatching()
       vehicles.remove()
       detachCamera()
