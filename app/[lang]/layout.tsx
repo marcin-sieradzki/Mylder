@@ -11,6 +11,9 @@ interface LangProps {
   params: Promise<{ lang: string }>
 }
 
+/** The path the pages sit under: the repository's in the GitHub Pages demo (ADR 0013), else none. */
+const BASE_PATH = process.env.NEXT_PUBLIC_MYLDER_BASE_PATH ?? ''
+
 // Only /en and /da exist; any other first segment is a 404.
 export const dynamicParams = false
 
@@ -27,8 +30,8 @@ export async function generateMetadata({ params }: LangProps): Promise<Metadata>
     description: meta.description,
     alternates: {
       languages: {
-        ...Object.fromEntries(langs.map((each) => [each, `/${each}`])),
-        'x-default': '/',
+        ...Object.fromEntries(langs.map((each) => [each, `${BASE_PATH}/${each}`])),
+        'x-default': `${BASE_PATH}/`,
       },
     },
   }

@@ -52,17 +52,18 @@ export function timetableFrom(files: TimetableFiles): Timetable {
   }
 }
 
-/** Reads the deployed timetable: the manifest, then the files it names. */
-export async function loadTimetable(dir: string = TIMETABLE_DIR): Promise<Timetable> {
-  // The files reach the deployment through `outputFileTracingIncludes`, so the build needn't trace
-  // this read, which would otherwise pull in the whole project.
-  const json = async (name: string): Promise<unknown> =>
-    JSON.parse(
-      await readFile(
-        /* turbopackIgnore: true */ join(/* turbopackIgnore: true */ dir, name),
-        'utf8',
-      ),
-    )
+/** Reads one of a timetable folder's files by its name in the manifest, as text. */
+export type ReadTimetableFile = (file: string) => Promise<string>
+
+/** The reader of a folder on disk. */
+export const filesIn =
+  (dir: string): ReadTimetableFile =>
+  (file) =>
+    readFile(/* turbopackIgnore: true */ join(/* turbopackIgnore: true */ dir, file), 'utf8')
+
+/** Reads a timetable: the manifest, then the files it names. */
+export async function readTimetable(read: ReadTimetableFile): Promise<Timetable> {
+  const json = async (name: string): Promise<unknown> => JSON.parse(await read(name))
   const manifest = readManifest(await json('manifest.json'))
   const { files } = manifest
   const [stops, patterns, paths, trips] = await Promise.all(
@@ -70,6 +71,12 @@ export async function loadTimetable(dir: string = TIMETABLE_DIR): Promise<Timeta
   )
   return timetableFrom({ manifest, stops, patterns, paths, trips })
 }
+
+/** Reads the deployed timetable, or the one in `dir`. */
+export const loadTimetable = (dir: string = TIMETABLE_DIR): Promise<Timetable> =>
+  // The files reach the deployment through `outputFileTracingIncludes`, so the build needn't trace
+  // this read, which would otherwise pull in the whole project.
+  readTimetable(filesIn(dir))
 
 /**
  * The files the browser loads, by the names its route takes: the network, and the day profiles
@@ -82,23 +89,20 @@ export type BrowserFileName = (typeof BROWSER_FILES)[number]
 export const isBrowserFile = (name: string): name is BrowserFileName =>
   (BROWSER_FILES as readonly string[]).includes(name)
 
-const readText = (dir: string, file: string) =>
-  readFile(/* turbopackIgnore: true */ join(/* turbopackIgnore: true */ dir, file), 'utf8')
-
-/** The current manifest as it is on disk. */
-export const readManifestFile = (dir: string): Promise<string> => readText(dir, 'manifest.json')
+/** The current manifest as it is stored. */
+export const readManifestFile = (read: ReadTimetableFile): Promise<string> => read('manifest.json')
 
 /**
- * One of the files the browser loads, as it is on disk, or undefined when the folder holds
+ * One of the files the browser loads, as it is stored, or undefined when the folder holds
  * another version.
  */
 export async function readBrowserFile(
-  dir: string,
+  read: ReadTimetableFile,
   version: string,
   name: BrowserFileName,
 ): Promise<string | undefined> {
-  const manifestText = await readManifestFile(dir)
+  const manifestText = await readManifestFile(read)
   const manifest = readManifest(JSON.parse(manifestText))
   if (manifest.version !== version) return undefined
-  return name === 'manifest' ? manifestText : readText(dir, manifest.files[name])
+  return name === 'manifest' ? manifestText : read(manifest.files[name])
 }

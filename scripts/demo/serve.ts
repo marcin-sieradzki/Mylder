@@ -39,10 +39,16 @@ async function find(pathname: string): Promise<string | undefined> {
 }
 
 createServer(async (request, response) => {
-  const found = await find(new URL(request.url ?? '/', 'http://localhost').pathname)
-  const file = found ?? join(ROOT, '404.html')
-  response.writeHead(found ? 200 : 404, {
-    'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
-  })
-  response.end(await readFile(file))
+  try {
+    const found = await find(new URL(request.url ?? '/', 'http://localhost').pathname)
+    const file = found ?? join(ROOT, '404.html')
+    const body = await readFile(file)
+    response.writeHead(found ? 200 : 404, {
+      'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
+    })
+    response.end(body)
+  } catch {
+    // A broken escape in the address, or no 404.html because the build failed.
+    response.writeHead(400).end()
+  }
 }).listen(PORT, () => console.log(`The demo is at http://localhost:${PORT}${BASE_PATH}/`))

@@ -8,10 +8,16 @@ import { Effect } from 'effect'
 import { cacheHeaders, RETRY_AFTER } from './caching.ts'
 import { runTracker, timetableDirOf, type RunTracker } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
-import { isBrowserFile, readBrowserFile, readManifestFile } from './timetable.ts'
+import {
+  filesIn,
+  isBrowserFile,
+  readBrowserFile,
+  readManifestFile,
+  type ReadTimetableFile,
+} from './timetable.ts'
 import type { TrackerShape } from './tracker.ts'
 
-const unavailable = (error: unknown) => {
+export const unavailable = (error: unknown) => {
   console.error('The tracker could not answer', error)
   return new Response(null, {
     status: 503,
@@ -19,7 +25,7 @@ const unavailable = (error: unknown) => {
   })
 }
 
-const notFound = (what: string) =>
+export const notFound = (what: string) =>
   Response.json(
     { error: `unknown ${what}` },
     { status: 404, headers: { 'Cache-Control': 'no-store' } },
@@ -83,27 +89,41 @@ const json = (body: string, cacheControl: string) =>
   })
 
 /** The current manifest, which the map starts from before its first snapshot. */
-export async function timetableManifestResponse(source?: Source): Promise<Response> {
-  try {
-    return json(await readManifestFile(timetableDirOf(source ?? environmentSource())), BRIEFLY)
-  } catch (error) {
-    return unavailable(error)
-  }
-}
+export const timetableManifestResponse = (source?: Source): Promise<Response> =>
+  manifestResponse(() => sourceFiles(source))
 
 /**
  * One of the files of a version the browser loads (`manifest`, `stops`, `patterns`, `paths` or
  * `dayProfiles`); 404 for the trips, any other name, or a version the tracker doesn't hold.
  */
-export async function timetableFileResponse(
+export const timetableFileResponse = (
   version: string,
   file: string,
   source?: Source,
+): Promise<Response> => browserFileResponse(() => sourceFiles(source), version, file)
+
+/** The files of a source's timetable: a recording's own, or the deployed one. */
+const sourceFiles = (source?: Source): ReadTimetableFile =>
+  filesIn(timetableDirOf(source ?? environmentSource()))
+
+/** The manifest from a timetable's files, which `files` gives inside the route's try. */
+export async function manifestResponse(files: () => ReadTimetableFile): Promise<Response> {
+  try {
+    return json(await readManifestFile(files()), BRIEFLY)
+  } catch (error) {
+    return unavailable(error)
+  }
+}
+
+/** A version's file the browser loads, from a timetable's files, given inside the route's try. */
+export async function browserFileResponse(
+  files: () => ReadTimetableFile,
+  version: string,
+  file: string,
 ): Promise<Response> {
   if (!isBrowserFile(file)) return notFound('timetable file')
   try {
-    const dir = timetableDirOf(source ?? environmentSource())
-    const body = await readBrowserFile(dir, version, file)
+    const body = await readBrowserFile(files(), version, file)
     return body === undefined ? notFound('timetable version') : json(body, IMMUTABLE)
   } catch (error) {
     return unavailable(error)

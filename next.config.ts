@@ -2,8 +2,8 @@ import type { NextConfig } from 'next'
 
 // The GitHub Pages demo (ADR 0013), built by `npm run demo`: a static export under the
 // repository's path. It has no route handlers and no proxy, whose files end in `.ts`, which its
-// page extensions leave out; the browser asks its routes of the simulated tracker in a Web Worker
-// beside the pages instead.
+// page extensions leave out, so a page, layout or metadata file the demo should carry must end in
+// `.tsx`. The browser asks its routes of the simulated tracker in a Web Worker beside the pages.
 const demoBasePath = process.env.MYLDER_DEMO_BASE_PATH
 
 const demo: NextConfig =

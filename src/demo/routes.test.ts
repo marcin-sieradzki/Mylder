@@ -56,15 +56,23 @@ describe("the demo's routes", () => {
     expect((await route('/elsewhere')).status).toBe(404)
   })
 
-  it('try the timetable again on the next ask after a read fails', async () => {
+  it('answer a path with a broken escape as not found', async () => {
+    expect((await route('/api/stops/%E0%A4%A')).status).toBe(404)
+  })
+
+  it('answer 503 while the timetable cannot be read, and try again on the next ask', async () => {
     let fail = true
     const flaky = demoRoutes({
       read: (file) => (fail ? Promise.reject(new Error('offline')) : fromDisk(file)),
       beneath: startingAt(start),
     })
-    await expect(flaky('/api/timetable')).rejects.toThrow('offline')
-    expect((await flaky('/api/snapshot')).status).toBe(503)
+    const failed = await flaky('/api/snapshot')
+    expect(failed.status).toBe(503)
+    expect(failed.headers.get('Retry-After')).toBe('30')
+    expect((await flaky('/api/timetable')).status).toBe(503)
+    expect((await flaky(`/api/timetable/${VERSION}/trips`)).status).toBe(404)
     fail = false
+    expect((await flaky('/api/timetable')).status).toBe(200)
     expect((await flaky('/api/snapshot')).status).toBe(200)
   })
 })

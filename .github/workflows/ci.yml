@@ -12,6 +12,7 @@ on:
 
 jobs:
   check:
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +25,7 @@ jobs:
       - run: npm run build
 
   e2e:
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +46,9 @@ jobs:
   # The GitHub Pages demo (ADR 0013): the static export with the simulated tracker in a Web
   # Worker, tested on its build, and deployed from main.
   demo:
+    # After a Timetable run, only when it worked; the check and e2e jobs ran on its commit's
+    # code already.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       NEXT_TELEMETRY_DISABLED: 1
@@ -70,7 +75,7 @@ jobs:
 
   # The repository's Pages source must be set to GitHub Actions.
   deploy-demo:
-    needs: [check, demo]
+    needs: demo
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:

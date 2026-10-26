@@ -1,16 +1,19 @@
 // The demo's routes (ADR 0013): the server's tracker on the simulated Rejseplanen, built from the
-// timetable files the demo serves, answering each route the page asks for by its path as
-// `app/api/` does, with the same answers and the same date header.
+// timetable files the demo serves, answering each route the page asks for by its path with the
+// server's own answers: the same bodies, date header, 404s and 503s.
 import { Effect, Layer, ManagedRuntime } from 'effect'
-import { readManifest } from '../timetable/manifest.ts'
 import { CpuClock } from '../tracker/report.ts'
-import { trackerAnswers } from '../tracker/routes.ts'
+import {
+  browserFileResponse,
+  manifestResponse,
+  notFound,
+  trackerAnswers,
+} from '../tracker/routes.ts'
 import { runOn, trackerLayer } from '../tracker/runtime.ts'
 import { DEFAULT_SCENARIO } from '../tracker/simulation/scenarios.ts'
-import { isBrowserFile, timetableFrom } from '../tracker/timetable.ts'
+import { readTimetable, type ReadTimetableFile } from '../tracker/timetable.ts'
 
-/** Reads one of the timetable folder's files by its name in the manifest, as text. */
-export type ReadTimetableFile = (file: string) => Promise<string>
+export type { ReadTimetableFile }
 
 export interface DemoSettings {
   readonly read: ReadTimetableFile
@@ -24,69 +27,53 @@ const workerCpu = Layer.succeed(
   Effect.sync(() => performance.now()),
 )
 
-const notFound = (what: string) =>
-  Response.json(
-    { error: `unknown ${what}` },
-    { status: 404, headers: { 'Cache-Control': 'no-store' } },
-  )
-
-const json = (body: string) =>
-  new Response(body, { headers: { 'Content-Type': 'application/json' } })
-
-async function load(read: ReadTimetableFile, beneath: Layer.Layer<never>) {
-  const manifestText = await read('manifest.json')
-  const manifest = readManifest(JSON.parse(manifestText))
-  const { files } = manifest
-  const [stops, patterns, paths, trips] = await Promise.all(
-    [files.stops, files.patterns, files.paths, files.trips].map(async (file) =>
-      JSON.parse(await read(file)),
-    ),
-  )
-  const timetable = timetableFrom({ manifest, stops, patterns, paths, trips })
-  const source = { kind: 'simulated', scenario: DEFAULT_SCENARIO } as const
-  const runtime = ManagedRuntime.make(
-    trackerLayer({ timetable, source, cpu: workerCpu }).pipe(Layer.provideMerge(beneath)),
-  )
-  return { manifestText, manifest, runtime }
+/** A path's segments after the first slash, or none when one isn't a valid escape. */
+function segmentsOf(path: string): string[] | undefined {
+  try {
+    return new URL(path, 'http://mylder').pathname.split('/').slice(1).map(decodeURIComponent)
+  } catch {
+    return undefined
+  }
 }
 
 /** The demo's routes, answering a path such as `/api/snapshot` or `/api/stops/<id>`. */
 export function demoRoutes({ read, beneath = Layer.empty }: DemoSettings) {
-  // Loaded at the first ask; a load that fails, such as on a dropped connection, is forgotten, so
-  // the next ask tries again, as the server's runtime does.
-  let loading: ReturnType<typeof load> | undefined
-  const loaded = () => {
-    if (!loading) {
-      loading = load(read, beneath)
-      loading.catch(() => {
-        loading = undefined
+  // The tracker's runtime, built at the first ask for it; a build that fails, such as on a
+  // dropped connection, is forgotten, so the next ask tries again, as the server's runtime does.
+  let building: ReturnType<typeof build> | undefined
+  async function build() {
+    const timetable = await readTimetable(read)
+    const source = { kind: 'simulated', scenario: DEFAULT_SCENARIO } as const
+    return ManagedRuntime.make(
+      trackerLayer({ timetable, source, cpu: workerCpu }).pipe(Layer.provideMerge(beneath)),
+    )
+  }
+  const runtime = () => {
+    if (!building) {
+      building = build()
+      building.catch(() => {
+        building = undefined
       })
     }
-    return loading
+    return building
   }
 
-  const answers = trackerAnswers(runOn(async () => (await loaded()).runtime))
-
-  /** The current manifest, or one of the files of its version the browser loads. */
-  async function timetableFile(version: string, file: string): Promise<Response> {
-    const { manifest, manifestText } = await loaded()
-    if (!isBrowserFile(file)) return notFound('timetable file')
-    if (version !== manifest.version) return notFound('timetable version')
-    return json(file === 'manifest' ? manifestText : await read(manifest.files[file]))
-  }
+  const answers = trackerAnswers(runOn(runtime))
+  // The network's files come straight from the folder, so the map draws its lines without
+  // waiting for the tracker's timetable.
+  const files = () => read
 
   return async function route(path: string): Promise<Response> {
-    const [api, name, ...rest] = new URL(path, 'http://mylder').pathname
-      .split('/')
-      .slice(1)
-      .map(decodeURIComponent)
+    const [api, name, ...rest] = segmentsOf(path) ?? []
     if (api !== 'api') return notFound('route')
     if (name === 'snapshot' && rest.length === 0) return answers.snapshot()
     if (name === 'disruptions' && rest.length === 0) return answers.disruptions()
     if (name === 'stops' && rest.length === 1) return answers.stop(rest[0])
     if (name === 'trips' && rest.length === 1) return answers.trip(rest[0])
-    if (name === 'timetable' && rest.length === 0) return json((await loaded()).manifestText)
-    if (name === 'timetable' && rest.length === 2) return timetableFile(rest[0], rest[1])
+    if (name === 'timetable' && rest.length === 0) return manifestResponse(files)
+    if (name === 'timetable' && rest.length === 2) {
+      return browserFileResponse(files, rest[0], rest[1])
+    }
     return notFound('route')
   }
 }
