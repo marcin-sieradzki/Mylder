@@ -1,7 +1,9 @@
 // Freezing and replaying recordings: the tracker runs over a plan's minutes on the test clock,
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
 // layer, and both give the same snapshots and disruption lists (docs/testing-seams.md). The stop
-// and trip answers a plan saves for screen tests are worked out from those snapshots.
+// and trip answers a plan saves for screen tests are worked out from those snapshots. A
+// recording's `aircraft/` folder is hand-made or recorded, never frozen: the aircraft snapshots
+// saved beside it are what the aircraft source makes of it, one call every 10 s.
 import 'server-only'
 import { join } from 'node:path'
 import { Effect, References } from 'effect'
@@ -12,6 +14,10 @@ import {
   type StopDepartures,
   type TripDetail,
 } from '../answers.ts'
+import { Aircraft } from '../aircraft/aircraft.ts'
+import { aircraftLayer } from '../aircraft/runtime.ts'
+import type { AircraftSnapshot } from '../aircraft/snapshot.ts'
+import { RECORDED_AIRCRAFT } from '../aircraft/source.ts'
 import type { Disruptions } from '../disruptions.ts'
 import * as Http from '../http.ts'
 import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses.ts'
@@ -23,7 +29,7 @@ import type { Source } from '../source.ts'
 import { loadTimetable, type Timetable } from '../timetable.ts'
 import { Tracker } from '../tracker.ts'
 import * as RecordedHttpClient from './layer.ts'
-import type { Calls, Recorded } from './layer.ts'
+import { readCalls, readStart, type Calls, type Recorded } from './layer.ts'
 import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
@@ -42,6 +48,35 @@ export interface Frozen extends Served {
 
 /** Where a minute's disruption list is saved in a recording's folder, for screen tests. */
 export const disruptionsFile = (file: string) => join('answers', 'disruptions', file)
+
+/** Where the aircraft snapshot of each call is saved in a recording's folder, for the screens. */
+export const aircraftFile = (file: string) => join('answers', 'aircraft', file)
+
+/** The folders of a recording that are its own, kept when the rest is frozen again. */
+export const UNFROZEN = RECORDED_AIRCRAFT.folders
+
+/**
+ * The aircraft source's snapshot of each call in a recording's `aircraft/` folder, asked every
+ * 10 s from the recording's start on the test clock; none when it has no such folder.
+ */
+export const replayAircraft = (dir: string): Effect.Effect<readonly AircraftSnapshot[]> =>
+  Effect.gen(function* () {
+    const [calls, start] = yield* Effect.promise(() =>
+      Promise.all([readCalls(RECORDED_AIRCRAFT, dir), readStart(dir)]),
+    )
+    const count = calls.get('aircraft')?.length ?? 0
+    const source = { kind: 'recording', folder: 'replayed' } as const
+    const http = Http.layer(RecordedHttpClient.recordedClient(RECORDED_AIRCRAFT, calls))
+    return yield* Effect.gen(function* () {
+      const aircraft = yield* Aircraft
+      const snapshots: AircraftSnapshot[] = []
+      for (let call = 0; call < count; call++) {
+        yield* TestClock.setTime(start + call * 10_000)
+        snapshots.push((yield* aircraft.getSnapshot)!)
+      }
+      return snapshots
+    }).pipe(Effect.provide(aircraftLayer({ source, http })))
+  }).pipe(Effect.provide(TestClock.layer()))
 
 /**
  * The stop and trip answers a plan saves for screen tests, by their files' paths in its folder,

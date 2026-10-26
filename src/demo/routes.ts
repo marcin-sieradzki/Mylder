@@ -3,6 +3,7 @@
 // server's own answers: the same bodies, date header, 404s and 503s.
 import { Effect, Layer, ManagedRuntime } from 'effect'
 import { notFound } from '../tracker/cdn-answer.ts'
+import { remember } from '../tracker/remember.ts'
 import { CpuClock } from '../tracker/report.ts'
 import { browserFileResponse, manifestResponse, trackerAnswers } from '../tracker/routes.ts'
 import { runOn, trackerLayer } from '../tracker/runtime.ts'
@@ -36,37 +37,19 @@ function segmentsOf(path: string): string[] | undefined {
 export function demoRoutes({ read: readFolder, beneath = Layer.empty }: DemoSettings) {
   // The manifest is read once, so the tracker and the network's files hold the same version for
   // the page's life, as the deployment it opened on; a read that fails is tried again.
-  let manifest: Promise<string> | undefined
-  const read: ReadTimetableFile = (file) => {
-    if (file !== 'manifest.json') return readFolder(file)
-    if (!manifest) {
-      manifest = readFolder(file)
-      manifest.catch(() => {
-        manifest = undefined
-      })
-    }
-    return manifest
-  }
+  const manifest = remember(() => readFolder('manifest.json'))
+  const read: ReadTimetableFile = (file) =>
+    file === 'manifest.json' ? manifest() : readFolder(file)
 
   // The tracker's runtime, built at the first ask for it; a build that fails, such as on a
   // dropped connection, is forgotten, so the next ask tries again, as the server's runtime does.
-  let building: ReturnType<typeof build> | undefined
-  async function build() {
+  const runtime = remember(async () => {
     const timetable = await readTimetable(read)
     const source = { kind: 'simulated', scenario: DEFAULT_SCENARIO } as const
     return ManagedRuntime.make(
       trackerLayer({ timetable, source, cpu: workerCpu }).pipe(Layer.provideMerge(beneath)),
     )
-  }
-  const runtime = () => {
-    if (!building) {
-      building = build()
-      building.catch(() => {
-        building = undefined
-      })
-    }
-    return building
-  }
+  })
 
   const answers = trackerAnswers(runOn(runtime))
 

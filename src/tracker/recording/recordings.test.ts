@@ -9,8 +9,8 @@ import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
-import { startingAt } from './clock'
-import { disruptionsFile, replay, savedAnswers } from './freeze'
+import { sharedStartingAt, startingAt } from './clock'
+import { aircraftFile, disruptionsFile, replay, replayAircraft, savedAnswers } from './freeze'
 import {
   callFile,
   layer,
@@ -67,6 +67,22 @@ describe('a frozen recording', () => {
       }),
   )
 
+  it.effect('replays its aircraft folder into the aircraft snapshots saved beside it', () =>
+    Effect.gen(function* () {
+      const dir = recordingDir('weekday')
+      const snapshots = yield* replayAircraft(dir)
+      const saved = yield* Effect.promise(() =>
+        Promise.all(snapshots.map((_, i) => readJson(join(dir, aircraftFile(callFile(i)))))),
+      )
+      expect(snapshots.length).toBeGreaterThanOrEqual(12)
+      expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
+      for (const snapshot of snapshots) {
+        expect(snapshot.aircraft.length).toBeGreaterThanOrEqual(20)
+        expect(snapshot.aircraft.length).toBeLessThanOrEqual(40)
+      }
+    }),
+  )
+
   it('carries no key in any file', async () => {
     const files = await filesUnder(RECORDINGS_DIR)
     expect(files.length).toBeGreaterThan(0)
@@ -85,6 +101,27 @@ describe('a frozen recording', () => {
     })
     expect(await first('spent')).toMatchObject({ status: 403, body: { errorCode: 'API_QUOTA' } })
     expect(((await first('cap')) as { Journey: unknown[] }).Journey).toHaveLength(1000)
+  })
+
+  it('shows what the aircraft snapshot drops in every weekday aircraft answer', async () => {
+    interface Answered {
+      hex: string
+      lon?: number
+      type?: string
+      dbFlags?: number
+      lat?: number
+      rr_lat?: number
+    }
+    const dir = join(recordingDir('weekday'), 'aircraft')
+    const files = (await readdir(dir)).sort()
+    expect(files.length).toBeGreaterThanOrEqual(12)
+    for (const file of files) {
+      const { ac } = (await readJson(join(dir, file))) as { ac: Answered[] }
+      expect(ac.some((each) => (each.lon ?? 0) > 12.7)).toBe(true)
+      expect(ac.some((each) => ((each.dbFlags ?? 0) & 4) !== 0)).toBe(true)
+      expect(ac.some((each) => each.type === 'adsb_icao_nt')).toBe(true)
+      expect(ac.some((each) => each.lat === undefined && each.rr_lat !== undefined)).toBe(true)
+    }
   })
 })
 
@@ -255,6 +292,22 @@ describe('the recorded layer for another API', () => {
 })
 
 describe("a recording's clock", () => {
+  it.effect('reads the same in every runtime under the recording, whenever each was built', () =>
+    Effect.gen(function* () {
+      // A moment of its own: the offset is the process's, kept from the first runtime built.
+      const start = Date.UTC(2026, 5, 16, 5, 21)
+      yield* TestClock.setTime(1_000)
+      const tracker = yield* Layer.build(sharedStartingAt(start))
+      yield* TestClock.adjust('3 minutes')
+      const aircraft = yield* Layer.build(sharedStartingAt(start))
+      const now = (built: typeof tracker) => Effect.provide(Clock.currentTimeMillis, built)
+      expect([yield* now(tracker), yield* now(aircraft)]).toEqual([
+        start + 180_000,
+        start + 180_000,
+      ])
+    }).pipe(Effect.scoped),
+  )
+
   it.effect('starts at the recording’s moment and runs on with the clock beneath', () =>
     Effect.gen(function* () {
       const start = Date.UTC(2026, 5, 16, 5, 20)
