@@ -60,10 +60,15 @@ export const aircraftRuntime: () => Promise<ManagedRuntime.ManagedRuntime<Aircra
 /** Runs one use of the aircraft source, as a plain promise. */
 export type RunAircraft = <A>(use: (aircraft: AircraftShape) => Effect.Effect<A>) => Promise<A>
 
+/** Runs one use of the aircraft source on the runtime `built` gives, as a plain promise. */
+export const runAircraftOn =
+  (built: () => Promise<ManagedRuntime.ManagedRuntime<Aircraft, never>>): RunAircraft =>
+  async (use) =>
+    (await built()).runPromise(
+      Effect.gen(function* () {
+        return yield* use(yield* Aircraft)
+      }),
+    )
+
 /** Runs one use of the aircraft source on this instance's runtime, as a plain promise. */
-export const runAircraft: RunAircraft = async (use) =>
-  (await aircraftRuntime()).runPromise(
-    Effect.gen(function* () {
-      return yield* use(yield* Aircraft)
-    }),
-  )
+export const runAircraft: RunAircraft = runAircraftOn(aircraftRuntime)

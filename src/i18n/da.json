@@ -130,6 +130,8 @@
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
       "aircraft": "Fly: © {source} under {licence}.",
       "aircraftFrom": "Fly: © {source}.",
+      "recording": "Flyene er optagne data fra adsb.lol, åbne under samme licens i {recordings}.",
+      "recordings": "Mylders repository",
       "style": "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se {licence}.",
       "styleLicence": "licensen"
     },
@@ -243,7 +245,7 @@
     "simulated": "Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.",
     "recorded": "Optagne data fra {date}.",
     "aircraftLive": "Fly: live fra {provider}.",
-    "aircraftRecorded": "Fly: optaget."
+    "aircraftRecorded": "Fly: optagne data fra adsb.lol."
   },
   "interval": {
     "seconds": "{n}. sekund",

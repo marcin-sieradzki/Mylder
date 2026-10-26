@@ -10,6 +10,8 @@ export const OPENMAPTILES = 'https://openmaptiles.org/'
 export const OPENFREEMAP = 'https://openfreemap.org/'
 export const MAP_STYLE_LICENCE =
   'https://github.com/marcin-sieradzki/mylder/blob/main/src/map/style/LICENSE.md'
+/** The recordings, which keep adsb.lol's answers open under the ODbL, as its share-alike asks. */
+export const RECORDINGS = 'https://github.com/marcin-sieradzki/mylder/tree/main/recordings'
 export const ADSB_LOL = 'https://adsb.lol/'
 export const ADSB_FI = 'https://adsb.fi/'
 

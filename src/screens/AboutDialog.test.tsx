@@ -158,6 +158,31 @@ describe('the About dialog', () => {
     expect(openDialog('Om Mylder')).toHaveTextContent('Fly: © adsb.lol-bidragydere under ODbL.')
   })
 
+  it('says recorded planes are recorded adsb.lol data, open in the repository, in both languages', () => {
+    liveAircraft.update({ snapshot: aircraft })
+    show('en', weekday)
+    const dialog = openDialog('About Mylder')
+    expect(dialog).toHaveTextContent(
+      "Aircraft: © adsb.lol contributors under the ODbL.The planes are recorded adsb.lol data, open under the same licence in Mylder's repository.",
+    )
+    expect(within(dialog).getByRole('link', { name: "Mylder's repository" })).toHaveAttribute(
+      'href',
+      'https://github.com/marcin-sieradzki/mylder/tree/main/recordings',
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', weekday)
+    expect(openDialog('Om Mylder')).toHaveTextContent(
+      'Fly: © adsb.lol-bidragydere under ODbL.Flyene er optagne data fra adsb.lol, åbne under samme licens i Mylders repository.',
+    )
+  })
+
+  it('says nothing of a recording when the planes are live', () => {
+    liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.lol' } })
+    show('en', weekday)
+    expect(openDialog('About Mylder')).not.toHaveTextContent('recorded')
+  })
+
   it('credits adsb.fi with a link to its home page when it answered, in English and Danish', () => {
     liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.fi' } })
     show('en', weekday)

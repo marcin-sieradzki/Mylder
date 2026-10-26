@@ -12,6 +12,7 @@ import { loadTimetable } from '../timetable'
 import { sharedStartingAt, startingAt } from './clock'
 import { aircraftFile, disruptionsFile, replay, replayAircraft, savedAnswers } from './freeze'
 import {
+  bundledFiles,
   callFile,
   layer,
   readCalls,
@@ -148,6 +149,24 @@ describe('the recorded layer', () => {
         bodies.push(JSON.parse((yield* callWith(client, service)).text))
       }
       expect(bodies).toEqual([{ n: 1 }, { n: 9 }, { n: 2 }, { n: 2 }])
+    }),
+  )
+
+  it.effect("starts each service's calls again from the first once none are left, looping", () =>
+    Effect.gen(function* () {
+      const client = recordedClient(
+        RECORDED_REJSEPLANEN,
+        new Map([
+          ['journeyPos', [answer(1), answer(2)]],
+          ['himsearch', [answer(9)]],
+        ]),
+        'loop',
+      )
+      const bodies = []
+      for (const service of ['journeyPos', 'himsearch', 'journeyPos', 'journeyPos', 'himsearch']) {
+        bodies.push(JSON.parse((yield* callWith(client, service)).text))
+      }
+      expect(bodies).toEqual([{ n: 1 }, { n: 9 }, { n: 2 }, { n: 1 }, { n: 9 }])
     }),
   )
 
@@ -304,6 +323,22 @@ describe('the recorded layer for another API', () => {
     await madeRecording({}, async (dir) => {
       expect(await readCalls(radar, dir)).toEqual(new Map())
     })
+  })
+
+  it('reads a recording bundled by its files’ paths as it reads one from its folder', async () => {
+    const dir = '../../recordings/bundled'
+    const bundle = {
+      [`${dir}/aircraft/0002.json`]: { now: 2, ac: [] },
+      [`${dir}/aircraft/0001.json`]: { status: 503 },
+      [`${dir}/aircraft/notes.txt`]: 'not a call',
+      [`${dir}/clock.json`]: { start: '2026-06-16T05:20:00.000Z' },
+    }
+    expect(await readCalls(radar, dir, bundledFiles(bundle))).toEqual(
+      new Map([['aircraft', [{ status: 503 }, { answer: { now: 2, ac: [] } }]]]),
+    )
+    expect(await readCalls(radar, '../../recordings/elsewhere', bundledFiles(bundle))).toEqual(
+      new Map(),
+    )
   })
 })
 
