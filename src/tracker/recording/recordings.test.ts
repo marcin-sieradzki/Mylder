@@ -35,16 +35,20 @@ const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
-    'replays %s through the tracker into the snapshots it was frozen with',
+    'replays %s through the tracker into the snapshots and lists it was frozen with',
     ([, plan]) =>
       Effect.gen(function* () {
         const dir = recordingDir(plan.name)
         const replayed = yield* replay(plan, dir)
-        const saved = yield* Effect.promise(() =>
-          Promise.all(replayed.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
+        const saved = (folder: string) =>
+          Effect.promise(() =>
+            Promise.all(replayed.snapshots.map((_, i) => readJson(join(dir, folder, callFile(i))))),
+          )
+        expect(replayed.snapshots).toHaveLength(plan.minutes)
+        expect(JSON.parse(JSON.stringify(replayed.snapshots))).toEqual(yield* saved('snapshots'))
+        expect(JSON.parse(JSON.stringify(replayed.disruptions))).toEqual(
+          yield* saved('disruptions'),
         )
-        expect(replayed).toHaveLength(plan.minutes)
-        expect(JSON.parse(JSON.stringify(replayed))).toEqual(saved)
       }),
   )
 

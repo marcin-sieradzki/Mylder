@@ -7,7 +7,7 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
 import type { DisruptionFacts, DisruptionKind } from '../domain/disruption.ts'
-import type { Mode } from '../timetable/format.ts'
+import { MODES, type Mode } from '../timetable/format.ts'
 import type { Stops } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { Message } from './rejseplanen/answers.ts'
@@ -26,7 +26,7 @@ const KIND_RULES: readonly {
 
 /** One message as Rejseplanen sent it, with its fields' kind, its modes and its validity. */
 export interface Disruption extends DisruptionFacts {
-  /** The modes it concerns, from its products, in the order the screens list modes. */
+  /** The modes it concerns, from its products, in the timetable's order. */
   readonly modes: readonly Mode[]
   readonly message: Message
 }
@@ -76,22 +76,20 @@ function fieldsKindOf(message: Message): DisruptionKind {
 }
 
 /**
- * Each mode's product classes (docs/live-data.md, "Products"), in the order the screens list
- * modes: every train class is Train, and express, night and harbour buses are Bus.
+ * Each mode's product classes (docs/live-data.md, "Products"): every train class is Train, and
+ * express, night and harbour buses are Bus.
  */
-const MODE_PRODUCTS: readonly (readonly [Mode, number])[] = [
-  ['metro', 1024],
-  ['s-tog', 16],
-  ['train', 1 | 2 | 4 | 8],
-  ['light-rail', 2048],
-  ['bus', 32 | 64 | 128 | 512],
-]
+const MODE_PRODUCTS: Readonly<Record<Mode, number>> = {
+  bus: 32 | 64 | 128 | 512,
+  metro: 1024,
+  's-tog': 16,
+  train: 1 | 2 | 4 | 8,
+  'light-rail': 2048,
+}
 
-/** The modes a message's products concern: none when it gives none. */
+/** The modes a message's products concern, in the timetable's order: none when it gives none. */
 export const modesOf = (products: number | undefined): Mode[] =>
-  products === undefined
-    ? []
-    : MODE_PRODUCTS.filter(([, classes]) => (products & classes) !== 0).map(([mode]) => mode)
+  products === undefined ? [] : MODES.filter((mode) => (products & MODE_PRODUCTS[mode]) !== 0)
 
 /** A short fingerprint of the messages, which changes whenever any of them does. */
 const versionOf = (messages: readonly Message[]) =>

@@ -11,15 +11,20 @@ import {
 } from '@mylder/perron'
 import { DisruptionCard, type DisruptionCardProps } from '@mylder/perron/patterns'
 import { useId } from 'react'
-import { readList, type DisruptionKind } from '../domain/disruption'
+import { checkedEvery, type DisruptionKind } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale, type Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
-import { disruptionList, useDisruptionList, type DisruptionListStore } from '../map/disruptions'
-import { useLiveSnapshot } from '../map/live'
+import {
+  disruptionList,
+  useListedDisruptions,
+  type DisruptionListStore,
+  type ListedDisruptions,
+} from '../map/disruptions'
+import { useSnapshot } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
-import type { Disruption, Disruptions, Snapshot } from '../tracker/index'
+import type { Disruption, Snapshot } from '../tracker/index'
 import styles from './DisruptionList.module.css'
 
 type Words = ClientDictionary['disruptions']
@@ -33,14 +38,7 @@ const SEVERITY: Record<DisruptionKind, SeverityLabelSeverity> = {
   'service-notice': 'notice',
 }
 
-/** How often the list is checked, in minutes, at each budget level: never once the month is spent. */
-const CHECKED_EVERY: Record<Snapshot['budget']['level'], number | undefined> = {
-  normal: 15,
-  stretched: 15,
-  tight: 30,
-  spent: undefined,
-}
-
+/** How the screen writes moments: in its language, on the timetable's clock, against now. */
 interface Clock {
   readonly lang: Lang
   readonly timezone: string
@@ -49,8 +47,8 @@ interface Clock {
 
 const formats = new Map<string, Intl.DateTimeFormat>()
 
-/** A moment in the zone as `options` write it in the language, its format made once. */
-function written(moment: number, { lang, timezone }: Clock, options: Intl.DateTimeFormatOptions) {
+/** A moment as `options` write it in the clock's language and zone, its format made once. */
+function formatted(moment: number, { lang, timezone }: Clock, options: Intl.DateTimeFormatOptions) {
   const key = `${lang} ${timezone} ${JSON.stringify(options)}`
   let format = formats.get(key)
   if (!format) {
@@ -60,44 +58,43 @@ function written(moment: number, { lang, timezone }: Clock, options: Intl.DateTi
   return format.format(moment)
 }
 
-/** The day a moment falls on in the zone, to compare days by. */
-const dayOf = (moment: number, clock: Clock) =>
-  written(moment, clock, { year: 'numeric', month: '2-digit', day: '2-digit' })
-
+const DAY: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' }
+const MONTH: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit' }
 const DATE: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }
-const DAY_ONLY: Intl.DateTimeFormatOptions = { day: 'numeric' }
+const DAY_OF_MONTH: Intl.DateTimeFormatOptions = { day: 'numeric' }
 
 /** A `<time>` for a moment, as `text`. */
-const timeOf = (moment: number, text: string) => (
+const timeElement = (moment: number, text: string) => (
   <time dateTime={new Date(moment).toISOString()}>{text}</time>
 )
 
 /**
  * A message's time, as its card says it: "05:00 to 23:30" within one day, with its date when that
  * day is not today; "15 to 18 June" across days; one end alone, "From 08:03" or "Until 18 June".
+ * An end at midnight closes the day before it.
  */
 function timeOfMessage({ from, to }: Disruption, clock: Clock): DisruptionCardProps['time'] {
-  const today = dayOf(clock.now, clock)
-  const clockOf = (moment: number) => clockTime(moment, clock.timezone)
-  const dateOf = (moment: number) => written(moment, clock, DATE)
+  const today = formatted(clock.now, clock, DAY)
+  const hours = (moment: number) => clockTime(moment, clock.timezone)
+  const date = (moment: number) => formatted(moment, clock, DATE)
   /** One end alone: its clock time today, else its date. */
-  const end = (moment: number) =>
-    timeOf(moment, dayOf(moment, clock) === today ? clockOf(moment) : dateOf(moment))
+  const alone = (moment: number, day: number) =>
+    timeElement(moment, formatted(day, clock, DAY) === today ? hours(moment) : date(day))
   if (from === undefined || to === undefined) {
     return {
-      ...(from === undefined ? {} : { from: end(from) }),
-      ...(to === undefined ? {} : { to: end(to) }),
+      ...(from === undefined ? {} : { from: alone(from, from) }),
+      ...(to === undefined ? {} : { to: alone(to, to - 1) }),
     }
   }
-  if (dayOf(from, clock) === dayOf(to, clock)) {
-    const start = dayOf(from, clock) === today ? clockOf(from) : `${dateOf(from)} ${clockOf(from)}`
-    return { from: timeOf(from, start), to: timeOf(to, clockOf(to)) }
+  const lastDay = to - 1
+  if (formatted(from, clock, DAY) === formatted(lastDay, clock, DAY)) {
+    const onDay = formatted(from, clock, DAY) === today ? '' : `${date(from)} `
+    return { from: timeElement(from, `${onDay}${hours(from)}`), to: timeElement(to, hours(to)) }
   }
-  const sameMonth =
-    written(from, clock, { month: 'numeric' }) === written(to, clock, { month: 'numeric' })
+  const sameMonth = formatted(from, clock, MONTH) === formatted(lastDay, clock, MONTH)
   return {
-    from: timeOf(from, written(from, clock, sameMonth ? DAY_ONLY : DATE)),
-    to: timeOf(to, dateOf(to)),
+    from: timeElement(from, formatted(from, clock, sameMonth ? DAY_OF_MONTH : DATE)),
+    to: timeElement(to, date(lastDay)),
   }
 }
 
@@ -109,20 +106,19 @@ function stopsOf({ message }: Disruption): DisruptionCardProps['stops'] {
   return [...new Set(named)]
 }
 
-interface CardProps {
+interface MessageCardProps {
   readonly disruption: Disruption
   readonly kind: DisruptionKind
   readonly clock: Clock
-  readonly words: Words
-  readonly modes: ClientDictionary['modes']
-  readonly modesLabel: string
 }
 
 /**
  * One of Rejseplanen's messages as a card, in Rejseplanen's own words, which are Danish: its
  * heading, its lead, and its full text behind "More" when it says more.
  */
-function MessageCard({ disruption, kind, clock, words, modes, modesLabel }: CardProps) {
+function MessageCard({ disruption, kind, clock }: MessageCardProps) {
+  const { dictionary } = useI18n()
+  const words = dictionary.disruptions
   const { head, lead, text } = disruption.message
   const sentence = lead ?? text
   const more = lead !== undefined && text !== undefined && text.length > lead.length
@@ -149,10 +145,10 @@ function MessageCard({ disruption, kind, clock, words, modes, modesLabel }: Card
         </Text>
       )}
       {disruption.modes.length > 0 ? (
-        <ul aria-label={modesLabel} className={styles.modes}>
+        <ul aria-label={dictionary.topBar.modes} className={styles.modes}>
           {disruption.modes.map((mode) => (
             <Tag key={mode} render={<li />}>
-              {modes[mode]}
+              {dictionary.modes[mode]}
             </Tag>
           ))}
         </ul>
@@ -161,21 +157,23 @@ function MessageCard({ disruption, kind, clock, words, modes, modesLabel }: Card
   )
 }
 
-/** The footer's lines: when the list was checked, how often, and whether it may be incomplete. */
+/**
+ * The footer's lines (docs/screens.md, "Footer"): when the list was last checked, the time of its
+ * last good answer, how often it is checked, and whether it may be out of date or incomplete.
+ */
 function footerOf(
-  list: Disruptions,
-  reading: ReturnType<typeof readList<Disruption>>,
+  { list, reading }: ListedDisruptions,
   level: Snapshot['budget']['level'] | undefined,
-  clock: Clock,
+  timezone: string,
   words: Words,
 ): string[] {
-  const at = list.fetched === null ? undefined : clockTime(list.fetched, clock.timezone)
-  const every = CHECKED_EVERY[level ?? 'normal']
+  const lastGood = list.fetched === null ? undefined : clockTime(list.fetched, timezone)
+  const every = checkedEvery(level ?? 'normal')
   const lines: string[] = []
   if (list.checked === null) lines.push(words.notChecked)
-  else if (at === undefined) lines.push(words.failed)
-  else if (reading.lastCheckFailed) lines.push(words.lastChecked.replace('{time}', at))
-  else lines.push(words.checked.replace('{time}', at))
+  else if (lastGood === undefined) lines.push(words.failed)
+  else if (reading.lastCheckFailed) lines.push(words.lastChecked.replace('{time}', lastGood))
+  else lines.push(words.checked.replace('{time}', lastGood))
   if (reading.outOfDate) lines.push(words.outOfDate)
   if (every !== undefined) lines.push(words.every.replace('{minutes}', String(every)))
   if (reading.mayBeIncomplete) lines.push(words.incomplete)
@@ -190,29 +188,31 @@ function footerOf(
 export function DisruptionList({ store = disruptionList }: { store?: DisruptionListStore }) {
   const { lang, dictionary } = useI18n()
   const words = dictionary.disruptions
-  const list = useDisruptionList(store)
-  const { snapshot, clockOffset, lastGoodPoll } = useLiveSnapshot()
+  const listed = useListedDisruptions(store)
+  const snapshot = useSnapshot()
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
   const laterHeading = useId()
 
-  if (!list) {
+  if (!listed) {
     return (
-      <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.footer}>
+      <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.loading}>
         {words.loading}
       </Text>
     )
   }
 
-  // The server's clock when the latest poll landed, so the list moves on with each poll; before
-  // the first, when the list was last checked.
-  const now =
-    lastGoodPoll === undefined ? (list.checked ?? list.fetched ?? 0) : lastGoodPoll + clockOffset
+  const { list, reading, now } = listed
   const clock: Clock = { lang, timezone, now }
-  const reading = readList(list, clock.now)
-  const card = { clock, words, modes: dictionary.modes, modesLabel: dictionary.topBar.modes }
   return (
     <div className={styles.list}>
-      {reading.runningNormally ? <NormalService /> : null}
+      {reading.runningNormally && list.checked !== null ? (
+        <NormalService
+          runningNormallyLabel={words.runningNormally.replace(
+            '{time}',
+            clockTime(list.checked, timezone),
+          )}
+        />
+      ) : null}
       {reading.active.length > 0 ? (
         <ul aria-label={words.active} className={styles.cards}>
           {reading.active.map(({ disruption, kind }) => (
@@ -220,7 +220,7 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
               key={disruption.message.id}
               disruption={disruption}
               kind={kind}
-              {...card}
+              clock={clock}
             />
           ))}
         </ul>
@@ -237,19 +237,19 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
                 key={disruption.message.id}
                 disruption={disruption}
                 kind={kind}
-                {...card}
+                clock={clock}
               />
             ))}
           </ul>
         </Section>
       ) : null}
-      <footer className={styles.footer}>
-        {footerOf(list, reading, snapshot?.budget.level, clock, words).map((line) => (
+      <div className={styles.footer}>
+        {footerOf(listed, snapshot?.budget.level, timezone, words).map((line) => (
           <Text key={line} variant="caption" emphasis="secondary" render={<p />}>
             {line}
           </Text>
         ))}
-      </footer>
+      </div>
     </div>
   )
 }

@@ -98,6 +98,7 @@
       "disruptions": "Driftsforstyrrelser",
       "checked": "Tjekket {time}",
       "checkFailed": "Sidst tjekket {time}; det seneste tjek mislykkedes.",
+      "firstCheckFailed": "Det seneste tjek mislykkedes",
       "notChecked": "Ikke tjekket endnu"
     },
     "keys": {
@@ -123,6 +124,7 @@
     "later": "Senere",
     "more": "Mere",
     "inDanish": "Fra Rejseplanen, på dansk",
+    "runningNormally": "Kører normalt, tjekket {time}",
     "loading": "Henter meddelelser fra Rejseplanen …",
     "checked": "Meddelelser fra Rejseplanen, tjekket {time}.",
     "notChecked": "Meddelelser fra Rejseplanen, endnu ikke tjekket.",

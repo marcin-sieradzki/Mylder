@@ -3,6 +3,7 @@
 import { Sheet, Tab, Tabs, TabsList, TabsPanel } from '@mylder/perron'
 import { useRef, type ReactNode, type RefObject } from 'react'
 import { useI18n } from '../i18n/useI18n'
+import { useListedDisruptions } from '../map/disruptions'
 import { useSnapshot } from '../map/live'
 import { onMap } from '../map/vehicles'
 import { isTab, mapView, SHEET_TABS, useHiddenModes, useSheetTab, type SheetTab } from '../map/view'
@@ -40,10 +41,14 @@ export function CitySheet({ open, onClose, asked, opener }: CitySheetProps) {
   const tab = useSheetTab()
   const hidden = useHiddenModes()
   const snapshot = useSnapshot()
+  // Loaded with the page, so the tab counts its cards before it opens.
+  const disruptions = useListedDisruptions()?.reading
   const popup = useRef<HTMLDivElement>(null)
   const counts: Partial<Record<SheetTab, number>> = {
     // The trips on the map after the filters.
     vehicles: snapshot?.trips.filter((trip) => onMap(trip, hidden)).length,
+    // The cards listed.
+    disruptions: disruptions && disruptions.active.length + disruptions.later.length,
   }
 
   return (

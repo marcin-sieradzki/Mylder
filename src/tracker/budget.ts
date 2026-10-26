@@ -3,6 +3,7 @@
 // level, which decides the poll interval, how often the disruptions are fetched and whether
 // on-demand calls are allowed. The level moves only at a run; the snapshot carries it.
 import 'server-only'
+import { checkedEvery } from '../domain/disruption.ts'
 import type { IsoDate } from '../timetable/format.ts'
 import { wallClock } from '../timetable/time.ts'
 import type { Snapshot } from './snapshot.ts'
@@ -28,17 +29,6 @@ const POLL_INTERVAL: Readonly<Record<BudgetLevel, number>> = {
   tight: 120,
   spent: 60,
 }
-
-/** Minutes between disruption fetches at each level; none when spent. */
-const DISRUPTIONS_EVERY: Readonly<Record<BudgetLevel, number | undefined>> = {
-  normal: 15,
-  stretched: 15,
-  tight: 30,
-  spent: undefined,
-}
-
-/** Minutes between disruption fetches at a level, or undefined when there are none. */
-export const disruptionsEvery = (level: BudgetLevel): number | undefined => DISRUPTIONS_EVERY[level]
 
 /** A calendar month in a zone: its key, `2026-10`, its bounds, and the date the next begins. */
 export interface Month {
@@ -118,7 +108,7 @@ export function pacing({ calls, now, timezone, quotaGone = false }: PacingInput)
         : gap > 0
           ? 'stretched'
           : 'normal'
-  const every = disruptionsEvery(level)
+  const every = checkedEvery(level)
   return {
     month,
     level,

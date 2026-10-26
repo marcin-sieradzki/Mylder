@@ -1,7 +1,8 @@
 // Freezes the recordings in `recordings/` from their plans (src/tracker/recording/plans.ts), and
 // with them the saved snapshots screen tests use: `npm run recordings`. Each folder is rewritten
 // whole: the fixture timetable prepared into `timetable/`, `clock.json`, each service's answers
-// in call order, and the tracker's snapshot of every minute in `snapshots/`.
+// in call order, the tracker's snapshot of every minute in `snapshots/` and its disruption list
+// in `disruptions/`.
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect } from 'effect'
@@ -34,7 +35,7 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
     log: () => {},
   })
   const timetable = await loadTimetable(join(dir, 'timetable'))
-  const { calls, snapshots } = await Effect.runPromise(freeze(plan, timetable))
+  const { calls, snapshots, disruptions } = await Effect.runPromise(freeze(plan, timetable))
   const clock: RecordingClock = { start: new Date(plan.start).toISOString() }
   await writeJson(join(dir, 'clock.json'), clock)
   for (const [service, recorded] of calls) {
@@ -44,6 +45,9 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
   }
   for (const [i, snapshot] of snapshots.entries()) {
     await writeJson(join(dir, 'snapshots', callFile(i)), snapshot)
+  }
+  for (const [i, list] of disruptions.entries()) {
+    await writeJson(join(dir, 'disruptions', callFile(i)), list)
   }
   const answered = [...calls].map(([service, each]) => `${each.length} ${service}`).join(', ')
   console.log(`recordings/${plan.name}: ${answered}, ${snapshots.length} snapshots`)

@@ -162,6 +162,23 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Disruptions')).toBe('Not checked yet')
   })
 
+  it('gives a failed check the time of the last good one, as the Disruptions footer does', () => {
+    const good = weekday.disruptions!
+    show('en', {
+      ...weekday,
+      disruptions: { ...good, checked: good.checked + 15 * 60_000, ok: false },
+    })
+    let dialog = openDialog('About Mylder')
+    expect(fact(dialog, 'Disruptions')).toBe('Last checked 07:20; the latest check failed.')
+    act(() =>
+      liveSnapshot.update({
+        snapshot: { ...weekday, disruptions: { ...good, fetched: null, ok: false } },
+      }),
+    )
+    dialog = screen.getByRole('dialog', { name: 'About Mylder' })
+    expect(fact(dialog, 'Disruptions')).toBe('The latest check failed')
+  })
+
   it('opens from the corner credit’s Rejseplanen link, and Esc closes it and returns focus', async () => {
     const user = userEvent.setup()
     show('en', weekday)

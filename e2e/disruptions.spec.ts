@@ -14,17 +14,17 @@ test("the Disruptions tab lists the recording's messages, active first", async (
       .getByRole('list', { name: 'Later' })
       .getByText('Ingen S-tog mellem Hellerup og Holte i weekenden'),
   ).toBeVisible()
-  await expect(sheet.getByRole('contentinfo')).toContainText(
-    'Messages from Rejseplanen, checked 07:20.',
-  )
+  await expect(sheet.getByText('Messages from Rejseplanen, checked 07:20.')).toBeVisible()
 })
 
 test('in Danish, on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/da?tab=disruptions')
   const sheet = page.getByRole('dialog', { name: 'Overblik' })
-  await expect(
-    sheet.getByRole('list', { name: 'Aktuelle nu' }).getByRole('listitem').first(),
-  ).toBeAttached()
+  const active = sheet.getByRole('list', { name: 'Aktuelle nu' })
+  await expect(active.getByText('Færre S-tog mellem København H og Hellerup')).toBeAttached()
+  await expect(sheet.getByRole('tab', { name: /^Driftsforstyrrelser/ })).toHaveText(
+    'Driftsforstyrrelser 3',
+  )
   await expect(sheet.getByText('Fra Rejseplanen, på dansk')).toHaveCount(0)
 })

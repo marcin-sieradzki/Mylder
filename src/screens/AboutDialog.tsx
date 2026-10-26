@@ -77,8 +77,10 @@ function sourceOf({ source }: Snapshot, words: Words['status']): string {
 function disruptionsOf(snapshot: Snapshot, timezone: string, words: Words['status']): string {
   const list = snapshot.disruptions
   if (!list) return words.notChecked
-  const time = clockTime(list.checked, timezone)
-  return (list.ok ? words.checked : words.checkFailed).replace('{time}', time)
+  if (list.ok) return words.checked.replace('{time}', clockTime(list.checked, timezone))
+  // A failed check gives the time of the last good one, as the Disruptions footer does.
+  if (list.fetched === null) return words.firstCheckFailed
+  return words.checkFailed.replace('{time}', clockTime(list.fetched, timezone))
 }
 
 /** The page's status from the snapshot (docs/screens.md, "The About dialog"). */

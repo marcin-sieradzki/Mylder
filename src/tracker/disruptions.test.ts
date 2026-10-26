@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { modesOf } from './disruptions'
 
 describe('the modes a message concerns', () => {
-  it('reads them from its products, in the order the screens list modes', () => {
+  it('reads them from its products, in the timetable’s order, as the mode chips show them', () => {
     // Bus, Metro and an IC train.
-    expect(modesOf(32 | 1024 | 1)).toEqual(['metro', 'train', 'bus'])
+    expect(modesOf(32 | 1024 | 1)).toEqual(['bus', 'metro', 'train'])
     expect(modesOf(16)).toEqual(['s-tog'])
   })
 

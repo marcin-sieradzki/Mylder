@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Disruptions } from '../tracker/index.ts'
-import { disruptionListStore } from './disruptions.ts'
+import { disruptionListStore, TRIES } from './disruptions.ts'
 import { RETRY_AFTER } from './timetable.ts'
 
 /** The route's answer at a version. */
@@ -14,35 +14,41 @@ const list = (version: string): Disruptions => ({
   nextDue: 2,
 })
 
-/** A fetch that answers each call with the next of `answers`, and counts its calls. */
+/** A fetch that answers each call with the next of `answers`, then the last again, and counts. */
 function answering(...answers: (Disruptions | Error)[]) {
   const paths: string[] = []
   const fetchJson = (path: string) => {
     paths.push(path)
-    const next = answers.shift()
-    return next instanceof Error || next === undefined
-      ? Promise.reject(next ?? new Error('no answer'))
-      : Promise.resolve(next)
+    const next = answers.length > 1 ? answers.shift() : answers[0]
+    return next instanceof Error ? Promise.reject(next) : Promise.resolve(next)
   }
   return { fetchJson, paths }
+}
+
+/** A store with a reader, as the Disruptions tab keeps one while it shows. */
+function read(fetchJson: (path: string) => Promise<unknown>) {
+  const store = disruptionListStore(fetchJson)
+  const seen: (string | undefined)[] = []
+  store.subscribe(() => seen.push(store.get()?.version))
+  return { store, seen }
 }
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 
 describe('the disruption list in the browser', () => {
-  it('loads on the page’s first ask, before a snapshot names a version', async () => {
+  it('loads on the first ask, before a snapshot names a version', async () => {
     const { fetchJson, paths } = answering(list('a'))
-    const store = disruptionListStore(fetchJson)
+    const { store, seen } = read(fetchJson)
     store.want(undefined)
     await vi.runAllTimersAsync()
-    expect(store.get()?.version).toBe('a')
+    expect(seen).toEqual(['a'])
     expect(paths).toEqual(['/api/disruptions'])
   })
 
   it('loads again only when the snapshot names another version', async () => {
     const { fetchJson, paths } = answering(list('a'), list('b'))
-    const store = disruptionListStore(fetchJson)
+    const { store } = read(fetchJson)
     store.want(undefined)
     await vi.runAllTimersAsync()
     store.want('a')
@@ -55,48 +61,67 @@ describe('the disruption list in the browser', () => {
     expect(store.get()?.version).toBe('b')
   })
 
-  it('tells its subscribers when a list lands', async () => {
-    const store = disruptionListStore(answering(list('a')).fetchJson)
-    const onChange = vi.fn<() => void>()
-    store.subscribe(onChange)
-    store.want('a')
-    await vi.runAllTimersAsync()
-    expect(onChange).toHaveBeenCalledTimes(1)
+  it('loads the version a snapshot names while a first load is on its way', async () => {
+    const { fetchJson, paths } = answering(list('a'), list('b'))
+    const { store, seen } = read(fetchJson)
+    store.want(undefined)
+    store.want('b')
+    await vi.advanceTimersByTimeAsync(0)
+    expect(seen).toEqual(['a', 'b'])
+    expect(paths).toHaveLength(2)
   })
 
   it('keeps the list it holds through a failed load, and tries again a while later', async () => {
     const { fetchJson, paths } = answering(list('a'), new Error('503'), list('b'))
-    const store = disruptionListStore(fetchJson)
+    const { store } = read(fetchJson)
     store.want('a')
-    await vi.runAllTimersAsync()
+    await vi.advanceTimersByTimeAsync(0)
     store.want('b')
     await vi.advanceTimersByTimeAsync(0)
     expect(store.get()?.version).toBe('a')
-    expect(paths).toHaveLength(2)
     await vi.advanceTimersByTimeAsync(RETRY_AFTER)
     expect(paths).toHaveLength(3)
     expect(store.get()?.version).toBe('b')
   })
 
-  it('drops an answer that a later version’s load has overtaken', async () => {
-    let resolveFirst: (value: Disruptions) => void = () => {}
-    const answers = [
-      new Promise<Disruptions>((resolve) => (resolveFirst = resolve)),
-      Promise.resolve(list('b')),
-    ]
-    const store = disruptionListStore(() => answers.shift()!)
-    store.want('a')
+  it('keeps an older version a cached route still serves, and asks again for the new one', async () => {
+    const { fetchJson, paths } = answering(list('a'), list('a'), list('b'))
+    const { store, seen } = read(fetchJson)
     store.want('b')
     await vi.advanceTimersByTimeAsync(0)
-    resolveFirst(list('a'))
-    await vi.advanceTimersByTimeAsync(0)
-    expect(store.get()?.version).toBe('b')
+    expect(store.get()?.version).toBe('a')
+    await vi.advanceTimersByTimeAsync(2 * RETRY_AFTER)
+    expect(seen).toEqual(['a', 'a', 'b'])
+    expect(paths).toHaveLength(3)
   })
 
-  it('ignores an answer that is not a disruption list', async () => {
-    const store = disruptionListStore(() => Promise.resolve({ error: 'unknown disruptions' }))
+  it(`gives up on a version after ${TRIES} tries, until the next is named`, async () => {
+    const { fetchJson, paths } = answering(new Error('503'))
+    const { store } = read(fetchJson)
+    store.want('a')
+    await vi.advanceTimersByTimeAsync(10 * RETRY_AFTER)
+    expect(paths).toHaveLength(TRIES)
+    store.want('b')
+    await vi.advanceTimersByTimeAsync(0)
+    expect(paths).toHaveLength(TRIES + 1)
+  })
+
+  it('stops trying again once nothing reads it', async () => {
+    const { fetchJson, paths } = answering(new Error('503'))
+    const store = disruptionListStore(fetchJson)
+    const stop = store.subscribe(() => {})
     store.want('a')
     await vi.advanceTimersByTimeAsync(0)
-    expect(store.get()).toBeUndefined()
+    stop()
+    await vi.advanceTimersByTimeAsync(10 * RETRY_AFTER)
+    expect(paths).toHaveLength(1)
+  })
+
+  it('tries again after an answer that is not a disruption list', async () => {
+    const answers: unknown[] = [{ error: 'unknown disruptions' }, list('a')]
+    const { store, seen } = read(() => Promise.resolve(answers.shift()))
+    store.want('a')
+    await vi.advanceTimersByTimeAsync(RETRY_AFTER)
+    expect(seen).toEqual(['a'])
   })
 })
