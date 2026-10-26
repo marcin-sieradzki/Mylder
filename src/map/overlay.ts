@@ -119,6 +119,12 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   // The picked dot's card follows it as the map pans, even while the dots stand still.
   const onMove = () => vehicles && picking.follow(vehicles, project)
   map.on('move', onMove)
+  // A resized window moves the canvas on the page, which the card's point counts from.
+  const onResize = () => {
+    picking.resized()
+    onMove()
+  }
+  map.on('resize', onResize)
 
   return {
     repaint: () => void draw(),
@@ -131,6 +137,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       loop.stop()
       map.off('zoom', onZoom)
       map.off('move', onMove)
+      map.off('resize', onResize)
       map.removeControl(overlay)
       delete container.dataset.vehicles
     },

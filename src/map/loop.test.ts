@@ -146,6 +146,34 @@ describe('the vehicles between polls', () => {
     expect(offA(vehicles, 12880)).toBeLessThan(1)
   })
 
+  it('leaves a trip that cannot be placed where the snapshot put it, and moves every other', () => {
+    vi.setSystemTime(s(10))
+    start()
+    const bad = minute6.trips.find(
+      (trip) => trip.pattern !== A_PATTERN && trip.progress > 0 && !trip.waiting,
+    )!
+    // A path that claims to run on past its only point, so no point along it can be found.
+    const path = network.pathOf(bad.pattern)
+    const broken: Network = {
+      ...network,
+      pathOf: (pattern) =>
+        pattern === bad.pattern
+          ? { ...path, points: path.points.slice(0, 1), distances: [0] }
+          : network.pathOf(pattern),
+    }
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const vehicles = vehiclesFrom(minute6)
+    const i = vehicles.keys.indexOf(bad.key)
+    const where = [...vehicles.positions.subarray(i * 2, i * 2 + 2)]
+    loop!.show(vehicles, minute6, broken)
+    wait(1000)
+    expect(offA(vehicles, 12880)).toBeLessThan(1)
+    expect([...vehicles.positions.subarray(i * 2, i * 2 + 2)]).toEqual(where)
+    // Two 5C trips run on the pattern: each is said once, not on every frame.
+    expect(errors).toHaveBeenCalledTimes(2)
+    errors.mockRestore()
+  })
+
   it('keeps the dots where the snapshot puts them until its timetable has loaded', () => {
     vi.setSystemTime(s(10))
     start()

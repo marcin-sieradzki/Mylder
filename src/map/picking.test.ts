@@ -22,11 +22,15 @@ const vehicles = vehiclesOf(
 const A_LIVE = 's-tog.A.0bc307e3eb.20260616.0707'
 const BUS_LIVE = 'bus.5C.a74214d87d.20260616.0714'
 
-/** The map's canvas, 100 px from the viewport's left and 50 px from its top. */
-function canvas(): HTMLElement {
+/** The map's canvas, 100 px from the viewport's left and 50 px from its top, counting its measures. */
+function canvas() {
   const element = document.createElement('div')
-  element.getBoundingClientRect = () => DOMRect.fromRect({ x: 100, y: 50, width: 800, height: 600 })
-  return element
+  const at = { x: 100, y: 50, measured: 0 }
+  element.getBoundingClientRect = () => {
+    at.measured++
+    return DOMRect.fromRect({ x: at.x, y: at.y, width: 800, height: 600 })
+  }
+  return { element, at }
 }
 
 const layers = vehicleLayers(vehicles, 1)
@@ -42,13 +46,17 @@ const pointer = (x: number, y: number, key?: string) =>
     layer: key === undefined ? null : glyphs,
   }) as unknown as PickingInfo
 
-/** A picking whose vehicles have been drawn once, where they stand. */
+/** Every dot drawn 20 px from the canvas's left and 10 px from its top. */
+const still = () => ({ x: 20, y: 10 })
+
+/** A picking whose vehicles have been drawn once, standing still. */
 function picking() {
   const store = pickedStore()
-  const picks = vehiclePicking(canvas(), store)
-  picks.follow(vehicles, () => ({ x: 0, y: 0 }))
+  const page = canvas()
+  const picks = vehiclePicking(page.element, store)
+  picks.follow(vehicles, still)
   store.clear()
-  return { store, picks }
+  return { store, picks, page }
 }
 
 describe('picking a dot', () => {
@@ -62,10 +70,11 @@ describe('picking a dot', () => {
     ])
   })
 
-  it('pins the card on the dot a tap found, at the tap on the page', () => {
+  it('pins the card on the dot a tap found, on the page, not at the tap', () => {
     const { store, picks } = picking()
-    picks.props.onClick(pointer(40, 30, A_LIVE))
-    expect(store.get()).toEqual({ key: A_LIVE, point: [140, 80], pinned: true })
+    // Up to 12 px from the dot, with no frame to move the card after: the dots stand still.
+    picks.props.onClick(pointer(30, 18, A_LIVE))
+    expect(store.get()).toEqual({ key: A_LIVE, point: [120, 60], pinned: true })
     // The pointer leaving the dot keeps a pinned card open.
     picks.props.onHover(pointer(400, 300))
     expect(store.get()?.key).toBe(A_LIVE)
@@ -76,8 +85,8 @@ describe('picking a dot', () => {
 
   it('shows a card while the pointer rests on a dot, and none once it leaves', () => {
     const { store, picks } = picking()
-    picks.props.onHover(pointer(10, 10, BUS_LIVE))
-    expect(store.get()).toEqual({ key: BUS_LIVE, point: [110, 60], pinned: false })
+    picks.props.onHover(pointer(10, 4, BUS_LIVE))
+    expect(store.get()).toEqual({ key: BUS_LIVE, point: [120, 60], pinned: false })
     picks.props.onHover(pointer(12, 12, A_LIVE))
     expect(store.get()?.key).toBe(A_LIVE)
     picks.props.onHover(pointer(400, 300))
@@ -96,5 +105,18 @@ describe('picking a dot', () => {
     )
     picks.follow(without, () => ({ x: 60, y: 30 }))
     expect(store.get()).toBeUndefined()
+  })
+
+  it('measures the canvas once rather than each frame, and again when the map resizes', () => {
+    const { store, picks, page } = picking()
+    picks.props.onClick(pointer(20, 10, A_LIVE))
+    for (let x = 21; x < 30; x++) picks.follow(vehicles, () => ({ x, y: 10 }))
+    expect(store.get()?.point).toEqual([129, 60])
+    expect(page.at.measured).toBe(1)
+    // The window narrowed: the canvas now starts at the viewport's left.
+    page.at.x = 0
+    picks.resized()
+    picks.follow(vehicles, () => ({ x: 29, y: 10 }))
+    expect(store.get()?.point).toEqual([29, 60])
   })
 })

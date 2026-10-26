@@ -1,8 +1,8 @@
 // Which dot the reader has picked, for its card (docs/screens.md, "The moving map"): a hover
 // picks one for as long as the pointer rests on it, a tap or click pins it until a tap elsewhere
 // or Esc. deck.gl picks on the GPU within `TAP_RADIUS` of the pointer, so every dot has a tap
-// target of at least 24 px (ADR 0003). The card's point follows its dot as the dot moves and the
-// map pans.
+// target of at least 24 px (ADR 0003). The card opens on its dot, not at the pointer, and its point
+// follows the dot as the dot moves and the map pans.
 import 'client-only'
 import type { PickingInfo } from '@deck.gl/core'
 import { useSyncExternalStore } from 'react'
@@ -71,8 +71,13 @@ export interface VehiclePicking {
    * Takes the vehicles as last drawn, and moves the picked dot's point to where `project` puts it
    * now. `project` turns a longitude and latitude into pixels from the canvas's top left.
    */
-  follow(vehicles: Vehicles, project: (lonLat: [number, number]) => { x: number; y: number }): void
+  follow(vehicles: Vehicles, project: Project): void
+  /** Measures the canvas again on the page, after the map resized. */
+  resized(): void
 }
+
+/** Turns a longitude and latitude into pixels from the canvas's top left. */
+type Project = (lonLat: [number, number]) => { x: number; y: number }
 
 /**
  * Picking for the dots drawn in `canvas`, the element deck.gl's pixels count from, into `store`.
@@ -84,6 +89,7 @@ export function vehiclePicking(
   onPointer: (onDot: boolean) => void = () => {},
 ): VehiclePicking {
   let vehicles: Vehicles | undefined
+  let project: Project | undefined
   // Where the picked trip was found last, so a frame looks it up only when either changes.
   let found: { vehicles: Vehicles; key: string; index: number } | undefined
   const indexOf = (drawn: Vehicles, key: string) => {
@@ -91,9 +97,18 @@ export function vehiclePicking(
       found = { vehicles: drawn, key, index: drawn.keys.indexOf(key) }
     return found.index
   }
+  // The canvas's place on the page, measured once and again only when the map resizes, as the
+  // map fills the window and never scrolls.
+  let box: DOMRect | undefined
   const onPage = (x: number, y: number): [number, number] => {
-    const box = canvas.getBoundingClientRect()
+    box ??= canvas.getBoundingClientRect()
     return [box.left + x, box.top + y]
+  }
+  /** Where the `i`th dot is on the page, or where the pointer is before anything is drawn. */
+  const dotAt = (i: number, info: PickingInfo): [number, number] => {
+    if (!vehicles || !project) return onPage(info.x, info.y)
+    const { x, y } = project([vehicles.positions[i * 2], vehicles.positions[i * 2 + 1]])
+    return onPage(x, y)
   }
   /** The trip a pick found, if it found one of the dots. */
   const keyOf = (info: PickingInfo) =>
@@ -110,25 +125,30 @@ export function vehiclePicking(
         const now = store.get()
         if (now?.pinned) return
         if (key === undefined) store.clear()
-        else if (key !== now?.key) store.pick({ key, point: onPage(info.x, info.y), pinned: false })
+        else if (key !== now?.key)
+          store.pick({ key, point: dotAt(info.index, info), pinned: false })
       },
       onClick(info) {
         const key = keyOf(info)
         if (key === undefined) store.clear()
-        else store.pick({ key, point: onPage(info.x, info.y), pinned: true })
+        else store.pick({ key, point: dotAt(info.index, info), pinned: true })
       },
     },
-    follow(drawn, project) {
+    follow(drawn, projection) {
       vehicles = drawn
+      project = projection
       const picked = store.get()
       if (!picked) return
       const i = indexOf(drawn, picked.key)
       // The trip has left the map: arrived, cancelled, or no longer in the snapshot.
       if (i < 0) return store.clear()
-      const { x, y } = project([drawn.positions[i * 2], drawn.positions[i * 2 + 1]])
+      const { x, y } = projection([drawn.positions[i * 2], drawn.positions[i * 2 + 1]])
       const point = onPage(x, y)
       const moved = Math.hypot(point[0] - picked.point[0], point[1] - picked.point[1])
       if (moved >= 0.5) store.pick({ ...picked, point })
+    },
+    resized() {
+      box = undefined
     },
   }
 }

@@ -25,11 +25,14 @@ const M1_TIMETABLE = 'metro.M1.7f21f99145.20260616.0703'
 /** Waiting at its first stop, Timetable only, leaving at 07:30. */
 const BUS_WAITING = 'bus.991.7ce514fd98.20260616.0730'
 
-/** Opens the card on `key` with the server's clock `seconds` after the snapshot's fetch. */
-function openCard(lang: Lang, key: string, seconds: number) {
+/**
+ * Opens the card on `key` with the server's clock `seconds` after the snapshot's fetch, pinned by
+ * a tap unless a hover opened it.
+ */
+function openCard(lang: Lang, key: string, seconds: number, pinned = true) {
   vi.setSystemTime(minute6.fetched + seconds * 1000)
   liveSnapshot.update({ snapshot: minute6, clockOffset: 0 })
-  pickedVehicle.pick({ key, point: [200, 200], pinned: true })
+  pickedVehicle.pick({ key, point: [200, 200], pinned })
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
       <VehicleCard />
@@ -41,11 +44,14 @@ const card = () => screen.getByRole('tooltip')
 
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: false })
+  // jsdom has no server: the timetable stays on its way, so the card reads Copenhagen's clock.
+  vi.stubGlobal('fetch', () => new Promise(() => {}))
 })
 
 afterEach(() => {
   pickedVehicle.clear()
   liveSnapshot.update({ snapshot: undefined })
+  vi.unstubAllGlobals()
   vi.useRealTimers()
 })
 
@@ -107,6 +113,15 @@ describe("a dot's card", () => {
     act(() => pickedVehicle.pick({ key: BUS_WAITING, point: [200, 200], pinned: true }))
     expect(card()).toHaveTextContent('Kun køreplan')
     expect(card()).toHaveTextContent('Afgår 07:30')
+  })
+
+  it('lets the pointer through to the map while a hover holds it open, so it never hides its dot', () => {
+    openCard('en', A_LIVE, 20, false)
+    // The card opens 8 px from its dot, and a dot is picked from 12 px: over the card, the pointer
+    // must still be over the map, or the map hears it leave and the card closes.
+    expect(getComputedStyle(card()).pointerEvents).toBe('none')
+    act(() => pickedVehicle.pick({ key: A_LIVE, point: [200, 200], pinned: true }))
+    expect(getComputedStyle(card()).pointerEvents).not.toBe('none')
   })
 
   it('closes on Esc', () => {

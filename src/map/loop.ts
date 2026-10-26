@@ -2,7 +2,8 @@
 // (motion.ts) has it now and writes the point into the vehicles' positions, then hands them to
 // the canvas (docs/live-data.md, "Moving between polls"). Under the system's reduced motion
 // setting, or while the pause control holds, it runs no frames: the dots step to their new
-// places once per snapshot and stand still between.
+// places once per snapshot and stand still between. A trip that cannot be placed stays where
+// the snapshot put it, said once, while the others move.
 import 'client-only'
 import { pointAt, type MeasuredPath } from '../domain/trip-motion.ts'
 import type { Network } from '../timetable/network.ts'
@@ -51,8 +52,11 @@ interface Shown {
   readonly vehicles: Vehicles
   readonly snapshot: Snapshot
   readonly network: Network | undefined
-  /** Each vehicle's mover, in drawing order; none for a trip with no path to move along. */
-  readonly movers: readonly (Mover | undefined)[]
+  /**
+   * Each vehicle's mover, in drawing order; none for a trip with no path to move along, or one
+   * that could not be placed.
+   */
+  readonly movers: (Mover | undefined)[]
 }
 
 /** Whether two sets of vehicles are the same trips in the same order. */
@@ -73,29 +77,46 @@ export function vehicleLoop({
   let frame: number | undefined
   const still = () => pause.get() || Boolean(reducedMotion?.matches)
 
+  const cannotPlace = (key: string, error: unknown) =>
+    console.error(`The trip ${key} could not be placed`, error)
+  /** Stops moving the `i`th dot, which stays where it was last written. */
+  const drop = (i: number, error: unknown) => {
+    if (!shown) return
+    shown.movers[i] = undefined
+    cannotPlace(shown.vehicles.keys[i], error)
+  }
+
   /** Writes each dot where it was last placed, and draws them. */
   const write = () => {
     if (!shown) return
     const { vehicles, movers } = shown
     movers.forEach((mover, i) => {
       if (!mover) return
-      const [lat, lon] = pointAt(mover.path, mover.progress)
-      vehicles.positions[i * 2] = lon
-      vehicles.positions[i * 2 + 1] = lat
-      vehicles.opacity[i] = mover.opacity
+      try {
+        const [lat, lon] = pointAt(mover.path, mover.progress)
+        vehicles.positions[i * 2] = lon
+        vehicles.positions[i * 2 + 1] = lat
+        vehicles.opacity[i] = mover.opacity
+      } catch (error) {
+        drop(i, error)
+      }
     })
     draw(vehicles)
   }
   /** Places each dot where its motion has it at `at`. */
   const place = (at: number) => {
     const stilled = still()
-    for (const mover of shown?.movers ?? []) {
-      if (!mover) continue
-      const { progress, opacity } = placeAt(mover.motion, at)
-      mover.progress = progress
-      // A dot stilled mid-fade stands whole.
-      mover.opacity = stilled ? 1 : opacity
-    }
+    shown?.movers.forEach((mover, i) => {
+      if (!mover) return
+      try {
+        const { progress, opacity } = placeAt(mover.motion, at)
+        mover.progress = progress
+        // A dot stilled mid-fade stands whole.
+        mover.opacity = stilled ? 1 : opacity
+      } catch (error) {
+        drop(i, error)
+      }
+    })
     write()
   }
 
@@ -132,8 +153,13 @@ export function vehicleLoop({
       const kept = was?.path === path ? was : undefined
       if (kept && stilled && again) return kept
       const drawn = kept && !stilled ? { progress: kept.progress, at } : undefined
-      const motion = motionOf(trip, snapshot.fetched, path, drawn)
-      return { motion, path, ...placeAt(motion, at) }
+      try {
+        const motion = motionOf(trip, snapshot.fetched, path, drawn)
+        return { motion, path, ...placeAt(motion, at) }
+      } catch (error) {
+        cannotPlace(trip.key, error)
+        return undefined
+      }
     })
   }
 

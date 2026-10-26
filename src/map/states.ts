@@ -58,13 +58,13 @@ export function dataStatesStore(live: SnapshotStore = liveSnapshot): DataStatesS
     states = fresh
     return true
   }
+  // Only a tick or a new snapshot moves the states on while anything watches, so a read, such as
+  // a card's render each frame, is cheap and gives what the subscribers last heard.
   const check = () => {
     if (refresh()) notify()
   }
-  // A read between ticks, such as a render's, can be the first to see a change: the subscribers
-  // hear of it once the read is done.
   const get = () => {
-    if (refresh()) queueMicrotask(notify)
+    if (!stopListening) refresh()
     return states
   }
   // On each whole second of the server's clock, where the snapshot's times fall.
@@ -94,6 +94,21 @@ export function dataStatesStore(live: SnapshotStore = liveSnapshot): DataStatesS
 
 /** The page's one store of states, from the page's live snapshot. */
 export const dataStates = dataStatesStore()
+
+/**
+ * One trip's data state now, for a component such as its card: it renders again only when that
+ * one changes. None for a trip the snapshot doesn't carry.
+ */
+export function useDataState(
+  key: string,
+  store: DataStatesStore = dataStates,
+): DataState | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().get(key),
+    () => undefined,
+  )
+}
 
 /** Each drawn trip's data state now, for a component: it renders again when one changes. */
 export function useDataStates(store: DataStatesStore = dataStates): DataStates {

@@ -75,6 +75,13 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
 /** The page's one loader, shared by everything on the map. */
 export const timetables = timetableLoader()
 
+/** Copenhagen's zone, every timetable's, until the one a snapshot names has loaded. */
+const COPENHAGEN = 'Europe/Copenhagen'
+
+/** The zone whose clock the timetable's times read on, for a network that may not have loaded. */
+export const timezoneOf = (network: Network | undefined): string =>
+  network?.manifest.timezone ?? COPENHAGEN
+
 /**
  * A version's network for a component, such as the one the live snapshot names: none until it
  * has loaded, then the latest loaded until the next one has. One that won't load leaves the last.

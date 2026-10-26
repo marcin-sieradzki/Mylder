@@ -71,6 +71,18 @@ export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapsh
 }
 
 /**
+ * The server's clock minus this device's, for a component that reads the server's time: it
+ * renders again only when an answer moves it.
+ */
+export function useClockOffset(store: SnapshotStore = liveSnapshot): number {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().clockOffset,
+    () => NOTHING_YET.clockOffset,
+  )
+}
+
+/**
  * The latest snapshot alone, for a component that shows nothing of how the poll is going: it
  * renders again only when a snapshot lands.
  */

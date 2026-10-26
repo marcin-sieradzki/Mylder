@@ -57,3 +57,29 @@ export function clockMoment(
 export function serviceDayStart(day: IsoDate, timezone: string): number {
   return wallClock(day, 12 * 3600, timezone) - 12 * 3600 * 1000
 }
+
+const clocks = new Map<string, Intl.DateTimeFormat>()
+
+/**
+ * A moment as the zone's 24-hour clock reads it, as the boards write it in both languages:
+ * `08:14`, or `08:14:05` with seconds.
+ */
+export function clockTime(
+  moment: number,
+  timezone: string,
+  { seconds = false }: { seconds?: boolean } = {},
+): string {
+  const key = `${timezone} ${seconds}`
+  let clock = clocks.get(key)
+  if (!clock) {
+    clock = new Intl.DateTimeFormat('en-GB', {
+      timeZone: timezone,
+      hourCycle: 'h23',
+      hour: '2-digit',
+      minute: '2-digit',
+      ...(seconds ? { second: '2-digit' } : {}),
+    })
+    clocks.set(key, clock)
+  }
+  return clock.format(moment)
+}
