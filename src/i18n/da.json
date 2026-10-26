@@ -13,6 +13,7 @@
   "topBar": {
     "updated": "Opdateret {time}",
     "modes": "Transportformer",
+    "aircraft": "Fly",
     "about": "Om Mylder",
     "updatedPaused": "Opdateret {time}, sat på pause"
   },

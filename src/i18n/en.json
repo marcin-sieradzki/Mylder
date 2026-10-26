@@ -13,6 +13,7 @@
   "topBar": {
     "updated": "Updated {time}",
     "modes": "Modes",
+    "aircraft": "Planes",
     "about": "About Mylder",
     "updatedPaused": "Updated {time}, paused"
   },

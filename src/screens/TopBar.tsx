@@ -4,10 +4,11 @@ import { FilterChip, IconButton } from '@mylder/perron'
 import { TopBar as PerronTopBar } from '@mylder/perron/patterns'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
+import { useAircraftCount, useAircraftOff } from '../map/aircraft'
 import { useLastAnswer, useSnapshot } from '../map/live'
 import { useOutOfDate, usePaused } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
-import { mapView, useHiddenModes } from '../map/view'
+import { mapView, useAircraftHidden, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
@@ -34,23 +35,41 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
   return counts
 }
 
+const showAircraft = (_event: Event, shown: boolean) => mapView.update({ aircraftHidden: !shown })
+
 /**
  * The moving map's top bar (docs/screens.md, "The moving map"): Perron's TopBar with the brand,
- * the Updated line, the mode filters, the language switch and the About button, in the page's
- * header. Its phone layout follows the window's width in Perron's own CSS, from one render, so the
- * prerendered page paints a phone its own bar first.
+ * the Updated line, the mode filters and the Planes filter, the language switch and the About
+ * button, in the page's header. Its phone layout follows the window's width in Perron's own CSS,
+ * from one render, so the prerendered page paints a phone its own bar first.
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
   const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
   const hidden = useHiddenModes()
+  const aircraftHidden = useAircraftHidden()
+  const aircraftCount = useAircraftCount()
+  const aircraftOff = useAircraftOff()
   // The time the server received the latest position answer; while Paused it holds and says so.
   const updatedAt = useLastAnswer()
   const paused = usePaused()
   const outOfDate = useOutOfDate()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
+  // The Planes chip shows once the aircraft have answered, so a server with them off never names
+  // them, or while the address hides them, to turn them on again. Off, the page no longer asks
+  // for them, so the count it last had is left out.
+  const planes =
+    !aircraftOff && (aircraftCount !== undefined || aircraftHidden) ? (
+      <FilterChip
+        selected={!aircraftHidden}
+        onChange={showAircraft}
+        count={aircraftHidden ? undefined : aircraftCount}
+      >
+        {dictionary.topBar.aircraft}
+      </FilterChip>
+    ) : undefined
 
   const show = (mode: Mode, shown: boolean) => {
     const next = new Set(hidden)
@@ -72,20 +91,26 @@ export function TopBar() {
         updatedLabel={dictionary.topBar[paused ? 'updatedPaused' : 'updated']}
         // Perron's own phrase, "Updated 07:20:00, may be out of date", in the page's language.
         outOfDate={outOfDate}
-        filtersLabel={dictionary.topBar.modes}
+        // The group holds the Planes filter beside the modes, so it keeps Perron's own name,
+        // "Filters".
         filters={
-          network
-            ? modesOf(network).map((mode) => (
-                <FilterChip
-                  key={mode}
-                  selected={!hidden.has(mode)}
-                  onChange={(_event, shown) => show(mode, shown)}
-                  count={underway.get(mode) ?? 0}
-                >
-                  {dictionary.modes[mode]}
-                </FilterChip>
-              ))
-            : undefined
+          network || planes ? (
+            <>
+              {network
+                ? modesOf(network).map((mode) => (
+                    <FilterChip
+                      key={mode}
+                      selected={!hidden.has(mode)}
+                      onChange={(_event, shown) => show(mode, shown)}
+                      count={underway.get(mode) ?? 0}
+                    >
+                      {dictionary.modes[mode]}
+                    </FilterChip>
+                  ))
+                : undefined}
+              {planes}
+            </>
+          ) : undefined
         }
         tools={
           <>

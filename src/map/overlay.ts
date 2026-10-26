@@ -5,9 +5,9 @@
 // clock, a filter or the theme changes; the aircraft where their latest answer put them; every
 // dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap on a
 // vehicle opens its detail, and a tap that finds no dot opens the stop under it, if any. Each
-// frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot and the
-// aircraft while the map is open. The numbers of vehicles and aircraft drawn are on the map's
-// container as `data-vehicles` and `data-aircraft`, for tests.
+// frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot while the
+// map is open, and the aircraft while the Planes filter shows them too. The numbers of vehicles
+// and aircraft drawn are on the map's container as `data-vehicles` and `data-aircraft`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
@@ -160,10 +160,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     )
   }
 
-  // The aircraft stand where their latest answer put them, drawn again when one lands.
+  // The aircraft stand where their latest answer put them, drawn again when one lands, unless the
+  // Planes filter keeps them off the map.
+  let aircraftShown = mapView.get().aircraftHidden !== true
   const drawAircraft = () => {
     const { snapshot } = liveAircraft.get()
-    aircraft = snapshot && aircraftOf(snapshot, readPaint(root, aircraftPaint()))
+    aircraft =
+      snapshot && aircraftShown ? aircraftOf(snapshot, readPaint(root, aircraftPaint())) : undefined
     renderNextFrame()
   }
 
@@ -203,7 +206,17 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     aircraftFrom = snapshot
     drawAircraft()
   })
-  const stopPollingAircraft = pollAircraft()
+  // The Planes filter turned off stops the aircraft's poll too; turned on, the poll starts again,
+  // asking at once if one fell due meanwhile.
+  let stopPollingAircraft = aircraftShown ? pollAircraft() : undefined
+  const stopAircraftFilter = mapView.subscribe(() => {
+    const shown = mapView.get().aircraftHidden !== true
+    if (shown === aircraftShown) return
+    aircraftShown = shown
+    stopPollingAircraft?.()
+    stopPollingAircraft = shown ? pollAircraft() : undefined
+    drawAircraft()
+  })
   drawAircraft()
 
   const onZoom = () => {
@@ -235,7 +248,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopFiltering()
       stopPolling()
       stopAircraft()
-      stopPollingAircraft()
+      stopAircraftFilter()
+      stopPollingAircraft?.()
       if (frameAsked !== undefined) cancelAnimationFrame(frameAsked)
       loop.stop()
       follow.remove()

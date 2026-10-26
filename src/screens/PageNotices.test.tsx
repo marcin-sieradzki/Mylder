@@ -332,7 +332,7 @@ describe('the timetable notice', () => {
     land(live(), '2026-08-21T10:00:00Z')
     renderScreen('en')
     // Wait for the snapshot's timetable to load.
-    await screen.findByRole('group', { name: 'Modes' })
+    await screen.findByRole('group', { name: 'Filters' })
     expect(notices()).toEqual([])
   })
 
