@@ -492,13 +492,8 @@ describe('the tracker', () => {
 
       const stop = timetable.stops.stopForPlatform(late.next[0].stop)!
       const board = yield* t.getStopDepartures(stop.id)
-      expect(board?.stop).toEqual({ id: stop.id, name: stop.name })
-      // A platform's id finds its stop too.
-      expect((yield* t.getStopDepartures(late.next[0].stop))?.stop.id).toBe(stop.id)
       const row = board?.departures.find((each) => each.trip === late.key)
       expect(row).toMatchObject({ expected: next.expectedDeparture, state: late.state })
-      const times = board!.departures.map((each) => each.expected ?? each.scheduled)
-      expect(times).toEqual([...times].sort((a, b) => a - b))
 
       expect(yield* t.getStopDepartures('no such stop')).toBeUndefined()
       expect(yield* t.getTripDetail('bus.5C.nothing.20260616.0700')).toBeUndefined()

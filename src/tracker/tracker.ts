@@ -4,15 +4,19 @@
 // join the answer to the timetable and the stored
 // history, run the domain rules for every trip on the map, store the snapshot and the history,
 // and return the snapshot. A failed or empty call keeps every trip's history, so trips age by the
-// clock. The stop and trip answers come from the timetable plus the snapshot's delays until
-// on-demand calls are wired (#32).
+// clock. The stop and trip answers are answers.ts's, from the stored snapshot.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
-import { timedCalls } from '../domain/trip-motion.ts'
-import { COPENHAGEN_BOX, type Mode } from '../timetable/format.ts'
-import { platformId } from '../timetable/stops.ts'
+import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
-import type { PlannedTrip } from '../timetable/trips.ts'
+import {
+  plannedTrip,
+  stopDeparturesFrom,
+  stopIndexOf,
+  tripDetailFrom,
+  type StopDepartures,
+  type TripDetail,
+} from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import {
   buildTrips,
@@ -34,7 +38,7 @@ import {
 import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
 import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
-import type { Snapshot, SnapshotTrip } from './snapshot.ts'
+import type { Snapshot } from './snapshot.ts'
 import type { Source } from './source.ts'
 import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
@@ -44,12 +48,6 @@ export const PRODUCTS = 3839
 
 /** The most journeys one answer may hold. */
 export const MAX_JOURNEYS = 1000
-
-/** How long a stop's departures look ahead. */
-export const DEPARTURES_AHEAD = 60 * 60_000
-
-/** The most departures a stop's answer lists. */
-export const MAX_DEPARTURES = 30
 
 export type PositionMode = Snapshot['positionMode']
 
@@ -67,49 +65,6 @@ export class TrackerConfig extends Context.Service<TrackerConfig, TrackerSetting
 export class TimetableService extends Context.Service<TimetableService, Timetable>()(
   'mylder/tracker/Timetable',
 ) {}
-
-/** One departure from a stop: the timetable's time plus the snapshot's delay for its trip. */
-export interface StopDeparture {
-  readonly trip: string
-  readonly line: string
-  readonly mode: Mode
-  readonly headsign: string
-  readonly platform: string
-  readonly scheduled: number
-  readonly expected?: number
-  readonly state: SnapshotTrip['state']
-}
-
-export interface StopDepartures {
-  readonly stop: { readonly id: string; readonly name: string }
-  /** The snapshot the delays came from, and when the next one is due. */
-  readonly fetched: number
-  readonly nextDue: number
-  readonly departures: readonly StopDeparture[]
-}
-
-export interface TripCall {
-  readonly index: number
-  readonly stop: string
-  readonly name: string
-  readonly arrival: number
-  readonly departure: number
-  readonly expectedArrival?: number
-  readonly expectedDeparture?: number
-}
-
-export interface TripDetail {
-  readonly key: string
-  readonly line: string
-  readonly mode: Mode
-  readonly headsign: string
-  readonly pattern: number
-  readonly state: SnapshotTrip['state']
-  readonly delay?: number
-  readonly fetched: number
-  readonly nextDue: number
-  readonly calls: readonly TripCall[]
-}
 
 /** A failed call as the status section lists it. */
 const callFailed = (error: CallError): Snapshot['status']['calls'][number] => ({
@@ -425,106 +380,18 @@ export const layer: Layer.Layer<
       return snapshot
     })
 
-    /** The snapshot's trips by key, for the stop and trip answers. */
-    const tripsByKey = (snapshot: Snapshot) =>
-      new Map(snapshot.trips.map((trip) => [trip.key, trip]))
-
-    /** A planned trip of the service days running now, by its key. */
-    const plannedTrip = (tripKey: string, now: number): PlannedTrip | undefined => {
-      for (const day of timetable.serviceDaysAt(now)) {
-        const trip = timetable.tripsOn(day).find((each) => each.key === tripKey)
-        if (trip) return trip
-      }
-      return undefined
-    }
-
-    /** A trip's calls shifted by the snapshot's delay for it, when it has one. */
-    const withDelay = (trip: PlannedTrip, delay: number | undefined) =>
-      delay === undefined ? undefined : timedCalls(trip.calls, delay)
-
-    const { platforms, stops } = timetable.stops
-    const platformIdOf = (platform: number) => platforms[platform].id
-
-    /** A stop by its own id, or by the id of one of its platforms. */
-    const stopIndexOf = (id: string) => {
-      const byStop = stops.findIndex((stop) => stop.id === id)
-      if (byStop >= 0) return byStop
-      const platform = platforms.findIndex((each) => each.id === platformId(id))
-      return platform >= 0 ? platforms[platform].stop : -1
-    }
-
+    // An unknown stop or trip answers without a run.
     const getStopDepartures = (stopId: string) =>
       Effect.gen(function* () {
-        const stopIndex = stopIndexOf(stopId)
-        if (stopIndex < 0) return undefined
-        const snapshot = yield* getSnapshot
-        const now = snapshot.fetched
-        const onMap = tripsByKey(snapshot)
-        const departures: StopDeparture[] = []
-        for (const day of timetable.serviceDaysAt(now)) {
-          for (const trip of timetable.tripsOn(day)) {
-            const live = onMap.get(trip.key)
-            let expected: ReturnType<typeof withDelay> | null = null
-            trip.calls.forEach((call, i) => {
-              if (i === trip.calls.length - 1 || platforms[call.platform].stop !== stopIndex) return
-              // Shift the trip's calls once, and only for a trip that calls here.
-              if (expected === null) expected = withDelay(trip, live?.delay)
-              const leaves = expected?.[i].departure ?? call.departure
-              if (leaves < now || leaves > now + DEPARTURES_AHEAD) return
-              departures.push({
-                trip: trip.key,
-                line: trip.line.name,
-                mode: trip.line.mode,
-                headsign: trip.headsign,
-                platform: platformIdOf(call.platform),
-                scheduled: call.departure,
-                ...(expected ? { expected: leaves } : {}),
-                state: live?.state ?? 'timetable-only',
-              })
-            })
-          }
-        }
-        departures.sort((a, b) => (a.expected ?? a.scheduled) - (b.expected ?? b.scheduled))
-        const stop = stops[stopIndex]
-        return {
-          stop: { id: stop.id, name: stop.name },
-          fetched: now,
-          nextDue: snapshot.nextDue,
-          departures: departures.slice(0, MAX_DEPARTURES),
-        }
+        if (stopIndexOf(timetable, stopId) < 0) return undefined
+        return stopDeparturesFrom(timetable, yield* getSnapshot, stopId)
       })
 
     const getTripDetail = (tripKey: string) =>
       Effect.gen(function* () {
-        const trip = plannedTrip(tripKey, yield* Clock.currentTimeMillis)
-        if (!trip) return undefined
-        const snapshot = yield* getSnapshot
-        const live = tripsByKey(snapshot).get(trip.key)
-        const expected = withDelay(trip, live?.delay)
-        return {
-          key: trip.key,
-          line: trip.line.name,
-          mode: trip.line.mode,
-          headsign: trip.headsign,
-          pattern: trip.pattern,
-          state: live?.state ?? 'timetable-only',
-          ...(live?.delay === undefined ? {} : { delay: live.delay }),
-          fetched: snapshot.fetched,
-          nextDue: snapshot.nextDue,
-          calls: trip.calls.map((call, index) => ({
-            index,
-            stop: platformIdOf(call.platform),
-            name: platforms[call.platform].name,
-            arrival: call.arrival,
-            departure: call.departure,
-            ...(expected
-              ? {
-                  expectedArrival: expected[index].arrival,
-                  expectedDeparture: expected[index].departure,
-                }
-              : {}),
-          })),
-        }
+        const now = yield* Clock.currentTimeMillis
+        if (!plannedTrip(timetable, tripKey, now)) return undefined
+        return tripDetailFrom(timetable, yield* getSnapshot, tripKey, now)
       })
 
     /** The disruption list, due again at the next fetch its budget level allows. */
