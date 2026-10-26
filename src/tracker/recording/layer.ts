@@ -12,11 +12,16 @@ import * as Http from '../http.ts'
 export const RECORDINGS_DIR = 'recordings'
 
 /**
- * One recorded call as its file holds it: a failure, `{ "status": 503 }` with the body that came
- * with it if any, or `{ "timeout": true }`; anything else is the body of a 200.
+ * One recorded call as its file holds it: a failure, `{ "status": 503 }` with the body and the
+ * headers that came with it if any, such as a 429's `Retry-After`, or `{ "timeout": true }`;
+ * anything else is the body of a 200.
  */
 export type Recorded =
-  | { readonly status: number; readonly body?: unknown }
+  | {
+      readonly status: number
+      readonly body?: unknown
+      readonly headers?: Readonly<Record<string, string>>
+    }
   | { readonly timeout: true }
   | { readonly answer: unknown }
 
@@ -38,7 +43,14 @@ export interface RecordingClock {
   readonly start: string
 }
 
-const FAILURE_KEYS = new Set(['status', 'body', 'timeout'])
+const FAILURE_KEYS = new Set(['status', 'body', 'headers', 'timeout'])
+
+/** Whether a recorded failure's headers are names and their text values. */
+const isHeaders = (headers: unknown): headers is Readonly<Record<string, string>> =>
+  typeof headers === 'object' &&
+  headers !== null &&
+  !Array.isArray(headers) &&
+  Object.values(headers).every((value) => typeof value === 'string')
 
 /**
  * A file's content as a recorded call: a failure when it has only a failure's keys, and an error
@@ -50,11 +62,24 @@ export function readRecorded(content: unknown): Recorded {
   }
   const keys = Object.keys(content)
   if (keys.length === 0 || !keys.every((key) => FAILURE_KEYS.has(key))) return { answer: content }
-  const failure = content as { status?: unknown; body?: unknown; timeout?: unknown }
+  const failure = content as {
+    status?: unknown
+    body?: unknown
+    headers?: unknown
+    timeout?: unknown
+  }
   if (failure.timeout === true && keys.length === 1) return { timeout: true }
-  if (Number.isInteger(failure.status) && failure.timeout === undefined) {
+  if (
+    Number.isInteger(failure.status) &&
+    failure.timeout === undefined &&
+    (failure.headers === undefined || isHeaders(failure.headers))
+  ) {
     const status = failure.status as number
-    return 'body' in failure ? { status, body: failure.body } : { status }
+    return {
+      status,
+      ...('body' in failure ? { body: failure.body } : {}),
+      ...(failure.headers === undefined ? {} : { headers: failure.headers }),
+    }
   }
   throw new Error(`Not a recorded failure: ${JSON.stringify(content)}`)
 }
@@ -67,11 +92,11 @@ export const fileContent = (recorded: Recorded): unknown =>
 export function answer(request: Http.Request, recorded: Recorded): Effect.Effect<Http.Response> {
   if ('answer' in recorded) return Effect.succeed(Http.json(request, 200, recorded.answer))
   if ('timeout' in recorded) return Http.gatewayTimeout(request)
-  const { status, body } = recorded
+  const { status, body, headers } = recorded
   return Effect.succeed(
     typeof body === 'string' || body === undefined
-      ? Http.text(request, status, body ?? '')
-      : Http.json(request, status, body),
+      ? Http.text(request, status, body ?? '', headers)
+      : Http.json(request, status, body, headers),
   )
 }
 

@@ -11,21 +11,37 @@ export { HttpClient }
 export type Request = HttpClientRequest.HttpClientRequest
 export type Response = HttpClientResponse.HttpClientResponse
 
+/** Headers an answer carries beside its content type, such as a 429's `Retry-After`. */
+type ExtraHeaders = Readonly<Record<string, string>>
+
 /** Answers a request with a JSON body. */
-export const json = (request: Request, status: number, body: unknown): Response =>
+export const json = (
+  request: Request,
+  status: number,
+  body: unknown,
+  headers: ExtraHeaders = {},
+): Response =>
   HttpClientResponse.fromWeb(
     request,
     new globalThis.Response(JSON.stringify(body), {
       status,
-      headers: { 'content-type': 'application/json;charset=UTF-8' },
+      headers: { ...headers, 'content-type': 'application/json;charset=UTF-8' },
     }),
   )
 
 /** Answers a request with a plain body, as a server in front of an API might fail. */
-export const text = (request: Request, status: number, body: string): Response =>
+export const text = (
+  request: Request,
+  status: number,
+  body: string,
+  headers: ExtraHeaders = {},
+): Response =>
   HttpClientResponse.fromWeb(
     request,
-    new globalThis.Response(body, { status, headers: { 'content-type': 'text/plain' } }),
+    new globalThis.Response(body, {
+      status,
+      headers: { ...headers, 'content-type': 'text/plain' },
+    }),
   )
 
 /** How long a timed-out call hangs before the gateway gives up, past any client's timeout. */
@@ -53,15 +69,26 @@ export interface Unanswered {
   readonly message: string
 }
 
-/** GETs a URL with a query through a client, answering with the status and the body's text. */
+/** An answer as `getText` gives it: its status, its headers by lowercase name, and its body. */
+export interface Answer {
+  readonly status: number
+  readonly headers: Readonly<Record<string, string>>
+  readonly text: string
+}
+
+/** GETs a URL with a query through a client, answering with the status, headers and body. */
 export const getText = (
   httpClient: HttpClient.HttpClient,
   url: string,
   urlParams: Readonly<Record<string, string | number>>,
-): Effect.Effect<{ readonly status: number; readonly text: string }, Unanswered> =>
+): Effect.Effect<Answer, Unanswered> =>
   httpClient.get(url, { urlParams }).pipe(
     Effect.flatMap((response) =>
-      Effect.map(response.text, (body) => ({ status: response.status, text: body })),
+      Effect.map(response.text, (body) => ({
+        status: response.status,
+        headers: response.headers,
+        text: body,
+      })),
     ),
     Effect.mapError((failure) => ({
       network: failure.reason instanceof HttpClientError.TransportError,

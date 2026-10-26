@@ -112,7 +112,7 @@ A **broadcast** position is one the aircraft sent itself: ADS-B, ADS-R or ADS-C 
 3. The position was not broadcast: **Estimated**.
 4. It is younger than two poll intervals: **Live**; otherwise **Ageing**.
 
-A position's age is the feed's own (`seen_pos`) at the snapshot's fetch, counted on by the clock, so a stale answer from the CDN and a browser whose polls stop both age truly. _A plane that broadcast its position 12 s before a fetch is Live, turns Ageing 8 s later without a poll, No signal at 60 s, and leaves the map at 5 min. When adsb.lol stops answering, each plane keeps the state its age gives it for 60 s, and then every plane is No signal where it was last placed._
+A position's age is the feed's own (`seen_pos`) at the snapshot's fetch, counted on by the clock, so a stale answer from the CDN and a browser whose polls stop both age truly. _A plane that broadcast its position 12 s before a fetch is Live, turns Ageing 8 s later without a poll, No signal at 60 s, and leaves the map at 5 min. When adsb.lol and adsb.fi both stop answering, each plane keeps the state its age gives it for 60 s, and then every plane is No signal where it was last placed._
 
 ## When the answers stop
 
