@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { disruptionKind, disruptionPhase, type DisruptionFacts } from './disruption'
+import { disruptionKind, disruptionPhase, readList, type DisruptionFacts } from './disruption'
 
 // 08:00 in Copenhagen on Monday 2026-10-26.
 const NOW = Date.UTC(2026, 9, 26, 7)
@@ -70,5 +70,55 @@ describe('a disruption’s phase', () => {
     expect(disruptionPhase({ fieldsKind: 'delays', act: true }, NOW)).toBe('active')
     expect(disruptionPhase({ fieldsKind: 'delays' }, NOW)).toBe('active')
     expect(disruptionPhase({ fieldsKind: 'delays', act: false }, NOW)).toBe('later')
+  })
+})
+
+describe('the disruption list at a moment', () => {
+  const checkedAt = NOW - 5 * 60_000
+  const list = (messages: DisruptionFacts[], more: Partial<Parameters<typeof readList>[0]> = {}) =>
+    readList(
+      { fetched: checkedAt, checked: checkedAt, ok: true, received: 3, messages, ...more },
+      NOW,
+    )
+  const startingAt = (from: number): DisruptionFacts => ({
+    fieldsKind: 'delays',
+    from,
+    to: from + HOUR,
+  })
+
+  it('lists active ones newest first, then Later by start, and leaves out the rest', () => {
+    const older = startingAt(NOW - 30 * 60_000)
+    const newer = startingAt(NOW - 10 * 60_000)
+    const soon = startingAt(NOW + 2 * DAY)
+    const sooner = startingAt(NOW + DAY)
+    const ended = startingAt(NOW - 2 * HOUR)
+    const read = list([older, soon, ended, newer, sooner])
+    expect(read.active.map(({ disruption }) => disruption)).toEqual([newer, older])
+    expect(read.later.map(({ disruption }) => disruption)).toEqual([sooner, soon])
+    expect(read.later.map(({ kind }) => kind)).toEqual(['planned-works', 'planned-works'])
+    expect(read.runningNormally).toBe(false)
+  })
+
+  it('says Running normally when nothing is active and the last check succeeded', () => {
+    expect(list([]).runningNormally).toBe(true)
+    expect(list([startingAt(NOW + DAY)]).runningNormally).toBe(true)
+  })
+
+  it('never says Running normally after a failed check, or before the first', () => {
+    const failed = list([], { ok: false })
+    expect(failed.runningNormally).toBe(false)
+    expect(failed.lastCheckFailed).toBe(true)
+    expect(list([], { fetched: null, checked: null }).runningNormally).toBe(false)
+  })
+
+  it('marks the list out of date an hour after its last good answer', () => {
+    expect(list([], { fetched: NOW - HOUR }).outOfDate).toBe(false)
+    expect(list([], { fetched: NOW - HOUR - 1, ok: false }).outOfDate).toBe(true)
+    expect(list([], { fetched: null, ok: false }).outOfDate).toBe(false)
+  })
+
+  it('warns that an answer of exactly 100 messages may be cut short', () => {
+    expect(list([], { received: 100 }).mayBeIncomplete).toBe(true)
+    expect(list([], { received: 99 }).mayBeIncomplete).toBe(false)
   })
 })

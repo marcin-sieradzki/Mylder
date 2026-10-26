@@ -141,3 +141,7 @@ _Avoid_: Offline, No signal (for the page)
 **Disruption**:
 One of Rejseplanen's messages about the network that belongs to Copenhagen, shown in its own words and language. It is active from its start until its end, and listed under Later when it starts within the next 7 days.
 _Avoid_: Alert, incident, notice
+
+**Data card**:
+Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen or no positions for a mode, shown first and marked as Mylder's.
+_Avoid_: System alert, status card

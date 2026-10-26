@@ -60,3 +60,75 @@ export function disruptionPhase(
   if (from === undefined || from <= now) return 'active'
   return from - now <= LATER_WITHIN ? 'later' : undefined
 }
+
+/** A listed disruption with the kind its card names. */
+export interface Listed<D extends DisruptionFacts> {
+  readonly disruption: D
+  readonly kind: DisruptionKind
+}
+
+/** The disruption list as the route serves it: when it was fetched and checked, and its messages. */
+export interface ListFacts<D extends DisruptionFacts> {
+  /** When the last good answer came, or null when none has. */
+  readonly fetched: number | null
+  /** When it was last asked for, or null before the first check. */
+  readonly checked: number | null
+  /** Whether the last check worked. */
+  readonly ok: boolean
+  /** How many messages the answer held, Copenhagen's or not. */
+  readonly received: number
+  readonly messages: readonly D[]
+}
+
+/** The list as the Disruptions screen reads it at a moment. */
+export interface ListReading<D extends DisruptionFacts> {
+  /** Active ones, newest start first. */
+  readonly active: readonly Listed<D>[]
+  /** Later ones, by start. */
+  readonly later: readonly Listed<D>[]
+  /** Nothing is active and the last check worked: said once, for the network. */
+  readonly runningNormally: boolean
+  readonly lastCheckFailed: boolean
+  /** An hour or more since the last good answer. */
+  readonly outOfDate: boolean
+  /** Rejseplanen sends at most this many, so a full answer may be cut short. */
+  readonly mayBeIncomplete: boolean
+}
+
+/** The most messages one `himsearch` answer holds. */
+export const MAX_MESSAGES = 100
+
+/** How long a good answer counts as up to date. */
+const UP_TO_DATE_FOR = 3600_000
+
+/**
+ * The list at a moment: active ones newest first, then Later by start, each with its card's kind.
+ * Active ones sort by start until the first day shows whether priority orders them.
+ */
+export function readList<D extends DisruptionFacts>(
+  list: ListFacts<D>,
+  now: number,
+): ListReading<D> {
+  const active: Listed<D>[] = []
+  const later: Listed<D>[] = []
+  for (const disruption of list.messages) {
+    const phase = disruptionPhase(disruption, now)
+    if (phase) {
+      ;(phase === 'active' ? active : later).push({
+        disruption,
+        kind: disruptionKind(disruption, now),
+      })
+    }
+  }
+  const start = ({ disruption }: Listed<D>) => disruption.from ?? -Infinity
+  active.sort((a, b) => start(b) - start(a))
+  later.sort((a, b) => start(a) - start(b))
+  return {
+    active,
+    later,
+    runningNormally: active.length === 0 && list.ok && list.checked !== null,
+    lastCheckFailed: !list.ok,
+    outOfDate: list.fetched !== null && now - list.fetched > UP_TO_DATE_FOR,
+    mayBeIncomplete: list.received === MAX_MESSAGES,
+  }
+}

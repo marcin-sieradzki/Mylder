@@ -16,6 +16,11 @@
     "calls": 5
   },
   "store": "ok",
+  "lastSeen": {
+    "bus": 1781587380000,
+    "s-tog": 1781587380000,
+    "train": 1781587380000
+  },
   "disruptions": {
     "fetched": 1781587200000,
     "checked": 1781587200000,

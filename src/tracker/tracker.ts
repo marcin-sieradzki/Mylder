@@ -25,7 +25,15 @@ import {
   type Disruptions,
 } from './disruptions.ts'
 import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
-import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
+import {
+  countBy,
+  CpuClock,
+  lastSeenByMode,
+  RUNNING_OUT_DAYS,
+  runLine,
+  STALE_DAYS,
+  timetableAge,
+} from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Source } from './source.ts'
@@ -262,6 +270,7 @@ export const layer: Layer.Layer<
             ...(pace.resumes ? { resumes: pace.resumes } : {}),
           },
           store: 'ok',
+          lastSeen: lastSeenByMode(trips, previous, serviceDay),
           disruptions: summaryOf(yield* storedDisruptions),
           source: describeSource(config.source),
           status: {
