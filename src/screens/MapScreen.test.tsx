@@ -141,9 +141,15 @@ describe('the top bar', () => {
     renderScreen('en')
     const modes = await screen.findByRole('group', { name: 'Modes' })
     const drawn = () =>
-      vehiclesOf(snapshot, undefined, readPaint(document.documentElement, vehiclePaint()), {
-        hidden: mapView.get().hidden,
-      }).length
+      vehiclesOf(
+        snapshot,
+        undefined,
+        readPaint(document.documentElement, vehiclePaint()),
+        undefined,
+        {
+          hidden: mapView.get().hidden,
+        },
+      ).length
     expect(drawn()).toBe(18)
 
     fireEvent.click(within(modes).getByRole('button', { name: 'Bus 6' }))

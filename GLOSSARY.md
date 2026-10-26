@@ -135,3 +135,13 @@ _Avoid_: Outage, down, No signal (for the page)
 **Disconnected**:
 The browser's own polls of Mylder fail. The page says so at once, dots keep moving on what the browser has, and data states age by the clock. A condition of the page, not a data state.
 _Avoid_: Offline, No signal (for the page)
+
+## Disruptions
+
+**Disruption**:
+One of Rejseplanen's messages about the network that belongs to Copenhagen, shown in its own words and language. It is active from its start until its end, and listed under Later when it starts within the next 7 days.
+_Avoid_: Alert, incident, notice
+
+**Data card**:
+Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen or no positions for a mode, shown first and marked as Mylder's.
+_Avoid_: System alert, status card
