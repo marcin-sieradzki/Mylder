@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 -4 27 27">
   <title>Mylder</title>
   <style>
-    .bus { fill: #D99A00 }
-    .ring { stroke: #12181B }
     @media (prefers-color-scheme: dark) {
       .bus { fill: #F2B630 }
       .ring { stroke: #EBEEEB }

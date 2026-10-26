@@ -149,6 +149,7 @@ describe('the map controls', () => {
 
 describe('the prerendered controls', () => {
   it('hydrate without a warning, before the map has attached', async () => {
+    expect(mapCamera.get()).toBeUndefined()
     const tools = (
       <Providers lang="en" dictionary={en}>
         <MapTools />
@@ -158,13 +159,15 @@ describe('the prerendered controls', () => {
     page.innerHTML = renderToString(tools)
     document.body.append(page)
     const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const root = await act(async () => hydrateRoot(page, tools))
+    let root: ReturnType<typeof hydrateRoot> | undefined
     onTestFinished(() => {
       warn.mockRestore()
-      act(() => root.unmount())
+      act(() => root?.unmount())
       page.remove()
     })
+    root = await act(async () => hydrateRoot(page, tools))
     expect(warn).not.toHaveBeenCalled()
+    expect(within(page).getByText('—')).toBeInTheDocument()
   })
 })
 
