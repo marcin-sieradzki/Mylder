@@ -240,6 +240,12 @@ describe('Reporting live, by mode', () => {
     expect(figure('Reported this minute')).toHaveTextContent('6')
     expect(figure('Average delay')).toHaveTextContent('Too few vehicles with a known delay')
   })
+
+  it('follows the mode filters in Reporting live, when it holds the third slot', () => {
+    window.history.replaceState(null, '', '/en?hide=bus,metro')
+    renderPulse('en', withoutDelays(saved(MINUTE_6)))
+    expect(figure('Reporting live')).toHaveTextContent('6 of 7 vehicles that could report')
+  })
 })
 
 describe('How sure are we?', () => {
