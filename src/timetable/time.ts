@@ -27,6 +27,12 @@ function offset(moment: number, timezone: string): number {
   return wall - Math.floor(moment / 1000) * 1000
 }
 
+/** The moment the zone's clock last read a whole hour, at or before `moment`. */
+export function hourStart(moment: number, timezone: string): number {
+  const wall = moment + offset(moment, timezone)
+  return moment - (((wall % 3_600_000) + 3_600_000) % 3_600_000)
+}
+
 /** The moment the zone's clock reads `seconds` after midnight on `day`. */
 export function wallClock(day: IsoDate, seconds: number, timezone: string): number {
   const extraDays = Math.floor(seconds / 86_400)

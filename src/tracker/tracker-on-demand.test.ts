@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Effect, type Layer } from 'effect'
+import { Effect, Fiber, type Layer } from 'effect'
 import { TestClock } from 'effect/testing'
 import { pacing } from './budget'
 import { callsKey } from './rejseplanen/client'
@@ -68,6 +68,19 @@ const failing = (service: string) => {
   )
 }
 
+/** The simulated Rejseplanen, its departure boards taking a second to answer. */
+const slow = (() => {
+  const simulation = simulatedClient({ timetable })
+  return Http.layer(
+    Http.client((request, url) =>
+      (url.pathname.endsWith('multiDepartureBoard') ? Effect.sleep('1 second') : Effect.void).pipe(
+        Effect.andThen(simulation.execute(request)),
+        Effect.orDie,
+      ),
+    ),
+  )
+})()
+
 /** Eleven stops with buses or S-tog leaving in the next half hour. */
 const BUSY_STOPS = [
   '718',
@@ -101,6 +114,22 @@ describe('a stop’s on-demand departures', () => {
       })
       expect(yield* boardCalls).toBe(2)
     }).pipe(Effect.provide(tracker())),
+  )
+
+  it.effect('makes one board call for a stop two viewers open at once', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      // The map's snapshot first, so both viewers ask for the board alone.
+      yield* (yield* Tracker).getSnapshot
+      const both = yield* Effect.forkChild(
+        Effect.all([departures(NORREPORT), departures(NORREPORT)], { concurrency: 'unbounded' }),
+      )
+      yield* TestClock.adjust('1 second')
+      const [first, second] = yield* Fiber.join(both)
+      expect(yield* boardCalls).toBe(1)
+      // The one that found the call under way answers from the timetable meanwhile.
+      expect([first?.source.kind, second?.source.kind].sort()).toEqual(['rejseplanen', 'timetable'])
+    }).pipe(Effect.provide(tracker(slow))),
   )
 
   it.effect('answers the 11th stop opened in a minute from the timetable', () =>
@@ -219,5 +248,20 @@ describe('a stop’s on-demand departures', () => {
       // A 503 is tried once more, and both count.
       expect(yield* boardCalls).toBe(2)
     }).pipe(Effect.provide(tracker(failing('multiDepartureBoard')))),
+  )
+
+  it.effect('reads the Metro on a board as intervals, beside the buses’ and S-tog’s times', () =>
+    Effect.gen(function* () {
+      // 07:05, when M1 leaves Nørreport both ways in the next half hour.
+      yield* TestClock.setTime(Date.UTC(2026, 5, 16, 5, 5))
+      const answer = (yield* departures(NORREPORT))!
+      expect(answer.source.kind).toBe('rejseplanen')
+      expect(answer.departures.length).toBeGreaterThan(0)
+      expect(answer.departures.some((row) => row.mode === 'metro')).toBe(false)
+      expect(answer.intervals.map(({ line, every }) => [line, every])).toEqual([
+        ['M1', { from: 4, to: 4 }],
+        ['M1', { from: 4, to: 4 }],
+      ])
+    }).pipe(Effect.provide(tracker())),
   )
 })

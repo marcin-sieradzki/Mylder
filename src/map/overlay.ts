@@ -63,8 +63,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     onTap(key) {
       openPanel({ kind: 'trip', id: key })
     },
-    onPointer(onDot) {
-      canvas.style.cursor = onDot ? 'pointer' : ''
+    onPointer(onDot, x, y) {
+      canvas.style.cursor = onDot || stopAt(map, x, y) !== undefined ? 'pointer' : ''
     },
     onMiss(x, y) {
       const stop = stopAt(map, x, y)

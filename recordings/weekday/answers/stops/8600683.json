@@ -16,5 +16,6 @@
     "kind": "timetable"
   },
   "departures": [],
+  "intervals": [],
   "messages": []
 }

@@ -52,6 +52,43 @@ test('a tap on a stop opens its departures, which the address keeps', async ({ p
   await expect(page).not.toHaveURL(/stop=/)
 })
 
+test('the pointer turns over a stop’s marker, as over a dot', async ({ page }) => {
+  await serveFirstMinute(page)
+  await page.goto('/en')
+  await expect(page.locator('[data-vehicles]')).toHaveAttribute('data-vehicles', '17')
+  const { width, height } = page.viewportSize()!
+  const marker = onScreen([OSTERPORT.lat, OSTERPORT.lon], width, height)
+  const canvas = page.locator('.maplibregl-canvas')
+  await expect(async () => {
+    await page.mouse.move(marker.x + 40, marker.y + 40)
+    await page.mouse.move(marker.x + 2, marker.y - 2)
+    await expect(canvas).toHaveCSS('cursor', 'pointer', { timeout: 500 })
+  }).toPass()
+  await page.mouse.move(marker.x + 60, marker.y + 60)
+  await expect(canvas).not.toHaveCSS('cursor', 'pointer')
+})
+
+test('a stop’s panel leaves the map’s controls and credit in view on a wide screen', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto(`/en?stop=${OSTERPORT.id}`)
+  const panel = page.getByRole('dialog', { name: 'Østerport St.' })
+  await expect(panel.getByRole('list', { name: 'Departures' })).toBeVisible()
+  // Once the panel has slid in.
+  await expect(async () => {
+    const side = (await panel.boundingBox())!
+    expect(side.x + side.width).toBeGreaterThan(1250)
+    for (const part of [
+      page.getByRole('toolbar', { name: 'Map controls' }),
+      page.getByRole('link', { name: 'Rejseplanen' }),
+    ]) {
+      const box = (await part.boundingBox())!
+      expect(box.x + box.width).toBeLessThanOrEqual(side.x)
+    }
+  }).toPass()
+})
+
 test('an unknown stop in the address opens as not found', async ({ page }) => {
   await page.goto('/en?stop=nowhere')
   await expect(page.getByRole('dialog', { name: 'Stop not found' })).toBeVisible()
