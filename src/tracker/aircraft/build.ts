@@ -35,6 +35,12 @@ export function sourceOf(type: string | undefined): Fix['source'] {
 /** Seconds to a tenth, as the feed gives them. */
 export const tenths = (seconds: number) => Math.round(seconds * 10) / 10
 
+/**
+ * The callsign the feed gives, without its padding: none for readsb's placeholder of `@`s, which
+ * it sends while it hasn't heard one.
+ */
+const callsignOf = (flight: string | undefined) => flight?.replace(/[@\s]+$/, '').trim()
+
 const inBox = (lat: number, lon: number) =>
   lat >= COPENHAGEN_BOX.south &&
   lat <= COPENHAGEN_BOX.north &&
@@ -64,7 +70,7 @@ export function aircraftIn(answer: ReadsbAnswer): Fix[] {
   for (const aircraft of answer.ac) {
     const position = positionOf(aircraft)
     if (!position || !inBox(position.lat, position.lon) || !shown(aircraft)) continue
-    const callsign = aircraft.flight?.trim()
+    const callsign = callsignOf(aircraft.flight)
     kept.push({
       hex: aircraft.hex,
       ...(callsign ? { callsign } : {}),

@@ -219,6 +219,23 @@ describe('GET /api/aircraft', () => {
       ),
   )
 
+  it.effect('gives no callsign for readsb’s placeholder of one it hasn’t heard', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const { snapshot } = yield* request
+      expect(snapshot?.aircraft.map(({ hex, callsign }) => ({ hex, callsign }))).toEqual([
+        { hex: '511196', callsign: undefined },
+        { hex: 'aaa001', callsign: 'SAS1426' },
+      ])
+    }).pipe(
+      Effect.provide(
+        replaying(
+          answer(plane('aaa001'), plane('511196', { type: 'mlat', flight: '@@@@@@@@' })),
+        ),
+      ),
+    ),
+  )
+
   it.effect(
     'holds the answer at the CDN until its next due, never past it, dated when it was fetched',
     () =>
