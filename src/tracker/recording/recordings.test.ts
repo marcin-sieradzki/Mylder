@@ -9,14 +9,17 @@ import { RECORDED_REJSEPLANEN } from '../rejseplanen/responses'
 import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
-import { startingAt } from './clock'
-import { disruptionsFile, replay, savedAnswers } from './freeze'
+import { sharedStartingAt, startingAt } from './clock'
+import { aircraftFile, disruptionsFile, replay, replayAircraft, savedAnswers } from './freeze'
 import {
+  bundledFiles,
   callFile,
   layer,
   readCalls,
   readJson,
   readRecorded,
+  isCallFile,
+  readStart,
   recordedClient,
   recordingDir,
   RECORDINGS_DIR,
@@ -36,8 +39,31 @@ async function filesUnder(dir: string): Promise<string[]> {
 }
 
 /** A call to a service through a client, as its status and body. */
+/** An answer's status and body, as the tests compare them. */
+const statusAndText = ({ status, text }: Http.Answer) => ({ status, text })
+
 const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
-  Http.getText(client, `https://www.rejseplan.dk/api/${service}`, {}).pipe(Effect.orDie)
+  Http.getText(client, `https://www.rejseplan.dk/api/${service}`, {}).pipe(
+    Effect.map(statusAndText),
+    Effect.orDie,
+  )
+
+/** A recording folder made for one test, holding `files` by their paths, removed after it. */
+async function madeRecording<A>(
+  files: Record<string, unknown>,
+  within: (dir: string) => Promise<A>,
+): Promise<A> {
+  const dir = await mkdtemp(join(tmpdir(), 'recording-'))
+  try {
+    for (const [path, content] of Object.entries(files)) {
+      await mkdir(join(dir, path, '..'), { recursive: true })
+      await writeFile(join(dir, path), JSON.stringify(content))
+    }
+    return await within(dir)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+}
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
@@ -67,6 +93,25 @@ describe('a frozen recording', () => {
       }),
   )
 
+  it.effect('replays its aircraft folder into the aircraft snapshots saved beside it', () =>
+    Effect.gen(function* () {
+      const dir = recordingDir('weekday')
+      const snapshots = yield* replayAircraft(dir)
+      const saved = yield* Effect.promise(() =>
+        Promise.all(snapshots.map((_, i) => readJson(join(dir, aircraftFile(callFile(i)))))),
+      )
+      expect(snapshots.length).toBeGreaterThanOrEqual(12)
+      expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
+      // An evening over Copenhagen from one receiver's reach: a handful of planes at a time,
+      // and every data state somewhere in the three minutes.
+      for (const snapshot of snapshots) expect(snapshot.aircraft.length).toBeGreaterThanOrEqual(5)
+      const states = new Set(
+        snapshots.flatMap(({ aircraft }) => aircraft.map((each) => each.state)),
+      )
+      expect([...states].sort()).toEqual(['ageing', 'estimated', 'live', 'no-signal'])
+    }),
+  )
+
   it('carries no key in any file', async () => {
     const files = await filesUnder(RECORDINGS_DIR)
     expect(files.length).toBeGreaterThan(0)
@@ -85,6 +130,25 @@ describe('a frozen recording', () => {
     })
     expect(await first('spent')).toMatchObject({ status: 403, body: { errorCode: 'API_QUOTA' } })
     expect(((await first('cap')) as { Journey: unknown[] }).Journey).toHaveLength(1000)
+  })
+
+  it('shows what the aircraft snapshot drops in every weekday aircraft answer', async () => {
+    interface Answered {
+      hex: string
+      lat: number
+      lon: number
+      type?: string
+    }
+    const dir = join(recordingDir('weekday'), 'aircraft')
+    const files = (await readdir(dir)).filter(isCallFile).sort()
+    expect(files.length).toBeGreaterThanOrEqual(12)
+    for (const file of files) {
+      // Real answers: the planes east of the box, over Øresund and Malmö, and the transponders
+      // on Kastrup's apron. PIA, LADD and rough positions are the route tests' hand-made cases.
+      const { ac } = (await readJson(join(dir, file))) as { ac: Answered[] }
+      expect(ac.some((each) => each.lon > 12.7)).toBe(true)
+      expect(ac.some((each) => each.type === 'adsb_icao_nt')).toBe(true)
+    }
   })
 })
 
@@ -105,6 +169,24 @@ describe('the recorded layer', () => {
         bodies.push(JSON.parse((yield* callWith(client, service)).text))
       }
       expect(bodies).toEqual([{ n: 1 }, { n: 9 }, { n: 2 }, { n: 2 }])
+    }),
+  )
+
+  it.effect("starts each service's calls again from the first once none are left, looping", () =>
+    Effect.gen(function* () {
+      const client = recordedClient(
+        RECORDED_REJSEPLANEN,
+        new Map([
+          ['journeyPos', [answer(1), answer(2)]],
+          ['himsearch', [answer(9)]],
+        ]),
+        'loop',
+      )
+      const bodies = []
+      for (const service of ['journeyPos', 'himsearch', 'journeyPos', 'journeyPos', 'himsearch']) {
+        bodies.push(JSON.parse((yield* callWith(client, service)).text))
+      }
+      expect(bodies).toEqual([{ n: 1 }, { n: 9 }, { n: 2 }, { n: 1 }, { n: 9 }])
     }),
   )
 
@@ -153,9 +235,16 @@ describe('the recorded layer', () => {
 
   it('refuses a file shaped like a failure that isn\u2019t one', () => {
     expect(readRecorded({ status: 503 })).toEqual({ status: 503 })
+    expect(readRecorded({ status: 429, headers: { 'retry-after': '60' } })).toEqual({
+      status: 429,
+      headers: { 'retry-after': '60' },
+    })
     expect(readRecorded({ timeout: true })).toEqual({ timeout: true })
     expect(() => readRecorded({ status: '503' })).toThrow('Not a recorded failure')
     expect(() => readRecorded({ timeout: false })).toThrow('Not a recorded failure')
+    expect(() => readRecorded({ status: 429, headers: { 'retry-after': 60 } })).toThrow(
+      'Not a recorded failure',
+    )
   })
 
   it('keeps a recording inside the recordings folder', () => {
@@ -175,25 +264,11 @@ describe('the recorded layer for another API', () => {
   const call = (path: string) =>
     Effect.gen(function* () {
       const client = yield* Http.HttpClient.HttpClient
-      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(Effect.orDie)
+      return yield* Http.getText(client, `https://radar.example${path}`, {}).pipe(
+        Effect.map(statusAndText),
+        Effect.orDie,
+      )
     })
-
-  /** A recording folder made for one test, holding `files` by their paths, removed after it. */
-  async function madeRecording<A>(
-    files: Record<string, unknown>,
-    within: (dir: string) => Promise<A>,
-  ): Promise<A> {
-    const dir = await mkdtemp(join(tmpdir(), 'recording-'))
-    try {
-      for (const [path, content] of Object.entries(files)) {
-        await mkdir(join(dir, path, '..'), { recursive: true })
-        await writeFile(join(dir, path), JSON.stringify(content))
-      }
-      return await within(dir)
-    } finally {
-      await rm(dir, { recursive: true, force: true })
-    }
-  }
 
   it.effect(
     'replays its folder in call order, failures too, and answers an unknown call its own way',
@@ -252,9 +327,90 @@ describe('the recorded layer for another API', () => {
       expect(await readCalls(radar, dir)).toEqual(new Map())
     })
   })
+
+  it('reads only the call files in a folder, not the clock its answers were recorded on', async () => {
+    await madeRecording(
+      {
+        'aircraft/0001.json': { now: 1, ac: [] },
+        'aircraft/clock.json': { start: '2026-10-26T18:53:13.500Z' },
+      },
+      async (dir) => {
+        expect(await readCalls(radar, dir)).toEqual(
+          new Map([['aircraft', [{ answer: { now: 1, ac: [] } }]]]),
+        )
+      },
+    )
+  })
+
+  it('reads a recording bundled by its files’ paths as it reads one from its folder', async () => {
+    const dir = '../../recordings/bundled'
+    const bundle = {
+      [`${dir}/aircraft/0002.json`]: { now: 2, ac: [] },
+      [`${dir}/aircraft/0001.json`]: { status: 503 },
+      [`${dir}/aircraft/notes.txt`]: 'not a call',
+      [`${dir}/aircraft/clock.json`]: { start: '2026-10-26T18:53:13.500Z' },
+      [`${dir}/clock.json`]: { start: '2026-06-16T05:20:00.000Z' },
+    }
+    expect(await readCalls(radar, dir, bundledFiles(bundle))).toEqual(
+      new Map([['aircraft', [{ status: 503 }, { answer: { now: 2, ac: [] } }]]]),
+    )
+    expect(await readCalls(radar, '../../recordings/elsewhere', bundledFiles(bundle))).toEqual(
+      new Map(),
+    )
+  })
 })
 
 describe("a recording's clock", () => {
+  it.effect('reads the same in every runtime under the recording, whenever each was built', () =>
+    Effect.gen(function* () {
+      // A moment of its own: the offset is the process's, kept from the first runtime built.
+      const start = Date.UTC(2026, 5, 16, 5, 21)
+      yield* TestClock.setTime(1_000)
+      const tracker = yield* Layer.build(sharedStartingAt(start))
+      yield* TestClock.adjust('3 minutes')
+      const aircraft = yield* Layer.build(sharedStartingAt(start))
+      const now = (built: typeof tracker) => Effect.provide(Clock.currentTimeMillis, built)
+      expect([yield* now(tracker), yield* now(aircraft)]).toEqual([
+        start + 180_000,
+        start + 180_000,
+      ])
+    }).pipe(Effect.scoped),
+  )
+
+  it.effect('reads each start’s own time in runtimes under recordings that start apart', () =>
+    Effect.gen(function* () {
+      // The transit answers and the aircraft answers, recorded on two days.
+      const transit = Date.UTC(2026, 5, 16, 5, 22)
+      const aircraft = Date.UTC(2026, 9, 26, 18, 53, 13, 500)
+      yield* TestClock.setTime(1_000)
+      const tracker = yield* Layer.build(sharedStartingAt(transit))
+      yield* TestClock.adjust('3 minutes')
+      const overhead = yield* Layer.build(sharedStartingAt(aircraft))
+      yield* TestClock.adjust('1 minute')
+      const again = yield* Layer.build(sharedStartingAt(transit))
+      const now = (built: typeof tracker) => Effect.provide(Clock.currentTimeMillis, built)
+      expect([yield* now(tracker), yield* now(overhead), yield* now(again)]).toEqual([
+        transit + 240_000,
+        aircraft + 60_000,
+        transit + 240_000,
+      ])
+    }).pipe(Effect.scoped),
+  )
+
+  it('starts the aircraft answers at their own folder’s moment, or else the recording’s', async () => {
+    const recording = { 'clock.json': { start: '2026-06-16T05:20:00.000Z' } }
+    await madeRecording(
+      { ...recording, 'aircraft/clock.json': { start: '2026-10-26T18:53:13.500Z' } },
+      async (dir) => {
+        expect(await readStart(dir)).toBe(Date.UTC(2026, 5, 16, 5, 20))
+        expect(await readStart(dir, 'aircraft')).toBe(Date.UTC(2026, 9, 26, 18, 53, 13, 500))
+      },
+    )
+    await madeRecording(recording, async (dir) => {
+      expect(await readStart(dir, 'aircraft')).toBe(Date.UTC(2026, 5, 16, 5, 20))
+    })
+  })
+
   it.effect('starts at the recording’s moment and runs on with the clock beneath', () =>
     Effect.gen(function* () {
       const start = Date.UTC(2026, 5, 16, 5, 20)

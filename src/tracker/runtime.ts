@@ -1,10 +1,11 @@
 // The tracker's runtime: its layers composed once per instance, from the settings read at the
 // first request (docs/testing-seams.md, "The switch"), so one build serves every source.
 import 'server-only'
-import { Effect, Layer, Logger, ManagedRuntime, Schema } from 'effect'
+import { Effect, Layer, Logger, type ManagedRuntime, Schema } from 'effect'
 import { join } from 'node:path'
-import { startingAt } from './recording/clock.ts'
+import { sharedStartingAt } from './recording/clock.ts'
 import { readStart, recordingDir } from './recording/layer.ts'
+import { rememberRuntime } from './remember.ts'
 import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
@@ -87,7 +88,8 @@ export function timetableDirOf(source: Source): string {
 
 /**
  * The tracker as the environment sets it up. A recording brings its own timetable and its clock,
- * which starts at the recording's moment (docs/testing-seams.md, "The switch").
+ * which starts at the recording's moment, as the aircraft's does (docs/testing-seams.md, "The
+ * switch").
  */
 async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
   const source = readSource(process.env.MYLDER_SOURCE)
@@ -100,31 +102,25 @@ async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
     return trackerLayer({ timetable, source, positionMode }).pipe(
-      Layer.provideMerge(startingAt(start)),
+      Layer.provideMerge(sharedStartingAt(start)),
     )
   }
   const timetable = await loadTimetable(timetableDirOf(source))
   return trackerLayer({ timetable, source, positionMode, key: process.env[KEY_VARIABLE] })
 }
 
-let runtime: Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> | undefined
-
 /**
  * This instance's runtime, built once at the first request from the environment, which is read
  * then rather than at build time (docs/testing-seams.md, "The switch"). A failed build, such as a
  * timetable that can't be read, is forgotten, so the next request tries again.
  */
-export function trackerRuntime(): Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> {
-  if (runtime) return runtime
-  // One JSON line per log, which the host's log search reads field by field.
-  runtime = environmentLayer().then((layer) =>
-    ManagedRuntime.make(layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson])))),
+export const trackerRuntime: () => Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> =
+  rememberRuntime(() =>
+    // One JSON line per log, which the host's log search reads field by field.
+    environmentLayer().then((layer) =>
+      layer.pipe(Layer.provideMerge(Logger.layer([Logger.consoleJson]))),
+    ),
   )
-  runtime.catch(() => {
-    runtime = undefined
-  })
-  return runtime
-}
 
 /** Runs one use of the tracker, as a plain promise. */
 export type RunTracker = <A>(use: (tracker: TrackerShape) => Effect.Effect<A>) => Promise<A>

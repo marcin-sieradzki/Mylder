@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -6,7 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { liveAircraft } from '../map/aircraft'
 import { liveSnapshot } from '../map/live'
+import type { AircraftSnapshot } from '../tracker/aircraft/index'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { AboutDialog } from './AboutDialog'
@@ -21,6 +23,12 @@ const saved = (recording: string, name: string): Snapshot =>
 // 07:25 on the weekday recording, its timetable prepared on 2 June; and a month spent.
 const weekday = saved('weekday', '0006.json')
 const spent = saved('spent', '0003.json')
+const aircraft = JSON.parse(
+  readFileSync(
+    join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', '0001.json'),
+    'utf8',
+  ),
+) as AircraftSnapshot
 
 function show(lang: Lang, snapshot?: Snapshot) {
   liveSnapshot.update({ snapshot, clockOffset: 0 })
@@ -57,6 +65,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => aboutDialog.close())
   liveSnapshot.update({ snapshot: undefined })
+  liveAircraft.update({ snapshot: undefined })
   vi.unstubAllGlobals()
 })
 
@@ -130,6 +139,84 @@ describe('the About dialog', () => {
       liveSnapshot.update({ snapshot: { ...weekday, source: { kind: 'rejseplanen' } } })
     })
     expect(fact(dialog, 'Kilde')).toBe('Rejseplanen')
+  })
+
+  it('credits adsb.lol for the aircraft beside the map, in English and Danish', () => {
+    liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.lol' } })
+    show('en', weekday)
+    const dialog = openDialog('About Mylder')
+    expect(dialog).toHaveTextContent(
+      'Map: © OpenStreetMap contributors under the ODbL, © OpenMapTiles, OpenFreeMap.Aircraft: © adsb.lol contributors under the ODbL.',
+    )
+    expect(within(dialog).getByRole('link', { name: 'adsb.lol contributors' })).toHaveAttribute(
+      'href',
+      'https://adsb.lol/',
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', weekday)
+    expect(openDialog('Om Mylder')).toHaveTextContent('Fly: © adsb.lol-bidragydere under ODbL.')
+  })
+
+  it('says recorded planes are recorded adsb.lol data, open in the repository, in both languages', () => {
+    liveAircraft.update({ snapshot: aircraft })
+    show('en', weekday)
+    const dialog = openDialog('About Mylder')
+    expect(dialog).toHaveTextContent(
+      "Aircraft: © adsb.lol contributors under the ODbL.The planes are recorded adsb.lol data, open under the same licence in Mylder's repository.",
+    )
+    expect(within(dialog).getByRole('link', { name: "Mylder's repository" })).toHaveAttribute(
+      'href',
+      'https://github.com/marcin-sieradzki/mylder/tree/main/recordings',
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', weekday)
+    expect(openDialog('Om Mylder')).toHaveTextContent(
+      'Fly: © adsb.lol-bidragydere under ODbL.Flyene er optagne data fra adsb.lol, åbne under samme licens i Mylders repository.',
+    )
+  })
+
+  it('says nothing of a recording when the planes are live', () => {
+    liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.lol' } })
+    show('en', weekday)
+    expect(openDialog('About Mylder')).not.toHaveTextContent('recorded')
+  })
+
+  it('credits adsb.fi with a link to its home page when it answered, in English and Danish', () => {
+    liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.fi' } })
+    show('en', weekday)
+    const dialog = openDialog('About Mylder')
+    expect(dialog).toHaveTextContent('OpenFreeMap.Aircraft: © adsb.fi.')
+    expect(dialog).not.toHaveTextContent('adsb.lol')
+    expect(within(dialog).getByRole('link', { name: 'adsb.fi' })).toHaveAttribute(
+      'href',
+      'https://adsb.fi/',
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', weekday)
+    expect(openDialog('Om Mylder')).toHaveTextContent('OpenFreeMap.Fly: © adsb.fi.')
+  })
+
+  it('names no aircraft credit while the page has none', () => {
+    show('en', weekday)
+    expect(openDialog('About Mylder')).not.toHaveTextContent('Aircraft')
+  })
+
+  it('names no aircraft credit before a feed has answered', () => {
+    const { fetched, nextDue, pollInterval } = aircraft
+    liveAircraft.update({
+      snapshot: {
+        fetched,
+        nextDue,
+        pollInterval,
+        health: { status: 'error', kind: 'timeout', since: fetched },
+        aircraft: [],
+      },
+    })
+    show('en', weekday)
+    expect(openDialog('About Mylder')).not.toHaveTextContent('Aircraft')
   })
 
   it('names the simulation and Rejseplanen as sources, and says when no vehicle can be Live', () => {

@@ -93,7 +93,7 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
 export const timetables = timetableLoader()
 
 /** Copenhagen's zone, every timetable's, until the one a snapshot names has loaded. */
-const COPENHAGEN = 'Europe/Copenhagen'
+export const COPENHAGEN = 'Europe/Copenhagen'
 
 /** The zone whose clock the timetable's times read on, for a network that may not have loaded. */
 export const timezoneOf = (network: Network | undefined): string =>

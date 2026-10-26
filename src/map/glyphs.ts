@@ -105,7 +105,8 @@ export interface Glyph {
 
 const NO_DASH: readonly [number, number] = [0, 0]
 
-const withAlpha = ([r, g, b]: RGBA, alpha: number): RGBA => [r, g, b, Math.round(alpha)]
+/** `colour` at `alpha`, 0 to 255. */
+export const withAlpha = ([r, g, b]: RGBA, alpha: number): RGBA => [r, g, b, Math.round(alpha)]
 
 /** The glyph of a vehicle of `mode` in `state`, in its line's `colour`. */
 export function glyphOf(state: DataState, mode: Mode, colour: RGBA, look: Look): Glyph {

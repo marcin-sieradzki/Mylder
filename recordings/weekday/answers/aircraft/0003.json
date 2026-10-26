@@ -1,0 +1,116 @@
+{
+  "fetched": 1793040813500,
+  "nextDue": 1793040823500,
+  "pollInterval": 10,
+  "provider": "recording",
+  "health": {
+    "status": "ok",
+    "since": 1793040793500
+  },
+  "lastAnswer": 1793040813500,
+  "aircraft": [
+    {
+      "hex": "458d99",
+      "callsign": "MMD109",
+      "type": "AT75",
+      "lat": 55.75785,
+      "lon": 12.658567,
+      "altitude": 4050,
+      "speed": 225.2,
+      "track": 41.76,
+      "age": 0,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "45ab23",
+      "callsign": "GRL1762",
+      "type": "B738",
+      "lat": 55.611843,
+      "lon": 12.642184,
+      "altitude": "ground",
+      "speed": 11.8,
+      "track": 267.19,
+      "age": 50.3,
+      "source": "broadcast",
+      "state": "ageing"
+    },
+    {
+      "hex": "45caad",
+      "callsign": "DNU53K",
+      "type": "AT76",
+      "lat": 55.625548,
+      "lon": 12.667837,
+      "altitude": 50,
+      "speed": 102.1,
+      "track": 221.03,
+      "age": 18.5,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "48a5e7",
+      "callsign": "SRN3273",
+      "type": "SF34",
+      "lat": 55.704315,
+      "lon": 12.520638,
+      "altitude": 4975,
+      "speed": 235.8,
+      "track": 52.06,
+      "age": 0,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "4caf7e",
+      "callsign": "SAS506",
+      "type": "A20N",
+      "lat": 55.72261,
+      "lon": 12.318337,
+      "altitude": 8100,
+      "speed": 293.6,
+      "track": 96.06,
+      "age": 0.4,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "4cafd0",
+      "callsign": "RYR25LB",
+      "type": "B738",
+      "lat": 55.582255,
+      "lon": 12.121096,
+      "altitude": 34000,
+      "speed": 458,
+      "track": 216.74,
+      "age": 0.3,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "4cc594",
+      "callsign": "ICE216",
+      "type": "A320",
+      "lat": 55.734946,
+      "lon": 12.118263,
+      "altitude": 10050,
+      "speed": 319.8,
+      "track": 96.1,
+      "age": 0.4,
+      "source": "broadcast",
+      "state": "live"
+    },
+    {
+      "hex": "511196",
+      "type": "SF34",
+      "lat": 55.571008,
+      "lon": 12.511244,
+      "altitude": 5325,
+      "speed": 80,
+      "track": 299,
+      "age": 2.9,
+      "source": "multilateration",
+      "state": "estimated"
+    }
+  ]
+}

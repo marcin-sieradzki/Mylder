@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 import { PORT, RECORDING, SIMULATED_PORT } from './e2e/recording'
 
-// The production build serves the weekday recording, at the recording's moment, and a second
-// server on the same build serves the simulation, to prove the default source starts.
+// The production build serves the weekday recording, at the recording's moment, its aircraft
+// too, and a second server on the same build serves the simulation, to prove the default source
+// starts, with the aircraft off, so no test calls adsb.lol.
 
 export default defineConfig({
   testDir: './e2e',
@@ -24,13 +25,16 @@ export default defineConfig({
     {
       command: `npm run build && npm start -- --port ${PORT}`,
       port: PORT,
-      env: { MYLDER_SOURCE: `recording:${RECORDING}` },
+      env: {
+        MYLDER_SOURCE: `recording:${RECORDING}`,
+        MYLDER_AIRCRAFT_SOURCE: `recording:${RECORDING}`,
+      },
       reuseExistingServer: !process.env.CI,
     },
     {
       command: `npm start -- --port ${SIMULATED_PORT}`,
       port: SIMULATED_PORT,
-      env: { MYLDER_SOURCE: 'simulated' },
+      env: { MYLDER_SOURCE: 'simulated', MYLDER_AIRCRAFT_SOURCE: 'off' },
       reuseExistingServer: !process.env.CI,
     },
   ],

@@ -13,6 +13,7 @@
   "topBar": {
     "updated": "Updated {time}",
     "modes": "Modes",
+    "aircraft": "Planes",
     "about": "About Mylder",
     "updatedPaused": "Updated {time}, paused"
   },
@@ -32,6 +33,15 @@
     "departs": "Departs {time}",
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
+  },
+  "aircraft": {
+    "altitude": "{metres} m",
+    "onGround": "On the ground",
+    "speed": "{speed} km/h",
+    "placed": "Placed by ground receivers {age} ago",
+    "loading": "Loading the plane…",
+    "gone": "Plane not on the map",
+    "goneDetail": "The planes feed no longer places it over Copenhagen."
   },
   "trip": {
     "fallbackTitle": "Vehicle",
@@ -78,11 +88,15 @@
   },
   "legend": {
     "label": "Data states",
-    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
+    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions.",
+    "aircraftNoData": "Planes: no data since {time}"
   },
   "credit": {
     "transitData": "Transit data",
-    "openStreetMap": "OpenStreetMap contributors"
+    "openStreetMap": "OpenStreetMap contributors",
+    "aircraft": "Aircraft: {source} under the {licence}",
+    "aircraftFrom": "Aircraft: {source}",
+    "contributors": "{name} contributors"
   },
   "stop": {
     "fallbackTitle": "Stop",
@@ -114,6 +128,10 @@
       "title": "Data and credits",
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "aircraft": "Aircraft: © {source} under the {licence}.",
+      "aircraftFrom": "Aircraft: © {source}.",
+      "recording": "The planes are recorded adsb.lol data, open under the same licence in {recordings}.",
+      "recordings": "Mylder's repository",
       "style": "The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see {licence}.",
       "styleLicence": "its licence"
     },
@@ -225,7 +243,9 @@
     "timetableEnds": "The timetable ends on {date}. Without a new one, the map has no trips after that.",
     "timetableEnded": "The timetable ended on {date}. Without a new one, the map has no trips to show.",
     "simulated": "Simulated data: vehicles and times are made up from the timetable.",
-    "recorded": "Recorded data from {date}."
+    "recorded": "Recorded data from {date}.",
+    "aircraftLive": "Planes: live from {provider}.",
+    "aircraftRecorded": "Planes: recorded adsb.lol data."
   },
   "interval": {
     "seconds": "{n} s",

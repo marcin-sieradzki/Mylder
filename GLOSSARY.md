@@ -74,6 +74,10 @@ _Avoid_: Stop time, visit, passing
 A call seen from the stop's side, as a stop's departure list shows it.
 _Avoid_: Arrival (for the list), next bus
 
+**Aircraft**:
+A plane or helicopter on the map, from the aircraft feed; not a Vehicle or a Trip, and not a Mode. It carries the same data states as a trip, but never Timetable only.
+_Avoid_: Flight, plane (in code)
+
 ## Realtime
 
 **Answer**:

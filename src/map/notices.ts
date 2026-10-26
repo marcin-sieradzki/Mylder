@@ -137,7 +137,7 @@ export function outOfDateAt(live: LiveSnapshot, now: number): boolean {
 }
 
 /** Whether the snapshot may be out of date now, ticking by the server's clock. */
-export const outOfDate: TickingStore<boolean> = tickingStore(outOfDateAt, Object.is)
+export const outOfDate: TickingStore<boolean> = tickingStore(outOfDateAt, Object.is, liveSnapshot)
 
 /** Whether the snapshot may be out of date now, for the Updated line. */
 export function useOutOfDate(store: TickingStore<boolean> = outOfDate): boolean {

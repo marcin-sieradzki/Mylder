@@ -13,6 +13,7 @@
   "topBar": {
     "updated": "Opdateret {time}",
     "modes": "Transportformer",
+    "aircraft": "Fly",
     "about": "Om Mylder",
     "updatedPaused": "Opdateret {time}, sat på pause"
   },
@@ -32,6 +33,15 @@
     "departs": "Afgår {time}",
     "seconds": "{seconds} s",
     "minutes": "{minutes} min"
+  },
+  "aircraft": {
+    "altitude": "{metres} m",
+    "onGround": "På jorden",
+    "speed": "{speed} km/t",
+    "placed": "Placeret af modtagere på jorden for {age} siden",
+    "loading": "Henter flyet…",
+    "gone": "Flyet er ikke på kortet",
+    "goneDetail": "Flydata placerer det ikke længere over København."
   },
   "trip": {
     "fallbackTitle": "Køretøj",
@@ -78,11 +88,15 @@
   },
   "legend": {
     "label": "Datatilstande",
-    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
+    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner.",
+    "aircraftNoData": "Fly: ingen data siden {time}"
   },
   "credit": {
     "transitData": "Trafikdata",
-    "openStreetMap": "OpenStreetMap-bidragydere"
+    "openStreetMap": "OpenStreetMap-bidragydere",
+    "aircraft": "Fly: {source} under {licence}",
+    "aircraftFrom": "Fly: {source}",
+    "contributors": "{name}-bidragydere"
   },
   "stop": {
     "fallbackTitle": "Stoppested",
@@ -114,6 +128,10 @@
       "title": "Data og kreditering",
       "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "aircraft": "Fly: © {source} under {licence}.",
+      "aircraftFrom": "Fly: © {source}.",
+      "recording": "Flyene er optagne data fra adsb.lol, åbne under samme licens i {recordings}.",
+      "recordings": "Mylders repository",
       "style": "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se {licence}.",
       "styleLicence": "licensen"
     },
@@ -225,7 +243,9 @@
     "timetableEnds": "Køreplanen slutter {date}. Uden en ny har kortet ingen ture derefter.",
     "timetableEnded": "Køreplanen sluttede {date}. Uden en ny har kortet ingen ture at vise.",
     "simulated": "Simulerede data: køretøjer og tider er digtet op ud fra køreplanen.",
-    "recorded": "Optagne data fra {date}."
+    "recorded": "Optagne data fra {date}.",
+    "aircraftLive": "Fly: live fra {provider}.",
+    "aircraftRecorded": "Fly: optagne data fra adsb.lol."
   },
   "interval": {
     "seconds": "{n}. sekund",

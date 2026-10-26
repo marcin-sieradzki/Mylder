@@ -14,7 +14,7 @@ export const fill = (template: string, values: Record<string, string | number>) 
   template.replace(/\{(\w+)\}/g, (whole, name: string) => String(values[name] ?? whole))
 
 /** How long ago `moment` was at `now`: whole seconds under a minute, else whole minutes. */
-function ageOf(moment: number, now: number, words: Words): string {
+export function ageOf(moment: number, now: number, words: Words): string {
   const seconds = Math.max(0, Math.floor((now - moment) / 1000))
   return seconds < 60
     ? fill(words.seconds, { seconds })
