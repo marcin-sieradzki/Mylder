@@ -215,6 +215,13 @@ describe("a stop's departures", () => {
     expect(await panel('Stoppestedet findes ikke')).toBeInTheDocument()
   })
 
+  it('opens a departure’s trip, in place of the stop', async () => {
+    openStop('en', '?stop=27532&hide=train')
+    const koge = row(await panel('Nørreport St.'), 'Køge St.')
+    fireEvent.click(within(koge).getByRole('button', { name: 'S-tog E to Køge St.' }))
+    expect(window.location.search).toBe(`?hide=train&trip=${E_TO_KOGE}`)
+  })
+
   it('closes on its close button and on Esc, and leaves the address', async () => {
     openStop('en', '?stop=27532&hide=train')
     const stop = await panel('Nørreport St.')

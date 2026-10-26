@@ -19,6 +19,7 @@ import { clockTime } from '../timetable/time'
 import type { StopDeparture, StopDepartures } from '../tracker/index'
 import type { PanelFrame } from './DetailPanels'
 import { badgeLine, departureTimes } from './departureRow'
+import { OpenTrip } from './OpenTrip'
 import styles from './StopPanel.module.css'
 import { useServerSecond } from './useServerSecond'
 
@@ -163,6 +164,7 @@ function Departure({ row, state, now, timezone, words }: DepartureProps) {
   const cancelled = row.cancelled === true
   return (
     <li className={styles.departure} data-cancelled={cancelled ? '' : undefined}>
+      <OpenTrip departure={row} />
       <DepartureRow
         variant={state}
         line={badgeLine(row.colour, row.mode)}

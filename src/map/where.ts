@@ -4,12 +4,7 @@
 // so the words and the dot agree. Stops are indexes in the pattern's calling order; the panel
 // names them.
 import type { DataState } from '../domain/data-state.ts'
-import {
-  progressAt,
-  timelineOf,
-  type MeasuredPath,
-  type TimedCall,
-} from '../domain/trip-motion.ts'
+import { progressAt, timelineOf, type MeasuredPath, type TimedCall } from '../domain/trip-motion.ts'
 import type { SnapshotTrip } from '../tracker/index.ts'
 import { motionOf } from './motion.ts'
 
