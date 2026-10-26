@@ -327,6 +327,22 @@ describe('the tracker', () => {
     }).pipe(Effect.provide(tracker('REPORT_ONLY', dropping(dropped))))
   })
 
+  it.effect('remembers when an answer last carried each mode, through failed minutes', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      const first = yield* snapshot
+      const carried = new Set(first.trips.filter((trip) => trip.seen).map((trip) => trip.mode))
+      expect(carried.size).toBeGreaterThan(0)
+      expect(Object.keys(first.lastSeen).sort()).toEqual([...carried].sort())
+      expect(Object.values(first.lastSeen).every((at) => at === MOMENT)).toBe(true)
+      // Every later call fails: each mode keeps the moment it was last carried.
+      for (let minute = 1; minute <= 6; minute++) {
+        yield* TestClock.adjust('60 seconds')
+        expect((yield* snapshot).lastSeen).toEqual(first.lastSeen)
+      }
+    }).pipe(Effect.provide(tracker('CALC_REPORT', failingAfter(1)))),
+  )
+
   it.effect('lets one failed answer change no trip’s state, and two end Live', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)

@@ -16,6 +16,7 @@
     "calls": 2
   },
   "store": "ok",
+  "lastSeen": {},
   "disruptions": {
     "fetched": 1781587200000,
     "checked": 1781587200000,

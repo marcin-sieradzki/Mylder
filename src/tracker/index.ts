@@ -8,7 +8,7 @@ import type { StopDepartures, TripDetail } from './tracker.ts'
 import type { Snapshot } from './snapshot.ts'
 
 export type { Snapshot, SnapshotTrip, NextCall } from './snapshot.ts'
-export type { Disruptions } from './disruptions.ts'
+export type { Disruption, Disruptions } from './disruptions.ts'
 export type { StopDepartures, StopDeparture, TripCall, TripDetail } from './tracker.ts'
 
 /** The whole-city snapshot: the stored one while it is fresh, else a new run's. */

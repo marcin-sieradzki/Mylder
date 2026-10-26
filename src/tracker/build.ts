@@ -253,3 +253,23 @@ export function buildTrips({ timetable, now, answer, history = {}, context }: Bu
   }
   return { trips, unmatched, history: kept }
 }
+
+/**
+ * By mode, when a position answer last carried one of its trips: the latest of the previous
+ * snapshot's record and the trips' own `seen`, keeping only moments from `since` on (the start of
+ * the earliest service day still running), so night trips keep their mode's time past midnight.
+ */
+export function lastSeenByMode(
+  trips: readonly SnapshotTrip[],
+  previous: Readonly<Record<string, number>> | undefined,
+  since: number,
+): Record<string, number> {
+  const lastSeen: Record<string, number> = {}
+  for (const [mode, at] of Object.entries(previous ?? {})) if (at >= since) lastSeen[mode] = at
+  for (const { mode, seen } of trips) {
+    if (seen !== undefined && seen >= since && seen > (lastSeen[mode] ?? -Infinity)) {
+      lastSeen[mode] = seen
+    }
+  }
+  return lastSeen
+}
