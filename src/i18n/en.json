@@ -53,6 +53,10 @@
   },
   "pulse": {
     "onTheMove": "On the move",
-    "inService": "of {total} in service"
+    "inService": "of {total} in service",
+    "dayProfile": "Vehicles in service today",
+    "planned": "Planned, from today's timetable",
+    "peak": "Peak {count} at {time}",
+    "profileMissing": "Could not load today's timetable"
   }
 }

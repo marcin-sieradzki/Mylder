@@ -10,6 +10,7 @@ import { useHiddenModes } from '../map/view'
 import type { Mode } from '../timetable/format'
 import type { Snapshot } from '../tracker/index'
 import styles from './CityPulse.module.css'
+import { DayProfile } from './DayProfile'
 import { grouped } from './numbers'
 
 interface OnTheMove {
@@ -62,6 +63,7 @@ export function CityPulse() {
           </Text>
         ) : null}
       </div>
+      <DayProfile />
     </div>
   )
 }

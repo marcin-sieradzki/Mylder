@@ -53,6 +53,10 @@
   },
   "pulse": {
     "onTheMove": "I bevægelse",
-    "inService": "af {total} i drift"
+    "inService": "af {total} i drift",
+    "dayProfile": "Køretøjer i drift i dag",
+    "planned": "Planlagt, ud fra dagens køreplan",
+    "peak": "Højest {count} kl. {time}",
+    "profileMissing": "Kunne ikke hente dagens køreplan"
   }
 }
