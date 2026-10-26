@@ -37,7 +37,12 @@ export function viewOf(search: string): MapView {
   const query = new URLSearchParams(search)
   const place = (query.get(MAP) ?? '').split('/').map((part) => (part ? Number(part) : NaN))
   const [zoom, lat, lon] = place
-  const placed = place.length === 3 && place.every(Number.isFinite)
+  // MapLibre refuses a latitude past a pole and won't start; a place off the map is no place.
+  const placed =
+    place.length === 3 &&
+    within(zoom, 0, MAX_ZOOM) &&
+    within(lat, -90, 90) &&
+    within(lon, -180, 180)
   const hidden = new Set(
     (query.get(HIDE) ?? '').split(',').filter((mode): mode is Mode => isMode(mode)),
   )
@@ -48,6 +53,12 @@ export function viewOf(search: string): MapView {
     ...(panel ? { panel } : {}),
   }
 }
+
+/** The closest zoom MapLibre draws. */
+const MAX_ZOOM = 24
+
+/** Whether `value` is a number from `low` to `high`; NaN is not. */
+const within = (value: number, low: number, high: number) => value >= low && value <= high
 
 const isMode = (value: string): value is Mode => (MODES as readonly string[]).includes(value)
 
