@@ -1,0 +1,8 @@
+/* A Perron icon file as a mask over the text's colour, as an inline icon takes currentColor; in
+   forced colours it keeps the system's text colour it inherits. */
+.icon {
+  display: inline-block;
+  background-color: currentColor;
+  mask: var(--mylder-icon) center / contain no-repeat;
+  forced-color-adjust: none;
+}

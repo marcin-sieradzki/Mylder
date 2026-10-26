@@ -14,27 +14,10 @@ import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
+import { PerronIcon } from './PerronIcon'
 import { usePhone } from './usePhone'
 
 const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
-
-/** Perron's `info` icon, "About and help", on its 18 px grid. */
-const INFO_ICON = (
-  <svg
-    className="perron-icon"
-    viewBox="0 0 18 18"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <circle cx="9" cy="9" r="7" />
-    <path d="M9 8.2v4.3" />
-    <circle cx="9" cy="5.6" r=".4" fill="currentColor" />
-  </svg>
-)
 
 /** The modes the timetable runs, in Mylder's order: Bus, Metro, S-tog, Train, Light rail. */
 const modesOf = (network: Network): Mode[] => {
@@ -106,7 +89,7 @@ export function TopBar() {
           <>
             <LanguageSwitch />
             <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
-              {INFO_ICON}
+              <PerronIcon name="info" />
             </IconButton>
           </>
         }

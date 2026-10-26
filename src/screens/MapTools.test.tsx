@@ -1,5 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import pauseFile from '@mylder/perron/icons/pause.svg'
+import playFile from '@mylder/perron/icons/play.svg'
 import { afterEach, describe, expect, it } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
@@ -14,6 +16,10 @@ import { Providers } from './Providers'
  * MapLibre's map, which needs WebGL that jsdom lacks: a camera that moves at once, as MapLibre
  * does under reduced motion, between zoom 6 and 18. Its pans are in pixels at the centre.
  */
+/** The file of the Perron icon a button draws, which the icon takes as its mask. */
+const iconOf = (button: HTMLElement) =>
+  button.querySelector<HTMLElement>('.perron-icon')?.style.getPropertyValue('--mylder-icon')
+
 function fakeMap() {
   const container = document.createElement('div')
   document.body.append(container)
@@ -114,19 +120,16 @@ describe('the map controls', () => {
     expect(motionPause.get()).toBe(false)
   })
 
-  it('draws the pause as an icon, pause while moving and play while paused, named in words', async () => {
+  it("draws the pause as Perron's own icon, pause while moving and play while paused, named in words", async () => {
     const user = userEvent.setup()
     open('da')
-    const icon = (button: HTMLElement) => button.querySelector('svg path')?.getAttribute('d')
     const pause = screen.getByRole('button', { name: 'Pause' })
     expect(pause).not.toHaveTextContent(/\S/)
-    // Perron's `pause` icon, two bars.
-    expect(icon(pause)).toBe('M5.75 3.5v9M10.25 3.5v9')
+    expect(iconOf(pause)).toBe(`url("${pauseFile}")`)
     await user.click(pause)
     const resume = screen.getByRole('button', { name: 'Fortsæt' })
     expect(resume).not.toHaveTextContent(/\S/)
-    // Perron's `play` icon, a triangle.
-    expect(icon(resume)).toMatch(/^M5 3\.4v9\.2/)
+    expect(iconOf(resume)).toBe(`url("${playFile}")`)
   })
 
   it('gives the scale bar the ground a pixel spans, and dims zoom in at the closest zoom', async () => {
