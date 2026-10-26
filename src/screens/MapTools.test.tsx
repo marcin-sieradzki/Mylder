@@ -2,7 +2,9 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import pauseFile from '@mylder/perron/icons/pause.svg'
 import playFile from '@mylder/perron/icons/play.svg'
-import { afterEach, describe, expect, it } from 'vitest'
+import { hydrateRoot } from 'react-dom/client'
+import { renderToString } from 'react-dom/server'
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
@@ -142,6 +144,30 @@ describe('the map controls', () => {
     expect(state.zoom).toBe(18)
     expect(mapCamera.get()?.metersPerPixel).toBeCloseTo(0.17, 2)
     expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
+  })
+})
+
+describe('the prerendered controls', () => {
+  it('hydrate without a warning, before the map has attached', async () => {
+    expect(mapCamera.get()).toBeUndefined()
+    const tools = (
+      <Providers lang="en" dictionary={en}>
+        <MapTools />
+      </Providers>
+    )
+    const page = document.createElement('div')
+    page.innerHTML = renderToString(tools)
+    document.body.append(page)
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let root: ReturnType<typeof hydrateRoot> | undefined
+    onTestFinished(() => {
+      warn.mockRestore()
+      act(() => root?.unmount())
+      page.remove()
+    })
+    root = await act(async () => hydrateRoot(page, tools))
+    expect(warn).not.toHaveBeenCalled()
+    expect(within(page).getByText('—')).toBeInTheDocument()
   })
 })
 

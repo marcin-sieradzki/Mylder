@@ -133,7 +133,9 @@ export const mapCamera = cameraStore()
 /**
  * What `read` takes from the camera's view, for the controls or the scale bar: a component renders
  * again only when its own reading changes, so the zoom buttons sit still while the map pans and
- * the scale moves with the latitude.
+ * the scale moves with the latitude. Before the map attaches, as in the prerendered page, `read`
+ * gets no view, and must give a value equal to itself by `===` each time: React checks that
+ * reading, so a reader that gives NaN or a new object there warns on every hydration.
  */
 export function useCameraView<T>(
   read: (view: CameraView | undefined) => T,
