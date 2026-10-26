@@ -59,12 +59,22 @@ export interface VehicleOverlay {
 export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): VehicleOverlay {
   const root = document.documentElement
   const canvas = map.getCanvas()
+  // Off a dot, the stop under the pointer is looked up once a frame, where it rests by then, as
+  // pointer moves come faster than frames.
+  let resting: { x: number; y: number } | undefined
+  let cursorFrame: number | undefined
+  const cursorOverStops = () => {
+    cursorFrame = undefined
+    if (resting) canvas.style.cursor = stopAt(map, resting.x, resting.y) ? 'pointer' : ''
+  }
   const picking = vehiclePicking(container, undefined, {
     onTap(key) {
       openPanel({ kind: 'trip', id: key })
     },
     onPointer(onDot, x, y) {
-      canvas.style.cursor = onDot || stopAt(map, x, y) !== undefined ? 'pointer' : ''
+      resting = onDot ? undefined : { x, y }
+      if (onDot) canvas.style.cursor = 'pointer'
+      else cursorFrame ??= requestAnimationFrame(cursorOverStops)
     },
     onMiss(x, y) {
       const stop = stopAt(map, x, y)
@@ -173,6 +183,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       stopFiltering()
       stopPolling()
       loop.stop()
+      if (cursorFrame !== undefined) cancelAnimationFrame(cursorFrame)
       map.off('zoom', onZoom)
       map.off('move', onMove)
       map.off('resize', onResize)
