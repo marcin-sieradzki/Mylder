@@ -23,6 +23,29 @@
     "train": "Train",
     "light-rail": "Light rail"
   },
+  "vehicle": {
+    "title": "{mode} {line} to {headsign}",
+    "reported": "Reported {age} ago",
+    "lastSeen": "Last seen {age} ago",
+    "estimated": "Estimated from schedule",
+    "noSignalSince": "No signal since {time}",
+    "departs": "Departs {time}",
+    "seconds": "{seconds} s",
+    "minutes": "{minutes} min"
+  },
+  "legend": {
+    "label": "Data states",
+    "noLive": "No vehicle can be Live: Rejseplanen sends only estimated positions."
+  },
+  "controls": {
+    "motion": "Motion",
+    "pause": "Pause",
+    "resume": "Resume"
+  },
+  "credit": {
+    "transitData": "Transit data",
+    "openStreetMap": "OpenStreetMap contributors"
+  },
   "notices": {
     "disconnected": "No connection since {since}. Vehicles move on the last data from {data}.",
     "disconnectedNoData": "No connection since {since}.",

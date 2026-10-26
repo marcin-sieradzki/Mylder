@@ -23,6 +23,29 @@
     "train": "Tog",
     "light-rail": "Letbane"
   },
+  "vehicle": {
+    "title": "{mode} {line} mod {headsign}",
+    "reported": "Meldt for {age} siden",
+    "lastSeen": "Sidst set for {age} siden",
+    "estimated": "Beregnet ud fra køreplanen",
+    "noSignalSince": "Intet signal siden {time}",
+    "departs": "Afgår {time}",
+    "seconds": "{seconds} s",
+    "minutes": "{minutes} min"
+  },
+  "legend": {
+    "label": "Datatilstande",
+    "noLive": "Intet køretøj kan være Live: Rejseplanen sender kun beregnede positioner."
+  },
+  "controls": {
+    "motion": "Bevægelse",
+    "pause": "Pause",
+    "resume": "Fortsæt"
+  },
+  "credit": {
+    "transitData": "Trafikdata",
+    "openStreetMap": "OpenStreetMap-bidragydere"
+  },
   "notices": {
     "disconnected": "Ingen forbindelse siden {since}. Køretøjerne bevæger sig på de seneste data fra {data}.",
     "disconnectedNoData": "Ingen forbindelse siden {since}.",

@@ -7,6 +7,7 @@ import 'client-only'
 import type { Accessor, DefaultProps, Layer } from '@deck.gl/core'
 import { PathStyleExtension } from '@deck.gl/extensions'
 import { ScatterplotLayer, type ScatterplotLayerProps } from '@deck.gl/layers'
+import { PICKED_LAYER } from './picking.ts'
 import type { Vehicles } from './vehicles.ts'
 
 type CutProps<D> = {
@@ -108,7 +109,7 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
       pickable: false,
     }),
     new VehicleGlyphLayer({
-      id: 'vehicles',
+      id: PICKED_LAYER,
       data: { length, attributes: { ...data.glyphs, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
@@ -117,7 +118,8 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
       stroked: true,
       antialiasing: true,
       extensions: dashed,
-      pickable: false,
+      // deck.gl picks within the overlay's picking radius of the pointer (picking.ts).
+      pickable: true,
     }),
   ]
 }

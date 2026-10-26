@@ -1,0 +1,12 @@
+/* The legend on glass at the bottom left of the map; its note wraps to the legend's width. */
+.legend {
+  display: grid;
+  gap: var(--perron-space-150);
+  max-inline-size: calc(10 * var(--perron-space-600));
+  padding-block: var(--perron-space-200);
+  padding-inline: var(--perron-space-300);
+}
+
+.note {
+  margin: 0;
+}
