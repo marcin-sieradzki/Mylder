@@ -313,6 +313,8 @@ describe('GET /api/aircraft', () => {
       expect(snapshot?.health).toEqual({ status: 'error', kind: 'timeout', since: MOMENT + 8_000 })
       expect(snapshot?.aircraft).toEqual([])
       expect(snapshot).not.toHaveProperty('lastAnswer')
+      // Nobody has answered, so the snapshot names nobody.
+      expect(snapshot).not.toHaveProperty('provider')
     }).pipe(Effect.provide(replaying({ timeout: true }))),
   )
 

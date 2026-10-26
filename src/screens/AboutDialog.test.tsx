@@ -204,6 +204,21 @@ describe('the About dialog', () => {
     expect(openDialog('About Mylder')).not.toHaveTextContent('Aircraft')
   })
 
+  it('names no aircraft credit before a feed has answered', () => {
+    const { fetched, nextDue, pollInterval } = aircraft
+    liveAircraft.update({
+      snapshot: {
+        fetched,
+        nextDue,
+        pollInterval,
+        health: { status: 'error', kind: 'timeout', since: fetched },
+        aircraft: [],
+      },
+    })
+    show('en', weekday)
+    expect(openDialog('About Mylder')).not.toHaveTextContent('Aircraft')
+  })
+
   it('names the simulation and Rejseplanen as sources, and says when no vehicle can be Live', () => {
     const simulated: Snapshot = {
       ...weekday,

@@ -52,7 +52,8 @@ export const AircraftSnapshot = Schema.Struct({
   nextDue: Schema.Number,
   /** In seconds. */
   pollInterval: Schema.Number,
-  provider: AircraftProvider,
+  /** Who gave the aircraft; none until a feed has answered. */
+  provider: optional(AircraftProvider),
   health: AircraftHealth,
   /** When the feed last answered; none until it has. */
   lastAnswer: optional(Schema.Number),

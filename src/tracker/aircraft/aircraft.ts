@@ -164,8 +164,9 @@ export const layer: Layer.Layer<Aircraft, never, Http.HttpClient.HttpClient | Ai
         const kept = latest ? aged(latest.aircraft, (now - latest.fetched) / 1000) : []
         return {
           ...due,
-          // The aircraft kept are the last answer's, so the snapshot names who gave them.
-          provider: latest?.provider ?? feed.provider,
+          // The aircraft kept are the last answer's, so the snapshot names who gave them, and
+          // nobody before any feed has answered.
+          ...(latest?.provider === undefined ? {} : { provider: latest.provider }),
           health,
           ...(latest?.lastAnswer === undefined ? {} : { lastAnswer: latest.lastAnswer }),
           aircraft: withStates(kept, decided(health)),

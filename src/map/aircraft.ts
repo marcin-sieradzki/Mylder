@@ -27,7 +27,7 @@ export const aircraftRoute: PollRoute<AircraftSnapshot> = {
     return (
       typeof value?.fetched === 'number' &&
       typeof value.nextDue === 'number' &&
-      typeof value.provider === 'string' &&
+      (value.provider === undefined || typeof value.provider === 'string') &&
       Array.isArray(value.aircraft)
     )
   },
@@ -78,7 +78,8 @@ export function useAircraftClockOffset(store: AircraftStore = liveAircraft): num
 
 /**
  * Where the aircraft on the page come from, for the credits and the source banner: none until an
- * aircraft snapshot has landed, so a page with the aircraft off never names them.
+ * aircraft snapshot from a feed that answered has landed, so a page with the aircraft off, or
+ * whose feeds have never answered, names nobody.
  */
 export function useAircraftProvider(
   store: AircraftStore = liveAircraft,

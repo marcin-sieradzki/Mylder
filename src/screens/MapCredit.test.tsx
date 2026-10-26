@@ -95,6 +95,21 @@ describe("the map's corner credit", () => {
     )
   })
 
+  it('names no aircraft source before a feed has answered', () => {
+    const { fetched, nextDue, pollInterval } = recordedAircraft
+    const unanswered: AircraftSnapshot = {
+      fetched,
+      nextDue,
+      pollInterval,
+      health: { status: 'error', kind: 'timeout', since: fetched },
+      aircraft: [],
+    }
+    act(() => liveAircraft.update({ snapshot: unanswered }))
+    expect(show('en')).toHaveTextContent(
+      'Transit data: Rejseplanen (CC BY 4.0) · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap',
+    )
+  })
+
   it('credits adsb.lol for recorded aircraft too', () => {
     act(() => liveAircraft.update({ snapshot: recordedAircraft }))
     expect(show('en')).toHaveTextContent('Aircraft: © adsb.lol contributors under the ODbL')

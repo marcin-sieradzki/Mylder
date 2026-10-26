@@ -25,7 +25,7 @@ Neither host sends CORS headers, which doesn't matter: only the server calls the
 
 `Aircraft.getSnapshot` (`src/tracker/aircraft/aircraft.ts`) serves the latest snapshot while it holds, and otherwise calls the feed. Calls go one at a time within an instance, so the requests that come while one is on its way wait for it and are served the snapshot it made. Two instances may each call once in the same 10 s; the CDN in front of them makes that rare.
 
-A call both feeds fail (each by a timeout, a network error, a status of 400 or more, or an answer the schema rejects) still answers 200: a snapshot with health `error`, the kind of adsb.fi's failure and since when, the last answer's aircraft, named for the provider that gave them, with their ages counted on to now and their states decided again, or none before the first answer. Once the feed has failed for over 60 s, every aircraft is No signal at its last fix. The route answers 503 only when the source can't be built at all.
+A call both feeds fail (each by a timeout, a network error, a status of 400 or more, or an answer the schema rejects) still answers 200: a snapshot with health `error`, the kind of adsb.fi's failure and since when, the last answer's aircraft, named for the provider that gave them, with their ages counted on to now and their states decided again, or, before the first answer, none and no provider, since nobody has answered. Once the feed has failed for over 60 s, every aircraft is No signal at its last fix. The route answers 503 only when the source can't be built at all.
 
 ## The snapshot
 
@@ -36,7 +36,7 @@ Codes and numbers only, in the feed's units, which the browser converts. Its sch
 | `fetched`      | When the server received the answer, or gave up on it                                      |
 | `nextDue`      | `fetched` plus 10 s                                                                        |
 | `pollInterval` | 10, in seconds                                                                             |
-| `provider`     | `adsb.lol`, `adsb.fi` or `recording`: who answered                                         |
+| `provider`     | `adsb.lol`, `adsb.fi` or `recording`: who answered; absent until a feed has                |
 | `health`       | `ok` or `error`, since when, and an error's kind: `timeout`, `network`, `status` or `body` |
 | `lastAnswer`   | When the feed last answered; absent until it has                                           |
 | `aircraft`     | Every aircraft kept, by hex                                                                |
@@ -72,7 +72,7 @@ The aircraft have their own runtime (`src/tracker/aircraft/runtime.ts`), apart f
 
 ## Credits and the banner
 
-Once an aircraft snapshot has landed, the corner credit and the About dialog credit "Aircraft: © adsb.lol contributors under the ODbL" beside the transit and map credits, or "Aircraft: © adsb.fi", linked to adsb.fi's home page as its terms ask, when adsb.fi answered, from one function by provider, `aircraftCredit` in `src/screens/credits.ts`; a recording is credited as adsb.lol's answers, and the About dialog adds that the planes are recorded adsb.lol data, open under the same licence in the repository's `recordings/`, linked. The banner names the provider that answered too. The source banner names the transit's source, then says "Planes: live from adsb.lol." or "Planes: recorded adsb.lol data.". Recorded planes beside Rejseplanen's own transit get a banner of their own. With the aircraft off, none of this shows.
+Once an aircraft snapshot from a feed that answered has landed, the corner credit and the About dialog credit "Aircraft: © adsb.lol contributors under the ODbL" beside the transit and map credits, or "Aircraft: © adsb.fi", linked to adsb.fi's home page as its terms ask, when adsb.fi answered, from one function by provider, `aircraftCredit` in `src/screens/credits.ts`; a recording is credited as adsb.lol's answers, and the About dialog adds that the planes are recorded adsb.lol data, open under the same licence in the repository's `recordings/`, linked. The banner names the provider that answered too. The source banner names the transit's source, then says "Planes: live from adsb.lol." or "Planes: recorded adsb.lol data.". Recorded planes beside Rejseplanen's own transit get a banner of their own. With the aircraft off, or before either feed has answered, none of this shows: the snapshot names no provider then, and the legend's "Planes: no data since" says why the sky is empty.
 
 ## The demo
 

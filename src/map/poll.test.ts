@@ -407,7 +407,6 @@ describe("the aircraft's route", () => {
       fetched,
       nextDue: fetched + 10 * S,
       pollInterval: 10,
-      provider: 'adsb.lol',
       health: { status: 'error', kind: 'timeout', since: fetched },
       aircraft: [],
     }

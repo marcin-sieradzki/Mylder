@@ -142,6 +142,23 @@ describe('the source banner', () => {
     expect(notices()).toEqual(['Optagne data fra 16. juni 2026. Fly: optagne data fra adsb.lol.'])
   })
 
+  it('says nothing of the planes before their feed has answered', () => {
+    land({ ...saved('0004.json'), source: { kind: 'simulated', name: 'weekday' } })
+    const { fetched, nextDue, pollInterval } = aircraft('adsb.lol')
+    const unanswered: AircraftSnapshot = {
+      fetched,
+      nextDue,
+      pollInterval,
+      health: { status: 'error', kind: 'timeout', since: fetched },
+      aircraft: [],
+    }
+    act(() => liveAircraft.update({ snapshot: unanswered }))
+    renderScreen('en')
+    expect(notices()).toEqual([
+      'Simulated data: vehicles and times are made up from the timetable.',
+    ])
+  })
+
   it('says recorded planes are recorded when the transit is Rejseplanen’s, and live ones nothing', () => {
     land(live())
     act(() => liveAircraft.update({ snapshot: aircraft('recording') }))
