@@ -7,8 +7,8 @@ import { MapLegend } from './MapLegend'
 import { MapTools } from './MapTools'
 
 interface MapFootProps {
-  /** Where the open sheet sits, so the foot keeps clear of it; none while it is closed. */
-  sheet?: 'left' | 'bottom'
+  /** Whether the sheet is open, so the foot keeps clear of it. */
+  besideSheet: boolean
   /** The button that opens the closed sheet again, above the legend. */
   opener?: ReactNode
 }
@@ -19,9 +19,9 @@ interface MapFootProps {
  * open side sheet it starts past the sheet; over a bottom sheet it stands on its peek, so the
  * credit stays in view.
  */
-export function MapFoot({ sheet, opener }: MapFootProps) {
+export function MapFoot({ besideSheet, opener }: MapFootProps) {
   return (
-    <div className={styles.foot} data-sheet={sheet}>
+    <div className={styles.foot} data-sheet={besideSheet ? 'open' : undefined}>
       <div className={styles.legend}>
         {opener}
         <MapLegend />

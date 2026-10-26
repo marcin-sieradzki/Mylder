@@ -8,7 +8,6 @@ import { CitySheet } from './CitySheet'
 import { MapFoot } from './MapFoot'
 import styles from './MapScreen.module.css'
 import { TopBar } from './TopBar'
-import { usePhone } from './usePhone'
 import { VehicleCard } from './VehicleCard'
 
 // MapLibre needs the browser's window, so the map loads on the client only.
@@ -21,7 +20,6 @@ const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
  */
 export function MapScreen() {
   const { dictionary } = useI18n()
-  const anchor = usePhone() ? 'bottom' : 'left'
   const [sheet, setSheet] = useState<'open' | 'closed' | 'reopened'>('open')
   const opener = useRef<HTMLButtonElement>(null)
   const open = sheet !== 'closed'
@@ -32,7 +30,7 @@ export function MapScreen() {
       </main>
       <TopBar />
       <MapFoot
-        sheet={open ? anchor : undefined}
+        besideSheet={open}
         opener={
           open ? null : (
             <Button ref={opener} onClick={() => setSheet('reopened')}>
@@ -42,7 +40,6 @@ export function MapScreen() {
         }
       />
       <CitySheet
-        anchor={anchor}
         open={open}
         onClose={() => setSheet('closed')}
         asked={sheet === 'reopened'}

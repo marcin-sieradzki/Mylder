@@ -71,8 +71,9 @@ const within = (value: number, low: number, high: number) => value >= low && val
 
 const isMode = (value: string): value is Mode => (MODES as readonly string[]).includes(value)
 
-const isTab = (value: string): value is SheetTab =>
-  (SHEET_TABS as readonly string[]).includes(value)
+/** Whether `value` names one of the sheet's tabs. */
+export const isTab = (value: string | null): value is SheetTab =>
+  (SHEET_TABS as readonly (string | null)[]).includes(value)
 
 /** `search` with the view written into it, every other parameter kept in its place. */
 export function searchWith(search: string, view: MapView): string {

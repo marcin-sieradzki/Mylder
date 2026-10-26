@@ -1,16 +1,16 @@
 'use client'
 
 import { Sheet, Tab, Tabs, TabsList, TabsPanel } from '@mylder/perron'
-import type { RefObject } from 'react'
+import { useRef, type ReactNode, type RefObject } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useSnapshot } from '../map/live'
-import { mapView, SHEET_TABS, useHiddenModes, useSheetTab, type SheetTab } from '../map/view'
+import { onMap } from '../map/vehicles'
+import { isTab, mapView, SHEET_TABS, useHiddenModes, useSheetTab, type SheetTab } from '../map/view'
 import { CityPulse } from './CityPulse'
 import styles from './CitySheet.module.css'
+import { usePhone } from './usePhone'
 
 interface CitySheetProps {
-  /** Where the sheet sits: beside the map on a desktop, at the bottom on a phone. */
-  anchor: 'left' | 'bottom'
   /** Whether the sheet is open. */
   open: boolean
   /** Called when the sheet asks to close. */
@@ -21,29 +21,45 @@ interface CitySheetProps {
   opener: RefObject<HTMLButtonElement | null>
 }
 
-const isTab = (value: string | null): value is SheetTab =>
-  (SHEET_TABS as readonly (string | null)[]).includes(value)
+// The Vehicles list (#76) and Disruptions (#77) fill their tabs in their own tickets.
+const PANELS: Record<SheetTab, ReactNode> = {
+  pulse: <CityPulse />,
+  vehicles: null,
+  disruptions: null,
+}
 
 /**
  * The sheet beside the map (docs/screens.md): City pulse, the Vehicles list and Disruptions as
  * tabs, in a side sheet on a desktop and a bottom sheet with a peek on a phone. The open tab is
  * kept in the address.
  */
-export function CitySheet({ anchor, open, onClose, asked, opener }: CitySheetProps) {
+export function CitySheet({ open, onClose, asked, opener }: CitySheetProps) {
   const { dictionary } = useI18n()
   const words = dictionary.sheet
   const tab = useSheetTab()
   const hidden = useHiddenModes()
   const snapshot = useSnapshot()
-  // The Vehicles tab counts the trips on the map after the filters.
-  const vehicles = snapshot?.trips.filter((trip) => !trip.cancelled && !hidden.has(trip.mode))
+  const popup = useRef<HTMLDivElement>(null)
+  const counts: Partial<Record<SheetTab, number>> = {
+    // The trips on the map after the filters.
+    vehicles: snapshot?.trips.filter((trip) => onMap(trip, hidden)).length,
+  }
 
   return (
     <Sheet
-      anchor={anchor}
+      ref={popup}
+      anchor={usePhone() ? 'bottom' : 'left'}
       title={words.title}
       open={open}
-      onClose={onClose}
+      onClose={(_event, reason, details) => {
+        // The sheet stays open beside the map: Esc closes it only from inside it, not when it
+        // closes a dot's card or a dialog elsewhere on the page.
+        if (reason === 'escape-key' && !popup.current?.contains(document.activeElement)) {
+          details.cancel()
+          return
+        }
+        onClose()
+      }}
       initialFocus={asked}
       finalFocus={opener}
       slotProps={{ viewport: { className: styles.viewport } }}
@@ -55,18 +71,17 @@ export function CitySheet({ anchor, open, onClose, asked, opener }: CitySheetPro
         }}
       >
         <TabsList aria-label={words.title}>
-          <Tab value="pulse">{words.pulse}</Tab>
-          <Tab value="vehicles" count={vehicles?.length}>
-            {words.vehicles}
-          </Tab>
-          <Tab value="disruptions">{words.disruptions}</Tab>
+          {SHEET_TABS.map((value) => (
+            <Tab key={value} value={value} count={counts[value]}>
+              {words[value]}
+            </Tab>
+          ))}
         </TabsList>
-        <TabsPanel value="pulse">
-          <CityPulse />
-        </TabsPanel>
-        {/* The Vehicles list (#76) and Disruptions (#77) fill their tabs in their own tickets. */}
-        <TabsPanel value="vehicles" />
-        <TabsPanel value="disruptions" />
+        {SHEET_TABS.map((value) => (
+          <TabsPanel key={value} value={value}>
+            {PANELS[value]}
+          </TabsPanel>
+        ))}
       </Tabs>
     </Sheet>
   )

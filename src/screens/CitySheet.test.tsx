@@ -17,21 +17,21 @@ const saved = (name: string): Snapshot =>
     readFileSync(join(process.cwd(), 'recordings', 'weekday', 'snapshots', name), 'utf8'),
   ) as Snapshot
 
+/**
+ * Lands a saved snapshot with the server's clock 20 s past its fetch, as when the poll has just
+ * brought it.
+ */
+const land = (name: string) => {
+  const snapshot = saved(name)
+  act(() => liveSnapshot.update({ snapshot, clockOffset: snapshot.fetched + 20_000 - Date.now() }))
+}
+
 const renderScreen = (lang: Lang) =>
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
       <MapScreen />
     </Providers>,
   )
-
-/** Makes the page as wide as a phone, under Perron's breakpoint.phone, or as a desktop. */
-const widthOf = (phone: boolean) =>
-  vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: phone && query.includes('max-width'),
-    media: query,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  }))
 
 const sheet = () => screen.getByRole('dialog')
 const tabs = (name: string) => within(sheet()).getByRole('tablist', { name })
@@ -43,13 +43,13 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  liveSnapshot.update({ snapshot: undefined })
+  liveSnapshot.update({ snapshot: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
 })
 
 describe('the sheet beside the map', () => {
   it('holds City pulse, the Vehicles list and Disruptions as tabs, City pulse open', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land('0006.json')
     renderScreen('en')
     expect(sheet()).toHaveAccessibleName('Overview')
     const list = tabs('Overview')
@@ -66,7 +66,7 @@ describe('the sheet beside the map', () => {
   })
 
   it('names its tabs in Danish', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land('0006.json')
     renderScreen('da')
     expect(sheet()).toHaveAccessibleName('Overblik')
     expect(
@@ -92,14 +92,14 @@ describe('the sheet beside the map', () => {
     ).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('sits on the left on a desktop and at the bottom on a phone', () => {
-    widthOf(false)
-    const { unmount } = renderScreen('en')
-    expect(sheet()).toHaveAttribute('data-anchor', 'left')
-    unmount()
-    widthOf(true)
+  it('stays open when Esc closes something elsewhere, and closes on Esc from inside it', () => {
     renderScreen('en')
-    expect(sheet()).toHaveAttribute('data-anchor', 'bottom')
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    expect(sheet()).toBeInTheDocument()
+    const tab = within(tabs('Overview')).getByRole('tab', { name: 'City pulse' })
+    tab.focus()
+    fireEvent.keyDown(tab, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('can be closed and opened again', () => {
@@ -115,7 +115,7 @@ describe("City pulse's first figure", () => {
   // The sixth minute: 6 buses underway and a seventh waiting at its first stop, 4 Metro trains,
   // 6 S-trains and 1 regional train, so 17 on the move of the 18 in service.
   it('counts the trips on the move of those in service', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land('0006.json')
     renderScreen('en')
     const pulse = within(sheet()).getByRole('tabpanel', { name: 'City pulse' })
     const figure = within(pulse).getByRole('group', { name: 'On the move' })
@@ -124,7 +124,7 @@ describe("City pulse's first figure", () => {
   })
 
   it('says it in Danish', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land('0006.json')
     renderScreen('da')
     const figure = within(sheet()).getByRole('group', { name: 'I bevægelse' })
     expect(figure).toHaveTextContent('17')
@@ -132,7 +132,7 @@ describe("City pulse's first figure", () => {
   })
 
   it('follows the mode filters, with the whole kept in view', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land('0006.json')
     renderScreen('en')
     const modes = screen.getByRole('banner')
     const figure = () => within(sheet()).getByRole('group', { name: 'On the move' })
@@ -148,6 +148,26 @@ describe("City pulse's first figure", () => {
     expect(within(tabs('Overview')).getByRole('tab', { name: /^Vehicles/ })).toHaveTextContent(
       'Vehicles 11',
     )
+  })
+
+  it('leaves out a trip once it is No signal by the clock, with no poll', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: false })
+    try {
+      const snapshot = saved('0006.json')
+      vi.setSystemTime(snapshot.fetched + 20_000)
+      act(() => liveSnapshot.update({ snapshot, clockOffset: 0 }))
+      renderScreen('en')
+      const figure = () => within(sheet()).getByRole('group', { name: 'On the move' })
+      expect(figure()).toHaveTextContent('17')
+      // Six trips with computed positions fall silent at 5 min of the answer, and the seven
+      // reported ones Live then Ageing a minute later; the whole stays 18.
+      act(() => vi.advanceTimersByTime(230_000))
+      expect(figure()).toHaveTextContent(/^On the move11of 18 in service$/)
+      act(() => vi.advanceTimersByTime(60_000))
+      expect(figure()).toHaveTextContent(/^On the move4of 18 in service$/)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('shows "—" before the first snapshot lands', () => {
