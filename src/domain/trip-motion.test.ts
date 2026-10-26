@@ -6,6 +6,8 @@ import {
   snapToPath,
   progressAt,
   timedCalls,
+  timelineFrom,
+  timelineOf,
   tripAt,
   tripPhase,
   type Call,
@@ -137,6 +139,28 @@ describe('progressAt', () => {
 
   it('holds a trip before its timeline starts', () => {
     expect(progressAt([{ time: minutes(1), progress: 500 }], minutes(0), path.length)).toBe(500)
+  })
+})
+
+describe('timelineFrom', () => {
+  const timeline = timelineOf(timedCalls(calls), path)
+
+  it('carries a position on to the next call it hasn’t reached, there on that call’s time', () => {
+    // Seen at 07:05 three quarters of the way to B, where the timetable puts it halfway.
+    const seen = { time: minutes(5), progress: (path.stops[1] * 3) / 4 }
+    const carried = timelineFrom(timeline, seen)
+    expect(carried[0]).toEqual(seen)
+    expect(progressAt(carried, minutes(7.5), path.length)).toBeCloseTo((path.stops[1] * 7) / 8, 6)
+    expect(progressAt(carried, minutes(10.5), path.length)).toBeCloseTo(path.stops[1], 6)
+    expect(progressAt(carried, minutes(15), path.length)).toBeCloseTo(path.length, 6)
+  })
+
+  it('never runs a position back to a call it has passed', () => {
+    // Seen at 07:09 already past B, which the timetable reaches at 07:10.
+    const seen = { time: minutes(9), progress: path.stops[1] + 100 }
+    const carried = timelineFrom(timeline, seen)
+    expect(carried.every((point) => point.progress >= seen.progress)).toBe(true)
+    expect(progressAt(carried, minutes(10.5), path.length)).toBeGreaterThan(seen.progress)
   })
 })
 

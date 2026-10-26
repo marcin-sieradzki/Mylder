@@ -1,17 +1,19 @@
 // The tracker run (docs/live-data.md, "One call a minute"): whoever asks, at most once a poll
 // interval, take the lease for the slot or serve the stored snapshot; call `journeyPos` for the
-// city box in the configured position mode; join the answer to the timetable, run the domain
-// rules for every trip on the map, store and return the snapshot. The stop and trip answers
-// come from the timetable plus the snapshot's delays until on-demand calls are wired (#32).
+// city box in the configured position mode; join the answer to the timetable and the stored
+// history, run the domain rules for every trip on the map, store the snapshot and the history,
+// and return the snapshot. A failed or empty call keeps every trip's history, so trips age by the
+// clock. The stop and trip answers come from the timetable plus the snapshot's delays until
+// on-demand calls are wired (#32).
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
-import type { ApiHealth } from '../domain/data-state.ts'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { COPENHAGEN_BOX, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
-import { buildTrips, type PositionAnswer } from './build.ts'
+import { buildTrips, expectedUnderway, type History, type PositionAnswer } from './build.ts'
+import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Source } from './source.ts'
@@ -134,25 +136,6 @@ export const describeSource = (source: Source): Snapshot['source'] =>
       ? { kind: 'recording', name: source.folder }
       : { kind: 'rejseplanen' }
 
-/** The health a failed call gives: a refused key or a spent month is `spent`, the rest `error`. */
-const healthOf = (error: CallError): Outcome =>
-  error.kind === 'quota' || error.kind === 'refused'
-    ? { status: 'spent', kind: error.kind }
-    : { status: 'error', kind: error.kind }
-
-/** How a run's call went, for the snapshot's health. */
-type Outcome = { readonly status: ApiHealth['status']; readonly kind?: string }
-
-/** The health an outcome gives, keeping the start of a health that carries on. */
-function healthAfter(
-  previous: ApiHealth | undefined,
-  outcome: Outcome,
-  now: number,
-): Snapshot['api'] {
-  const since = previous && previous.status === outcome.status ? previous.since : now
-  return { status: outcome.status, since, ...(outcome.kind ? { kind: outcome.kind } : {}) }
-}
-
 export const layer: Layer.Layer<
   Tracker,
   never,
@@ -167,11 +150,14 @@ export const layer: Layer.Layer<
     const key = (name: string) => `${config.keyPrefix}:${name}`
     const month = monthIn(timetable.manifest.timezone)
 
-    // The in-memory store keeps the snapshot as built; the Redis adapter (#56) decodes it with
-    // the snapshot's schema on the way back.
+    // The in-memory store keeps the snapshot and history as built; the Redis adapter (#56)
+    // decodes them on the way back.
     const stored = store
       .get(key('snapshot'))
       .pipe(Effect.map((value) => value as Snapshot | undefined))
+    const storedHistory = store
+      .get(key('history'))
+      .pipe(Effect.map((value) => value as History | undefined))
 
     /** The month's budget as the snapshot shows it; levels arrive with the pacing (#55). */
     const budget = (now: number) =>
@@ -182,7 +168,10 @@ export const layer: Layer.Layer<
         })),
       )
 
-    /** Builds a snapshot at a moment, from an answer when a call made one. */
+    /**
+     * Builds a snapshot at a moment from the history and, when a call made one, an answer, and
+     * the history to keep.
+     */
     const snapshotAt = (
       now: number,
       previous: Snapshot | undefined,
@@ -195,10 +184,11 @@ export const layer: Layer.Layer<
     ) =>
       Effect.gen(function* () {
         const api = healthAfter(previous?.api, outcome.health, now)
-        const { trips, unmatched } = buildTrips({
+        const { trips, unmatched, history } = buildTrips({
           timetable,
           now,
           answer: outcome.answer,
+          history: yield* storedHistory,
           context: { pollInterval: POLL_INTERVAL, positionMode: config.positionMode, health: api },
         })
         const states: Record<string, number> = {}
@@ -222,7 +212,7 @@ export const layer: Layer.Layer<
           status: { calls: outcome.calls, unmatched, states },
           trips,
         }
-        return snapshot
+        return { snapshot, history }
       })
 
     /** One run: the call, the build, the store. */
@@ -243,31 +233,23 @@ export const layer: Layer.Layer<
         )
         if (Result.isSuccess(result)) {
           const { answer, attempts, ms } = result.success
+          const journeys = answer.Journey ?? []
+          const health = answerOutcome(journeys.length, expectedUnderway(timetable, now))
           return yield* snapshotAt(now, previous, {
-            answer: { journeys: answer.Journey ?? [], mode },
-            health: { status: 'ok' },
+            answer: { journeys, mode },
+            health,
             ...(answer.planRtTs ? { apiTime: answer.planRtTs } : {}),
-            calls: [{ service: 'journeyPos', outcome: 'ok', attempts, ms }],
+            calls: [{ service: 'journeyPos', outcome: health.status, attempts, ms }],
           })
         }
+        // A failed run builds from the history alone, so every trip keeps moving on its timeline
+        // and ages by the rules (docs/live-data.md, "What can go wrong"). The message carries no key.
         const error: CallError = result.failure
         yield* Effect.logWarning(`Tracker run: ${error.message}`)
-        const health = healthAfter(previous?.api, healthOf(error), now)
-        const calls = [
-          { service: 'journeyPos', outcome: error.kind, attempts: error.attempts, ms: 0 },
-        ]
-        // A failed run keeps the previous snapshot's trips, moving on their timelines and ageing
-        // by the rules, with the health set to the failure (docs/live-data.md, "One call a minute").
-        if (previous) {
-          return {
-            ...previous,
-            nextDue: now + POLL_INTERVAL * 1000,
-            api: health,
-            budget: yield* budget(now),
-            status: { ...previous.status, calls },
-          }
-        }
-        return yield* snapshotAt(now, previous, { health: healthOf(error), calls })
+        return yield* snapshotAt(now, previous, {
+          health: failureOutcome(error),
+          calls: [{ service: 'journeyPos', outcome: error.kind, attempts: error.attempts, ms: 0 }],
+        })
       })
 
     const getSnapshot = Effect.gen(function* () {
@@ -280,11 +262,15 @@ export const layer: Layer.Layer<
         // Another request holds this slot's run: serve what is stored, or the timetable alone,
         // due again in a few seconds so the CDN asks soon.
         if (previous) return previous
-        const interim = yield* snapshotAt(now, previous, { health: { status: 'ok' }, calls: [] })
-        return { ...interim, nextDue: now + MIN_CDN_SECONDS * 1000 }
+        const { snapshot } = yield* snapshotAt(now, previous, {
+          health: { status: 'ok' },
+          calls: [],
+        })
+        return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }
       }
-      const snapshot = yield* run(now, slot, previous)
+      const { snapshot, history } = yield* run(now, slot, previous)
       yield* store.set(key('snapshot'), snapshot, SNAPSHOT_SECONDS)
+      yield* store.set(key('history'), history, SNAPSHOT_SECONDS)
       return snapshot
     })
 

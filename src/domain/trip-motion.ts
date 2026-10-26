@@ -31,8 +31,14 @@ export interface TimedCall {
   readonly departure: number
 }
 
+/** Where a trip is at a moment, as metres along its pattern's path. */
+export interface Position {
+  readonly time: number
+  readonly progress: number
+}
+
 /** A trip's progress along its path at moments, which it moves between at constant speed. */
-export type Timeline = readonly { readonly time: number; readonly progress: number }[]
+export type Timeline = readonly Position[]
 
 /**
  * Where a trip is in its day: not yet on the map, Waiting at its first stop, underway, or
@@ -163,6 +169,20 @@ export function timelineOf(calls: readonly TimedCall[], path: MeasuredPath): Tim
     { time: call.arrival, progress: path.stops[i] },
     { time: call.departure, progress: path.stops[i] },
   ])
+}
+
+/**
+ * A timeline that starts from a position an answer gave and carries it on to the calls ahead of
+ * it in both time and distance, so a trip ahead of or behind its times moves on from where it
+ * was seen and never runs back.
+ */
+export function timelineFrom(timeline: Timeline, position: Position): Timeline {
+  return [
+    position,
+    ...timeline.filter(
+      (point) => point.time > position.time && point.progress >= position.progress,
+    ),
+  ]
 }
 
 /**
