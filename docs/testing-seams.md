@@ -49,7 +49,7 @@ Every test asserts external behaviour: what the route returns, what the snapshot
 
 ## Rules
 
-- Recordings carry no key, no personal data and no more than a scenario needs; prefer a hand-made 20-journey recording to a full-city hour where the case allows. A real recording is trimmed to the box and the minutes the tests and the demo use.
+- Recordings carry no key, no personal data and no more than a scenario needs; prefer a hand-made 20-journey recording to a full-city hour where the case allows. A real recording keeps the minutes the tests and the demo use and is cut to a box a little wider than theirs: the `weekday` aircraft to 55.40 to 56.10 N and 12.00 to 12.75 E, plus three aircraft outside it, with every field of each answer kept so the answers stay the shape of the feed's contract.
 - A test never reads `Date.now()` on the server side and never sleeps.
 - A change to the snapshot schema regenerates the saved snapshots the screen tests use, from the recordings, with one script.
 - CI needs no secrets, because no test calls the API.
