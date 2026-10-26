@@ -1,0 +1,11 @@
+/* The Vehicles list: the search, the source line and the table, one column in the sheet. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-300);
+}
+
+/* The table keeps its columns on a narrow sheet and scrolls sideways rather than squeezing them. */
+.scroll {
+  overflow-x: auto;
+}

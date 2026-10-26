@@ -182,6 +182,14 @@
     "vehicles": "Vehicles",
     "disruptions": "Disruptions"
   },
+  "vehicleList": {
+    "search": "Search lines and destinations",
+    "placeholder": "Line or destination, such as 5C",
+    "positionsAt": "positions {time}",
+    "positionsOutOfDate": "positions {time}, may be out of date",
+    "noMatch": "No vehicles match.",
+    "none": "No vehicles on the map."
+  },
   "pulse": {
     "onTheMove": "On the move",
     "inService": "of {total} in service",
