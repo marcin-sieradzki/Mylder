@@ -25,6 +25,7 @@ import {
   type Disruptions,
 } from './disruptions.ts'
 import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './health.ts'
+import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Source } from './source.ts'
@@ -103,6 +104,15 @@ export interface TripDetail {
   readonly calls: readonly TripCall[]
 }
 
+/** A failed call as the status section lists it. */
+const callFailed = (error: CallError): Snapshot['status']['calls'][number] => ({
+  service: error.service,
+  outcome: error.kind,
+  attempts: error.attempts,
+  ms: error.ms ?? 0,
+  ...(error.status === undefined ? {} : { status: error.status }),
+})
+
 /** How a run's calls went, for the snapshot it builds. */
 interface RunOutcome {
   /** The mode the run asked in, for alternating mode's turns. */
@@ -156,7 +166,7 @@ export const describeSource = (source: Source): Snapshot['source'] =>
 export const layer: Layer.Layer<
   Tracker,
   never,
-  TrackerConfig | TimetableService | Store | Rejseplanen
+  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock
 > = Layer.effect(
   Tracker,
   Effect.gen(function* () {
@@ -164,6 +174,7 @@ export const layer: Layer.Layer<
     const timetable = yield* TimetableService
     const store = yield* Store
     const rejseplanen = yield* Rejseplanen
+    const cpu = yield* CpuClock
     const key = (name: string) => `${config.keyPrefix}:${name}`
     const { timezone } = timetable.manifest
     const area = { stops: timetable.stops, products: PRODUCTS, timezone }
@@ -203,13 +214,14 @@ export const layer: Layer.Layer<
 
     /**
      * Builds a snapshot at a moment from the history and, when a call made one, an answer, and
-     * the history to keep.
+     * the history to keep. `cpuFrom` is the CPU clock when the run began.
      */
     const snapshotAt = (
       now: number,
       previous: Snapshot | undefined,
       before: Pacing,
       outcome: RunOutcome,
+      cpuFrom: number,
     ) =>
       Effect.gen(function* () {
         const api = healthAfter(previous?.api, outcome.health, now)
@@ -229,14 +241,15 @@ export const layer: Layer.Layer<
             health: api,
           },
         })
-        const states: Record<string, number> = {}
-        for (const trip of trips) states[trip.state] = (states[trip.state] ?? 0) + 1
+        const serviceDay = timetable.serviceDaysAt(now).at(-1)!
+        const age = timetableAge(timetable.manifest, serviceDay)
         const snapshot: Snapshot = {
           fetched: now,
           nextDue: now + pace.pollInterval * 1000,
           pollInterval: pace.pollInterval,
-          serviceDay: timetable.serviceDaysAt(now).at(-1)!,
+          serviceDay,
           timetableVersion: timetable.manifest.version,
+          ...(age.daysLeft < RUNNING_OUT_DAYS ? { timetableRunningOut: true as const } : {}),
           positionMode: config.positionMode,
           ...(config.positionMode === 'alternating' && outcome.mode
             ? { answerMode: outcome.mode }
@@ -251,7 +264,14 @@ export const layer: Layer.Layer<
           store: 'ok',
           disruptions: summaryOf(yield* storedDisruptions),
           source: describeSource(config.source),
-          status: { calls: outcome.calls, unmatched, states },
+          status: {
+            calls: outcome.calls,
+            unmatched,
+            modes: countBy(trips, 'mode'),
+            states: countBy(trips, 'state'),
+            cpuMs: Math.round((yield* cpu) - cpuFrom),
+            timetable: age,
+          },
           trips,
         }
         return { snapshot, history }
@@ -291,7 +311,7 @@ export const layer: Layer.Layer<
         return {
           mode,
           health: failureOutcome(error),
-          calls: [{ service: 'journeyPos', outcome: error.kind, attempts: error.attempts, ms: 0 }],
+          calls: [callFailed(error)],
         }
       })
 
@@ -323,30 +343,40 @@ export const layer: Layer.Layer<
         }
         const error = yield* noteFailure(result.failure, pace)
         yield* store.set(key('disruptions'), failedList(list, now), DISRUPTIONS_SECONDS)
-        return [{ service: 'himsearch', outcome: error.kind, attempts: error.attempts, ms: 0 }]
+        return [callFailed(error)]
       })
 
     /** One run: the budget, the calls, the build. */
     const run = (now: number, previous: Snapshot | undefined) =>
       Effect.gen(function* () {
+        const cpuFrom = yield* cpu
         const pace = yield* paceAt(now)
         // A spent month makes no call: the trips move on and age from their history alone, and
         // the modes take turns again from where they stopped.
         if (pace.level === 'spent') {
-          return yield* snapshotAt(now, previous, pace, {
-            ...(previous?.answerMode ? { mode: previous.answerMode } : {}),
-            health: { status: 'spent' },
-            calls: [],
-          })
+          return yield* snapshotAt(
+            now,
+            previous,
+            pace,
+            {
+              ...(previous?.answerMode ? { mode: previous.answerMode } : {}),
+              health: { status: 'spent' },
+              calls: [],
+            },
+            cpuFrom,
+          )
         }
         const positions = yield* askPositions(now, previous, pace)
         // A refused key or a spent month refuses the disruption call too, so it isn't made.
         const disruptions =
           positions.health.status === 'spent' ? [] : yield* refreshDisruptions(now, pace)
-        return yield* snapshotAt(now, previous, pace, {
-          ...positions,
-          calls: [...positions.calls, ...disruptions],
-        })
+        return yield* snapshotAt(
+          now,
+          previous,
+          pace,
+          { ...positions, calls: [...positions.calls, ...disruptions] },
+          cpuFrom,
+        )
       })
 
     const getSnapshot = Effect.gen(function* () {
@@ -361,15 +391,25 @@ export const layer: Layer.Layer<
         // Another request holds this run: serve what is stored, or the timetable alone, due
         // again in a few seconds so the CDN asks soon.
         if (previous) return previous
-        const { snapshot } = yield* snapshotAt(now, previous, yield* paceAt(now), {
-          health: { status: 'ok' },
-          calls: [],
-        })
+        const { snapshot } = yield* snapshotAt(
+          now,
+          previous,
+          yield* paceAt(now),
+          { health: { status: 'ok' }, calls: [] },
+          yield* cpu,
+        )
         return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }
       }
       const { snapshot, history } = yield* run(now, previous)
       yield* store.set(key('snapshot'), snapshot, SNAPSHOT_SECONDS)
       yield* store.set(key('history'), history, SNAPSHOT_SECONDS)
+      yield* Effect.logInfo('Tracker run', runLine(snapshot))
+      const { prepared, daysOld } = snapshot.status.timetable
+      if (daysOld > STALE_DAYS) {
+        yield* Effect.logWarning(
+          `Tracker run: the timetable was prepared ${daysOld} days ago, on ${prepared}; its job may have stopped`,
+        )
+      }
       return snapshot
     })
 

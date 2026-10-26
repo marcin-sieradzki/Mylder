@@ -31,6 +31,8 @@ export interface CallError {
   readonly message: string
   /** How many attempts the call made before it gave up. */
   readonly attempts: number
+  /** How long it ran over all its attempts, once it has given up. */
+  readonly ms?: number
 }
 
 /** One call that answered, with how many attempts it took and how long it ran. */
@@ -171,7 +173,14 @@ export const layer = (
         })
         return Effect.gen(function* () {
           const started = yield* Clock.currentTimeMillis
-          const answer = yield* attempt.pipe(Effect.retry({ times: 1, while: retryable }))
+          const answer = yield* attempt.pipe(
+            Effect.retry({ times: 1, while: retryable }),
+            Effect.catch((error) =>
+              Effect.flatMap(Clock.currentTimeMillis, (ended) =>
+                Effect.fail<CallError>({ ...error, ms: ended - started }),
+              ),
+            ),
+          )
           const ended = yield* Clock.currentTimeMillis
           return { answer, attempts, ms: ended - started }
         })

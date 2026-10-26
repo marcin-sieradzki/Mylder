@@ -336,7 +336,7 @@ describe('the tracker', () => {
       const failed = yield* minutesLater(1)
       expect(failed.api).toEqual({ status: 'error', since: MOMENT + 60_000, kind: 'status' })
       expect(failed.status.calls).toEqual([
-        { service: 'journeyPos', outcome: 'status', attempts: 2, ms: 0 },
+        { service: 'journeyPos', outcome: 'status', attempts: 2, ms: 0, status: 503 },
       ])
       // Every attempt is counted: the first run's two calls, then a 503 tried twice.
       expect(calls(failed)).toBe(4)

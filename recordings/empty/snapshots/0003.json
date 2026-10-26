@@ -37,8 +37,21 @@
       }
     ],
     "unmatched": 0,
+    "modes": {
+      "bus": 6,
+      "metro": 4,
+      "s-tog": 6,
+      "train": 1
+    },
     "states": {
       "timetable-only": 17
+    },
+    "cpuMs": 0,
+    "timetable": {
+      "prepared": "2026-06-02",
+      "last": "2026-08-26",
+      "daysLeft": 72,
+      "daysOld": 14
     }
   },
   "trips": [
