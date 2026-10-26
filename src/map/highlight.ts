@@ -184,35 +184,51 @@ const ROOM = 200
 /** The margin a fit keeps beyond whatever floats over the map. */
 const MARGIN = 24
 
+/** What floats over the map's top and foot, as measured on the screen, in CSS pixels. */
+export interface Floating {
+  /** How far down the top bar and the page notices under it reach. */
+  readonly top?: number
+  /** How far up the legend at the map's foot reaches, which counts on a desktop. */
+  readonly bottom?: number
+}
+
 /**
  * How far a fit keeps from the edges of a map `width` by `height`, clear of what floats over it,
  * from Perron's sizes: on a desktop the top bar and the highlight chip under it, the sheet at the
  * left and the detail panel at the right; on a phone the top bar's two rows, the chip and the
- * bottom sheet's peek. A window too small for that pads less, so the highlight keeps room.
+ * bottom sheet's peek. Where the screen has measured them, it keeps clear of the page notices
+ * that push the chip down and, on a desktop, of the legend. A window too small for that pads
+ * less, at the bottom first, so the highlight keeps room.
  */
-export function fitPadding(width: number, height: number): Padding {
+export function fitPadding(width: number, height: number, floating: Floating = {}): Padding {
   const gap = 12 // size.panel-gap, and space.300 from the edge
   const chip = 34 + 8 // size.control, and its gap under the top bar (MapHighlight.module.css)
-  const padding: Padding =
-    width > PHONE
-      ? {
-          top: gap + 68 + chip + MARGIN, // the top bar's glass group
-          right: 364 + gap + MARGIN, // size.detail-width
-          bottom: 2 * MARGIN,
-          left: 376 + gap + MARGIN, // size.sheet-width
-        }
-      : {
-          top: gap + 114 + chip + MARGIN, // the top bar's group, its filters on a second row
-          right: MARGIN,
-          bottom: 182 + gap + MARGIN, // size.sheet-peek
-          left: MARGIN,
-        }
+  const desktop = width > PHONE
+  // The chip sits under the notices, however many there are. On a phone the legend stands on the
+  // sheet's peek at the left only, so the peek's padding is enough there.
+  const below = floating.top === undefined ? 0 : floating.top + chip + MARGIN
+  const above = !desktop || floating.bottom === undefined ? 0 : floating.bottom + MARGIN
+  const padding: Padding = desktop
+    ? {
+        top: Math.max(gap + 68 + chip + MARGIN, below), // the top bar's glass group
+        right: 364 + gap + MARGIN, // size.detail-width
+        bottom: Math.max(2 * MARGIN, above),
+        left: 376 + gap + MARGIN, // size.sheet-width
+      }
+    : {
+        top: Math.max(gap + 114 + chip + MARGIN, below), // the top bar's group, filters below
+        right: MARGIN,
+        bottom: 182 + gap + MARGIN, // size.sheet-peek
+        left: MARGIN,
+      }
   const across = Math.min(1, Math.max(0, width - ROOM) / (padding.left + padding.right))
-  const down = Math.min(1, Math.max(0, height - ROOM) / (padding.top + padding.bottom))
+  // Down, the bottom gives way first, so the chip stays clear of the highlight longest.
+  const down = Math.max(0, height - ROOM)
+  const top = Math.min(padding.top, down)
   return {
-    top: Math.floor(padding.top * down),
+    top: Math.floor(top),
     right: Math.floor(padding.right * across),
-    bottom: Math.floor(padding.bottom * down),
+    bottom: Math.floor(Math.min(padding.bottom, down - top)),
     left: Math.floor(padding.left * across),
   }
 }
