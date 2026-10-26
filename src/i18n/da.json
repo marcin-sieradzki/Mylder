@@ -64,7 +64,9 @@
     "fromTimetable": "Fra køreplanen",
     "positionSource": "Rejseplanen-position",
     "timetableSource": "Køreplan",
-    "callSource": "Rejseplanen-tider"
+    "callSource": "Rejseplanen-tider",
+    "follow": "Følg",
+    "showLine": "Vis hele linjen"
   },
   "legend": {
     "label": "Datatilstande",
@@ -175,5 +177,10 @@
   "pulse": {
     "onTheMove": "I bevægelse",
     "inService": "af {total} i drift"
+  },
+  "highlight": {
+    "showing": "Viser: {label}",
+    "line": "linje {line}",
+    "clear": "Ryd"
   }
 }

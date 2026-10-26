@@ -13,6 +13,8 @@ import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import type { PanelStateOf } from '../map/panels'
 import { useDataState } from '../map/states'
+import { useHiddenModes } from '../map/view'
+import { onMap } from '../map/vehicles'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { whereOf } from '../map/where'
 import type { Network } from '../timetable/network'
@@ -21,6 +23,7 @@ import type { SnapshotTrip, TripDetail } from '../tracker/index'
 import type { PanelFrame } from './DetailPanels'
 import { badgeLine } from './departureRow'
 import { useServerSecond } from './useServerSecond'
+import { VehicleActions } from './VehicleActions'
 import {
   intervalWords,
   nextCallOf,
@@ -45,8 +48,8 @@ export interface VehiclePanelProps {
 /**
  * Vehicle detail (docs/screens.md): the trip's line, destination and mode, what its data state
  * means, its facts, where it is, its stops and where their times came from. Its header names the
- * trip from the snapshot while the answer is on its way. The header's action row is where Follow
- * and Show whole line go.
+ * trip from the snapshot while the answer is on its way. The header's action row holds Follow and
+ * Show whole line.
  */
 export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const { dictionary } = useI18n()
@@ -55,6 +58,7 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const network = useNetwork(snapshot?.timetableVersion)
   const { answer, status } = state
   const trip = snapshot?.trips.find((each) => each.key === state.panel.id)
+  const hidden = useHiddenModes()
   const named = answer ?? trip
   // The line's colour from the answer, or from the timetable's pattern before the answer lands.
   const pattern = trip && network?.patterns.patterns[trip.pattern]
@@ -76,6 +80,14 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
             line: badgeLine(colour ?? '', named.mode),
             lineName: named.line,
             subheader: dictionary.modes[named.mode],
+            action: (
+              <VehicleActions
+                tripKey={state.panel.id}
+                pattern={answer?.pattern ?? trip?.pattern}
+                onMap={trip !== undefined && onMap(trip, hidden)}
+                network={network}
+              />
+            ),
           }
         : {})}
     >

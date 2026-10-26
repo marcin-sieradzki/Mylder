@@ -9,6 +9,7 @@ import { AboutDialog } from './AboutDialog'
 import { CitySheet } from './CitySheet'
 import { DetailPanels } from './DetailPanels'
 import { MapFoot } from './MapFoot'
+import { MapHighlight } from './MapHighlight'
 import styles from './MapScreen.module.css'
 import { TopBar } from './TopBar'
 import { VehicleCard } from './VehicleCard'
@@ -18,8 +19,8 @@ const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
 
 /**
  * The moving map (docs/screens.md): the map fills the window, with the top bar over it, the
- * legend, the controls and the credit at its foot, the sheet beside it, the picked dot's card, the
- * open panel and the About dialog. The sheet starts open; closed, a button at the foot opens it
+ * legend, the controls and the credit at its foot, the sheet beside it, the highlight chip, the
+ * picked dot's card, the open panel and the About dialog. The sheet starts open; closed, a button at the foot opens it
  * again.
  */
 export function MapScreen() {
@@ -51,6 +52,7 @@ export function MapScreen() {
         asked={sheet === 'reopened'}
         opener={opener}
       />
+      <MapHighlight />
       <VehicleCard />
       <DetailPanels />
       <AboutDialog />

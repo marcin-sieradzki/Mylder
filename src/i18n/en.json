@@ -64,7 +64,9 @@
     "fromTimetable": "From the timetable",
     "positionSource": "Rejseplanen position",
     "timetableSource": "Timetable",
-    "callSource": "Rejseplanen times"
+    "callSource": "Rejseplanen times",
+    "follow": "Follow",
+    "showLine": "Show whole line"
   },
   "legend": {
     "label": "Data states",
@@ -175,5 +177,10 @@
   "pulse": {
     "onTheMove": "On the move",
     "inService": "of {total} in service"
+  },
+  "highlight": {
+    "showing": "Showing: {label}",
+    "line": "line {line}",
+    "clear": "Clear"
   }
 }

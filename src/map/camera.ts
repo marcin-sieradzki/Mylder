@@ -46,8 +46,11 @@ export interface Camera {
   subscribe(onChange: () => void): () => void
   zoomIn(): void
   zoomOut(): void
-  /** Pans by a step in a direction: -1, 0 or 1 across, and down. */
-  pan(across: -1 | 0 | 1, down: -1 | 0 | 1): void
+  /**
+   * Pans by a step in a direction: -1, 0 or 1 across, and down. `input` is the viewer's key press
+   * it answers, which the move carries, as MapLibre's own moves carry theirs, so Follow ends.
+   */
+  pan(across: -1 | 0 | 1, down: -1 | 0 | 1, input?: Event): void
   reset(): void
   /** Whether `element` is the map or inside it. */
   holds(element: Element): boolean
@@ -111,7 +114,12 @@ export function cameraStore(): Camera {
     },
     zoomIn: () => map?.zoomIn(),
     zoomOut: () => map?.zoomOut(),
-    pan: (across, down) => map?.panBy([across * PAN_STEP, down * PAN_STEP]),
+    pan: (across, down, input) =>
+      map?.panBy(
+        [across * PAN_STEP, down * PAN_STEP],
+        undefined,
+        input ? { originalEvent: input } : undefined,
+      ),
     reset() {
       if (map && home) map.easeTo(home())
     },

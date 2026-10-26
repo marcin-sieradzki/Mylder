@@ -1,0 +1,24 @@
+/* The highlight chip floats alone over the map, centred under the top bar, above the sheet and
+   below the detail panel (Perron's layout, "Stacking"). The top bar's glass group is 68px tall on
+   a desktop, its 46px row and the group's own padding, and 114px on a phone, with the filters on
+   a second row: the chip keeps 10px below it. */
+.chip {
+  position: absolute;
+  inset-block-start: calc(
+    var(--perron-space-300) + var(--perron-size-top-bar) + var(--perron-space-500) +
+      var(--perron-size-panel-gap)
+  );
+  inset-inline: var(--perron-size-panel-gap);
+  z-index: var(--perron-z-index-highlight);
+  inline-size: fit-content;
+  margin-inline: auto;
+}
+
+@media (max-width: 760px) {
+  .chip {
+    inset-block-start: calc(
+      var(--perron-space-300) + 2 * var(--perron-size-top-bar-phone) + var(--perron-space-800) +
+        var(--perron-space-200)
+    );
+  }
+}
