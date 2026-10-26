@@ -86,6 +86,21 @@ describe("each vehicle's data state, by the clock", () => {
     expect(screen.getByText('A: ageing')).toBeInTheDocument()
   })
 
+  it('tells its subscribers of a change that a read found first', async () => {
+    vi.setSystemTime(serverAt(10) - SLOW)
+    const live = snapshotStore()
+    live.update({ snapshot: minute6, clockOffset: SLOW })
+    const store = dataStatesStore(live)
+    const changes = vi.fn()
+    store.subscribe(changes)
+    changes.mockClear()
+    // Read at 240 s, before the second's tick: A has turned Ageing.
+    vi.setSystemTime(serverAt(240) - SLOW)
+    expect(store.get().get(A_LIVE)).toBe('ageing')
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(changes).toHaveBeenCalledTimes(1)
+  })
+
   it('starts again from each new snapshot', () => {
     const live = openAt(250)
     expect(screen.getByText('A: ageing')).toBeInTheDocument()

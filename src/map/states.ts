@@ -47,15 +47,25 @@ export function dataStatesStore(live: SnapshotStore = liveSnapshot): DataStatesS
   let timer: ReturnType<typeof setTimeout> | undefined
   let stopListening: (() => void) | undefined
 
-  const get = () => {
+  const notify = () => {
+    for (const listener of listeners) listener()
+  }
+  /** Takes the states now; whether one has changed. */
+  const refresh = () => {
     const now = live.get()
     const fresh = now.snapshot ? statesAt(now.snapshot, serverNow(now)) : NONE
-    if (!same(fresh, states)) states = fresh
-    return states
+    if (same(fresh, states)) return false
+    states = fresh
+    return true
   }
   const check = () => {
-    const before = states
-    if (get() !== before) for (const listener of listeners) listener()
+    if (refresh()) notify()
+  }
+  // A read between ticks, such as a render's, can be the first to see a change: the subscribers
+  // hear of it once the read is done.
+  const get = () => {
+    if (refresh()) queueMicrotask(notify)
+    return states
   }
   // On each whole second of the server's clock, where the snapshot's times fall.
   const tick = () => {
