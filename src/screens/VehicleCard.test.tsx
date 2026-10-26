@@ -25,14 +25,11 @@ const M1_TIMETABLE = 'metro.M1.7f21f99145.20260616.0703'
 /** Waiting at its first stop, Timetable only, leaving at 07:30. */
 const BUS_WAITING = 'bus.991.7ce514fd98.20260616.0730'
 
-/**
- * Opens the card on `key` with the server's clock `seconds` after the snapshot's fetch, pinned by
- * a tap unless a hover opened it.
- */
-function openCard(lang: Lang, key: string, seconds: number, pinned = true) {
+/** Opens the card on `key`, as a hover does, with the server's clock `seconds` after the fetch. */
+function openCard(lang: Lang, key: string, seconds: number) {
   vi.setSystemTime(minute6.fetched + seconds * 1000)
   liveSnapshot.update({ snapshot: minute6, clockOffset: 0 })
-  pickedVehicle.pick({ key, point: [200, 200], pinned })
+  pickedVehicle.pick({ key, point: [200, 200] })
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
       <VehicleCard />
@@ -110,18 +107,17 @@ describe("a dot's card", () => {
     openCard('da', BUS_ESTIMATED, 20)
     expect(card()).toHaveTextContent('Bus 5C mod Husum Torv')
     expect(card()).toHaveTextContent('Beregnet ud fra køreplanen')
-    act(() => pickedVehicle.pick({ key: BUS_WAITING, point: [200, 200], pinned: true }))
+    act(() => pickedVehicle.pick({ key: BUS_WAITING, point: [200, 200] }))
     expect(card()).toHaveTextContent('Kun køreplan')
     expect(card()).toHaveTextContent('Afgår 07:30')
   })
 
-  it('lets the pointer through to the map while a hover holds it open, so it never hides its dot', () => {
-    openCard('en', A_LIVE, 20, false)
+  it('lets the pointer through to the map, so it never hides its dot', () => {
+    openCard('en', A_LIVE, 20)
     // The card opens 8 px from its dot, and a dot is picked from 12 px: over the card, the pointer
-    // must still be over the map, or the map hears it leave and the card closes.
+    // must still be over the map, or the map hears it leave and the card closes, and a tap must
+    // still reach the dot to open its detail.
     expect(getComputedStyle(card()).pointerEvents).toBe('none')
-    act(() => pickedVehicle.pick({ key: A_LIVE, point: [200, 200], pinned: true }))
-    expect(getComputedStyle(card()).pointerEvents).not.toBe('none')
   })
 
   it('closes on Esc', () => {

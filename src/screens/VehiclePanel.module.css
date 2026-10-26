@@ -1,0 +1,9 @@
+/* Vehicle detail: the state's dot and word with the line its state means beside them, wrapping
+   under them on a narrow panel. */
+.state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--perron-space-200);
+  row-gap: var(--perron-space-050);
+}

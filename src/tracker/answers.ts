@@ -112,8 +112,8 @@ export interface TripCall {
   readonly expectedDeparture?: number
   /**
    * The trip won't call here: the detail cancels every side of the call it has (the arrival at
-   * the last stop, the departure at the first, both between), or the trip is cancelled, or the
-   * snapshot has it so. The call stays, marked.
+   * the last stop, the departure at the first, both between), or the snapshot has the call
+   * cancelled. The call stays, marked.
    */
   readonly cancelled?: true
 }
@@ -130,6 +130,8 @@ export interface TripDetail {
   readonly key: string
   readonly line: string
   readonly mode: Mode
+  /** The line's Perron colour token, such as `perron-color-transit-line-a`. */
+  readonly colour: string
   readonly headsign: string
   readonly pattern: number
   readonly state: SnapshotTrip['state']
@@ -140,8 +142,13 @@ export interface TripDetail {
    * minus the timetabled one. Only in an answer from the detail, where it has an expected time.
    */
   readonly nextCallDelay?: number
-  /** The whole trip is cancelled, by its detail or the snapshot. */
+  /** The whole trip is called off, by its detail or the snapshot; its calls stay, and so does its panel. */
   readonly cancelled?: true
+  /**
+   * An interval line's interval at the trip's next stop this hour, which its panel shows in place
+   * of times (ADR 0006); none for any other line, or an hour with under two departures.
+   */
+  readonly interval?: Interval
   readonly fetched: number
   readonly nextDue: number
   readonly source: AnswerSource
@@ -355,26 +362,53 @@ export function stopDeparturesFrom(
 }
 
 /**
- * A trip's calls at their timetabled times and, when the snapshot's entry `live` has a delay,
- * those times shifted by it, with its state and cancellations.
+ * How often a Metro trip's line leaves the platform of its next call in the current hour, the
+ * trip's direction only, from the planned departures of the service days running then, as a
+ * stop's interval rows are worked out.
+ */
+function intervalAt(timetable: Timetable, trip: PlannedTrip, now: number): Interval | undefined {
+  if (trip.line.mode !== 'metro') return undefined
+  const next = trip.calls.find((call) => call.departure >= now) ?? trip.calls[0]
+  const departures: number[] = []
+  for (const day of timetable.serviceDaysAt(now)) {
+    for (const each of timetable.tripsOn(day)) {
+      if (each.line.name !== trip.line.name || each.direction !== trip.direction) continue
+      each.calls.forEach((call, i) => {
+        if (i < each.calls.length - 1 && call.platform === next.platform)
+          departures.push(call.departure)
+      })
+    }
+  }
+  const hour = hourStart(now, timetable.manifest.timezone)
+  return intervalOf(departures, hour, hour + INTERVAL_HOUR)
+}
+
+/**
+ * A trip's calls at a moment, at their timetabled times and, when the snapshot's entry `live` has
+ * a delay, those times shifted by it, with its state, what the snapshot has cancelled marked, and
+ * a Metro trip's interval.
  */
 export function tripDetailOf(
   timetable: Timetable,
   snapshot: SnapshotDelays,
   trip: PlannedTrip,
   live: SnapshotTrip | undefined,
+  now: number,
 ): TripDetail {
   const { platforms } = timetable.stops
   const expected = withDelay(trip, live?.delay)
+  const interval = intervalAt(timetable, trip, now)
   return {
     key: trip.key,
     line: trip.line.name,
     mode: trip.line.mode,
+    colour: trip.line.colour,
     headsign: trip.headsign,
     pattern: trip.pattern,
     state: live?.state ?? 'timetable-only',
     ...(live?.delay === undefined ? {} : { delay: live.delay }),
     ...(live?.cancelled ? { cancelled: true as const } : {}),
+    ...(interval ? { interval } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
@@ -390,9 +424,7 @@ export function tripDetailOf(
             expectedDeparture: expected[index].departure,
           }
         : {}),
-      ...(live?.cancelled || live?.cancelledCalls?.includes(index)
-        ? { cancelled: true as const }
-        : {}),
+      ...(live?.cancelledCalls?.includes(index) ? { cancelled: true as const } : {}),
     })),
   }
 }
@@ -409,5 +441,5 @@ export function tripDetailFrom(
 ): TripDetail | undefined {
   const trip = plannedTrip(timetable, tripKey, now)
   if (!trip) return undefined
-  return tripDetailOf(timetable, snapshot, trip, tripsByKey(snapshot).get(trip.key))
+  return tripDetailOf(timetable, snapshot, trip, tripsByKey(snapshot).get(trip.key), now)
 }

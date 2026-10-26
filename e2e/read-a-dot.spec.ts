@@ -12,17 +12,17 @@ const first = savedSnapshots()[0] as { trips: Trip[] }
 /** A bus on line 991 to Teglholmen, with no other dot within 100 px at the opening view. */
 const BUS_991 = first.trips.find((trip) => trip.key === 'bus.991.7ce514fd98.20260616.0700')!
 
-test("a tap within 12 px of a dot's centre opens its card", async ({ page }) => {
+test("a pointer within 12 px of a dot's centre opens its card", async ({ page }) => {
   await serveFirstMinute(page)
   await page.goto('/en')
   await expect(page.locator('[data-vehicles]')).toHaveAttribute('data-vehicles', '17')
   const { width, height } = page.viewportSize()!
   const dot = onScreen(BUS_991.position, width, height)
-  await page.mouse.click(dot.x + 8, dot.y - 8)
+  await page.mouse.move(dot.x + 8, dot.y - 8)
   const card = page.getByRole('tooltip')
   await expect(card).toContainText('Bus 991 to Teglholmen')
   await expect(card).toContainText('Estimated from schedule')
-  await page.keyboard.press('Escape')
+  await page.mouse.move(dot.x + 200, dot.y + 200)
   await expect(card).toBeHidden()
 })
 

@@ -135,10 +135,11 @@ function callFromStop(
   const { expectedArrival: _a, expectedDeparture: _d, cancelled: _c, ...planned } = call
   // Cancelled when every side the call has is: the first only departs, the last only arrives.
   const cancelled =
-    tripCancelled ||
-    ((call.index === 0 || stop.cancelledArrival === true) &&
-      (call.index === last || stop.cancelledDeparture === true))
+    (call.index === 0 || stop.cancelledArrival === true) &&
+    (call.index === last || stop.cancelledDeparture === true)
   if (cancelled) return { ...planned, cancelled: true }
+  // A trip called off whole keeps its calls, marked on the trip, with no times expected.
+  if (tripCancelled) return planned
   const arrival = expectedOf(
     timezone,
     call.arrival,
@@ -216,7 +217,8 @@ export function tripFromDetail(
   const { trip, matched } = found
   const { timezone } = timetable.manifest
   const onMap = tripsByKey(snapshot)
-  const base = tripDetailOf(timetable, snapshot, trip, onMap.get(guess.key) ?? onMap.get(trip.key))
+  const live = onMap.get(guess.key) ?? onMap.get(trip.key)
+  const base = tripDetailOf(timetable, snapshot, trip, live, now)
   const tripCancelled = detail.cancelled === true
   const stopAt = new Map<number, Stop>()
   matched.forEach((index, s) => {
@@ -225,8 +227,7 @@ export function tripFromDetail(
   const last = trip.calls.length - 1
   const calls = base.calls.map((call) => {
     const stop = stopAt.get(call.index)
-    if (stop) return callFromStop(timezone, call, stop, last, tripCancelled)
-    return tripCancelled ? { ...call, cancelled: true as const } : call
+    return stop ? callFromStop(timezone, call, stop, last, tripCancelled) : call
   })
   // The next call it will make, by the time it is expected there or else timetabled: the
   // departure, or the arrival at the last stop.
@@ -289,7 +290,7 @@ export const tripAnswer = (
     const called = ref === undefined ? undefined : yield* ask(`trip:${guess.key}`, detail({ ref }))
     const answer = called && tripFromDetail(timetable, snapshot, guess, called, now)
     if (!answer)
-      return tripDetailOf(timetable, snapshot, guess, tripsByKey(snapshot).get(guess.key))
+      return tripDetailOf(timetable, snapshot, guess, tripsByKey(snapshot).get(guess.key), now)
     // Only a journey with a number can be told apart from the rest of its day.
     const journey = ref === undefined ? undefined : readRef(ref)?.journey
     if (answer.key !== guess.key && journey !== undefined && !journey.startsWith('@')) {

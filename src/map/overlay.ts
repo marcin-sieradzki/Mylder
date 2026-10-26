@@ -1,9 +1,9 @@
 // The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
 // the live snapshot's vehicles, less the modes the viewer's filters hide, where the motion loop
 // moves them each frame, with their glyphs made again when a snapshot lands, a data state turns
-// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover or
-// a tap picks a dot for its card (picking.ts), and a tap that finds no dot opens the stop under
-// it, if any. It polls the snapshot while the map is open. The number of vehicles drawn is on the
+// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover
+// picks a dot for its card (picking.ts), a tap on one opens its detail, and a tap that finds no
+// dot opens the stop under it, if any. It polls the snapshot while the map is open. The number of vehicles drawn is on the
 // map's container as `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
@@ -60,6 +60,9 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const root = document.documentElement
   const canvas = map.getCanvas()
   const picking = vehiclePicking(container, undefined, {
+    onTap(key) {
+      openPanel({ kind: 'trip', id: key })
+    },
     onPointer(onDot, x, y) {
       canvas.style.cursor = onDot || stopAt(map, x, y) !== undefined ? 'pointer' : ''
     },

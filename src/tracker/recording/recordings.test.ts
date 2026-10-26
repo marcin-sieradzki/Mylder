@@ -36,7 +36,7 @@ const callWith = (client: Http.HttpClient.HttpClient, service: string) =>
 
 describe('a frozen recording', () => {
   it.effect.each(RECORDINGS.map((plan) => [plan.name, plan] as const))(
-    'replays %s through the tracker into the snapshots and stop answers it was frozen with',
+    'replays %s through the tracker into the snapshots and route answers it was frozen with',
     ([, plan]) =>
       Effect.gen(function* () {
         const dir = recordingDir(plan.name)
@@ -48,7 +48,9 @@ describe('a frozen recording', () => {
         expect(JSON.parse(JSON.stringify(replayed))).toEqual(saved)
         const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
         const answers = savedAnswers(plan, recorded, replayed)
-        expect(answers.size).toBe(plan.answers?.stops.length ?? 0)
+        expect(answers.size).toBe(
+          (plan.answers?.stops.length ?? 0) + (plan.answers?.trips?.length ?? 0),
+        )
         for (const [file, answer] of answers) {
           const kept = yield* Effect.promise(() => readJson(join(dir, file)))
           expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)

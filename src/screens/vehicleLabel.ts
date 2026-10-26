@@ -10,7 +10,7 @@ import type { SnapshotTrip } from '../tracker/index.ts'
 type Words = ClientDictionary['vehicle']
 
 /** Fills each `{name}` in `template` with its value. */
-const fill = (template: string, values: Record<string, string | number>) =>
+export const fill = (template: string, values: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (whole, name: string) => String(values[name] ?? whole))
 
 /** How long ago `moment` was at `now`: whole seconds under a minute, else whole minutes. */

@@ -154,7 +154,7 @@ describe("the map's keys", () => {
   it('close the card with Esc', async () => {
     const user = userEvent.setup()
     open()
-    act(() => pickedVehicle.pick({ key: 'any', point: [0, 0], pinned: true }))
+    act(() => pickedVehicle.pick({ key: 'any', point: [0, 0] }))
     await user.keyboard('{Escape}')
     expect(pickedVehicle.get()).toBeUndefined()
   })

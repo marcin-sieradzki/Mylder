@@ -63,10 +63,11 @@ const message = (change: Partial<Message>): Message => ({
 })
 
 describe('a trip’s answer from its detail', () => {
-  it('marks every call of a cancelled trip, and the trip', () => {
+  it('marks a cancelled trip, keeping its calls with no times expected', () => {
     const answer = fromDetail({ Stops: { Stop: stops() }, cancelled: true })!
     expect(answer.cancelled).toBe(true)
-    expect(answer.calls.every((call) => call.cancelled === true)).toBe(true)
+    expect(answer.calls).toHaveLength(trip.calls.length)
+    expect(answer.calls.some((call) => call.expectedDeparture !== undefined)).toBe(false)
     expect(answer.nextCallDelay).toBeUndefined()
   })
 
