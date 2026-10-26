@@ -2,8 +2,8 @@ import '@mylder/perron/tokens.css'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { pointAt } from '../domain/trip-motion.ts'
-import { readNetwork } from '../timetable/network.ts'
+import { measurePath, pointAt } from '../domain/trip-motion.ts'
+import { readNetwork, type Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { vehicleLoop, type VehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
@@ -115,6 +115,63 @@ describe('the vehicles between polls', () => {
     expect(offA(withoutBuses, 13000)).toBeLessThan(1)
     wait(5000)
     expect(offA(withoutBuses, 13150)).toBeLessThan(1)
+  })
+
+  it('keeps each stilled dot where it stands when a mode filter changes which trips are drawn', () => {
+    vi.setSystemTime(s(10))
+    start()
+    loop!.show(vehiclesFrom(minute6), minute6, network)
+    pause.set(true)
+    wait(20_000)
+    const paint = readPaint(document.documentElement, vehiclePaint(network))
+    const withoutBuses = vehiclesOf(minute6, network, paint, undefined, {
+      hidden: new Set(['bus']),
+    })
+    loop!.show(withoutBuses, minute6, network)
+    // Paused at 10 s, 300 m on from fetch: still there at 30 s.
+    expect(offA(withoutBuses, 12850)).toBeLessThan(1)
+  })
+
+  it('moves every other dot when one trip has no path to move along', () => {
+    vi.setSystemTime(s(10))
+    start()
+    const first = minute6.trips[0].pattern
+    const broken: Network = {
+      ...network,
+      pathOf: (pattern) => (pattern === first ? measurePath([]) : network.pathOf(pattern)),
+    }
+    const vehicles = vehiclesFrom(minute6)
+    loop!.show(vehicles, minute6, broken)
+    wait(1000)
+    expect(offA(vehicles, 12880)).toBeLessThan(1)
+  })
+
+  it('leaves a trip that cannot be placed where the snapshot put it, and moves every other', () => {
+    vi.setSystemTime(s(10))
+    start()
+    const bad = minute6.trips.find(
+      (trip) => trip.pattern !== A_PATTERN && trip.progress > 0 && !trip.waiting,
+    )!
+    // A path that claims to run on past its only point, so no point along it can be found.
+    const path = network.pathOf(bad.pattern)
+    const broken: Network = {
+      ...network,
+      pathOf: (pattern) =>
+        pattern === bad.pattern
+          ? { ...path, points: path.points.slice(0, 1), distances: [0] }
+          : network.pathOf(pattern),
+    }
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const vehicles = vehiclesFrom(minute6)
+    const i = vehicles.keys.indexOf(bad.key)
+    const where = [...vehicles.positions.subarray(i * 2, i * 2 + 2)]
+    loop!.show(vehicles, minute6, broken)
+    wait(1000)
+    expect(offA(vehicles, 12880)).toBeLessThan(1)
+    expect([...vehicles.positions.subarray(i * 2, i * 2 + 2)]).toEqual(where)
+    // Two 5C trips run on the pattern: each is said once, not on every frame.
+    expect(errors).toHaveBeenCalledTimes(2)
+    errors.mockRestore()
   })
 
   it('keeps the dots where the snapshot puts them until its timetable has loaded', () => {

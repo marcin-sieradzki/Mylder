@@ -37,7 +37,12 @@ export function viewOf(search: string): MapView {
   const query = new URLSearchParams(search)
   const place = (query.get(MAP) ?? '').split('/').map((part) => (part ? Number(part) : NaN))
   const [zoom, lat, lon] = place
-  const placed = place.length === 3 && place.every(Number.isFinite)
+  // MapLibre refuses a latitude past a pole and won't start; a place off the map is no place.
+  const placed =
+    place.length === 3 &&
+    within(zoom, 0, MAX_ZOOM) &&
+    within(lat, -90, 90) &&
+    within(lon, -180, 180)
   const hidden = new Set(
     (query.get(HIDE) ?? '').split(',').filter((mode): mode is Mode => isMode(mode)),
   )
@@ -48,6 +53,12 @@ export function viewOf(search: string): MapView {
     ...(panel ? { panel } : {}),
   }
 }
+
+/** The closest zoom MapLibre draws. */
+const MAX_ZOOM = 24
+
+/** Whether `value` is a number from `low` to `high`; NaN is not. */
+const within = (value: number, low: number, high: number) => value >= low && value <= high
 
 const isMode = (value: string): value is Mode => (MODES as readonly string[]).includes(value)
 
@@ -82,9 +93,15 @@ export function addressView(): ViewStore {
   const notify = () => {
     for (const listener of listeners) listener()
   }
+  // The filters stay the same set while the map moves, so what follows them sees they didn't
+  // change.
   const get = (): MapView => {
     const search = window.location.search
-    if (read?.search !== search) read = { search, view: viewOf(search) }
+    if (read?.search === search) return read.view
+    const view = viewOf(search)
+    const was = read?.view.hidden
+    const same = was?.size === view.hidden.size && [...view.hidden].every((mode) => was.has(mode))
+    read = { search, view: same ? { ...view, hidden: was } : view }
     return read.view
   }
   return {
@@ -111,7 +128,14 @@ export function addressView(): ViewStore {
 /** The page's one view. */
 export const mapView = addressView()
 
-/** The map's view, for a component; the prerendered page shows the default view. */
-export function useMapView(store: ViewStore = mapView): MapView {
-  return useSyncExternalStore(store.subscribe, store.get, () => NOTHING)
+/**
+ * The modes the filters hide, for a component: it renders again when a filter changes, not when
+ * the map moves. The prerendered page hides none.
+ */
+export function useHiddenModes(store: ViewStore = mapView): ReadonlySet<Mode> {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().hidden,
+    () => NOTHING.hidden,
+  )
 }

@@ -5,6 +5,7 @@ import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { usePageNotices, type PageNotice } from '../map/notices'
+import { clockTime } from '../timetable/time'
 import styles from './PageNotices.module.css'
 
 const LOCALES: Record<Lang, string> = { en: 'en-GB', da: 'da-DK' }
@@ -43,25 +44,6 @@ function dayAndMonth(date: string, lang: Lang): string {
   return format.format(Date.parse(`${date}T00:00:00Z`))
 }
 
-const clocks = new Map<string, Intl.DateTimeFormat>()
-
-/** A moment as the zone's 24-hour clock reads it: `08:16`, or with seconds `08:14:05`. */
-function clockTime(moment: number, timezone: string, seconds = false): string {
-  const key = `${timezone} ${seconds}`
-  let clock = clocks.get(key)
-  if (!clock) {
-    clock = new Intl.DateTimeFormat('en-GB', {
-      timeZone: timezone,
-      hourCycle: 'h23',
-      hour: '2-digit',
-      minute: '2-digit',
-      ...(seconds ? { second: '2-digit' } : {}),
-    })
-    clocks.set(key, clock)
-  }
-  return clock.format(moment)
-}
-
 /** One notice's sentences. */
 function wordsOf(
   notice: PageNotice,
@@ -76,7 +58,7 @@ function wordsOf(
         ? words.disconnectedNoData.replace('{since}', since)
         : words.disconnected
             .replace('{since}', since)
-            .replace('{data}', clockTime(notice.lastData, timezone, true))
+            .replace('{data}', clockTime(notice.lastData, timezone, { seconds: true }))
     }
     case 'paused':
       if (notice.reason === 'no-answer') {

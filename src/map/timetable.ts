@@ -22,10 +22,19 @@ const fetchFromServer: FetchJson = async (path) => {
   return response.json()
 }
 
-/** A loader that keeps every version it has loaded; a failed load is tried again when asked. */
+/** How long a failed load is answered with its failure before it is tried again. */
+export const RETRY_AFTER = 30_000
+
+/**
+ * A loader that keeps every version it has loaded. A failed load is remembered for a while, so a
+ * map redrawn each second doesn't ask again each time, and then tried again when asked.
+ */
 export function timetableLoader(fetchJson: FetchJson = fetchFromServer): TimetableLoader {
   const versions = new Map<string, Promise<Network>>()
   let current: Promise<Network> | undefined
+  /** Calls `forget` a while after `load` fails. */
+  const onFailure = (load: Promise<Network>, forget: () => void) =>
+    load.catch(() => setTimeout(forget, RETRY_AFTER))
 
   const load = (version: string, manifest?: unknown): Promise<Network> => {
     let network = versions.get(version)
@@ -41,17 +50,22 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
         readNetwork({ manifest: manifestFile, stops, patterns, paths }),
       )
       versions.set(version, network)
-      network.catch(() => versions.delete(version))
+      onFailure(network, () => versions.delete(version))
     }
     return network
   }
 
   return {
     current() {
-      current ??= fetchJson('/api/timetable').then((manifest) =>
-        load((manifest as { version: string }).version, manifest),
-      )
-      current.catch(() => (current = undefined))
+      if (!current) {
+        const loading = fetchJson('/api/timetable').then((manifest) =>
+          load((manifest as { version: string }).version, manifest),
+        )
+        current = loading
+        onFailure(loading, () => {
+          if (current === loading) current = undefined
+        })
+      }
       return current
     },
     version: (version) => load(version),
@@ -60,6 +74,13 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
 
 /** The page's one loader, shared by everything on the map. */
 export const timetables = timetableLoader()
+
+/** Copenhagen's zone, every timetable's, until the one a snapshot names has loaded. */
+const COPENHAGEN = 'Europe/Copenhagen'
+
+/** The zone whose clock the timetable's times read on, for a network that may not have loaded. */
+export const timezoneOf = (network: Network | undefined): string =>
+  network?.manifest.timezone ?? COPENHAGEN
 
 /**
  * A version's network for a component, such as the one the live snapshot names: none until it

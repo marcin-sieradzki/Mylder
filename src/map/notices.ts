@@ -8,11 +8,12 @@ import { useSyncExternalStore } from 'react'
 import { liveLimit } from '../domain/data-state.ts'
 import { RUNNING_OUT_DAYS, serviceDaysLeft } from '../timetable/dates.ts'
 import type { IsoDate, Manifest } from '../timetable/format.ts'
+import type { Network } from '../timetable/network.ts'
 import { calendarDay } from '../timetable/time.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveSnapshot, type LiveSnapshot, type SnapshotStore } from './live.ts'
 import { serverNow } from './states.ts'
-import { timetables, type TimetableLoader } from './timetable.ts'
+import { timetables, timezoneOf, type TimetableLoader } from './timetable.ts'
 
 /** One notice, top to bottom in the order the page shows them. */
 export type PageNotice =
@@ -39,10 +40,7 @@ export interface PageNotices {
   readonly list: readonly PageNotice[]
 }
 
-/** Copenhagen's zone, every timetable's, until the snapshot's own timetable has loaded. */
-const COPENHAGEN = 'Europe/Copenhagen'
-
-const NONE: PageNotices = { timezone: COPENHAGEN, list: [] }
+const NONE: PageNotices = { timezone: timezoneOf(undefined), list: [] }
 
 /** The source banner, whenever the data isn't Rejseplanen's own. */
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
@@ -94,20 +92,20 @@ function timetableNotice({ window, timezone }: Manifest, now: number) {
 }
 
 /**
- * The notices `live` gives at `now`, on the server's clock, with the manifest of the snapshot's
- * timetable once it has loaded.
+ * The notices `live` gives at `now`, on the server's clock, with the snapshot's timetable once it
+ * has loaded.
  */
-export function noticesAt(live: LiveSnapshot, now: number, manifest?: Manifest): PageNotices {
+export function noticesAt(live: LiveSnapshot, now: number, network?: Network): PageNotices {
   const { snapshot } = live
   const list: PageNotice[] = [
     disconnectedNotice(live),
     snapshot && pausedNotice(snapshot, now),
     snapshot && budgetNotice(snapshot),
-    manifest && timetableNotice(manifest, now),
+    network && timetableNotice(network.manifest, now),
     snapshot && sourceNotice(snapshot),
   ].filter((notice) => notice !== undefined)
-  const timezone = manifest?.timezone ?? COPENHAGEN
-  return list.length === 0 && timezone === COPENHAGEN ? NONE : { timezone, list }
+  const timezone = timezoneOf(network)
+  return list.length === 0 && timezone === NONE.timezone ? NONE : { timezone, list }
 }
 
 const same = (a: PageNotices, b: PageNotices) =>
@@ -126,9 +124,9 @@ export function pageNoticesStore(
   loader: TimetableLoader = timetables,
 ): PageNoticesStore {
   let notices = NONE
-  /** The latest snapshot's timetable version, and its manifest once loaded. */
+  /** The latest snapshot's timetable version, and its network once loaded. */
   let version: string | undefined
-  let manifest: Manifest | undefined
+  let network: Network | undefined
   const listeners = new Set<() => void>()
   let timer: ReturnType<typeof setTimeout> | undefined
   let stopListening: (() => void) | undefined
@@ -138,9 +136,9 @@ export function pageNoticesStore(
     if (wanted === undefined || wanted === version) return
     version = wanted
     loader.version(wanted).then(
-      (network) => {
+      (loaded) => {
         if (version !== wanted) return
-        manifest = network.manifest
+        network = loaded
         check()
       },
       () => {
@@ -152,7 +150,7 @@ export function pageNoticesStore(
 
   const get = () => {
     const now = live.get()
-    const fresh = noticesAt(now, serverNow(now), manifest)
+    const fresh = noticesAt(now, serverNow(now), network)
     if (!same(fresh, notices)) notices = fresh
     return notices
   }

@@ -47,15 +47,25 @@ export function dataStatesStore(live: SnapshotStore = liveSnapshot): DataStatesS
   let timer: ReturnType<typeof setTimeout> | undefined
   let stopListening: (() => void) | undefined
 
-  const get = () => {
+  const notify = () => {
+    for (const listener of listeners) listener()
+  }
+  /** Takes the states now; whether one has changed. */
+  const refresh = () => {
     const now = live.get()
     const fresh = now.snapshot ? statesAt(now.snapshot, serverNow(now)) : NONE
-    if (!same(fresh, states)) states = fresh
-    return states
+    if (same(fresh, states)) return false
+    states = fresh
+    return true
   }
+  // Only a tick or a new snapshot moves the states on while anything watches, so a read, such as
+  // a card's render each frame, is cheap and gives what the subscribers last heard.
   const check = () => {
-    const before = states
-    if (get() !== before) for (const listener of listeners) listener()
+    if (refresh()) notify()
+  }
+  const get = () => {
+    if (!stopListening) refresh()
+    return states
   }
   // On each whole second of the server's clock, where the snapshot's times fall.
   const tick = () => {
@@ -84,6 +94,21 @@ export function dataStatesStore(live: SnapshotStore = liveSnapshot): DataStatesS
 
 /** The page's one store of states, from the page's live snapshot. */
 export const dataStates = dataStatesStore()
+
+/**
+ * One trip's data state now, for a component such as its card: it renders again only when that
+ * one changes. None for a trip the snapshot doesn't carry.
+ */
+export function useDataState(
+  key: string,
+  store: DataStatesStore = dataStates,
+): DataState | undefined {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().get(key),
+    () => undefined,
+  )
+}
 
 /** Each drawn trip's data state now, for a component: it renders again when one changes. */
 export function useDataStates(store: DataStatesStore = dataStates): DataStates {

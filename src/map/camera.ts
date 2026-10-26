@@ -122,7 +122,18 @@ export function cameraStore(): Camera {
 /** The page's one camera, which the canvas attaches its map to. */
 export const mapCamera = cameraStore()
 
-/** The camera's view, for the controls and the scale bar. */
-export function useCameraView(camera: Camera = mapCamera): CameraView | undefined {
-  return useSyncExternalStore(camera.subscribe, camera.get, () => undefined)
+/**
+ * What `read` takes from the camera's view, for the controls or the scale bar: a component renders
+ * again only when its own reading changes, so the zoom buttons sit still while the map pans and
+ * the scale moves with the latitude.
+ */
+export function useCameraView<T>(
+  read: (view: CameraView | undefined) => T,
+  camera: Camera = mapCamera,
+): T {
+  return useSyncExternalStore(
+    camera.subscribe,
+    () => read(camera.get()),
+    () => read(undefined),
+  )
 }

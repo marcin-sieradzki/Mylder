@@ -86,6 +86,25 @@ describe("each vehicle's data state, by the clock", () => {
     expect(screen.getByText('A: ageing')).toBeInTheDocument()
   })
 
+  it('gives every read between ticks what its subscribers last heard, however often it is read', () => {
+    vi.setSystemTime(serverAt(239.5) - SLOW)
+    const live = snapshotStore()
+    live.update({ snapshot: minute6, clockOffset: SLOW })
+    const store = dataStatesStore(live)
+    const changes = vi.fn<() => void>()
+    store.subscribe(changes)
+    changes.mockClear()
+    const before = store.get()
+    // Read at 240 s, before the second's tick, as a card rendering each frame reads: A turns
+    // Ageing on the tick, for the reads and the subscribers at once.
+    vi.setSystemTime(serverAt(240) - SLOW)
+    expect(store.get()).toBe(before)
+    expect(store.get().get(A_LIVE)).toBe('live')
+    vi.advanceTimersByTime(500)
+    expect(store.get().get(A_LIVE)).toBe('ageing')
+    expect(changes).toHaveBeenCalledTimes(1)
+  })
+
   it('starts again from each new snapshot', () => {
     const live = openAt(250)
     expect(screen.getByText('A: ageing')).toBeInTheDocument()

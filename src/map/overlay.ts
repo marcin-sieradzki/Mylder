@@ -56,14 +56,17 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   })
 
   // The snapshot's own timetable gives each line its colour; one that won't load leaves the
-  // vehicles in their modes' colours rather than off the map.
+  // vehicles in their modes' colours rather than off the map. The loader answers with the same
+  // failure for a while, and it is logged once.
+  let reported: unknown
   const draw = async () => {
     const { snapshot } = liveSnapshot.get()
     if (!snapshot) return
     const network: Network | undefined = await timetables
       .version(snapshot.timetableVersion)
       .catch((error: unknown) => {
-        console.error('The timetable could not load', error)
+        if (error !== reported) console.error('The timetable could not load', error)
+        reported = error
         return undefined
       })
     // A newer snapshot may have landed meanwhile: it draws itself.
@@ -76,20 +79,31 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     )
   }
 
+  // A snapshot landing turns its trips' states too: everything asked for at once draws once.
+  let asked = false
+  const redraw = () => {
+    if (asked) return
+    asked = true
+    queueMicrotask(() => {
+      asked = false
+      void draw()
+    })
+  }
+
   const stopListening = liveSnapshot.subscribe(() => {
     const { snapshot } = liveSnapshot.get()
     if (snapshot === drawnFrom) return
     drawnFrom = snapshot
-    void draw()
+    redraw()
   })
-  const stopAgeing = dataStates.subscribe(() => void draw())
+  const stopAgeing = dataStates.subscribe(redraw)
   // A mode filter turned on or off draws the same snapshot again without that mode.
   let filteredBy = mapView.get().hidden
   const stopFiltering = mapView.subscribe(() => {
     const { hidden } = mapView.get()
     if (hidden === filteredBy) return
     filteredBy = hidden
-    void draw()
+    redraw()
   })
   const stopPolling = pollSnapshot()
   drawnFrom = liveSnapshot.get().snapshot
@@ -105,6 +119,12 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   // The picked dot's card follows it as the map pans, even while the dots stand still.
   const onMove = () => vehicles && picking.follow(vehicles, project)
   map.on('move', onMove)
+  // A resized window moves the canvas on the page, which the card's point counts from.
+  const onResize = () => {
+    picking.resized()
+    onMove()
+  }
+  map.on('resize', onResize)
 
   return {
     repaint: () => void draw(),
@@ -117,6 +137,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       loop.stop()
       map.off('zoom', onZoom)
       map.off('move', onMove)
+      map.off('resize', onResize)
       map.removeControl(overlay)
       delete container.dataset.vehicles
     },

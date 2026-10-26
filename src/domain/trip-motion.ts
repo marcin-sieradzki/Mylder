@@ -59,7 +59,7 @@ export const WAITING_FROM = 5 * 60_000
 const EARTH_RADIUS = 6_371_000
 
 /** The distance between two nearby points, in metres. Exact enough across a city. */
-function distance([lat1, lon1]: LatLon, [lat2, lon2]: LatLon): number {
+export function distance([lat1, lon1]: LatLon, [lat2, lon2]: LatLon): number {
   const rad = Math.PI / 180
   const x = (lon2 - lon1) * rad * Math.cos(((lat1 + lat2) / 2) * rad)
   const y = (lat2 - lat1) * rad

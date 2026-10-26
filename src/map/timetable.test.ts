@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { timetableLoader } from './timetable.ts'
 
 // The browser's side of the timetable routes, answered from the weekday recording's files as the
@@ -25,6 +25,10 @@ function server() {
   }
   return { requests, fetchJson }
 }
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('the timetable loader', () => {
   it("starts from the current manifest and loads that version's network", async () => {
@@ -58,11 +62,31 @@ describe('the timetable loader', () => {
     expect(requests).toContain(`/api/timetable/${VERSION}/manifest`)
   })
 
-  it('tries a failed version again the next time it is asked for', async () => {
+  it('tries a failed version again only once a while has passed', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     const { fetchJson, requests } = server()
     const loader = timetableLoader(fetchJson)
+    const stops = () => requests.filter((path) => path.endsWith('/stops'))
     await expect(loader.version('2026-10-25-6495dcc6')).rejects.toThrow('404')
     await expect(loader.version('2026-10-25-6495dcc6')).rejects.toThrow('404')
-    expect(requests.filter((path) => path.endsWith('/stops'))).toHaveLength(2)
+    expect(stops()).toHaveLength(1)
+    vi.advanceTimersByTime(30_000)
+    await expect(loader.version('2026-10-25-6495dcc6')).rejects.toThrow('404')
+    expect(stops()).toHaveLength(2)
+  })
+
+  it('asks for the current manifest again a while after it failed', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { fetchJson, requests } = server()
+    let down = true
+    const loader = timetableLoader((path) =>
+      down ? Promise.reject(new Error(`503 for ${path}`)) : fetchJson(path),
+    )
+    await expect(loader.current()).rejects.toThrow('503')
+    down = false
+    await expect(loader.current()).rejects.toThrow('503')
+    vi.advanceTimersByTime(30_000)
+    expect((await loader.current()).manifest.version).toBe(VERSION)
+    expect(requests).toContain('/api/timetable')
   })
 })

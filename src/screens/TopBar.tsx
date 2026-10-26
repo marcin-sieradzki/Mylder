@@ -3,12 +3,13 @@
 import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
 import { useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { useLiveSnapshot } from '../map/live'
+import { useSnapshot } from '../map/live'
 import { isPaused, usePageNotices } from '../map/notices'
-import { useNetwork } from '../map/timetable'
-import { mapView, useMapView } from '../map/view'
+import { timezoneOf, useNetwork } from '../map/timetable'
+import { mapView, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
 import type { Network } from '../timetable/network'
+import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { LanguageSwitch } from './LanguageSwitch'
 import styles from './TopBar.module.css'
@@ -20,24 +21,6 @@ import styles from './TopBar.module.css'
  */
 const answeredAt = (snapshot: Snapshot): number | undefined =>
   snapshot.api.status === 'ok' ? snapshot.fetched : undefined
-
-const clocks = new Map<string, Intl.DateTimeFormat>()
-
-/** A moment as the zone's 24-hour clock reads it, with seconds: `08:14:05`. */
-function clockTime(moment: number, timezone: string): string {
-  let clock = clocks.get(timezone)
-  if (!clock) {
-    clock = new Intl.DateTimeFormat('en-GB', {
-      timeZone: timezone,
-      hourCycle: 'h23',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-    clocks.set(timezone, clock)
-  }
-  return clock.format(moment)
-}
 
 /** Perron's `info` icon, "About and help", drawn on the top bar's 18 px grid. */
 const INFO_ICON = (
@@ -56,9 +39,6 @@ const INFO_ICON = (
     <circle cx="9" cy="5.6" r=".4" fill="currentColor" />
   </svg>
 )
-
-/** Copenhagen's zone, every timetable's, until the snapshot's own timetable has loaded. */
-const COPENHAGEN = 'Europe/Copenhagen'
 
 /**
  * The latest answer time this page has seen. It never counts up: a snapshot without an answer of
@@ -94,14 +74,14 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
-  const { snapshot } = useLiveSnapshot()
+  const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
-  const { hidden } = useMapView()
+  const hidden = useHiddenModes()
   const updatedAt = useUpdatedAt(snapshot)
   // While Paused the line keeps the last answer's time and says so.
   const paused = isPaused(usePageNotices())
   const underway = underwayByMode(snapshot)
-  const timezone = network?.manifest.timezone ?? COPENHAGEN
+  const timezone = timezoneOf(network)
 
   const show = (mode: Mode, shown: boolean) => {
     const next = new Set(hidden)
@@ -118,7 +98,7 @@ export function TopBar() {
         <Text variant="data-sm" emphasis="secondary" className={styles.updated}>
           {dictionary.topBar[paused ? 'updatedPaused' : 'updated'].replace(
             '{time}',
-            updatedAt === undefined ? '—' : clockTime(updatedAt, timezone),
+            updatedAt === undefined ? '—' : clockTime(updatedAt, timezone, { seconds: true }),
           )}
         </Text>
       </div>

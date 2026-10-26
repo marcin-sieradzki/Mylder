@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { timetableFileResponse, timetableManifestResponse } from './routes.ts'
 import { readSource } from './source.ts'
 
@@ -6,6 +6,10 @@ import { readSource } from './source.ts'
 // recording's, as `MYLDER_SOURCE=recording:weekday` sets it.
 const recording = readSource('recording:weekday')
 const VERSION = '2026-06-02-4f2b8119'
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 describe('the timetable routes', () => {
   it('answer the current manifest, kept only briefly since a deployment can change it', async () => {
@@ -42,6 +46,12 @@ describe('the timetable routes', () => {
     for (const file of ['trips', 'day-profiles', 'dayProfiles', '../manifest.json']) {
       expect((await timetableFileResponse(VERSION, file, recording)).status).toBe(404)
     }
+  })
+
+  it('answer 503, as the other routes do, when the environment names no source', async () => {
+    vi.stubEnv('MYLDER_SOURCE', 'nowhere')
+    expect((await timetableManifestResponse()).status).toBe(503)
+    expect((await timetableFileResponse(VERSION, 'stops')).status).toBe(503)
   })
 
   it('answer 404 for a version the tracker does not hold', async () => {

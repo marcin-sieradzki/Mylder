@@ -4,6 +4,7 @@
 // that carried the trip, and a Waiting trip gives its departure, never that the vehicle is there.
 import type { DataState } from '../domain/data-state.ts'
 import type { ClientDictionary } from '../i18n/dictionary.ts'
+import { clockTime } from '../timetable/time.ts'
 import type { SnapshotTrip } from '../tracker/index.ts'
 
 type Words = ClientDictionary['vehicle']
@@ -11,17 +12,6 @@ type Words = ClientDictionary['vehicle']
 /** Fills each `{name}` in `template` with its value. */
 const fill = (template: string, values: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (whole, name: string) => String(values[name] ?? whole))
-
-// Mylder's times are Copenhagen's, written 10:42 in both languages, as the boards write them.
-const clock = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Europe/Copenhagen',
-  hourCycle: 'h23',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
-/** A moment as Copenhagen's clock reads it, such as "10:42". */
-export const clockTime = (moment: number): string => clock.format(moment)
 
 /** How long ago `moment` was at `now`: whole seconds under a minute, else whole minutes. */
 function ageOf(moment: number, now: number, words: Words): string {
@@ -41,16 +31,18 @@ export const titleOf = (trip: SnapshotTrip, dictionary: ClientDictionary): strin
 
 /**
  * The state's label for `trip` in `state` at `now`, such as "Reported 20 s ago", or none where
- * it would only repeat the state's word, as Timetable only's does.
+ * it would only repeat the state's word, as Timetable only's does. Its times read on the clock of
+ * `timezone`, the timetable's.
  */
 export function stateLabelOf(
   trip: SnapshotTrip,
   state: DataState,
   now: number,
+  timezone: string,
   words: Words,
 ): string | undefined {
   const departs = trip.waiting ? trip.next[0]?.time : undefined
-  if (departs !== undefined) return fill(words.departs, { time: clockTime(departs) })
+  if (departs !== undefined) return fill(words.departs, { time: clockTime(departs, timezone) })
   switch (state) {
     case 'live':
       return trip.reported === undefined
@@ -64,7 +56,9 @@ export function stateLabelOf(
       return words.estimated
     case 'no-signal': {
       const since = trip.seen ?? trip.reported ?? trip.updated
-      return since === undefined ? undefined : fill(words.noSignalSince, { time: clockTime(since) })
+      return since === undefined
+        ? undefined
+        : fill(words.noSignalSince, { time: clockTime(since, timezone) })
     }
     case 'timetable-only':
       return undefined
