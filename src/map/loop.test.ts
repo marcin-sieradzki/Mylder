@@ -2,8 +2,8 @@ import '@mylder/perron/tokens.css'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { pointAt } from '../domain/trip-motion.ts'
-import { readNetwork } from '../timetable/network.ts'
+import { measurePath, pointAt } from '../domain/trip-motion.ts'
+import { readNetwork, type Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { vehicleLoop, type VehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
@@ -130,6 +130,20 @@ describe('the vehicles between polls', () => {
     loop!.show(withoutBuses, minute6, network)
     // Paused at 10 s, 300 m on from fetch: still there at 30 s.
     expect(offA(withoutBuses, 12850)).toBeLessThan(1)
+  })
+
+  it('moves every other dot when one trip has no path to move along', () => {
+    vi.setSystemTime(s(10))
+    start()
+    const first = minute6.trips[0].pattern
+    const broken: Network = {
+      ...network,
+      pathOf: (pattern) => (pattern === first ? measurePath([]) : network.pathOf(pattern)),
+    }
+    const vehicles = vehiclesFrom(minute6)
+    loop!.show(vehicles, minute6, broken)
+    wait(1000)
+    expect(offA(vehicles, 12880)).toBeLessThan(1)
   })
 
   it('keeps the dots where the snapshot puts them until its timetable has loaded', () => {

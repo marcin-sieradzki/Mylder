@@ -99,9 +99,10 @@ export function vehicleLoop({
     write()
   }
 
+  // The next frame is asked for first, so a frame that fails leaves the loop running.
   const run = () => {
-    place(now())
     frame = requestAnimationFrame(run)
+    place(now())
   }
   const halt = () => {
     if (frame !== undefined) cancelAnimationFrame(frame)
@@ -126,6 +127,7 @@ export function vehicleLoop({
     return vehicles.trips.map((trip) => {
       if (!network?.patterns.patterns[trip.pattern]) return undefined
       const path = network.pathOf(trip.pattern)
+      if (path.points.length === 0) return undefined
       const was = before.get(trip.key)
       const kept = was?.path === path ? was : undefined
       if (kept && stilled && again) return kept
