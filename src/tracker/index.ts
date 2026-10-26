@@ -17,6 +17,7 @@ export type {
   StopInterval,
   TripCall,
   TripDetail,
+  TripMessage,
 } from './answers.ts'
 
 /** The whole-city snapshot: the stored one while it is fresh, else a new run's. */

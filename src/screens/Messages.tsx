@@ -4,13 +4,16 @@ import { Text } from '@mylder/perron'
 import { DisruptionCard, type DisruptionCardProps } from '@mylder/perron/patterns'
 import type { ComponentProps } from 'react'
 import { disruptionKind, disruptionPhase, type DisruptionKind } from '../domain/disruption'
-import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale, type Lang } from '../i18n/lang'
 import { clockTime } from '../timetable/time'
 import type { Disruption } from '../tracker/index'
-import styles from './StopPanel.module.css'
+import styles from './Messages.module.css'
 
-type Words = ClientDictionary['stop']
+/** The section's words: its name, and Later's heading. */
+interface Words {
+  readonly messages: string
+  readonly later: string
+}
 
 /** The card's severity for each kind a disruption card names. */
 const SEVERITY: Readonly<Record<DisruptionKind, DisruptionCardProps['severity']>> = {
@@ -59,21 +62,24 @@ function stopsOf({ message }: Disruption): DisruptionCardProps['stops'] {
   return message.affectedStops?.StopLocation.map((stop) => stop.name)
 }
 
-interface StopMessagesProps {
+interface MessagesProps {
   messages: readonly Disruption[]
   now: number
   lang: Lang
   timezone: string
   words: Words
+  /** The caption under the cards that says where they came from, and when, if it says. */
+  source: string
 }
 
 /**
- * The stop's messages (docs/screens.md, "Stop departures", "Messages"; "Disruptions", "A card"):
- * those active now, then those starting within the week under Later, each a card of its kind,
- * with its heading and lead as Rejseplanen wrote them, in Danish, its stops and its time. Kind and
- * phase come from the domain's rule at `now`, so a card moves from Later as its start passes.
+ * A panel's messages (docs/screens.md, "Stop departures" and "Vehicle detail", "Messages";
+ * "Disruptions", "A card"): those active now, then those starting within the week under Later,
+ * each a card of its kind, with its heading and lead as Rejseplanen wrote them, in Danish, its
+ * stops and its time. Kind and phase come from the domain's rule at `now`, so a card moves from
+ * Later as its start passes.
  */
-export function StopMessages({ messages, now, lang, timezone, words }: StopMessagesProps) {
+export function Messages({ messages, now, lang, timezone, words, source }: MessagesProps) {
   const active: Disruption[] = []
   const later: Disruption[] = []
   for (const disruption of messages) {
@@ -116,7 +122,7 @@ export function StopMessages({ messages, now, lang, timezone, words }: StopMessa
         </>
       )}
       <Text variant="caption" emphasis="secondary">
-        {words.messagesSource}
+        {source}
       </Text>
     </section>
   )

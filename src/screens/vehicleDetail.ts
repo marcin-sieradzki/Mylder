@@ -7,7 +7,7 @@ import { tripPhase, type TimedCall } from '../domain/trip-motion.ts'
 import type { ClientDictionary } from '../i18n/dictionary.ts'
 import type { Where } from '../map/where.ts'
 import { clockTime } from '../timetable/time.ts'
-import type { SnapshotTrip, TripDetail } from '../tracker/index.ts'
+import type { SnapshotTrip, TripCall, TripDetail, TripMessage } from '../tracker/index.ts'
 import { fill } from './vehicleLabel.ts'
 
 type Words = ClientDictionary['trip']
@@ -135,21 +135,48 @@ export interface TimelineStop {
 }
 
 /**
+ * A call's name with a note for each of `messages` whose stretch of the trip starts or ends
+ * there, "Sydhavn St. — Langsom kørsel from here", so the list marks the stops a card covers.
+ */
+function notedName(call: TripCall, messages: readonly TripMessage[], words: Words): string {
+  let name = call.name
+  for (const { message, calls } of messages) {
+    if (!calls) continue
+    const note =
+      calls.first === calls.last
+        ? call.index === calls.first && words.rangeAt
+        : (call.index === calls.first && words.rangeFrom) ||
+          (call.index === calls.last && words.rangeTo)
+    if (note) name = fill(note, { stop: name, head: message.head })
+  }
+  return name
+}
+
+/** The messages whose stretch of the trip its stops list marks, and the words it marks them in. */
+export interface TimelineMarks {
+  readonly messages: readonly TripMessage[]
+  readonly words: Words
+}
+
+/**
  * The trip's stops with the times its state allows: none for an interval trip; the timetable's
  * with the delay unknown for No signal; the timetable's alone for Timetable only; else the
  * timetable's with the expected time and the delay where the answer gives one. Each call's time
- * is its departure, the last's its arrival.
+ * is its departure, the last's its arrival. The first and last stop of each message in `marks`
+ * say so after their names.
  */
 export function timelineStops(
   detail: TripDetail,
   state: DataState,
   timezone: string,
+  marks?: TimelineMarks,
 ): TimelineStop[] {
   const interval = runsToInterval(detail)
   const last = detail.calls.length - 1
   return detail.calls.map((call, i) => {
     const cancelled = detail.cancelled === true || call.cancelled === true
-    const base = { name: call.name, ...(cancelled ? { cancelled } : {}) }
+    const name = marks ? notedName(call, marks.messages, marks.words) : call.name
+    const base = { name, ...(cancelled ? { cancelled } : {}) }
     if (interval) return base
     const scheduled = i === last ? call.arrival : call.departure
     const expected = i === last ? call.expectedArrival : call.expectedDeparture

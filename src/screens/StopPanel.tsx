@@ -21,7 +21,7 @@ import type { StopDeparture, StopDepartures, StopInterval } from '../tracker/ind
 import type { PanelFrame } from './DetailPanels'
 import { badgeLine, departureState, departureTimes } from './departureRow'
 import { OpenTrip } from './OpenTrip'
-import { StopMessages } from './StopMessages'
+import { Messages } from './Messages'
 import styles from './StopPanel.module.css'
 import { useServerSecond } from './useServerSecond'
 
@@ -125,12 +125,13 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
   const shown = answer.departures.filter((row) => !hidden.has(row.mode)).slice(0, SHOWN_DEPARTURES)
   return (
     <>
-      <StopMessages
+      <Messages
         messages={answer.messages}
         now={now}
         lang={lang}
         timezone={timezone}
         words={words}
+        source={words.messagesSource}
       />
       {shown.length + intervals.length === 0 ? (
         <Text variant="body-sm" emphasis="secondary">

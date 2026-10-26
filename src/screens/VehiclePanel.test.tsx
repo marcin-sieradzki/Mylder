@@ -8,7 +8,7 @@ import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
 import { liveSnapshot } from '../map/live'
 import { openPanel } from '../map/view'
-import type { Snapshot, SnapshotTrip, TripDetail } from '../tracker/index'
+import type { Snapshot, SnapshotTrip, TripDetail, TripMessage } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
 
@@ -34,6 +34,35 @@ const BUS_ESTIMATED = 'bus.5C.32331e0e20.20260616.0707'
 const M1 = 'metro.M1.7f21f99145.20260616.0707'
 /** Bus 991 to Teglholmen, Timetable only, Waiting at Orientkaj St. from 07:25 to leave at 07:30. */
 const BUS_WAITING = 'bus.991.7ce514fd98.20260616.0730'
+
+/** Line A to Hillerød St. again, the next trip of its pattern, for a corrected join. */
+const A_LATER = 's-tog.A.0bc307e3eb.20260616.0717'
+
+/** The trip's detail called at 07:21:20, twenty seconds after the saved answers' minute. */
+const CALLED = minute2.fetched + 20_000
+
+/**
+ * A's saved answer as one from its detail: Rejseplanen five minutes late at its next call,
+ * København Syd St. (call 7) cancelled, and a message on Sydhavn St. to København H (calls 9 to
+ * 11), running an hour either side of the minute.
+ */
+function fromDetail(): TripDetail {
+  const answer = saved(A_LIVE)
+  const message: TripMessage = {
+    fieldsKind: 'delays',
+    from: minute2.fetched - 3600_000,
+    to: minute2.fetched + 3600_000,
+    message: { id: 'slow', head: 'Langsom kørsel', lead: 'Togene kører langsomt ved Sydhavn.' },
+    calls: { first: 9, last: 11 },
+  }
+  return {
+    ...answer,
+    nextCallDelay: 300,
+    source: { kind: 'rejseplanen', at: CALLED },
+    calls: answer.calls.map((call) => (call.index === 7 ? { ...call, cancelled: true } : call)),
+    messages: [message],
+  }
+}
 
 /** The trip route's answers by key; a trip missing here is a 404. */
 let answers: Map<string, TripDetail>
@@ -241,6 +270,79 @@ describe("a vehicle's detail", () => {
     const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
     fireEvent.click(within(trip).getByRole('button', { name: 'Close' }))
     expect(window.location.search).toBe('')
+  })
+})
+
+describe("a vehicle's detail from its trip's detail", () => {
+  it('gives the delay Rejseplanen has at its next call', async () => {
+    answers.set(A_LIVE, fromDetail())
+    openTrip('en', A_LIVE)
+    const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    expect(fact(trip, 'Delay')).toHaveTextContent('+5 min')
+  })
+
+  it('marks a cancelled call, keeping it in the list', async () => {
+    answers.set(A_LIVE, fromDetail())
+    openTrip('en', A_LIVE)
+    const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    const items = within(within(trip).getByRole('list', { name: 'Stops' })).getAllByRole('listitem')
+    expect(items[7]).toHaveTextContent('København Syd St.')
+    expect(items[7]).toHaveTextContent('Cancelled')
+    expect(items[7]).toHaveAttribute('data-cancelled')
+    expect(items[6]).not.toHaveAttribute('data-cancelled')
+  })
+
+  it('shows its own messages as cards after its stops, each one’s stops marked on the list', async () => {
+    answers.set(A_LIVE, fromDetail())
+    openTrip('en', A_LIVE)
+    const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    const stops = within(trip).getByRole('list', { name: 'Stops' })
+    const items = within(stops).getAllByRole('listitem')
+    expect(items[9]).toHaveTextContent('Sydhavn St. — Langsom kørsel from here')
+    expect(items[11]).toHaveTextContent('København H — Langsom kørsel to here')
+    expect(items[10]).not.toHaveTextContent('Langsom kørsel')
+    const cards = within(trip).getByRole('region', { name: 'Messages' })
+    expect(stops.compareDocumentPosition(cards) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const [card] = within(cards).getAllByRole('listitem')
+    expect(card).toHaveTextContent('Delays')
+    expect(card).toHaveTextContent('Langsom kørsel')
+    expect(card).toHaveTextContent('Togene kører langsomt ved Sydhavn.')
+    expect(cards).toHaveTextContent('From Rejseplanen, in Danish; checked 07:21')
+  })
+
+  it('names the position’s time and the times’ own in its source line', async () => {
+    answers.set(A_LIVE, fromDetail())
+    openTrip('en', A_LIVE, minute2, 60)
+    const trip = await panel(/to Hillerød St\./, 'Reported by the vehicle; seen 07:21:00')
+    expect(trip).toHaveTextContent(
+      'Rejseplanen position · updated 07:21:00 · Rejseplanen times · updated 07:21:20',
+    )
+    expect(trip).not.toHaveTextContent('From the timetable')
+  })
+
+  it('opens the trip its detail corrects the join to', async () => {
+    answers.set(A_LIVE, { ...fromDetail(), key: A_LATER })
+    answers.set(A_LATER, { ...fromDetail(), key: A_LATER })
+    openTrip('en', A_LIVE)
+    await panel(/to Hillerød St\./, 'Langsom kørsel')
+    expect(window.location.search).toBe(`?trip=${A_LATER}`)
+  })
+
+  it('says the same in Danish', async () => {
+    answers.set(A_LIVE, fromDetail())
+    openTrip('da', A_LIVE)
+    const trip = await panel(/mod Hillerød St\./, 'Meldt af køretøjet; set 07:21:00')
+    expect(fact(trip, 'Forsinkelse')).toHaveTextContent('+5 min')
+    const items = within(within(trip).getByRole('list', { name: 'Stop' })).getAllByRole('listitem')
+    expect(items[7]).toHaveTextContent('Aflyst')
+    expect(items[9]).toHaveTextContent('Sydhavn St. — Langsom kørsel herfra')
+    expect(items[11]).toHaveTextContent('København H — Langsom kørsel hertil')
+    const cards = within(trip).getByRole('region', { name: 'Meddelelser' })
+    expect(cards).toHaveTextContent('Fra Rejseplanen; tjekket 07:21')
+    expect(trip).toHaveTextContent(
+      'Rejseplanen-position · opdateret 07:21:00 · Rejseplanen-tider · opdateret 07:21:20',
+    )
+    expect(trip).not.toHaveTextContent('Fra køreplanen')
   })
 })
 

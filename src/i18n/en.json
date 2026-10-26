@@ -65,7 +65,13 @@
     "fromTimetable": "From the timetable",
     "positionSource": "Rejseplanen position",
     "timetableSource": "Timetable",
-    "callSource": "Rejseplanen times"
+    "callSource": "Rejseplanen times",
+    "messages": "Messages",
+    "later": "Later",
+    "messagesChecked": "From Rejseplanen, in Danish; checked {time}",
+    "rangeFrom": "{stop} — {head} from here",
+    "rangeTo": "{stop} — {head} to here",
+    "rangeAt": "{stop} — {head} here"
   },
   "legend": {
     "label": "Data states",

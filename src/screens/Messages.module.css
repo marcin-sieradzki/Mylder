@@ -1,0 +1,20 @@
+/* A panel's messages: the cards in a column, Later's heading over its own, and the caption that
+   says where they came from, set off from what follows. */
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-200);
+  margin-block-end: var(--perron-space-400);
+}
+
+.messages > * {
+  margin: 0;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--perron-space-200);
+  padding: 0;
+  list-style: none;
+}

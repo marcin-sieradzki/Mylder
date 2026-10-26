@@ -7,19 +7,24 @@ import {
   StopTimeline,
   type SourceLineSource,
 } from '@mylder/perron/patterns'
+import { useEffect } from 'react'
 import type { DataState } from '../domain/data-state'
+import { disruptionPhase } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
+import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import type { PanelStateOf } from '../map/panels'
 import { useDataState } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
+import { openPanel } from '../map/view'
 import { whereOf } from '../map/where'
 import type { Network } from '../timetable/network'
 import { clockTime } from '../timetable/time'
 import type { SnapshotTrip, TripDetail } from '../tracker/index'
 import type { PanelFrame } from './DetailPanels'
 import { badgeLine } from './departureRow'
+import { Messages } from './Messages'
 import { useServerSecond } from './useServerSecond'
 import {
   intervalWords,
@@ -44,16 +49,21 @@ export interface VehiclePanelProps {
 
 /**
  * Vehicle detail (docs/screens.md): the trip's line, destination and mode, what its data state
- * means, its facts, where it is, its stops and where their times came from. Its header names the
- * trip from the snapshot while the answer is on its way. The header's action row is where Follow
- * and Show whole line go.
+ * means, its facts, where it is, its stops, its own messages and where their times came from.
+ * Its header names the trip from the snapshot while the answer is on its way. The header's action
+ * row is where Follow and Show whole line go. An answer for another trip than the address's, the
+ * one the trip's detail corrected the join to, takes over the address.
  */
 export function VehiclePanel({ state, frame }: VehiclePanelProps) {
-  const { dictionary } = useI18n()
+  const { dictionary, lang } = useI18n()
   const words = dictionary.trip
   const snapshot = useSnapshot()
   const network = useNetwork(snapshot?.timetableVersion)
   const { answer, status } = state
+  const corrected = answer && answer.key !== state.panel.id ? answer.key : undefined
+  useEffect(() => {
+    if (corrected !== undefined) openPanel({ kind: 'trip', id: corrected })
+  }, [corrected])
   const trip = snapshot?.trips.find((each) => each.key === state.panel.id)
   const named = answer ?? trip
   // The line's colour from the answer, or from the timetable's pattern before the answer lands.
@@ -80,7 +90,7 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
         : {})}
     >
       {answer ? (
-        <Detail answer={answer} trip={trip} network={network} words={words} />
+        <Detail answer={answer} trip={trip} network={network} lang={lang} words={words} />
       ) : (
         <Pending status={status} words={words} />
       )}
@@ -109,11 +119,15 @@ interface DetailProps {
   /** The trip as the snapshot carries it, while it is on the map. */
   trip: SnapshotTrip | undefined
   network: Network | undefined
+  lang: Lang
   words: Words
 }
 
-/** The trip's state, facts, place and stops, aged by the server's clock, then the source line. */
-function Detail({ answer, trip, network, words }: DetailProps) {
+/**
+ * The trip's state, facts, place and stops, aged by the server's clock, then its messages and the
+ * source line.
+ */
+function Detail({ answer, trip, network, lang, words }: DetailProps) {
   const now = useServerSecond(useClockOffset())
   // The trip's state now, by the clock, while the snapshot carries it; else the answer's.
   const state: DataState = useDataState(answer.key) ?? answer.state
@@ -123,6 +137,14 @@ function Detail({ answer, trip, network, words }: DetailProps) {
   const sentence = stateSentence({ detail: answer, trip, state, timezone, words })
   const next = nextCallOf(answer, trip, now)
   const live = state === 'live' || state === 'ageing'
+  // Rejseplanen's own delay at the next call, from the trip's detail, else the snapshot's.
+  const delaySeconds = answer.nextCallDelay ?? answer.delay
+  // The messages listed now, from the trip's detail, and the moment it was called.
+  const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
+  const messages =
+    called === undefined
+      ? []
+      : (answer.messages ?? []).filter((message) => disruptionPhase(message, now) !== undefined)
   const where =
     trip && network && !cancelled && network.patterns.patterns[trip.pattern]
       ? whereWords(
@@ -140,8 +162,8 @@ function Detail({ answer, trip, network, words }: DetailProps) {
         )
       : undefined
   const delay =
-    cancelled || answer.delay === undefined || !(live || state === 'estimated') ? undefined : (
-      <Delay minutes={answer.delay / 60} />
+    cancelled || delaySeconds === undefined || !(live || state === 'estimated') ? undefined : (
+      <Delay minutes={delaySeconds / 60} />
     )
   return (
     <>
@@ -182,9 +204,19 @@ function Detail({ answer, trip, network, words }: DetailProps) {
       <StopTimeline
         aria-label={words.stops}
         line={badgeLine(answer.colour, answer.mode)}
-        stops={timelineStops(answer, state, timezone)}
+        stops={timelineStops(answer, state, timezone, { messages, words })}
         {...(next === undefined ? {} : { nextStopIndex: next })}
       />
+      {called === undefined ? null : (
+        <Messages
+          messages={messages}
+          now={now}
+          lang={lang}
+          timezone={timezone}
+          words={words}
+          source={fill(words.messagesChecked, { time: clockTime(called, timezone) })}
+        />
+      )}
       {answer.source.kind === 'timetable' ? (
         <Text variant="caption" emphasis="secondary">
           {words.fromTimetable}
