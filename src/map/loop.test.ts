@@ -292,28 +292,33 @@ describe('the vehicles between polls', () => {
     loop!.show(vehicles, minute6, network)
     wait(1000)
     const style = basemapStyle(readPaint(document.documentElement, paintTokens(network)), network)
-    const beside = new Set<string>()
-    vehicles.trips.forEach((trip, i) => {
+    const dots = vehicles.trips.map((trip, i) => {
       const pattern = network.patterns.patterns[trip.pattern]
       const line = network.patterns.lines[pattern.line].name
       const [x, y] = vehicles.offsets.subarray(i * 2, i * 2 + 2)
-      if (x === 0 && y === 0) {
-        expect(['M1', 'RE', 'A', '5C', '991']).toContain(line)
-        return
-      }
-      beside.add(line)
-      expect(Math.hypot(x, y)).toBeCloseTo(1.4, 5)
       // x to the east and y to the north, in px: square to the way the dot runs, to its right
       // or left as its line is drawn, facing the line's direction 0.
       const [east, north] = headingNear(network.pathOf(trip.pattern), [
         ...vehicles.positions.subarray(i * 2, i * 2 + 2),
       ])
-      expect(Math.abs(x * east + y * north)).toBeLessThan(0.01)
       const right = Math.sign(x * north - y * east)
-      expect(sidesOf(style, network, line)).toEqual(
-        new Set([right * (pattern.direction === 0 ? 1 : -1)]),
-      )
+      return {
+        line,
+        off: Math.hypot(x, y),
+        along: Math.abs(x * east + y * north),
+        side: right * (pattern.direction === 0 ? 1 : -1),
+      }
     })
-    expect(beside).toEqual(new Set(['A', 'E']))
+    const centred = dots.filter(({ off }) => off === 0)
+    expect(new Set(centred.map(({ line }) => line))).toEqual(
+      new Set(['M1', 'RE', 'A', '5C', '991']),
+    )
+    const beside = dots.filter(({ off }) => off !== 0)
+    for (const { line, off, along, side } of beside) {
+      expect(off).toBeCloseTo(1.4, 5)
+      expect(along).toBeLessThan(0.01)
+      expect(sidesOf(style, network, line)).toEqual(new Set([side]))
+    }
+    expect(new Set(beside.map(({ line }) => line))).toEqual(new Set(['A', 'E']))
   })
 })
