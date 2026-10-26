@@ -1,0 +1,25 @@
+/* The terms, the states, the status and the keys; the dialog itself scrolls when they overflow. */
+.body {
+  display: grid;
+  gap: var(--perron-space-300);
+}
+
+.body p {
+  margin: 0;
+}
+
+.body p + p,
+.body p + ul,
+.body ul + p {
+  margin-block-start: var(--perron-space-150);
+}
+
+/* Each state's dot and word, then its sentence; each key line. */
+.states,
+.keys {
+  display: grid;
+  gap: var(--perron-space-150);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
