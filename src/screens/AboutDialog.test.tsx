@@ -91,7 +91,9 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Calls this month')).toBe('7')
     expect(fact(dialog, 'Disruptions')).toBe('Checked 07:20')
     expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
-    expect(dialog).toHaveTextContent('Pause, beside the zoom buttons, stops the vehicles moving')
+    expect(dialog).toHaveTextContent(
+      'The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again.',
+    )
   })
 
   it('gives them in Danish', () => {
@@ -108,6 +110,9 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Databudget')).toBe('Normalt')
     expect(fact(dialog, 'Kald denne måned')).toBe('7')
     expect(dialog).toHaveTextContent('lukker køretøjets kort eller panel')
+    expect(dialog).toHaveTextContent(
+      'Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen.',
+    )
     expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
     act(() => {
       liveSnapshot.update({

@@ -121,7 +121,7 @@
       "zoom": "{plus} og {minus} zoomer kortet.",
       "pan": "{left} {right} {up} {down} flytter det.",
       "close": "{esc} lukker køretøjets kort eller panel.",
-      "pause": "Pause, ved siden af zoomknapperne, stopper køretøjerne, og Fortsæt sætter dem i gang igen."
+      "pause": "Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen."
     }
   },
   "sheet": {
