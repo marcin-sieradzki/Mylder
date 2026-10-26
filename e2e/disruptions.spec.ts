@@ -28,3 +28,39 @@ test('in Danish, on a phone', async ({ page }) => {
   )
   await expect(sheet.getByText('Fra Rejseplanen, på dansk')).toHaveCount(0)
 })
+
+test('Show on map on a card raises the chip, and Clear takes it down', async ({ page }) => {
+  await page.goto('/en?tab=disruptions')
+  const card = page
+    .getByRole('list', { name: 'Active now' })
+    .getByRole('listitem')
+    .filter({ hasText: 'Færre S-tog mellem København H og Hellerup' })
+  await card.getByRole('button', { name: 'Show on map' }).click()
+  const chip = page.getByRole('button', {
+    name: 'Showing: Færre S-tog mellem København H og Hellerup · Clear',
+  })
+  await expect(chip).toBeVisible()
+  await chip.click()
+  await expect(chip).toBeHidden()
+})
+
+test('a tap on a ringed stop opens its departures', async ({ page }) => {
+  await page.goto('/en?tab=disruptions')
+  // The 5C diversion names two platforms of one stop, Klaksvigsgade: one ring and no stretch, so
+  // the camera centres it in the room the sheet and the panel leave (fitPadding on a desktop).
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Linje 5C kører en anden rute ved Langebro' })
+    .getByRole('button', { name: 'Show on map' })
+    .click()
+  await expect(page.getByRole('button', { name: /^Showing: Linje 5C/ })).toBeVisible()
+  // The camera has settled on the ring, at the fit's closest zoom, once the address says so.
+  await expect(page).toHaveURL(/[?&]map=15\.00\//)
+  const { width, height } = page.viewportSize()!
+  const centre = { x: 412 + (width - 412 - 400) / 2, y: 146 + (height - 146 - 48) / 2 }
+  const panel = page.getByRole('dialog', { name: 'Klaksvigsgade' })
+  await expect(async () => {
+    await page.mouse.click(centre.x, centre.y)
+    await expect(panel).toBeVisible({ timeout: 1_000 })
+  }).toPass()
+})

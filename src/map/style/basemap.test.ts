@@ -367,6 +367,19 @@ describe('a highlight on the basemap', () => {
     expect(index(style, 'mylder-highlight-stops')).toBeLessThan(firstLabel)
   })
 
+  it("carries each ringed stop's id, so a tap on a ring opens its departures", () => {
+    const ringed: Highlight = {
+      label: { kind: 'text', text: 'Signalfejl' },
+      lines: [],
+      stops: [
+        { id: '8600626', point: [55.6731, 12.5656], colour: 'perron-color-transit-severity-delay' },
+      ],
+    }
+    const [stop] = features(styleNow(ringed), 'mylder-highlight-stops')
+    expect(stop.properties).toMatchObject({ id: '8600626' })
+    expect(STOP_LAYERS).toContain('mylder-highlight-stops')
+  })
+
   it('draws nothing in focus, and dims nothing, while nothing is highlighted', () => {
     const style = styleNow()
     expect(features(style, 'mylder-highlight-lines')).toEqual([])
