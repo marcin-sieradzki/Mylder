@@ -20,10 +20,11 @@ const closest = (view: CameraView | undefined) => view?.closest ?? false
 const farthest = (view: CameraView | undefined) => view?.farthest ?? false
 /**
  * The ground a pixel spans, to three figures, finer than the bar can show: a camera Follow moves
- * each frame changes it in the eighth figure, which needn't draw the bar again.
+ * each frame changes it in the eighth figure, which needn't draw the bar again. None before the
+ * map attaches, which the bar shows as unknown.
  */
 const metersPerPixel = (view: CameraView | undefined) =>
-  view ? Number(view.metersPerPixel.toPrecision(3)) : Number.NaN
+  view ? Number(view.metersPerPixel.toPrecision(3)) : 0
 
 /** The scale bar, on its own: it reads the ground a pixel spans, which moves with every pan. */
 function MapScale() {
