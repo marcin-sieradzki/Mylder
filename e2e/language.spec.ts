@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './recording'
 
 test.describe('a first visit to /', () => {
   test.describe('from a browser asking for Danish', () => {

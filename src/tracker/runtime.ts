@@ -2,6 +2,9 @@
 // first request (docs/testing-seams.md, "The switch"), so one build serves every source.
 import 'server-only'
 import { Effect, Layer, ManagedRuntime, Schema } from 'effect'
+import { join } from 'node:path'
+import { startingAt } from './recording/clock.ts'
+import { readStart, recordingDir } from './recording/layer.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
 import type * as Http from './rejseplanen/http.ts'
@@ -71,6 +74,28 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
   return trackerServiceLayer.pipe(Layer.provide(client), Layer.provideMerge(base))
 }
 
+/**
+ * The tracker as the environment sets it up. A recording brings its own timetable and its clock,
+ * which starts at the recording's moment (docs/testing-seams.md, "The switch").
+ */
+async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
+  const source = readSource(process.env.MYLDER_SOURCE)
+  const positionMode = readPositionMode(process.env[POSITION_MODE_VARIABLE])
+  if (source.kind === 'recording') {
+    const dir = recordingDir(source.folder)
+    const [timetable, start] = await Promise.all([
+      loadTimetable(join(dir, 'timetable')),
+      readStart(dir),
+    ])
+    // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
+    return trackerLayer({ timetable, source, positionMode }).pipe(
+      Layer.provideMerge(startingAt(start)),
+    )
+  }
+  const timetable = await loadTimetable()
+  return trackerLayer({ timetable, source, positionMode, key: process.env[KEY_VARIABLE] })
+}
+
 let runtime: Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> | undefined
 
 /**
@@ -80,16 +105,7 @@ let runtime: Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> | un
  */
 export function trackerRuntime(): Promise<ManagedRuntime.ManagedRuntime<Tracker | Store, never>> {
   if (runtime) return runtime
-  runtime = loadTimetable().then((timetable) =>
-    ManagedRuntime.make(
-      trackerLayer({
-        timetable,
-        source: readSource(process.env.MYLDER_SOURCE),
-        positionMode: readPositionMode(process.env[POSITION_MODE_VARIABLE]),
-        key: process.env[KEY_VARIABLE],
-      }),
-    ),
-  )
+  runtime = environmentLayer().then((layer) => ManagedRuntime.make(layer))
   runtime.catch(() => {
     runtime = undefined
   })

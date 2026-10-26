@@ -304,6 +304,12 @@ export const SERVICES = ['journeyPos', 'multiDepartureBoard', 'journeyDetail', '
 
 export type Service = (typeof SERVICES)[number]
 
+/** The service a request's URL calls, from the last segment of its path, in any case. */
+export function serviceOf(url: URL): Service | undefined {
+  const last = url.pathname.split('/').at(-1)?.toLowerCase()
+  return SERVICES.find((service) => service.toLowerCase() === last)
+}
+
 /** Each service's answer schema. */
 export const ANSWERS = {
   journeyPos: JourneyPosAnswer,

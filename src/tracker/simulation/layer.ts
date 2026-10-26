@@ -12,8 +12,7 @@ import {
   JourneyPosAnswer,
   QUOTA_SPENT,
   REFUSED_KEY,
-  SERVICES,
-  type Service,
+  serviceOf,
 } from '../rejseplanen/answers.ts'
 import * as Http from '../rejseplanen/http.ts'
 import type { Timetable } from '../timetable.ts'
@@ -34,20 +33,11 @@ export interface SimulationOptions {
   readonly seed?: number
 }
 
-/** The service a request calls, from the last segment of its path, in any case. */
-function serviceOf(url: URL): Service | undefined {
-  const last = url.pathname.split('/').at(-1)?.toLowerCase()
-  return SERVICES.find((service) => service.toLowerCase() === last)
-}
-
 /** The failure the scenario schedules for a moment's minute of the hour, if any. */
 function failureAt(scenario: Scenario, now: number): FailureKind | undefined {
   const minute = new Date(now).getUTCMinutes()
   return scenario.failures.find(({ from, to }) => minute >= from && minute < to)?.kind
 }
-
-/** How long a timed-out call hangs before the gateway gives up, past any client's timeout. */
-const TIMEOUT_AFTER = '30 seconds'
 
 /**
  * A scheduled failure's answer. Rejseplanen's own error shapes are guesses until the first real
@@ -58,7 +48,7 @@ function failure(request: Http.Request, kind: Exclude<FailureKind, 'empty'>) {
     case 'unavailable':
       return Effect.succeed(Http.text(request, 503, 'Service Unavailable'))
     case 'timeout':
-      return Effect.sleep(TIMEOUT_AFTER).pipe(Effect.as(Http.text(request, 504, 'Gateway Timeout')))
+      return Http.gatewayTimeout(request)
     case 'refused-key':
       return Effect.succeed(Http.error(request, 401, REFUSED_KEY, 'access denied for accessId'))
     case 'quota':
