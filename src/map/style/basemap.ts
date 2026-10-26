@@ -14,6 +14,7 @@ import type { LatLon } from '../../timetable/polyline.ts'
 import type { Highlight } from '../highlight.ts'
 import { modeColour, numberOf, type Paint } from '../paint.ts'
 import positron from './positron.json'
+import { patternPlaces, strandsOf, type StrandOf } from './strands.ts'
 
 type MapColour =
   | 'water'
@@ -52,33 +53,115 @@ const LINE: readonly [RegExp, MapColour][] = [
   [/^boundary/, 'rail'],
 ]
 
-/** The rail modes, bottom to top: each drawn at its mode's width and opacity. */
-const RAIL: readonly { mode: Mode; layer: string; width: string; opacity: string }[] = [
+/**
+ * The rail modes, bottom to top: each drawn at its mode's width and opacity, its lines that share
+ * a track its track spacing apart.
+ */
+const RAIL: readonly {
+  mode: Mode
+  layer: string
+  width: string
+  opacity: string
+  spacing: string
+}[] = [
   {
     mode: 'train',
     layer: 'mylder-lines-train',
     width: 'perron-map-line-width-regional',
     opacity: 'perron-opacity-map-line-regional',
+    spacing: 'perron-map-track-spacing-regional',
   },
   {
     mode: 'light-rail',
     layer: 'mylder-lines-light-rail',
     width: 'perron-map-line-width-regional',
     opacity: 'perron-opacity-map-line-regional',
+    spacing: 'perron-map-track-spacing-regional',
   },
   {
     mode: 's-tog',
     layer: 'mylder-lines-s-tog',
     width: 'perron-map-line-width-stog',
     opacity: 'perron-opacity-map-line',
+    spacing: 'perron-map-track-spacing-stog',
   },
   {
     mode: 'metro',
     layer: 'mylder-lines-metro',
     width: 'perron-map-line-width-metro',
     opacity: 'perron-opacity-map-line',
+    spacing: 'perron-map-track-spacing-metro',
   },
 ]
+
+const LINE_COLOUR = 'perron-color-transit-line-'
+
+/**
+ * A line's `map.strand.*` token, its place on the full trunk, for a line with a colour of its
+ * own, `perron-color-transit-line-a` giving `perron-map-strand-a`; none for any other line.
+ */
+const strandToken = (line: LineRecord): string | undefined =>
+  line.colour.startsWith(LINE_COLOUR)
+    ? `perron-map-strand-${line.colour.slice(LINE_COLOUR.length)}`
+    : undefined
+
+/** The rail lines of the network with a strand token of their own. */
+const strandedLines = (network: Network): LineRecord[] =>
+  network.patterns.lines.filter((line) => line.mode !== 'bus' && strandToken(line))
+
+/**
+ * Each line's strand from its token, or, for a line without one, its parent's: the line of its
+ * mode with a token whose name its own starts with, the longest, so Bx rides beside B. A line with
+ * neither has none, and goes beyond the lines that have one.
+ */
+function strandsByToken(paint: Paint, network: Network): StrandOf {
+  const stranded = strandedLines(network).sort((a, b) => b.name.length - a.name.length)
+  const own = (line: LineRecord) => numberOf(paint, strandToken(line)!)
+  return (line) => {
+    if (strandToken(line)) return own(line)
+    const parent = stranded.find(
+      (each) => each.mode === line.mode && line.name.startsWith(each.name),
+    )
+    return parent && own(parent)
+  }
+}
+
+/** The tokens a line's offset reads: each rail mode's track spacing and each line's strand. */
+export const strandTokens = (network?: Network): string[] => [
+  ...RAIL.map(({ spacing }) => spacing),
+  ...(network ? strandedLines(network).map((line) => strandToken(line)!) : []),
+]
+
+/** A line's offset in px for its `place` in track spacings, as the style draws it. */
+function offsetOf(paint: Paint, line: LineRecord, place: number): number {
+  const spacing = numberOf(paint, RAIL.find(({ mode }) => mode === line.mode)!.spacing)
+  return Math.round(place * spacing * 100) / 100 || 0
+}
+
+const offsetsBuilt = new WeakMap<Network, { readonly paint: string; readonly offsets: Offsets }>()
+
+type Offsets = readonly (Float32Array | undefined)[]
+
+/**
+ * Each pattern's offset on each of its steps, in px to the right of the way it runs: its line's
+ * strand there, so a vehicle on the step rides on the strand its line is drawn on. None for a bus
+ * route's. Worked out once per network and paint.
+ */
+export function vehicleOffsets(paint: Paint, network: Network): Offsets {
+  const read = strandTokens(network)
+    .map((token) => paint.get(token))
+    .join()
+  const found = offsetsBuilt.get(network)
+  if (found?.paint === read) return found.offsets
+  const { lines, patterns } = network.patterns
+  const offsets = patternPlaces(network, strandsByToken(paint, network)).map((places, index) => {
+    if (!places) return undefined
+    const line = lines[patterns[index].line]
+    return Float32Array.from(places, (place) => offsetOf(paint, line, place))
+  })
+  offsetsBuilt.set(network, { paint: read, offsets })
+  return offsets
+}
 
 const STOP_FILL = map('land')
 const STOP_RING = map('label')
@@ -91,11 +174,11 @@ const DIM_LINE = 'perron-opacity-map-dim-line'
 const DIM_STATION = 'perron-opacity-map-dim-station'
 
 /**
- * Every token the style reads, for `readPaint`: the map's colours, the line widths and
- * opacities, and the colour of each line the network draws.
+ * Every token the style reads, for `readPaint`: the map's colours, the line widths, opacities
+ * and track spacings, and the colour and strand of each line the network draws.
  */
 export function paintTokens(network?: Network, highlight?: Highlight): string[] {
-  const lines = network ? drawnLines(network).map(({ line }) => line.colour) : []
+  const lines = network ? drawnLines(network) : []
   const focused = highlight
     ? [...highlight.lines.map((line) => line.colour), ...highlight.stops.map((stop) => stop.colour)]
     : []
@@ -107,7 +190,8 @@ export function paintTokens(network?: Network, highlight?: Highlight): string[] 
     ...RAIL.flatMap(({ width, opacity }) => [width, opacity]),
     modeColour('bus'),
     modeColour('train'),
-    ...lines,
+    ...lines.map((line) => line.colour),
+    ...strandTokens(network),
     FOCUS_EXTRA,
     BUS_FOCUS,
     DIM_LINE,
@@ -182,6 +266,7 @@ function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
       'line-color': ['get', 'colour'],
       'line-width': ['get', 'width'],
       'line-opacity': ['get', 'opacity'],
+      'line-offset': ['get', 'offset'],
     },
   }))
   const stops = (
@@ -209,16 +294,9 @@ function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
 }
 
 /** The lines drawn at rest: every Metro, S-tog, train and light rail line with a pattern. */
-function drawnLines(network: Network) {
-  const segments = new Map<number, Set<number>>()
-  for (const pattern of network.patterns.patterns) {
-    let line = segments.get(pattern.line)
-    if (!line) segments.set(pattern.line, (line = new Set()))
-    for (const segment of pattern.segments) line.add(segment)
-  }
-  return [...segments]
-    .map(([index, lineSegments]) => ({ line: network.patterns.lines[index], lineSegments }))
-    .filter(({ line }) => line.mode !== 'bus')
+function drawnLines(network: Network): LineRecord[] {
+  const run = new Set(network.patterns.patterns.map((pattern) => pattern.line))
+  return [...run].map((index) => network.patterns.lines[index]).filter((l) => l.mode !== 'bus')
 }
 
 /**
@@ -245,47 +323,53 @@ function drawnPieces(points: readonly LatLon[]): [number, number][][] {
   return pieces
 }
 
-const geometries = new WeakMap<Network, Map<LineRecord, MultiLineString>>()
+const decoded = new WeakMap<Network, Map<number, [number, number][][]>>()
 
-/** Each line's path as one multi-line of its patterns' segments, decoded once per network. */
-function lineGeometries(network: Network): Map<LineRecord, MultiLineString> {
-  let found = geometries.get(network)
-  if (!found) {
-    found = new Map(
-      drawnLines(network).map(({ line, lineSegments }) => [
-        line,
-        {
-          type: 'MultiLineString',
-          coordinates: [...lineSegments].flatMap((segment) =>
-            drawnPieces(network.paths.points(segment)),
-          ),
-        },
-      ]),
-    )
-    geometries.set(network, found)
-  }
-  return found
+/** A segment's drawn pieces, decoded once per network. */
+function piecesOf(network: Network, segment: number): [number, number][][] {
+  let found = decoded.get(network)
+  if (!found) decoded.set(network, (found = new Map()))
+  let pieces = found.get(segment)
+  if (!pieces) found.set(segment, (pieces = drawnPieces(network.paths.points(segment))))
+  return pieces
 }
 
+/**
+ * Each line's path, one multi-line of its patterns' segments for each offset it is drawn at: its
+ * strand on each stretch times its mode's track spacing, in px, to the right of the way it runs.
+ * Dimmed while something is highlighted over it.
+ */
 function lineFeatures(
   paint: Paint,
   network: Network,
   dimmed: boolean,
 ): FeatureCollection<MultiLineString> {
+  const byLine = new Map<LineRecord, Map<number, [number, number][][]>>()
+  for (const { line, segments, place } of strandsOf(network, strandsByToken(paint, network))) {
+    const offset = offsetOf(paint, line, place)
+    let offsets = byLine.get(line)
+    if (!offsets) byLine.set(line, (offsets = new Map()))
+    const pieces = offsets.get(offset) ?? []
+    offsets.set(offset, pieces)
+    for (const segment of segments) pieces.push(...piecesOf(network, segment))
+  }
   const features: Feature<MultiLineString>[] = []
-  for (const [line, geometry] of lineGeometries(network)) {
+  for (const [line, offsets] of byLine) {
     const rail = RAIL.find(({ mode }) => mode === line.mode)!
-    features.push({
-      type: 'Feature',
-      properties: {
-        line: line.name,
-        mode: line.mode,
-        colour: paint.get(line.colour) || paint.get(modeColour(line.mode)),
-        width: numberOf(paint, rail.width),
-        opacity: numberOf(paint, dimmed ? DIM_LINE : rail.opacity),
-      },
-      geometry,
-    })
+    for (const [offset, coordinates] of offsets) {
+      features.push({
+        type: 'Feature',
+        properties: {
+          line: line.name,
+          mode: line.mode,
+          colour: paint.get(line.colour) || paint.get(modeColour(line.mode)),
+          width: numberOf(paint, rail.width),
+          opacity: numberOf(paint, dimmed ? DIM_LINE : rail.opacity),
+          offset,
+        },
+        geometry: { type: 'MultiLineString', coordinates },
+      })
+    }
   }
   return { type: 'FeatureCollection', features }
 }

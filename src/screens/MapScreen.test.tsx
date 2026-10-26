@@ -24,6 +24,10 @@ const saved = (name: string, recording = 'weekday'): Snapshot =>
     readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
   ) as Snapshot
 
+/** A snapshot landed, with the server's clock `after` ms past its fetch. */
+const land = (snapshot: Snapshot, after = 20_000) =>
+  act(() => liveSnapshot.update({ snapshot, clockOffset: snapshot.fetched + after - Date.now() }))
+
 const renderScreen = (lang: Lang) =>
   render(
     <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
@@ -37,7 +41,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  liveSnapshot.update({ snapshot: undefined, failingSince: undefined })
+  liveSnapshot.update({ snapshot: undefined, failingSince: undefined, clockOffset: 0 })
   vi.unstubAllGlobals()
 })
 
@@ -66,22 +70,22 @@ describe('the map screen', () => {
 describe('the top bar', () => {
   it('says when the positions are from, to the second, in Copenhagen time', () => {
     // The recording's first minute was fetched at 05:20:00 UTC, 07:20:00 in Copenhagen's summer.
-    act(() => liveSnapshot.update({ snapshot: saved('0001.json') }))
+    land(saved('0001.json'))
     renderScreen('en')
     expect(within(screen.getByRole('banner')).getByText('Updated 07:20:00')).toBeInTheDocument()
   })
 
   it('moves the time on with each snapshot built from an answer, in Danish', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0001.json') }))
+    land(saved('0001.json'))
     renderScreen('da')
     const banner = screen.getByRole('banner')
     expect(within(banner).getByText('Opdateret 07:20:00')).toBeInTheDocument()
-    act(() => liveSnapshot.update({ snapshot: saved('0006.json') }))
+    land(saved('0006.json'))
     expect(within(banner).getByText('Opdateret 07:25:00')).toBeInTheDocument()
   })
 
   it('keeps the last answer time while Rejseplanen gives none or the page is disconnected', () => {
-    act(() => liveSnapshot.update({ snapshot: saved('0001.json') }))
+    land(saved('0001.json'))
     renderScreen('da')
     const banner = screen.getByRole('banner')
     // The month's calls ran out a minute later: that snapshot was built from no answer, and the
@@ -90,6 +94,26 @@ describe('the top bar', () => {
     expect(within(banner).getByText('Opdateret 07:20:00, sat på pause')).toBeInTheDocument()
     act(() => liveSnapshot.update({ failingSince: Date.parse('2026-06-16T05:23:00Z') }))
     expect(within(banner).getByText('Opdateret 07:20:00, sat på pause')).toBeInTheDocument()
+  })
+
+  it('adds "may be out of date" once the snapshot is older than its poll interval, by the server clock', () => {
+    // The minute's snapshot was fetched at 07:20:00 and polls every 60 s; the next is due at
+    // 07:21:00, and the browser's poll brings it a few seconds after.
+    land(saved('0001.json'), 59_000)
+    renderScreen('en')
+    const banner = screen.getByRole('banner')
+    expect(within(banner).getByText('Updated 07:20:00')).toBeInTheDocument()
+    land(saved('0001.json'), 75_000)
+    expect(within(banner).getByText('Updated 07:20:00, may be out of date')).toBeInTheDocument()
+  })
+
+  it('says so in Danish, and leaves it to the page notice while the page is disconnected', () => {
+    land(saved('0001.json'), 75_000)
+    renderScreen('da')
+    const banner = screen.getByRole('banner')
+    expect(within(banner).getByText('Opdateret 07:20:00, måske forældet')).toBeInTheDocument()
+    act(() => liveSnapshot.update({ failingSince: Date.now() - 30_000 }))
+    expect(within(banner).getByText('Opdateret 07:20:00')).toBeInTheDocument()
   })
 
   it("has a chip for each of the timetable's modes, counting the trips underway in it", async () => {

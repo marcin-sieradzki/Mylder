@@ -1,17 +1,14 @@
 import '@mylder/perron/tokens.css'
-import type { FeatureCollection, MultiLineString } from 'geojson'
+import type { MultiLineString } from 'geojson'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type {
-  GeoJSONSourceSpecification,
-  LayerSpecification,
-  StyleSpecification,
-} from 'maplibre-gl'
+import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
-import { readNetwork } from '../../timetable/network.ts'
+import { readNetwork, type Network } from '../../timetable/network.ts'
 import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
 import { patternHighlight, type Highlight } from '../highlight.ts'
 import { readPaint } from '../paint.ts'
+import { drawnOf, features, sidesOf } from '../../test/drawnLines.ts'
 import { basemapStyle, paintTokens, STOP_LAYERS } from './basemap.ts'
 
 // The basemap as the page paints it: Perron's own token sheet on the document, and the weekday
@@ -39,11 +36,6 @@ const layer = (style: StyleSpecification, id: string) => {
   return found as LayerSpecification & { paint: Record<string, unknown> }
 }
 
-const features = (style: StyleSpecification, source: string) => {
-  const data = (style.sources[source] as GeoJSONSourceSpecification).data
-  return (data as FeatureCollection).features
-}
-
 const lineColours = (style: StyleSpecification) =>
   Object.fromEntries(
     features(style, 'mylder-lines').map((f) => [f.properties!.line, f.properties!.colour]),
@@ -52,6 +44,72 @@ const lineColours = (style: StyleSpecification) =>
 /** The distance between two [lon, lat] points in km, near enough at Copenhagen's latitude. */
 const kilometres = ([lon1, lat1]: number[], [lon2, lat2]: number[]) =>
   Math.hypot((lon2 - lon1) * 111.32 * Math.cos((55.7 * Math.PI) / 180), (lat2 - lat1) * 110.57)
+
+/** The stretch a step between two stops runs, keyed by both stops, lower first. */
+const stretchKey = (from: number, to: number) => (from < to ? `${from}-${to}` : `${to}-${from}`)
+
+/**
+ * Each line's offset on each stretch it is drawn on, keyed `line|stretch`, as px to the right
+ * facing away from the stop `facing` gives for the stretch, by default its lower-numbered: one
+ * frame for every line on it, whichever way each runs.
+ */
+function placesOf(
+  style: StyleSpecification,
+  on: Network,
+  facing: (stretch: string) => number | undefined = (stretch) => Number(stretch.split('-')[0]),
+): Map<string, number> {
+  const stopOf = (platform: number) => on.stops.platforms[platform].stop
+  const runs = new Map<number, { stretch: string; from: number }>()
+  for (const pattern of on.patterns.patterns) {
+    pattern.segments.forEach((segment, i) => {
+      const [from, to] = [stopOf(pattern.stops[i]), stopOf(pattern.stops[i + 1])]
+      runs.set(segment, { stretch: stretchKey(from, to), from })
+    })
+  }
+  const places = new Map<string, number>()
+  for (const line of new Set(on.patterns.lines.map((each) => each.name))) {
+    for (const { offset, segment } of drawnOf(style, on, line)) {
+      const { stretch, from } = runs.get(segment)!
+      const start = facing(stretch)
+      if (start === undefined) continue
+      places.set(`${line}|${stretch}`, (from === start ? offset : -offset) || 0)
+    }
+  }
+  return places
+}
+
+/**
+ * The lines on each stretch of a `line`'s first pattern in its direction 0 where all of `names`
+ * run, ordered across the track from left to right as that pattern runs.
+ */
+function acrossOf(
+  style: StyleSpecification,
+  on: Network,
+  line: string,
+  names: readonly string[],
+): string[][] {
+  const stopOf = (platform: number) => on.stops.platforms[platform].stop
+  const index = on.patterns.lines.findIndex((each) => each.name === line)
+  const reference = on.patterns.patterns.find(
+    (pattern) => pattern.line === index && pattern.direction === 0,
+  )!
+  const starts = new Map(
+    reference.stops.slice(1).map((stop, i) => {
+      const from = stopOf(reference.stops[i])
+      return [stretchKey(from, stopOf(stop)), from]
+    }),
+  )
+  const byStretch = new Map<string, Map<string, number>>()
+  for (const [id, place] of placesOf(style, on, (stretch) => starts.get(stretch))) {
+    const [name, stretch] = id.split('|')
+    if (!names.includes(name)) continue
+    if (!byStretch.has(stretch)) byStretch.set(stretch, new Map())
+    byStretch.get(stretch)!.set(name, place)
+  }
+  return [...byStretch.values()]
+    .filter((lines) => lines.size === names.length)
+    .map((lines) => [...lines].sort((a, b) => a[1] - b[1]).map(([name]) => name))
+}
 
 afterEach(() => {
   delete document.documentElement.dataset.theme
@@ -146,6 +204,88 @@ describe('the basemap', () => {
     const points = (lines.geometry as MultiLineString).coordinates.flat()
     expect(points).toContainEqual([12.54, 55.66])
     expect(points.some(([, lat]) => lat < 55.3)).toBe(true)
+  })
+
+  it('draws lines that share a track side by side, a track spacing apart, centred, each keeping its side', () => {
+    // A and E run together from Hundige to Holte, and A alone on to Hillerød. Two lines alone on
+    // a track sit half an S-tog track spacing (2.8 px) either side of its centre, in their
+    // strands' order: A (strand −2) on one side, E (+1) on the other, all the way along.
+    const style = styleNow()
+    expect(layer(style, 'mylder-lines-s-tog').paint['line-offset']).toEqual(['get', 'offset'])
+    const sides = (name: string) => sidesOf(style, network, name)
+    const drawn = (name: string) => drawnOf(style, network, name)
+
+    for (const name of ['A', 'E']) {
+      expect(new Set(drawn(name).map(({ offset }) => Math.abs(offset)))).toEqual(
+        new Set(name === 'A' ? [0, 1.4] : [1.4, 0]),
+      )
+      expect(sides(name).size).toBe(1)
+    }
+    expect([...sides('A'), ...sides('E')].sort()).toEqual([-1, 1])
+    // Each stretch once per line: the way back is the same strand, not a mirror of it.
+    const a = drawn('A').map(({ segment }) => segment)
+    expect(new Set(a).size).toBe(a.length)
+    expect(a.length).toBeLessThan(
+      new Set(
+        network.patterns.patterns
+          .filter((pattern) => network.patterns.lines[pattern.line].name === 'A')
+          .flatMap((pattern) => pattern.segments),
+      ).size,
+    )
+  })
+
+  it('puts each line on the same side whatever order the timetable lists its patterns in', () => {
+    const patterns = read(manifest.files.patterns) as { patterns: unknown[] }
+    const reordered = readNetwork({
+      manifest,
+      stops: read(manifest.files.stops),
+      patterns: { ...patterns, patterns: patterns.patterns.toReversed() },
+      paths: read(manifest.files.paths),
+    })
+    const paint = readPaint(document.documentElement, paintTokens(network))
+    const places = placesOf(basemapStyle(paint, network), network)
+    expect([...places.values()].some((place) => place !== 0)).toBe(true)
+    expect(placesOf(basemapStyle(paint, reordered), reordered)).toEqual(places)
+  })
+
+  it("places a line without a strand of its own by its parent line's, or else outside the others", () => {
+    // Given E's patterns to two more S-tog lines without a colour of their own: Ex, an express
+    // of E, takes E's strand and sits beside it; Q has no parent and goes beyond every line with
+    // a strand, rather than between A and E.
+    const file = read(manifest.files.patterns) as {
+      lines: { name: string; mode: string; colour: string }[]
+      patterns: { line: number }[]
+    }
+    const e = file.lines.findIndex((line) => line.name === 'E')
+    const extra = ['Ex', 'Q'].map((name) => {
+      const line =
+        file.lines.push({ name, mode: 's-tog', colour: 'perron-color-transit-mode-regional' }) - 1
+      return file.patterns
+        .filter((pattern) => pattern.line === e)
+        .map((pattern) => ({ ...pattern, line }))
+    })
+    file.patterns.push(...extra.flat())
+    const withMore = readNetwork({
+      manifest,
+      stops: read(manifest.files.stops),
+      patterns: file,
+      paths: read(manifest.files.paths),
+    })
+    const style = basemapStyle(readPaint(document.documentElement, paintTokens(withMore)), withMore)
+    const orders = acrossOf(style, withMore, 'E', ['A', 'E', 'Ex', 'Q'])
+    expect(orders.length).toBeGreaterThan(0)
+    const order = orders[0][0] === 'A' ? ['A', 'E', 'Ex', 'Q'] : ['Q', 'Ex', 'E', 'A']
+    for (const each of orders) expect(each).toEqual(order)
+  })
+
+  it("keeps a line alone on its track on the centre, beside another mode's line too", () => {
+    // M1 is the only metro line, and RE meets E only between Køge Nord and Køge, on its own track.
+    const offsets = new Set(
+      features(styleNow(), 'mylder-lines')
+        .filter((f) => ['M1', 'RE'].includes(f.properties!.line))
+        .map((f) => f.properties!.offset),
+    )
+    expect(offsets).toEqual(new Set([0]))
   })
 
   it('leaves the bus routes out at rest, as Perron draws a bus route only in focus', () => {

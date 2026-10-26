@@ -1,8 +1,8 @@
 // The vehicles as the canvas draws them: each trip of the snapshot that isn't cancelled, in its
 // line's colour and its data state's glyph, laid out as one typed array per attribute so deck.gl
 // takes them without copying (docs/screens.md, "The moving map"; docs/data-states.md, "Which
-// trips are on the map"). Positions and opacities are their own arrays, which the motion loop
-// writes into each frame (loop.ts); the glyphs change only with a snapshot, a data state or a
+// trips are on the map"). Positions, offsets and opacities are their own arrays, which the motion
+// loop writes into each frame (loop.ts); the glyphs change only with a snapshot, a data state or a
 // theme.
 import 'client-only'
 import type { DataState } from '../domain/data-state.ts'
@@ -11,6 +11,7 @@ import type { Network } from '../timetable/network.ts'
 import type { Snapshot, SnapshotTrip } from '../tracker/index.ts'
 import { glyphOf, lookOf, parseColour, vehicleTokens, type RGBA } from './glyphs.ts'
 import { modeColour, type Paint } from './paint.ts'
+import { strandTokens, vehicleOffsets } from './style/basemap.ts'
 import type { MapView } from './view.ts'
 
 const SHOW_ALL: Pick<MapView, 'hidden'> = { hidden: new Set() }
@@ -23,6 +24,16 @@ export interface Vehicles {
   readonly keys: readonly string[]
   /** Longitude and latitude, two per vehicle. */
   readonly positions: Float64Array
+  /**
+   * How far each vehicle is drawn off its position, in px, east and north, two per vehicle: onto
+   * its line's strand where lines share a track (Perron's map foundation, "Lines and dots").
+   */
+  readonly offsets: Float32Array
+  /**
+   * Each vehicle's strand on each step of its pattern, in px to the right of its way, which its
+   * offset turns to its heading; none for a vehicle that rides on the track's centre.
+   */
+  readonly strands: readonly (Float32Array | undefined)[]
   /** How opaque each vehicle is drawn, 0 to 1: under 1 only while it fades to a far new place. */
   readonly opacity: Float32Array
   readonly radius: Float32Array
@@ -38,13 +49,17 @@ export interface Vehicles {
   readonly haloColour: RGBA
 }
 
-/** Every token the vehicles read, for `readPaint`: the glyphs' and each line's colour. */
+/**
+ * Every token the vehicles read, for `readPaint`: the glyphs', each line's colour, and the
+ * strands and track spacings that set where they ride.
+ */
 export function vehiclePaint(network?: Network): string[] {
   return [
     ...vehicleTokens(),
     modeColour('bus'),
     modeColour('train'),
     ...(network?.patterns.lines.map((line) => line.colour) ?? []),
+    ...strandTokens(network),
   ]
 }
 
@@ -86,11 +101,14 @@ export function vehiclesOf(
 
   const drawn = snapshot.trips.filter((trip) => onMap(trip, filter.hidden))
   const n = drawn.length
+  const strands = network ? vehicleOffsets(paint, network) : []
   const vehicles = {
     length: n,
     trips: drawn,
     keys: drawn.map((trip) => trip.key),
     positions: new Float64Array(n * 2),
+    offsets: new Float32Array(n * 2),
+    strands: drawn.map((trip) => strands[trip.pattern]),
     opacity: new Float32Array(n).fill(1),
     radius: new Float32Array(n),
     lineWidth: new Float32Array(n),

@@ -77,6 +77,12 @@ export interface VehiclePicking {
 /** Turns a longitude and latitude into pixels from the canvas's top left. */
 type Project = (lonLat: [number, number]) => { x: number; y: number }
 
+/** Where the `i`th dot is drawn in the canvas: its position, moved by its offset onto its strand. */
+function drawnAt(vehicles: Vehicles, i: number, project: Project): [number, number] {
+  const { x, y } = project([vehicles.positions[i * 2], vehicles.positions[i * 2 + 1]])
+  return [x + vehicles.offsets[i * 2], y - vehicles.offsets[i * 2 + 1]]
+}
+
 export interface PickingListeners {
   /** Hears a tap on a dot, by its trip's key, so that its detail can open. */
   readonly onTap?: (key: string) => void
@@ -117,8 +123,7 @@ export function vehiclePicking(
   /** Where the `i`th dot is on the page, or where the pointer is before anything is drawn. */
   const dotAt = (i: number, info: PickingInfo): [number, number] => {
     if (!vehicles || !project) return onPage(info.x, info.y)
-    const { x, y } = project([vehicles.positions[i * 2], vehicles.positions[i * 2 + 1]])
-    return onPage(x, y)
+    return onPage(...drawnAt(vehicles, i, project))
   }
   /** The trip a pick found, if it found one of the dots. */
   const keyOf = (info: PickingInfo) =>
@@ -150,8 +155,7 @@ export function vehiclePicking(
       const i = indexOf(drawn, picked.key)
       // The trip has left the map: arrived, cancelled, or no longer in the snapshot.
       if (i < 0) return store.clear()
-      const { x, y } = projection([drawn.positions[i * 2], drawn.positions[i * 2 + 1]])
-      const point = onPage(x, y)
+      const point = onPage(...drawnAt(drawn, i, projection))
       const moved = Math.hypot(point[0] - picked.point[0], point[1] - picked.point[1])
       if (moved >= 0.5) store.pick({ ...picked, point })
     },

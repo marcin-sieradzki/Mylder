@@ -65,7 +65,7 @@ const dashed = [new PathStyleExtension({ dash: true })]
 
 /**
  * Each vehicle set's glyph attributes as deck.gl takes them, made once, so a frame or a zoom
- * uploads only the positions and opacities.
+ * uploads only the positions, offsets and opacities.
  */
 const binary = new WeakMap<Vehicles, ReturnType<typeof attributesOf>>()
 
@@ -95,6 +95,8 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
   const { length } = vehicles
   const moving = {
     getPosition: { value: vehicles.positions, size: 2 },
+    // East and north in px, as deck.gl's common space runs, y up.
+    getPixelOffset: { value: vehicles.offsets, size: 2 },
     getOpacity: { value: vehicles.opacity, size: 1 },
   }
   return [

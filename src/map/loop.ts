@@ -1,6 +1,6 @@
 // The vehicles' animation loop: outside React, each frame it places every dot where its motion
-// (motion.ts) has it now and writes the point into the vehicles' positions, then hands them to
-// the canvas (docs/live-data.md, "Moving between polls"). Under the system's reduced motion
+// (motion.ts) has it now and writes the point into the vehicles' positions, and its offset onto
+// its line's strand (offsets.ts), then hands them to the canvas (docs/live-data.md, "Moving between polls"). Under the system's reduced motion
 // setting, or while the pause control holds, it runs no frames: the dots step to their new
 // places once per snapshot and stand still between. A trip that cannot be placed stays where
 // the snapshot put it, said once, while the others move.
@@ -10,6 +10,7 @@ import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import type { Along } from './follow.ts'
 import { motionOf, placeAt, type Motion } from './motion.ts'
+import { writeOffset } from './offsets.ts'
 import { motionPause, type MotionPause } from './pause.ts'
 import type { Vehicles } from './vehicles.ts'
 
@@ -102,6 +103,7 @@ export function vehicleLoop({
         const [lat, lon] = pointAt(mover.path, mover.progress)
         vehicles.positions[i * 2] = lon
         vehicles.positions[i * 2 + 1] = lat
+        writeOffset(vehicles, i, mover.path, mover.progress)
         vehicles.opacity[i] = mover.opacity
       } catch (error) {
         drop(i, error)

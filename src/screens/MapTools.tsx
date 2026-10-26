@@ -8,6 +8,7 @@ import { mapCamera, useCameraView, type CameraView } from '../map/camera'
 import { listenForMapKeys } from '../map/keys'
 import { motionPause, useMotionPaused } from '../map/pause'
 import styles from './MapTools.module.css'
+import { PerronIcon } from './PerronIcon'
 
 const zoomIn = () => mapCamera.zoomIn()
 const zoomOut = () => mapCamera.zoomOut()
@@ -44,11 +45,14 @@ export function MapTools() {
     <div className={styles.tools}>
       <MapScale />
       <div className={styles.buttons}>
-        {/* Perron has no pause icon yet, so the pause says its word. */}
+        {/* MapControls holds only its own three buttons, so the pause has a bar of its own. */}
         <Toolbar aria-label={dictionary.controls.motion}>
-          <ToolbarButton color="neutral" onClick={togglePause}>
-            {paused ? dictionary.controls.resume : dictionary.controls.pause}
-          </ToolbarButton>
+          <ToolbarButton
+            color="neutral"
+            startIcon={<PerronIcon name={paused ? 'play' : 'pause'} />}
+            aria-label={paused ? dictionary.controls.resume : dictionary.controls.pause}
+            onClick={togglePause}
+          />
         </Toolbar>
         <MapControls
           disabled={!hasMap}

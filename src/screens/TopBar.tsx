@@ -1,10 +1,11 @@
 'use client'
 
-import { Brand, FilterChip, IconButton, Surface, Text } from '@mylder/perron'
+import { FilterChip, IconButton } from '@mylder/perron'
+import { TopBar as PerronTopBar } from '@mylder/perron/patterns'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useLastAnswer, useSnapshot } from '../map/live'
-import { usePaused } from '../map/notices'
+import { useOutOfDate, usePaused } from '../map/notices'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, useHiddenModes } from '../map/view'
 import { MODES, type Mode } from '../timetable/format'
@@ -13,27 +14,11 @@ import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { aboutDialog } from './about'
 import { LanguageSwitch } from './LanguageSwitch'
+import { PerronIcon } from './PerronIcon'
 import styles from './TopBar.module.css'
+import { usePhoneOnceStarted } from './usePhone'
 
 const openAbout = (event: MouseEvent<HTMLButtonElement>) => aboutDialog.open(event.currentTarget)
-
-/** Perron's `info` icon, "About and help", drawn on the top bar's 18 px grid. */
-const INFO_ICON = (
-  <svg
-    className={styles.icon}
-    viewBox="0 0 18 18"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <circle cx="9" cy="9" r="7" />
-    <path d="M9 8.2v4.3" />
-    <circle cx="9" cy="5.6" r=".4" fill="currentColor" />
-  </svg>
-)
 
 /** The modes the timetable runs, in Mylder's order: Bus, Metro, S-tog, Train, Light rail. */
 const modesOf = (network: Network): Mode[] => {
@@ -52,9 +37,11 @@ function underwayByMode(snapshot: Snapshot | undefined): Map<Mode, number> {
 }
 
 /**
- * The moving map's top bar (docs/screens.md, "The moving map"): the brand, the Updated line, the
- * mode filters, the language switch and the About button, composed from Perron until its TopBar
- * pattern ships.
+ * The moving map's top bar (docs/screens.md, "The moving map"): Perron's TopBar with the brand,
+ * the Updated line, the mode filters, the language switch and the About button, in the page's
+ * header. Its phone layout follows the window's width: the prerendered page carries both layouts
+ * and its CSS shows the one for the width, so a phone paints its own bar first; once the page has
+ * started it renders that one only.
  */
 export function TopBar() {
   const { lang, dictionary } = useI18n()
@@ -64,6 +51,8 @@ export function TopBar() {
   // The time the server received the latest position answer; while Paused it holds and says so.
   const updatedAt = useLastAnswer()
   const paused = usePaused()
+  const outOfDate = useOutOfDate()
+  const phone = usePhoneOnceStarted()
   const underway = underwayByMode(snapshot)
   const timezone = timezoneOf(network)
 
@@ -74,38 +63,50 @@ export function TopBar() {
     mapView.update({ hidden: next })
   }
 
+  const bar = (size: 'small' | 'medium') => (
+    <div key={size} className={styles[size]}>
+      <PerronTopBar
+        size={size}
+        brandHref={`/${lang}`}
+        time={
+          updatedAt === undefined ? undefined : clockTime(updatedAt, timezone, { seconds: true })
+        }
+        // Mylder says a pause after the time, "Updated 07:20:00, paused", so it gives the whole
+        // phrase in its own words rather than Perron's "Paused ·" before it.
+        updatedLabel={dictionary.topBar[paused ? 'updatedPaused' : 'updated']}
+        // Perron's own phrase, "Updated 07:20:00, may be out of date", in the page's language.
+        outOfDate={outOfDate}
+        filtersLabel={dictionary.topBar.modes}
+        filters={
+          network
+            ? modesOf(network).map((mode) => (
+                <FilterChip
+                  key={mode}
+                  selected={!hidden.has(mode)}
+                  onChange={(_event, shown) => show(mode, shown)}
+                  count={underway.get(mode) ?? 0}
+                >
+                  {dictionary.modes[mode]}
+                </FilterChip>
+              ))
+            : undefined
+        }
+        tools={
+          <>
+            <LanguageSwitch />
+            <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
+              <PerronIcon name="info" />
+            </IconButton>
+          </>
+        }
+      />
+    </div>
+  )
+
   return (
-    <Surface variant="glass" render={<header />} className={styles.bar}>
-      <div className={styles.identity}>
-        {/* oxlint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label -- Brand fills the link with its name */}
-        <Brand render={<a href={`/${lang}`} />} />
-        <Text variant="data-sm" emphasis="secondary" className={styles.updated}>
-          {dictionary.topBar[paused ? 'updatedPaused' : 'updated'].replace(
-            '{time}',
-            updatedAt === undefined ? '—' : clockTime(updatedAt, timezone, { seconds: true }),
-          )}
-        </Text>
-      </div>
-      {network ? (
-        <fieldset aria-label={dictionary.topBar.modes} className={styles.modes}>
-          {modesOf(network).map((mode) => (
-            <FilterChip
-              key={mode}
-              selected={!hidden.has(mode)}
-              onChange={(_event, shown) => show(mode, shown)}
-              count={underway.get(mode) ?? 0}
-            >
-              {dictionary.modes[mode]}
-            </FilterChip>
-          ))}
-        </fieldset>
-      ) : null}
-      <div className={styles.tools}>
-        <LanguageSwitch />
-        <IconButton label={dictionary.topBar.about} size="large" onClick={openAbout}>
-          {INFO_ICON}
-        </IconButton>
-      </div>
-    </Surface>
+    <header>
+      {phone !== false && bar('small')}
+      {phone !== true && bar('medium')}
+    </header>
   )
 }
