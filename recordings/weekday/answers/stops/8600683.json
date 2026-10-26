@@ -15,5 +15,6 @@
   "source": {
     "kind": "timetable"
   },
-  "departures": []
+  "departures": [],
+  "messages": []
 }

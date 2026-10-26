@@ -1,10 +1,12 @@
 // Freezing and replaying recordings: the tracker runs over a plan's minutes on the test clock,
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
-// layer, and both give the same snapshots (docs/testing-seams.md).
+// layer, and both give the same snapshots (docs/testing-seams.md). The stop answers a plan saves
+// for screen tests are worked out from those snapshots.
 import 'server-only'
 import { join } from 'node:path'
 import { Effect, References } from 'effect'
 import { TestClock } from 'effect/testing'
+import { stopDeparturesFrom, type StopDepartures } from '../answers.ts'
 import { serviceOf, type Service } from '../rejseplanen/answers.ts'
 import * as Http from '../rejseplanen/http.ts'
 import { stoppedCpu } from '../report.ts'
@@ -20,38 +22,47 @@ import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
 
-/** What a plan's run gives: the snapshot of every minute, and its route answers by path. */
-export interface Played {
-  readonly snapshots: readonly Snapshot[]
-  /** Each saved route answer by its file's path in the folder, such as `answers/stops/27532.json`. */
-  readonly answers: ReadonlyMap<string, unknown>
-}
-
-/** A frozen recording: each service's calls in order, and what the run gave. */
-export interface Frozen extends Played {
+/** A frozen recording: each service's calls in order, and the snapshot of every minute. */
+export interface Frozen {
   readonly calls: Calls
+  readonly snapshots: readonly Snapshot[]
 }
 
-/** Where a stop's saved route answer goes in a recording's folder. */
-export const stopAnswerFile = (stopId: string): string => join('answers', 'stops', `${stopId}.json`)
+/**
+ * The stop answers a plan saves for screen tests, by their files' paths in its folder, such as
+ * `answers/stops/27532.json`: each as the stop route answers from the timetable and the snapshot
+ * of the plan's minute, with no call, so saving them spends none and leaves the snapshots as they
+ * are.
+ */
+export function savedAnswers(
+  plan: RecordingPlan,
+  timetable: Timetable,
+  snapshots: readonly Snapshot[],
+): ReadonlyMap<string, StopDepartures | undefined> {
+  const answers = new Map<string, StopDepartures | undefined>()
+  if (!plan.answers) return answers
+  const snapshot = snapshots[plan.answers.minute]
+  for (const stop of plan.answers.stops) {
+    answers.set(
+      join('answers', 'stops', `${stop}.json`),
+      stopDeparturesFrom(timetable, snapshot, stop),
+    )
+  }
+  return answers
+}
 
 const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: plan.name })
 
-/** The tracker's snapshot at the start of each of a plan's minutes, and the answers it saves. */
+/** The tracker's snapshot at the start of each of a plan's minutes. */
 const play = (plan: RecordingPlan) =>
   Effect.gen(function* () {
     const tracker = yield* Tracker
     const snapshots: Snapshot[] = []
-    const answers = new Map<string, unknown>()
     for (let minute = 0; minute < plan.minutes; minute++) {
       yield* TestClock.setTime(plan.start + minute * MINUTE)
       snapshots.push(yield* tracker.getSnapshot)
-      if (plan.answers?.minute !== minute) continue
-      for (const stop of plan.answers.stops) {
-        answers.set(stopAnswerFile(stop), yield* tracker.getStopDepartures(stop))
-      }
     }
-    return { snapshots, answers } satisfies Played
+    return snapshots
   }).pipe(
     // Each run's report line is noise here; warnings still show.
     Effect.provideService(References.MinimumLogLevel, 'Warn'),
@@ -124,12 +135,12 @@ export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect
       trackerLayer({ timetable, source: sourceOf(plan), http: Http.layer(taped), cpu: stoppedCpu }),
     ),
     Effect.provide(TestClock.layer()),
-    Effect.map((played) => ({ calls, ...played })),
+    Effect.map((snapshots) => ({ calls, snapshots })),
   )
 }
 
 /** Runs the tracker over a plan against its recording folder, as it ran when it was frozen. */
-export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Played> =>
+export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<readonly Snapshot[]> =>
   Effect.gen(function* () {
     const timetable = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
     return yield* play(plan).pipe(

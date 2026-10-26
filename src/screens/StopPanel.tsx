@@ -1,7 +1,12 @@
 'use client'
 
 import { EmptyState, LineBadge, Text } from '@mylder/perron'
-import { DepartureRow, DetailPanel, SourceLine } from '@mylder/perron/patterns'
+import {
+  DepartureRow,
+  DetailPanel,
+  SourceLine,
+  type SourceLineSource,
+} from '@mylder/perron/patterns'
 import type { DataState } from '../domain/data-state'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { useI18n } from '../i18n/useI18n'
@@ -125,16 +130,23 @@ function Departures({ answer, timezone, words }: DeparturesProps) {
           {words.fromTimetable}
         </Text>
       ) : null}
-      <SourceLine
-        sources={[
-          {
-            name: words.timetableAndPositions,
-            time: clockTime(answer.fetched, timezone, { seconds: true }),
-          },
-        ]}
-      />
+      <SourceLine sources={[sourceOf(answer, timezone, words)]} />
     </>
   )
+}
+
+/**
+ * Where the answer's times came from, with the time of that source's data: a board call's moment,
+ * or the positions' time of the snapshot the timetable's times were shifted by.
+ */
+function sourceOf(answer: StopDepartures, timezone: string, words: Words): SourceLineSource {
+  const { source } = answer
+  return source.kind === 'rejseplanen'
+    ? { name: 'Rejseplanen', time: clockTime(source.at, timezone, { seconds: true }) }
+    : {
+        name: words.timetableAndPositions,
+        time: clockTime(answer.fetched, timezone, { seconds: true }),
+      }
 }
 
 interface DepartureProps {

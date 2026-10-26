@@ -16,8 +16,8 @@ export interface RecordingPlan {
   /** Fill every `journeyPos` answer to this many journeys, as a full box at a peak would be. */
   readonly fill?: number
   /**
-   * Route answers saved beside the snapshots, for screen tests: these stops' departures as the
-   * stop route gives them at the start of the plan's `minute`, counted from 0.
+   * Stop answers saved beside the snapshots, for screen tests: these stops' departures as the stop
+   * route answers them from the timetable and the snapshot of the plan's `minute`, counted from 0.
    */
   readonly answers?: { readonly minute: number; readonly stops: readonly string[] }
 }

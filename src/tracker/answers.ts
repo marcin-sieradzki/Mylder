@@ -1,12 +1,14 @@
 // The stop and trip answers (docs/screens.md, "Vehicle detail" and "Stop departures"): a stop's
 // departures and a trip's calls from the timetable plus the snapshot's delay for each trip. They
 // share nothing with the run but the snapshot, so they are pure functions of the two; the tracker
-// reads the snapshot and calls them. The on-demand calls (#32) fall back to them.
+// reads the snapshot and calls them. The on-demand calls (`on-demand.ts`, `stop-board.ts`) fall
+// back to them.
 import 'server-only'
 import { timedCalls } from '../domain/trip-motion.ts'
 import { MODES, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
+import type { Disruption } from './disruptions.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
 
@@ -28,7 +30,10 @@ const FROM_TIMETABLE: AnswerSource = { kind: 'timetable' }
 /** A line as a panel names it: its public name, its mode and its Perron colour token. */
 export type AnswerLine = Pick<LineRecord, 'name' | 'mode' | 'colour'>
 
-/** One departure from a stop: the timetable's time plus the snapshot's delay for its trip. */
+/**
+ * One departure from a stop: the timetable's time, and the expected one from the board or the
+ * snapshot's delay for its trip. Its delay is `expected - scheduled`.
+ */
 export interface StopDeparture {
   readonly trip: string
   readonly line: string
@@ -39,11 +44,14 @@ export interface StopDeparture {
   readonly platform: string
   readonly scheduled: number
   readonly expected?: number
-  readonly state: SnapshotTrip['state']
-  /** The trip won't call here: cancelled whole, or this call. The row stays, marked. */
-  readonly cancelled?: true
-  /** The platform or track the board gives, when it gives one. */
+  /** The platform's track or stand, when the board gives one. */
   readonly track?: string
+  /**
+   * The trip won't call here: the board says so, or the snapshot has it cancelled whole or at this
+   * call. The row stays, marked.
+   */
+  readonly cancelled?: true
+  readonly state: SnapshotTrip['state']
 }
 
 export interface StopDepartures {
@@ -53,11 +61,13 @@ export interface StopDepartures {
     readonly name: string
     readonly lines: readonly AnswerLine[]
   }
-  /** The snapshot the delays came from, and when the next one is due. */
+  /** The snapshot the states and delays came from, and when the answer is next due. */
   readonly fetched: number
   readonly nextDue: number
   readonly source: AnswerSource
   readonly departures: readonly StopDeparture[]
+  /** The stop's disruption messages, from the board and the disruption list, as received. */
+  readonly messages: readonly Disruption[]
 }
 
 export interface TripCall {
@@ -88,7 +98,7 @@ export interface TripDetail {
 export type SnapshotDelays = Pick<Snapshot, 'fetched' | 'nextDue' | 'trips'>
 
 /** The snapshot's trips by key. */
-const tripsByKey = (snapshot: SnapshotDelays) =>
+export const tripsByKey = (snapshot: SnapshotDelays) =>
   new Map(snapshot.trips.map((trip) => [trip.key, trip]))
 
 /** A trip's calls shifted by the snapshot's delay for it, when it has one. */
@@ -102,6 +112,12 @@ export function stopIndexOf(timetable: Timetable, id: string): number {
   if (byStop >= 0) return byStop
   const platform = platforms.findIndex((each) => each.id === platformId(id))
   return platform >= 0 ? platforms[platform].stop : -1
+}
+
+/** A stop as its answer names it, with the lines whose patterns call at its platforms. */
+export function stopOf(timetable: Timetable, stopIndex: number): StopDepartures['stop'] {
+  const { id, name } = timetable.stops.stops[stopIndex]
+  return { id, name, lines: linesAt(timetable, stopIndex) }
 }
 
 /** The lines whose patterns call at a stop's platforms, in the modes' order and then by name. */
@@ -148,7 +164,7 @@ export function stopDeparturesFrom(
 ): StopDepartures | undefined {
   const stopIndex = stopIndexOf(timetable, stopId)
   if (stopIndex < 0) return undefined
-  const { platforms, stops } = timetable.stops
+  const { platforms } = timetable.stops
   const now = snapshot.fetched
   const onMap = tripsByKey(snapshot)
   const departures: StopDeparture[] = []
@@ -179,13 +195,13 @@ export function stopDeparturesFrom(
     }
   }
   departures.sort((a, b) => (a.expected ?? a.scheduled) - (b.expected ?? b.scheduled))
-  const stop = stops[stopIndex]
   return {
-    stop: { id: stop.id, name: stop.name, lines: linesAt(timetable, stopIndex) },
+    stop: stopOf(timetable, stopIndex),
     fetched: now,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
     departures: departures.slice(0, MAX_DEPARTURES),
+    messages: [],
   }
 }
 

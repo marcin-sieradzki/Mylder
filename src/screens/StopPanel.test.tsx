@@ -173,6 +173,18 @@ describe("a stop's departures", () => {
     expect(stop).toHaveTextContent('Timetable and positions · updated 07:21:00')
   })
 
+  it('names Rejseplanen and the time of its call when the answer came from the board', async () => {
+    // 07:21:20 in Copenhagen.
+    answers.set('27532', {
+      ...NORREPORT,
+      source: { kind: 'rejseplanen', at: NORREPORT.fetched + 20_000 },
+    })
+    openStop('en', '?stop=27532')
+    const stop = await panel('Nørreport St.')
+    expect(stop).toHaveTextContent('Rejseplanen · updated 07:21:20')
+    expect(stop).not.toHaveTextContent('From the timetable')
+  })
+
   it('says the same in Danish', async () => {
     answers.set('27532', withRow(NORREPORT, E_TO_KOGE, { cancelled: true }))
     openStop('da', '?stop=27532')
