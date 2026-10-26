@@ -4,12 +4,12 @@
 import 'server-only'
 import { runTracker as run } from './runtime.ts'
 import type { Disruptions } from './disruptions.ts'
-import type { StopDepartures, TripDetail } from './tracker.ts'
+import type { StopDepartures, TripDetail } from './answers.ts'
 import type { Snapshot } from './snapshot.ts'
 
 export type { Snapshot, SnapshotTrip, NextCall } from './snapshot.ts'
 export type { Disruption, Disruptions } from './disruptions.ts'
-export type { StopDepartures, StopDeparture, TripCall, TripDetail } from './tracker.ts'
+export type { StopDepartures, StopDeparture, TripCall, TripDetail } from './answers.ts'
 
 /** The whole-city snapshot: the stored one while it is fresh, else a new run's. */
 export const getSnapshot = (): Promise<Snapshot> => run((tracker) => tracker.getSnapshot)

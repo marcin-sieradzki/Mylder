@@ -45,6 +45,69 @@
     "transitData": "Trafikdata",
     "openStreetMap": "OpenStreetMap-bidragydere"
   },
+  "about": {
+    "title": "Om Mylder",
+    "description": "Et livekort over Københavns busser, S-tog, metro og tog, ærligt om hvor friske positionerne er.",
+    "honest": "Mylder viser data, som Rejseplanen sender dem, med Rejseplanens egne ord og sprog, og markerer hvert tal, Mylder selv regner ud.",
+    "nonCommercial": "Mylder er ikke-kommercielt: ingen reklamer, ingen betalt version og intet salg af data eller af noget, der er bygget på dem.",
+    "credits": {
+      "title": "Data og kreditering",
+      "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
+      "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "style": "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se {licence}.",
+      "styleLicence": "licensen"
+    },
+    "states": {
+      "title": "Datatilstande",
+      "live": "Køretøjet har selv meldt denne position inden for omtrent de seneste to forespørgsler.",
+      "ageing": "Køretøjets seneste melding er ældre end det, men under 5 minutter; prikken kører videre fra den langs linjen.",
+      "estimated": "Ingen ny melding, men Rejseplanen har stadig turen: en position, den har beregnet, eller forventede tider.",
+      "timetableOnly": "Ingen realtid for turen i dag, så den er placeret efter køreplanen. Det gælder alle metrotog.",
+      "noSignal": "Turen havde realtid, og den stoppede for 5 minutter siden eller mere; prikken kører efter køreplanen og sin seneste forsinkelse."
+    },
+    "status": {
+      "title": "Denne side",
+      "source": "Kilde",
+      "simulated": "Simulerede køretøjer, scenarie {name}",
+      "recording": "En optagelse, {name}",
+      "rejseplanen": "Rejseplanen",
+      "notReal": "Køretøjerne på denne side er ikke rigtige.",
+      "positions": "Positioner",
+      "positionModes": {
+        "REPORT_ONLY": "Kun meldinger fra køretøjerne",
+        "CALC_REPORT": "Positioner beregnet af Rejseplanen",
+        "alternating": "Meldinger og beregnede positioner på skift",
+        "none": "Ingen positionskald"
+      },
+      "apiTime": "Rejseplanens realtid",
+      "updates": "Forespørgsel",
+      "every": "Hvert {interval}",
+      "budget": "Databudget",
+      "budgetLevels": {
+        "normal": "Normalt",
+        "stretched": "Forlænget",
+        "tight": "Stramt",
+        "spent": "Brugt op"
+      },
+      "calls": "Kald denne måned",
+      "paused": "Livedata er sat på pause indtil {date}: denne måneds kald er brugt op.",
+      "budgetLine": "Opdaterer hvert {interval} for at holde databudgettet.",
+      "store": "Serverlager",
+      "storeOk": "Tilgængeligt",
+      "storeUnavailable": "Utilgængeligt: intet køretøj kan være Ældre eller Intet signal, før det er tilbage.",
+      "disruptions": "Driftsforstyrrelser",
+      "checked": "Tjekket {time}",
+      "checkFailed": "Sidst tjekket {time}; det seneste tjek mislykkedes.",
+      "notChecked": "Ikke tjekket endnu"
+    },
+    "keys": {
+      "title": "Taster",
+      "zoom": "{plus} og {minus} zoomer kortet.",
+      "pan": "{left} {right} {up} {down} flytter det.",
+      "close": "{esc} lukker køretøjets kort eller panel.",
+      "pause": "Pause, ved siden af zoomknapperne, stopper køretøjerne, og Fortsæt sætter dem i gang igen."
+    }
+  },
   "sheet": {
     "title": "Overblik",
     "pulse": "Byens puls",
