@@ -1,9 +1,9 @@
 // The vehicles' overlay on the map: deck.gl's own canvas over MapLibre's (ADR 0003), drawing
-// the live snapshot's vehicles where the motion loop moves them each frame, with their glyphs
-// made again when a snapshot lands, a data state turns by the clock or the theme changes, and
-// their size when the zoom moves it. A hover or a tap picks a dot for its card (picking.ts). It
-// polls the snapshot while the map is open. The number of vehicles drawn is on the map's
-// container as `data-vehicles`, for tests.
+// the live snapshot's vehicles, less the modes the viewer's filters hide, where the motion loop
+// moves them each frame, with their glyphs made again when a snapshot lands, a data state turns
+// by the clock, a filter or the theme changes, and their size when the zoom moves it. A hover or
+// a tap picks a dot for its card (picking.ts). It polls the snapshot while the map is open. The
+// number of vehicles drawn is on the map's container as `data-vehicles`, for tests.
 import 'client-only'
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import type { Map as MapLibreMap } from 'maplibre-gl'
@@ -18,6 +18,7 @@ import { dataStates, serverNow } from './states.ts'
 import { timetables } from './timetable.ts'
 import { vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf, type Vehicles } from './vehicles.ts'
+import { mapView } from './view.ts'
 
 export interface VehicleOverlay {
   /** Reads Perron's paint again, after the theme changed. */
@@ -68,7 +69,11 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     // A newer snapshot may have landed meanwhile: it draws itself.
     if (removed || liveSnapshot.get().snapshot !== snapshot) return
     const paint = readPaint(root, vehiclePaint(network))
-    loop.show(vehiclesOf(snapshot, network, paint, dataStates.get()), snapshot, network)
+    loop.show(
+      vehiclesOf(snapshot, network, paint, dataStates.get(), mapView.get()),
+      snapshot,
+      network,
+    )
   }
 
   const stopListening = liveSnapshot.subscribe(() => {
@@ -78,6 +83,14 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     void draw()
   })
   const stopAgeing = dataStates.subscribe(() => void draw())
+  // A mode filter turned on or off draws the same snapshot again without that mode.
+  let filteredBy = mapView.get().hidden
+  const stopFiltering = mapView.subscribe(() => {
+    const { hidden } = mapView.get()
+    if (hidden === filteredBy) return
+    filteredBy = hidden
+    void draw()
+  })
   const stopPolling = pollSnapshot()
   drawnFrom = liveSnapshot.get().snapshot
   void draw()
@@ -99,6 +112,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       removed = true
       stopListening()
       stopAgeing()
+      stopFiltering()
       stopPolling()
       loop.stop()
       map.off('zoom', onZoom)

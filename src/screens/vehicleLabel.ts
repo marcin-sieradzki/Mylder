@@ -31,9 +31,13 @@ function ageOf(moment: number, now: number, words: Words): string {
     : fill(words.minutes, { minutes: Math.floor(seconds / 60) })
 }
 
-/** The card's heading, such as "Bus 5C to Husum Torv". */
-export const titleOf = (trip: SnapshotTrip, words: Words): string =>
-  fill(words.title, { mode: words.modes[trip.mode], line: trip.line, headsign: trip.headsign })
+/** The card's heading, such as "Bus 5C to Husum Torv", in the top bar's words for the modes. */
+export const titleOf = (trip: SnapshotTrip, dictionary: ClientDictionary): string =>
+  fill(dictionary.vehicle.title, {
+    mode: dictionary.modes[trip.mode],
+    line: trip.line,
+    headsign: trip.headsign,
+  })
 
 /**
  * The state's label for `trip` in `state` at `now`, such as "Reported 20 s ago", or none where

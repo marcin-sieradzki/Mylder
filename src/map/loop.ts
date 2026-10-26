@@ -55,6 +55,10 @@ interface Shown {
   readonly movers: readonly (Mover | undefined)[]
 }
 
+/** Whether two sets of vehicles are the same trips in the same order. */
+const sameTrips = (a: Vehicles, b: Vehicles): boolean =>
+  a.length === b.length && a.keys.every((key, i) => key === b.keys[i])
+
 const systemReducedMotion = (): MediaSetting | null =>
   typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
 
@@ -151,7 +155,13 @@ export function vehicleLoop({
   return {
     show(vehicles, snapshot, network) {
       const at = now()
-      const same = shown && shown.snapshot === snapshot && shown.network === network
+      // A filter turned on or off shows the same snapshot with other trips: each moves on from
+      // where it stands rather than taking another's motion.
+      const same =
+        shown &&
+        shown.snapshot === snapshot &&
+        shown.network === network &&
+        sameTrips(shown.vehicles, vehicles)
       const movers = same ? shown!.movers : moversOf(vehicles, snapshot, network, at)
       shown = { vehicles, snapshot, network, movers }
       // The same snapshot again brings new glyphs only: stilled dots stay where they stand.

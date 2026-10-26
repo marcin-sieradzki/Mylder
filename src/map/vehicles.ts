@@ -10,6 +10,9 @@ import type { Network } from '../timetable/network.ts'
 import type { Snapshot, SnapshotTrip } from '../tracker/index.ts'
 import { glyphOf, lookOf, parseColour, vehicleTokens, type RGBA } from './glyphs.ts'
 import { modeColour, type Paint } from './paint.ts'
+import type { MapView } from './view.ts'
+
+const SHOW_ALL: Pick<MapView, 'hidden'> = { hidden: new Set() }
 
 export interface Vehicles {
   readonly length: number
@@ -50,12 +53,14 @@ const INK: RGBA = [0, 0, 0, 255]
  * The vehicles of a snapshot, on its timetable's network once that has loaded, in the paint
  * read now. Until then, and for a line Perron has no colour for, a vehicle takes its mode's.
  * Each takes its data state from `states`, the states by the clock, else the snapshot's own.
+ * A mode the viewer's filter hides is left out: a filter changes what is drawn, never the data.
  */
 export function vehiclesOf(
   snapshot: Snapshot,
   network: Network | undefined,
   paint: Paint,
   states?: ReadonlyMap<string, DataState>,
+  filter: Pick<MapView, 'hidden'> = SHOW_ALL,
 ): Vehicles {
   const look = lookOf(paint)
   const colours = new Map<string, RGBA>()
@@ -71,7 +76,7 @@ export function vehiclesOf(
     return own ? colour(line.colour) : colour(modeColour(trip.mode))
   }
 
-  const drawn = snapshot.trips.filter((trip) => !trip.cancelled)
+  const drawn = snapshot.trips.filter((trip) => !trip.cancelled && !filter.hidden.has(trip.mode))
   const n = drawn.length
   const vehicles = {
     length: n,

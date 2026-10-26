@@ -3,6 +3,7 @@
 // they are served and loaded"). The routes mark each version's files immutable, so a reload
 // takes them from the browser's cache.
 import 'client-only'
+import { useEffect, useState } from 'react'
 import { readNetwork, type Network } from '../timetable/network.ts'
 
 /** Reads one route's JSON; rejects on a network failure or an answer other than a 2xx. */
@@ -59,3 +60,28 @@ export function timetableLoader(fetchJson: FetchJson = fetchFromServer): Timetab
 
 /** The page's one loader, shared by everything on the map. */
 export const timetables = timetableLoader()
+
+/**
+ * A version's network for a component, such as the one the live snapshot names: none until it
+ * has loaded, then the latest loaded until the next one has. One that won't load leaves the last.
+ */
+export function useNetwork(
+  version: string | undefined,
+  loader: TimetableLoader = timetables,
+): Network | undefined {
+  const [network, setNetwork] = useState<Network>()
+  useEffect(() => {
+    if (!version) return
+    let wanted = true
+    loader.version(version).then(
+      (loaded) => {
+        if (wanted) setNetwork(loaded)
+      },
+      (error: unknown) => console.error('The timetable could not load', error),
+    )
+    return () => {
+      wanted = false
+    }
+  }, [version, loader])
+  return network
+}

@@ -1,0 +1,83 @@
+/* The top bar floats over the map on glass. On a desktop it is one row: the brand and the Updated
+   line, the mode filters, then the language switch and About at the end. On a phone the Updated
+   line sits under the brand and the filters take a second row of their own, scrolling sideways if
+   a timetable has more modes than fit. */
+.bar {
+  position: absolute;
+  inset-block-start: var(--perron-space-300);
+  inset-inline: var(--perron-space-300);
+  z-index: var(--perron-z-index-map-controls);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--perron-space-300);
+  row-gap: var(--perron-space-100);
+  min-block-size: var(--perron-size-top-bar-phone);
+  padding-block: var(--perron-space-100);
+  padding-inline: var(--perron-space-400);
+}
+
+/* The brand and the Updated line: side by side on a desktop, the line under the brand on a phone. */
+.identity {
+  display: flex;
+  align-items: center;
+  column-gap: var(--perron-space-300);
+}
+
+.updated {
+  white-space: nowrap;
+}
+
+/* A fieldset, so the chips are one named group; without its own box. */
+.modes {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  gap: var(--perron-space-200);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--perron-space-100);
+  margin-inline-start: auto;
+}
+
+.icon {
+  display: block;
+  inline-size: var(--perron-icon-size);
+  block-size: var(--perron-icon-size);
+}
+
+/* Up to Perron's breakpoint.phone (760px); a custom property cannot sit in a media query. */
+@media (max-width: 760px) {
+  .bar {
+    padding-inline: var(--perron-space-300);
+  }
+
+  .identity {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modes {
+    order: 1;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: var(--perron-space-100);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-block-end: var(--perron-space-100);
+  }
+}
+
+@media (min-width: 761px) {
+  .bar {
+    min-block-size: var(--perron-size-top-bar);
+    padding-block: 0;
+  }
+}

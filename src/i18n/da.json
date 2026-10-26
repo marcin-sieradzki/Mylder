@@ -10,15 +10,20 @@
     "label": "Sprog",
     "switchTo": "English"
   },
+  "topBar": {
+    "updated": "Opdateret {time}",
+    "modes": "Transportformer",
+    "about": "Om Mylder"
+  },
+  "modes": {
+    "bus": "Bus",
+    "metro": "Metro",
+    "s-tog": "S-tog",
+    "train": "Tog",
+    "light-rail": "Letbane"
+  },
   "vehicle": {
     "title": "{mode} {line} mod {headsign}",
-    "modes": {
-      "bus": "Bus",
-      "metro": "Metro",
-      "s-tog": "S-tog",
-      "train": "Tog",
-      "light-rail": "Letbane"
-    },
     "reported": "Meldt for {age} siden",
     "lastSeen": "Sidst set for {age} siden",
     "estimated": "Beregnet ud fra køreplanen",

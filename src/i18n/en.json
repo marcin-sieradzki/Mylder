@@ -10,15 +10,20 @@
     "label": "Language",
     "switchTo": "Dansk"
   },
+  "topBar": {
+    "updated": "Updated {time}",
+    "modes": "Modes",
+    "about": "About Mylder"
+  },
+  "modes": {
+    "bus": "Bus",
+    "metro": "Metro",
+    "s-tog": "S-tog",
+    "train": "Train",
+    "light-rail": "Light rail"
+  },
   "vehicle": {
     "title": "{mode} {line} to {headsign}",
-    "modes": {
-      "bus": "Bus",
-      "metro": "Metro",
-      "s-tog": "S-tog",
-      "train": "Train",
-      "light-rail": "Light rail"
-    },
     "reported": "Reported {age} ago",
     "lastSeen": "Last seen {age} ago",
     "estimated": "Estimated from schedule",

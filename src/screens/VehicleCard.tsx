@@ -70,7 +70,7 @@ function Card({ trip, point, live }: CardProps) {
   const label = stateLabelOf(trip, state, now, words)
   return (
     <MapTooltip open anchorEl={anchor} onClose={close} role="tooltip" className={styles.card}>
-      <span className={styles.title}>{titleOf(trip, words)}</span>
+      <span className={styles.title}>{titleOf(trip, dictionary)}</span>
       <span className={styles.state}>
         <VehicleDotLabel variant={state} />
         {label === undefined ? null : <span>{label}</span>}
