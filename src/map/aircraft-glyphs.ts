@@ -10,7 +10,8 @@ import 'client-only'
 import icon from '@mylder/perron/icons/aircraft.svg'
 import type { AircraftState } from '../domain/aircraft-state.ts'
 import type { SnapshotAircraft } from '../tracker/aircraft/index.ts'
-import { lookOf, parseColour, vehicleTokens, type RGBA } from './glyphs.ts'
+import { urlOf, type Asset } from './asset.ts'
+import { lookOf, parseColour, vehicleTokens, withAlpha, type RGBA } from './glyphs.ts'
 import { numberOf, type Paint } from './paint.ts'
 
 const COLOUR = 'perron-color-map-aircraft'
@@ -71,8 +72,6 @@ export interface AircraftGlyph {
   readonly angle: number
 }
 
-const withAlpha = ([r, g, b]: RGBA, alpha: number): RGBA => [r, g, b, Math.round(alpha)]
-
 /** The glyph of `aircraft` in `state`. */
 export function aircraftGlyphOf(
   state: AircraftState,
@@ -114,9 +113,6 @@ export function outlineOf(svg: string): string | undefined {
   return found ? (found[1] ?? found[2]) : undefined
 }
 
-/** A file as the build hands it over: Next.js gives a static image, Vite its URL. */
-type Asset = string | { readonly src: string }
-
 let loading: Promise<string> | undefined
 
 /**
@@ -125,8 +121,7 @@ let loading: Promise<string> | undefined
  */
 export function aircraftOutline(): Promise<string> {
   loading ??= (async () => {
-    const asset = icon as Asset
-    const response = await fetch(typeof asset === 'string' ? asset : asset.src)
+    const response = await fetch(urlOf(icon as Asset))
     if (!response.ok) throw new Error(`Perron's aircraft icon answered ${response.status}`)
     const outline = outlineOf(await response.text())
     if (outline === undefined) throw new Error("Perron's aircraft icon has no outline")

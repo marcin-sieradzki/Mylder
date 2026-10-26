@@ -105,14 +105,12 @@ export interface Glyph {
 
 const NO_DASH: readonly [number, number] = [0, 0]
 
-const withAlpha = ([r, g, b]: RGBA, alpha: number): RGBA => [r, g, b, Math.round(alpha)]
+/** `colour` at `alpha`, 0 to 255. */
+export const withAlpha = ([r, g, b]: RGBA, alpha: number): RGBA => [r, g, b, Math.round(alpha)]
 
 /** The glyph of a vehicle of `mode` in `state`, in its line's `colour`. */
-export const glyphOf = (state: DataState, mode: Mode, colour: RGBA, look: Look): Glyph =>
-  sizedGlyph(state, look.radius[mode], colour, look)
-
-/** The glyph of a dot of radius `r` in `state`, in `colour`: a vehicle's, or an aircraft's. */
-export function sizedGlyph(state: DataState, r: number, colour: RGBA, look: Look): Glyph {
+export function glyphOf(state: DataState, mode: Mode, colour: RGBA, look: Look): Glyph {
+  const r = look.radius[mode]
   const plain = { fill: colour, line: colour, dash: NO_DASH, cut: 0 }
   switch (state) {
     case 'live': {
