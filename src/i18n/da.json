@@ -44,5 +44,15 @@
   "credit": {
     "transitData": "Trafikdata",
     "openStreetMap": "OpenStreetMap-bidragydere"
+  },
+  "sheet": {
+    "title": "Overblik",
+    "pulse": "Byens puls",
+    "vehicles": "Køretøjer",
+    "disruptions": "Driftsforstyrrelser"
+  },
+  "pulse": {
+    "onTheMove": "I bevægelse",
+    "inService": "af {total} i drift"
   }
 }

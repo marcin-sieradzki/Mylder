@@ -1,0 +1,12 @@
+/* The sheet's layer: under the top bar's, so the bar stays over it. A side sheet starts below the
+   bar, which keeps the brand and the Updated line in view; a bottom sheet rises over the bar at
+   full height. The class is doubled to win over Perron's own viewport rule. */
+.viewport.viewport {
+  z-index: var(--perron-z-index-sheet);
+}
+
+.viewport.viewport[data-anchor='left'] {
+  padding-block-start: calc(
+    var(--perron-space-300) + var(--perron-size-top-bar) + var(--perron-size-panel-gap)
+  );
+}

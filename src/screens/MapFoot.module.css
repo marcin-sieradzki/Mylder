@@ -24,6 +24,20 @@
 
 .legend {
   grid-area: legend;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--perron-size-panel-gap);
+}
+
+/* Beside the open side sheet, past its width and the gaps either side of it. */
+.foot[data-sheet='left'] {
+  inset-inline-start: calc(var(--perron-size-sheet-width) + 2 * var(--perron-size-panel-gap));
+}
+
+/* On the open bottom sheet's peek, so the credit stays above it. */
+.foot[data-sheet='bottom'] {
+  inset-block-end: calc(var(--perron-size-sheet-peek) + var(--perron-size-panel-gap));
 }
 
 .tools {

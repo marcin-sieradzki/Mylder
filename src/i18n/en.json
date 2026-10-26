@@ -44,5 +44,15 @@
   "credit": {
     "transitData": "Transit data",
     "openStreetMap": "OpenStreetMap contributors"
+  },
+  "sheet": {
+    "title": "Overview",
+    "pulse": "City pulse",
+    "vehicles": "Vehicles",
+    "disruptions": "Disruptions"
+  },
+  "pulse": {
+    "onTheMove": "On the move",
+    "inService": "of {total} in service"
   }
 }
