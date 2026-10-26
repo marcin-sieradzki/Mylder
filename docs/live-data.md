@@ -143,12 +143,13 @@ The host's own data cache is not relied on for the once-a-minute rule. Its defau
 
 ### What must persist between polls
 
-- **The previous snapshot's history**: per trip, its key, when it was last seen and last reported, its last reported position and progress, whether it has had realtime this service day, and its last delay. Without it, no trip can be Ageing or No signal, and Timetable only cannot be told from a trip that dropped out.
+- **The previous snapshot's history**: per trip, its key, when it was last seen and last reported, its last reported position and progress, whether it has had realtime this service day, its last delay, and its journey reference, which an opened vehicle's `journeyDetail` asks with. Without it, no trip can be Ageing or No signal, and Timetable only cannot be told from a trip that dropped out.
 - **The latest snapshot**, compressed, so an instance that did not build it can serve it.
 - **The lease**: one key per run, named by the moment the run falls due, set only if absent, expiring after a minute.
 - **The disruption list**: the last `himsearch` messages that belong to Copenhagen (`docs/screens.md`, "Disruptions"), with how many the answer held, when they were fetched and when the list was last checked, kept a month so a spent month still shows its last list.
 - **The call counter**: one counter per calendar month, plus one per service (`journeyPos`, `himsearch`, `journeyDetail`, `multiDepartureBoard`) for the about page and the logs. Keyed by month, so there is no reset to get wrong; kept two months.
 - **On-demand caches**: a stop's departures and a vehicle's detail, for 60 seconds each, keyed by stop id or trip key.
+- **The join's corrections**: by Rejseplanen's journey (`ZI@DA`), the trip an opened vehicle's `journeyDetail` showed it to be where the join's first guess was another, kept a day under `<prefix>:corrections` and read by every run.
 
 ### What the store is
 
@@ -191,6 +192,13 @@ An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-bo
 6. A failed call is logged, a quota error spends the month as a run's does, and nothing is kept, so the stop answers from the timetable and the next viewer may ask again.
 
 Either way the answer carries the stop's messages: those on its board's departures, then the disruption list's that name the stop, each once.
+
+An opened vehicle asks for its detail the same way (`trip-detail.ts`), under `<prefix>:on-demand:trip:<trip key>`, within the same minute's counter:
+
+1. The call asks with the trip's journey reference, which the history keeps once a position answer has carried the trip. A trip no answer has carried, such as a Timetable only one or the Metro, makes none.
+2. The detail's calls are matched stop by stop on planned times onto the trip the join guessed (`docs/timetable.md`, "The join"). When they fit another trip of the day instead, one of the same line first, the answer is that trip's, under its key, and the correction is kept: the next run joins the journey to it and moves what earlier runs saw of the journey to it. Calls that fit no trip answer from the timetable.
+3. The expected time per call, the cancelled calls (a call is cancelled when every side it has is: the departure at the first stop, the arrival at the last, both between), the trip's cancellation (its calls stay, unmarked, with no times expected), Rejseplanen's own delay at the next call (`nextCallDelay`, expected minus timetabled) and the trip's own messages, each with the first and last of the trip's calls it covers, are the detail's. The state and the snapshot's `delay` stay the snapshot's, for the vehicle the viewer opened.
+4. The source, the due time and a failed call go as a stop's do.
 
 ### The pacing rule
 
