@@ -2,12 +2,14 @@ import '@mylder/perron/tokens.css'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { measurePath, pointAt } from '../domain/trip-motion.ts'
+import { measurePath, pointAt, type MeasuredPath } from '../domain/trip-motion.ts'
 import { readNetwork, type Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { sidesOf } from '../test/drawnLines.ts'
 import { vehicleLoop, type VehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
 import { motionPauseStore, type MotionPause } from './pause.ts'
+import { basemapStyle, paintTokens } from './style/basemap.ts'
 import { vehiclePaint, vehiclesOf, type Vehicles } from './vehicles.ts'
 
 // The weekday recording's sixth and seventh minutes on its own timetable. A runs from 12,550 m at
@@ -46,6 +48,31 @@ const offA = (vehicles: Vehicles, progress: number) => {
     (drawnLon - lon) * metresPerDegree * Math.cos((lat * Math.PI) / 180),
     (drawnLat - lat) * metresPerDegree,
   )
+}
+
+/**
+ * Which way a path runs at the piece nearest `[lon, lat]`, as a unit step east and north: the
+ * way a dot drawn there travels.
+ */
+function headingNear(path: MeasuredPath, [lon, lat]: number[]): [number, number] {
+  const scale = Math.cos((lat * Math.PI) / 180)
+  let best: [number, number] = [0, 0]
+  let nearest = Infinity
+  for (let k = 1; k < path.points.length; k++) {
+    const [lat1, lon1] = path.points[k - 1]
+    const [lat2, lon2] = path.points[k]
+    const [east, north] = [(lon2 - lon1) * scale, lat2 - lat1]
+    const [px, py] = [(lon - lon1) * scale, lat - lat1]
+    const length = Math.hypot(east, north)
+    if (length === 0) continue
+    const share = Math.min(Math.max((px * east + py * north) / length ** 2, 0), 1)
+    const away = Math.hypot(px - share * east, py - share * north)
+    if (away < nearest) {
+      nearest = away
+      best = [east / length, north / length]
+    }
+  }
+  return best
 }
 
 /** A stand-in for the system's reduced-motion setting, which jsdom cannot give. */
@@ -242,5 +269,40 @@ describe('the vehicles between polls', () => {
     const still = drawnA(next)
     wait(5000)
     expect(drawnA(next)).toEqual(still)
+  })
+
+  it("rides each dot on its line's strand where lines share a track, across its way", () => {
+    // A and E share the track from Hundige to Holte, each half an S-tog track spacing (1.4 px)
+    // off its centre: a dot there sits as far off, square to its way, on its line's side. A alone
+    // beyond Holte, M1, RE and the buses ride on the centre.
+    vi.setSystemTime(s(10))
+    start()
+    const vehicles = vehiclesFrom(minute6)
+    loop!.show(vehicles, minute6, network)
+    wait(1000)
+    const style = basemapStyle(readPaint(document.documentElement, paintTokens(network)), network)
+    const beside = new Set<string>()
+    vehicles.trips.forEach((trip, i) => {
+      const pattern = network.patterns.patterns[trip.pattern]
+      const line = network.patterns.lines[pattern.line].name
+      const [x, y] = vehicles.offsets.subarray(i * 2, i * 2 + 2)
+      if (x === 0 && y === 0) {
+        expect(['M1', 'RE', 'A', '5C', '991']).toContain(line)
+        return
+      }
+      beside.add(line)
+      expect(Math.hypot(x, y)).toBeCloseTo(1.4, 5)
+      // x to the east and y to the north, in px: square to the way the dot runs, to its right
+      // or left as its line is drawn, facing the line's direction 0.
+      const [east, north] = headingNear(network.pathOf(trip.pattern), [
+        ...vehicles.positions.subarray(i * 2, i * 2 + 2),
+      ])
+      expect(Math.abs(x * east + y * north)).toBeLessThan(0.01)
+      const right = Math.sign(x * north - y * east)
+      expect(sidesOf(style, network, line)).toEqual(
+        new Set([right * (pattern.direction === 0 ? 1 : -1)]),
+      )
+    })
+    expect(beside).toEqual(new Set(['A', 'E']))
   })
 })

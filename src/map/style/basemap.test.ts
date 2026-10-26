@@ -1,16 +1,13 @@
 import '@mylder/perron/tokens.css'
-import type { FeatureCollection, MultiLineString } from 'geojson'
+import type { MultiLineString } from 'geojson'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type {
-  GeoJSONSourceSpecification,
-  LayerSpecification,
-  StyleSpecification,
-} from 'maplibre-gl'
+import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork, type Network } from '../../timetable/network.ts'
 import { encodePolyline, type LatLon } from '../../timetable/polyline.ts'
 import { readPaint } from '../paint.ts'
+import { drawnOf, features, sidesOf } from '../../test/drawnLines.ts'
 import { basemapStyle, paintTokens } from './basemap.ts'
 
 // The basemap as the page paints it: Perron's own token sheet on the document, and the weekday
@@ -34,11 +31,6 @@ const layer = (style: StyleSpecification, id: string) => {
   return found as LayerSpecification & { paint: Record<string, unknown> }
 }
 
-const features = (style: StyleSpecification, source: string) => {
-  const data = (style.sources[source] as GeoJSONSourceSpecification).data
-  return (data as FeatureCollection).features
-}
-
 const lineColours = (style: StyleSpecification) =>
   Object.fromEntries(
     features(style, 'mylder-lines').map((f) => [f.properties!.line, f.properties!.colour]),
@@ -47,44 +39,6 @@ const lineColours = (style: StyleSpecification) =>
 /** The distance between two [lon, lat] points in km, near enough at Copenhagen's latitude. */
 const kilometres = ([lon1, lat1]: number[], [lon2, lat2]: number[]) =>
   Math.hypot((lon2 - lon1) * 111.32 * Math.cos((55.7 * Math.PI) / 180), (lat2 - lat1) * 110.57)
-
-/** Each drawn piece of a line's path: the segment it is, and the offset it is drawn at. */
-function drawnOf(style: StyleSpecification, on: Network, name: string) {
-  const segmentAt = new Map<string, number>()
-  on.paths.segments.forEach((_, segment) => {
-    const points = on.paths.points(segment).map(([lat, lon]) => [lon, lat])
-    segmentAt.set(JSON.stringify([points[0], points.at(-1)]), segment)
-  })
-  return features(style, 'mylder-lines')
-    .filter((f) => f.properties!.line === name)
-    .flatMap((f) =>
-      (f.geometry as MultiLineString).coordinates.map((piece) => ({
-        offset: f.properties!.offset as number,
-        segment: segmentAt.get(JSON.stringify([piece[0], piece.at(-1)]))!,
-      })),
-    )
-}
-
-/** Which way a line's patterns run a segment: 1 along the line's direction 0, -1 against. */
-function wayOf(on: Network, name: string, segment: number) {
-  const line = on.patterns.lines.findIndex((each) => each.name === name)
-  const ways = on.patterns.patterns
-    .filter((pattern) => pattern.line === line && pattern.segments.includes(segment))
-    .map((pattern) => (pattern.direction === 0 ? 1 : -1))
-  expect(new Set(ways).size).toBe(1)
-  return ways[0]
-}
-
-/**
- * The sides of the track a line is drawn on off its centre, facing its direction 0: 1 for the
- * right, -1 for the left.
- */
-const sidesOf = (style: StyleSpecification, on: Network, name: string) =>
-  new Set(
-    drawnOf(style, on, name)
-      .filter(({ offset }) => offset !== 0)
-      .map(({ offset, segment }) => Math.sign(offset) * wayOf(on, name, segment)),
-  )
 
 /** The stretch a step between two stops runs, keyed by both stops, lower first. */
 const stretchKey = (from: number, to: number) => (from < to ? `${from}-${to}` : `${to}-${from}`)
