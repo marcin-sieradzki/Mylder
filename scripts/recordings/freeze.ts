@@ -49,6 +49,6 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
   }
   for (const [file, answer] of answers) await writeJson(join(dir, file), answer)
   const answered = [...calls].map(([service, each]) => `${each.length} ${service}`).join(', ')
-  const saved = answers.size ? `, ${answers.size} stop answers` : ''
+  const saved = answers.size ? `, ${answers.size} route answers` : ''
   console.log(`recordings/${plan.name}: ${answered}, ${snapshots.length} snapshots${saved}`)
 }
