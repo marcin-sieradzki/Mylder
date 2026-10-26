@@ -38,7 +38,6 @@ function trackerWorker(url: string) {
     waiting.clear()
   }
   started.addEventListener('error', fail)
-  started.addEventListener('messageerror', fail)
   const current = {
     post(path: string) {
       const ask: RouteAsk = { id: ++asked, path }

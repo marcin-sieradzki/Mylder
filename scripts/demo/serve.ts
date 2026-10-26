@@ -31,7 +31,13 @@ const isFile = async (path: string) => {
 
 async function find(pathname: string): Promise<string | undefined> {
   if (!pathname.startsWith(`${BASE_PATH}/`) && pathname !== BASE_PATH) return undefined
-  const path = join(ROOT, normalize(decodeURIComponent(pathname.slice(BASE_PATH.length))))
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(pathname.slice(BASE_PATH.length))
+  } catch {
+    return undefined
+  }
+  const path = join(ROOT, normalize(decoded))
   for (const candidate of [path, `${path}.html`, join(path, 'index.html')]) {
     if (await isFile(candidate)) return candidate
   }
@@ -47,8 +53,9 @@ createServer(async (request, response) => {
       'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream',
     })
     response.end(body)
-  } catch {
-    // A broken escape in the address, or no 404.html because the build failed.
-    response.writeHead(400).end()
+  } catch (error) {
+    // No 404.html, because the build failed.
+    console.error(error)
+    response.writeHead(500).end()
   }
 }).listen(PORT, () => console.log(`The demo is at http://localhost:${PORT}${BASE_PATH}/`))

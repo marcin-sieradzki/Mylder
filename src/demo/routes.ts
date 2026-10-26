@@ -37,7 +37,21 @@ function segmentsOf(path: string): string[] | undefined {
 }
 
 /** The demo's routes, answering a path such as `/api/snapshot` or `/api/stops/<id>`. */
-export function demoRoutes({ read, beneath = Layer.empty }: DemoSettings) {
+export function demoRoutes({ read: readFolder, beneath = Layer.empty }: DemoSettings) {
+  // The manifest is read once, so the tracker and the network's files hold the same version for
+  // the page's life, as the deployment it opened on; a read that fails is tried again.
+  let manifest: Promise<string> | undefined
+  const read: ReadTimetableFile = (file) => {
+    if (file !== 'manifest.json') return readFolder(file)
+    if (!manifest) {
+      manifest = readFolder(file)
+      manifest.catch(() => {
+        manifest = undefined
+      })
+    }
+    return manifest
+  }
+
   // The tracker's runtime, built at the first ask for it; a build that fails, such as on a
   // dropped connection, is forgotten, so the next ask tries again, as the server's runtime does.
   let building: ReturnType<typeof build> | undefined
@@ -59,9 +73,6 @@ export function demoRoutes({ read, beneath = Layer.empty }: DemoSettings) {
   }
 
   const answers = trackerAnswers(runOn(runtime))
-  // The network's files come straight from the folder, so the map draws its lines without
-  // waiting for the tracker's timetable.
-  const files = () => read
 
   return async function route(path: string): Promise<Response> {
     const [api, name, ...rest] = segmentsOf(path) ?? []
@@ -70,10 +81,11 @@ export function demoRoutes({ read, beneath = Layer.empty }: DemoSettings) {
     if (name === 'disruptions' && rest.length === 0) return answers.disruptions()
     if (name === 'stops' && rest.length === 1) return answers.stop(rest[0])
     if (name === 'trips' && rest.length === 1) return answers.trip(rest[0])
-    if (name === 'timetable' && rest.length === 0) return manifestResponse(files)
-    if (name === 'timetable' && rest.length === 2) {
-      return browserFileResponse(files, rest[0], rest[1])
-    }
+    // The network's files come straight from the folder, so the map draws its lines without
+    // waiting for the tracker's timetable.
+    if (name === 'timetable' && rest.length === 0) return manifestResponse(read)
+    if (name === 'timetable' && rest.length === 2)
+      return browserFileResponse(read, rest[0], rest[1])
     return notFound('route')
   }
 }

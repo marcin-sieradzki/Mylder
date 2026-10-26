@@ -1,8 +1,8 @@
 // The route handlers' answers, built here so the routes in `app/api/` stay one line each: each
 // carries the CDN header for its snapshot, read on the tracker's own clock, which a recording
 // sets. A snapshot that can't be built at all, because the timetable can't be read, is a 503.
-// The timetable files the browser loads come from the tracker's own timetable, each version kept
-// for good.
+// The timetable files the browser loads come from the folder the tracker's timetable is read
+// from, each version kept for good.
 import 'server-only'
 import { Effect } from 'effect'
 import { cacheHeaders, RETRY_AFTER } from './caching.ts'
@@ -90,40 +90,45 @@ const json = (body: string, cacheControl: string) =>
 
 /** The current manifest, which the map starts from before its first snapshot. */
 export const timetableManifestResponse = (source?: Source): Promise<Response> =>
-  manifestResponse(() => sourceFiles(source))
+  manifestResponse(sourceFiles(source))
 
 /**
  * One of the files of a version the browser loads (`manifest`, `stops`, `patterns`, `paths` or
- * `dayProfiles`); 404 for the trips, any other name, or a version the tracker doesn't hold.
+ * `dayProfiles`); 404 for the trips, any other name, or a version the folder doesn't hold.
  */
 export const timetableFileResponse = (
   version: string,
   file: string,
   source?: Source,
-): Promise<Response> => browserFileResponse(() => sourceFiles(source), version, file)
+): Promise<Response> => browserFileResponse(sourceFiles(source), version, file)
 
-/** The files of a source's timetable: a recording's own, or the deployed one. */
-const sourceFiles = (source?: Source): ReadTimetableFile =>
-  filesIn(timetableDirOf(source ?? environmentSource()))
+/**
+ * The files of a source's timetable folder: a recording's own, or the deployed one. The source is
+ * read at each read, inside the route's try.
+ */
+const sourceFiles =
+  (source?: Source): ReadTimetableFile =>
+  (file) =>
+    filesIn(timetableDirOf(source ?? environmentSource()))(file)
 
-/** The manifest from a timetable's files, which `files` gives inside the route's try. */
-export async function manifestResponse(files: () => ReadTimetableFile): Promise<Response> {
+/** The manifest from a timetable folder's files. */
+export async function manifestResponse(read: ReadTimetableFile): Promise<Response> {
   try {
-    return json(await readManifestFile(files()), BRIEFLY)
+    return json(await readManifestFile(read), BRIEFLY)
   } catch (error) {
     return unavailable(error)
   }
 }
 
-/** A version's file the browser loads, from a timetable's files, given inside the route's try. */
+/** One of the files of a version the browser loads, from a timetable folder's files. */
 export async function browserFileResponse(
-  files: () => ReadTimetableFile,
+  read: ReadTimetableFile,
   version: string,
   file: string,
 ): Promise<Response> {
   if (!isBrowserFile(file)) return notFound('timetable file')
   try {
-    const body = await readBrowserFile(files(), version, file)
+    const body = await readBrowserFile(read, version, file)
     return body === undefined ? notFound('timetable version') : json(body, IMMUTABLE)
   } catch (error) {
     return unavailable(error)
