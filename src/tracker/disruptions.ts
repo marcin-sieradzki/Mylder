@@ -59,7 +59,7 @@ export function inArea(message: Message, { stops, products }: Area): boolean {
 }
 
 /** The stops a message names: those it affects and where its stretch starts and ends. */
-const namedStops = (message: Message) => [
+export const namedStops = (message: Message) => [
   ...(message.affectedStops?.StopLocation ?? []),
   ...(message.validFromStop ? [message.validFromStop] : []),
   ...(message.validToStop ? [message.validToStop] : []),

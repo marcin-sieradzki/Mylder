@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { stopDeparturesFrom, tripDetailFrom, type SnapshotDelays } from './answers'
 import type { SnapshotTrip } from './snapshot'
-import { fixtureTimetable } from './testing'
+import { fixtureTimetable, startingAtMidnight } from './testing'
 
 // 07:20 in Copenhagen on Tuesday 2026-06-16, when the fixture has trips underway.
 const MOMENT = Date.UTC(2026, 5, 16, 5, 20, 30)
@@ -232,5 +232,33 @@ describe('a Metro platform’s departures', () => {
       ['M1', 'Vestamager St. (Metro)'],
       ['M1', 'Vestamager St. (Metro)'],
     ])
+  })
+})
+
+describe('the answers just before midnight', () => {
+  // 23:50 in Copenhagen on Tuesday 2026-06-16, with Wednesday's trips starting from midnight.
+  const NIGHT = Date.UTC(2026, 5, 16, 21, 50)
+  const night = startingAtMidnight(timetable, '2026-06-17')
+  const tomorrow = night
+    .tripsOn('2026-06-17')
+    .find((trip) => trip.line.mode !== 'metro' && trip.calls[0].departure < NIGHT + 20 * 60_000)!
+  const first = tomorrow.calls[0]
+  const at = (moment: number): SnapshotDelays => ({
+    fetched: moment,
+    nextDue: moment + 60_000,
+    trips: [],
+  })
+
+  it('lists the next service day’s departures in the half hour', () => {
+    const stopId = night.stops.stops[night.stops.platforms[first.platform].stop].id
+    const rows = stopDeparturesFrom(night, at(NIGHT), stopId)!.departures
+    expect(rows.map((row) => [row.trip, row.scheduled])).toContainEqual([
+      tomorrow.key,
+      first.departure,
+    ])
+  })
+
+  it('answers for a trip of the next service day', () => {
+    expect(tripDetailFrom(night, at(NIGHT), tomorrow.key, NIGHT)?.key).toBe(tomorrow.key)
   })
 })

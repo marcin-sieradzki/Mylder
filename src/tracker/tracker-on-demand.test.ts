@@ -19,6 +19,9 @@ import { Tracker } from './tracker'
 const MOMENT = Date.UTC(2026, 5, 16, 5, 20, 30)
 const ZONE = 'Europe/Copenhagen'
 
+/** 07:21, when the next minute's on-demand calls open. */
+const NEXT_MINUTE = Date.UTC(2026, 5, 16, 5, 21)
+
 const timetable = await fixtureTimetable()
 const weekday = readSource('simulated')
 const prefix = keyPrefixOf(weekday)
@@ -81,6 +84,18 @@ const slow = (() => {
   )
 })()
 
+/** The simulated Rejseplanen, its departure boards answering 503 just inside the call's timeout. */
+const slowlyFailing = (() => {
+  const simulation = simulatedClient({ timetable })
+  return Http.layer(
+    Http.client((request, url) =>
+      url.pathname.endsWith('multiDepartureBoard')
+        ? Effect.sleep('7900 millis').pipe(Effect.as(Http.json(request, 503, {})))
+        : simulation.execute(request).pipe(Effect.orDie),
+    ),
+  )
+})()
+
 /** Eleven stops with buses or S-tog leaving in the next half hour. */
 const BUSY_STOPS = [
   '718',
@@ -132,6 +147,35 @@ describe('a stop’s on-demand departures', () => {
     }).pipe(Effect.provide(tracker(slow))),
   )
 
+  it.effect('has the viewer who found the call under way ask again in a few seconds', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      yield* (yield* Tracker).getSnapshot
+      const both = yield* Effect.forkChild(
+        Effect.all([departures(NORREPORT), departures(NORREPORT)], { concurrency: 'unbounded' }),
+      )
+      yield* TestClock.adjust('1 second')
+      const meanwhile = (yield* Fiber.join(both)).find((each) => each?.source.kind === 'timetable')!
+      // Not the snapshot's minute: by then the board the other call brought sits in the store.
+      expect(meanwhile.nextDue).toBeLessThanOrEqual(MOMENT + 5_000)
+    }).pipe(Effect.provide(tracker(slow))),
+  )
+
+  it.effect('makes no second board call while the first is still trying, however long', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(MOMENT)
+      yield* (yield* Tracker).getSnapshot
+      // Two attempts of almost 8 s each: the second viewer opens the stop during the second.
+      const first = yield* Effect.forkChild(departures(NORREPORT))
+      yield* TestClock.adjust('15500 millis')
+      const second = yield* Effect.forkChild(departures(NORREPORT))
+      yield* TestClock.adjust('30 seconds')
+      yield* Fiber.join(first)
+      expect((yield* Fiber.join(second))?.source.kind).toBe('timetable')
+      expect(yield* boardCalls).toBe(2)
+    }).pipe(Effect.provide(tracker(slowlyFailing))),
+  )
+
   it.effect('answers the 11th stop opened in a minute from the timetable', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
@@ -139,6 +183,9 @@ describe('a stop’s on-demand departures', () => {
       for (const stop of BUSY_STOPS) sources.push((yield* departures(stop))?.source.kind)
       expect(sources).toEqual([...Array(10).fill('rejseplanen'), 'timetable'])
       expect(yield* boardCalls).toBe(10)
+      // Due again when the next minute opens, not with the snapshot.
+      const eleventh = (yield* departures(BUSY_STOPS[10]))!
+      expect(eleventh.nextDue).toBeLessThanOrEqual(NEXT_MINUTE)
       // The next minute has room again.
       yield* TestClock.adjust('60 seconds')
       expect((yield* departures(BUSY_STOPS[10]))?.source.kind).toBe('rejseplanen')
