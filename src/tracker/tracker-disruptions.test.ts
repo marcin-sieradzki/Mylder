@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect, type Layer } from 'effect'
 import { TestClock } from 'effect/testing'
+import { disruptionKind, disruptionPhase } from '../domain/disruption'
 import { pacing, SPENT_AT } from './budget'
 import { callsKey } from './rejseplanen/client'
 import * as Http from './rejseplanen/http'
@@ -117,12 +118,21 @@ describe('the tracker’s disruption list', () => {
       expect(list.ok).toBe(true)
       expect(list.nextDue).toBe(MOMENT + 15 * 60_000)
       expect(list.messages.length).toBeGreaterThan(0)
-      // Messages pass through as received, each with its kind.
-      const fault = list.messages.find(({ message }) => message.id === 'simulated-2')
-      expect(fault?.message.head).toBe('Færre S-tog mellem København H og Hellerup')
-      expect(fault?.kind).toBe('service-notice')
-      const weekend = list.messages.find(({ message }) => message.id === 'simulated-3')
-      expect(weekend?.kind).toBe('planned-works')
+      // Messages pass through as received, each with its fields' kind and its validity in
+      // Copenhagen's clock: the signal fault runs 05:00 to 23:30 today, the track works from
+      // 01:00 on Saturday to 23:00 on Sunday.
+      const fault = list.messages.find(({ message }) => message.id === 'simulated-2')!
+      expect(fault.message.head).toBe('Færre S-tog mellem København H og Hellerup')
+      expect(fault.fieldsKind).toBe('service-notice')
+      expect(fault.from).toBe(Date.UTC(2026, 5, 16, 3, 0))
+      expect(fault.to).toBe(Date.UTC(2026, 5, 16, 21, 30))
+      expect(disruptionPhase(fault, MOMENT)).toBe('active')
+      const weekend = list.messages.find(({ message }) => message.id === 'simulated-3')!
+      expect(weekend.fieldsKind).toBe('service-notice')
+      expect(weekend.from).toBe(Date.UTC(2026, 5, 19, 23, 0))
+      expect(weekend.to).toBe(Date.UTC(2026, 5, 21, 21, 0))
+      expect(disruptionKind(weekend, MOMENT)).toBe('planned-works')
+      expect(disruptionPhase(weekend, MOMENT)).toBe('later')
       expect(s.disruptions).toEqual({
         fetched: MOMENT,
         checked: MOMENT,

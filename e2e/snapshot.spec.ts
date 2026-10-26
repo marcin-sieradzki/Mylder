@@ -43,7 +43,7 @@ test('the disruption route serves the recorded messages, cached for the CDN', as
   expect(response.headers()['vercel-cdn-cache-control']).toMatch(/max-age=\d+/)
   const list = (await response.json()) as {
     ok: boolean
-    messages: { kind: string; message: { head: string } }[]
+    messages: { fieldsKind: string; message: { head: string } }[]
   }
   expect(list.ok).toBe(true)
   expect(list.messages.length).toBeGreaterThan(0)

@@ -1,22 +1,21 @@
 // The disruption list (docs/live-data.md, "One call a minute", step 4; docs/screens.md,
 // "Disruptions"): `himsearch`'s messages that belong to Copenhagen, as received, each with the
-// kind its card shows, kept in the store between fetches with when it was fetched and last
-// checked. Plain functions; the run in `tracker.ts` decides when to fetch.
+// kind its fields say and its validity as moments, kept in the store between fetches with when it
+// was fetched and last checked. The kind a card names and whether it is active or Later depend
+// on the clock, so the browser reads them with `src/domain/disruption.ts`. Plain functions; the
+// run in `tracker.ts` decides when to fetch.
 import 'server-only'
 import { createHash } from 'node:crypto'
+import type { Disruption as DisruptionRule, DisruptionKind } from '../domain/disruption.ts'
 import type { Stops } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import type { Message } from './rejseplanen/answers.ts'
 import type { Snapshot } from './snapshot.ts'
 
-/** The kinds a disruption card names (docs/screens.md, "A card"). */
-export type DisruptionKind =
-  'delays' | 'diversion' | 'planned-works' | 'data-feed' | 'service-notice'
-
 /**
  * The one table that reads a message's kind from its fields, first match wins. Empty until the
  * first real answers show what each `category` and `priority` mean (`himsearch` sends no icon
- * field we decode yet); until then every message of a day or less is a service notice.
+ * field we decode yet); until then every message's fields say Service notice.
  */
 const KIND_RULES: readonly {
   readonly category?: string
@@ -24,12 +23,8 @@ const KIND_RULES: readonly {
   readonly kind: DisruptionKind
 }[] = []
 
-/** A message that runs longer than this is planned works, whatever its category says. */
-const PLANNED_LONGER_THAN = 24 * 3600_000
-
-/** One message as Rejseplanen sent it, with its kind. */
-export interface Disruption {
-  readonly kind: DisruptionKind
+/** One message as Rejseplanen sent it, with its fields' kind and its validity. */
+export interface Disruption extends DisruptionRule {
   readonly message: Message
 }
 
@@ -67,18 +62,8 @@ export function inArea(message: Message, { stops, products }: Area): boolean {
   return message.products === undefined || (message.products & products) !== 0
 }
 
-/**
- * A message's kind from its structured fields only: planned works when it runs longer than a
- * day, else what the table says, else a service notice. A message that has not started yet is
- * planned works too; the browser, which keeps the time, marks that, so the list's kinds and
- * version don't change with the clock between fetches.
- */
-export function kindOf(message: Message, timezone: string): DisruptionKind {
-  const from = clockMoment(message.sDate, message.sTime, timezone)
-  const to = clockMoment(message.eDate, message.eTime, timezone)
-  if (from !== undefined && to !== undefined && to - from > PLANNED_LONGER_THAN) {
-    return 'planned-works'
-  }
+/** A message's kind from its structured fields only: what the table says, else a service notice. */
+export function fieldsKindOf(message: Message): DisruptionKind {
   const rule = KIND_RULES.find(
     ({ category, priority }) =>
       (category === undefined || category === message.category) &&
@@ -91,6 +76,18 @@ export function kindOf(message: Message, timezone: string): DisruptionKind {
 const versionOf = (messages: readonly Message[]) =>
   createHash('sha256').update(JSON.stringify(messages)).digest('hex').slice(0, 12)
 
+/** A message with its fields' kind and its validity, read in the timetable's zone. */
+function disruptionOf(message: Message, timezone: string): Disruption {
+  const from = clockMoment(message.sDate, message.sTime, timezone)
+  const to = clockMoment(message.eDate, message.eTime, timezone)
+  return {
+    fieldsKind: fieldsKindOf(message),
+    ...(from === undefined ? {} : { from }),
+    ...(to === undefined ? {} : { to }),
+    message,
+  }
+}
+
 /** The list a fetch gives: the answer's messages that belong to Copenhagen. */
 export function fetchedList(answer: readonly Message[], now: number, area: Area): DisruptionList {
   const messages = answer.filter((message) => inArea(message, area))
@@ -100,7 +97,7 @@ export function fetchedList(answer: readonly Message[], now: number, area: Area)
     ok: true,
     version: versionOf(messages),
     received: answer.length,
-    messages: messages.map((message) => ({ kind: kindOf(message, area.timezone), message })),
+    messages: messages.map((message) => disruptionOf(message, area.timezone)),
   }
 }
 
