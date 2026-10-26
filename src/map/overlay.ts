@@ -172,18 +172,20 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
       (error: unknown) => console.error("Perron's aircraft glyph could not load", error),
     )
   let lookOfAircraft: AircraftLook | undefined
-  let aircraftDrawnFrom: AircraftSnapshot | undefined
+  // The answer the aircraft's glyphs were last made from.
+  let glyphsFrom: AircraftSnapshot | undefined
   const drawAircraft = () => {
     const { snapshot } = liveAircraft.get()
     if (!snapshot || !aircraftShown || outline === undefined) {
-      aircraft = aircraftDrawnFrom = undefined
+      aircraft = glyphsFrom = undefined
       return aircraftMotion.show(undefined)
     }
     const look = (lookOfAircraft ??= aircraftLookOf(readPaint(root, aircraftTokens()), outline))
     const states = aircraftStates.get()
-    const again = aircraft && aircraftDrawnFrom === snapshot ? aircraft : undefined
-    aircraft = (again && restyled(again, look, states)) ?? aircraftOf(snapshot, look, states)
-    aircraftDrawnFrom = snapshot
+    const restylable = aircraft && glyphsFrom === snapshot ? aircraft : undefined
+    aircraft =
+      (restylable && restyled(restylable, look, states)) ?? aircraftOf(snapshot, look, states)
+    glyphsFrom = snapshot
     aircraftMotion.show(aircraft, snapshot)
   }
   // An answer landing turns its aircraft's states too: both draw once.
@@ -228,12 +230,13 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   void draw()
   // While the Planes filter shows them, the aircraft are drawn again as their answers land and
   // their states turn; hidden, neither is watched.
-  let aircraftFrom = liveAircraft.get().snapshot
+  // The latest answer the watch has heard land, drawn or not.
+  let aircraftLanded = liveAircraft.get().snapshot
   const watchAircraft = () => {
     const stopLanding = liveAircraft.subscribe(() => {
       const { snapshot } = liveAircraft.get()
-      if (snapshot === aircraftFrom) return
-      aircraftFrom = snapshot
+      if (snapshot === aircraftLanded) return
+      aircraftLanded = snapshot
       // An answer landing with no outline yet, its load having failed, asks for it again.
       if (snapshot && outline === undefined) loadOutline()
       redrawAircraft()
@@ -256,7 +259,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     stopPollingAircraft?.()
     stopWatchingAircraft = shown ? watchAircraft() : undefined
     stopPollingAircraft = shown ? pollAircraft() : undefined
-    aircraftFrom = liveAircraft.get().snapshot
+    aircraftLanded = liveAircraft.get().snapshot
     drawAircraft()
   })
   drawAircraft()

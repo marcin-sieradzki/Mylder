@@ -110,11 +110,13 @@ export function aircraftLoop({ now, frames }: AircraftLoopOptions): AircraftLoop
         return frames.request()
       }
       const at = now()
-      const again = shown?.snapshot === snapshot
+      const sameSnapshot = shown?.snapshot === snapshot
       // Stilled, the same snapshot drawn again, with new states, keeps each where it stands.
-      const stands = frames.still() && again
+      const stands = frames.still() && sameSnapshot
       const before = drawnPoints()
-      const motions = again ? motionsKept(drawn, snapshot, at) : motionsOf(drawn, snapshot, at)
+      const motions = sameSnapshot
+        ? motionsKept(drawn, snapshot, at)
+        : motionsOf(drawn, snapshot, at)
       shown = { drawn, snapshot, motions }
       place(at)
       if (stands) {

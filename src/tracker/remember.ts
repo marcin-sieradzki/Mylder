@@ -18,16 +18,16 @@ export function remember<A>(build: () => Promise<A>): () => Promise<A> {
 }
 
 /**
- * A runtime of the layer `layer` gives, built at the first call and kept, unless the build fails.
+ * A runtime of the layer `buildLayer` gives, built at the first call and kept, unless the build fails.
  * Its layer is built then too, not at its first use: a runtime keeps a layer that failed to build,
  * such as on a recording whose files can't be read, failing every use, so the failure must reach
  * `remember` for the next call to build it again.
  */
 export function rememberRuntime<R, E>(
-  layer: () => Promise<Layer.Layer<R, E>>,
+  buildLayer: () => Promise<Layer.Layer<R, E>>,
 ): () => Promise<ManagedRuntime.ManagedRuntime<R, E>> {
   return remember(async () => {
-    const runtime = ManagedRuntime.make(await layer())
+    const runtime = ManagedRuntime.make(await buildLayer())
     try {
       await runtime.context()
     } catch (error) {
