@@ -59,7 +59,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests, with Vite only as Vitest's compiler
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `implement-spec` (with `tdd`, `codebase-design` and `code-review`), `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT)
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `tdd` (with `codebase-design`), `code-review`, `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT); `create-verification-skill` and `maintain-verification-skill` (MIT, licence in each folder); and Mylder's own `factory` and `verify-mylder`
 - Planned: Vercel for deploys, Effect for the server's tracker, MapLibre GL and deck.gl for the map, and Perron for every component and token
 
 ## Getting started
