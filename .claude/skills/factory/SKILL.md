@@ -1,8 +1,8 @@
 ---
 name: factory
-description: 'Build a spec issue to merged code, one ticket at a time: implement, review, verify, merge, stopping a ticket only at a cap. Use for /factory <spec>.'
+description: 'Build a spec issue, or a lone ticket, to merged code, one ticket at a time: implement, review, verify, merge, stopping a ticket only at a cap. Use for /factory <spec>.'
 disable-model-invocation: true
-argument-hint: '<spec issue number>'
+argument-hint: '<spec or ticket issue number>'
 ---
 
 `/factory <spec>` builds every ticket of one spec issue to a merged PR. You are the **orchestrator**: you start every subagent, read what each returns, post the verdicts, merge, and keep the run log. The design, the words (run, brake, verdict, evidence, cap, run log), the labels and the roles are in [`docs/agents/factory.md`](../../../docs/agents/factory.md); read it, and [`docs/agents/issue-tracker.md`](../../../docs/agents/issue-tracker.md) for every issue operation, before step 1. With no `gh`, as in a cloud thread, use the GitHub MCP tools for the same operations.
@@ -19,7 +19,7 @@ Done when the spec is claimed and the run log exists.
 
 ## 2. Decompose when there are no tickets
 
-With no sub-issues, call the Skill tool with `to-tickets` on the spec and publish its tickets without the quiz: take its recommended slicing. Done when the spec has sub-issues with their blocking edges.
+When the issue is itself a ticket (it has `## Acceptance criteria` and no sub-issues), it is the run's only ticket: go to step 3, where the spec named under its `## Parent` is the spec its reviewer and verifier read. Otherwise, with no sub-issues, call the Skill tool with `to-tickets` on the spec and publish its tickets without the quiz, taking its recommended slicing. Done when the run has its tickets, with their blocking edges.
 
 ## 3. Work the frontier
 
