@@ -36,8 +36,8 @@ Create a label the first time it is needed (`issue-tracker.md`, **Labels**).
 The session is the **orchestrator**: it reads the task graph, starts every subagent, reads every diff and verdict, merges, and talks to the maintainer. At most three subagents run at once, each in a fresh context, given pointers rather than pasted context:
 
 - **Implementer**: builds one ticket with the `tdd` skill in its own worktree on its own branch, until `npm run check` passes. On a rework it gets only the findings or the failing verdict, and adds a regression test for what the verifier caught.
-- **Reviewer**: runs the `code-review` skill on the ticket's PR, read-only, against the ticket and its spec.
-- **Verifier**: never sees the diff or the implementer's notes. It gets the ticket's user stories and the `verify-mylder` skill, launches `main` and the branch side by side, drives each story on both, and returns its verdict.
+- **Reviewer**: the `code-review` skill on the ticket's branch, against the ticket and its spec. The orchestrator runs it, and its Standards and Spec axes are two read-only subagents, which count as two of the three.
+- **Verifier**: never sees the diff or the implementer's notes. It gets the ticket's acceptance criteria, the spec's user stories it serves and the `verify-mylder` skill, launches `main` and the branch side by side, drives each on both, plus the touched features' journeys as a regression check, and returns its verdict. A ticket a rider can't see (a refactor, the tracker's insides) is verified by that regression check alone.
 
 ## Tasks
 
