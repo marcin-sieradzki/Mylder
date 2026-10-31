@@ -35,8 +35,23 @@ const cutModule = {
 }
 
 /**
- * A scatterplot with two more attributes per vehicle: the width of its No signal cut, and how
- * opaque it is drawn.
+ * A billboard's radius and pixel offset at exactly their px on the canvas, however the map is
+ * tilted. deck.gl adds them to the dot's clip-space position through
+ * `project_pixel_size_to_clipspace`, which scales them by the focal distance so that the divide
+ * by w gives their px at the canvas's centre only: on a tilted map a near dot would be drawn
+ * bigger and a far one smaller, and its offset, which offsets.ts has already drawn through the
+ * camera, foreshortened twice. Scaled by w over the focal distance first, they come out as given.
+ */
+export const SCREEN_SIZE = 'size.xy *= gl_Position.w / project.focalDistance;\n'
+
+const screenSizeModule = {
+  name: 'vehicleScreenSize',
+  inject: { 'vs:DECKGL_FILTER_SIZE': SCREEN_SIZE },
+}
+
+/**
+ * A scatterplot with two more attributes per vehicle, the width of its No signal cut and how
+ * opaque it is drawn, whose billboards keep their px whatever the tilt.
  */
 export class VehicleGlyphLayer<D = unknown> extends ScatterplotLayer<D, CutProps<D>> {
   static override layerName = 'VehicleGlyphLayer'
@@ -50,7 +65,10 @@ export class VehicleGlyphLayer<D = unknown> extends ScatterplotLayer<D, CutProps
     const shaders = super.getShaders()
     return {
       ...shaders,
-      modules: [...shaders.modules, cutModule as unknown as (typeof shaders.modules)[number]],
+      modules: [
+        ...shaders.modules,
+        ...([cutModule, screenSizeModule] as unknown as typeof shaders.modules),
+      ],
     }
   }
 
