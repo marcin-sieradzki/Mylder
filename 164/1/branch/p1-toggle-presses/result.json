@@ -1,0 +1,10 @@
+{
+  "journey": "p1-toggle-presses",
+  "pass": true,
+  "steps": [
+    "01-flat-controls-before: flat, controls before (http://localhost:4333/en)",
+    "02-just-after-pressing-3d: just after pressing 3D (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "03-tilted-toggle-pressed: tilted, toggle pressed (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "04-flat-again-toggle-unpressed: flat again, toggle unpressed (http://localhost:4333/en?map=11.20/55.68000/12.56500)"
+  ]
+}

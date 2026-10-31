@@ -1,0 +1,8 @@
+{
+  "journey": "p7-phone-hidden",
+  "pass": true,
+  "steps": [
+    "01-phone-flat-no-toggle-or-compass: phone flat, no toggle or compass (http://localhost:4332/en)",
+    "02-phone-tilted-link-no-toggle-or-compass: phone tilted link, no toggle or compass (http://localhost:4332/en?map=14.00/55.67600/12.56800/-30.0/50.0)"
+  ]
+}

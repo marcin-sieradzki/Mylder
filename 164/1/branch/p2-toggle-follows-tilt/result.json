@@ -1,0 +1,12 @@
+{
+  "journey": "p2-toggle-follows-tilt",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4333/en)",
+    "02-tilted-30-by-keys-toggle-pressed: tilted 30 by keys, toggle pressed (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/30.0)",
+    "03-flat-by-keys-toggle-unpressed: flat by keys, toggle unpressed (http://localhost:4333/en?map=11.20/55.68000/12.56500)",
+    "04-tilted-by-right-drag-toggle-pressed: tilted by right-drag, toggle pressed (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/30.0)",
+    "05-flat-again-toggle-unpressed: flat again, toggle unpressed (http://localhost:4333/en?map=11.20/55.68000/12.56500)",
+    "06-tilted-link-opens-with-toggle-pressed: tilted link opens with toggle pressed (http://localhost:4333/en?map=14.00/55.67600/12.56800/-30.0/50.0)"
+  ]
+}

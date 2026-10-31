@@ -1,0 +1,10 @@
+{
+  "journey": "p6-reduced-motion",
+  "pass": true,
+  "steps": [
+    "01-no-preference-toggle-on: no-preference toggle on (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "02-no-preference-compass-pressed: no-preference compass pressed (http://localhost:4333/en?map=11.20/55.68000/12.56500)",
+    "03-reduce-toggle-on: reduce toggle on (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "04-reduce-compass-pressed: reduce compass pressed (http://localhost:4333/en?map=11.20/55.68000/12.56500)"
+  ]
+}

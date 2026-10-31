@@ -1,0 +1,7 @@
+{
+  "journey": "reg-draw-chrome",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-with-its-chrome-address-bare: map drawn with its chrome, address bare (http://localhost:4333/en)"
+  ]
+}

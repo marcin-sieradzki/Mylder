@@ -1,0 +1,11 @@
+{
+  "journey": "p3-compass",
+  "pass": true,
+  "steps": [
+    "01-north-up-compass: north-up, compass (http://localhost:4333/en)",
+    "02-turned-45-needle: turned 45, needle (http://localhost:4333/en?map=11.20/55.68000/12.56500/45.0/0.0)",
+    "03-turned-45-needle: turned -45, needle (http://localhost:4333/en?map=11.20/55.68000/12.56500/-45.0/0.0)",
+    "04-turned-and-tilted: turned and tilted (http://localhost:4333/en?map=11.20/55.68000/12.56500/-45.0/20.0)",
+    "05-compass-pressed-map-faces-north: compass pressed, map faces north (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/20.0)"
+  ]
+}

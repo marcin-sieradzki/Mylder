@@ -1,0 +1,10 @@
+{
+  "journey": "link-out-of-range",
+  "pass": false,
+  "error": "expect(received).not.toContain(expected) // indexOf\n\nExpected substring: not \"95.0\"\nReceived string:        \"14.00/95.00000/12.56800/-30.0/50.0\"",
+  "steps": [
+    "01-tilt-75-out-of-range-map-opens-heading-30-kept: tilt 75 out of range: map opens, heading -30 kept (http://localhost:4332/en?map=14.00/55.67600/12.56800/-30.0/75.0)",
+    "02-heading-200-out-of-range-map-opens-tilt-40-kept: heading 200 out of range: map opens, tilt 40 kept (http://localhost:4332/en?map=14.00/55.67600/12.56800/200.0/40.0)",
+    "03-failure: failure (http://localhost:4332/en?map=14.00/95.00000/12.56800/-30.0/50.0)"
+  ]
+}

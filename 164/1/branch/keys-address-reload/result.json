@@ -1,0 +1,10 @@
+{
+  "journey": "keys-address-reload",
+  "pass": true,
+  "steps": [
+    "01-flat-north-up-three-part-address: flat north-up, three-part address (http://localhost:4333/en?map=13.00/55.67600/12.56800)",
+    "02-tilted-20-and-turned-30-by-keys-five-part-address: tilted 20 and turned 30 by keys, five-part address (http://localhost:4333/en?map=13.00/55.67600/12.56800/30.0/20.0)",
+    "03-after-reload-same-tilt-and-heading: after reload: same tilt and heading (http://localhost:4333/en?map=13.00/55.67600/12.56800/30.0/20.0)",
+    "04-centre-the-map-flat-north-up-three-part-address: centre the map: flat north-up, three-part address (http://localhost:4333/en?map=11.20/55.68000/12.56500)"
+  ]
+}

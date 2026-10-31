@@ -1,0 +1,10 @@
+{
+  "journey": "p5-arrow-order",
+  "pass": true,
+  "steps": [
+    "01-tabbed-into-controls: tabbed into controls (http://localhost:4333/en)",
+    "02-toggle-focused-by-arrows: toggle focused by arrows (http://localhost:4333/en)",
+    "03-toggle-pressed-with-enter: toggle pressed with Enter (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "04-one-tab-stop: one tab stop (http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/50.0)"
+  ]
+}

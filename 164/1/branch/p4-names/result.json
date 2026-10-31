@@ -1,0 +1,9 @@
+{
+  "journey": "p4-names",
+  "pass": true,
+  "steps": [
+    "01-english-controls: english controls (http://localhost:4333/en)",
+    "02-danish-controls: danish controls (http://localhost:4333/da)",
+    "03-danish-toggle-pressed: danish toggle pressed (http://localhost:4333/da?map=11.20/55.68000/12.56500/0.0/50.0)"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "journey": "reg-link-out-of-range",
+  "pass": true,
+  "steps": [
+    "01-tilt-75-out-of-range-heading-30-flat-every-dot-drawn: tilt 75 out of range: heading -30, flat, every dot drawn (http://localhost:4333/en?map=14.00/55.67600/12.56800/-30.0/75.0)"
+  ]
+}

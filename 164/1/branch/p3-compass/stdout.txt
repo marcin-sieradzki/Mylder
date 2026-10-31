@@ -1,0 +1,7 @@
+north rotations [{"tag":"svg","deg":0}]
+turned 45 rotations [{"tag":"svg","deg":-45}]
+compass name turned: Reset to north | aria snapshot: - button "Reset to north"
+turned -45 rotations [{"tag":"svg","deg":45}]
+after reset tilt 20 http://localhost:4333/en?map=11.20/55.68000/12.56500/0.0/20.0
+after reset rotations [{"tag":"svg","deg":0}]
+PASS p3-compass: 5 steps in .verify/branch-155-r1/p3-compass/

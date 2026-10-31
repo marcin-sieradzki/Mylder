@@ -1,0 +1,8 @@
+{
+  "journey": "p2-toggle-follows-tilt",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator: getByRole('toolbar').first().getByRole('button', { name: /3D/ })\nExpected: \"false\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toHaveAttribute\" getByRole('toolbar').first().getByRole('button', { name: /3D/ }) with timeout 5000ms\n  - waiting for getByRole('toolbar').first().getByRole('button', { name: /3D/ })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4332/en)"
+  ]
+}

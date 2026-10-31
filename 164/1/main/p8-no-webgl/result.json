@@ -1,0 +1,7 @@
+{
+  "journey": "p8-no-webgl",
+  "pass": true,
+  "steps": [
+    "01-no-webgl: no WebGL (http://localhost:4332/en)"
+  ]
+}

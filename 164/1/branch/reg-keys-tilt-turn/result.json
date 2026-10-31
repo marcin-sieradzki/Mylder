@@ -1,0 +1,9 @@
+{
+  "journey": "reg-keys-tilt-turn",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4333/en)",
+    "02-tilted-30-turned-30: tilted 30 turned 30 (http://localhost:4333/en?map=11.20/55.68000/12.56500/30.0/30.0)",
+    "03-centred-flat-north-up: centred: flat north-up (http://localhost:4333/en?map=11.20/55.68000/12.56500)"
+  ]
+}

@@ -1,0 +1,11 @@
+error: The map could not start GPUInitializationError: WebGL2 is required to display this map. We are sorry, but it seems that your browser does not support WebGL2, a technology for rendering 3D graphics on the web. Read more on https://wiki.openstreetmap.org/wiki/This_map_requires_WebGL
+    at v5._setupPainter (http://localhost:4332/_next/static/chunks/0o1t9kqdtyo62.js:817:134555)
+    at new v5 (http://localhost:4332/_next/static/chunks/0o1t9kqdtyo62.js:817:109280)
+    at http://localhost:4332/_next/static/chunks/0o1t9kqdtyo62.js:4791:5705
+    at iE (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:113726)
+    at e (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:139957)
+    at e (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:139944)
+    at uS (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:140228)
+    at uw (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:138496)
+    at uS (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:138879)
+    at uw (http://localhost:4332/_next/static/chunks/0haur4kqmt_ye.js:1:138496)

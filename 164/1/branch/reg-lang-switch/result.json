@@ -1,0 +1,9 @@
+{
+  "journey": "reg-lang-switch",
+  "pass": true,
+  "steps": [
+    "01-english-with-line-5c: english with line=5C (http://localhost:4333/en?line=5C)",
+    "02-dansk-keeps-the-line: dansk keeps the line (http://localhost:4333/da?line=5C)",
+    "03-english-again: english again (http://localhost:4333/en?line=5C)"
+  ]
+}
