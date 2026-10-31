@@ -4,9 +4,11 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { aircraftLookNow } from '../test/aircraftIcon.ts'
+import { between, inOrder, vertexShaderOf } from '../test/shaders.ts'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import { aircraftLayers, aircraftOf } from './AircraftGlyphLayer.ts'
 import { aircraftStatesAt } from './aircraft-states.ts'
+import { SCREEN_SIZE } from './screen-size.ts'
 
 // deck.gl draws with WebGL, which jsdom lacks: these tests read the layers' props, which say
 // which of the atlas's glyphs each plane is drawn with.
@@ -66,6 +68,26 @@ describe('the planes on the canvas', () => {
     for (const layer of aircraftLayers(drawn, 1, 90)) {
       expect(anglesIn(layer)[mmd]).toBeCloseTo(29.62, 4)
       expect(anglesIn(layer)[grl]).toBeCloseTo(-177.19, 4)
+    }
+  })
+
+  it('draws every plane at its px near and far, however the map tilts', () => {
+    // As the vehicle dots are: deck.gl adds an icon's outline to its position in clip space scaled
+    // by the focal distance, so after the divide by w it has its px only at the canvas's centre,
+    // and on a tilted map a plane at the foot of the view would be drawn bigger than one at the
+    // top. Each layer scales the outline by w over the focal distance first.
+    for (const layer of aircraftLayers(drawn, 1, 0)) {
+      expect(layer.props).toMatchObject({ sizeUnits: 'pixels', billboard: true })
+      const vs = vertexShaderOf(layer)
+      const billboard = between(vs, 'if (icon.billboard)', '} else {')
+      const steps = [
+        'gl_Position = project_position_to_clipspace(',
+        'vec3 offset = vec3(pixelOffset, 0.0);',
+        'DECKGL_FILTER_SIZE(offset, geometry);',
+        'gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);',
+      ]
+      expect(inOrder(billboard, steps)).toBe(true)
+      expect(between(vs, 'void DECKGL_FILTER_SIZE(', '}')).toContain(SCREEN_SIZE.trim())
     }
   })
 })
