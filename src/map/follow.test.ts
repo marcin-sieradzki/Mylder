@@ -107,12 +107,14 @@ describe('the followed trip', () => {
   })
 })
 
-/** A map whose camera stands at Kastrup until Follow moves it. */
-const stillMap = () => {
-  const camera = { centre: [12.65, 55.62] as [number, number] }
+/** A map whose camera stands at Kastrup, at `angle`, until Follow moves it. */
+const stillMap = (angle: { pitch?: number; bearing?: number } = {}) => {
+  const camera = { centre: [12.65, 55.62] as [number, number], pitch: 0, bearing: 0, ...angle }
   const map: FollowMap = {
-    jumpTo: ({ center }) => {
-      camera.centre = center as [number, number]
+    jumpTo: ({ center, pitch, bearing }) => {
+      if (center) camera.centre = center as [number, number]
+      if (pitch !== undefined) camera.pitch = pitch
+      if (bearing !== undefined) camera.bearing = bearing
       return map as never
     },
     isMoving: () => false,
@@ -180,6 +182,28 @@ describe('Follow started on a trip the loop has not drawn yet', () => {
       () => undefined,
     )
     expect(follow.get()).toBeUndefined()
+    followed.remove()
+  })
+})
+
+describe('Follow on a tilted, turned map', () => {
+  afterEach(() => openPanel(undefined))
+
+  it('keeps the tilt and heading while the camera stays on the dot', () => {
+    const { map, camera } = stillMap({ pitch: 50, bearing: -30 })
+    const follow = followStore(mapView)
+    const followed = followCamera(map, document.createElement('div'), follow)
+    followed.frame(drawn as never, () => undefined)
+    openPanel({ kind: 'trip', id: METRO })
+    follow.start(METRO)
+    expect(camera).toEqual({ centre: [12.5857, 55.6795], pitch: 50, bearing: -30 })
+    // The Metro runs on towards Nørreport, and the camera with it.
+    const on = {
+      keys: [BUS, METRO],
+      positions: new Float64Array([12.5716, 55.6833, 12.58, 55.681]),
+    }
+    followed.frame(on as never, () => ({ progress: 4_400, end: 9_800 }))
+    expect(camera).toEqual({ centre: [12.58, 55.681], pitch: 50, bearing: -30 })
     followed.remove()
   })
 })

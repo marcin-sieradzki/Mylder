@@ -2,14 +2,17 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { readNetwork } from '../timetable/network.ts'
+import { CANVAS, stubProjection, type StubCamera } from '../test/projection.ts'
 import type { Disruptions } from '../tracker/index.ts'
 import {
-  boundsOf,
   disruptionHighlight,
   fitPadding,
+  fitPlace,
+  groundLens,
   highlightStore,
   patternHighlight,
   type Highlight,
+  type Place,
 } from './highlight.ts'
 
 // The map's highlight (docs/screens.md, "The highlight chip"): what is highlighted, from Show
@@ -130,30 +133,6 @@ describe("a disruption's stretch and stops", () => {
   })
 })
 
-describe("the highlight's bounds", () => {
-  it('hold every line and stop, from the south-west corner to the north-east', () => {
-    expect(boundsOf(stretch)).toEqual([
-      [12.552, 55.6762],
-      [12.5857, 55.701],
-    ])
-  })
-
-  it('hold the whole of a line, end to end', () => {
-    const [[west, south], [east, north]] = boundsOf(
-      patternHighlight(network, patternOf('M1', 'Vestamager St. (Metro)')),
-    )!
-    // Vanløse in the north-west, Vestamager in the south.
-    expect(west).toBeCloseTo(12.4914, 3)
-    expect(north).toBeCloseTo(55.6873, 3)
-    expect(south).toBeLessThan(55.63)
-    expect(east).toBeGreaterThan(12.58)
-  })
-
-  it('are none for a highlight with nothing to draw', () => {
-    expect(boundsOf({ ...stretch, lines: [], stops: [] })).toBeUndefined()
-  })
-})
-
 describe('the fit', () => {
   it('keeps clear of the top bar, the chip, the sheet and the panel on a desktop', () => {
     expect(fitPadding(1280, 800)).toEqual({ top: 146, right: 400, bottom: 48, left: 412 })
@@ -199,6 +178,108 @@ describe('the fit', () => {
     const padding = fitPadding(900, 400)
     expect(padding.left + padding.right).toBeLessThanOrEqual(900 - 200)
     expect(padding.top + padding.bottom).toBeLessThanOrEqual(400 - 200)
+  })
+})
+
+describe('the fit, however the map is tilted and turned', () => {
+  type Angle = Pick<StubCamera, 'bearing' | 'pitch'>
+  const padding = fitPadding(CANVAS.width, CANVAS.height)
+  const room = {
+    left: padding.left,
+    right: CANVAS.width - padding.right,
+    top: padding.top,
+    bottom: CANVAS.height - padding.bottom,
+  }
+  /** The camera at `angle`, as the map draws the ground from each place. */
+  const lens = (angle: Angle) => (place: Place) =>
+    stubProjection({ centre: place.centre, zoom: place.zoom, ...angle })
+  /** How far across and down the canvas `highlight` is drawn from `place`, at `angle`. */
+  function drawn(highlight: Highlight, place: Place, angle: Angle) {
+    const { project } = lens(angle)(place)
+    const points = [
+      ...highlight.lines.flatMap((line) => line.points),
+      ...highlight.stops.map((stop) => stop.point),
+    ].map(([lat, lon]) => project([lon, lat]))
+    const xs = points.map((point) => point.x)
+    const ys = points.map((point) => point.y)
+    return {
+      left: Math.min(...xs),
+      right: Math.max(...xs),
+      top: Math.min(...ys),
+      bottom: Math.max(...ys),
+    }
+  }
+
+  const angles: [string, Angle][] = [
+    ['flat and north-up, as today', {}],
+    ['flat and turned to face east', { bearing: 90 }],
+    ['tilted 50° and turned 30° anticlockwise', { pitch: 50, bearing: -30 }],
+    ['tilted to the most and turned to face south-east', { pitch: 60, bearing: 135 }],
+  ]
+  const highlights: [string, Highlight][] = [
+    ["M1's whole line", patternHighlight(network, patternOf('M1', 'Vestamager St. (Metro)'))],
+    ["5C's whole line", patternHighlight(network, patternOf('5C', 'Husum Torv'))],
+    ['a stretch around Nørreport', stretch],
+  ]
+
+  for (const [angleName, angle] of angles) {
+    for (const [highlightName, highlight] of highlights) {
+      it(`fits ${highlightName} clear of what floats over the map, ${angleName}`, () => {
+        const place = fitPlace(highlight, CANVAS, padding, lens(angle))!
+        const at = drawn(highlight, place, angle)
+        expect(at.left).toBeGreaterThan(room.left - 0.5)
+        expect(at.right).toBeLessThan(room.right + 0.5)
+        expect(at.top).toBeGreaterThan(room.top - 0.5)
+        expect(at.bottom).toBeLessThan(room.bottom + 0.5)
+        // As close as it goes: it fills the room one way, and sits in its middle both ways.
+        const fillsAcross = room.right - room.left - (at.right - at.left)
+        const fillsDown = room.bottom - room.top - (at.bottom - at.top)
+        expect(Math.min(fillsAcross, fillsDown)).toBeLessThan(1)
+        expect((at.left + at.right) / 2).toBeCloseTo((room.left + room.right) / 2, 0)
+        expect((at.top + at.bottom) / 2).toBeCloseTo((room.top + room.bottom) / 2, 0)
+      })
+    }
+
+    it(`centres a lone stop in the room at the closest zoom, ${angleName}`, () => {
+      const stop: Highlight = {
+        label: { kind: 'text', text: 'Linje 5C kører en anden rute ved Langebro' },
+        lines: [],
+        stops: [{ point: [55.6626, 12.5606], colour: 'perron-color-transit-severity-diversion' }],
+      }
+      const place = fitPlace(stop, CANVAS, padding, lens(angle))!
+      expect(place.zoom).toBe(15)
+      const at = drawn(stop, place, angle)
+      expect(at.left).toBeCloseTo((room.left + room.right) / 2, 0)
+      expect(at.top).toBeCloseTo((room.top + room.bottom) / 2, 0)
+    })
+  }
+
+  it("measures what it draws as MapLibre's camera draws the ground, however tilted and turned", () => {
+    const place: Place = { centre: [12.5716, 55.6833], zoom: 13.4 }
+    const ground: [number, number][] = [
+      [12.5716, 55.6833],
+      [12.6, 55.7],
+      [12.49, 55.64],
+    ]
+    for (const [, angle] of angles) {
+      const camera = { ...CANVAS, pitch: angle.pitch ?? 0, bearing: angle.bearing ?? 0, fov: 36.87 }
+      const measured = groundLens(camera)(place)
+      const stub = stubProjection({ centre: place.centre, zoom: place.zoom, ...angle })
+      for (const point of ground) {
+        const drawnAt = measured.project(point)
+        expect(drawnAt.x).toBeCloseTo(stub.project(point).x, 1)
+        expect(drawnAt.y).toBeCloseTo(stub.project(point).y, 1)
+        const [lon, lat] = measured.unproject(drawnAt)
+        expect(lon).toBeCloseTo(point[0], 6)
+        expect(lat).toBeCloseTo(point[1], 6)
+      }
+    }
+  })
+
+  it('has nowhere to go for a highlight with nothing to draw', () => {
+    expect(fitPlace({ ...stretch, lines: [], stops: [] }, CANVAS, padding, lens({}))).toBe(
+      undefined,
+    )
   })
 })
 
