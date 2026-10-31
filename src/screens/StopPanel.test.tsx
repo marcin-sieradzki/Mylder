@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { PHONE_QUERY } from '../map/highlight'
 import { liveSnapshot } from '../map/live'
 import { mapView, openPanel } from '../map/view'
 import type {
@@ -108,7 +109,32 @@ const row = (within_: HTMLElement, destination: string) =>
     .getAllByRole('listitem')
     .find((each) => each.textContent?.includes(destination))!
 
+/** Whether the page is as narrow as a phone, as each test sets it. */
+let phone = false
+const phoneChanges = new Set<() => void>()
+const mediaLists = new Map<string, object>()
+/**
+ * The browser's `matchMedia`, which jsdom lacks: only the phone's query matches, and only while
+ * `phone` is set. One list per query for the whole file, as the page keeps its list.
+ */
+function matchMedia(query: string) {
+  let list = mediaLists.get(query)
+  if (!list) {
+    list = {
+      get matches() {
+        return query === PHONE_QUERY && phone
+      },
+      addEventListener: (_: string, listener: () => void) => phoneChanges.add(listener),
+      removeEventListener: (_: string, listener: () => void) => phoneChanges.delete(listener),
+    }
+    mediaLists.set(query, list)
+  }
+  return list
+}
+
 beforeEach(() => {
+  phone = false
+  vi.stubGlobal('matchMedia', matchMedia)
   // The server's clock reads the answers' moment; this device's is the server's, as the page's
   // first snapshot has said.
   vi.useFakeTimers({ toFake: ['Date'], now: NORREPORT.fetched })
@@ -1013,5 +1039,90 @@ describe('a stop opened by link before the page’s clock settles', () => {
     settle()
     expect(countdowns(arrivals)[0]).toBe('8 min')
     unmount()
+  })
+})
+
+describe('the trips standing at a stop’s platforms, on a phone', () => {
+  beforeEach(() => {
+    phone = true
+  })
+
+  it('shows every one in the row, with no Show all', async () => {
+    answers.set('48645', standingAt([1, 2, 3, 4, 5, 6].map((n) => standingTrain(n))))
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(
+      within(section)
+        .getAllByRole('listitem')
+        .map((each) => /Destination \d/.exec(each.textContent ?? '')?.[0]),
+    ).toEqual([1, 2, 3, 4, 5, 6].map((n) => `Destination ${n}`))
+    expect(within(section).queryByRole('button', { name: /Show all/ })).not.toBeInTheDocument()
+  })
+
+  it('gives each its line, destination, track, time and data state, above the tabs', async () => {
+    answers.set('48645', standingAt([...REFSHALEOEN.standing, standingTrain(5)]))
+    openStop('en', '?stop=48645')
+    const stop = await panel('Refshaleøen')
+    const section = standingSection(stop)
+    const [bus, train] = within(section).getAllByRole('listitem')
+    expect(bus).toHaveTextContent('991')
+    expect(bus).toHaveTextContent('Teglholmen')
+    expect(bus).toHaveTextContent('Estimated')
+    expect(bus).toHaveTextContent('2 min')
+    expect(within(bus).getByText('07:23')).toHaveTextContent(/^~07:23$/)
+    expect(train).toHaveTextContent('Destination 5')
+    expect(train).toHaveTextContent('Track 5')
+    expect(train).toHaveTextContent('Live')
+    expect(train).toHaveTextContent('07:26')
+    expect(section.compareDocumentPosition(tabs(stop))).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('opens a standing trip’s vehicle, in place of the stop', async () => {
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    fireEvent.click(within(section).getByRole('button', { name: 'Bus 991 to Teglholmen' }))
+    expect(window.location.search).toBe(`?trip=${BUS_991}`)
+  })
+
+  it('says so in words when nothing stands at the platforms', async () => {
+    openStop('en', '?stop=27532')
+    const section = standingSection(await panel('Nørreport St.'))
+    expect(section).toHaveTextContent(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    expect(within(section).queryByRole('list')).not.toBeInTheDocument()
+  })
+
+  it('names the row for the section, and the keyboard reaches each trip in it, in order', async () => {
+    answers.set('48645', standingAt([1, 2, 3].map((n) => standingTrain(n))))
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(within(section).getByRole('list', { name: 'At the platforms now' })).toBeInTheDocument()
+    const buttons = within(section).getAllByRole('button')
+    expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual(
+      [1, 2, 3].map((n) => `S-tog A to Destination ${n}`),
+    )
+    act(() => buttons[0].focus())
+    const user = userEvent.setup()
+    await user.tab()
+    expect(buttons[1]).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(window.location.search).toBe('?trip=s-tog.A.standing2.20260616.0700')
+  })
+
+  it('says the same in Danish', async () => {
+    answers.set('48645', standingAt([...REFSHALEOEN.standing, standingTrain(5)]))
+    const { unmount } = openStop('da', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'), 'Ved perronerne nu')
+    expect(within(section).getByRole('list', { name: 'Ved perronerne nu' })).toBeInTheDocument()
+    const [bus, train] = within(section).getAllByRole('listitem')
+    expect(bus).toHaveTextContent('Beregnet')
+    expect(train).toHaveTextContent('Spor 5')
+    unmount()
+    act(() => openPanel(undefined))
+    openStop('da', '?stop=27532')
+    expect(standingSection(await panel('Nørreport St.'), 'Ved perronerne nu')).toHaveTextContent(
+      'Intet køretøj af de viste typer holder ved perronerne nu.',
+    )
   })
 })
