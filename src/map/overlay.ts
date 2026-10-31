@@ -132,7 +132,11 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const frames = frameDriver({ render })
   const follow = followCamera(map, container)
   const along = (key: string) => loop.along(key)
-  const loop = vehicleLoop({ now: () => serverNow(liveSnapshot.get()), frames })
+  const loop = vehicleLoop({
+    now: () => serverNow(liveSnapshot.get()),
+    frames,
+    projection: () => ({ project, zoom: map.getZoom() }),
+  })
   const aircraftMotion = aircraftLoop({ now: () => serverNow(liveAircraft.get()), frames })
 
   // The snapshot's own timetable gives each line its colour; one that won't load leaves the

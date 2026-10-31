@@ -11,7 +11,7 @@ import type { Snapshot } from '../tracker/index.ts'
 import type { Along } from './follow.ts'
 import type { FrameDriver } from './frames.ts'
 import { motionOf, placeAt, type Motion } from './motion.ts'
-import { writeOffset } from './offsets.ts'
+import { writeOffset, type Projection } from './offsets.ts'
 import type { Vehicles } from './vehicles.ts'
 
 export interface LoopOptions {
@@ -19,6 +19,8 @@ export interface LoopOptions {
   now(): number
   /** The frames the dots move in, which render them once each frame. */
   frames: FrameDriver
+  /** How the map's camera draws the ground now, which each dot's offset onto its strand is drawn by. */
+  projection(): Projection
 }
 
 export interface VehicleLoop {
@@ -33,6 +35,11 @@ export interface VehicleLoop {
    * stop lies; none for a trip not drawn, or one that stands where the snapshot put it.
    */
   along(key: string): Along | undefined
+  /**
+   * Writes each dot's offset onto its strand again where the map's camera draws it now, after
+   * the camera turned or tilted, for the next render; the dots stay where they are.
+   */
+  reproject(): void
   stop(): void
 }
 
@@ -61,7 +68,7 @@ const sameTrips = (a: Vehicles, b: Vehicles): boolean =>
   a.length === b.length && a.keys.every((key, i) => key === b.keys[i])
 
 /** The vehicles' motion, in the frames `frames` runs while there are vehicles to move. */
-export function vehicleLoop({ now, frames }: LoopOptions): VehicleLoop {
+export function vehicleLoop({ now, frames, projection }: LoopOptions): VehicleLoop {
   let shown: Shown | undefined
   const { still } = frames
 
@@ -78,13 +85,14 @@ export function vehicleLoop({ now, frames }: LoopOptions): VehicleLoop {
   const write = () => {
     if (!shown) return
     const { vehicles, movers } = shown
+    const camera = projection()
     movers.forEach((mover, i) => {
       if (!mover) return
       try {
         const [lat, lon] = pointAt(mover.path, mover.progress)
         vehicles.positions[i * 2] = lon
         vehicles.positions[i * 2 + 1] = lat
-        writeOffset(vehicles, i, mover.path, mover.progress)
+        writeOffset(vehicles, i, mover.path, mover.progress, camera)
         vehicles.opacity[i] = mover.opacity
       } catch (error) {
         drop(i, error)
@@ -181,6 +189,7 @@ export function vehicleLoop({ now, frames }: LoopOptions): VehicleLoop {
       if (!mover) return undefined
       return { progress: mover.progress, end: mover.path.stops.at(-1) ?? mover.path.length }
     },
+    reproject: write,
     stop() {
       stopDriving()
       shown = undefined

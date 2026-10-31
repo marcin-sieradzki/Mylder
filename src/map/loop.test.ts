@@ -6,6 +6,7 @@ import { measurePath, pointAt, type MeasuredPath } from '../domain/trip-motion.t
 import { readNetwork, type Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { sidesOf } from '../test/drawnLines.ts'
+import { stubProjection } from '../test/projection.ts'
 import { frameDriver, type FrameDriver } from './frames.ts'
 import { vehicleLoop, type VehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
@@ -97,7 +98,9 @@ let pause: MotionPause
 function start(prefersReduced = false) {
   const media = reducedMotion(prefersReduced)
   frames = frameDriver({ render: () => {}, pause, reducedMotion: media })
-  loop = vehicleLoop({ now: () => Date.now(), frames })
+  // The map flat and facing north, as it opens.
+  const flat = stubProjection({ centre: [12.57, 55.68], zoom: 12 })
+  loop = vehicleLoop({ now: () => Date.now(), frames, projection: () => flat })
   return media
 }
 

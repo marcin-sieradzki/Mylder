@@ -1,8 +1,10 @@
 // The vehicles' deck.gl layers, as the map-layer prototype (#14) settled them: a land-coloured
 // halo under every dot, then the glyph, a scatterplot whose Timetable only ring is dashed by the
 // path-style extension and whose No signal dot is cut by a few lines of shader. A few more fade
-// a dot, halo and all, while it jumps to a far new place. deck.gl draws them over the map in its
-// own canvas (ADR 0003). WebGL is not tested in jsdom.
+// a dot, halo and all, while it jumps to a far new place. Each dot faces the screen at one size in
+// px however the map is tilted (ADR 0016), moved off its position by its offset onto its strand
+// (offsets.ts). deck.gl draws them over the map in its own canvas (ADR 0003). WebGL is not tested
+// in jsdom.
 import 'client-only'
 import type { Accessor, DefaultProps, Layer } from '@deck.gl/core'
 import { PathStyleExtension } from '@deck.gl/extensions'
@@ -95,7 +97,7 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
   const { length } = vehicles
   const moving = {
     getPosition: { value: vehicles.positions, size: 2 },
-    // East and north in px, as deck.gl's common space runs, y up.
+    // Across the canvas and up it in px, as deck.gl moves a billboard.
     getPixelOffset: { value: vehicles.offsets, size: 2 },
     getOpacity: { value: vehicles.opacity, size: 1 },
   }
@@ -105,6 +107,7 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
       data: { length, attributes: { ...data.halos, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
+      billboard: true,
       filled: true,
       stroked: false,
       getFillColor: data.haloColour,
@@ -115,6 +118,7 @@ export function vehicleLayers(vehicles: Vehicles, radiusScale: number): Layer[] 
       data: { length, attributes: { ...data.glyphs, ...moving } },
       radiusUnits: 'pixels',
       radiusScale,
+      billboard: true,
       lineWidthUnits: 'pixels',
       filled: true,
       stroked: true,
