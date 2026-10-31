@@ -3,8 +3,9 @@
 // The key never picks the source, so a missing key fails loudly instead of showing a simulation.
 import 'server-only'
 import { Effect, type Layer } from 'effect'
+import * as Http from './http.ts'
 import { REFUSED_KEY } from './rejseplanen/answers.ts'
-import * as Http from './rejseplanen/http.ts'
+import { errorAnswer, RECORDED_REJSEPLANEN } from './rejseplanen/responses.ts'
 import * as RecordedHttpClient from './recording/layer.ts'
 import { recordingDir } from './recording/layer.ts'
 import * as SimulatedRejseplanen from './simulation/layer.ts'
@@ -44,7 +45,7 @@ export function readSource(value: string | undefined): Source {
  */
 const missingKey = Http.client((request) =>
   Effect.logError(`MYLDER_SOURCE=rejseplanen needs ${KEY_VARIABLE}; the call is refused`).pipe(
-    Effect.as(Http.error(request, 401, REFUSED_KEY, `No ${KEY_VARIABLE} is set`)),
+    Effect.as(errorAnswer(request, 401, REFUSED_KEY, `No ${KEY_VARIABLE} is set`)),
   ),
 )
 
@@ -68,7 +69,7 @@ export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.
         seed: settings.seed,
       })
     case 'recording':
-      return RecordedHttpClient.layer(recordingDir(source.folder))
+      return RecordedHttpClient.layer(RECORDED_REJSEPLANEN, recordingDir(source.folder))
     case 'rejseplanen':
       return settings.key ? Http.fetchLayer : Http.layer(missingKey)
   }

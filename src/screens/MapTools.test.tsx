@@ -147,7 +147,7 @@ describe('the map controls', () => {
 })
 
 describe('the controls before the map attaches', () => {
-  it('dim the zoom but keep the pause', async () => {
+  it('dim the zoom and the reset but keep the pause', async () => {
     const user = userEvent.setup()
     render(
       <Providers lang="en" dictionary={en}>
@@ -156,6 +156,10 @@ describe('the controls before the map attaches', () => {
     )
     expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('button', { name: 'Zoom out' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+    expect(screen.getByRole('button', { name: 'Centre the map' })).toHaveAttribute(
       'aria-disabled',
       'true',
     )
@@ -217,7 +221,7 @@ describe("the map's keys", () => {
   it('close the card with Esc', async () => {
     const user = userEvent.setup()
     open()
-    act(() => pickedVehicle.pick({ key: 'any', point: [0, 0] }))
+    act(() => pickedVehicle.pick({ kind: 'trip', key: 'any', point: [0, 0] }))
     await user.keyboard('{Escape}')
     expect(pickedVehicle.get()).toBeUndefined()
   })

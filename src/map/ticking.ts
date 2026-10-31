@@ -1,9 +1,9 @@
-// A value read from the live snapshot at the server's time, such as the data states or the page
-// notices (docs/live-data.md, "What ages where"). It ticks on each whole second of the server's
-// clock while anything watches it, and only a tick or a landed snapshot moves it on, so a read,
-// such as a render each frame, is cheap and gives what the subscribers last heard.
+// A value read from a live store at its server's time, such as the data states or the page
+// notices (docs/live-data.md, "What ages where"). It ticks on each whole second of that store's
+// server clock while anything watches it, and only a tick or a landed snapshot moves it on, so a
+// read, such as a render each frame, is cheap and gives what the subscribers last heard.
 import 'client-only'
-import { liveSnapshot, serverNow, type LiveSnapshot, type SnapshotStore } from './live.ts'
+import { serverNow, type LiveState } from './live.ts'
 
 export interface TickingStore<T> {
   /** The value now; the same one until `same` says it changed. */
@@ -12,11 +12,21 @@ export interface TickingStore<T> {
   subscribe(onChange: () => void): () => void
 }
 
-/** The value `read` gives of what `live` holds, at the server's time. */
-export function tickingStore<T>(
-  read: (live: LiveSnapshot, now: number) => T,
+/** Any store that keeps its server's clock, such as a live store of any kind of snapshot. */
+export interface ClockedStore<L extends Pick<LiveState<unknown>, 'clockOffset'>> {
+  get(): L
+  subscribe(onChange: () => void): () => void
+}
+
+/** Whether two maps hold the same values by the same keys, such as two moments' data states. */
+export const sameByKey = <K, V>(a: ReadonlyMap<K, V>, b: ReadonlyMap<K, V>): boolean =>
+  a.size === b.size && [...a].every(([key, value]) => b.has(key) && b.get(key) === value)
+
+/** The value `read` gives of what `live` holds, at its server's time. */
+export function tickingStore<T, L extends Pick<LiveState<unknown>, 'clockOffset'>>(
+  read: (live: L, now: number) => T,
   same: (a: T, b: T) => boolean,
-  live: SnapshotStore = liveSnapshot,
+  live: ClockedStore<L>,
 ): TickingStore<T> {
   const readNow = () => {
     const now = live.get()

@@ -4,12 +4,8 @@ import info from '@mylder/perron/icons/info.svg'
 import pause from '@mylder/perron/icons/pause.svg'
 import play from '@mylder/perron/icons/play.svg'
 import type { CSSProperties } from 'react'
+import { urlOf, type Asset } from '../map/asset'
 import styles from './PerronIcon.module.css'
-
-/** A file as the build hands it over: Next.js gives a static image, Vite its URL. */
-type Asset = string | { readonly src: string }
-
-const urlOf = (asset: Asset) => (typeof asset === 'string' ? asset : asset.src)
 
 /** The icons from Perron's icons/ folder that the screens draw. */
 const ICONS = { info, pause, play } satisfies Record<string, Asset>

@@ -6,6 +6,7 @@ import { useRef, useState } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { usePanel } from '../map/view'
 import { AboutDialog } from './AboutDialog'
+import { AircraftCard } from './AircraftCard'
 import { CitySheet } from './CitySheet'
 import { DetailPanels } from './DetailPanels'
 import { MapFoot } from './MapFoot'
@@ -21,8 +22,8 @@ const BaseMap = dynamic(() => import('../map/BaseMap'), { ssr: false })
 /**
  * The moving map (docs/screens.md): the map fills the window, with the top bar over it, the
  * legend, the controls and the credit at its foot, the sheet beside it, the highlight chip, the
- * picked dot's card, the open panel and the About dialog. The sheet starts open; closed, a button at the foot opens it
- * again.
+ * picked dot's card, a vehicle's or a plane's, the open panel and the About dialog. The sheet
+ * starts open; closed, a button at the foot opens it again.
  */
 export function MapScreen() {
   const { dictionary } = useI18n()
@@ -61,6 +62,7 @@ export function MapScreen() {
       />
       <MapHighlight below={top} />
       <VehicleCard />
+      <AircraftCard />
       <DetailPanels />
       <AboutDialog />
     </div>

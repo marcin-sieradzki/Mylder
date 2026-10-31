@@ -40,7 +40,7 @@ Rejseplanen API ──▶ one Next.js app ──────────CDN─�
   disruptions)       to the Labs GTFS timetable     along their paths
 ```
 
-The free Rejseplanen key allows about one call a minute, so browsers never call the API. The app's server makes that call only while someone is watching, joins the answer to a timetable prepared from Rejseplan Labs GTFS, decides each trip's data state, and serves one snapshot of the whole city through the CDN. Every browser polls that snapshot and moves each vehicle along its path until the next one. Until the key arrives, a simulated Rejseplanen answers in its place: it builds the same API answers from the timetable, so the tracker, the snapshot and every screen run exactly as they will on real data, and every screen says the data is simulated. One environment variable, `MYLDER_SOURCE`, picks the simulation, a recording or the real API ([`docs/testing-seams.md`](docs/testing-seams.md)). The decisions and their reasons are in [`docs/adr/`](docs/adr/); the plumbing in [`docs/live-data.md`](docs/live-data.md), [`docs/timetable.md`](docs/timetable.md) and [`docs/screens.md`](docs/screens.md).
+The free Rejseplanen key allows about one call a minute, so browsers never call the API. The app's server makes that call only while someone is watching, joins the answer to a timetable prepared from Rejseplan Labs GTFS, decides each trip's data state, and serves one snapshot of the whole city through the CDN. Every browser polls that snapshot and moves each vehicle along its path until the next one. Until the key arrives, a simulated Rejseplanen answers in its place: it builds the same API answers from the timetable, so the tracker, the snapshot and every screen run exactly as they will on real data, and every screen says the data is simulated. One environment variable, `MYLDER_SOURCE`, picks the simulation, a recording or the real API ([`docs/testing-seams.md`](docs/testing-seams.md)). The planes overhead come from adsb.lol, which needs no key, on a snapshot of their own that browsers poll every 10 s ([`docs/aircraft.md`](docs/aircraft.md)). The decisions and their reasons are in [`docs/adr/`](docs/adr/); the plumbing in [`docs/live-data.md`](docs/live-data.md), [`docs/timetable.md`](docs/timetable.md) and [`docs/screens.md`](docs/screens.md).
 
 ## Roadmap
 
@@ -57,6 +57,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [x] Disruptions on one screen, and an About dialog with the sources and their terms
 - [x] English and Danish, light and dark, mobile first
 - [x] A simulated demo on GitHub Pages
+- [x] The planes over Copenhagen, live from adsb.lol with adsb.fi as its fallback
 - [ ] Go live on the real Rejseplanen API, once the key arrives
 - [ ] Deploy production and previews on Vercel, with the tracker's state in a hosted Redis
 
@@ -71,7 +72,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [Vitest](https://vitest.dev) + Testing Library for unit and component tests, with Vite only as Vitest's compiler
 - [Playwright](https://playwright.dev) for end-to-end tests
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting, [Prettier](https://prettier.io) for formatting
-- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `implement-spec` (with `tdd`, `codebase-design` and `code-review`), `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT)
+- Agent skills in `.claude/skills/`: `grill-me`, `grilling`, `wayfinder` (with `domain-modeling`, `prototype` and `research`), `to-spec`, `to-tickets`, `tdd` (with `codebase-design`), `code-review`, `improve-codebase-architecture` and `software-factory` from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT), and `vercel-react-best-practices` from [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (MIT); `create-verification-skill` and `maintain-verification-skill` (MIT, licence in each folder); and Mylder's own `factory` and `verify-mylder`
 - Planned: Vercel for deploys and Upstash Redis for the tracker's state
 
 ## Getting started
@@ -125,7 +126,7 @@ Tests sit beside the code they test; Playwright journeys are in `e2e/`, and the 
 
 ## Data
 
-Transit data from [Rejseplanen Labs](https://labs.rejseplanen.dk), used under its non-commercial guidelines. API keys stay on the server and are never committed.
+Transit data from [Rejseplanen Labs](https://labs.rejseplanen.dk), used under its non-commercial guidelines. Aircraft from [adsb.lol](https://adsb.lol/)'s contributors under the ODbL, or [adsb.fi](https://adsb.fi/) when adsb.lol doesn't answer. API keys stay on the server and are never committed.
 
 ## About
 

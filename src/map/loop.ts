@@ -1,34 +1,24 @@
-// The vehicles' animation loop: outside React, each frame it places every dot where its motion
-// (motion.ts) has it now and writes the point into the vehicles' positions, and its offset onto
-// its line's strand (offsets.ts), then hands them to the canvas (docs/live-data.md, "Moving between polls"). Under the system's reduced motion
-// setting, or while the pause control holds, it runs no frames: the dots step to their new
-// places once per snapshot and stand still between. A trip that cannot be placed stays where
-// the snapshot put it, said once, while the others move.
+// The vehicles' motion: each frame the frame driver (frames.ts) runs, it places every dot where
+// its motion (motion.ts) has it now and writes the point into the vehicles' positions, and its
+// offset onto its line's strand (offsets.ts), for the canvas to draw (docs/live-data.md, "Moving
+// between polls"). While the driver holds the motion still, the dots step to their new places
+// once per snapshot and stand still between. A trip that cannot be placed stays where the
+// snapshot put it, said once, while the others move.
 import 'client-only'
 import { pointAt, type MeasuredPath } from '../domain/trip-motion.ts'
 import type { Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import type { Along } from './follow.ts'
+import type { FrameDriver } from './frames.ts'
 import { motionOf, placeAt, type Motion } from './motion.ts'
 import { writeOffset } from './offsets.ts'
-import { motionPause, type MotionPause } from './pause.ts'
 import type { Vehicles } from './vehicles.ts'
-
-/** The part of a `MediaQueryList` the loop reads. */
-export interface MediaSetting {
-  readonly matches: boolean
-  addEventListener(type: 'change', listener: () => void): void
-  removeEventListener(type: 'change', listener: () => void): void
-}
 
 export interface LoopOptions {
   /** The server's time now, in milliseconds since the epoch. */
   now(): number
-  /** Draws the vehicles, whose positions and opacities have just been written. */
-  draw(vehicles: Vehicles): void
-  pause?: MotionPause
-  /** The system's reduced-motion setting; none where the browser has no media queries. */
-  reducedMotion?: MediaSetting | null
+  /** The frames the dots move in, which render them once each frame. */
+  frames: FrameDriver
 }
 
 export interface VehicleLoop {
@@ -70,19 +60,10 @@ interface Shown {
 const sameTrips = (a: Vehicles, b: Vehicles): boolean =>
   a.length === b.length && a.keys.every((key, i) => key === b.keys[i])
 
-const systemReducedMotion = (): MediaSetting | null =>
-  typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null
-
-/** A loop that runs frames while there are vehicles to move and the motion isn't stilled. */
-export function vehicleLoop({
-  now,
-  draw,
-  pause = motionPause,
-  reducedMotion = systemReducedMotion(),
-}: LoopOptions): VehicleLoop {
+/** The vehicles' motion, in the frames `frames` runs while there are vehicles to move. */
+export function vehicleLoop({ now, frames }: LoopOptions): VehicleLoop {
   let shown: Shown | undefined
-  let frame: number | undefined
-  const still = () => pause.get() || Boolean(reducedMotion?.matches)
+  const { still } = frames
 
   const cannotPlace = (key: string, error: unknown) =>
     console.error(`The trip ${key} could not be placed`, error)
@@ -93,7 +74,7 @@ export function vehicleLoop({
     cannotPlace(shown.vehicles.keys[i], error)
   }
 
-  /** Writes each dot where it was last placed, and draws them. */
+  /** Writes each dot where it was last placed, for the next render. */
   const write = () => {
     if (!shown) return
     const { vehicles, movers } = shown
@@ -109,7 +90,6 @@ export function vehicleLoop({
         drop(i, error)
       }
     })
-    draw(vehicles)
   }
   /** Places each dot where its motion has it at `at`. */
   const place = (at: number) => {
@@ -126,16 +106,6 @@ export function vehicleLoop({
       }
     })
     write()
-  }
-
-  // The next frame is asked for first, so a frame that fails leaves the loop running.
-  const run = () => {
-    frame = requestAnimationFrame(run)
-    place(now())
-  }
-  const halt = () => {
-    if (frame !== undefined) cancelAnimationFrame(frame)
-    frame = undefined
   }
 
   /** Each trip's motion from the snapshot, from where its dot stands now when it moves on. */
@@ -172,25 +142,22 @@ export function vehicleLoop({
   }
 
   // Stilled, the dots stop where they are; moving again, each eases on from there.
-  const onStillness = () => {
-    if (still()) {
-      halt()
-      place(now())
-      return
-    }
-    if (!shown || frame !== undefined) return
-    const at = now()
-    const { snapshot } = shown
-    shown.movers.forEach((mover, i) => {
-      if (!mover) return
-      const trip = shown!.vehicles.trips[i]
-      const drawn = { progress: mover.progress, at }
-      mover.motion = motionOf(trip, snapshot.fetched, mover.path, drawn)
-    })
-    run()
-  }
-  const stopPause = pause.subscribe(onStillness)
-  reducedMotion?.addEventListener('change', onStillness)
+  const stopDriving = frames.drive({
+    moving: () => Boolean(shown?.movers.some(Boolean)),
+    frame: () => place(now()),
+    stillness(stilled) {
+      if (stilled) return place(now())
+      if (!shown) return
+      const at = now()
+      const { snapshot } = shown
+      shown.movers.forEach((mover, i) => {
+        if (!mover) return
+        const trip = shown!.vehicles.trips[i]
+        const drawn = { progress: mover.progress, at }
+        mover.motion = motionOf(trip, snapshot.fetched, mover.path, drawn)
+      })
+    },
+  })
 
   return {
     show(vehicles, snapshot, network) {
@@ -205,11 +172,8 @@ export function vehicleLoop({
       shown = { vehicles, snapshot, network, movers }
       // The same snapshot again brings new glyphs or filters only: stilled dots stay put.
       if (again && still()) write()
-      else if (!movers.some(Boolean) || still()) {
-        halt()
-        place(at)
-      } else if (frame === undefined) run()
       else place(at)
+      frames.request()
     },
     along(key) {
       if (!shown) return undefined
@@ -218,9 +182,7 @@ export function vehicleLoop({
       return { progress: mover.progress, end: mover.path.stops.at(-1) ?? mover.path.length }
     },
     stop() {
-      halt()
-      stopPause()
-      reducedMotion?.removeEventListener('change', onStillness)
+      stopDriving()
       shown = undefined
     },
   }

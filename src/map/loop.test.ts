@@ -6,6 +6,7 @@ import { measurePath, pointAt, type MeasuredPath } from '../domain/trip-motion.t
 import { readNetwork, type Network } from '../timetable/network.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { sidesOf } from '../test/drawnLines.ts'
+import { frameDriver, type FrameDriver } from './frames.ts'
 import { vehicleLoop, type VehicleLoop } from './loop.ts'
 import { readPaint } from './paint.ts'
 import { motionPauseStore, type MotionPause } from './pause.ts'
@@ -90,11 +91,13 @@ function reducedMotion(matches: boolean) {
 }
 
 let loop: VehicleLoop | undefined
+let frames: FrameDriver | undefined
 let pause: MotionPause
 
 function start(prefersReduced = false) {
   const media = reducedMotion(prefersReduced)
-  loop = vehicleLoop({ now: () => Date.now(), draw: () => {}, pause, reducedMotion: media })
+  frames = frameDriver({ render: () => {}, pause, reducedMotion: media })
+  loop = vehicleLoop({ now: () => Date.now(), frames })
   return media
 }
 
@@ -110,7 +113,9 @@ beforeEach(() => {
 
 afterEach(() => {
   loop?.stop()
+  frames?.stop()
   loop = undefined
+  frames = undefined
   vi.useRealTimers()
 })
 

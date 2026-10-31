@@ -75,6 +75,10 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
       console.error('The map could not start', error)
       return
     }
+    // The map stays north-up, as the dots' offsets onto their strands (offsets.ts) and the
+    // aircraft's turn to their tracks are measured on the screen: a two-finger twist zooms and
+    // pans but doesn't turn it.
+    created.touchZoomRotate.disableRotation()
     map.current = created
     created.getCanvas().setAttribute('aria-label', name.current)
     let disposed = false

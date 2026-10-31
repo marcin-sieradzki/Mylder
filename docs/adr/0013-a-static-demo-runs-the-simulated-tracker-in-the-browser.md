@@ -12,6 +12,6 @@ This amends ADR 0011 for the demo only: Effect runs in the demo's worker, never 
 
 ## Consequences
 
-- The demo downloads the timetable's trips file (about 4.5 MB, under 1 MB compressed) and the worker (about 80 kB compressed), and runs each minute's run on the visitor's device. Its call counter is the visitor's own and starts empty.
+- The demo downloads the timetable's trips file (about 4.5 MB, under 1 MB compressed) and the worker (about 101 kB compressed, some 20 kB of it the recorded planes it replays in a loop, `docs/aircraft.md`), and runs each minute's run on the visitor's device. Its call counter is the visitor's own and starts empty.
 - The tracker's modules stay server modules: in the worker build, `server-only` resolves to its empty twin, and the few Node built-ins they import resolve to the stand-ins in `src/demo/shims/`, which the worker never needs beyond loading. A tracker change that reads files or Node APIs while it runs breaks the demo, which its end-to-end tests catch.
 - CI builds the demo on every pull request, runs its end-to-end tests on the static build, and deploys it from `main`, and again after each Timetable run, whose commits start no workflow of their own.

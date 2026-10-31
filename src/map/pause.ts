@@ -1,6 +1,6 @@
-// Whether the map's motion is paused: the pause control's state, which the vehicles' loop
-// follows (docs/screens.md, "The moving map"). Paused, the dots stand still and step to their
-// new places once per snapshot, as under the system's reduced motion setting.
+// Whether the map's motion is paused: the pause control's state, which the frame driver
+// (frames.ts) follows (docs/screens.md, "The moving map"). Paused, the dots stand still and step
+// to their new places once per snapshot, as under the system's reduced motion setting.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 

@@ -34,3 +34,6 @@ blob-report
 next-env.d.ts
 *.tsbuildinfo
 out
+
+# Verification runs (.claude/skills/verify-mylder)
+.verify

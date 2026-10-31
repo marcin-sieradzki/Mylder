@@ -1,21 +1,38 @@
-// The page's live snapshot: the latest snapshot the poll landed, the server's clock and how the
-// poll is going, in one store that React reads through `useSyncExternalStore` and the map's
-// canvas subscribes to outside React (docs/live-data.md, "The browser").
+// The page's live snapshots: the latest snapshot a poll landed, the server's clock and how the
+// poll is going, in a store that React reads through `useSyncExternalStore` and the map's canvas
+// subscribes to outside React (docs/live-data.md, "The browser"). Each kind of snapshot has a
+// store of its own, filled by its own poll and on its own server's clock; the transit snapshot's
+// also keeps its last answer.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { lastAnswer } from '../domain/pause.ts'
 import type { Snapshot } from '../tracker/index.ts'
-import { snapshotPoller } from './poll.ts'
+import { pagePoll, snapshotPoller, snapshotRoute } from './poll.ts'
 
-export interface LiveSnapshot {
+/** What a store holds of one kind of snapshot, `S`. */
+export interface LiveState<S> {
   /** The latest snapshot, kept through failed polls; none until the first lands. */
-  readonly snapshot?: Snapshot
+  readonly snapshot?: S
   /** The server's clock minus this device's, in ms, from the latest answer's date header. */
   readonly clockOffset: number
   /** When the latest poll that answered landed, on this device's clock. */
   readonly lastGoodPoll?: number
   /** Since when polls have failed, on this device's clock; unset once one answers. */
   readonly failingSince?: number
+  /** Set when the route is off on the server, so no snapshot will come. */
+  readonly off?: true
+}
+
+/** A store of one kind of snapshot, whose state `L` may keep more than its poll gives it. */
+export interface LiveStore<S, L extends LiveState<S> = LiveState<S>> {
+  get(): L
+  /** Replaces what changed and tells every subscriber. */
+  update(change: Partial<LiveState<S>>): void
+  /** Calls back on every change; returns the function that stops it. */
+  subscribe(onChange: () => void): () => void
+}
+
+export interface LiveSnapshot extends LiveState<Snapshot> {
   /**
    * When the server received the latest position answer this page has seen, on the server's
    * clock: the latest of each landed snapshot's last answer (src/domain/pause.ts), so it never
@@ -24,18 +41,13 @@ export interface LiveSnapshot {
   readonly lastAnswer?: number
 }
 
-export interface SnapshotStore {
-  get(): LiveSnapshot
-  /** Replaces what changed and tells every subscriber. */
-  update(change: Partial<Omit<LiveSnapshot, 'lastAnswer'>>): void
-  /** Calls back on every change; returns the function that stops it. */
-  subscribe(onChange: () => void): () => void
-}
+/** The transit snapshot's store. */
+export type SnapshotStore = LiveStore<Snapshot, LiveSnapshot>
 
 const NOTHING_YET: LiveSnapshot = { clockOffset: 0 }
 
 /** The server's time now, by this device's clock and the offset the latest answer gave. */
-export const serverNow = ({ clockOffset }: Pick<LiveSnapshot, 'clockOffset'>): number =>
+export const serverNow = ({ clockOffset }: Pick<LiveState<unknown>, 'clockOffset'>): number =>
   Date.now() + clockOffset
 
 /** The latest answer time once `state`'s snapshot has landed; none once it is cleared. */
@@ -45,15 +57,20 @@ function lastAnswerOf({ snapshot, lastAnswer: before }: LiveSnapshot): number | 
   return its === undefined || (before !== undefined && before > its) ? before : its
 }
 
-/** A store holding nothing yet. Each change makes a new state, so React sees it changed. */
-export function snapshotStore(): SnapshotStore {
-  let state = NOTHING_YET
+/**
+ * A store holding nothing yet. Each change makes a new state, so React sees it changed. `keep`
+ * works out what the store keeps itself, from the state each new or cleared snapshot gives.
+ */
+export function liveStore<S, L extends LiveState<S> = LiveState<S>>(
+  keep?: (state: L) => L,
+): LiveStore<S, L> {
+  let state = NOTHING_YET as L
   const listeners = new Set<() => void>()
   return {
     get: () => state,
     update(change) {
       state = { ...state, ...change }
-      if ('snapshot' in change) state = { ...state, lastAnswer: lastAnswerOf(state) }
+      if (keep && 'snapshot' in change) state = keep(state)
       for (const listener of listeners) listener()
     },
     subscribe(onChange) {
@@ -63,26 +80,18 @@ export function snapshotStore(): SnapshotStore {
   }
 }
 
-/** The page's one store, filled by the page's one poll. */
+/** A transit store holding nothing yet, which keeps the latest answer time itself. */
+export const snapshotStore = (): SnapshotStore =>
+  liveStore<Snapshot, LiveSnapshot>((state) => ({ ...state, lastAnswer: lastAnswerOf(state) }))
+
+/** The page's one transit store, filled by the page's one poll of it. */
 export const liveSnapshot = snapshotStore()
 
-let pagePoller: ReturnType<typeof snapshotPoller> | undefined
-let users = 0
-
 /**
- * Starts the page's poll if it isn't running, for as long as anything on the page needs it.
- * Returns the function that says it is no longer needed. Its jitter is drawn once per page load.
+ * Starts the page's poll of the transit snapshot if it isn't running, for as long as anything on
+ * the page needs it. Returns the function that says it is no longer needed.
  */
-export function pollSnapshot(): () => void {
-  pagePoller ??= snapshotPoller(liveSnapshot)
-  if (users++ === 0) pagePoller.start()
-  let stopped = false
-  return () => {
-    if (stopped) return
-    stopped = true
-    if (--users === 0) pagePoller?.stop()
-  }
-}
+export const pollSnapshot = pagePoll(() => snapshotPoller(liveSnapshot, snapshotRoute))
 
 /** The live snapshot, for a component: it renders again when the store changes. */
 export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapshot {
@@ -90,10 +99,11 @@ export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapsh
 }
 
 /**
- * The server's clock minus this device's, for a component that reads the server's time: it
+ * The server's clock minus this device's, for a component that reads the server's time: the
+ * transit snapshot's server unless another kind's store is given, such as the aircraft's. It
  * renders again only when an answer moves it.
  */
-export function useClockOffset(store: SnapshotStore = liveSnapshot): number {
+export function useClockOffset(store: LiveStore<unknown> = liveSnapshot): number {
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().clockOffset,
@@ -116,10 +126,13 @@ export function usePollMoment(store: SnapshotStore = liveSnapshot): number | und
 }
 
 /**
- * The latest snapshot alone, for a component that shows nothing of how the poll is going: it
- * renders again only when a snapshot lands.
+ * The latest snapshot alone, for a component that shows nothing of how the poll is going: the
+ * transit snapshot unless another kind's store is given, such as the aircraft's. It renders
+ * again only when a snapshot lands; none until one has.
  */
-export function useSnapshot(store: SnapshotStore = liveSnapshot): Snapshot | undefined {
+export function useSnapshot(): Snapshot | undefined
+export function useSnapshot<S>(store: LiveStore<S>): S | undefined
+export function useSnapshot(store: LiveStore<unknown> = liveSnapshot): unknown {
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().snapshot,

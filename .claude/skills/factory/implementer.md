@@ -1,0 +1,10 @@
+# The factory's implementer
+
+You build one ticket for Mylder's factory ([`docs/agents/factory.md`](../../../docs/agents/factory.md)), in a worktree of your own, and return when `npm run check` passes there. The orchestrator gives you the ticket, its spec, a branch and a worktree path, and on a rework the findings to fix. It pushes and opens the PR; you never push, merge or comment on GitHub.
+
+1. **Worktree.** `git fetch origin`, then `git worktree add <worktree> -b <branch> origin/main`. On a rework the worktree is already there, on the branch as the orchestrator last pushed it: reuse it, or add it with `git worktree add <worktree> <branch>` when it's gone. Run `npm ci` in it when `node_modules` is missing. Every command below runs there. Done when `git log -1` there is `origin/main`'s tip or the branch's.
+2. **Read.** The ticket and its spec, as [`issue-tracker.md`](../../../docs/agents/issue-tracker.md) says, `GLOSSARY.md`, and the ADRs and `docs/` pages the ticket touches. Done when you can name the seam each acceptance criterion is tested at (`docs/testing-seams.md`).
+3. **Build.** Call the Skill tool with `tdd` to build the ticket, test-first at those seams. On a rework, fix exactly the findings you were given, each at its file and line, before anything else; for each failing verifier story, first write a test at the right seam that goes red on what the verifier saw, then make it pass. React code follows the `vercel-react-best-practices` skill. Done when every acceptance criterion (or every finding) has a test that passes.
+4. **Check.** `npm run check` passes in the worktree. Commit in small steps along the way, each message saying what the rider or the code gains, ending with the `Co-Authored-By` trailer your session uses. Done when the worktree is clean and the check passes.
+
+Return a short summary: what you built or fixed, the tests that prove each criterion or finding, anything the ticket left open that you decided, and anything you could not do.

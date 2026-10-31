@@ -1,0 +1,9 @@
+/* A plane's panel: the state's dot and word with its label beside them, wrapping under them on a
+   narrow panel, as vehicle detail's. */
+.state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--perron-space-200);
+  row-gap: var(--perron-space-050);
+}

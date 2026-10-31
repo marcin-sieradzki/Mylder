@@ -6,7 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { liveAircraft } from '../map/aircraft'
 import { liveSnapshot } from '../map/live'
+import type { AircraftSnapshot } from '../tracker/aircraft/index'
 import type { Snapshot } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
@@ -44,6 +46,7 @@ beforeEach(() => {
 
 afterEach(() => {
   liveSnapshot.update({ snapshot: undefined, clockOffset: 0 })
+  liveAircraft.update({ snapshot: undefined })
   vi.unstubAllGlobals()
 })
 
@@ -108,6 +111,47 @@ describe('the sheet beside the map', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Overview' }))
     expect(sheet()).toBeInTheDocument()
+  })
+})
+
+describe('the planes beside the sheet', () => {
+  it('leave City pulse and the Vehicles list the same with the Planes filter on and off', () => {
+    land('0006.json')
+    // 9 aircraft over Copenhagen at the same time.
+    const aircraft = JSON.parse(
+      readFileSync(
+        join(process.cwd(), 'recordings', 'weekday', 'answers', 'aircraft', '0006.json'),
+        'utf8',
+      ),
+    ) as AircraftSnapshot
+    // On the aircraft server's clock 2 s after the fetch, so the map draws every one.
+    act(() =>
+      liveAircraft.update({
+        snapshot: aircraft,
+        clockOffset: aircraft.fetched + 2_000 - Date.now(),
+      }),
+    )
+    renderScreen('en')
+    const figures = () => {
+      fireEvent.click(within(tabs('Overview')).getByRole('tab', { name: 'City pulse' }))
+      const pulse = within(sheet()).getByRole('tabpanel', { name: 'City pulse' }).textContent
+      const vehicles = within(tabs('Overview')).getByRole('tab', { name: /^Vehicles/ })
+      fireEvent.click(vehicles)
+      const table = within(sheet()).getByRole('table')
+      return {
+        pulse,
+        vehicles: vehicles.textContent,
+        rows: within(table).getAllByRole('link').length,
+        list: table.textContent,
+      }
+    }
+    const planes = within(screen.getByRole('banner')).getByRole('button', { name: 'Planes 9' })
+    const on = figures()
+    expect(on.vehicles).toBe('Vehicles 18')
+    expect(on.rows).toBe(18)
+    fireEvent.click(planes)
+    expect(planes).toHaveAttribute('aria-pressed', 'false')
+    expect(figures()).toEqual(on)
   })
 })
 

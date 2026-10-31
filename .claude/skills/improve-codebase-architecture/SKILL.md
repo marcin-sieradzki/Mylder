@@ -72,11 +72,11 @@ Side effects happen inline as decisions crystallize; call the Skill tool with "d
 
 ## Between specs
 
-Mylder runs this command between spec implementations, before the next `/implement-spec`, so each spec starts on the deepened code. When the maintainer has asked for the top recommendations to be approved rather than grilled one by one:
+The maintainer runs this command by hand between specs, before the next `/factory`, so the next spec starts on the deepened code. When the maintainer has asked for the top recommendations to be approved rather than grilled one by one:
 
 1. Skip the question at the end of step 2. Every `Strong` candidate is approved; with none, the **Top recommendation** is.
 2. Run the grilling loop on each approved candidate alone, answering from `GLOSSARY.md`, the ADRs and the code, and keeping its side effects (glossary terms, ADRs).
 3. Call the Skill tool with `to-spec` to publish the approved candidates as one spec issue, then with `to-tickets` to slice it.
-4. Report the report's link and the spec issue. The spec is implemented with `/implement-spec`, and merged, before the next spec starts.
+4. Report the report's link and the spec issue. The spec is built with `/factory` once the maintainer marks it `factory:ready`, before the next spec starts.
 
 `Worth exploring` and `Speculative` candidates stay in the report for the maintainer.

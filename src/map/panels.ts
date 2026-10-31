@@ -1,21 +1,25 @@
 // The open panel's answer (docs/screens.md, "Vehicle detail" and "Stop departures"): the stop
 // route's answer for an open stop, the trip route's for an open trip, asked for when the panel
 // opens in the address (view.ts) and again just after each answer falls due, while anything on the
-// page watches it. One store for the page, which React reads through `useSyncExternalStore`, so
-// the panels share one ask. Everything outside Mylder (the network, the timers, the server's clock,
-// the random draw) comes in as a dependency.
+// page watches it. An aircraft's panel has no route: its card is the aircraft snapshot's own. One
+// store for the page, which React reads through `useSyncExternalStore`, so the panels share one
+// ask. Everything outside Mylder (the network, the timers, the server's clock, the random draw)
+// comes in as a dependency.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { StopDepartures, TripDetail } from '../tracker/index.ts'
 import { liveSnapshot, serverNow } from './live.ts'
 import { fetchRoute } from './routes.ts'
-import { mapView, type Panel, type PanelKind, type ViewStore } from './view.ts'
+import { mapView, type Panel, type ViewStore } from './view.ts'
 
 /** Each panel's answer, by what it shows. */
 export interface PanelAnswers {
   readonly stop: StopDepartures
   readonly trip: TripDetail
 }
+
+/** The kinds of panel a route answers. */
+export type RoutedKind = keyof PanelAnswers
 
 /**
  * How the ask is going: on its way, answered, unknown to the route (its 404), or failed with
@@ -24,23 +28,26 @@ export interface PanelAnswers {
 export type PanelStatus = 'loading' | 'ok' | 'not-found' | 'error'
 
 /** One kind of panel's state: the panel, and its answer once one has landed. */
-export interface PanelStateOf<K extends PanelKind> {
+export interface PanelStateOf<K extends RoutedKind> {
   readonly panel: Panel & { readonly kind: K }
   readonly status: PanelStatus
   readonly answer?: PanelAnswers[K]
 }
 
 /** The open panel's state, told apart by `panel.kind`. */
-export type PanelState = { [K in PanelKind]: PanelStateOf<K> }[PanelKind]
+export type PanelState = { [K in RoutedKind]: PanelStateOf<K> }[RoutedKind]
 
 /** Whether the open panel's state is one of a kind's, for a screen that shows that kind. */
-export const isPanelOf = <K extends PanelKind>(
+export const isPanelOf = <K extends RoutedKind>(
   state: PanelState | undefined,
   kind: K,
 ): state is PanelStateOf<K> & PanelState => state?.panel.kind === kind
 
 export interface PanelAnswersStore {
-  /** The open panel's state; none while no panel is open. The same object until it changes. */
+  /**
+   * The open panel's state; none while no panel a route answers is open. The same object until it
+   * changes.
+   */
   get(): PanelState | undefined
   /** Calls back on every change, and asks while anything listens; returns the function that stops it. */
   subscribe(onChange: () => void): () => void
@@ -72,10 +79,19 @@ const RETRY = 10 * S
 /** The least wait after an answer, for one already due when it lands, as one is mid-run. */
 const LEAST_WAIT = 5 * S
 
-const ROUTES: Readonly<Record<PanelKind, string>> = { stop: '/api/stops/', trip: '/api/trips/' }
+const ROUTES: Readonly<Record<RoutedKind, string>> = { stop: '/api/stops/', trip: '/api/trips/' }
+
+/** A panel a route answers. */
+type RoutedPanel = Panel & { readonly kind: RoutedKind }
+
+/** The open panel in `view`, when a route answers it. */
+const routedIn = (view: ViewStore): RoutedPanel | undefined => {
+  const { panel } = view.get()
+  return panel && panel.kind in ROUTES ? (panel as RoutedPanel) : undefined
+}
 
 /** The route that answers a panel. */
-const routeOf = (panel: Panel) => `${ROUTES[panel.kind]}${encodeURIComponent(panel.id)}`
+const routeOf = (panel: RoutedPanel) => `${ROUTES[panel.kind]}${encodeURIComponent(panel.id)}`
 
 const isAnswer = (body: unknown): body is { readonly nextDue: number } =>
   typeof (body as { nextDue?: unknown } | null)?.nextDue === 'number'
@@ -104,7 +120,7 @@ export function panelAnswers(
   let inFlight: AbortController | undefined
   let stopFollowing: (() => void) | undefined
   /** The panel being asked for. */
-  let followed: Panel | undefined
+  let followed: RoutedPanel | undefined
 
   const set = (next: PanelState | undefined) => {
     state = next
@@ -119,11 +135,11 @@ export function panelAnswers(
     inFlight = undefined
   }
 
-  const plan = (panel: Panel, wait: number) => {
+  const plan = (panel: RoutedPanel, wait: number) => {
     timer = timers.set(() => void ask(panel), wait)
   }
 
-  async function ask(panel: Panel) {
+  async function ask(panel: RoutedPanel) {
     timer = undefined
     const controller = new AbortController()
     inFlight = controller
@@ -155,7 +171,7 @@ export function panelAnswers(
 
   /** Starts asking for the panel the view has open, when it isn't the one asked for already. */
   const follow = () => {
-    const panel = view.get().panel
+    const panel = routedIn(view)
     if (panel === followed) return
     halt()
     followed = panel
@@ -169,7 +185,7 @@ export function panelAnswers(
     get() {
       // Nothing listens, so nothing follows the view: read its panel now, without asking.
       if (!stopFollowing) {
-        const panel = view.get().panel
+        const panel = routedIn(view)
         if (panel !== state?.panel)
           state = panel ? ({ panel, status: 'loading' } as PanelState) : undefined
       }

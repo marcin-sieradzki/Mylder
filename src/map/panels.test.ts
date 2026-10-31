@@ -85,6 +85,15 @@ describe("the open panel's answer", () => {
     expect(asked).toEqual([])
   })
 
+  it("is none for an aircraft's panel, whose card the aircraft snapshot holds, and asks for nothing", async () => {
+    const { store, view } = open('?stop=27532')
+    await landed()
+    view.update({ panel: { kind: 'aircraft', id: '4ab1e3' } })
+    await vi.advanceTimersByTimeAsync(10 * 60 * S)
+    expect(store.get()).toBeUndefined()
+    expect(asked.map((each) => each.url)).toEqual(['/api/stops/27532'])
+  })
+
   it('asks again just after the answer falls due, and takes the new answer', async () => {
     const { store } = open('?stop=27532')
     await landed()
