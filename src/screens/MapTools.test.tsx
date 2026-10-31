@@ -350,6 +350,29 @@ describe("the map's keys", () => {
     expect(state.pitch).toBe(0)
   })
 
+  it('add up steps pressed while the last one is still easing, at most two ahead of the map', async () => {
+    const user = userEvent.setup()
+    const { state, settle, map } = open()
+    const shift = (keys: string) => user.keyboard(`{Shift>}${keys}{/Shift}`)
+    await shift('{ArrowRight}{ArrowRight}')
+    act(settle)
+    expect(state.bearing).toBe(30)
+    // A held key repeats faster than a step eases: it turns the map on two steps ahead of it,
+    // rather than spinning it.
+    await shift('{ArrowRight}'.repeat(6))
+    act(settle)
+    expect(state.bearing).toBe(60)
+    await shift('{ArrowUp}'.repeat(4))
+    act(settle)
+    expect(state.pitch).toBe(20)
+    expect(state.bearing).toBe(60)
+    // Once it has come to rest, a step starts from where it is, however a gesture left it.
+    act(() => void map.jumpTo({ bearing: 170, pitch: 33 }))
+    await shift('{ArrowRight}{ArrowDown}')
+    act(settle)
+    expect(state).toMatchObject({ bearing: -175, pitch: 23 })
+  })
+
   it('end Follow with a Shift + arrow press, as with any other key move', async () => {
     const user = userEvent.setup()
     const { map, container } = open()

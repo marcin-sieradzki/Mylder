@@ -5,7 +5,7 @@
 // motion. The canvas attaches its MapLibre map; until it has, and where WebGL is missing, the
 // controls have nothing to move.
 import 'client-only'
-import type { CameraOptions, Map as MapLibreMap } from 'maplibre-gl'
+import type { CameraOptions, EaseToOptions, Map as MapLibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
 import type { MediaSetting } from './frames.ts'
 
@@ -81,6 +81,7 @@ export const TURN_STEP = 15
 
 /** How long a tilt or turn by a key eases for, in ms, as MapLibre's own keys do. */
 const STEP_EASE = 300
+const STEP = 'mylder-step'
 
 /** Whether the system asks for reduced motion; not where the browser has no media queries. */
 const systemReducedMotion = () =>
@@ -128,11 +129,34 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
   }
 
   /** Moves the attached map to `target`, carrying the viewer's `input` as MapLibre's moves do. */
-  const move = (target: CameraOptions, input: Event | undefined, duration?: number) => {
+  const move = (target: CameraOptions, input: Event | undefined, ease?: EaseToOptions) => {
     if (!map) return
     const eventData = input ? { originalEvent: input } : undefined
     if (reducedMotion()) map.jumpTo(target, eventData)
-    else map.easeTo({ ...target, ...(duration === undefined ? {} : { duration }) }, eventData)
+    else map.easeTo({ ...ease, ...target }, eventData)
+  }
+  /**
+   * Where the steps under way are going, until the map comes to rest: a press while one eases
+   * steps on from there, so presses in quick succession add up however slowly the map draws. A
+   * held key repeats faster than a step eases, so the aim runs at most two steps ahead of the map.
+   */
+  let aim: { pitch: number; bearing: number } | undefined
+  const rest = () => (aim = undefined)
+  const step = (by: { pitch?: number; bearing?: number }, input: Event | undefined) => {
+    if (!map) return
+    const now = { pitch: map.getPitch(), bearing: map.getBearing() }
+    const from = aim ?? now
+    // The turn ahead of the map the shorter way round, as MapLibre eases a heading.
+    const turn =
+      ((((from.bearing + (by.bearing ?? 0) - now.bearing + 180) % 360) + 360) % 360) - 180
+    const tilt = from.pitch + (by.pitch ?? 0) - now.pitch
+    const ahead = (value: number, most: number) => Math.min(most, Math.max(-most, value))
+    aim = {
+      pitch: Math.min(map.getMaxPitch(), Math.max(0, now.pitch + ahead(tilt, 2 * TILT_STEP))),
+      bearing: now.bearing + ahead(turn, 2 * TURN_STEP),
+    }
+    // One ease id, as MapLibre's own keys give theirs, chains each step onto the one under way.
+    move(aim, input, { duration: STEP_EASE, easeId: STEP })
   }
 
   return {
@@ -140,9 +164,12 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
       map = attached
       home = opened
       attached.on('move', update)
+      attached.on('moveend', rest)
       update()
       return () => {
         attached.off('move', update)
+        attached.off('moveend', rest)
+        rest()
         if (map !== attached) return
         map = undefined
         home = undefined
@@ -162,14 +189,8 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
         undefined,
         input ? { originalEvent: input } : undefined,
       ),
-    tilt(by, input) {
-      if (!map) return
-      const pitch = Math.min(map.getMaxPitch(), Math.max(0, map.getPitch() + by * TILT_STEP))
-      move({ pitch }, input, STEP_EASE)
-    },
-    turn(by, input) {
-      if (map) move({ bearing: map.getBearing() + by * TURN_STEP }, input, STEP_EASE)
-    },
+    tilt: (by, input) => step({ pitch: by * TILT_STEP }, input),
+    turn: (by, input) => step({ bearing: by * TURN_STEP }, input),
     reset() {
       if (home) move({ ...home(), bearing: 0, pitch: 0 }, undefined)
     },
