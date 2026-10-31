@@ -8,7 +8,8 @@ import type { Snapshot } from '../tracker/index.ts'
 import { stubProjection, worldOf, type StubCamera } from '../test/projection.ts'
 import { writeOffset } from './offsets.ts'
 import { readPaint } from './paint.ts'
-import { tripsDrawn } from './VehicleGlyphLayer.ts'
+import { dotPicking, pickedStore } from './picking.ts'
+import { tripsDrawn, vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf } from './vehicles.ts'
 
 // Where a dot on its line's strand is drawn, with the map's camera stood in for: MapLibre draws
@@ -30,8 +31,8 @@ const vehicles = vehiclesOf(
   readPaint(document.documentElement, vehiclePaint(network)),
 )
 
-// Two S-tog trains where A and E share a track, each half a track spacing (1.4 px) off its centre:
-// E heading south-west towards Hundige, and A heading north-east towards Hillerød.
+// An E and an A train, each at places on its path where A and E share a track, half an S-tog
+// track spacing (1.4 px) off its centre.
 const E_SOUTH = 's-tog.E.e8dc141a28.20260616.0702'
 const A_NORTH = 's-tog.A.0bc307e3eb.20260616.0707'
 
@@ -60,8 +61,8 @@ function strandAndDot(key: string, along: number, turn: Partial<StubCamera>) {
   const piece = path.distances.findIndex((distance) => distance > along)
   const step = path.stops.findLastIndex((stop) => stop <= along)
   const place = vehicles.strands[i]![step]
-  const [from, to] = [path.points[piece - 1], path.points[piece]].map(([lat, lon]) =>
-    worldOf([lon, lat], camera.zoom),
+  const [from, to] = [path.points[piece - 1], path.points[piece]].map(([pointLat, pointLon]) =>
+    worldOf([pointLon, pointLat], camera.zoom),
   )
   const [dx, dy] = [to[0] - from[0], to[1] - from[1]]
   const length = Math.hypot(dx, dy)
@@ -115,5 +116,26 @@ describe("a dot on its line's strand", () => {
       // Off the track's centre by about the strand's 1.4 px, the rest of the way foreshortened.
       expect(awayFrom(dot, centreLine)).toBeGreaterThan(0.7)
     }
+  })
+})
+
+describe('picking a dot on its strand', () => {
+  it('opens its card on the dot where the canvas draws it, on a map turned to face east', () => {
+    const turned = stubProjection({ centre: [12.59, 55.7], zoom: 14, bearing: 90 })
+    const { i } = standAt(E_SOUTH, 14443, turned)
+    const store = pickedStore()
+    const canvas = document.createElement('div')
+    canvas.getBoundingClientRect = () => DOMRect.fromRect({ x: 0, y: 0, width: 800, height: 600 })
+    const picks = dotPicking(canvas, store)
+    picks.follow([tripsDrawn(vehicles)], turned.project)
+    const glyphs = vehicleLayers(vehicles, 1).find((layer) => layer.props.pickable)
+    picks.props.onHover({ x: 0, y: 0, picked: true, index: i, layer: glyphs } as never)
+    // Facing north the dot sits 1.36 px west of its position and 0.33 px south; facing east, the
+    // ground's west is down the canvas and its south to the right.
+    const { x, y } = turned.project([vehicles.positions[i * 2], vehicles.positions[i * 2 + 1]])
+    const [px, py] = store.get()!.point
+    expect(store.get()?.key).toBe(E_SOUTH)
+    expect(px - x).toBeCloseTo(0.3254, 3)
+    expect(py - y).toBeCloseTo(1.3617, 3)
   })
 })
