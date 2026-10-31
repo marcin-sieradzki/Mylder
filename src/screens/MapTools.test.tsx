@@ -199,6 +199,42 @@ describe('the map controls', () => {
     expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-disabled', 'true')
   })
 
+  it('eases the view back to flat, north-up and the place it opened on', async () => {
+    const user = userEvent.setup()
+    const { state, settle, gesture } = open()
+    gesture({ center: [12.6, 55.7], zoom: 14, pitch: 40, bearing: 70 })
+    await user.click(screen.getByRole('button', { name: 'Centre the map' }))
+    // Under way, the map hasn't reached it yet.
+    expect(state).toMatchObject({ zoom: 14, pitch: 40, bearing: 70 })
+    act(settle)
+    expect(state).toMatchObject({
+      zoom: 11.2,
+      center: { lng: 12.565, lat: 55.68 },
+      pitch: 0,
+      bearing: 0,
+    })
+  })
+
+  it('jumps back at once when the system asks for reduced motion', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }))
+    onTestFinished(() => void vi.unstubAllGlobals())
+    const user = userEvent.setup()
+    const { state, gesture } = open()
+    gesture({ center: [12.6, 55.7], zoom: 14, pitch: 40, bearing: 70 })
+    await user.click(screen.getByRole('button', { name: 'Centre the map' }))
+    expect(state).toMatchObject({
+      zoom: 11.2,
+      center: { lng: 12.565, lat: 55.68 },
+      pitch: 0,
+      bearing: 0,
+      easing: undefined,
+    })
+  })
+
   it('hides the scale bar while the map is tilted, and shows it flat again, turned or not', () => {
     const { gesture } = open()
     expect(screen.getByText('Scale')).toBeInTheDocument()

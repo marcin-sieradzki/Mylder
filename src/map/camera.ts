@@ -1,7 +1,9 @@
-// The map's camera as the controls and the keys move it (docs/screens.md, "The moving map"): zoom
-// in and out by a step, pan by a step, and reset to the view the map opened on, plus what the
-// scale bar and the zoom buttons read back. The canvas attaches its MapLibre map; until it has,
-// and where WebGL is missing, the controls have nothing to move.
+// The map's camera as the controls and the keys move it (docs/screens.md, "The moving map" and
+// "The 3D view"): zoom in and out by a step, pan, tilt and turn by a step, and reset to the view
+// the map opened on, flat and north-up, plus what the scale bar and the zoom buttons read back:
+// the zoom, the tilt and the heading. Each move eases, or jumps when the system asks for reduced
+// motion. The canvas attaches its MapLibre map; until it has, and where WebGL is missing, the
+// controls have nothing to move.
 import 'client-only'
 import type { CameraOptions, Map as MapLibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
@@ -63,6 +65,7 @@ export interface Camera {
   tilt(by: -1 | 1, input?: Event): void
   /** Turns by a step, 1 clockwise or -1 anticlockwise, carrying `input` as `pan` does. */
   turn(by: -1 | 1, input?: Event): void
+  /** Returns to the view the map opened on, flat and north-up. */
   reset(): void
   /** Whether `element` is the map or inside it. */
   holds(element: Element): boolean
@@ -78,7 +81,7 @@ export const TURN_STEP = 15
 /** How long a tilt or turn by a key eases for, in ms, as MapLibre's own keys do. */
 const STEP_EASE = 300
 
-/** Whether the system asks for reduced motion; no where the browser has no media queries. */
+/** Whether the system asks for reduced motion; not where the browser has no media queries. */
 const systemReducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -167,7 +170,7 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
       if (map) move({ bearing: map.getBearing() + by * TURN_STEP }, input, STEP_EASE)
     },
     reset() {
-      if (map && home) map.easeTo(home())
+      if (home) move({ ...home(), bearing: 0, pitch: 0 }, undefined)
     },
     holds: (element) => Boolean(map?.getContainer().contains(element)),
   }
