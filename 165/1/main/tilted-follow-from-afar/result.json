@@ -1,0 +1,10 @@
+{
+  "journey": "tilted-follow-from-afar",
+  "pass": true,
+  "steps": [
+    "01-tilted-turned-map-away-from-the-m1-train-panel-open: tilted turned map away from the M1 train, panel open (http://localhost:4342/en?map=13.00/55.66000/12.60000/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "02-follow-pressed-camera-moved-to-the-train: follow pressed, camera moved to the train (http://localhost:4342/en?map=13.00/55.66000/12.60000/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-following-0-card-of-m1-at-the-centre-still-tilted-and-turned: following 0: card of M1 at the centre, still tilted and turned (http://localhost:4342/en?map=13.00/55.66000/12.60000/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "04-following-1-card-of-m1-at-the-centre-still-tilted-and-turned: following 1: card of M1 at the centre, still tilted and turned (http://localhost:4342/en?map=13.00/55.66000/12.60000/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)"
+  ]
+}

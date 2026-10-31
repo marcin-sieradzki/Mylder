@@ -1,0 +1,10 @@
+{
+  "journey": "tilted-line",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /\\/-30\\.0\\/50\\.0$/\nReceived string:  \"10.98/55.65540/12.54031/0.0/50.0\"",
+  "steps": [
+    "01-tilted-turned-map-with-the-m1-panel-open: tilted turned map with the M1 panel open (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "02-whole-line-fitted: whole line fitted (http://localhost:4342/en?map=10.98/55.65540/12.54031/0.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-failure: failure (http://localhost:4342/en?map=10.98/55.65540/12.54031/0.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)"
+  ]
+}

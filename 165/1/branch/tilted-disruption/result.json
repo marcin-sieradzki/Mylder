@@ -1,0 +1,11 @@
+{
+  "journey": "tilted-disruption",
+  "pass": true,
+  "steps": [
+    "01-tilted-turned-map-with-the-disruptions-tab: tilted turned map with the Disruptions tab (http://localhost:4343/en?tab=disruptions&map=13.00/55.67000/12.57000/-30.0/50.0)",
+    "02-s-tog-stretch-fitted: S-tog stretch fitted (http://localhost:4343/en?tab=disruptions&map=12.14/55.69880/12.56468/-30.0/50.0)",
+    "03-stretch-cleared: stretch cleared (http://localhost:4343/en?tab=disruptions&map=12.14/55.69880/12.56468/-30.0/50.0)",
+    "04-klaksvigsgade-ring-fitted: Klaksvigsgade ring fitted (http://localhost:4343/en?tab=disruptions&map=15.00/55.66899/12.58183/-30.0/50.0)",
+    "05-ring-tapped-klaksvigsgade-departures: ring tapped: Klaksvigsgade departures (http://localhost:4343/en?tab=disruptions&map=15.00/55.66899/12.58183/-30.0/50.0&stop=807)"
+  ]
+}

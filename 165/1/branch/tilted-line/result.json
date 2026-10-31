@@ -1,0 +1,9 @@
+{
+  "journey": "tilted-line",
+  "pass": true,
+  "steps": [
+    "01-tilted-turned-map-with-the-m1-panel-open: tilted turned map with the M1 panel open (http://localhost:4343/en?map=14.00/55.68409/12.56095/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "02-whole-line-fitted: whole line fitted (http://localhost:4343/en?map=11.36/55.65766/12.56588/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-panel-closed-whole-line-still-fitted: panel closed, whole line still fitted (http://localhost:4343/en?map=11.36/55.65766/12.56588/-30.0/50.0)"
+  ]
+}

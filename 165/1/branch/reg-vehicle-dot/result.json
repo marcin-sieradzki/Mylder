@@ -1,0 +1,11 @@
+{
+  "journey": "reg-vehicle-dot",
+  "pass": true,
+  "steps": [
+    "01-map-centred-on-the-m1-train: map centred on the M1 train (http://localhost:4343/en?map=14.00/55.68191/12.55202)",
+    "02-tapped-dot-opened-the-panel: tapped dot opened the panel (http://localhost:4343/en?map=14.00/55.68191/12.55202&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-follow-on: follow on (http://localhost:4343/en?map=14.00/55.68191/12.55202&trip=metro.M1.c6fa766489.20260616.0705)",
+    "04-whole-line-and-chip: whole line and chip (http://localhost:4343/en?map=10.98/55.65540/12.54031&trip=metro.M1.c6fa766489.20260616.0705)",
+    "05-chip-cleared: chip cleared (http://localhost:4343/en?map=10.98/55.65540/12.54031&trip=metro.M1.c6fa766489.20260616.0705)"
+  ]
+}

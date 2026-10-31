@@ -1,0 +1,11 @@
+{
+  "journey": "tilted-follow",
+  "pass": true,
+  "steps": [
+    "01-tilted-turned-map-with-the-m1-panel-open: tilted turned map with the M1 panel open (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "02-follow-pressed: follow pressed (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-following-0-card-of-m1-at-the-centre-still-tilted-and-turned: following 0: card of M1 at the centre, still tilted and turned (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "04-following-1-card-of-m1-at-the-centre-still-tilted-and-turned: following 1: card of M1 at the centre, still tilted and turned (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)",
+    "05-following-2-card-of-m1-at-the-centre-still-tilted-and-turned: following 2: card of M1 at the centre, still tilted and turned (http://localhost:4342/en?map=14.00/55.68191/12.55204/-30.0/50.0&trip=metro.M1.c6fa766489.20260616.0705)"
+  ]
+}

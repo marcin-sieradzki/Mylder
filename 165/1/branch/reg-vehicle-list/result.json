@@ -1,0 +1,10 @@
+{
+  "journey": "reg-vehicle-list",
+  "pass": true,
+  "steps": [
+    "01-vehicles-list: vehicles list (http://localhost:4343/en?tab=vehicles)",
+    "02-trip-panel-with-facts: trip panel with facts (http://localhost:4343/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-closed: closed (http://localhost:4343/en?tab=vehicles)",
+    "04-trip-not-found: trip not found (http://localhost:4343/en?trip=nothing)"
+  ]
+}

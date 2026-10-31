@@ -1,0 +1,10 @@
+{
+  "journey": "tilted-disruption",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /\\/-30\\.0\\/50\\.0$/\nReceived string:  \"11.28/55.70501/12.57566/0.0/50.0\"",
+  "steps": [
+    "01-tilted-turned-map-with-the-disruptions-tab: tilted turned map with the Disruptions tab (http://localhost:4342/en?tab=disruptions&map=13.00/55.67000/12.57000/-30.0/50.0)",
+    "02-s-tog-stretch-fitted: S-tog stretch fitted (http://localhost:4342/en?tab=disruptions&map=11.28/55.70501/12.57566/0.0/50.0)",
+    "03-failure: failure (http://localhost:4342/en?tab=disruptions&map=11.28/55.70501/12.57566/0.0/50.0)"
+  ]
+}

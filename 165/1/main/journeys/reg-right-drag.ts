@@ -1,0 +1,51 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { map, mapParam, opened, press, scale } from './helpers.ts'
+
+// map-3d: right-drag turns and tilts; Ctrl-drag the same; Shift+Down back to flat.
+export default async ({ page, step, expect }: Journey) => {
+  await opened({ page, expect }, '/en')
+  await expect(map(page)).toHaveAttribute('data-tilt', '0', { timeout: 20000 })
+  await page.waitForTimeout(1000)
+  const v = page.viewportSize()!
+  const x = v.width / 2 + 100, y = v.height / 2
+  await step('flat')
+  await page.mouse.move(x, y)
+  await page.mouse.down({ button: 'right' })
+  await page.mouse.move(x + 150, y, { steps: 10 })
+  await page.mouse.up({ button: 'right' })
+  await expect(map(page)).not.toHaveAttribute('data-heading', '0', { timeout: 20000 })
+  await expect(map(page)).toHaveAttribute('data-tilt', '0')
+  await expect(scale(page)).toBeVisible()
+  const heading = await map(page).getAttribute('data-heading')
+  await page.waitForTimeout(800)
+  console.log('turned heading', heading, 'map=', mapParam(page))
+  await step('right-drag turned')
+  await page.mouse.move(x, y)
+  await page.mouse.down({ button: 'right' })
+  await page.mouse.move(x, y - 60, { steps: 10 })
+  await page.mouse.up({ button: 'right' })
+  await expect(map(page)).not.toHaveAttribute('data-tilt', '0', { timeout: 20000 })
+  await expect(map(page)).toHaveAttribute('data-heading', heading!)
+  await expect(scale(page)).toBeHidden()
+  await page.waitForTimeout(800)
+  console.log('tilted', await map(page).getAttribute('data-tilt'), 'map=', mapParam(page))
+  await step('right-drag tilted')
+  await page.keyboard.down('Control')
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x - 150, y, { steps: 10 })
+  await page.mouse.up()
+  await page.keyboard.up('Control')
+  await expect(map(page)).not.toHaveAttribute('data-heading', heading!, { timeout: 20000 })
+  await page.waitForTimeout(800)
+  console.log('ctrl-drag heading', await map(page).getAttribute('data-heading'), 'map=', mapParam(page))
+  await step('ctrl-drag turned')
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  await expect(async () => {
+    await page.keyboard.press('Shift+ArrowDown')
+    await page.waitForTimeout(450)
+    await expect(scale(page)).toBeVisible({ timeout: 500 })
+  }).toPass({ timeout: 30000 })
+  await expect(map(page)).toHaveAttribute('data-tilt', '0', { timeout: 10000 })
+  await step('shift+down back to flat, scale shown')
+}

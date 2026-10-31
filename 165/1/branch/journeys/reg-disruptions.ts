@@ -1,0 +1,25 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+// Regression, disruptions dis-list, dis-footer, dis-show, Danish.
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  const sheet = page.getByRole('dialog', { name: 'Overview' })
+  await sheet.getByRole('tab', { name: /^Disruptions/ }).click()
+  const active = sheet.getByRole('list', { name: 'Active now' })
+  await expect(active.getByText('Færre S-tog mellem København H og Hellerup')).toBeVisible()
+  await expect(active.getByText('Linje 5C kører en anden rute ved Langebro')).toBeVisible()
+  await expect(sheet.getByRole('list', { name: 'Later' }).getByText('Ingen S-tog mellem Hellerup og Holte i weekenden')).toBeVisible()
+  await expect(sheet.getByText('Messages from Rejseplanen, checked 07:20.')).toBeVisible()
+  await step('disruptions listed')
+  await active.getByRole('listitem').first().getByRole('button', { name: 'Show on map' }).click()
+  const chip = page.getByRole('button', { name: /^Showing: .* · Clear$/ })
+  await expect(chip).toBeVisible()
+  await page.waitForTimeout(2_500)
+  await step('shown on map')
+  await chip.click()
+  await expect(chip).toBeHidden()
+  await step('cleared')
+  await page.goto('/da?tab=disruptions')
+  const da = page.getByRole('dialog', { name: 'Overblik' })
+  await expect(da.getByRole('list', { name: 'Aktuelle nu' }).getByText('Færre S-tog mellem København H og Hellerup')).toBeVisible()
+  await step('Danish')
+}

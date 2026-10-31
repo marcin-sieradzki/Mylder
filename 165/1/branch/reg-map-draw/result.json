@@ -1,0 +1,7 @@
+{
+  "journey": "reg-map-draw",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-with-17-dots-and-its-chrome: map drawn with 17 dots and its chrome (http://localhost:4343/en)"
+  ]
+}

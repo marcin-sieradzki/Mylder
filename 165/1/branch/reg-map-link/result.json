@@ -1,0 +1,10 @@
+{
+  "journey": "reg-map-link",
+  "pass": true,
+  "steps": [
+    "01-tilted-link: tilted link (http://localhost:4343/en?map=14.00/55.67600/12.56800/-30.0/50.0)",
+    "02-keys-wrote-the-angle-to-the-address: keys wrote the angle to the address (http://localhost:4343/en?map=13.00/55.67600/12.56800/30.0/20.0)",
+    "03-reloaded-at-the-same-angle: reloaded at the same angle (http://localhost:4343/en?map=13.00/55.67600/12.56800/30.0/20.0)",
+    "04-out-of-range-tilt-opens-flat: out-of-range tilt opens flat (http://localhost:4343/en?map=14.00/55.67600/12.56800/-30.0/75.0)"
+  ]
+}

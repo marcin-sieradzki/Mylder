@@ -1,0 +1,14 @@
+{
+  "journey": "flat-as-today",
+  "pass": true,
+  "steps": [
+    "01-flat-map-with-the-m1-panel-open: flat map with the M1 panel open (http://localhost:4343/en?map=14.00/55.68128/12.53614&trip=metro.M1.c6fa766489.20260616.0705)",
+    "02-following-flat-0: following flat 0 (http://localhost:4343/en?map=14.00/55.68128/12.53614&trip=metro.M1.c6fa766489.20260616.0705)",
+    "03-following-flat-1: following flat 1 (http://localhost:4343/en?map=14.00/55.68128/12.53614&trip=metro.M1.c6fa766489.20260616.0705)",
+    "04-pan-ended-follow: pan ended follow (http://localhost:4343/en?map=14.00/55.68144/12.52357&trip=metro.M1.c6fa766489.20260616.0705)",
+    "05-flat-whole-line-fitted: flat whole line fitted (http://localhost:4343/en?map=10.98/55.65540/12.54031&trip=metro.M1.c6fa766489.20260616.0705)",
+    "06-flat-stretch-fitted: flat stretch fitted (http://localhost:4343/en?tab=disruptions&map=11.28/55.70501/12.57566)",
+    "07-flat-klaksvigsgade-ring-fitted: flat Klaksvigsgade ring fitted (http://localhost:4343/en?tab=disruptions&map=15.00/55.66895/12.58213)",
+    "08-flat-ring-tapped-klaksvigsgade-departures: flat ring tapped: Klaksvigsgade departures (http://localhost:4343/en?tab=disruptions&map=15.00/55.66895/12.58213&stop=807)"
+  ]
+}
