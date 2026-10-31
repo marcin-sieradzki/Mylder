@@ -7,6 +7,7 @@
 import 'client-only'
 import type { CameraOptions, Map as MapLibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
+import type { MediaSetting } from './frames.ts'
 
 /** What a view reads back for the controls. */
 export interface CameraView {
@@ -174,6 +175,40 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
     },
     holds: (element) => Boolean(map?.getContainer().contains(element)),
   }
+}
+
+/** The part of MapLibre's map whose two-finger gestures tilt and turn it. */
+export type TouchMap = Pick<MapLibreMap, 'touchPitch' | 'touchZoomRotate'>
+
+/**
+ * Under Perron's breakpoint.phone, 760px, as Perron's own CSS asks it; none where the browser has
+ * no media queries.
+ */
+const systemPhone = (): MediaSetting | null =>
+  typeof matchMedia === 'function' ? matchMedia('(max-width: 759.98px)') : null
+
+/**
+ * Lets a two-finger drag tilt `map` and a two-finger twist turn it, except while the page is as
+ * narrow as a phone (`phone`), where 3D waits for a measured frame rate (ADR 0016): there the
+ * gestures only pan and zoom. Follows the width across the breakpoint; returns the function that
+ * stops following it.
+ */
+export function touchTiltAndTurn(
+  map: TouchMap,
+  phone: MediaSetting | null = systemPhone(),
+): () => void {
+  const apply = () => {
+    if (phone?.matches) {
+      map.touchPitch.disable()
+      map.touchZoomRotate.disableRotation()
+    } else {
+      map.touchPitch.enable()
+      map.touchZoomRotate.enableRotation()
+    }
+  }
+  apply()
+  phone?.addEventListener('change', apply)
+  return () => phone?.removeEventListener('change', apply)
 }
 
 /** The page's one camera, which the canvas attaches its map to. */
