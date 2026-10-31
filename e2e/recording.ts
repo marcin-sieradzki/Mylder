@@ -58,6 +58,16 @@ export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 export const SNAPSHOT_PORT = 4176
 export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
 
+/**
+ * A fourth server on the same build, on the crowded recording, where six trains stand at
+ * København H from 07:20 to 07:24 (recordings/crowded): more than its standing list shows before
+ * "Show all". It starts at the weekday recording's moment, by its server's clock from its first
+ * request, so only the test that asks it, once, may ask it.
+ */
+export const CROWDED = 'crowded'
+export const CROWDED_PORT = 4177
+export const CROWDED_URL = `http://localhost:${CROWDED_PORT}`
+
 export const test = base.extend({
   page: async ({ page }, provide) => {
     await page.clock.install({ time: RECORDING_START })

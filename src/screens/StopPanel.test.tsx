@@ -631,6 +631,39 @@ describe('the trips standing at a stop’s platforms', () => {
     expect(all).toHaveTextContent('Show fewer')
   })
 
+  it('shows 4 of the six trains standing at København H on the crowded recording, and the rest on Show all', async () => {
+    // Its stop route's answer at 07:22:00, saved with the recording.
+    const crowded = JSON.parse(
+      readFileSync(
+        join(process.cwd(), 'recordings', 'crowded', 'answers', 'stops', '8600626.json'),
+        'utf8',
+      ),
+    ) as StopDepartures
+    vi.setSystemTime(crowded.fetched)
+    answers.set('8600626', crowded)
+    openStop('en', '?stop=8600626')
+    const section = standingSection(await panel('København H'))
+    const trains = () =>
+      within(section)
+        .getAllByRole('listitem')
+        .map((each) => within(each).getByRole('button').getAttribute('aria-label'))
+    expect(trains()).toEqual([
+      'Train RE to Næstved St.',
+      'S-tog A to Hundige St.',
+      'S-tog A to Hillerød St.',
+      'S-tog E to Køge St.',
+    ])
+    fireEvent.click(within(section).getByRole('button', { name: 'Show all 6' }))
+    expect(trains()).toEqual([
+      'Train RE to Næstved St.',
+      'S-tog A to Hundige St.',
+      'S-tog A to Hillerød St.',
+      'S-tog E to Køge St.',
+      'S-tog E to Holte St.',
+      'S-tog A to Hillerød St.',
+    ])
+  })
+
   it('shows 4 with no button when 4 stand', async () => {
     answers.set('48645', standingAt([1, 2, 3, 4].map((n) => standingTrain(n))))
     openStop('en', '?stop=48645')
