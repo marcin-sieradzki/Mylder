@@ -1,0 +1,12 @@
+{
+  "journey": "pr-watch-departures",
+  "pass": false,
+  "error": "the source line read \"may be out of date\": WARN for 857 ms: Rejseplanen · departures 07:20:02, may be out of date; WARN for 1695 ms: Rejseplanen · departures 07:21:03, may be out of date; WARN for 2455 ms: Rejseplanen · departures 07:22:05, may be out of date\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 23\n\n- Array []\n+ Array [\n+   Object {\n+     \"line\": \"Rejseplanen · departures 07:20:02, may be out of date\",\n+     \"t\": 62237.20000000298,\n+     \"via\": \"mutation\",\n+     \"wall\": 1793479902874,\n+     \"warn\": true,\n+   },\n+   Object {\n+     \"line\": \"Rejseplanen · departures 07:21:03, may be out of date\",\n+     \"t\": 123192.40000000224,\n+     \"via\": \"mutation\",\n+     \"wall\": 1793479963829,\n+     \"warn\": true,\n+   },\n+   Object {\n+     \"line\": \"Rejseplanen · departures 07:22:05, may be out of date\",\n+     \"t\": 185204.90000000224,\n+     \"via\": \"mutation\",\n+     \"wall\": 1793480025842,\n+     \"warn\": true,\n+   },\n+ ]",
+  "steps": [
+    "01-departures-settled-rec-07-20-04: departures settled rec 07:20:04 (http://localhost:4320/en?stop=8600783)",
+    "02-departures-after-1-min-rec-07-21-06: departures after 1 min rec 07:21:06 (http://localhost:4320/en?stop=8600783)",
+    "03-departures-after-2-min-rec-07-22-06: departures after 2 min rec 07:22:06 (http://localhost:4320/en?stop=8600783)",
+    "04-departures-after-3-min-rec-07-23-07: departures after 3 min rec 07:23:07 (http://localhost:4320/en?stop=8600783)",
+    "05-failure: failure (http://localhost:4320/en?stop=8600783)"
+  ]
+}

@@ -1,0 +1,42 @@
+warned 80.0 s after blocking, at rec ~07:25:10, answer time 07:23:47: age ~83 s. Line: Rejseplanen · departures 07:23:47, may be out of date
+recovered: yes, at rec ~07:25:17 (6.3 s after unblocking)
+
+Source line, every text it took:
+   0.000s rec~07:23:48 mutation      (no panel)
+   0.988s rec~07:23:49 mutation      Rejseplanen · departures 07:23:47
+  82.048s rec~07:25:10 mutation WARN Rejseplanen · departures 07:23:47, may be out of date
+  88.498s rec~07:25:16 mutation      Rejseplanen · departures 07:25:09
+
+Board requests:
+   1.0s 2026-10-31T20:43:24.366Z ask /api/stops/8600783
+   1.0s 2026-10-31T20:43:24.406Z answer 200 /api/stops/8600783
+blocked at rec 07:23:51; answer shown 07:23:47
+   7.8s 2026-10-31T20:43:31.190Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+   7.9s 2026-10-31T20:43:31.284Z answer 503 /api/stops/8600783
+  17.9s 2026-10-31T20:43:41.312Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  18.0s 2026-10-31T20:43:41.344Z answer 503 /api/stops/8600783
+  28.1s 2026-10-31T20:43:51.459Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  28.1s 2026-10-31T20:43:51.505Z answer 503 /api/stops/8600783
+  38.2s 2026-10-31T20:44:01.534Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  38.2s 2026-10-31T20:44:01.537Z answer 503 /api/stops/8600783
+  48.2s 2026-10-31T20:44:11.541Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  48.2s 2026-10-31T20:44:11.545Z answer 503 /api/stops/8600783
+  58.3s 2026-10-31T20:44:21.667Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  58.3s 2026-10-31T20:44:21.703Z answer 503 /api/stops/8600783
+  68.3s 2026-10-31T20:44:31.700Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  68.3s 2026-10-31T20:44:31.707Z answer 503 /api/stops/8600783
+  78.4s 2026-10-31T20:44:41.821Z ask /api/stops/8600783
+  route 503: http://localhost:4321/api/stops/8600783
+  78.6s 2026-10-31T20:44:41.960Z answer 503 /api/stops/8600783
+warned 80.0 s after blocking, at rec ~07:25:10, answer time 07:23:47: age ~83 s. Line: Rejseplanen · departures 07:23:47, may be out of date
+unblocked at rec 07:25:12
+  88.6s 2026-10-31T20:44:51.958Z ask /api/stops/8600783
+  88.6s 2026-10-31T20:44:51.978Z answer 200 /api/stops/8600783
+recovered: yes, at rec ~07:25:17 (6.3 s after unblocking)

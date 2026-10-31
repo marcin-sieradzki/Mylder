@@ -1,0 +1,93 @@
+TABPANEL:
+E
+From Holte St.
+Live
+7 min
+Timetabled 07:27
+07:27
+07:29
++2 min
+2 min late
+5C
+From Sundbyvester Plads
+Estimated
+~16 min
+Timetabled 07:36
+07:36
+~07:38
++2 min
+2 min late
+5C
+From Herlev Hospital, Sløjfen
+Estimated
+~16 min
+Timetabled 07:39
+07:39
+~07:38
+−1 min
+1 min early
+A
+From Hundige St.
+Live
+18 min
+Timetabled 07:36
+07:36
+07:40
++4 min
+4 min late
+A
+From Hillerød St.
+Live
+19 min
+Timetabled 07:39
+07:39
+07:41
++2 min
+2 min late
+5C
+From Sundbyvester Plads
+Estimated
+~23 min
+~07:45
+On time
+5C
+From Husum Torv, Sløjfen
+Live
+24 min
+Timetabled 07:44
+07:44
+07:46
++2 min
+2 min late
+A
+From Hundige St.
+Live
+25 min
+Timetabled 07:46
+07:46
+07:47
++1 min
+1 min late
+E
+From Køge St.
+Estimated
+~27 min
+Timetabled 07:48
+07:48
+~07:49
++1 min
+1 min late
+A
+From Hillerød St.
+Live
+29 min
+Timetabled 07:49
+07:49
+07:51
++2 min
+2 min late
+Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.
+From the timetable
+
+Timetable and positions 07:22:01
+PASS reg-arrivals-norreport: 3 steps in .verify/branch-184-r1-reg/reg-arrivals-norreport/

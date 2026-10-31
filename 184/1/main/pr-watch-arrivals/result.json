@@ -1,0 +1,12 @@
+{
+  "journey": "pr-watch-arrivals",
+  "pass": false,
+  "error": "the source line read \"may be out of date\": WARN for 954 ms: Rejseplanen · arrivals 07:21:03, may be out of date; WARN for 1624 ms: Rejseplanen · arrivals 07:22:05, may be out of date\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 16\n\n- Array []\n+ Array [\n+   Object {\n+     \"line\": \"Rejseplanen · arrivals 07:21:03, may be out of date\",\n+     \"t\": 122729.79999999702,\n+     \"via\": \"mutation\",\n+     \"wall\": 1793479963913,\n+     \"warn\": true,\n+   },\n+   Object {\n+     \"line\": \"Rejseplanen · arrivals 07:22:05, may be out of date\",\n+     \"t\": 184658.09999999776,\n+     \"via\": \"mutation\",\n+     \"wall\": 1793480025841,\n+     \"warn\": true,\n+   },\n+ ]",
+  "steps": [
+    "01-arrivals-settled-rec-07-20-04: arrivals settled rec 07:20:04 (http://localhost:4320/en?stop=8600783&board=arrivals)",
+    "02-arrivals-after-1-min-rec-07-21-05: arrivals after 1 min rec 07:21:05 (http://localhost:4320/en?stop=8600783&board=arrivals)",
+    "03-arrivals-after-2-min-rec-07-22-07: arrivals after 2 min rec 07:22:07 (http://localhost:4320/en?stop=8600783&board=arrivals)",
+    "04-arrivals-after-3-min-rec-07-23-07: arrivals after 3 min rec 07:23:07 (http://localhost:4320/en?stop=8600783&board=arrivals)",
+    "05-failure: failure (http://localhost:4320/en?stop=8600783&board=arrivals)"
+  ]
+}

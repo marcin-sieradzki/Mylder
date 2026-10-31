@@ -1,0 +1,24 @@
+Source line, every text it took (departures):
+   0.000s rec~07:20:25 mutation      (no panel)
+   1.133s rec~07:20:26 mutation      Rejseplanen · departures 07:20:24
+  64.623s rec~07:21:29 mutation      Rejseplanen · departures 07:21:27
+ 126.996s rec~07:22:32 mutation      Rejseplanen · departures 07:22:30
+
+Warnings:
+(none)
+
+Board requests:
+   1.0s 2026-10-31T20:40:00.870Z ask /api/stops/8600783
+   1.1s 2026-10-31T20:40:01.035Z answer 200 /api/stops/8600783
+   8.4s 2026-10-31T20:40:08.261Z ask /api/stops/8600783
+   8.4s 2026-10-31T20:40:08.261Z answer 200 /api/stops/8600783
+  40.1s 2026-10-31T20:40:40.049Z ask /api/stops/8600783
+  40.3s 2026-10-31T20:40:40.208Z answer 200 /api/stops/8600783
+  64.4s 2026-10-31T20:41:04.301Z ask /api/stops/8600783
+  64.5s 2026-10-31T20:41:04.384Z answer 200 /api/stops/8600783
+ 102.2s 2026-10-31T20:41:42.093Z ask /api/stops/8600783
+ 102.3s 2026-10-31T20:41:42.214Z answer 200 /api/stops/8600783
+ 127.1s 2026-10-31T20:42:07.008Z ask /api/stops/8600783
+ 127.1s 2026-10-31T20:42:07.009Z answer 200 /api/stops/8600783
+ 164.9s 2026-10-31T20:42:44.841Z ask /api/stops/8600783
+ 165.0s 2026-10-31T20:42:44.881Z answer 200 /api/stops/8600783

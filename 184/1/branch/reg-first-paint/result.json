@@ -1,0 +1,8 @@
+{
+  "journey": "reg-first-paint",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-st-settled: Nørreport St. settled (http://localhost:4321/en?stop=27532)",
+    "02-k-benhavn-syd-st-arrivals-settled: København Syd St. Arrivals settled (http://localhost:4321/en?stop=8600783&board=arrivals)"
+  ]
+}

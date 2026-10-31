@@ -1,0 +1,9 @@
+{
+  "journey": "pr-fail-departures-503",
+  "pass": true,
+  "steps": [
+    "01-departures-first-answer-07-23-47-rec-07-23-49: departures first answer 07:23:47 rec 07:23:49 (http://localhost:4321/en?stop=8600783)",
+    "02-departures-503-warns-age-83s: departures 503 warns age 83s (http://localhost:4321/en?stop=8600783)",
+    "03-departures-503-recovered: departures 503 recovered (http://localhost:4321/en?stop=8600783)"
+  ]
+}

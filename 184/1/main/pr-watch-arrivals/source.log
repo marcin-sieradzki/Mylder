@@ -1,0 +1,35 @@
+Source line, every text it took (arrivals):
+   0.000s rec~07:20:03 mutation      (no panel)
+   0.975s rec~07:20:04 mutation      (no source line)
+   1.168s rec~07:20:04 mutation      Rejseplanen · arrivals 07:20:02
+  61.316s rec~07:21:04 mutation      Rejseplanen · arrivals 07:21:03
+ 122.562s rec~07:22:05 mutation WARN Rejseplanen · arrivals 07:21:03, may be out of date
+ 123.516s rec~07:22:06 mutation      Rejseplanen · arrivals 07:22:05
+ 184.490s rec~07:23:07 mutation WARN Rejseplanen · arrivals 07:22:05, may be out of date
+ 186.114s rec~07:23:09 mutation      Rejseplanen · arrivals 07:23:08
+
+Warnings:
+WARN for 954 ms: Rejseplanen · arrivals 07:21:03, may be out of date
+WARN for 1624 ms: Rejseplanen · arrivals 07:22:05, may be out of date
+
+Board requests:
+   1.1s 2026-10-31T20:50:42.228Z ask /api/stops/8600783
+   1.1s 2026-10-31T20:50:42.229Z ask /api/stops/8600783/arrivals
+   1.2s 2026-10-31T20:50:42.364Z answer 200 /api/stops/8600783
+   1.3s 2026-10-31T20:50:42.438Z answer 200 /api/stops/8600783/arrivals
+   8.3s 2026-10-31T20:50:49.429Z ask /api/stops/8600783/arrivals
+   8.3s 2026-10-31T20:50:49.434Z answer 200 /api/stops/8600783/arrivals
+   9.1s 2026-10-31T20:50:50.264Z ask /api/stops/8600783
+   9.1s 2026-10-31T20:50:50.271Z answer 200 /api/stops/8600783
+  61.2s 2026-10-31T20:51:42.381Z ask /api/stops/8600783/arrivals
+  61.5s 2026-10-31T20:51:42.608Z answer 200 /api/stops/8600783/arrivals
+  62.1s 2026-10-31T20:51:43.284Z ask /api/stops/8600783
+  62.1s 2026-10-31T20:51:43.289Z answer 200 /api/stops/8600783
+ 123.6s 2026-10-31T20:52:44.738Z ask /api/stops/8600783/arrivals
+ 123.7s 2026-10-31T20:52:44.841Z answer 200 /api/stops/8600783/arrivals
+ 124.2s 2026-10-31T20:52:45.324Z ask /api/stops/8600783
+ 124.3s 2026-10-31T20:52:45.408Z answer 200 /api/stops/8600783
+ 186.2s 2026-10-31T20:53:47.367Z ask /api/stops/8600783/arrivals
+ 186.3s 2026-10-31T20:53:47.432Z answer 200 /api/stops/8600783/arrivals
+ 187.1s 2026-10-31T20:53:48.227Z ask /api/stops/8600783
+ 187.1s 2026-10-31T20:53:48.246Z answer 200 /api/stops/8600783

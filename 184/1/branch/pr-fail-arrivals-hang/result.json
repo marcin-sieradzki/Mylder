@@ -1,0 +1,9 @@
+{
+  "journey": "pr-fail-arrivals-hang",
+  "pass": true,
+  "steps": [
+    "01-arrivals-first-answer-07-23-47-rec-07-23-50: arrivals first answer 07:23:47 rec 07:23:50 (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "02-arrivals-hang-warns-age-83s: arrivals hang warns age 83s (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "03-arrivals-hang-recovered: arrivals hang recovered (http://localhost:4321/en?stop=8600783&board=arrivals)"
+  ]
+}

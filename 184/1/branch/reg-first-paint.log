@@ -1,0 +1,12 @@
+NØRREPORT PAINTS (4):
+332ms mutation: 
+1798ms mutation: [Stop] 
+2351ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Estimated | — | Unknown | Timetabled 07:27 | 07:27 | ~07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | — | Unknown | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | — | Unknown | ~07:39 | On time }
+4814ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Estimated | ~9 min | Timetabled 07:27 | 07:27 | ~07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | ~18 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | ~19 min | ~07:39 | On time }
+KØBENHAVN SYD PAINTS (5):
+444ms mutation: 
+806ms mutation: [Stop] 
+1312ms mutation: [København Syd St.] Lines{ A // E // RE }
+1331ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ RE | From København H | Estimated | Track 8 | — | Unknown | Timetabled 07:21 | 07:21 | ~07:22 | +1 min | 1 min late // A | From Hundige St. | Estimated | Track 8 | — | Unknown | Timetabled 07:23 | 07:23 | ~07:27 | +4 min | 4 min late // A | From Hundige St. | Estimated | Track 8 | — | Unknown | Timetabled 07:33 | 07:33 | ~07:34 | +1 min | 1 min late }
+2165ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ RE | From København H | Estimated | Track 8 | ~2 min | Timetabled 07:21 | 07:21 | ~07:22 | +1 min | 1 min late // A | From Hundige St. | Estimated | Track 8 | ~7 min | Timetabled 07:23 | 07:23 | ~07:27 | +4 min | 4 min late // A | From Hundige St. | Estimated | Track 8 | ~14 min | Timetabled 07:33 | 07:33 | ~07:34 | +1 min | 1 min late }
+PASS reg-first-paint: 2 steps in .verify/branch-184-r1-reg/reg-first-paint/

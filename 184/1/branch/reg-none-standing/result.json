@@ -1,0 +1,9 @@
+{
+  "journey": "reg-none-standing",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-st-opened: Nørreport St. opened (http://localhost:4321/en?stop=27532)",
+    "02-none-standing-said-in-words: none standing said in words (http://localhost:4321/en?stop=27532)",
+    "03-danish-region-ved-perronerne-nu: Danish region Ved perronerne nu (http://localhost:4321/da?stop=27532)"
+  ]
+}

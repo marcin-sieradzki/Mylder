@@ -1,0 +1,7 @@
+   0.000s rec~07:20:24 mutation      (no panel)
+   1.471s rec~07:20:26 mutation      (no source line)
+   1.544s rec~07:20:26 mutation      Rejseplanen · arrivals 07:20:24
+  64.766s rec~07:21:29 mutation      Rejseplanen · arrivals 07:21:28
+ 127.981s rec~07:22:32 mutation      Rejseplanen · arrivals 07:22:31
+call times seen: 07:20:24, 07:21:28, 07:22:31
+PASS pr-watch-arrivals: 4 steps in .verify/branch-184-r1/pr-watch-arrivals/

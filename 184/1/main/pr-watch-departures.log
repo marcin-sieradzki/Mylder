@@ -1,0 +1,41 @@
+   0.000s rec~07:20:02 mutation      (no panel)
+   1.182s rec~07:20:04 mutation      Rejseplanen · departures 07:20:02
+  61.973s rec~07:21:04 mutation WARN Rejseplanen · departures 07:20:02, may be out of date
+  62.829s rec~07:21:05 mutation      Rejseplanen · departures 07:21:03
+ 122.928s rec~07:22:05 mutation WARN Rejseplanen · departures 07:21:03, may be out of date
+ 124.623s rec~07:22:07 mutation      Rejseplanen · departures 07:22:05
+ 184.940s rec~07:23:07 mutation WARN Rejseplanen · departures 07:22:05, may be out of date
+ 187.395s rec~07:23:10 mutation      Rejseplanen · departures 07:23:08
+call times seen: 07:20:02, 07:21:03, 07:22:05, 07:23:08
+FAIL pr-watch-departures: 5 steps in .verify/main-184-r1-b/pr-watch-departures/
+the source line read "may be out of date": WARN for 857 ms: Rejseplanen · departures 07:20:02, may be out of date; WARN for 1695 ms: Rejseplanen · departures 07:21:03, may be out of date; WARN for 2455 ms: Rejseplanen · departures 07:22:05, may be out of date
+
+expect(received).toEqual(expected) // deep equality
+
+- Expected  -  1
++ Received  + 23
+
+- Array []
++ Array [
++   Object {
++     "line": "Rejseplanen · departures 07:20:02, may be out of date",
++     "t": 62237.20000000298,
++     "via": "mutation",
++     "wall": 1793479902874,
++     "warn": true,
++   },
++   Object {
++     "line": "Rejseplanen · departures 07:21:03, may be out of date",
++     "t": 123192.40000000224,
++     "via": "mutation",
++     "wall": 1793479963829,
++     "warn": true,
++   },
++   Object {
++     "line": "Rejseplanen · departures 07:22:05, may be out of date",
++     "t": 185204.90000000224,
++     "via": "mutation",
++     "wall": 1793480025842,
++     "warn": true,
++   },
++ ]

@@ -1,0 +1,2 @@
+warned 80.0 s after blocking, at rec ~07:25:10, answer time 07:23:47: age ~83 s. Line: Rejseplanen · departures 07:23:47, may be out of date
+PASS pr-fail-departures-503: 3 steps in .verify/branch-184-r1/pr-fail-departures-503/

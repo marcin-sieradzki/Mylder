@@ -1,0 +1,10 @@
+{
+  "journey": "pr-watch-arrivals",
+  "pass": true,
+  "steps": [
+    "01-arrivals-settled-rec-07-20-26: arrivals settled rec 07:20:26 (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "02-arrivals-after-1-min-rec-07-21-28: arrivals after 1 min rec 07:21:28 (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "03-arrivals-after-2-min-rec-07-22-28: arrivals after 2 min rec 07:22:28 (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "04-arrivals-after-3-min-rec-07-23-29: arrivals after 3 min rec 07:23:29 (http://localhost:4321/en?stop=8600783&board=arrivals)"
+  ]
+}

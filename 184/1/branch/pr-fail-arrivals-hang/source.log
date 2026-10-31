@@ -1,0 +1,31 @@
+warned 75.1 s after blocking, at rec ~07:25:10, answer time 07:23:47: age ~83 s. Line: Rejseplanen · arrivals 07:23:47, may be out of date
+recovered: yes, at rec ~07:25:11 (1.1 s after unblocking)
+
+Source line, every text it took:
+   0.000s rec~07:23:48 mutation      (no panel)
+   0.841s rec~07:23:49 mutation      (no source line)
+   0.978s rec~07:23:49 mutation      Rejseplanen · arrivals 07:23:47
+  81.334s rec~07:25:10 mutation WARN Rejseplanen · arrivals 07:23:47, may be out of date
+  82.406s rec~07:25:11 mutation      Rejseplanen · arrivals 07:25:09
+
+Board requests:
+   0.9s 2026-10-31T20:43:24.427Z ask /api/stops/8600783
+   0.9s 2026-10-31T20:43:24.427Z ask /api/stops/8600783/arrivals
+   1.0s 2026-10-31T20:43:24.508Z answer 200 /api/stops/8600783
+   1.1s 2026-10-31T20:43:24.665Z answer 200 /api/stops/8600783/arrivals
+blocked at rec 07:23:54; answer shown 07:23:47
+   9.2s 2026-10-31T20:43:32.737Z ask /api/stops/8600783
+  route hang: http://localhost:4321/api/stops/8600783
+   9.5s 2026-10-31T20:43:33.052Z ask /api/stops/8600783/arrivals
+  route hang: http://localhost:4321/api/stops/8600783/arrivals
+  59.2s 2026-10-31T20:44:22.744Z failed net::ERR_ABORTED /api/stops/8600783
+  59.5s 2026-10-31T20:44:23.086Z failed net::ERR_ABORTED /api/stops/8600783/arrivals
+  69.2s 2026-10-31T20:44:32.732Z ask /api/stops/8600783
+  route hang: http://localhost:4321/api/stops/8600783
+  69.6s 2026-10-31T20:44:33.143Z ask /api/stops/8600783/arrivals
+  route hang: http://localhost:4321/api/stops/8600783/arrivals
+warned 75.1 s after blocking, at rec ~07:25:10, answer time 07:23:47: age ~83 s. Line: Rejseplanen · arrivals 07:23:47, may be out of date
+unblocked at rec 07:25:10
+  82.4s 2026-10-31T20:44:45.946Z answer 200 /api/stops/8600783
+  82.5s 2026-10-31T20:44:46.036Z answer 200 /api/stops/8600783/arrivals
+recovered: yes, at rec ~07:25:11 (1.1 s after unblocking)

@@ -1,0 +1,10 @@
+{
+  "journey": "pr-watch-departures",
+  "pass": true,
+  "steps": [
+    "01-departures-settled-rec-07-20-26: departures settled rec 07:20:26 (http://localhost:4321/en?stop=8600783)",
+    "02-departures-after-1-min-rec-07-21-28: departures after 1 min rec 07:21:28 (http://localhost:4321/en?stop=8600783)",
+    "03-departures-after-2-min-rec-07-22-29: departures after 2 min rec 07:22:29 (http://localhost:4321/en?stop=8600783)",
+    "04-departures-after-3-min-rec-07-23-29: departures after 3 min rec 07:23:29 (http://localhost:4321/en?stop=8600783)"
+  ]
+}

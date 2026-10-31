@@ -1,0 +1,16 @@
+warning: [.WebGL-0x16f40098b000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x16f40098f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x16f40098b000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x16f40098f200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED
+error: Failed to load resource: net::ERR_FAILED

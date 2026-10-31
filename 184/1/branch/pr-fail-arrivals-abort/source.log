@@ -1,0 +1,71 @@
+warned 74.8 s after blocking, at rec ~07:21:47, answer time 07:20:24: age ~83 s. Line: Rejseplanen · arrivals 07:20:24, may be out of date
+recovered: yes, at rec ~07:21:57 (9.8 s after unblocking)
+
+Source line, every text it took:
+   0.000s rec~07:20:25 mutation      (no panel)
+   1.460s rec~07:20:27 mutation      (no source line)
+   1.556s rec~07:20:27 mutation      Rejseplanen · arrivals 07:20:24
+  81.671s rec~07:21:47 mutation WARN Rejseplanen · arrivals 07:20:24, may be out of date
+  91.236s rec~07:21:57 mutation      Rejseplanen · arrivals 07:21:28
+
+Board requests:
+   1.6s 2026-10-31T20:40:02.180Z ask /api/stops/8600783
+   1.6s 2026-10-31T20:40:02.183Z ask /api/stops/8600783/arrivals
+   1.6s 2026-10-31T20:40:02.223Z answer 200 /api/stops/8600783
+   1.7s 2026-10-31T20:40:02.343Z answer 200 /api/stops/8600783/arrivals
+blocked at rec 07:20:32; answer shown 07:20:24
+   9.5s 2026-10-31T20:40:10.123Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+   9.6s 2026-10-31T20:40:10.205Z failed net::ERR_FAILED /api/stops/8600783
+  10.3s 2026-10-31T20:40:10.889Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  10.3s 2026-10-31T20:40:10.892Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  19.7s 2026-10-31T20:40:20.297Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  19.7s 2026-10-31T20:40:20.341Z failed net::ERR_FAILED /api/stops/8600783
+  20.3s 2026-10-31T20:40:20.905Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  20.5s 2026-10-31T20:40:21.113Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  29.9s 2026-10-31T20:40:30.572Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  30.1s 2026-10-31T20:40:30.690Z failed net::ERR_FAILED /api/stops/8600783
+  30.5s 2026-10-31T20:40:31.104Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  30.6s 2026-10-31T20:40:31.197Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  40.1s 2026-10-31T20:40:40.691Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  40.1s 2026-10-31T20:40:40.706Z failed net::ERR_FAILED /api/stops/8600783
+  40.7s 2026-10-31T20:40:41.296Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  40.7s 2026-10-31T20:40:41.353Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  50.3s 2026-10-31T20:40:50.934Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  50.3s 2026-10-31T20:40:50.964Z failed net::ERR_FAILED /api/stops/8600783
+  50.8s 2026-10-31T20:40:51.465Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  50.9s 2026-10-31T20:40:51.478Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  60.4s 2026-10-31T20:41:01.066Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  60.5s 2026-10-31T20:41:01.114Z failed net::ERR_FAILED /api/stops/8600783
+  61.0s 2026-10-31T20:41:01.642Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  61.1s 2026-10-31T20:41:01.705Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  70.8s 2026-10-31T20:41:11.473Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  71.0s 2026-10-31T20:41:11.652Z failed net::ERR_FAILED /api/stops/8600783
+  71.2s 2026-10-31T20:41:11.832Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  71.2s 2026-10-31T20:41:11.862Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+  81.0s 2026-10-31T20:41:21.645Z ask /api/stops/8600783
+  route abort: http://localhost:4321/api/stops/8600783
+  81.1s 2026-10-31T20:41:21.694Z failed net::ERR_FAILED /api/stops/8600783
+  81.3s 2026-10-31T20:41:21.904Z ask /api/stops/8600783/arrivals
+  route abort: http://localhost:4321/api/stops/8600783/arrivals
+  81.3s 2026-10-31T20:41:21.970Z failed net::ERR_FAILED /api/stops/8600783/arrivals
+warned 74.8 s after blocking, at rec ~07:21:47, answer time 07:20:24: age ~83 s. Line: Rejseplanen · arrivals 07:20:24, may be out of date
+unblocked at rec 07:21:48
+  91.2s 2026-10-31T20:41:31.825Z ask /api/stops/8600783
+  91.2s 2026-10-31T20:41:31.866Z answer 200 /api/stops/8600783
+  91.4s 2026-10-31T20:41:31.989Z ask /api/stops/8600783/arrivals
+  91.4s 2026-10-31T20:41:32.044Z answer 200 /api/stops/8600783/arrivals
+recovered: yes, at rec ~07:21:57 (9.8 s after unblocking)

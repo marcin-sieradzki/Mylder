@@ -1,0 +1,25 @@
+warned 47.1 s after blocking, at rec ~07:24:10, answer time 07:23:08: age ~62 s. Line: Rejseplanen · arrivals 07:23:08, may be out of date
+recovered: yes, at rec ~07:24:12 (1.1 s after unblocking)
+
+Source line, every text it took:
+   0.000s rec~07:23:17 mutation      (no panel)
+   0.715s rec~07:23:18 mutation      (no source line)
+   0.856s rec~07:23:18 mutation      Rejseplanen · arrivals 07:23:08
+  52.673s rec~07:24:10 mutation WARN Rejseplanen · arrivals 07:23:08, may be out of date
+  54.293s rec~07:24:12 mutation      Rejseplanen · arrivals 07:24:10
+
+Board requests:
+   0.7s 2026-10-31T20:53:56.278Z ask /api/stops/8600783
+   0.7s 2026-10-31T20:53:56.280Z ask /api/stops/8600783/arrivals
+   0.7s 2026-10-31T20:53:56.294Z answer 200 /api/stops/8600783
+   0.9s 2026-10-31T20:53:56.507Z answer 200 /api/stops/8600783/arrivals
+blocked at rec 07:23:23; answer shown 07:23:08
+   8.9s 2026-10-31T20:54:04.452Z ask /api/stops/8600783/arrivals
+  route hang: http://localhost:4320/api/stops/8600783/arrivals
+   9.1s 2026-10-31T20:54:04.705Z ask /api/stops/8600783
+  route hang: http://localhost:4320/api/stops/8600783
+warned 47.1 s after blocking, at rec ~07:24:10, answer time 07:23:08: age ~62 s. Line: Rejseplanen · arrivals 07:23:08, may be out of date
+  54.3s 2026-10-31T20:54:49.869Z answer 200 /api/stops/8600783/arrivals
+  54.3s 2026-10-31T20:54:49.869Z answer 200 /api/stops/8600783
+unblocked at rec 07:24:11
+recovered: yes, at rec ~07:24:12 (1.1 s after unblocking)

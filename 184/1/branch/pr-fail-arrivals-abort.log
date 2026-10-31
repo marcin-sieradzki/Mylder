@@ -1,0 +1,2 @@
+warned 74.8 s after blocking, at rec ~07:21:47, answer time 07:20:24: age ~83 s. Line: Rejseplanen · arrivals 07:20:24, may be out of date
+PASS pr-fail-arrivals-abort: 3 steps in .verify/branch-184-r1/pr-fail-arrivals-abort/

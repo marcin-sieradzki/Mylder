@@ -1,0 +1,49 @@
+Source line, every text it took (arrivals):
+   0.000s rec~07:20:03 mutation      (no panel)
+   0.830s rec~07:20:03 mutation      (no source line)
+   0.879s rec~07:20:03 mutation      Rejseplanen · arrivals 07:20:02
+  66.592s rec~07:21:09 mutation      Rejseplanen · arrivals 07:21:08
+ 128.677s rec~07:22:11 mutation      Rejseplanen · arrivals 07:22:10
+ 190.675s rec~07:23:13 mutation      Rejseplanen · arrivals 07:23:12
+ 252.057s rec~07:24:15 mutation      Rejseplanen · arrivals 07:24:13
+
+Warnings:
+(none)
+
+Board requests:
+   0.9s 2026-10-31T20:55:16.705Z ask /api/stops/8600783
+   0.9s 2026-10-31T20:55:16.711Z ask /api/stops/8600783/arrivals
+   1.1s 2026-10-31T20:55:16.889Z answer 200 /api/stops/8600783
+   1.1s 2026-10-31T20:55:16.889Z answer 200 /api/stops/8600783/arrivals
+   7.2s 2026-10-31T20:55:23.077Z ask /api/stops/8600783/arrivals
+   7.3s 2026-10-31T20:55:23.109Z answer 200 /api/stops/8600783/arrivals
+   7.9s 2026-10-31T20:55:23.732Z ask /api/stops/8600783
+   8.0s 2026-10-31T20:55:23.853Z answer 200 /api/stops/8600783
+  60.5s 2026-10-31T20:56:16.332Z ask /api/stops/8600783/arrivals
+  60.6s 2026-10-31T20:56:16.434Z answer 200 /api/stops/8600783/arrivals
+  61.4s 2026-10-31T20:56:17.218Z ask /api/stops/8600783
+  61.4s 2026-10-31T20:56:17.237Z answer 200 /api/stops/8600783
+  66.7s 2026-10-31T20:56:22.543Z ask /api/stops/8600783/arrivals
+  66.8s 2026-10-31T20:56:22.607Z answer 200 /api/stops/8600783/arrivals
+ 122.3s 2026-10-31T20:57:18.113Z ask /api/stops/8600783/arrivals
+ 122.4s 2026-10-31T20:57:18.204Z answer 200 /api/stops/8600783/arrivals
+ 123.3s 2026-10-31T20:57:19.180Z ask /api/stops/8600783
+ 123.4s 2026-10-31T20:57:19.252Z answer 200 /api/stops/8600783
+ 128.6s 2026-10-31T20:57:24.444Z ask /api/stops/8600783/arrivals
+ 128.7s 2026-10-31T20:57:24.561Z answer 200 /api/stops/8600783/arrivals
+ 184.2s 2026-10-31T20:58:20.008Z ask /api/stops/8600783/arrivals
+ 184.4s 2026-10-31T20:58:20.252Z answer 200 /api/stops/8600783/arrivals
+ 184.9s 2026-10-31T20:58:20.707Z ask /api/stops/8600783
+ 184.9s 2026-10-31T20:58:20.769Z answer 200 /api/stops/8600783
+ 190.7s 2026-10-31T20:58:26.506Z ask /api/stops/8600783/arrivals
+ 190.8s 2026-10-31T20:58:26.627Z answer 200 /api/stops/8600783/arrivals
+ 245.7s 2026-10-31T20:59:21.585Z ask /api/stops/8600783/arrivals
+ 245.7s 2026-10-31T20:59:21.585Z answer 200 /api/stops/8600783/arrivals
+ 247.0s 2026-10-31T20:59:22.825Z ask /api/stops/8600783
+ 247.1s 2026-10-31T20:59:22.901Z answer 200 /api/stops/8600783
+ 252.2s 2026-10-31T20:59:28.060Z ask /api/stops/8600783/arrivals
+ 252.2s 2026-10-31T20:59:28.075Z answer 200 /api/stops/8600783/arrivals
+ 307.0s 2026-10-31T21:00:22.825Z ask /api/stops/8600783/arrivals
+ 307.0s 2026-10-31T21:00:22.843Z answer 200 /api/stops/8600783/arrivals
+ 308.0s 2026-10-31T21:00:23.851Z ask /api/stops/8600783
+ 308.0s 2026-10-31T21:00:23.882Z answer 200 /api/stops/8600783

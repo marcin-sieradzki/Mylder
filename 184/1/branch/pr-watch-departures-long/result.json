@@ -1,0 +1,12 @@
+{
+  "journey": "pr-watch-departures-long",
+  "pass": true,
+  "steps": [
+    "01-departures-settled-rec-07-20-04: departures settled rec 07:20:04 (http://localhost:4321/en?stop=8600783)",
+    "02-departures-after-1-min-rec-07-21-08: departures after 1 min rec 07:21:08 (http://localhost:4321/en?stop=8600783)",
+    "03-departures-after-2-min-rec-07-22-08: departures after 2 min rec 07:22:08 (http://localhost:4321/en?stop=8600783)",
+    "04-departures-after-3-min-rec-07-23-09: departures after 3 min rec 07:23:09 (http://localhost:4321/en?stop=8600783)",
+    "05-departures-after-4-min-rec-07-24-10: departures after 4 min rec 07:24:10 (http://localhost:4321/en?stop=8600783)",
+    "06-departures-after-5-min-rec-07-25-11: departures after 5 min rec 07:25:11 (http://localhost:4321/en?stop=8600783)"
+  ]
+}

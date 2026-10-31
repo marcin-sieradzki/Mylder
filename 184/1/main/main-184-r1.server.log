@@ -1,0 +1,6 @@
+▲ Next.js 16.4.3
+- Local:         http://localhost:4320
+- Network:       http://192.0.2.2:4320
+✓ Ready in 156ms
+✓ Running next.config.ts took 63ms
+{"message":["Tracker run",{"source":{"kind":"recording","name":"weekday"},"positionMode":"alternating","answerMode":"CALC_REPORT","budget":{"level":"normal","calls":2},"store":"ok","calls":[{"service":"journeyPos","outcome":"ok","attempts":1,"ms":16},{"service":"himsearch","outcome":"ok","attempts":1,"ms":3}],"unmatched":0,"modes":{"bus":6,"metro":4,"s-tog":6,"train":1},"states":{"estimated":13,"timetable-only":4},"cpuMs":50,"timetable":{"prepared":"2026-06-02","last":"2026-08-26","daysLeft":72,"daysOld":14}}],"level":"INFO","timestamp":"2026-06-16T05:20:00.078Z","annotations":{},"spans":{},"fiberId":"#4"}

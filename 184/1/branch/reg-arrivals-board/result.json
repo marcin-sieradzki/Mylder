@@ -1,0 +1,8 @@
+{
+  "journey": "reg-arrivals-board",
+  "pass": true,
+  "steps": [
+    "01-k-benhavn-syd-st-arrivals-from-the-board: København Syd St. Arrivals from the board (http://localhost:4321/en?stop=8600783&board=arrivals)",
+    "02-opened-again-same-call-time-07-22-27: opened again: same call time 07:22:27 (http://localhost:4321/en?stop=8600783&board=arrivals)"
+  ]
+}

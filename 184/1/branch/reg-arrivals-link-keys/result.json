@@ -1,0 +1,8 @@
+{
+  "journey": "reg-arrivals-link-keys",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-opened-on-arrivals-by-link: Refshaleøen opened on Arrivals by link (http://localhost:4321/en?stop=48645&board=arrivals)",
+    "02-arrowleft-enter-back-to-departures: ArrowLeft + Enter back to Departures (http://localhost:4321/en?stop=48645)"
+  ]
+}

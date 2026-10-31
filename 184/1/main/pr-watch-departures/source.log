@@ -1,0 +1,26 @@
+Source line, every text it took (departures):
+   0.000s rec~07:20:02 mutation      (no panel)
+   1.182s rec~07:20:04 mutation      Rejseplanen · departures 07:20:02
+  61.973s rec~07:21:04 mutation WARN Rejseplanen · departures 07:20:02, may be out of date
+  62.829s rec~07:21:05 mutation      Rejseplanen · departures 07:21:03
+ 122.928s rec~07:22:05 mutation WARN Rejseplanen · departures 07:21:03, may be out of date
+ 124.623s rec~07:22:07 mutation      Rejseplanen · departures 07:22:05
+ 184.940s rec~07:23:07 mutation WARN Rejseplanen · departures 07:22:05, may be out of date
+ 187.395s rec~07:23:10 mutation      Rejseplanen · departures 07:23:08
+
+Warnings:
+WARN for 857 ms: Rejseplanen · departures 07:20:02, may be out of date
+WARN for 1695 ms: Rejseplanen · departures 07:21:03, may be out of date
+WARN for 2455 ms: Rejseplanen · departures 07:22:05, may be out of date
+
+Board requests:
+   1.4s 2026-10-31T20:50:42.014Z ask /api/stops/8600783
+   1.4s 2026-10-31T20:50:42.073Z answer 200 /api/stops/8600783
+   9.4s 2026-10-31T20:50:50.048Z ask /api/stops/8600783
+   9.5s 2026-10-31T20:50:50.105Z answer 200 /api/stops/8600783
+  63.0s 2026-10-31T20:51:43.578Z ask /api/stops/8600783
+  63.0s 2026-10-31T20:51:43.631Z answer 200 /api/stops/8600783
+ 124.8s 2026-10-31T20:52:45.392Z ask /api/stops/8600783
+ 124.8s 2026-10-31T20:52:45.453Z answer 200 /api/stops/8600783
+ 187.7s 2026-10-31T20:53:48.284Z ask /api/stops/8600783
+ 187.7s 2026-10-31T20:53:48.293Z answer 200 /api/stops/8600783

@@ -1,0 +1,34 @@
+   0.000s rec~07:20:03 mutation      (no panel)
+   0.975s rec~07:20:04 mutation      (no source line)
+   1.168s rec~07:20:04 mutation      Rejseplanen · arrivals 07:20:02
+  61.316s rec~07:21:04 mutation      Rejseplanen · arrivals 07:21:03
+ 122.562s rec~07:22:05 mutation WARN Rejseplanen · arrivals 07:21:03, may be out of date
+ 123.516s rec~07:22:06 mutation      Rejseplanen · arrivals 07:22:05
+ 184.490s rec~07:23:07 mutation WARN Rejseplanen · arrivals 07:22:05, may be out of date
+ 186.114s rec~07:23:09 mutation      Rejseplanen · arrivals 07:23:08
+call times seen: 07:20:02, 07:21:03, 07:22:05, 07:23:08
+FAIL pr-watch-arrivals: 5 steps in .verify/main-184-r1-b/pr-watch-arrivals/
+the source line read "may be out of date": WARN for 954 ms: Rejseplanen · arrivals 07:21:03, may be out of date; WARN for 1624 ms: Rejseplanen · arrivals 07:22:05, may be out of date
+
+expect(received).toEqual(expected) // deep equality
+
+- Expected  -  1
++ Received  + 16
+
+- Array []
++ Array [
++   Object {
++     "line": "Rejseplanen · arrivals 07:21:03, may be out of date",
++     "t": 122729.79999999702,
++     "via": "mutation",
++     "wall": 1793479963913,
++     "warn": true,
++   },
++   Object {
++     "line": "Rejseplanen · arrivals 07:22:05, may be out of date",
++     "t": 184658.09999999776,
++     "via": "mutation",
++     "wall": 1793480025841,
++     "warn": true,
++   },
++ ]
