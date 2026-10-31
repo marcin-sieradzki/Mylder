@@ -177,7 +177,9 @@ describe('the source banner', () => {
 
 /** The browser's polls failing since `iso` on the server's clock. */
 const failingFrom = (iso: string) =>
-  act(() => liveSnapshot.update({ failingSince: Date.parse(iso) - liveSnapshot.get().clockOffset }))
+  act(() =>
+    liveSnapshot.update({ failingSince: Date.parse(iso) - (liveSnapshot.get().clockOffset ?? 0) }),
+  )
 
 describe('the Disconnected notice', () => {
   it('shows at once when a poll fails, naming the last data, and the Updated line keeps its time', () => {
