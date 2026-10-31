@@ -1,4 +1,4 @@
-# Stop departures
+# Stop panel
 
 A panel for one stop: its name, its lines as badges, "At the platforms now" with the trips standing at its platforms, and its departures for the next 30 minutes under their own title, each with a countdown and its data state, with Metro rows as intervals, and a source line. It is kept in the address as `?stop=<id>`.
 
