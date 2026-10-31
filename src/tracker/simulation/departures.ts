@@ -66,7 +66,7 @@ export function readDepartureBoardRequest(
 /** Which side of its calls a board lists: the trips leaving, or the trips arriving. */
 type Side = 'departure' | 'arrival'
 
-/** What a departure and an arrival share: the call, its times on `side`, its track, its messages. */
+/** What a departure and an arrival share: the call, its times on `side`, track and messages. */
 function boardCall(
   settings: SimulationSettings,
   simulated: SimulatedTrip,
