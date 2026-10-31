@@ -223,8 +223,8 @@ describe('the trips standing at a stop, with its board in hand', () => {
     Effect.gen(function* () {
       yield* TestClock.setTime(at(7, 32, 30))
       // 50 calls under the line: normal, but inside the cushion of 100, so no on-demand calls.
-      const { line } = pacing({ calls: 0, now: at(7, 32, 30), timezone: ZONE })
-      yield* (yield* Store).set(callsKey(prefix, '2026-06'), Math.ceil(line) - 50)
+      const pace = pacing({ calls: 0, now: at(7, 32, 30), timezone: ZONE })
+      yield* (yield* Store).set(callsKey(prefix, '2026-06'), Math.ceil(pace.line) - 50)
       const answer = (yield* (yield* Tracker).getStopDepartures(KOBENHAVN_H))!
       expect(answer.source).toEqual({ kind: 'timetable' })
       expect(answer.standing.map(({ line, departs }) => [line, departs])).toEqual([

@@ -8,7 +8,13 @@ import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
 import { liveSnapshot } from '../map/live'
 import { mapView, openPanel } from '../map/view'
-import type { Disruption, Snapshot, StopDeparture, StopDepartures } from '../tracker/index'
+import type {
+  Disruption,
+  Snapshot,
+  StandingTrip,
+  StopDeparture,
+  StopDepartures,
+} from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
 
@@ -31,6 +37,8 @@ const ORIENTKAJ = saved('54307')
 const HILLEROD = saved('8600683')
 /** Bella Center St.: the Metro alone, every 4 minutes towards Vestamager. */
 const BELLA_CENTER = saved('8603313')
+/** Refshaleøen: the 991 to Teglholmen standing at the stop until 07:23, Estimated. */
+const REFSHALEOEN = saved('48645')
 
 /** The stop route's answers by stop id; a stop missing here is a 404. */
 let answers: Map<string, StopDepartures>
@@ -81,6 +89,7 @@ beforeEach(() => {
     ['54307', ORIENTKAJ],
     ['8600683', HILLEROD],
     ['8603313', BELLA_CENTER],
+    ['48645', REFSHALEOEN],
   ])
   vi.stubGlobal('fetch', routes)
 })
@@ -457,5 +466,159 @@ describe("a Metro platform's departures", () => {
     const live = row(await panel('Bella Center St.'), 'Vestamager')
     expect(live).toHaveTextContent('Live')
     expect(live).not.toHaveTextContent('Hvert')
+  })
+})
+
+const BUS_991 = 'bus.991.7ce514fd98.20260616.0700'
+
+/** An S-tog standing at track `track` of Refshaleøen, as a board would give it, by hand. */
+const standingTrain = (n: number, change: Partial<StandingTrip> = {}): StandingTrip => ({
+  trip: `s-tog.A.standing${n}.20260616.0700`,
+  line: 'A',
+  mode: 's-tog',
+  colour: 'perron-color-transit-line-a',
+  headsign: `Destination ${n}`,
+  platform: '48645',
+  track: String(n),
+  scheduled: REFSHALEOEN.fetched + n * 60_000,
+  expected: REFSHALEOEN.fetched + n * 60_000,
+  departs: REFSHALEOEN.fetched + n * 60_000,
+  state: 'live',
+  ...change,
+})
+
+/** Refshaleøen with `standing` in place of its own standing trips. */
+const standingAt = (standing: readonly StandingTrip[]): StopDepartures => ({
+  ...REFSHALEOEN,
+  standing,
+})
+
+/** The panel's section of the trips standing at the stop's platforms. */
+const standingSection = (stop: HTMLElement, name = 'At the platforms now') =>
+  within(stop).getByRole('region', { name })
+
+describe('the trips standing at a stop’s platforms', () => {
+  it('lists each above the departures, with its line, destination, time and data state', async () => {
+    openStop('en', '?stop=48645')
+    const stop = await panel('Refshaleøen')
+    const section = standingSection(stop)
+    const [bus] = within(section).getAllByRole('listitem')
+    expect(within(section).getAllByRole('listitem')).toHaveLength(1)
+    expect(bus).toHaveTextContent('991')
+    expect(bus).toHaveTextContent('Teglholmen')
+    expect(bus).toHaveTextContent('Estimated')
+    expect(bus).toHaveTextContent('2 min')
+    expect(within(bus).getByText('07:23')).toHaveTextContent(/^~07:23$/)
+    // Above the departures.
+    const departures = within(stop).getByRole('list', { name: 'Departures' })
+    expect(section.compareDocumentPosition(departures)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('gives a standing trip’s track, as its board names it', async () => {
+    answers.set('48645', standingAt([standingTrain(5)]))
+    openStop('en', '?stop=48645')
+    const [train] = within(standingSection(await panel('Refshaleøen'))).getAllByRole('listitem')
+    expect(train).toHaveTextContent('Track 5')
+    expect(train).toHaveTextContent('Live')
+  })
+
+  it('says a trip that ends here ends here, with no time it leaves', async () => {
+    answers.set(
+      '48645',
+      standingAt([
+        standingTrain(1, {
+          ends: true,
+          departs: undefined,
+          scheduled: undefined,
+          expected: undefined,
+          state: 'timetable-only',
+        }),
+      ]),
+    )
+    openStop('en', '?stop=48645')
+    const [train] = within(standingSection(await panel('Refshaleøen'))).getAllByRole('listitem')
+    expect(train).toHaveTextContent('Ends here')
+    expect(train).toHaveTextContent('Timetable only')
+    expect(train).not.toHaveTextContent(/\d\d:\d\d/)
+  })
+
+  it('opens a standing trip’s vehicle, in place of the stop', async () => {
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    fireEvent.click(within(section).getByRole('button', { name: 'Bus 991 to Teglholmen' }))
+    expect(window.location.search).toBe(`?trip=${BUS_991}`)
+  })
+
+  it('shows 4 of more, and the rest on Show all', async () => {
+    answers.set('48645', standingAt([1, 2, 3, 4, 5, 6].map((n) => standingTrain(n))))
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    const destinations = () =>
+      within(section)
+        .getAllByRole('listitem')
+        .map((each) => /Destination \d/.exec(each.textContent ?? '')?.[0])
+    expect(destinations()).toEqual([1, 2, 3, 4].map((n) => `Destination ${n}`))
+    const all = within(section).getByRole('button', { name: 'Show all 6' })
+    expect(all).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(all)
+    expect(destinations()).toEqual([1, 2, 3, 4, 5, 6].map((n) => `Destination ${n}`))
+    expect(all).toHaveAttribute('aria-expanded', 'true')
+    expect(all).toHaveTextContent('Show fewer')
+  })
+
+  it('shows 4 with no button when 4 stand', async () => {
+    answers.set('48645', standingAt([1, 2, 3, 4].map((n) => standingTrain(n))))
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(within(section).getAllByRole('listitem')).toHaveLength(4)
+    expect(within(section).queryByRole('button', { name: /Show all/ })).not.toBeInTheDocument()
+  })
+
+  it('says so in words when nothing stands at the platforms', async () => {
+    openStop('en', '?stop=27532')
+    const section = standingSection(await panel('Nørreport St.'))
+    expect(section).toHaveTextContent(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    expect(within(section).queryByRole('list')).not.toBeInTheDocument()
+  })
+
+  it('leaves out the modes the filters hide', async () => {
+    answers.set('48645', standingAt([...REFSHALEOEN.standing, standingTrain(5)]))
+    openStop('en', '?stop=48645&hide=bus')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(within(section).getAllByRole('listitem')).toHaveLength(1)
+    expect(section).toHaveTextContent('Destination 5')
+    expect(section).not.toHaveTextContent('Teglholmen')
+  })
+
+  it('says the same in Danish', async () => {
+    answers.set(
+      '48645',
+      standingAt([
+        ...REFSHALEOEN.standing,
+        ...[1, 2, 3, 4].map((n) => standingTrain(n)),
+        standingTrain(6, {
+          ends: true,
+          departs: undefined,
+          scheduled: undefined,
+          expected: undefined,
+        }),
+      ]),
+    )
+    const { unmount } = openStop('da', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'), 'Ved perronerne nu')
+    const [bus] = within(section).getAllByRole('listitem')
+    expect(bus).toHaveTextContent('Beregnet')
+    fireEvent.click(within(section).getByRole('button', { name: 'Vis alle 6' }))
+    expect(within(section).getAllByRole('listitem')[1]).toHaveTextContent('Spor 1')
+    expect(within(section).getAllByRole('listitem')[5]).toHaveTextContent('Slutter her')
+    expect(within(section).getByRole('button', { name: 'Vis færre' })).toBeInTheDocument()
+    unmount()
+    act(() => openPanel(undefined))
+    openStop('da', '?stop=27532')
+    expect(standingSection(await panel('Nørreport St.'), 'Ved perronerne nu')).toHaveTextContent(
+      'Intet køretøj af de viste typer holder ved perronerne nu.',
+    )
   })
 })

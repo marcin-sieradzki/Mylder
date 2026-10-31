@@ -101,6 +101,11 @@
   "stop": {
     "fallbackTitle": "Stop",
     "lines": "Lines",
+    "standing": "At the platforms now",
+    "standingNone": "No vehicle of the types shown is standing at the platforms now.",
+    "showAll": "Show all {count}",
+    "showFewer": "Show fewer",
+    "endsHere": "Ends here",
     "departures": "Departures",
     "loading": "Loading departures…",
     "empty": "No departures in the next 30 minutes for the vehicle types shown.",

@@ -38,7 +38,7 @@ export interface DepartureTimes {
 
 /** A departure's times in `state` at `now`, read on the clock of `timezone`, the timetable's. */
 export function departureTimes(
-  row: StopDeparture,
+  row: Pick<StopDeparture, 'scheduled' | 'expected' | 'cancelled'>,
   state: DataState,
   now: number,
   timezone: string,
@@ -60,7 +60,7 @@ export function departureTimes(
  * where the map has no current realtime for the trip.
  */
 export function departureState(
-  row: StopDeparture,
+  row: Pick<StopDeparture, 'state' | 'expected' | 'cancelled'>,
   source: AnswerSource,
   onMap: DataState | undefined,
 ): DataState {
