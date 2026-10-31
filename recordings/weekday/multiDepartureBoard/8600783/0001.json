@@ -17,7 +17,6 @@
       "track": "8",
       "rtTrack": "8",
       "prognosisType": "PROGNOSED",
-      "direction": "Næstved St.",
       "reachable": true,
       "JourneyStatus": "P",
       "ProductAtStop": {
@@ -28,7 +27,8 @@
         "catOut": "Re",
         "catIn": "RE",
         "cls": "4"
-      }
+      },
+      "direction": "Næstved St."
     },
     {
       "JourneyDetailRef": {
@@ -47,7 +47,6 @@
       "track": "8",
       "rtTrack": "8",
       "prognosisType": "PROGNOSED",
-      "direction": "Hillerød St.",
       "reachable": true,
       "JourneyStatus": "P",
       "ProductAtStop": {
@@ -107,7 +106,8 @@
             "routeIdxTo": 17
           }
         ]
-      }
+      },
+      "direction": "Hillerød St."
     },
     {
       "JourneyDetailRef": {
@@ -126,7 +126,6 @@
       "track": "8",
       "rtTrack": "8",
       "prognosisType": "PROGNOSED",
-      "direction": "Hillerød St.",
       "reachable": true,
       "JourneyStatus": "P",
       "ProductAtStop": {
@@ -186,7 +185,8 @@
             "routeIdxTo": 17
           }
         ]
-      }
+      },
+      "direction": "Hillerød St."
     },
     {
       "JourneyDetailRef": {
@@ -205,7 +205,6 @@
       "track": "8",
       "rtTrack": "8",
       "prognosisType": "CALCULATED",
-      "direction": "Holte St.",
       "reachable": true,
       "JourneyStatus": "P",
       "ProductAtStop": {
@@ -265,7 +264,8 @@
             "routeIdxTo": 24
           }
         ]
-      }
+      },
+      "direction": "Holte St."
     },
     {
       "JourneyDetailRef": {
@@ -284,7 +284,6 @@
       "track": "8",
       "rtTrack": "8",
       "prognosisType": "PROGNOSED",
-      "direction": "Køge St.",
       "reachable": true,
       "JourneyStatus": "P",
       "ProductAtStop": {
@@ -344,7 +343,8 @@
             "routeIdxTo": 13
           }
         ]
-      }
+      },
+      "direction": "Køge St."
     }
   ],
   "serverVersion": "2.53.1.2",

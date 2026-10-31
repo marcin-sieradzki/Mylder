@@ -9,6 +9,7 @@ import type { Box } from '../../timetable/format.ts'
 import * as Http from '../http.ts'
 import { Store } from '../store.ts'
 import {
+  ArrivalBoardAnswer,
   DepartureBoardAnswer,
   ErrorAnswer,
   HimSearchAnswer,
@@ -61,7 +62,10 @@ export interface HimSearchQuery {
   readonly products: number
 }
 
-/** A stop's departures asked for: its platforms' ids, all in one call, for the next minutes. */
+/**
+ * A stop's departures or arrivals asked for: its platforms' ids, all in one call, for the next
+ * minutes.
+ */
 export interface DepartureBoardQuery {
   readonly ids: readonly string[]
   /** Minutes from now. */
@@ -81,6 +85,9 @@ export interface RejseplanenShape {
   readonly multiDepartureBoard: (
     query: DepartureBoardQuery,
   ) => Effect.Effect<Answered<DepartureBoardAnswer>, CallError>
+  readonly multiArrivalBoard: (
+    query: DepartureBoardQuery,
+  ) => Effect.Effect<Answered<ArrivalBoardAnswer>, CallError>
   readonly journeyDetail: (
     query: JourneyDetailQuery,
   ) => Effect.Effect<Answered<JourneyDetailAnswer>, CallError>
@@ -228,6 +235,12 @@ export const layer = (
         // How many ids one `idList` may hold is a first-day fact.
         multiDepartureBoard: (query) =>
           call('multiDepartureBoard', DepartureBoardAnswer, {
+            idList: query.ids.join('|'),
+            duration: query.duration,
+          }),
+        // Asked as the departure board is, the same `idList` and window.
+        multiArrivalBoard: (query) =>
+          call('multiArrivalBoard', ArrivalBoardAnswer, {
             idList: query.ids.join('|'),
             duration: query.duration,
           }),

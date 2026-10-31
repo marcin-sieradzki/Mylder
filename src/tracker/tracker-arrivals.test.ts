@@ -1,6 +1,8 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect } from 'effect'
+import { pacing } from './budget'
 import { TestClock } from 'effect/testing'
+import type { Service } from './rejseplanen/answers'
 import { callsKey } from './rejseplanen/client'
 import { keyPrefixOf, trackerLayer } from './runtime'
 import { readSource } from './source'
@@ -8,9 +10,12 @@ import { Store } from './store'
 import { fixtureTimetable } from './testing'
 import { Tracker } from './tracker'
 
-// A stop's arrivals (docs/screens.md, "Stop panel"): the trips arriving at its platforms in the
-// next 30 minutes, from the timetable plus the snapshot's delays, spending no call, on the weekday
-// recording from 07:20 in Copenhagen on Tuesday 2026-06-16.
+// A stop's arrivals (docs/screens.md, "Stop panel"; docs/live-data.md, "The budget"): the trips
+// arriving at its platforms in the next 30 minutes, from one `multiArrivalBoard` call for the
+// stop's platforms when the budget allows it, cached a minute, else from the timetable plus the
+// snapshot's delays, on the weekday recording from 07:20 in Copenhagen on Tuesday 2026-06-16. The
+// recording keeps one stop's arrival board, København Syd St.'s, asked at 07:22; any other stop's
+// call fails, as an unknown call to Rejseplanen does.
 const timetable = await fixtureTimetable()
 const recording = readSource('recording:weekday')
 const prefix = keyPrefixOf(recording)
@@ -37,11 +42,15 @@ const arrivalsAt = (stopId: string) =>
     return yield* (yield* Tracker).getStopArrivals(stopId)
   })
 
-/** Every call the month has made so far, from the store's counter. */
-const callsSoFar = Effect.gen(function* () {
-  const calls = yield* (yield* Store).get(callsKey(prefix, '2026-06'))
-  return typeof calls === 'number' ? calls : 0
-})
+/** The month's calls to one service so far, from the store's counter. */
+const callsTo = (service: Service) =>
+  Effect.gen(function* () {
+    const calls = yield* (yield* Store).get(callsKey(prefix, '2026-06', service))
+    return typeof calls === 'number' ? calls : 0
+  })
+
+/** København Syd St., whose arrival board the recording keeps, asked at 07:22. */
+const KOBENHAVN_SYD = '8600783'
 
 /** Nørreport St., where buses and S-tog arrive in the next half hour. */
 const NORREPORT = '27532'
@@ -225,19 +234,6 @@ describe('the trips arriving at a stop', () => {
     }).pipe(Effect.provide(onTheRecording)),
   )
 
-  it.effect('spends no call, even at a stop the recording keeps a departure board for', () =>
-    Effect.gen(function* () {
-      yield* playTo(22)
-      const before = yield* callsSoFar
-      const answer = (yield* arrivalsAt('8600783'))!
-      expect(answer.source).toEqual({ kind: 'timetable' })
-      expect(answer.arrivals.map(({ line, origin }) => `${line} from ${origin}`)).toContain(
-        'E from Holte St.',
-      )
-      expect(yield* callsSoFar).toBe(before)
-    }).pipe(Effect.provide(onTheRecording)),
-  )
-
   it.effect('carries the disruption list’s messages that name the stop', () =>
     Effect.gen(function* () {
       yield* playTo(21)
@@ -252,6 +248,104 @@ describe('the trips arriving at a stop', () => {
     Effect.gen(function* () {
       yield* playTo(20)
       expect(yield* arrivalsAt('nowhere')).toBeUndefined()
+    }).pipe(Effect.provide(onTheRecording)),
+  )
+})
+
+describe('a stop’s arrivals from its arrival board', () => {
+  it.effect(
+    'makes one multiArrivalBoard call for the stop, and gives its expected times and tracks',
+    () =>
+      Effect.gen(function* () {
+        yield* playTo(22)
+        const answer = (yield* arrivalsAt(KOBENHAVN_SYD))!
+        expect(answer.source).toEqual({ kind: 'rejseplanen', at: at(7, 22) })
+        expect(yield* callsTo('multiArrivalBoard')).toBe(1)
+        expect(answer.arrivals.length).toBeGreaterThan(0)
+        // The simulation gives trains a made-up track, and an expected time with their prognosis.
+        const trains = answer.arrivals.filter((row) => ['s-tog', 'train'].includes(row.mode))
+        expect(trains.length).toBeGreaterThan(0)
+        for (const row of trains) {
+          expect(row.track).toMatch(/^[1-8]$/)
+          expect(row.expected).toBeDefined()
+          expect(row.origin).not.toBe('København Syd St.')
+        }
+        // Due again when the board's minute runs out, if the snapshot isn't due sooner.
+        expect(answer.nextDue).toBeLessThanOrEqual(at(7, 23))
+      }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect('makes no second call when the stop’s Arrivals open again within the minute', () =>
+    Effect.gen(function* () {
+      yield* playTo(22)
+      yield* arrivalsAt(KOBENHAVN_SYD)
+      yield* TestClock.adjust('30 seconds')
+      const again = (yield* arrivalsAt(KOBENHAVN_SYD))!
+      expect(again.source).toEqual({ kind: 'rejseplanen', at: at(7, 22) })
+      expect(yield* callsTo('multiArrivalBoard')).toBe(1)
+    }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect('keeps the arrival board’s cache apart from the departure board’s', () =>
+    Effect.gen(function* () {
+      yield* playTo(22)
+      const departures = (yield* (yield* Tracker).getStopDepartures(KOBENHAVN_SYD))!
+      expect(departures.source.kind).toBe('rejseplanen')
+      // Departures alone spend no arrival call.
+      expect(yield* callsTo('multiArrivalBoard')).toBe(0)
+      expect(yield* callsTo('multiDepartureBoard')).toBe(1)
+      expect((yield* arrivalsAt(KOBENHAVN_SYD))!.source.kind).toBe('rejseplanen')
+      expect(yield* callsTo('multiArrivalBoard')).toBe(1)
+      expect(yield* callsTo('multiDepartureBoard')).toBe(1)
+    }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect(
+    'answers from the timetable with the snapshot’s delays when on-demand calls are stopped',
+    () =>
+      Effect.gen(function* () {
+        yield* playTo(22)
+        // 50 calls under the line: normal, but inside the cushion of 100.
+        const { line } = pacing({ calls: 0, now: at(7, 22), timezone: 'Europe/Copenhagen' })
+        yield* (yield* Store).set(callsKey(prefix, '2026-06'), Math.ceil(line) - 50)
+        const answer = (yield* arrivalsAt(NORREPORT))!
+        expect(answer.source).toEqual({ kind: 'timetable' })
+        expect(yield* callsTo('multiArrivalBoard')).toBe(0)
+        const { trips } = yield* (yield* Tracker).getSnapshot
+        const late = answer.arrivals.filter((row) => row.expected !== undefined)
+        expect(late.length).toBeGreaterThan(0)
+        for (const row of late) {
+          const trip = trips.find((each) => each.key === row.trip)!
+          expect(row.expected! - row.scheduled).toBe(trip.delay! * 1000)
+          expect(row.state).toBe(trip.state)
+        }
+      }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect('answers from the timetable with the snapshot’s delays when the call fails', () =>
+    Effect.gen(function* () {
+      yield* playTo(21)
+      // The recording has no arrival board for Nørreport St.: Rejseplanen refuses the call.
+      const answer = (yield* arrivalsAt(NORREPORT))!
+      expect(answer.source).toEqual({ kind: 'timetable' })
+      expect(yield* callsTo('multiArrivalBoard')).toBe(1)
+      expect(answer.arrivals[0]).toMatchObject({
+        line: 'E',
+        origin: 'Holte St.',
+        scheduled: at(7, 27),
+        expected: at(7, 29),
+        state: 'live',
+      })
+    }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect('makes no call at a stop where only the Metro arrives', () =>
+    Effect.gen(function* () {
+      yield* playTo(21)
+      const answer = (yield* arrivalsAt(BELLA_CENTER))!
+      expect(answer.intervals.map(({ line }) => line)).toEqual(['M1'])
+      expect(answer.source).toEqual({ kind: 'timetable' })
+      expect(yield* callsTo('multiArrivalBoard')).toBe(0)
     }).pipe(Effect.provide(onTheRecording)),
   )
 })

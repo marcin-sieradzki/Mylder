@@ -399,6 +399,11 @@ export const layer: Layer.Layer<
       failed: (error, pace) => noteFailure(error, pace, 'On-demand call'),
     })
 
+    // A board's rows join as the run's journeys do, corrections and all.
+    const correctionsNow = Clock.currentTimeMillis.pipe(
+      Effect.flatMap((now) => corrections.read(serviceDaysAhead(timetable, now))),
+    )
+
     // An unknown stop or trip answers without a run.
     const getStopDepartures = (stopId: string) =>
       Effect.gen(function* () {
@@ -408,25 +413,34 @@ export const layer: Layer.Layer<
         const history = yield* storedHistory
         const list = yield* storedDisruptions
         const board = rejseplanen.multiDepartureBoard
-        // The board's departures join as the run's journeys do, corrections and all.
-        const corrected = Clock.currentTimeMillis.pipe(
-          Effect.flatMap((now) => corrections.read(serviceDaysAhead(timetable, now))),
-        )
+        const arrivalBoard = rejseplanen.multiArrivalBoard
         return yield* stopAnswer(
-          { timetable, snapshot, history, list, ask, board, corrections: corrected },
+          {
+            timetable,
+            snapshot,
+            history,
+            list,
+            ask,
+            board,
+            arrivalBoard,
+            corrections: correctionsNow,
+          },
           found,
         )
       })
 
-    // From the timetable plus the snapshot's delays, so they spend no call of their own; the
-    // snapshot's run, when one is due, is the call any route makes.
+    // From the stop's arrival board, under its own cache beside the departure board's.
     const getStopArrivals = (stopId: string) =>
       Effect.gen(function* () {
         const found = findStop(timetable, stopId)
         if (!found) return undefined
         const snapshot = yield* getSnapshot
         const list = yield* storedDisruptions
-        return stopArrivalsAnswer({ timetable, snapshot, list }, found)
+        const arrivalBoard = rejseplanen.multiArrivalBoard
+        return yield* stopArrivalsAnswer(
+          { timetable, snapshot, list, ask, arrivalBoard, corrections: correctionsNow },
+          found,
+        )
       })
 
     /** A trip's journey reference, from the history, once an answer has carried it. */

@@ -122,6 +122,42 @@ describe('the Rejseplanen client', () => {
     },
   )
 
+  it.effect(
+    'asks multiArrivalBoard for every platform at once, counted under its own service',
+    () => {
+      const arrival = {
+        JourneyDetailRef: { ref: '2|#ZI#1#' },
+        name: 'Bus 5C',
+        stop: 'Nørreport St.',
+        stopExtId: '8603307',
+        time: '07:24:00',
+        date: '2026-06-16',
+        rtTime: '07:26:00',
+        origin: 'Husum Torv',
+      }
+      const { layer, urls } = answering([
+        (request) => Effect.succeed(Http.json(request, 200, { Arrival: [arrival] })),
+      ])
+      return Effect.gen(function* () {
+        const { answer } = yield* (yield* Rejseplanen).multiArrivalBoard({
+          ids: ['8603307', '8603308'],
+          duration: 30,
+        })
+        expect(answer.Arrival).toEqual([arrival])
+        const url = new URL(urls[0])
+        expect(url.pathname).toBe('/api/multiArrivalBoard')
+        expect(Object.fromEntries(url.searchParams)).toMatchObject({
+          accessId: KEY,
+          format: 'json',
+          idList: '8603307|8603308',
+          duration: '30',
+        })
+        expect(yield* (yield* Store).get('test:calls:2026-10:multiArrivalBoard')).toBe(1)
+        expect(yield* (yield* Store).get('test:calls:2026-10:multiDepartureBoard')).toBeUndefined()
+      }).pipe(Effect.provide(layer))
+    },
+  )
+
   it.effect('asks journeyDetail for a reference, counted under its service', () => {
     const stop = { name: 'Nørreport St.', extId: '8603307', lon: 12.57, lat: 55.68 }
     const { layer, urls } = answering([

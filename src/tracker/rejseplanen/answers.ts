@@ -1,4 +1,4 @@
-// What Rejseplanen API 2.0 answers to the four services Mylder calls, as Effect schemas. The live
+// What Rejseplanen API 2.0 answers to the five services Mylder calls, as Effect schemas. The live
 // client, the recordings and the simulation all decode or encode with these, so the tracker reads
 // one shape whichever source answered.
 //
@@ -223,8 +223,12 @@ export const JourneyPosAnswer = Schema.Struct({
 /** `JourneyStatus`: P planned, R replacement, A additional (an extra trip), S special. */
 export const JourneyStatus = Schema.Literals(['P', 'R', 'A', 'S'])
 
-/** One departure from a stop's platform. A cancelled one has no prognosis. */
-export const Departure = Schema.Struct({
+/**
+ * What a departure and an arrival share: a call at one of the stops asked for, its planned time and
+ * the realtime one where there is any, its track and whether it is cancelled. A cancelled one has
+ * no prognosis.
+ */
+const boardCall = {
   JourneyDetailRef,
   name: Schema.String,
   type: optional(Schema.String),
@@ -241,7 +245,6 @@ export const Departure = Schema.Struct({
   rtTrack: optional(Schema.String),
   rtPlatform: optional(Platform),
   prognosisType: optional(PrognosisType),
-  direction: optional(Schema.String),
   reachable: optional(Schema.Boolean),
   cancelled: optional(Schema.Boolean),
   partCancelled: optional(Schema.Boolean),
@@ -250,11 +253,30 @@ export const Departure = Schema.Struct({
   Product: optional(Schema.Array(Product)),
   Notes: optional(Notes),
   Messages: optional(Messages),
-})
+}
+
+/** One departure from a stop's platform, with where its trip goes. */
+export const Departure = Schema.Struct({ ...boardCall, direction: optional(Schema.String) })
 
 /** The `multiDepartureBoard` answer: departures from every stop in `idList`. */
 export const DepartureBoardAnswer = Schema.Struct({
   Departure: optional(Schema.Array(Departure)),
+  ...envelope,
+})
+
+/**
+ * One arrival at a stop's platform, with where its trip comes from: HAFAS's `Arrival`, a
+ * departure's fields with `origin` in place of `direction`.
+ */
+export const Arrival = Schema.Struct({ ...boardCall, origin: optional(Schema.String) })
+
+/**
+ * The `multiArrivalBoard` answer: arrivals at every stop in `idList`. Rejseplanen Labs lists the
+ * service; its shape is HAFAS's arrival board, unconfirmed by a saved answer
+ * (docs/researches/2026-10-31-multi-arrival-board.md).
+ */
+export const ArrivalBoardAnswer = Schema.Struct({
+  Arrival: optional(Schema.Array(Arrival)),
   ...envelope,
 })
 
@@ -300,7 +322,13 @@ export const REFUSED_KEY = 'API_AUTH'
 export const QUOTA_SPENT = 'API_QUOTA'
 
 /** The services Mylder calls, by the last segment of their URL path. */
-export const SERVICES = ['journeyPos', 'multiDepartureBoard', 'journeyDetail', 'himsearch'] as const
+export const SERVICES = [
+  'journeyPos',
+  'multiDepartureBoard',
+  'multiArrivalBoard',
+  'journeyDetail',
+  'himsearch',
+] as const
 
 export type Service = (typeof SERVICES)[number]
 
@@ -314,6 +342,7 @@ export function serviceOf(url: URL): Service | undefined {
 export const ANSWERS = {
   journeyPos: JourneyPosAnswer,
   multiDepartureBoard: DepartureBoardAnswer,
+  multiArrivalBoard: ArrivalBoardAnswer,
   journeyDetail: JourneyDetailAnswer,
   himsearch: HimSearchAnswer,
 } as const satisfies Record<Service, Schema.Top>
@@ -322,6 +351,8 @@ export type JourneyPosAnswer = typeof JourneyPosAnswer.Type
 export type PositionJourney = typeof PositionJourney.Type
 export type DepartureBoardAnswer = typeof DepartureBoardAnswer.Type
 export type Departure = typeof Departure.Type
+export type ArrivalBoardAnswer = typeof ArrivalBoardAnswer.Type
+export type Arrival = typeof Arrival.Type
 export type JourneyDetailAnswer = typeof JourneyDetailAnswer.Type
 export type HimSearchAnswer = typeof HimSearchAnswer.Type
 export type ErrorAnswer = typeof ErrorAnswer.Type

@@ -248,6 +248,36 @@ describe('the recorded layer', () => {
     )
   })
 
+  it('answers each stop’s arrival board from its own calls, apart from its departure board', async () => {
+    await madeRecording(
+      {
+        'multiDepartureBoard/8600783/0001.json': { departures: true },
+        'multiArrivalBoard/8600783/0001.json': { arrivals: true },
+      },
+      async (dir) => {
+        const board = (service: string, idList: string) =>
+          Effect.gen(function* () {
+            const client = yield* Http.HttpClient.HttpClient
+            return yield* Http.getText(client, `https://www.rejseplan.dk/api/${service}`, {
+              idList,
+              duration: 30,
+            }).pipe(Effect.map(statusAndText), Effect.orDie)
+          })
+        const [arrivals, departures, elsewhere] = await Effect.runPromise(
+          Effect.all([
+            board('multiArrivalBoard', '8600783'),
+            board('multiDepartureBoard', '8600783'),
+            board('multiArrivalBoard', '27532|50461'),
+          ]).pipe(Effect.provide(layer(RECORDED_REJSEPLANEN, dir))),
+        )
+        expect(JSON.parse(arrivals.text)).toEqual({ arrivals: true })
+        expect(JSON.parse(departures.text)).toEqual({ departures: true })
+        expect(elsewhere.status).toBe(400)
+        expect(JSON.parse(elsewhere.text)).toMatchObject({ errorCode: 'SVC_PARAM' })
+      },
+    )
+  })
+
   it.effect('hangs a timeout file past any client timeout, then answers 504', () =>
     Effect.gen(function* () {
       const client = recordedClient(
