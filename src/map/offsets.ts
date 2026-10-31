@@ -3,10 +3,13 @@
 // to the way it runs there. MapLibre draws each strand on the ground, its `line-offset` in px at
 // the camera's zoom (ADR 0016), so the dot's offset is measured there too: the strand's px as
 // metres on the ground at that zoom, to the right of the piece of path the dot is on, then drawn
-// through the map's camera, so it holds however the map is turned or tilted. The loop writes it
-// each frame with the position, and looks each step up by halving.
+// through the map's camera, so it holds however the map is turned or tilted. Flat and north-up,
+// that is the strand's px east and north on the canvas, which is worked out directly. The loop
+// writes it each frame with the position, and looks each step up by halving; flat and north-up,
+// it allocates nothing.
 import 'client-only'
 import type { MeasuredPath } from '../domain/trip-motion.ts'
+import { metersPerPixelAt } from './camera.ts'
 import type { Project } from './picking.ts'
 import type { Vehicles } from './vehicles.ts'
 
@@ -16,13 +19,15 @@ export interface Projection {
   readonly project: Project
   /** The camera's zoom, at which a strand's px are measured on the ground. */
   readonly zoom: number
+  /**
+   * Whether the map is flat and faces north, so that a px on the ground is a px on the canvas,
+   * east to the right and north up.
+   */
+  readonly flatNorthUp: boolean
 }
 
-/** The Earth's radius in metres, as Web Mercator takes it. */
-const EARTH_RADIUS = 6_378_137
-/** The width of MapLibre's world at zoom 0, in px: one 512 px tile. */
-const WORLD = 512
-const DEGREES = 180 / Math.PI
+/** A degree of latitude in metres, as Web Mercator takes the Earth: its circumference over 360. */
+const METRES_PER_DEGREE = (metersPerPixelAt(0, 0) * 512) / 360
 
 /** The last index of `sorted` whose value is at most `value`, or 0 before the first. */
 function lastAtMost(sorted: readonly number[], value: number): number {
@@ -66,18 +71,25 @@ export function writeOffset(
   const east = (lon2 - lon1) * Math.cos((lat1 * Math.PI) / 180)
   const north = lat2 - lat1
   const length = Math.hypot(east, north) || 1
-  // The strand's px as metres on the ground at the dot, at the camera's zoom.
+  // Facing (east, north), the right is (north, −east).
+  const rightEast = (place * north) / length
+  const rightNorth = (-place * east) / length
+  if (projection.flatNorthUp) {
+    offsets[i * 2] = rightEast
+    offsets[i * 2 + 1] = rightNorth
+    return
+  }
+  // The strand's px as metres on the ground at the dot, at the camera's zoom, and the point that
+  // far to the right of the piece.
   const lon = positions[i * 2]
   const lat = positions[i * 2 + 1]
+  const metres = metersPerPixelAt(lat, projection.zoom)
   const cos = Math.cos((lat * Math.PI) / 180)
-  const metres = (place * 2 * Math.PI * EARTH_RADIUS * cos) / (WORLD * 2 ** projection.zoom)
-  // Facing (east, north), the right is (north, −east): the point that far to the right.
-  const right = [
-    lon + ((metres * north) / length / (EARTH_RADIUS * cos)) * DEGREES,
-    lat + ((-metres * east) / length / EARTH_RADIUS) * DEGREES,
-  ] as [number, number]
   const at = projection.project([lon, lat])
-  const off = projection.project(right)
+  const off = projection.project([
+    lon + (rightEast * metres) / (METRES_PER_DEGREE * cos),
+    lat + (rightNorth * metres) / METRES_PER_DEGREE,
+  ])
   offsets[i * 2] = off.x - at.x
   offsets[i * 2 + 1] = at.y - off.y
 }

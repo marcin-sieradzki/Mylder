@@ -58,6 +58,7 @@ export function stubProjection({
   }
   return {
     zoom,
+    flatNorthUp: bearing === 0 && pitch === 0,
     projectWorld,
     project: (lonLat) => projectWorld(worldOf(lonLat, zoom)),
   }

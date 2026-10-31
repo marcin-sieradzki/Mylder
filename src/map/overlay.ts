@@ -102,6 +102,9 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     },
   })
   const project = (lonLat: [number, number]) => map.project(lonLat)
+  const flatNorthUp = () => map.getBearing() === 0 && map.getPitch() === 0
+  // Whether the camera has turned or tilted since the dots' offsets were last written.
+  let reproject = false
   const overlay = new MapLibreOverlay({ interleaved: false, layers: [], ...picking.props })
   map.addControl(overlay)
   let removed = false
@@ -118,6 +121,10 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
 
   // One render a frame draws every kind, wherever their motion has placed them.
   const render = () => {
+    if (reproject) {
+      reproject = false
+      if (frames.still()) loop.reproject()
+    }
     // With nothing left to draw, such as the aircraft alone with the Planes filter turned off,
     // no layers clear what was drawn.
     const drawn = kinds()
@@ -137,7 +144,7 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const loop = vehicleLoop({
     now: () => serverNow(liveSnapshot.get()),
     frames,
-    projection: () => ({ project, zoom: map.getZoom() }),
+    projection: () => ({ project, zoom: map.getZoom(), flatNorthUp: flatNorthUp() }),
   })
   const aircraftMotion = aircraftLoop({ now: () => serverNow(liveAircraft.get()), frames })
 
@@ -278,16 +285,16 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     frames.request()
   }
   map.on('zoom', onZoom)
-  // A turned or tilted camera changes where each strand's offset falls on the canvas and which
-  // way each plane points as it moves: each of its moves writes the offsets again and draws once
-  // more, even while the dots stand still, and so does the move that brings it back to flat and
-  // north-up. Flat and north-up, a pan or a zoom changes neither.
-  let level = true
+  // Turned or tilted, each move of the camera changes where each strand's offset falls on the
+  // canvas and which way each plane points: the next frame draws again, writing the offsets
+  // first while the dots stand still, as a frame that moves them writes them anyway. So does the
+  // move back to flat and north-up; flat and north-up, a pan or a zoom changes neither.
+  let wasFlatNorthUp = true
   const onCamera = () => {
-    const levelNow = map.getBearing() === 0 && map.getPitch() === 0
-    if (level && levelNow) return
-    level = levelNow
-    loop.reproject()
+    const flat = flatNorthUp()
+    if (wasFlatNorthUp && flat) return
+    wasFlatNorthUp = flat
+    reproject = true
     frames.request()
   }
   // The picked dot's card follows it as the map pans, even while the dots stand still.

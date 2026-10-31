@@ -92,10 +92,15 @@ describe("a dot on its line's strand", () => {
       [A_NORTH, 12550, [1.161948561668396, -0.7809451818466187]],
       [A_NORTH, 27653.79, [1.069651484489441, 0.9032416939735413]],
     ] as const
-    for (const [key, along, [east, north]] of cases) {
-      const { offset } = standAt(key, along, flat)
-      expect(offset[0]).toBeCloseTo(east, 4)
-      expect(offset[1]).toBeCloseTo(north, 4)
+    // Worked out directly, as the loop does each frame while the map is flat and north-up, or
+    // through the camera, as it does once the map turns, the offset is the same.
+    const projected = { ...flat, flatNorthUp: false }
+    for (const projection of [flat, projected]) {
+      for (const [key, along, [east, north]] of cases) {
+        const { offset } = standAt(key, along, projection)
+        expect(offset[0]).toBeCloseTo(east, 4)
+        expect(offset[1]).toBeCloseTo(north, 4)
+      }
     }
   })
 
