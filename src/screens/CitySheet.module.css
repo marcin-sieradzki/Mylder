@@ -1,9 +1,15 @@
 /* A side sheet lies under the top bar's layer and starts below the bar, which keeps the brand and
    the Updated line in view. A bottom sheet keeps Perron's layer and rises over the bar at full
-   height. The class is doubled to win over Perron's own viewport rule. */
+   height, unless a detail panel is open (below). The class is doubled to win over Perron's own viewport rule. */
 .viewport.viewport[data-anchor='left'] {
   z-index: var(--perron-z-index-sheet);
   padding-block-start: calc(
     var(--perron-space-300) + var(--perron-size-top-bar) + var(--perron-size-panel-gap)
   );
+}
+
+/* On a phone the open detail panel's bottom sheet is in front, at its peek where this one's is:
+   while one is open, this sheet drops to its own layer, under the detail panel's. */
+.viewport.viewport.behind[data-anchor='bottom'] {
+  z-index: var(--perron-z-index-sheet);
 }

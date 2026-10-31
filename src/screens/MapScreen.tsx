@@ -33,6 +33,7 @@ export function MapScreen() {
   const legend = useRef<HTMLDivElement>(null)
   const open = sheet !== 'closed'
   const panel = usePanel()
+  const panelOpen = panel !== undefined
   return (
     <div className={styles.screen}>
       <main className={styles.map}>
@@ -45,7 +46,7 @@ export function MapScreen() {
       <MapFoot
         legendRef={legend}
         besideSheet={open}
-        besidePanel={panel !== undefined}
+        besidePanel={panelOpen}
         opener={
           open ? null : (
             <Button ref={opener} onClick={() => setSheet('reopened')}>
@@ -59,6 +60,7 @@ export function MapScreen() {
         onClose={() => setSheet('closed')}
         asked={sheet === 'reopened'}
         opener={opener}
+        behindPanel={panelOpen}
       />
       <MapHighlight below={top} />
       <VehicleCard />

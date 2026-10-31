@@ -22,6 +22,8 @@ interface CitySheetProps {
   asked: boolean
   /** Where focus goes once it closes: the button that opens it again. */
   opener: RefObject<HTMLButtonElement | null>
+  /** Whether a detail panel is open, whose bottom sheet a phone shows in front of this one. */
+  behindPanel: boolean
 }
 
 const PANELS: Record<SheetTab, ReactNode> = {
@@ -35,7 +37,7 @@ const PANELS: Record<SheetTab, ReactNode> = {
  * tabs, in a side sheet on a desktop and a bottom sheet with a peek on a phone. The open tab is
  * kept in the address.
  */
-export function CitySheet({ open, onClose, asked, opener }: CitySheetProps) {
+export function CitySheet({ open, onClose, asked, opener, behindPanel }: CitySheetProps) {
   const { dictionary } = useI18n()
   const words = dictionary.sheet
   const tab = useSheetTab()
@@ -73,7 +75,11 @@ export function CitySheet({ open, onClose, asked, opener }: CitySheetProps) {
       }}
       initialFocus={asked}
       finalFocus={opener}
-      slotProps={{ viewport: { className: styles.viewport } }}
+      slotProps={{
+        viewport: {
+          className: behindPanel ? `${styles.viewport} ${styles.behind}` : styles.viewport,
+        },
+      }}
     >
       <Tabs
         value={tab}
