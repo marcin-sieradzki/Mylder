@@ -128,6 +128,7 @@
       "title": "Data og kreditering",
       "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "buildings": "Bygningshøjderne kommer fra OpenStreetMap og er omtrentlige.",
       "aircraft": "Fly: © {source} under {licence}.",
       "aircraftFrom": "Fly: © {source}.",
       "recording": "Flyene er optagne data fra adsb.lol, åbne under samme licens i {recordings}.",

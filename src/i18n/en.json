@@ -128,6 +128,7 @@
       "title": "Data and credits",
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "buildings": "Building heights come from OpenStreetMap and are approximate.",
       "aircraft": "Aircraft: © {source} under the {licence}.",
       "aircraftFrom": "Aircraft: © {source}.",
       "recording": "The planes are recorded adsb.lol data, open under the same licence in {recordings}.",
