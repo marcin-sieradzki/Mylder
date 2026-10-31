@@ -328,7 +328,9 @@ describe('the basemap', () => {
   })
 
   it('leaves out the buildings OpenStreetMap flags hide_3d', () => {
-    expect(layer(styleNow(), 'building-3d').filter).toEqual(['!=', ['get', 'hide_3d'], true])
+    expect(layer(styleNow(), 'building-3d')).toMatchObject({
+      filter: ['!=', ['get', 'hide_3d'], true],
+    })
   })
 
   it("paints the buildings faint in Perron's map building colour, in light and dark", () => {
