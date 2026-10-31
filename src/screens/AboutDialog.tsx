@@ -228,6 +228,24 @@ export function AboutDialog() {
               </Text>
             </li>
             <li>
+              <Text>
+                {compose(words.keys.turn, {
+                  shift: <Kbd>{words.keys.shift}</Kbd>,
+                  left: <Kbd>←</Kbd>,
+                  right: <Kbd>→</Kbd>,
+                })}
+              </Text>
+            </li>
+            <li>
+              <Text>
+                {compose(words.keys.tilt, {
+                  shift: <Kbd>{words.keys.shift}</Kbd>,
+                  up: <Kbd>↑</Kbd>,
+                  down: <Kbd>↓</Kbd>,
+                })}
+              </Text>
+            </li>
+            <li>
               <Text>{compose(words.keys.close, { esc: <Kbd>Esc</Kbd> })}</Text>
             </li>
             <li>

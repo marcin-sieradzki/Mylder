@@ -99,7 +99,23 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Data budget')).toBe('Normal')
     expect(fact(dialog, 'Calls this month')).toBe('7')
     expect(fact(dialog, 'Disruptions')).toBe('Checked 07:20')
-    expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
+    expect(keysIn(dialog)).toEqual([
+      '+',
+      '−',
+      '←',
+      '→',
+      '↑',
+      '↓',
+      'Shift',
+      '←',
+      '→',
+      'Shift',
+      '↑',
+      '↓',
+      'Esc',
+    ])
+    expect(dialog).toHaveTextContent('Shift + ← and → turn the map.')
+    expect(dialog).toHaveTextContent('Shift + ↑ and ↓ tilt it.')
     expect(dialog).toHaveTextContent(
       'The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again.',
     )
@@ -122,7 +138,23 @@ describe('the About dialog', () => {
     expect(dialog).toHaveTextContent(
       'Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen.',
     )
-    expect(keysIn(dialog)).toEqual(['+', '−', '←', '→', '↑', '↓', 'Esc'])
+    expect(keysIn(dialog)).toEqual([
+      '+',
+      '−',
+      '←',
+      '→',
+      '↑',
+      '↓',
+      'Skift',
+      '←',
+      '→',
+      'Skift',
+      '↑',
+      '↓',
+      'Esc',
+    ])
+    expect(dialog).toHaveTextContent('Skift + ← og → drejer kortet.')
+    expect(dialog).toHaveTextContent('Skift + ↑ og ↓ vipper det.')
     act(() => {
       liveSnapshot.update({
         snapshot: {
