@@ -37,6 +37,8 @@ test('Shift + ↑ tilts the map, hiding the scale bar with every vehicle still d
   await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
   for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
   await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '15')
   await expect(scale).toBeHidden()
   await expect.poll(drawsAll).toBe(true)
 
@@ -128,16 +130,16 @@ test('a tilted, turned map keeps its angle in the address, a reload opens it the
   await expect(map).toHaveAttribute('data-tilt', '0')
 
   await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
-  // Two steps of each, as many as the keys run ahead of the map.
-  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowUp')
-  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowRight')
-  await expect(map).toHaveAttribute('data-tilt', '20')
-  await expect(map).toHaveAttribute('data-heading', '30')
-  await expect(page).toHaveURL(/[?&]map=13\.00\/55\.67600\/12\.56800\/30\.0\/20\.0$/)
+  // Quick presses, each one counted however slowly the map draws.
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '45')
+  await expect(page).toHaveURL(/[?&]map=13\.00\/55\.67600\/12\.56800\/45\.0\/30\.0$/)
 
   await page.reload()
-  await expect(map).toHaveAttribute('data-tilt', '20')
-  await expect(map).toHaveAttribute('data-heading', '30')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '45')
   await expect(scaleBar(page)).toBeHidden()
 
   await page.getByRole('button', { name: 'Centre the map' }).click()
