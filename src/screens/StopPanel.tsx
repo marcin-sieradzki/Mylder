@@ -23,7 +23,7 @@ import type { DataState } from '../domain/data-state'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
-import { useClockOffset, useSnapshot } from '../map/live'
+import { useKnownClockOffset, useSnapshot } from '../map/live'
 import { useStopArrivals, type PanelStateOf, type PanelStatus } from '../map/panels'
 import { useDataStates } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -151,11 +151,14 @@ interface PendingProps {
   words: Words
 }
 
-/** What the panel's lists read: the filters, the trips' states on the map, the server's second. */
+/**
+ * What the panel's lists read: the filters, the trips' states on the map, the server's second,
+ * none until the page knows the server's clock.
+ */
 interface ListContext {
   readonly hidden: ReadonlySet<Mode>
   readonly states: ReadonlyMap<string, DataState>
-  readonly now: number
+  readonly now: number | undefined
   readonly timezone: string
   readonly lang: Lang
   readonly words: Words
@@ -178,7 +181,9 @@ interface StopListsProps {
 function StopLists({ state, timezone, lang, words, phone }: StopListsProps) {
   const hidden = useHiddenModes()
   const states = useDataStates()
-  const now = useServerSecond(useClockOffset())
+  // Until the first snapshot gives the server's clock, this device's could be any distance from it,
+  // so nothing counts down or calls an answer old by it.
+  const now = useServerSecond(useKnownClockOffset())
   const board = useStopBoard()
   const context: ListContext = { hidden, states, now, timezone, lang, words }
   const { answer, status } = state
@@ -288,7 +293,9 @@ interface BoardProps extends ListContext {
 /**
  * One of the stop's lists: its messages, then its rows in the modes the filters show, the interval
  * lines' first and the rest aged by the server's clock, then the note and the source line. An
- * arrival names where it comes from in place of where it goes.
+ * arrival names where it comes from in place of where it goes. Until the page knows the server's
+ * clock, the rows show no countdown, the messages read as at the answer's moment, and the source
+ * line never says it may be out of date.
  */
 function Board({
   board,
@@ -311,7 +318,7 @@ function Board({
     <>
       <Messages
         messages={answer.messages}
-        now={now}
+        now={now ?? answer.fetched}
         lang={lang}
         timezone={timezone}
         words={words}
@@ -360,7 +367,7 @@ function Board({
               name: 'Rejseplanen',
               label: words[named.at],
               time: clockTime(answer.source.at, timezone, { seconds: true }),
-              outOfDate: now - answer.source.at > BOARD_FRESH_FOR,
+              outOfDate: now !== undefined && now - answer.source.at > BOARD_FRESH_FOR,
             },
           ]}
         />
@@ -416,7 +423,7 @@ interface DepartureProps {
   /** Where it goes, or for an arrival where it comes from, as the row names it. */
   place: string
   state: DataState
-  now: number
+  now: number | undefined
   timezone: string
   words: Words
 }
@@ -458,7 +465,7 @@ interface StandingProps {
   trips: readonly StandingTrip[]
   source: AnswerSource
   states: ReadonlyMap<string, DataState>
-  now: number
+  now: number | undefined
   timezone: string
   words: Words
   /** Whether the panel is a phone's bottom sheet: every trip shows, as a row that scrolls sideways. */
@@ -523,7 +530,7 @@ function Standing({ trips, source, states, now, timezone, words, phone }: Standi
 interface StandingRowProps {
   trip: StandingTrip
   state: DataState
-  now: number
+  now: number | undefined
   timezone: string
   words: Words
   /** Whether it is a card in a phone's row rather than a row of a list. */
