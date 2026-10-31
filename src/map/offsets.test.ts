@@ -143,4 +143,30 @@ describe('picking a dot on its strand', () => {
     expect(px - x).toBeCloseTo(0.3254, 3)
     expect(py - y).toBeCloseTo(1.3617, 3)
   })
+
+  it('opens its card on its strand, and its detail on a tap, on a map tilted and turned', () => {
+    const tilted = { pitch: 45, bearing: -135 }
+    for (const [key, along] of [
+      [E_SOUTH, 14443],
+      [A_NORTH, 27653.79],
+    ] as const) {
+      const { strand } = strandAndDot(key, along, tilted)
+      const i = vehicles.keys.indexOf(key)
+      const [lon, lat] = vehicles.positions.subarray(i * 2, i * 2 + 2)
+      const projection = stubProjection({ centre: [lon, lat - 0.002], zoom: 14, ...tilted })
+      const store = pickedStore()
+      const tapped: string[] = []
+      const canvas = document.createElement('div')
+      canvas.getBoundingClientRect = () => DOMRect.fromRect({ x: 0, y: 0, width: 800, height: 600 })
+      const picks = dotPicking(canvas, store, { onTap: (_, tappedKey) => tapped.push(tappedKey) })
+      picks.follow([tripsDrawn(vehicles)], projection.project)
+      const glyphs = vehicleLayers(vehicles, 1).find((layer) => layer.props.pickable)
+      const pick = { x: 0, y: 0, picked: true, index: i, layer: glyphs } as never
+      picks.props.onHover(pick)
+      expect(store.get()?.key).toBe(key)
+      expect(awayFrom([...store.get()!.point], strand)).toBeLessThan(0.001)
+      picks.props.onClick(pick)
+      expect(tapped).toEqual([key])
+    }
+  })
 })
