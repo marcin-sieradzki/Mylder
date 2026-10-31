@@ -1,0 +1,10 @@
+{
+  "journey": "reg-map-basics",
+  "pass": true,
+  "steps": [
+    "01-map-drawn: map drawn (http://localhost:4353/en)",
+    "02-bus-off: bus off (http://localhost:4353/en?hide=bus)",
+    "03-bus-back: bus back (http://localhost:4353/en)",
+    "04-zoomed-in: zoomed in (http://localhost:4353/en?map=12.20/55.68000/12.56500)"
+  ]
+}

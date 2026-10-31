@@ -1,0 +1,9 @@
+{
+  "journey": "same-place-light",
+  "pass": true,
+  "steps": [
+    "01-noerre-voldgade-light: noerre voldgade light (http://localhost:4353/en?map=16.00/55.68000/12.57000/-30.0/60.0)",
+    "02-bernstorffsgade-light: bernstorffsgade light (http://localhost:4353/en?map=16.00/55.67073/12.57374/-30.0/60.0)",
+    "03-noerreport-light: noerreport light (http://localhost:4353/en?map=16.00/55.68300/12.57100/0.0/60.0)"
+  ]
+}

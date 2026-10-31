@@ -1,0 +1,12 @@
+{
+  "journey": "vehicle-far-light",
+  "pass": true,
+  "steps": [
+    "01-m1-up-the-street: M1 up the street (http://localhost:4352/en?map=16.00/55.68192/12.57305/-30.0/60.0)",
+    "02-m1-metro-chip-off: M1 Metro chip off (http://localhost:4352/en?map=16.00/55.68192/12.57305/-30.0/60.0&hide=metro)",
+    "03-m1-chip-back-on: M1 chip back on (http://localhost:4352/en?map=16.00/55.68192/12.57305/-30.0/60.0)",
+    "04-5c-up-the-street: 5C up the street (http://localhost:4352/en?map=16.00/55.66573/12.59177/-30.0/60.0)",
+    "05-5c-bus-chip-off: 5C Bus chip off (http://localhost:4352/en?map=16.00/55.66573/12.59177/-30.0/60.0&hide=bus)",
+    "06-5c-chip-back-on: 5C chip back on (http://localhost:4352/en?map=16.00/55.66573/12.59177/-30.0/60.0)"
+  ]
+}

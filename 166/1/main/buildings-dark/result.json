@@ -1,0 +1,9 @@
+{
+  "journey": "buildings-dark",
+  "pass": true,
+  "steps": [
+    "01-zoom-16-tilt-60-dark: zoom 16 tilt 60 dark (http://localhost:4352/en?map=16.00/55.68000/12.57000/-30.0/60.0)",
+    "02-zoom-14-tilt-60-dark: zoom 14 tilt 60 dark (http://localhost:4352/en?map=14.00/55.68000/12.57000/-30.0/60.0)",
+    "03-zoom-13-5-tilt-60-dark-footprints: zoom 13.5 tilt 60 dark footprints (http://localhost:4352/en?map=13.50/55.68000/12.57000/-30.0/60.0)"
+  ]
+}

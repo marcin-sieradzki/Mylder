@@ -1,0 +1,16 @@
+{
+  "journey": "reg-3d-controls",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4353/en)",
+    "02-tilted-30-turned-30-by-keys: tilted 30 turned 30 by keys (http://localhost:4353/en?map=11.20/55.68000/12.56500/30.0/30.0)",
+    "03-centred-flat-north-up: centred flat north-up (http://localhost:4353/en?map=11.20/55.68000/12.56500)",
+    "04-3d-toggle-on: 3D toggle on (http://localhost:4353/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "05-turned-15: turned 15 (http://localhost:4353/en?map=11.20/55.68000/12.56500/15.0/50.0)",
+    "06-back-to-north: back to north (http://localhost:4353/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "07-3d-toggle-off: 3D toggle off (http://localhost:4353/en?map=11.20/55.68000/12.56500)",
+    "08-right-drag-turned: right-drag turned (http://localhost:4353/en?map=11.20/55.68000/12.56500/120.0/0.0)",
+    "09-right-drag-tilted: right-drag tilted (http://localhost:4353/en?map=11.20/55.68000/12.56500/120.0/30.0)",
+    "10-ctrl-drag-turned: ctrl-drag turned (http://localhost:4353/en?map=11.20/55.68000/12.56500/120.0/0.0)"
+  ]
+}

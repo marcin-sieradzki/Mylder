@@ -1,0 +1,9 @@
+{
+  "journey": "behind-a-block-light",
+  "pass": true,
+  "steps": [
+    "01-bus-5c-among-the-blocks: bus 5C among the blocks (http://localhost:4352/en?map=16.00/55.67003/12.57950/-30.0/60.0)",
+    "02-bus-chip-off: bus chip off (http://localhost:4352/en?map=16.00/55.67003/12.57950/-30.0/60.0&hide=bus)",
+    "03-chip-back-on: chip back on (http://localhost:4352/en?map=16.00/55.67003/12.57950/-30.0/60.0)"
+  ]
+}
