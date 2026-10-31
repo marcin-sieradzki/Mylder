@@ -143,7 +143,7 @@ The host's own data cache is not relied on for the once-a-minute rule. Its defau
 
 ### What must persist between polls
 
-- **The previous snapshot's history**: per trip, its key, when it was last seen and last reported, its last reported position and progress, whether it has had realtime this service day, its last delay, and its journey reference, which an opened vehicle's `journeyDetail` asks with. Without it, no trip can be Ageing or No signal, and Timetable only cannot be told from a trip that dropped out.
+- **The previous snapshot's history**: per trip, its key, when it was last seen and last reported, its last reported position and progress, whether it has had realtime this service day, its last delay, and its journey reference, which an opened vehicle's `journeyDetail` asks with. A trip's history is kept until it has arrived at its last stop on its expected times, and its delay for 2 minutes more, while it stands there (`docs/screens.md`, "Stop panel"). Without it, no trip can be Ageing or No signal, and Timetable only cannot be told from a trip that dropped out.
 - **The latest snapshot**, compressed, so an instance that did not build it can serve it.
 - **The lease**: one key per run, named by the moment the run falls due, set only if absent, expiring after a minute.
 - **The disruption list**: the last `himsearch` messages that belong to Copenhagen (`docs/screens.md`, "Disruptions"), with how many the answer held, when they were fetched and when the list was last checked, kept a month so a spent month still shows its last list.

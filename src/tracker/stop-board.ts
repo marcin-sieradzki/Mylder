@@ -1,4 +1,4 @@
-// A stop's departures from its board (docs/screens.md, "Stop departures"): one
+// A stop's departures from its board (docs/screens.md, "Stop panel"): one
 // `multiDepartureBoard` answer for every platform of the stop, each departure joined back to its
 // trip in the timetable, by its journey reference and the join's corrections, or else by its line,
 // way, platform and planned time, each trip's call once, so a row keeps its trip's key and takes its data state from the

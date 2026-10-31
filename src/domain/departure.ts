@@ -1,5 +1,5 @@
 // What a departure's time and state follow (docs/data-states.md, "The states"; docs/screens.md,
-// "Stop departures"), one rule for the server that lists and sorts a stop's departures and the
+// "Stop panel"), one rule for the server that lists and sorts a stop's departures and the
 // browser that shows them as their trips age. Times are milliseconds since the epoch.
 import type { DataState } from './data-state.ts'
 
