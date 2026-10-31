@@ -4,7 +4,8 @@
 // deck.gl's canvas over it (docs/screens.md, "The moving map"; ADR 0003). It opens on the view
 // the address names and keeps where it was left in the address (`view.ts`), except while Follow
 // moves it each frame. A new highlight ends Follow and fits the camera to it, clear of the top bar,
-// the notices and the legend the screen hands it. The map lives outside React: React only names
+// the notices and the legend the screen hands it, moving only the centre and zoom, so a tilted,
+// turned map keeps its tilt and heading, as Follow's does. The map lives outside React: React only names
 // the canvas, and the screen's controls move it through the camera (camera.ts). The address keeps
 // its heading and tilt too, so a link opens in 3D. Its tilt and heading at rest are on its
 // container as `data-tilt` and `data-heading`, for tests.
@@ -15,7 +16,7 @@ import { useEffect, useEffectEvent, useRef, type RefObject } from 'react'
 import type { Network } from '../timetable/network.ts'
 import { gesturesTiltAndTurn, mapCamera } from './camera.ts'
 import { followedVehicle } from './follow.ts'
-import { boundsOf, fitPadding, mapHighlight, type Floating } from './highlight.ts'
+import { fitPadding, fitPlace, groundLens, mapHighlight, type Floating } from './highlight.ts'
 import { vehicleOverlay } from './overlay.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
@@ -117,16 +118,24 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
       repaint()
       vehicles.repaint()
     })
-    // A new highlight is drawn, and the camera fits it, clear of what floats over the map.
+    // A new highlight is drawn, and the camera fits it, clear of what floats over the map, at
+    // the tilt and heading the rider left it at.
     const stopHighlighting = mapHighlight.subscribe(() => {
       repaint()
       const highlight = mapHighlight.get()
-      const bounds = highlight && boundsOf(highlight)
-      if (!bounds) return
+      if (!highlight) return
+      const area = { width: element.clientWidth, height: element.clientHeight }
+      const padding = fitPadding(area.width, area.height, floating(element))
+      const lens = groundLens({
+        ...area,
+        pitch: created.getPitch(),
+        bearing: created.getBearing(),
+        fov: created.getVerticalFieldOfView(),
+      })
+      const place = fitPlace(highlight, area, padding, lens)
+      if (!place) return
       followedVehicle.stop()
-      const { clientWidth, clientHeight } = element
-      const padding = fitPadding(clientWidth, clientHeight, floating(element))
-      created.fitBounds(bounds, { padding, maxZoom: 15 })
+      created.flyTo({ center: place.centre, zoom: place.zoom })
     })
     timetables.current().then(
       (loaded) => {
