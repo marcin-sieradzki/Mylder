@@ -109,7 +109,10 @@ export function savedAnswers(
 
 const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: plan.name })
 
-/** The tracker's snapshot at the start of each of a plan's minutes, and its disruption list. */
+/**
+ * The tracker's snapshot at the start of each of a plan's minutes, and its disruption list, with
+ * the stops whose boards it keeps opened at theirs.
+ */
 const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
   Effect.gen(function* () {
     const tracker = yield* Tracker
@@ -119,6 +122,8 @@ const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
       yield* TestClock.setTime(plan.start + minute * MINUTE)
       snapshots.push(yield* tracker.getSnapshot)
       disruptions.push(yield* tracker.getDisruptions)
+      if (plan.boards?.minute !== minute) continue
+      for (const stop of plan.boards.stops) yield* tracker.getStopDepartures(stop)
     }
     return { snapshots, disruptions }
   }).pipe(

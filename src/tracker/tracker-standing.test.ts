@@ -18,9 +18,10 @@ import { Tracker } from './tracker'
 
 // The trips standing at a stop's platforms now (docs/screens.md, "Stop panel"), worked out from
 // the stop's calls in the timetable and the snapshot, on the weekday recording from 07:20 in
-// Copenhagen on Tuesday 2026-06-16. The recording has no departure boards, so every stop there
-// answers from the timetable plus the snapshot's delays; a board in hand is the simulation's, and
-// an order the fixture never shows is a snapshot made by hand.
+// Copenhagen on Tuesday 2026-06-16. The recording's one departure board is København Syd St.'s,
+// asked at 07:22, so every other stop there answers from the timetable plus the snapshot's
+// delays; a board in hand elsewhere is the simulation's, and an order the fixture never shows is
+// a snapshot made by hand.
 const timetable = await fixtureTimetable()
 const recording = readSource('recording:weekday')
 
@@ -68,6 +69,12 @@ const BUS_991_0730 = 'bus.991.7ce514fd98.20260616.0730'
 /** Hillerød St., where the A from Hundige at 07:07 ends, at 08:11 by its timetable. */
 const HILLEROD = '8600683'
 const A_0707 = 's-tog.A.0bc307e3eb.20260616.0707'
+
+/** København Syd St., where the RE to Næstved stands from 07:22 to 07:23 on the recording. */
+const KOBENHAVN_SYD = '8600783'
+
+/** Nørreport St., which the recording has no board for. */
+const NORREPORT = '27532'
 
 /** Bella Center St., where M1 stands from 07:22 to 07:23; Vestamager St., where it ends at 07:26. */
 const BELLA_CENTER = '8603313'
@@ -138,6 +145,25 @@ describe('the trips standing at a stop', () => {
         expect(yield* standingAt(HILLEROD)).toEqual([])
         expect(yield* remembered(A_0707)).toBeUndefined()
       }).pipe(Effect.provide(onTheRecording)),
+  )
+
+  it.effect('shows the track of the train standing at the stop the recording has a board for', () =>
+    Effect.gen(function* () {
+      yield* TestClock.setTime(at(7, 22, 30))
+      const tracker = yield* Tracker
+      const answer = (yield* tracker.getStopDepartures(KOBENHAVN_SYD))!
+      expect(answer.source.kind).toBe('rejseplanen')
+      expect(answer.standing).toEqual([
+        expect.objectContaining({
+          line: 'RE',
+          headsign: 'Næstved St.',
+          track: expect.stringMatching(/^[1-8]$/),
+          departs: at(7, 23),
+        }),
+      ])
+      // Any other stop has no board on the recording, and answers from the timetable.
+      expect((yield* tracker.getStopDepartures(NORREPORT))!.source).toEqual({ kind: 'timetable' })
+    }).pipe(Effect.provide(onTheRecording)),
   )
 
   it.effect('never lists the Metro, standing, Waiting or ending', () =>
