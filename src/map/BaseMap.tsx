@@ -5,8 +5,9 @@
 // the address names and keeps where it was left in the address (`view.ts`), except while Follow
 // moves it each frame. A new highlight ends Follow and fits the camera to it, clear of the top bar,
 // the notices and the legend the screen hands it. The map lives outside React: React only names
-// the canvas, and the screen's controls move it through the camera (camera.ts). Its tilt and
-// heading at rest are on its container as `data-tilt` and `data-heading`, for tests.
+// the canvas, and the screen's controls move it through the camera (camera.ts). The address keeps
+// its heading and tilt too, so a link opens in 3D. Its tilt and heading at rest are on its
+// container as `data-tilt` and `data-heading`, for tests.
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl'
@@ -19,7 +20,7 @@ import { vehicleOverlay } from './overlay.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
 import { timetables } from './timetable.ts'
-import { mapView } from './view.ts'
+import { MAX_PITCH, mapView } from './view.ts'
 
 export interface BaseMapProps {
   /** The canvas's accessible name, such as "Live map of Copenhagen". */
@@ -33,9 +34,6 @@ export interface BaseMapProps {
 
 /** Copenhagen's centre, between Nørreport and Kongens Nytorv. */
 const CENTRE: [number, number] = [12.565, 55.68]
-
-/** The most the map tilts, in degrees, before the view is mostly sky and far-off streets. */
-const MAX_PITCH = 60
 
 /** Wide enough for the whole S-tog network on a desktop, and the centre's on a phone. */
 const zoomFor = (width: number) => (width < 600 ? 10.4 : 11.2)
@@ -66,7 +64,10 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
         style: style(),
         center: view.centre ? [view.centre[0], view.centre[1]] : CENTRE,
         zoom: view.zoom ?? zoomFor(element.clientWidth),
-        // It opens flat and north-up, and tilts up to the 3D view's most (ADR 0016).
+        // It opens flat and north-up, unless the address names a heading and tilt, even on a
+        // phone, whose gestures don't tilt it, and tilts up to the 3D view's most (ADR 0016).
+        bearing: view.bearing ?? 0,
+        pitch: view.pitch ?? 0,
         maxPitch: MAX_PITCH,
         // The screen's corner credit and its keys (keys.ts) stand in for MapLibre's own.
         attributionControl: false,
@@ -88,7 +89,12 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
     const keepView = () => {
       if (followedVehicle.get() !== undefined) return
       const { lng, lat } = created.getCenter()
-      mapView.update({ centre: [lng, lat], zoom: created.getZoom() })
+      mapView.update({
+        centre: [lng, lat],
+        zoom: created.getZoom(),
+        bearing: created.getBearing(),
+        pitch: created.getPitch(),
+      })
     }
     created.on('moveend', keepView)
     // Its tilt and heading where it came to rest, to the degree, on its container for tests, as
