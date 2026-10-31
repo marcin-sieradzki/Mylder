@@ -75,8 +75,12 @@ One trip's visit to one stop, with its scheduled, expected and recorded times.
 _Avoid_: Stop time, visit, passing
 
 **Departure**:
-A call seen from the stop's side, as a stop's departure list shows it.
-_Avoid_: Arrival (for the list), next bus
+A call seen from the stop's side as its trip leaves, as a stop's Departures list shows it.
+_Avoid_: Next bus
+
+**Arrival**:
+A call seen from the stop's side as its trip comes in, as a stop's Arrivals list shows it: where the trip comes from, its platform or track, and when it arrives. A trip's first call has no arrival, and its last call has no departure.
+_Avoid_: Incoming, inbound, next arrival
 
 **Aircraft**:
 A plane or helicopter on the map, from the aircraft feed; not a Vehicle or a Trip, and not a Mode. It carries the same data states as a trip, but never Timetable only.

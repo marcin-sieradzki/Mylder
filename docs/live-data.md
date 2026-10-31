@@ -193,6 +193,8 @@ An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-bo
 
 Either way the answer carries the stop's messages: those on its board's departures, then the disruption list's that name the stop, each once.
 
+A stop's arrivals, asked for only while its panel's Arrivals tab is open (`/api/stops/<id>/arrivals`), spend no call for now: they come from the timetable plus the snapshot's delays, with the disruption list's messages that name the stop, and say `{ kind: 'timetable' }`.
+
 An opened vehicle asks for its detail the same way (`trip-detail.ts`), under `<prefix>:on-demand:trip:<trip key>`, within the same minute's counter:
 
 1. The call asks with the trip's journey reference, which the history keeps once a position answer has carried the trip. A trip no answer has carried, such as a Timetable only one or the Metro, makes none.
