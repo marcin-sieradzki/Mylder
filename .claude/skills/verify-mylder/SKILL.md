@@ -1,11 +1,11 @@
 ---
 name: verify-mylder
-description: "Launch Mylder's production build on a recording, the weekday one unless a recipe names another, and drive it in Chromium as a rider would, keeping screenshots and ARIA snapshots as evidence. Use to prove a change works in the real app, and for the factory's verdict."
+description: "Launch Mylder's production build on the weekday recording and drive it in Chromium as a rider would, keeping screenshots and ARIA snapshots as evidence. Use to prove a change works in the real app, and for the factory's verdict."
 ---
 
 # Verify Mylder
 
-Mylder's surface is one web page, the map at `/en` and `/da`, with its panels and side sheet, served by a Next.js production build. This skill starts that build on a recording (`docs/testing-seams.md`), the `weekday` one unless a recipe names another, drives it with Playwright as a rider would, and keeps what it saw. Every command runs from the root of the checkout under test; each run has a **run id** you choose (`ticket-92`, `main-92`), and everything it makes lives in `.verify/<run-id>/`, which git ignores.
+Mylder's surface is one web page, the map at `/en` and `/da`, with its panels and side sheet, served by a Next.js production build. This skill starts that build on a recording (`docs/testing-seams.md`), drives it with Playwright as a rider would, and keeps what it saw. Every command runs from the root of the checkout under test; each run has a **run id** you choose (`ticket-92`, `main-92`), and everything it makes lives in `.verify/<run-id>/`, which git ignores.
 
 The feature map in [`features/README.md`](features/README.md) says what to drive for each feature and what proves it. Read it before driving.
 
