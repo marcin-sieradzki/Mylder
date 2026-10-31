@@ -84,20 +84,56 @@ test.describe('on a phone', () => {
 
   const REFSHALEOEN = stops.find((stop) => stop.id === '48645')!
 
+  test('a link to a stop opens its sheet in front of the Overview’s, its tabs in reach', async ({
+    page,
+  }) => {
+    // Nørreport St., with its saved departures and arrivals. The Overview stays open at its peek.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '27532')
+    await serveSavedArrivals(page, '27532')
+    await page.goto('/en?stop=27532')
+    await expect(page.getByRole('dialog', { name: 'Overview' })).toBeVisible()
+    const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+    await expect(panel).toHaveAttribute('data-anchor', 'bottom')
+    // A tap lands on the tab only when no other sheet lies over it.
+    await panel.getByRole('tab', { name: 'Arrivals' }).click()
+    await expect(page).toHaveURL(/[?&]stop=27532&board=arrivals(&|$)/)
+    await expect(panel.getByRole('list', { name: 'Arrivals' })).toBeVisible()
+  })
+
+  test('a link to a stop’s arrivals opens in front of the Overview, its rows in reach', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await serveSavedArrivals(page, '48645')
+    await page.goto('/en?stop=48645&board=arrivals')
+    await expect(page.getByRole('dialog', { name: 'Overview' })).toBeVisible()
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(panel.getByRole('tab', { name: 'Arrivals' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await panel
+      .getByRole('region', { name: 'At the platforms now' })
+      .getByRole('button', { name: 'Bus 991 to Teglholmen' })
+      .click()
+    await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
+    await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
+  })
+
   test('a stop’s standing trips are a row that scrolls sideways above the tabs, each opening its vehicle', async ({
     page,
   }) => {
     // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23. Its dot
     // sits on the stop's marker, and a tap on a dot opens the vehicle, so the buses are hidden for
-    // the tap on the stop and shown again once its panel is open. A stop's sheet opens under the
-    // Overview's on a phone (#175), so the Overview is closed first.
+    // the tap on the stop and shown again once its panel is open. The Overview stays open at its
+    // peek, and the stop's sheet opens in front of it.
     await serveFirstMinute(page)
     await serveSavedStop(page, '48645')
     await page.goto(`/en?hide=bus&map=17.00/${REFSHALEOEN.lat}/${REFSHALEOEN.lon}`)
-    await page
-      .getByRole('dialog', { name: 'Overview' })
-      .getByRole('button', { name: 'Close' })
-      .click()
+    await expect(page.getByRole('dialog', { name: 'Overview' })).toBeVisible()
     const { width, height } = page.viewportSize()!
     const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
     await expect(async () => {
