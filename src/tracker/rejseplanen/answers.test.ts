@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { Schema } from 'effect'
 import { describe, expect, it } from 'vitest'
 import {
+  ArrivalBoardAnswer,
   DepartureBoardAnswer,
   ErrorAnswer,
   HimSearchAnswer,
@@ -22,6 +23,7 @@ describe('the answer schemas', () => {
     ['journey-pos', JourneyPosAnswer],
     ['journey-pos-empty', JourneyPosAnswer],
     ['departure-board', DepartureBoardAnswer],
+    ['arrival-board', ArrivalBoardAnswer],
     ['journey-detail', JourneyDetailAnswer],
     ['him-search', HimSearchAnswer],
     ['error-refused-key', ErrorAnswer],
@@ -56,6 +58,21 @@ describe('the answer schemas', () => {
     expect(metro.prognosisType).toBeUndefined()
   })
 
+  it('keep where an arrival comes from, a cancelled arrival, and a Metro arrival without a prognosis', () => {
+    const [late, cancelled, metro] = decode(ArrivalBoardAnswer, 'arrival-board').Arrival ?? []
+    expect(late).toMatchObject({
+      origin: 'Hillerød St.',
+      time: '10:31:00',
+      rtTime: '10:32:00',
+      rtTrack: '10',
+      prognosisType: 'PROGNOSED',
+    })
+    expect(cancelled).toMatchObject({ origin: 'Køge St.', cancelled: true, reachable: false })
+    expect(cancelled.prognosisType).toBeUndefined()
+    expect(metro.ProductAtStop?.cls).toBe('1024')
+    expect(metro.prognosisType).toBeUndefined()
+  })
+
   it('give a trip detail its cancelled call, last position and message range', () => {
     const detail = decode(JourneyDetailAnswer, 'journey-detail')
     expect(detail.Stops.Stop[1]).toMatchObject({ cancelledArrival: true, cancelledDeparture: true })
@@ -71,6 +88,7 @@ describe('the answer schemas', () => {
   it.each<[string, Schema.Codec<unknown, unknown>, (answer: any) => void, RegExp]>([
     ['journey-pos', JourneyPosAnswer, (a) => delete a.Journey[0].lat, /lat/],
     ['departure-board', DepartureBoardAnswer, (a) => delete a.Departure[0].time, /time/],
+    ['arrival-board', ArrivalBoardAnswer, (a) => delete a.Arrival[0].stopExtId, /stopExtId/],
     ['journey-detail', JourneyDetailAnswer, (a) => delete a.Stops, /Stops/],
     ['him-search', HimSearchAnswer, (a) => delete a.Message[1].head, /head/],
     ['error-refused-key', ErrorAnswer, (a) => delete a.errorCode, /errorCode/],

@@ -1,0 +1,74 @@
+{
+  "Arrival": [
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#58720#TA#0#DA#261026#1S#8600683#1T#943#LS#8600752#LT#1112#PU#86#RT#3#CA#006#ZE#A#ZB#A#PC#4#FR#8600683#FT#943#TO#8600752#TT#1112#"
+      },
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "S-tog A",
+        "displayNumber": "A",
+        "num": "24133",
+        "line": "A",
+        "catOut": "S-tog",
+        "cls": "16",
+        "operator": "DSB"
+      },
+      "name": "S-tog A",
+      "type": "ST",
+      "stop": "København H",
+      "stopExtId": "8600626",
+      "lon": 12.564968,
+      "lat": 55.672683,
+      "time": "10:31:00",
+      "date": "2026-10-26",
+      "rtTime": "10:32:00",
+      "rtDate": "2026-10-26",
+      "rtTrack": "10",
+      "prognosisType": "PROGNOSED",
+      "origin": "Hillerød St.",
+      "reachable": true
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#58930#TA#0#DA#261026#1S#8600803#1T#1002#LS#8600655#LT#1101#PU#86#RT#3#CA#006#ZE#E#ZB#E#PC#4#FR#8600803#FT#1002#TO#8600655#TT#1101#"
+      },
+      "JourneyStatus": "P",
+      "ProductAtStop": { "name": "S-tog E", "line": "E", "catOut": "S-tog", "cls": "16" },
+      "name": "S-tog E",
+      "stop": "København H",
+      "stopExtId": "8600626",
+      "time": "10:34:00",
+      "date": "2026-10-26",
+      "track": "9",
+      "origin": "Køge St.",
+      "cancelled": true,
+      "reachable": false,
+      "Notes": {
+        "Note": [{ "value": "Aflyst", "key": "text.realtime.journey.cancelled", "type": "R" }]
+      }
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#1791273300#PI#0#ZI#3002#TA#0#DA#261026#1S#8603327#1T#1015#LS#8603301#LT#1038#PU#86#RT#1#CA#MET#ZE#M1#ZB#Metro M1#PC#10#FR#8603327#FT#1015#TO#8603301#TT#1038#"
+      },
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "Metro M1",
+        "line": "M1",
+        "catOut": "Metro",
+        "catIn": "MET",
+        "cls": "1024"
+      },
+      "name": "Metro M1",
+      "stop": "Kongens Nytorv St. (Metro)",
+      "stopExtId": "8603305",
+      "time": "10:35:00",
+      "date": "2026-10-26",
+      "origin": "Vestamager St."
+    }
+  ],
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-10-26T10:33:12+01:00"
+}
