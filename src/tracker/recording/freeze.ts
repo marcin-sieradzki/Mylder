@@ -120,7 +120,7 @@ const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: 
 
 /**
  * The tracker's snapshot at the start of each of a plan's minutes, and its disruption list, with
- * the stops whose boards it keeps opened at theirs.
+ * the stops whose boards it keeps opened at theirs, on both tabs.
  */
 const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
   Effect.gen(function* () {
@@ -132,7 +132,10 @@ const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
       snapshots.push(yield* tracker.getSnapshot)
       disruptions.push(yield* tracker.getDisruptions)
       if (plan.boards?.minute !== minute) continue
-      for (const stop of plan.boards.stops) yield* tracker.getStopDepartures(stop)
+      for (const stop of plan.boards.stops) {
+        yield* tracker.getStopDepartures(stop)
+        yield* tracker.getStopArrivals(stop)
+      }
     }
     return { snapshots, disruptions }
   }).pipe(

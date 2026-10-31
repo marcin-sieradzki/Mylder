@@ -832,6 +832,44 @@ describe('the Departures and Arrivals tabs', () => {
     ).toBeInTheDocument()
   })
 
+  it('keep a cancelled arrival, marked Cancelled with its countdown struck', async () => {
+    arrivalAnswers.set('27532', withArrival(NORREPORT_ARRIVALS, E_FROM_HOLTE, { cancelled: true }))
+    openStop('en', '?stop=27532&board=arrivals')
+    const list = await within(await panel('Nørreport St.')).findByRole('list', {
+      name: 'Arrivals',
+    })
+    const holte = row(list, 'From Holte St.')
+    expect(holte).toHaveTextContent('Cancelled')
+    expect(holte).not.toHaveTextContent('Live')
+    // The countdown's figure sits in the countdown, which the row strikes.
+    const countdown = within(holte).getByText('8').parentElement!
+    expect(getComputedStyle(countdown).textDecorationLine).toBe('line-through')
+    // Its timetabled time, struck, and not the expected one it won't keep.
+    expect(getComputedStyle(within(holte).getByText('07:27')).textDecorationLine).toBe(
+      'line-through',
+    )
+    expect(within(holte).queryByText('07:29')).not.toBeInTheDocument()
+    // It stays in the list.
+    expect(within(list).getAllByRole('listitem')).toHaveLength(10)
+  })
+
+  it('name Rejseplanen and the time of its call, and give each arrival the board’s track', async () => {
+    // 07:21:20 in Copenhagen.
+    arrivalAnswers.set('27532', {
+      ...withArrival(NORREPORT_ARRIVALS, E_FROM_HOLTE, { track: '4' }),
+      source: { kind: 'rejseplanen', at: NORREPORT_ARRIVALS.fetched + 20_000 },
+    })
+    openStop('en', '?stop=27532&board=arrivals')
+    const arrivals = within(await panel('Nørreport St.')).getByRole('tabpanel', {
+      name: 'Arrivals',
+    })
+    const list = await within(arrivals).findByRole('list', { name: 'Arrivals' })
+    expect(row(list, 'From Holte St.')).toHaveTextContent('Track 4')
+    expect(arrivals).toHaveTextContent('Rejseplanen · arrivals 07:21:20')
+    expect(arrivals).not.toHaveTextContent('From the timetable')
+    expect(arrivals).not.toHaveTextContent('Timetable and positions')
+  })
+
   it('leave out the modes the filters hide', async () => {
     openStop('en', '?stop=27532&board=arrivals&hide=s-tog')
     const stop = await panel('Nørreport St.')

@@ -476,7 +476,7 @@ export function departuresAt(
 }
 
 /** The stop a trip starts from, as the timetable names it: where an arrival comes from. */
-const originOf = (timetable: Timetable, trip: PlannedTrip): string => {
+export const originOf = (timetable: Timetable, trip: PlannedTrip): string => {
   const { platforms, stops } = timetable.stops
   return stops[platforms[trip.calls[0].platform].stop].name
 }
@@ -497,18 +497,36 @@ export function arrivalsAt(
   const rows = timedRows(timetable, snapshot, calls, 'arrival').map(
     ({ row, trip }): StopArrival => ({ ...row, origin: originOf(timetable, trip) }),
   )
-  const listedRows = listedBy(timetable, snapshot, stop, rows, calls, now, 'arrival')
   return {
     stop,
     fetched: now,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
+    ...listedArrivals(timetable, snapshot, stop, rows, calls, now),
+    messages: [],
+  }
+}
+
+/**
+ * A stop's arrivals as its answer lists them, from its arriving calls (`callsAt`): its interval
+ * lines' read as one interval row per line and direction that arrives in the window, with where
+ * the next comes from, and the rest soonest first, as departures are listed.
+ */
+export function listedArrivals(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  stop: StopDepartures['stop'],
+  rows: readonly StopArrival[],
+  calls: readonly StopCall[],
+  now: number,
+): Pick<StopArrivals, 'arrivals' | 'intervals'> {
+  const listedRows = listedBy(timetable, snapshot, stop, rows, calls, now, 'arrival')
+  return {
     arrivals: listedRows.rows,
     intervals: listedRows.intervals.map(({ row, trip }) => ({
       ...row,
       origin: originOf(timetable, trip),
     })),
-    messages: [],
   }
 }
 

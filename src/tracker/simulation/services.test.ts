@@ -1,6 +1,8 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect, Schema } from 'effect'
+import { clockTime } from '../../timetable/time'
 import {
+  ArrivalBoardAnswer,
   DepartureBoardAnswer,
   HimSearchAnswer,
   JourneyDetailAnswer,
@@ -18,6 +20,9 @@ const decoded = <S extends Schema.Codec<unknown, unknown>>(schema: S) =>
 
 const board = (idList: string, moment = MOMENT) =>
   call('multiDepartureBoard', { idList, duration: 30 }, moment).pipe(decoded(DepartureBoardAnswer))
+
+const arrivals = (idList: string, moment = MOMENT) =>
+  call('multiArrivalBoard', { idList, duration: 30 }, moment).pipe(decoded(ArrivalBoardAnswer))
 
 const detail = (id: string, moment = MOMENT) =>
   call('journeyDetail', { id }, moment).pipe(decoded(JourneyDetailAnswer))
@@ -98,30 +103,101 @@ describe('the simulated multiDepartureBoard', () => {
   )
 })
 
-describe('one trip in every service', () => {
+describe('the simulated multiArrivalBoard', () => {
   it.effect(
-    'has the same expected time at a stop in journeyPos, the departure board and its detail',
+    'lists the arrivals the timetable plans at a stop over the window, in order, each from its trip’s first stop',
     () =>
       Effect.gen(function* () {
-        const journeys =
-          (yield* call('journeyPos', CITY).pipe(decoded(JourneyPosAnswer))).Journey ?? []
-        // A journey with a stop ahead, inside the board's window, that it is late for.
-        const late = journeys.flatMap((journey) =>
-          (journey.Stops?.Stop ?? [])
-            .filter((stop) => stop.rtDepTime !== undefined && stop.rtDepTime > '07:21:00')
-            .map((stop) => ({ journey, stop })),
+        const { Arrival = [] } = yield* arrivals('27532')
+        // Nørreport St.'s platforms from 07:20 on the fixture's plan: every call there but a trip's
+        // first, arriving in the next 30 minutes on its expected time.
+        const { timezone } = timetable.manifest
+        const { platforms, stops } = timetable.stops
+        const [day] = timetable.serviceDaysAt(MOMENT).slice(-1)
+        const from = Math.floor(MOMENT / 60_000) * 60_000
+        const planned = timetable.tripsOn(day).flatMap((trip) =>
+          trip.calls.flatMap((each, i) =>
+            i > 0 && stops[platforms[each.platform].stop].name === 'Nørreport St.'
+              ? [
+                  {
+                    line: trip.line.name,
+                    origin: stops[platforms[trip.calls[0].platform].stop].name,
+                    time: clockTime(each.arrival, timezone, { seconds: true }),
+                  },
+                ]
+              : [],
+          ),
         )
-        expect(late.length).toBeGreaterThan(0)
-        for (const { journey, stop } of late.slice(0, 5)) {
-          const ref = journey.JourneyDetailRef.ref
-          const row = ((yield* board(stop.extId)).Departure ?? []).find(
-            (d) => d.JourneyDetailRef.ref === ref && d.time === stop.depTime,
+        expect(Arrival.length).toBeGreaterThan(3)
+        for (const arrival of Arrival) {
+          expect(timetable.stops.stopForPlatform(arrival.stopExtId)?.name).toBe('Nørreport St.')
+          expect(planned).toContainEqual({
+            line: arrival.ProductAtStop?.line,
+            origin: arrival.origin,
+            time: arrival.time,
+          })
+          const at = Date.parse(
+            `${arrival.rtDate ?? arrival.date}T${arrival.rtTime ?? arrival.time}+02:00`,
           )
-          expect(row?.rtTime).toBe(stop.rtDepTime)
-          const own = (yield* detail(ref)).Stops.Stop.find((s) => s.routeIdx === stop.routeIdx)
-          expect(own?.rtDepTime).toBe(stop.rtDepTime)
+          expect(at).toBeGreaterThanOrEqual(from)
+          expect(at).toBeLessThan(from + 30 * 60_000)
         }
+        const times = Arrival.map((a) => `${a.rtDate ?? a.date} ${a.rtTime ?? a.time}`)
+        expect(times).toEqual([...times].sort())
+        // Never a trip that starts here.
+        expect(Arrival.every((a) => a.origin !== 'Nørreport St.')).toBe(true)
       }).pipe(Effect.provide(simulation)),
+  )
+
+  it.effect('gives the Metro no prognosis, and S-tog a prognosis and their track', () =>
+    Effect.gen(function* () {
+      const metro = (yield* arrivals('8603308', Date.UTC(2026, 5, 16, 5, 5))).Arrival ?? []
+      expect(metro.length).toBeGreaterThan(0)
+      for (const a of metro) {
+        expect(a.ProductAtStop?.cls).toBe('1024')
+        expect([a.prognosisType, a.rtTime]).toEqual([undefined, undefined])
+      }
+      const stog = ((yield* arrivals('8600626')).Arrival ?? []).filter(
+        (a) => a.ProductAtStop?.cls === '16' && !a.cancelled,
+      )
+      expect(stog.length).toBeGreaterThan(0)
+      for (const a of stog) {
+        expect(['PROGNOSED', 'CALCULATED']).toContain(a.prognosisType)
+        expect(a.track).toMatch(/^[1-8]$/)
+        expect(a.rtTrack).toBe(a.track)
+      }
+    }).pipe(Effect.provide(simulation)),
+  )
+})
+
+describe('one trip in every service', () => {
+  it.effect('has the same expected times at a stop in journeyPos, the boards and its detail', () =>
+    Effect.gen(function* () {
+      const journeys =
+        (yield* call('journeyPos', CITY).pipe(decoded(JourneyPosAnswer))).Journey ?? []
+      // A journey with a stop ahead, inside the board's window, that it is late for.
+      const late = journeys.flatMap((journey) =>
+        (journey.Stops?.Stop ?? [])
+          .filter((stop) => stop.rtDepTime !== undefined && stop.rtDepTime > '07:21:00')
+          .map((stop) => ({ journey, stop })),
+      )
+      expect(late.length).toBeGreaterThan(0)
+      for (const { journey, stop } of late.slice(0, 5)) {
+        const ref = journey.JourneyDetailRef.ref
+        const row = ((yield* board(stop.extId)).Departure ?? []).find(
+          (d) => d.JourneyDetailRef.ref === ref && d.time === stop.depTime,
+        )
+        expect(row?.rtTime).toBe(stop.rtDepTime)
+        const own = (yield* detail(ref)).Stops.Stop.find((s) => s.routeIdx === stop.routeIdx)
+        expect(own?.rtDepTime).toBe(stop.rtDepTime)
+        // And its arrival there, on the arrival board.
+        const arriving = ((yield* arrivals(stop.extId)).Arrival ?? []).find(
+          (a) => a.JourneyDetailRef.ref === ref && a.time === stop.arrTime,
+        )
+        expect(arriving?.rtTime ?? arriving?.time).toBe(stop.rtArrTime ?? stop.arrTime)
+        expect(own?.rtArrTime ?? own?.arrTime).toBe(stop.rtArrTime ?? stop.arrTime)
+      }
+    }).pipe(Effect.provide(simulation)),
   )
 })
 

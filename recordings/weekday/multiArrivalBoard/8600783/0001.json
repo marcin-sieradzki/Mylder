@@ -1,0 +1,353 @@
+{
+  "Arrival": [
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3305021903#PI#0#ZI#801443#TA#0#DA#160626#1S#8600626#1T#717#LS#8600810#LT#822#PU#86#RT#1#CA#RE#ZE#RE#ZB#Re 2427#PC#2#FR#8600626#FT#717#TO#8600810#TT#822#"
+      },
+      "name": "Re 2427",
+      "type": "ST",
+      "stop": "København Syd St.",
+      "stopExtId": "8600783",
+      "lon": 12.51685,
+      "lat": 55.65263,
+      "time": "07:21:00",
+      "date": "2026-06-16",
+      "rtTime": "07:22:00",
+      "rtDate": "2026-06-16",
+      "track": "8",
+      "rtTrack": "8",
+      "prognosisType": "PROGNOSED",
+      "reachable": true,
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "Re 2427",
+        "displayNumber": "RE",
+        "num": "2427",
+        "line": "RE",
+        "catOut": "Re",
+        "catIn": "RE",
+        "cls": "4"
+      },
+      "origin": "København H"
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3305021903#PI#0#ZI#473610#TA#0#DA#160626#1S#8600769#1T#707#LS#8600683#LT#811#PU#86#RT#1#CA#S#ZE#A#ZB#S-tog A#PC#4#FR#8600769#FT#707#TO#8600683#TT#811#"
+      },
+      "name": "S-tog A",
+      "type": "ST",
+      "stop": "København Syd St.",
+      "stopExtId": "8600783",
+      "lon": 12.51685,
+      "lat": 55.65263,
+      "time": "07:23:00",
+      "date": "2026-06-16",
+      "rtTime": "07:27:00",
+      "rtDate": "2026-06-16",
+      "track": "8",
+      "rtTrack": "8",
+      "prognosisType": "PROGNOSED",
+      "reachable": true,
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "S-tog A",
+        "displayNumber": "A",
+        "num": "611122",
+        "line": "A",
+        "catOut": "S-tog",
+        "catIn": "S",
+        "cls": "16"
+      },
+      "Messages": {
+        "Message": [
+          {
+            "id": "simulated-2",
+            "act": true,
+            "head": "Færre S-tog mellem København H og Hellerup",
+            "lead": "Signalfejl ved Østerport. Forvent ventetid og ændrede spor.",
+            "text": "På grund af en signalfejl ved Østerport kører der færre S-tog mellem København H og Hellerup. Forvent ventetid og ændrede spor.",
+            "company": "DSB S-tog",
+            "category": "1",
+            "priority": 80,
+            "products": 16,
+            "sDate": "2026-06-16",
+            "sTime": "05:00:00",
+            "eDate": "2026-06-16",
+            "eTime": "23:30:00",
+            "affectedStops": {
+              "StopLocation": [
+                {
+                  "name": "København H",
+                  "extId": "8600626",
+                  "lon": 12.56556,
+                  "lat": 55.67306
+                },
+                {
+                  "name": "Hellerup St.",
+                  "extId": "8600655",
+                  "lon": 12.56766,
+                  "lat": 55.73102
+                }
+              ]
+            },
+            "validFromStop": {
+              "name": "København H",
+              "extId": "8600626",
+              "lon": 12.56556,
+              "lat": 55.67306
+            },
+            "validToStop": {
+              "name": "Hellerup St.",
+              "extId": "8600655",
+              "lon": 12.56766,
+              "lat": 55.73102
+            },
+            "routeIdxFrom": 11,
+            "routeIdxTo": 17
+          }
+        ]
+      },
+      "origin": "Hundige St."
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3305021903#PI#0#ZI#816239#TA#0#DA#160626#1S#8600769#1T#717#LS#8600683#LT#821#PU#86#RT#1#CA#S#ZE#A#ZB#S-tog A#PC#4#FR#8600769#FT#717#TO#8600683#TT#821#"
+      },
+      "name": "S-tog A",
+      "type": "ST",
+      "stop": "København Syd St.",
+      "stopExtId": "8600783",
+      "lon": 12.51685,
+      "lat": 55.65263,
+      "time": "07:33:00",
+      "date": "2026-06-16",
+      "rtTime": "07:34:00",
+      "rtDate": "2026-06-16",
+      "track": "8",
+      "rtTrack": "8",
+      "prognosisType": "PROGNOSED",
+      "reachable": true,
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "S-tog A",
+        "displayNumber": "A",
+        "num": "612123",
+        "line": "A",
+        "catOut": "S-tog",
+        "catIn": "S",
+        "cls": "16"
+      },
+      "Messages": {
+        "Message": [
+          {
+            "id": "simulated-2",
+            "act": true,
+            "head": "Færre S-tog mellem København H og Hellerup",
+            "lead": "Signalfejl ved Østerport. Forvent ventetid og ændrede spor.",
+            "text": "På grund af en signalfejl ved Østerport kører der færre S-tog mellem København H og Hellerup. Forvent ventetid og ændrede spor.",
+            "company": "DSB S-tog",
+            "category": "1",
+            "priority": 80,
+            "products": 16,
+            "sDate": "2026-06-16",
+            "sTime": "05:00:00",
+            "eDate": "2026-06-16",
+            "eTime": "23:30:00",
+            "affectedStops": {
+              "StopLocation": [
+                {
+                  "name": "København H",
+                  "extId": "8600626",
+                  "lon": 12.56556,
+                  "lat": 55.67306
+                },
+                {
+                  "name": "Hellerup St.",
+                  "extId": "8600655",
+                  "lon": 12.56766,
+                  "lat": 55.73102
+                }
+              ]
+            },
+            "validFromStop": {
+              "name": "København H",
+              "extId": "8600626",
+              "lon": 12.56556,
+              "lat": 55.67306
+            },
+            "validToStop": {
+              "name": "Hellerup St.",
+              "extId": "8600655",
+              "lon": 12.56766,
+              "lat": 55.73102
+            },
+            "routeIdxFrom": 11,
+            "routeIdxTo": 17
+          }
+        ]
+      },
+      "origin": "Hundige St."
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3305021903#PI#0#ZI#559566#TA#0#DA#160626#1S#8600803#1T#705#LS#8600677#LT#814#PU#86#RT#1#CA#S#ZE#E#ZB#S-tog E#PC#4#FR#8600803#FT#705#TO#8600677#TT#814#"
+      },
+      "name": "S-tog E",
+      "type": "ST",
+      "stop": "København Syd St.",
+      "stopExtId": "8600783",
+      "lon": 12.51685,
+      "lat": 55.65263,
+      "time": "07:36:00",
+      "date": "2026-06-16",
+      "rtTime": "07:37:00",
+      "rtDate": "2026-06-16",
+      "track": "8",
+      "rtTrack": "8",
+      "prognosisType": "CALCULATED",
+      "reachable": true,
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "S-tog E",
+        "displayNumber": "E",
+        "num": "641123",
+        "line": "E",
+        "catOut": "S-tog",
+        "catIn": "S",
+        "cls": "16"
+      },
+      "Messages": {
+        "Message": [
+          {
+            "id": "simulated-2",
+            "act": true,
+            "head": "Færre S-tog mellem København H og Hellerup",
+            "lead": "Signalfejl ved Østerport. Forvent ventetid og ændrede spor.",
+            "text": "På grund af en signalfejl ved Østerport kører der færre S-tog mellem København H og Hellerup. Forvent ventetid og ændrede spor.",
+            "company": "DSB S-tog",
+            "category": "1",
+            "priority": 80,
+            "products": 16,
+            "sDate": "2026-06-16",
+            "sTime": "05:00:00",
+            "eDate": "2026-06-16",
+            "eTime": "23:30:00",
+            "affectedStops": {
+              "StopLocation": [
+                {
+                  "name": "København H",
+                  "extId": "8600626",
+                  "lon": 12.56556,
+                  "lat": 55.67306
+                },
+                {
+                  "name": "Hellerup St.",
+                  "extId": "8600655",
+                  "lon": 12.56766,
+                  "lat": 55.73102
+                }
+              ]
+            },
+            "validFromStop": {
+              "name": "København H",
+              "extId": "8600626",
+              "lon": 12.56556,
+              "lat": 55.67306
+            },
+            "validToStop": {
+              "name": "Hellerup St.",
+              "extId": "8600655",
+              "lon": 12.56766,
+              "lat": 55.73102
+            },
+            "routeIdxFrom": 18,
+            "routeIdxTo": 24
+          }
+        ]
+      },
+      "origin": "Køge St."
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3305021903#PI#0#ZI#866085#TA#0#DA#160626#1S#8600677#1T#702#LS#8600803#LT#811#PU#86#RT#1#CA#S#ZE#E#ZB#S-tog E#PC#4#FR#8600677#FT#702#TO#8600803#TT#811#"
+      },
+      "name": "S-tog E",
+      "type": "ST",
+      "stop": "København Syd St.",
+      "stopExtId": "8600783",
+      "lon": 12.51685,
+      "lat": 55.65263,
+      "time": "07:39:00",
+      "date": "2026-06-16",
+      "rtTime": "07:41:00",
+      "rtDate": "2026-06-16",
+      "track": "8",
+      "rtTrack": "8",
+      "prognosisType": "PROGNOSED",
+      "reachable": true,
+      "JourneyStatus": "P",
+      "ProductAtStop": {
+        "name": "S-tog E",
+        "displayNumber": "E",
+        "num": "641222",
+        "line": "E",
+        "catOut": "S-tog",
+        "catIn": "S",
+        "cls": "16"
+      },
+      "Messages": {
+        "Message": [
+          {
+            "id": "simulated-2",
+            "act": true,
+            "head": "Færre S-tog mellem København H og Hellerup",
+            "lead": "Signalfejl ved Østerport. Forvent ventetid og ændrede spor.",
+            "text": "På grund af en signalfejl ved Østerport kører der færre S-tog mellem København H og Hellerup. Forvent ventetid og ændrede spor.",
+            "company": "DSB S-tog",
+            "category": "1",
+            "priority": 80,
+            "products": 16,
+            "sDate": "2026-06-16",
+            "sTime": "05:00:00",
+            "eDate": "2026-06-16",
+            "eTime": "23:30:00",
+            "affectedStops": {
+              "StopLocation": [
+                {
+                  "name": "København H",
+                  "extId": "8600626",
+                  "lon": 12.56556,
+                  "lat": 55.67306
+                },
+                {
+                  "name": "Hellerup St.",
+                  "extId": "8600655",
+                  "lon": 12.56766,
+                  "lat": 55.73102
+                }
+              ]
+            },
+            "validFromStop": {
+              "name": "København H",
+              "extId": "8600626",
+              "lon": 12.56556,
+              "lat": 55.67306
+            },
+            "validToStop": {
+              "name": "Hellerup St.",
+              "extId": "8600655",
+              "lon": 12.56766,
+              "lat": 55.73102
+            },
+            "routeIdxFrom": 7,
+            "routeIdxTo": 13
+          }
+        ]
+      },
+      "origin": "Holte St."
+    }
+  ],
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-06-16T07:22:00+02:00"
+}
