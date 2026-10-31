@@ -85,6 +85,7 @@ async function record(url) {
   const dir = path.join(outDir, phase, dataset)
   fs.mkdirSync(dir, { recursive: true })
   counts[dataset] = 0
+  const jwt = await token()
   const container = rhea.create_container()
   const connection = container.connect({
     host: HOST,
@@ -96,7 +97,6 @@ async function record(url) {
   })
   const cbs = connection.open_sender('$cbs')
   connection.open_receiver('$cbs')
-  const jwt = await token()
   let listening = false
   connection.on('message', (ctx) => {
     const m = ctx.message
