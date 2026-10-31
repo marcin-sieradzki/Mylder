@@ -67,6 +67,13 @@ export interface Camera {
   tilt(by: -1 | 1, input?: Event): void
   /** Turns by a step, 1 clockwise or -1 anticlockwise, carrying `input` as `pan` does. */
   turn(by: -1 | 1, input?: Event): void
+  /**
+   * Tilts the map into the 3D view, at `VIEW_3D_PITCH`, or lays it flat, keeping its centre, zoom
+   * and heading: the 3D toggle's press.
+   */
+  view3d(on: boolean): void
+  /** Turns the map back to north, keeping its centre, zoom and tilt: the compass's press. */
+  north(): void
   /** Returns to the view the map opened on, flat and north-up. */
   reset(): void
   /** Whether `element` is the map or inside it. */
@@ -79,6 +86,9 @@ export const PAN_STEP = 100
 /** How far one tilt or turn by a key moves the map, in degrees, as MapLibre's own keys do. */
 export const TILT_STEP = 10
 export const TURN_STEP = 15
+
+/** The tilt the 3D toggle eases the map to, in degrees: the city's blocks in view, short of sky. */
+export const VIEW_3D_PITCH = 50
 
 /** How long a tilt or turn by a key eases for, in ms, as MapLibre's own keys do. */
 const STEP_EASE = 300
@@ -192,7 +202,16 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
       ),
     tilt: (by, input) => step({ pitch: by * TILT_STEP }, input),
     turn: (by, input) => step({ bearing: by * TURN_STEP }, input),
+    view3d(on) {
+      rest()
+      move({ pitch: on ? VIEW_3D_PITCH : 0 }, undefined)
+    },
+    north() {
+      rest()
+      move({ bearing: 0 }, undefined)
+    },
     reset() {
+      rest()
       if (home) move({ ...home(), bearing: 0, pitch: 0 }, undefined)
     },
     holds: (element) => Boolean(map?.getContainer().contains(element)),
