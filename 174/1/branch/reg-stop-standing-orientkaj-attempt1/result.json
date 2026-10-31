@@ -1,0 +1,8 @@
+{
+  "journey": "reg-stop-standing-orientkaj",
+  "pass": false,
+  "error": "expect(received).toBeGreaterThanOrEqual(expected)\n\nExpected: >= 1781587500000\nReceived:    1781587442034\n\nCall Log:\n- Timeout 120000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-failure: failure (http://localhost:4303/en)"
+  ]
+}

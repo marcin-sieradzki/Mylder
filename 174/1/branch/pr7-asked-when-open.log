@@ -1,0 +1,24 @@
+stop requests on Departures after 65 s: [
+  '449 http://localhost:4303/api/stops/27532',
+  '7015 http://localhost:4303/api/stops/27532',
+  '14460 http://localhost:4303/api/stops/27532',
+  '21906 http://localhost:4303/api/stops/27532',
+  '62794 http://localhost:4303/api/stops/27532'
+]
+arrivals asked after opening: [ '66367 http://localhost:4303/api/stops/27532/arrivals' ]
+arrivals after 65 s on Arrivals: [
+  '66367 http://localhost:4303/api/stops/27532/arrivals',
+  '124891 http://localhost:4303/api/stops/27532/arrivals'
+]
+all stop requests: [
+  '449 http://localhost:4303/api/stops/27532',
+  '7015 http://localhost:4303/api/stops/27532',
+  '14460 http://localhost:4303/api/stops/27532',
+  '21906 http://localhost:4303/api/stops/27532',
+  '62794 http://localhost:4303/api/stops/27532',
+  '66367 http://localhost:4303/api/stops/27532/arrivals',
+  '124891 http://localhost:4303/api/stops/27532/arrivals',
+  '125239 http://localhost:4303/api/stops/27532',
+  '186683 http://localhost:4303/api/stops/27532'
+]
+PASS pr7-asked-when-open: 3 steps in .verify/branch-169-r1/pr7-asked-when-open/

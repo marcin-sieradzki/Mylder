@@ -1,0 +1,12 @@
+FAIL pr4-no-arrivals: 1 steps in .verify/main-169-r1/pr4-no-arrivals/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' })
+

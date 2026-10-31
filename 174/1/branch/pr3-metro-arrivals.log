@@ -1,0 +1,20 @@
+snapshot fetched 2026-06-16T05:20:00.017Z
+ROW: M1
+From Vanløse St.
+Timetable only
+Every 4 min
+
+Metro: planned times
+TABPANEL:
+M1
+From Vanløse St.
+Timetable only
+Every 4 min
+
+Metro: planned times
+
+Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.
+From the timetable
+
+Timetable and positions 07:20:00
+PASS pr3-metro-arrivals: 2 steps in .verify/branch-169-r1/pr3-metro-arrivals/

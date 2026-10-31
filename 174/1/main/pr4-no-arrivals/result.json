@@ -1,0 +1,8 @@
+{
+  "journey": "pr4-no-arrivals",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4302/en?stop=8600683)"
+  ]
+}

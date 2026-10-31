@@ -1,0 +1,53 @@
+Reusing the build of 0a77add.
+Ready: http://localhost:4303/en (run branch-169-r1, server pid 2186)
+healthy: http://localhost:4303/en, commit 0a77add, recording minute 0 of 10
+== reg-standing-refshaleoen 18:01:27
+On time
+API standing: [{"trip":"bus.991.7ce514fd98.20260616.0700","line":"991","mode":"bus","colour":"perron-color-transit-mode-bus","headsign":"Teglholmen","platform":"48645","scheduled":1781587380000,"expected":1781587380000,"departs":1781587380000,"state":"estimated"}]
+PASS reg-standing-refshaleoen: 3 steps in .verify/branch-169-r1/reg-standing-refshaleoen/
+== reg-standing-tap 18:01:35
+PASS reg-standing-tap: 2 steps in .verify/branch-169-r1/reg-standing-tap/
+== pr6-link-arrivals 18:01:41
+—
+Delay unknown
+PASS pr6-link-arrivals: 1 steps in .verify/branch-169-r1/pr6-link-arrivals/
+== pr3-metro-arrivals 18:01:48
+
+Timetable and positions 07:20:00
+PASS pr3-metro-arrivals: 2 steps in .verify/branch-169-r1/pr3-metro-arrivals/
+== reg-standing-track 18:01:54
+1 min late
+API standing: [{"trip":"train.RE.7c3e865b99.20260616.0717","line":"RE","mode":"train","colour":"perron-color-transit-mode-regional","headsign":"Næstved St.","platform":"8600783","track":"8","scheduled":1781587320000,"expected":1781587380000,"departs":1781587380000,"state":"live"}]
+PASS reg-standing-track: 4 steps in .verify/branch-169-r1/reg-standing-track/
+== pr2-arrivals-list 18:03:33
+Timetable and positions 07:22:01
+arrival calls: [ 'http://localhost:4303/api/stops/27532/arrivals' ]
+PASS pr2-arrivals-list: 3 steps in .verify/branch-169-r1/pr2-arrivals-list/
+== pr1-tabs-default 18:03:40
++2 min
+2 min late
+PASS pr1-tabs-default: 3 steps in .verify/branch-169-r1/pr1-tabs-default/
+== pr4-no-arrivals 18:03:48
+
+Timetable and positions 07:22:01
+PASS pr4-no-arrivals: 2 steps in .verify/branch-169-r1/pr4-no-arrivals/
+== pr5-keys-danish 18:03:55
+
+Køreplan og positioner 07:22:01
+PASS pr5-keys-danish: 5 steps in .verify/branch-169-r1/pr5-keys-danish/
+== reg-none-standing 18:04:07
+PASS reg-none-standing: 2 steps in .verify/branch-169-r1/reg-none-standing/
+== reg-stop-missing 18:04:14
+PASS reg-stop-missing: 1 steps in .verify/branch-169-r1/reg-stop-missing/
+== reg-stop-language 18:04:19
+PASS reg-stop-language: 2 steps in .verify/branch-169-r1/reg-stop-language/
+== reg-stop-standing-orientkaj 18:04:27
+
+Call Log:
+- Timeout 120000ms exceeded while waiting on the predicate
+healthy: http://localhost:4303/en, commit 0a77add, recording minute 5 of 10
+== pr7-asked-when-open 18:06:28
+  '186683 http://localhost:4303/api/stops/27532'
+]
+PASS pr7-asked-when-open: 3 steps in .verify/branch-169-r1/pr7-asked-when-open/
+ALLDONE

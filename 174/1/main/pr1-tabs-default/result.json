@@ -1,0 +1,10 @@
+{
+  "journey": "pr1-tabs-default",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Østerport St.' }).getByRole('tablist', { name: 'Departures and arrivals' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Østerport St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Østerport St.' }).getByRole('tablist', { name: 'Departures and arrivals' })\n",
+  "steps": [
+    "01-map-centred-on-sterport-st-: map centred on Østerport St. (http://localhost:4302/en?map=15.00/55.6925/12.58779)",
+    "02--sterport-st-panel-open-from-the-map: Østerport St. panel open from the map (http://localhost:4302/en?map=15.00/55.69250/12.58779&stop=8600650)",
+    "03-failure: failure (http://localhost:4302/en?map=15.00/55.69250/12.58779&stop=8600650)"
+  ]
+}

@@ -1,0 +1,39 @@
+Reusing the build of 9c90aaf.
+Ready: http://localhost:4302/en (run main-169-r1, server pid 2185)
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 0 of 10
+== pr6-link-arrivals 18:01:27
+  - Expect "toHaveAttribute" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('tab', { name: 'Arrivals' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('tab', { name: 'Arrivals' })
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 0 of 10
+== pr3-metro-arrivals 18:01:34
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Bella Center St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Bella Center St.' }).getByRole('tablist', { name: 'Departures and arrivals' })
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 0 of 10
+== pr2-arrivals-list 18:01:41
+Call log:
+[2m  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Arrivals' })[22m
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 0 of 10
+== pr1-tabs-default 18:02:17
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Østerport St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Østerport St.' }).getByRole('tablist', { name: 'Departures and arrivals' })
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 1 of 10
+== pr4-no-arrivals 18:02:29
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Hillerød St.' }).getByRole('tablist', { name: 'Departures and arrivals' })
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 1 of 10
+== pr5-keys-danish 18:02:36
+  - Expect "toHaveAttribute" getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' })
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 1 of 10
+== pr7-asked-when-open 18:02:43
+Call log:
+[2m  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Arrivals' })[22m
+
+healthy: http://localhost:4302/en, commit 9c90aaf, recording minute 2 of 10
+ALLDONE

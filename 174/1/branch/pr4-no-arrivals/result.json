@@ -1,0 +1,8 @@
+{
+  "journey": "pr4-no-arrivals",
+  "pass": true,
+  "steps": [
+    "01-hiller-d-st-opened: Hillerød St. opened (http://localhost:4303/en?stop=8600683)",
+    "02-empty-arrivals-with-source-line: empty Arrivals with source line (http://localhost:4303/en?stop=8600683&board=arrivals)"
+  ]
+}

@@ -1,0 +1,8 @@
+ROW: 991
+Teglholmen
+Estimated
+~3 min
+~07:23
+On time
+API standing: [{"trip":"bus.991.7ce514fd98.20260616.0700","line":"991","mode":"bus","colour":"perron-color-transit-mode-bus","headsign":"Teglholmen","platform":"48645","scheduled":1781587380000,"expected":1781587380000,"departs":1781587380000,"state":"estimated"}]
+PASS reg-standing-refshaleoen: 3 steps in .verify/branch-169-r1/reg-standing-refshaleoen/

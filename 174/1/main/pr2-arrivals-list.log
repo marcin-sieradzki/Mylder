@@ -1,0 +1,5 @@
+FAIL pr2-arrivals-list: 2 steps in .verify/main-169-r1/pr2-arrivals-list/
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Arrivals' })[22m
+

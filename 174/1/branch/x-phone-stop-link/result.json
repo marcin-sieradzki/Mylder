@@ -1,0 +1,7 @@
+{
+  "journey": "x-phone-stop-link",
+  "pass": true,
+  "steps": [
+    "01-hiller-d-st-link-on-a-phone: Hillerød St. link on a phone (http://localhost:4303/en?stop=8600683)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "reg-standing-refshaleoen",
+  "pass": true,
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4303/en)",
+    "02-refshale-en-opened: Refshaleøen opened (http://localhost:4303/en?stop=48645)",
+    "03-standing-row-above-departures: standing row above departures (http://localhost:4303/en?stop=48645)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "pr5-keys-danish",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator: getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' })\nExpected: \"true\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toHaveAttribute\" getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4302/en?stop=27532)"
+  ]
+}

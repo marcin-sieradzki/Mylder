@@ -1,0 +1,8 @@
+{
+  "journey": "pr3-metro-arrivals",
+  "pass": true,
+  "steps": [
+    "01-bella-center-st-opened: Bella Center St. opened (http://localhost:4303/en?stop=8603313)",
+    "02-metro-interval-row: Metro interval row (http://localhost:4303/en?stop=8603313&board=arrivals)"
+  ]
+}

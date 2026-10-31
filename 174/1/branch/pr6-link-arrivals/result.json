@@ -1,0 +1,7 @@
+{
+  "journey": "pr6-link-arrivals",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-opened-on-arrivals-from-link: Refshaleøen opened on Arrivals from link (http://localhost:4303/en?stop=48645&board=arrivals)"
+  ]
+}

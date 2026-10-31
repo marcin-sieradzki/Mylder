@@ -1,0 +1,8 @@
+FAIL reg-stop-standing-orientkaj: 1 steps in .verify/branch-169-r1/reg-stop-standing-orientkaj/
+expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 1781587500000
+Received:    1781587442034
+
+Call Log:
+- Timeout 120000ms exceeded while waiting on the predicate

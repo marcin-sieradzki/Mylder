@@ -1,0 +1,10 @@
+{
+  "journey": "x-timetable-only-tilde",
+  "pass": true,
+  "steps": [
+    "01-54307-departures: 54307 departures (http://localhost:4303/en?stop=54307)",
+    "02-54307-arrivals: 54307 arrivals (http://localhost:4303/en?stop=54307&board=arrivals)",
+    "03-48645-departures: 48645 departures (http://localhost:4303/en?stop=48645)",
+    "04-48645-arrivals: 48645 arrivals (http://localhost:4303/en?stop=48645&board=arrivals)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "pr6-link-arrivals",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('tab', { name: 'Arrivals' })\nExpected: \"true\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toHaveAttribute\" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('tab', { name: 'Arrivals' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('tab', { name: 'Arrivals' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4302/en?stop=48645&board=arrivals)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "pr2-arrivals-list",
+  "pass": false,
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Arrivals' })\u001b[22m\n",
+  "steps": [
+    "01-n-rreport-st-on-departures: Nørreport St. on Departures (http://localhost:4302/en?stop=27532)",
+    "02-failure: failure (http://localhost:4302/en?stop=27532)"
+  ]
+}

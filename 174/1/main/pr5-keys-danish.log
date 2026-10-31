@@ -1,0 +1,12 @@
+FAIL pr5-keys-danish: 1 steps in .verify/main-169-r1/pr5-keys-danish/
+expect(locator).toHaveAttribute(expected) failed
+
+Locator: getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' })
+Expected: "true"
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toHaveAttribute" getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('tab', { name: 'Departures' })
+
