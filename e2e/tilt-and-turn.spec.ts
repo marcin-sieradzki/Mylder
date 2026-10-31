@@ -1,10 +1,11 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from './recording'
 
-// The 3D view's camera on the weekday recording: the keys and a right-drag tilt and turn the map,
-// the scale bar hides while it is tilted, every vehicle is still drawn, and reset brings it back
-// flat. The scale bar is found by the distance it shows; the camera's tilt and heading at rest are
-// on the map's container, beside the vehicles it draws.
+// The 3D view's camera on the weekday recording: the keys, a right-drag and the 3D toggle tilt and
+// turn the map, the scale bar hides while it is tilted, every vehicle is still drawn, the compass
+// turns it back to north, and reset brings it back flat. The scale bar is found by the distance it
+// shows; the camera's tilt and heading at rest are on the map's container, beside the vehicles it
+// draws.
 
 /** The scale bar, by the distance it shows, such as "2 km". */
 const scaleBar = (page: Page) => page.getByText(/\d+\s(m|km)$/)
@@ -84,4 +85,37 @@ test('a sideways right-drag turns the map, an upward one tilts it, and Shift + â
     await expect(scale).toBeVisible({ timeout: 500 })
   }).toPass()
   await expect(map).toHaveAttribute('data-tilt', '0')
+})
+
+test('the 3D toggle tilts the map, the compass turns it back to north, and reset lays it flat', async ({
+  page,
+}) => {
+  await page.goto('/en')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toBeAttached()
+  const scale = scaleBar(page)
+  await expect(scale).toBeVisible()
+  const toggle = page.getByRole('button', { name: '3D view' })
+  const compass = page.getByRole('button', { name: 'Reset to north' })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await expect(scale).toBeHidden()
+  await expect(map).toHaveAttribute('data-tilt', '50')
+
+  // Turned away from north, the compass says so, and a press turns the map back, still tilted.
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-heading', '15')
+  await expect(compass).toHaveAccessibleDescription('Map turned away from north')
+  await compass.click()
+  await expect(map).toHaveAttribute('data-heading', '0')
+  await expect(compass).not.toHaveAccessibleDescription('Map turned away from north')
+  await expect(map).toHaveAttribute('data-tilt', '50')
+
+  await page.getByRole('button', { name: 'Centre the map' }).click()
+  await expect(map).toHaveAttribute('data-tilt', '0')
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await expect(scale).toBeVisible()
 })
