@@ -1,0 +1,9 @@
+{
+  "journey": "p1-stop-link-390",
+  "pass": false,
+  "error": "the stop heading is in front\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: \"Nørreport St.\"\nReceived: \"Overview\"",
+  "steps": [
+    "01-stop-link-opened-overview-at-peek: stop link opened, Overview at peek (http://localhost:4330/en?stop=27532)",
+    "02-failure: failure (http://localhost:4330/en?stop=27532)"
+  ]
+}

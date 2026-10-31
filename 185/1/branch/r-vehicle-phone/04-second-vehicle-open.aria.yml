@@ -1,0 +1,254 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:22:05
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 9" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 3 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 17" [selected]
+    - tab "Disruptions 3"
+  - tabpanel "Vehicles 17":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations"
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: positions 07:22:05
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position Delay":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+          - columnheader "Delay":
+            - button "Delay"
+      - rowgroup:
+        - row "M1 Metro M1 to Vestamager St. (Metro) Timetable only Delay unknown":
+          - rowheader "M1"
+          - rowheader "Metro M1 to Vestamager St. (Metro)":
+            - link "Metro M1 to Vestamager St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703"
+              - text: Vestamager St. (Metro)
+          - cell "Timetable only"
+          - cell "Delay unknown"
+        - row "M1 Metro M1 to Vestamager St. (Metro) Timetable only Delay unknown":
+          - rowheader "M1"
+          - rowheader "Metro M1 to Vestamager St. (Metro)":
+            - link "Metro M1 to Vestamager St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707"
+              - text: Vestamager St. (Metro)
+          - cell "Timetable only"
+          - cell "Delay unknown"
+        - row "M1 Metro M1 to Vanløse St. (Metro) Timetable only Delay unknown":
+          - rowheader "M1"
+          - rowheader "Metro M1 to Vanløse St. (Metro)":
+            - link "Metro M1 to Vanløse St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.c6fa766489.20260616.0701"
+              - text: Vanløse St. (Metro)
+          - cell "Timetable only"
+          - cell "Delay unknown"
+        - row "M1 Metro M1 to Vanløse St. (Metro) Timetable only Delay unknown":
+          - rowheader "M1"
+          - rowheader "Metro M1 to Vanløse St. (Metro)":
+            - link "Metro M1 to Vanløse St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.c6fa766489.20260616.0705"
+              - text: Vanløse St. (Metro)
+          - cell "Timetable only"
+          - cell "Delay unknown"
+        - row "A S-tog A to Hillerød St. Live 4 min late":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0707"
+              - text: Hillerød St.
+          - cell "Live"
+          - cell "4 min late"
+        - row "A S-tog A to Hillerød St. Live 1 min late":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717"
+              - text: Hillerød St.
+          - cell "Live"
+          - cell "1 min late"
+        - row "A S-tog A to Hundige St. Live 2 min late":
+          - rowheader "A"
+          - rowheader "S-tog A to Hundige St.":
+            - link "S-tog A to Hundige St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.79fbe8e1f8.20260616.0705"
+              - text: Hundige St.
+          - cell "Live"
+          - cell "2 min late"
+        - row "A S-tog A to Hundige St. Live 2 min late":
+          - rowheader "A"
+          - rowheader "S-tog A to Hundige St.":
+            - link "S-tog A to Hundige St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.79fbe8e1f8.20260616.0715"
+              - text: Hundige St.
+          - cell "Live"
+          - cell "2 min late"
+        - row "E S-tog E to Holte St. Estimated 1 min late":
+          - rowheader "E"
+          - rowheader "S-tog E to Holte St.":
+            - link "S-tog E to Holte St.":
+              - /url: "?tab=vehicles&trip=s-tog.E.7c0294e28d.20260616.0705"
+              - text: Holte St.
+          - cell "Estimated"
+          - cell "1 min late"
+        - row "E S-tog E to Køge St. Live 2 min late":
+          - rowheader "E"
+          - rowheader "S-tog E to Køge St.":
+            - link "S-tog E to Køge St.":
+              - /url: "?tab=vehicles&trip=s-tog.E.e8dc141a28.20260616.0702"
+              - text: Køge St.
+          - cell "Live"
+          - cell "2 min late"
+        - row "RE Train RE to Næstved St. Live 1 min late":
+          - rowheader "RE"
+          - rowheader "Train RE to Næstved St.":
+            - link "Train RE to Næstved St.":
+              - /url: "?tab=vehicles&trip=train.RE.7c3e865b99.20260616.0717"
+              - text: Næstved St.
+          - cell "Live"
+          - cell "1 min late"
+        - row "5C Bus 5C to Husum Torv Estimated 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "2 min late"
+        - row "5C Bus 5C to Husum Torv Estimated On time":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0716"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "On time"
+        - row "5C Bus 5C to Sundbyvester Plads Live 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.a74214d87d.20260616.0714"
+              - text: Sundbyvester Plads
+          - cell "Live"
+          - cell "2 min late"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated 1 min early":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0700"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "1 min early"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated 1 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0716"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "1 min late"
+        - row "991 Bus 991 to Teglholmen Estimated 1 min late":
+          - rowheader "991"
+          - rowheader "Bus 991 to Teglholmen":
+            - link "Bus 991 to Teglholmen":
+              - /url: "?tab=vehicles&trip=bus.991.7ce514fd98.20260616.0700"
+              - text: Teglholmen
+          - cell "Estimated"
+          - cell "1 min late"
+- dialog "M1 to Vestamager St. (Metro)":
+  - heading "M1 to Vestamager St. (Metro)" [level=2]
+  - text: Metro
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Timetable only
+  - paragraph: Runs to an interval
+  - term: Delay
+  - definition: Runs to an interval
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: DR Byen St. (Metro)
+  - paragraph: At DR Byen St. (Metro)
+  - paragraph: Every 4 min
+  - list "Stops":
+    - listitem: Vanløse St. (Metro) Passed
+    - listitem: Flintholm St. (Metro) Passed
+    - listitem: Lindevang St. (Metro) Passed
+    - listitem: Fasanvej St. (Metro) Passed
+    - listitem: Frederiksberg St. (Metro) Passed
+    - listitem: Forum St. (Metro) Passed
+    - listitem: Nørreport St. (Metro) Passed
+    - listitem: Kongens Nytorv St. (Metro) Passed
+    - listitem: Christianshavn St. (Metro) Passed
+    - listitem: Islands Brygge St. (Metro) Passed
+    - listitem: DR Byen St. (Metro) Next stop
+    - listitem: Sundby St. (Metro)
+    - listitem: Bella Center St. (Metro)
+    - listitem: Ørestad St. (Metro)
+    - listitem: Vestamager St. (Metro)
+  - text: From the timetable
+  - paragraph:
+    - text: Timetable ·
+    - time: updated 07:22:05
+- alert
+- region "Notifications"

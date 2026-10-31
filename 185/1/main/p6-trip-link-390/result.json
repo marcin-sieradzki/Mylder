@@ -1,0 +1,9 @@
+{
+  "journey": "p6-trip-link-390",
+  "pass": false,
+  "error": "vehicle panel in front\n\nexpect(received).toMatch(expected)\n\nExpected pattern: / to /\nReceived string:  \"Overview\"",
+  "steps": [
+    "01-trip-link-opened: trip link opened (http://localhost:4330/en?trip=bus.5C.32331e0e20.20260616.0707)",
+    "02-failure: failure (http://localhost:4330/en?trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "p6-trip-link-390",
+  "pass": true,
+  "steps": [
+    "01-trip-link-opened: trip link opened (http://localhost:4331/en?trip=bus.5C.32331e0e20.20260616.0707)",
+    "02-show-whole-line-tapped: Show whole line tapped (http://localhost:4331/en?trip=bus.5C.32331e0e20.20260616.0707&map=10.72/55.68200/12.54282)",
+    "03-vehicle-closed: vehicle closed (http://localhost:4331/en?map=10.72/55.68200/12.54282)"
+  ]
+}

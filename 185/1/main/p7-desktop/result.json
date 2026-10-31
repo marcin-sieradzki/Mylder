@@ -1,0 +1,11 @@
+{
+  "journey": "p7-desktop",
+  "pass": true,
+  "steps": [
+    "01-desktop-overview: desktop Overview (http://localhost:4330/en)",
+    "02-desktop-stop-link: desktop stop link (http://localhost:4330/en?stop=27532)",
+    "03-desktop-arrivals: desktop Arrivals (http://localhost:4330/en?stop=27532&board=arrivals)",
+    "04-desktop-trip-link: desktop trip link (http://localhost:4330/en?trip=bus.5C.32331e0e20.20260616.0707)",
+    "05-desktop-vehicle-closed: desktop vehicle closed (http://localhost:4330/en)"
+  ]
+}

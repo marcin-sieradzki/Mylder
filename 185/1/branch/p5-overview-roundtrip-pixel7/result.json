@@ -1,0 +1,13 @@
+{
+  "journey": "p5-overview-roundtrip-pixel7",
+  "pass": true,
+  "steps": [
+    "01-overview-raised-to-full-height: Overview raised to full height (http://localhost:4331/en)",
+    "02-vehicles-list: Vehicles list (http://localhost:4331/en?tab=vehicles)",
+    "03-vehicle-panel-open: vehicle panel open (http://localhost:4331/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-vehicle-panel-closed: vehicle panel closed (http://localhost:4331/en?tab=vehicles)",
+    "05-city-pulse-tapped-after-close: City pulse tapped after close (http://localhost:4331/en)",
+    "06-disruptions-tapped-after-close: Disruptions tapped after close (http://localhost:4331/en?tab=disruptions)",
+    "07-overview-closed-with-its-close: Overview closed with its Close (http://localhost:4331/en?tab=disruptions)"
+  ]
+}

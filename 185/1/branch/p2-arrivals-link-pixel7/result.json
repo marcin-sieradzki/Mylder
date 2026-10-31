@@ -1,0 +1,10 @@
+{
+  "journey": "p2-arrivals-link-pixel7",
+  "pass": true,
+  "steps": [
+    "01-arrivals-link-opened: arrivals link opened (http://localhost:4331/en?stop=48645&board=arrivals)",
+    "02-departures-tapped: Departures tapped (http://localhost:4331/en?stop=48645)",
+    "03-arrivals-tapped: Arrivals tapped (http://localhost:4331/en?stop=48645&board=arrivals)",
+    "04-standing-card-tapped-vehicle-open: standing card tapped, vehicle open (http://localhost:4331/en?trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

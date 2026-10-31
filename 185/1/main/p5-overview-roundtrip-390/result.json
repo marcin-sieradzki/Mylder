@@ -1,0 +1,11 @@
+{
+  "journey": "p5-overview-roundtrip-390",
+  "pass": false,
+  "error": "tap at 356,696 would hit <SPAN> \"min\" in dialog \"Overview\", not the target in \"/ to /\"",
+  "steps": [
+    "01-overview-raised-to-full-height: Overview raised to full height (http://localhost:4330/en)",
+    "02-vehicles-list: Vehicles list (http://localhost:4330/en?tab=vehicles)",
+    "03-vehicle-panel-open: vehicle panel open (http://localhost:4330/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-failure: failure (http://localhost:4330/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)"
+  ]
+}

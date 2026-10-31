@@ -1,0 +1,10 @@
+{
+  "journey": "p1-stop-link-390",
+  "pass": true,
+  "steps": [
+    "01-stop-link-opened-overview-at-peek: stop link opened, Overview at peek (http://localhost:4331/en?stop=27532)",
+    "02-arrivals-tab-tapped: Arrivals tab tapped (http://localhost:4331/en?stop=27532&board=arrivals)",
+    "03-departures-tab-tapped: Departures tab tapped (http://localhost:4331/en?stop=27532)",
+    "04-departure-row-tapped-vehicle-open: departure row tapped, vehicle open (http://localhost:4331/en?trip=s-tog.E.e8dc141a28.20260616.0702)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "p2-arrivals-link-pixel7",
+  "pass": false,
+  "error": "tap at 64,781 would hit <DIV> \"On the move\" in dialog \"Overview\", not the target in \"Refshaleøen\"",
+  "steps": [
+    "01-arrivals-link-opened: arrivals link opened (http://localhost:4330/en?stop=48645&board=arrivals)",
+    "02-failure: failure (http://localhost:4330/en?stop=48645&board=arrivals)"
+  ]
+}

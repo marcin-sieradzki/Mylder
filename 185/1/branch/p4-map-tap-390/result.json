@@ -1,0 +1,8 @@
+{
+  "journey": "p4-map-tap-390",
+  "pass": true,
+  "steps": [
+    "01-map-at-sterport-overview-at-peek: map at Østerport, Overview at peek (http://localhost:4331/en?map=15.00/55.6925/12.58779)",
+    "02-stop-sheet-open-from-map-tap: stop sheet open from map tap (http://localhost:4331/en?map=15.00/55.69250/12.58779&stop=8600650)"
+  ]
+}

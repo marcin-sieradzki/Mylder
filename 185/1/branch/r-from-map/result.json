@@ -1,0 +1,8 @@
+{
+  "journey": "r-from-map",
+  "pass": true,
+  "steps": [
+    "01-map-at-sterport: map at Østerport (http://localhost:4331/en?map=15.00/55.6925/12.58779)",
+    "02-stop-panel-from-map-list: stop panel from map, list (http://localhost:4331/en?map=15.00/55.69250/12.58779&stop=8600650)"
+  ]
+}

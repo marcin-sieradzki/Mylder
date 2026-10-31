@@ -1,0 +1,8 @@
+{
+  "journey": "r-none-standing",
+  "pass": true,
+  "steps": [
+    "01-none-standing: none standing (http://localhost:4331/en?stop=27532)",
+    "02-danish-region: Danish region (http://localhost:4331/da?stop=27532)"
+  ]
+}
