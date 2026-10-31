@@ -133,7 +133,8 @@ export function standingAt(
       const last = trip.calls.length - 1
       let shifted: readonly TimedCall[] | undefined
       const live = onMap.get(trip.key)
-      // Off the map, a trip's delay is the history's, kept only while it ends somewhere.
+      // Off the map, a trip's delay is the history's: one remembered before it is drawn, or one
+      // that has arrived at its last stop and stands there.
       const delay = live ? live.delay : history?.[trip.key]?.delay
       trip.calls.forEach((call, index) => {
         if (platforms[call.platform].stop !== stopIndex) return
