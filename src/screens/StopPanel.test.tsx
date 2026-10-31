@@ -21,6 +21,7 @@ import type {
 } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
+import { BOARD_GRACE } from './StopPanel'
 
 // A stop's departures panel from the stop route's answers saved with the weekday recording, at
 // the start of its second minute, 07:21:00 in Copenhagen. jsdom has no server: the route answers
@@ -416,18 +417,18 @@ describe("a stop's departures from its board", () => {
     expect(within(stop).getByRole('heading', { name: 'Later' })).toBeInTheDocument()
   })
 
-  it('says a board answer over a minute old may be out of date', async () => {
-    // Called at 07:19:50, 70 s before the answers' moment.
-    answers.set('27532', fromBoard(NORREPORT, 70_000))
+  it('says a board answer well past its minute may be out of date', async () => {
+    // Called at 07:19:30, 90 s before the answers' moment.
+    answers.set('27532', fromBoard(NORREPORT, 90_000))
     openStop('en', '?stop=27532')
     expect(await panel('Nørreport St.')).toHaveTextContent(
-      'Rejseplanen · departures 07:19:50, may be out of date',
+      'Rejseplanen · departures 07:19:30, may be out of date',
     )
   })
 
   it('says the same in Danish', async () => {
     answers.set('27532', {
-      ...withRow(fromBoard(NORREPORT, 70_000), E_TO_KOGE, { track: '4' }),
+      ...withRow(fromBoard(NORREPORT, 90_000), E_TO_KOGE, { track: '4' }),
       messages: [CLOSED, WORKS],
     })
     openStop('da', '?stop=27532')
@@ -438,7 +439,71 @@ describe("a stop's departures from its board", () => {
     expect(cards).toHaveTextContent('Fra Rejseplanen')
     expect(cards).not.toHaveTextContent('in Danish')
     expect(within(stop).getByRole('heading', { name: 'Senere' })).toBeInTheDocument()
-    expect(stop).toHaveTextContent('Rejseplanen · afgange 07:19:50, måske forældet')
+    expect(stop).toHaveTextContent('Rejseplanen · afgange 07:19:30, måske forældet')
+  })
+})
+
+describe('a board’s source line as its minute runs out', () => {
+  // Each board is called at the answers' moment, 07:21:00, and due again a minute later; here the
+  // next answer never lands. How long the panel may take to bring it is `BOARD_GRACE`.
+  const MINUTE = 60_000
+
+  // The panel's second ticks on fake timers, so the clock moves with no wait.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'], now: NORREPORT.fetched })
+  })
+
+  /** Opens `search` in English and lets the stop's answers land. */
+  async function open(search: string) {
+    openStop('en', search)
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    return screen.getByRole('dialog', { name: 'Nørreport St.' })
+  }
+
+  /**
+   * Moves the server's clock to `after` ms past the answers' moment, then on to the panel's next
+   * second, when it reads the clock again.
+   */
+  async function moveClock(after: number) {
+    vi.setSystemTime(NORREPORT.fetched + after)
+    await act(() => vi.advanceTimersByTimeAsync(1_000))
+  }
+
+  it('keeps a fresh departure board unmarked past its minute while the next is on its way', async () => {
+    answers.set('27532', fromBoard(NORREPORT))
+    const stop = await open('?stop=27532')
+    const koge = row(stop, 'Køge St.')
+    expect(koge).toHaveTextContent('8 min')
+    // The panel's first ask again, at its latest.
+    await moveClock(MINUTE + 4_000)
+    expect(koge).toHaveTextContent('7 min')
+    expect(stop).toHaveTextContent('Rejseplanen · departures 07:21:00')
+    expect(stop).not.toHaveTextContent('may be out of date')
+    // Its second, when the CDN gave the first the old answer.
+    await moveClock(MINUTE + 13_000)
+    expect(stop).not.toHaveTextContent('may be out of date')
+  })
+
+  it('keeps a fresh arrival board unmarked past its minute while the next is on its way', async () => {
+    arrivalAnswers.set('27532', {
+      ...NORREPORT_ARRIVALS,
+      source: { kind: 'rejseplanen', at: NORREPORT_ARRIVALS.fetched },
+    })
+    const arrivals = within(await open('?stop=27532&board=arrivals')).getByRole('tabpanel', {
+      name: 'Arrivals',
+    })
+    expect(within(arrivals).getByRole('list', { name: 'Arrivals' })).toBeInTheDocument()
+    await moveClock(MINUTE + 4_000)
+    expect(arrivals).toHaveTextContent('Rejseplanen · arrivals 07:21:00')
+    expect(arrivals).not.toHaveTextContent('may be out of date')
+  })
+
+  it('says a board whose next answer is overdue may be out of date', async () => {
+    // A failed ask keeps the answer it had, so it ages past the same mark.
+    answers.set('27532', fromBoard(NORREPORT))
+    const stop = await open('?stop=27532')
+    await moveClock(MINUTE + BOARD_GRACE + 1_000)
+    expect(stop).toHaveTextContent('Rejseplanen · departures 07:21:00, may be out of date')
   })
 })
 
