@@ -418,7 +418,8 @@ export const layer: Layer.Layer<
         )
       })
 
-    // From the timetable plus the snapshot's delays, so they spend no call.
+    // From the timetable plus the snapshot's delays, so they spend no call of their own; the
+    // snapshot's run, when one is due, is the call any route makes.
     const getStopArrivals = (stopId: string) =>
       Effect.gen(function* () {
         const found = findStop(timetable, stopId)
