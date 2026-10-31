@@ -84,7 +84,9 @@ describe('a frozen recording', () => {
         const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
         const answers = savedAnswers(plan, recorded, snapshots)
         expect(answers.size).toBe(
-          (plan.answers?.stops.length ?? 0) + (plan.answers?.trips?.length ?? 0),
+          (plan.answers?.stops.length ?? 0) +
+            (plan.answers?.arrivals?.length ?? 0) +
+            (plan.answers?.trips?.length ?? 0),
         )
         for (const [file, answer] of answers) {
           const kept = yield* Effect.promise(() => readJson(join(dir, file)))

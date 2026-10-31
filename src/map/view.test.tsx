@@ -2,10 +2,12 @@ import { act, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   addressView,
+  openPanel,
   searchWith,
   useAircraftHidden,
   useHiddenModes,
   usePanel,
+  useStopBoard,
   viewOf,
 } from './view.ts'
 
@@ -147,6 +149,61 @@ describe('the open panel in the address', () => {
         panel: { kind: 'aircraft', id: '4ab1e3' },
       }),
     ).toBe('?aircraft=4ab1e3')
+  })
+})
+
+describe("the stop panel's open list in the address", () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('reads Arrivals from `board=arrivals` on an open stop, and Departures without it', () => {
+    expect(viewOf('?stop=8600626&board=arrivals')).toEqual({
+      hidden: new Set(),
+      panel: { kind: 'stop', id: '8600626' },
+      board: 'arrivals',
+    })
+    expect(viewOf('?stop=8600626').board).toBeUndefined()
+    expect(viewOf('?stop=8600626&board=departures').board).toBeUndefined()
+    expect(viewOf('?stop=8600626&board=nonsense').board).toBeUndefined()
+    // Only a stop has the two lists.
+    expect(viewOf('?trip=bus.5C.32331e0e20.20260616.0707&board=arrivals').board).toBeUndefined()
+  })
+
+  it('writes `board=arrivals` after the stop, and nothing for Departures or another panel', () => {
+    const stop = { kind: 'stop', id: '8600626' } as const
+    expect(searchWith('?line=5C', { hidden: new Set(), panel: stop, board: 'arrivals' })).toBe(
+      '?line=5C&stop=8600626&board=arrivals',
+    )
+    expect(searchWith('?stop=8600626&board=arrivals', { hidden: new Set(), panel: stop })).toBe(
+      '?stop=8600626',
+    )
+    expect(
+      searchWith('?stop=8600626&board=arrivals', {
+        hidden: new Set(),
+        panel: { kind: 'trip', id: 'bus.5C.32331e0e20.20260616.0707' },
+        board: 'arrivals',
+      }),
+    ).toBe('?trip=bus.5C.32331e0e20.20260616.0707')
+  })
+
+  it('switches the list in place, and opens another stop or closes the panel on Departures', () => {
+    window.history.replaceState(null, '', '/?stop=8600626')
+    const store = addressView()
+    function Board() {
+      return <p>{useStopBoard(store)}</p>
+    }
+    const { container } = render(<Board />)
+    expect(container).toHaveTextContent('departures')
+    act(() => store.update({ board: 'arrivals' }))
+    expect(window.location.search).toBe('?stop=8600626&board=arrivals')
+    expect(container).toHaveTextContent('arrivals')
+    act(() => openPanel({ kind: 'stop', id: '27532' }, store))
+    expect(window.location.search).toBe('?stop=27532')
+    expect(container).toHaveTextContent('departures')
+    act(() => store.update({ board: 'arrivals' }))
+    act(() => openPanel(undefined, store))
+    expect(window.location.search).toBe('')
   })
 })
 

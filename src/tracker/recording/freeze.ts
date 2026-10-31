@@ -9,8 +9,10 @@ import { join } from 'node:path'
 import { Effect, References } from 'effect'
 import { TestClock } from 'effect/testing'
 import {
+  stopArrivalsFrom,
   stopDeparturesFrom,
   tripDetailFrom,
+  type StopArrivals,
   type StopDepartures,
   type TripDetail,
 } from '../answers.ts'
@@ -79,8 +81,9 @@ export const replayAircraft = (dir: string): Effect.Effect<readonly AircraftSnap
   }).pipe(Effect.provide(TestClock.layer()))
 
 /**
- * The stop and trip answers a plan saves for screen tests, by their files' paths in its folder,
- * such as `answers/stops/27532.json` and `answers/trips/<key>.json`: each as its route answers
+ * The stop, arrivals and trip answers a plan saves for screen tests, by their files' paths in its
+ * folder, such as `answers/stops/27532.json`, `answers/arrivals/27532.json` and
+ * `answers/trips/<key>.json`: each as its route answers
  * from the timetable and the snapshot of the plan's minute, at that snapshot's moment, with no
  * call, so saving them spends none and leaves the snapshots as they are.
  */
@@ -88,14 +91,20 @@ export function savedAnswers(
   plan: RecordingPlan,
   timetable: Timetable,
   snapshots: readonly Snapshot[],
-): ReadonlyMap<string, StopDepartures | TripDetail | undefined> {
-  const answers = new Map<string, StopDepartures | TripDetail | undefined>()
+): ReadonlyMap<string, StopDepartures | StopArrivals | TripDetail | undefined> {
+  const answers = new Map<string, StopDepartures | StopArrivals | TripDetail | undefined>()
   if (!plan.answers) return answers
   const snapshot = snapshots[plan.answers.minute]
   for (const stop of plan.answers.stops) {
     answers.set(
       join('answers', 'stops', `${stop}.json`),
       stopDeparturesFrom(timetable, snapshot, stop),
+    )
+  }
+  for (const stop of plan.answers.arrivals ?? []) {
+    answers.set(
+      join('answers', 'arrivals', `${stop}.json`),
+      stopArrivalsFrom(timetable, snapshot, stop),
     )
   }
   for (const trip of plan.answers.trips ?? []) {
