@@ -1,0 +1,121 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:20:00
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?trip=bus.991.7ce514fd98.20260616.0700
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- button "Overview"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 3 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "991 to Teglholmen":
+  - heading "991 to Teglholmen" [level=2]
+  - text: Bus
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Estimated
+  - paragraph: Position computed by Rejseplanen
+  - term: Delay
+  - definition: On time
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: Refshaleøen (Refshalevej)
+  - paragraph: At Refshaleøen (Refshalevej)
+  - list "Stops":
+    - listitem:
+      - text: Orientkaj St. (Orientkaj) Passed
+      - time: 07:00
+      - text: On time
+    - listitem:
+      - text: Refshaleøen (Refshalevej) Next stop
+      - time: 07:23
+      - text: On time
+    - listitem:
+      - text: Nordre Toldbod (Københavns Havn)
+      - time: 07:28
+      - text: On time
+    - listitem:
+      - text: Operaen (Københavns Havn)
+      - time: 07:34
+      - text: On time
+    - listitem:
+      - text: Nyhavn (Københavns Havn)
+      - time: 07:39
+      - text: On time
+    - listitem:
+      - text: Knippelsbro (Københavns Havn)
+      - time: 07:46
+      - text: On time
+    - listitem:
+      - text: Det Kongelige Bibliotek (Københavns Havn)
+      - time: 07:50
+      - text: On time
+    - listitem:
+      - text: Bryggebroen (Islands Brygge)
+      - time: 08:01
+      - text: On time
+    - listitem:
+      - text: Islands Brygge Syd (Islands Brygge)
+      - time: 08:08
+      - text: On time
+    - listitem:
+      - text: Enghave Brygge
+      - time: 08:11
+      - text: On time
+    - listitem:
+      - text: Teglholmen (Teglholmens Sydkaj)
+      - time: 08:19
+      - text: On time
+  - text: From the timetable
+  - paragraph:
+    - text: Rejseplanen ·
+    - time: position 07:20:00
+    - text: · times from the timetable
+- alert
+- region "Notifications"

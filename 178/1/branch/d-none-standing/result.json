@@ -1,0 +1,8 @@
+{
+  "journey": "d-none-standing",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-empty-text: Nørreport empty text (http://localhost:4303/en?stop=27532)",
+    "02-danish-region: Danish region (http://localhost:4303/da?stop=27532)"
+  ]
+}

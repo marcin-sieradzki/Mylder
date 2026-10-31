@@ -1,0 +1,8 @@
+{
+  "journey": "d-standing",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-desktop-panel: Refshaleøen desktop panel (http://localhost:4302/en?stop=48645)",
+    "02-vehicle-open: vehicle open (http://localhost:4302/en?trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

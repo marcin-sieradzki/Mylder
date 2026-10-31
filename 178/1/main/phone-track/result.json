@@ -1,0 +1,10 @@
+{
+  "journey": "phone-track",
+  "pass": false,
+  "error": "expect(received).toBe(expected) // Object.is equality\n\nExpected: \"auto\"\nReceived: \"visible\"",
+  "steps": [
+    "01-map-at-k-benhavn-syd: map at København Syd (http://localhost:4302/en?map=17.00/55.65263/12.51685)",
+    "02-stop-sheet-open: stop sheet open (http://localhost:4302/en?map=17.00/55.65263/12.51685&stop=8600783)",
+    "03-failure: failure (http://localhost:4302/en?map=17.00/55.65263/12.51685&stop=8600783)"
+  ]
+}

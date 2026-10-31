@@ -1,0 +1,72 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:20:00
+  - group "Filters":
+    - button "Bus 6"
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?hide=bus&map=17.00/55.69105/12.60675&stop=48645
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- button "Overview"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 30 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Refshaleøen":
+  - heading "Refshaleøen" [level=2]
+  - list "Lines":
+    - listitem: "991"
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - paragraph: No vehicle of the types shown is standing at the platforms now.
+  - tablist "Departures and arrivals":
+    - tab "Departures" [selected]
+    - tab "Arrivals"
+  - tabpanel "Departures":
+    - paragraph: No departures in the next 30 minutes for the vehicle types shown.
+    - text: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. From the timetable
+    - paragraph:
+      - time: Timetable and positions 07:20:00
+- alert
+- region "Notifications"
