@@ -135,7 +135,10 @@ export interface StopArrivals extends Omit<
   StopDepartures,
   'standing' | 'departures' | 'intervals'
 > {
-  /** The trips arriving in the next 30 minutes, soonest shown arrival first, the interval lines' aside. */
+  /**
+   * The trips arriving in the next 30 minutes, soonest shown arrival first, the interval lines'
+   * aside.
+   */
   readonly arrivals: readonly StopArrival[]
   /** The interval lines' rows, one per line and direction arriving in the window, by line. */
   readonly intervals: readonly ArrivalInterval[]

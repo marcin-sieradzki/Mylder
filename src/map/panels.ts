@@ -2,10 +2,10 @@
 // route's answer for an open stop, the trip route's for an open trip, asked for when the panel
 // opens in the address (view.ts) and again just after each answer falls due, while anything on the
 // page watches it. An open stop's arrivals are a second answer beside its departures, asked for the
-// same way, but only while the stop is on Arrivals. An aircraft's panel has no route: its card is the aircraft snapshot's own. One
-// store for the page, which React reads through `useSyncExternalStore`, so the panels share one
-// ask. Everything outside Mylder (the network, the timers, the server's clock, the random draw)
-// comes in as a dependency.
+// same way, but only while the stop is on Arrivals. An aircraft's panel has no route: its card is
+// the aircraft snapshot's own. One store for the page, which React reads through
+// `useSyncExternalStore`, so the panels share one ask. Everything outside Mylder (the network, the
+// timers, the server's clock, the random draw) comes in as a dependency.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import type { StopArrivals, StopDepartures, TripDetail } from '../tracker/index.ts'
