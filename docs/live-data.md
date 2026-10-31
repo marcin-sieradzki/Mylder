@@ -111,7 +111,7 @@ A 1,500-trip snapshot with these fields is about 450 KB as JSON and about 50 to 
 
 ### Opening mid-minute
 
-A browser that opens at 10:42:37 gets the snapshot fetched at 10:42:03. It places every dot where its timed segments say it is now, 34 seconds in, not where it was at fetch time, and ages every state from the clock. It then polls at 10:43:03 plus jitter. So an opening page is never a minute behind. The browser takes the server's clock from the response's own date header, and keeps the difference to its clock, so a wrong device clock does not age every state at once.
+A browser that opens at 10:42:37 gets the snapshot fetched at 10:42:03. It places every dot where its timed segments say it is now, 34 seconds in, not where it was at fetch time, and ages every state from the clock. It then polls at 10:43:03 plus jitter. So an opening page is never a minute behind. The browser takes the server's clock from the response's own date header, and keeps the difference to its clock, so a wrong device clock does not age every state at once. Until the first snapshot lands with that header, the page doesn't know the difference, so what counts down to a moment or calls an answer old waits for it: a stop's countdowns read "—", never "Now", and its source lines never say "may be out of date" (`useKnownClockOffset` in `src/map/live.ts`).
 
 ### Moving between polls
 

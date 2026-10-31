@@ -45,7 +45,7 @@ function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
 }
 
 /** Disconnected, at once, while the browser's own polls fail. */
-function disconnectedNotice({ failingSince, clockOffset, lastAnswer }: LiveSnapshot) {
+function disconnectedNotice({ failingSince, clockOffset = 0, lastAnswer }: LiveSnapshot) {
   if (failingSince === undefined) return undefined
   return {
     kind: 'disconnected',

@@ -13,8 +13,11 @@ import { pagePoll, snapshotPoller, snapshotRoute } from './poll.ts'
 export interface LiveState<S> {
   /** The latest snapshot, kept through failed polls; none until the first lands. */
   readonly snapshot?: S
-  /** The server's clock minus this device's, in ms, from the latest answer's date header. */
-  readonly clockOffset: number
+  /**
+   * The server's clock minus this device's, in ms, from the latest answer's date header; none
+   * until an answer has given it, while this device's own clock may be far from the server's.
+   */
+  readonly clockOffset?: number
   /** When the latest poll that answered landed, on this device's clock. */
   readonly lastGoodPoll?: number
   /** Since when polls have failed, on this device's clock; unset once one answers. */
@@ -44,10 +47,13 @@ export interface LiveSnapshot extends LiveState<Snapshot> {
 /** The transit snapshot's store. */
 export type SnapshotStore = LiveStore<Snapshot, LiveSnapshot>
 
-const NOTHING_YET: LiveSnapshot = { clockOffset: 0 }
+const NOTHING_YET: LiveSnapshot = {}
 
-/** The server's time now, by this device's clock and the offset the latest answer gave. */
-export const serverNow = ({ clockOffset }: Pick<LiveState<unknown>, 'clockOffset'>): number =>
+/**
+ * The server's time now, by this device's clock and the offset the latest answer gave: this
+ * device's own until one has.
+ */
+export const serverNow = ({ clockOffset = 0 }: Pick<LiveState<unknown>, 'clockOffset'>): number =>
   Date.now() + clockOffset
 
 /** The latest answer time once `state`'s snapshot has landed; none once it is cleared. */
@@ -100,14 +106,23 @@ export function useLiveSnapshot(store: SnapshotStore = liveSnapshot): LiveSnapsh
 
 /**
  * The server's clock minus this device's, for a component that reads the server's time: the
- * transit snapshot's server unless another kind's store is given, such as the aircraft's. It
- * renders again only when an answer moves it.
+ * transit snapshot's server unless another kind's store is given, such as the aircraft's; 0, this
+ * device's own clock, until an answer gives it. It renders again only when an answer moves it.
  */
 export function useClockOffset(store: LiveStore<unknown> = liveSnapshot): number {
+  return useKnownClockOffset(store) ?? 0
+}
+
+/**
+ * The server's clock minus this device's once an answer has given it, for a component that counts
+ * down to a moment or says how old one is, which this device's own clock could get wrong by any
+ * amount: none until then. It renders again only when an answer moves it.
+ */
+export function useKnownClockOffset(store: LiveStore<unknown> = liveSnapshot): number | undefined {
   return useSyncExternalStore(
     store.subscribe,
     () => store.get().clockOffset,
-    () => NOTHING_YET.clockOffset,
+    () => undefined,
   )
 }
 
@@ -116,7 +131,7 @@ export function useClockOffset(store: LiveStore<unknown> = liveSnapshot): number
  * moment once a minute or so: it renders again only when a poll lands. None before the first.
  */
 export function usePollMoment(store: SnapshotStore = liveSnapshot): number | undefined {
-  const moment = ({ lastGoodPoll, clockOffset }: LiveSnapshot) =>
+  const moment = ({ lastGoodPoll, clockOffset = 0 }: LiveSnapshot) =>
     lastGoodPoll === undefined ? undefined : lastGoodPoll + clockOffset
   return useSyncExternalStore(
     store.subscribe,
