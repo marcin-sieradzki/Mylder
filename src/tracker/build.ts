@@ -12,6 +12,7 @@ import {
 } from '../domain/data-state.ts'
 import {
   delayOf,
+  ENDED_STANDS_FOR,
   pointAt,
   progressAt,
   snapToPath,
@@ -46,7 +47,8 @@ export interface PositionAnswer {
 /**
  * What the tracker remembers between runs of a trip that has had realtime this service day
  * (docs/live-data.md, "What the store is"). A trip's key names its service day, so a trip with
- * an entry had realtime today. Kept until the trip has arrived on its expected times.
+ * an entry had realtime today. Kept until the trip has arrived on its expected times, and for
+ * as long after as it counts as standing at its last stop (`standing.ts`), which reads its delay.
  */
 export interface TripHistory {
   /** The position the latest position answer of either mode gave it. */
@@ -220,9 +222,14 @@ export function buildTrips({
         : trip.calls
       const delay = (realtime ? delayOf(calls) : undefined) ?? before?.delay
       const timed = timedCalls(calls, before?.delay)
-      // A trip that has arrived on its expected times is done with, whatever an answer says.
+      // A trip that has arrived on its expected times is done with, whatever an answer says; its
+      // delay is kept while it stands at its last stop.
       const phase = tripPhase(timed, now)
-      if (phase === 'finished') continue
+      if (phase === 'finished') {
+        const standing = now < timed[timed.length - 1].arrival + ENDED_STANDS_FOR
+        if (standing && delay !== undefined) kept[trip.key] = { ...before, delay }
+        continue
+      }
       const timeline = timelineOf(timed, path)
       const atFirstStop = now < timed[0].departure
       let position: Position | undefined

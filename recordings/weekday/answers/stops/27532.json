@@ -30,6 +30,7 @@
   "source": {
     "kind": "timetable"
   },
+  "standing": [],
   "departures": [
     {
       "trip": "s-tog.E.e8dc141a28.20260616.0702",

@@ -5,6 +5,7 @@ import 'server-only'
 import { runTracker as run } from './runtime.ts'
 import type { Disruptions } from './disruptions.ts'
 import type { StopDepartures, TripDetail } from './answers.ts'
+export type { StandingTrip } from './standing.ts'
 import type { Snapshot } from './snapshot.ts'
 
 export type { Snapshot, SnapshotTrip, NextCall } from './snapshot.ts'

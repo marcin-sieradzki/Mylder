@@ -45,11 +45,11 @@ export const RECORDINGS: readonly RecordingPlan[] = [
     minutes: 10,
     // Nørreport, with Live and Estimated departures by bus and S-tog; Orientkaj St., Timetable only;
     // Hillerød St., with none in the next 30 minutes; Bella Center St., where the Metro runs to an
-    // interval. A Live S-tog, an Estimated bus, a Metro trip, and a bus that stands Waiting at
-    // Orientkaj St. from 07:25.
+    // interval; Refshaleøen, where a bus stands at the stop. A Live S-tog, an Estimated bus, a
+    // Metro trip, and a bus that stands Waiting at Orientkaj St. from 07:25.
     answers: {
       minute: 1,
-      stops: ['27532', '54307', '8600683', '8603313'],
+      stops: ['27532', '54307', '8600683', '8603313', '48645'],
       trips: [
         's-tog.A.0bc307e3eb.20260616.0707',
         'bus.5C.32331e0e20.20260616.0707',

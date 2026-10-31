@@ -15,6 +15,7 @@
   "source": {
     "kind": "timetable"
   },
+  "standing": [],
   "departures": [],
   "intervals": [],
   "messages": []

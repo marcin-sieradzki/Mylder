@@ -1,0 +1,47 @@
+{
+  "stop": {
+    "id": "48645",
+    "name": "Refshaleøen",
+    "lines": [
+      {
+        "name": "991",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      }
+    ]
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "standing": [
+    {
+      "trip": "bus.991.7ce514fd98.20260616.0700",
+      "line": "991",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Teglholmen",
+      "platform": "48645",
+      "scheduled": 1781587380000,
+      "expected": 1781587380000,
+      "departs": 1781587380000,
+      "state": "estimated"
+    }
+  ],
+  "departures": [
+    {
+      "trip": "bus.991.7ce514fd98.20260616.0700",
+      "line": "991",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Teglholmen",
+      "platform": "48645",
+      "scheduled": 1781587380000,
+      "expected": 1781587380000,
+      "state": "estimated"
+    }
+  ],
+  "intervals": [],
+  "messages": []
+}
