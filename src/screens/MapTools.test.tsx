@@ -2,12 +2,13 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
-import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
 import { mapCamera, type CameraMap } from '../map/camera'
 import { followCamera, followedVehicle, type FollowMap } from '../map/follow'
+import { PHONE_QUERY } from '../map/highlight'
 import { motionPause } from '../map/pause'
 import { pickedVehicle } from '../map/picking'
 import { MapTools } from './MapTools'
@@ -110,6 +111,38 @@ function fakeMap() {
   return { map: map as unknown as CameraMap, state, container, settle, gesture }
 }
 
+/** The page's media queries as each test sets them: as narrow as a phone, and reduced motion. */
+const media = { phone: false, reducedMotion: false }
+const mediaChanges = new Set<() => void>()
+const mediaLists = new Map<string, object>()
+/**
+ * The browser's `matchMedia`, which jsdom lacks, answering from `media`. It gives one list per
+ * query for the whole file, as a browser may, so a hook that keeps its list reads each test's.
+ */
+function matchMedia(query: string) {
+  let list = mediaLists.get(query)
+  if (!list) {
+    list = {
+      get matches() {
+        if (query === PHONE_QUERY) return media.phone
+        return query === '(prefers-reduced-motion: reduce)' && media.reducedMotion
+      },
+      addEventListener: (_: string, listener: () => void) => mediaChanges.add(listener),
+      removeEventListener: (_: string, listener: () => void) => mediaChanges.delete(listener),
+    }
+    mediaLists.set(query, list)
+  }
+  return list
+}
+
+/** Widens the page past the phone breakpoint, telling whoever listens. */
+function widen() {
+  media.phone = false
+  act(() => mediaChanges.forEach((onChange) => onChange()))
+}
+
+beforeEach(() => void vi.stubGlobal('matchMedia', matchMedia))
+
 let detach: (() => void) | undefined
 let mapElement: HTMLElement | undefined
 
@@ -127,6 +160,9 @@ function open(lang: Lang = 'en') {
 }
 
 afterEach(() => {
+  vi.unstubAllGlobals()
+  media.phone = false
+  media.reducedMotion = false
   detach?.()
   motionPause.set(false)
   pickedVehicle.clear()
@@ -216,12 +252,7 @@ describe('the map controls', () => {
   })
 
   it('jumps back at once when the system asks for reduced motion', async () => {
-    vi.stubGlobal('matchMedia', (query: string) => ({
-      matches: query === '(prefers-reduced-motion: reduce)',
-      addEventListener: () => {},
-      removeEventListener: () => {},
-    }))
-    onTestFinished(() => void vi.unstubAllGlobals())
+    media.reducedMotion = true
     const user = userEvent.setup()
     const { state, gesture } = open()
     gesture({ center: [12.6, 55.7], zoom: 14, pitch: 40, bearing: 70 })
@@ -247,6 +278,147 @@ describe('the map controls', () => {
   })
 })
 
+describe('the 3D toggle', () => {
+  it('eases the map to a tilt of about 50° and shows pressed, and back to flat unpressed', async () => {
+    const user = userEvent.setup()
+    const { state, settle } = open()
+    await user.click(screen.getByRole('button', { name: '3D view', pressed: false }))
+    // Under way, the map hasn't reached it yet.
+    expect(state.pitch).toBe(0)
+    act(settle)
+    expect(state.pitch).toBe(50)
+    await user.click(screen.getByRole('button', { name: '3D view', pressed: true }))
+    act(settle)
+    expect(state.pitch).toBe(0)
+    expect(screen.getByRole('button', { name: '3D view' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('keeps the heading and the centre as it tilts and lays the map flat', async () => {
+    const user = userEvent.setup()
+    const { state, settle, gesture } = open()
+    gesture({ center: [12.6, 55.7], zoom: 14, bearing: 70 })
+    await user.click(screen.getByRole('button', { name: '3D view' }))
+    act(settle)
+    expect(state).toMatchObject({
+      zoom: 14,
+      center: { lng: 12.6, lat: 55.7 },
+      pitch: 50,
+      bearing: 70,
+    })
+    await user.click(screen.getByRole('button', { name: '3D view' }))
+    act(settle)
+    expect(state).toMatchObject({
+      zoom: 14,
+      center: { lng: 12.6, lat: 55.7 },
+      pitch: 0,
+      bearing: 70,
+    })
+  })
+
+  it('shows pressed whenever the map is tilted, however it got there', async () => {
+    const user = userEvent.setup()
+    const { settle, gesture } = open()
+    const toggle = () => screen.getByRole('button', { name: '3D view' })
+    expect(toggle()).toHaveAttribute('aria-pressed', 'false')
+    gesture({ pitch: 25 })
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true')
+    gesture({ pitch: 0 })
+    expect(toggle()).toHaveAttribute('aria-pressed', 'false')
+    await user.keyboard('{Shift>}{ArrowUp}{/Shift}')
+    act(settle)
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true')
+    await user.keyboard('{Shift>}{ArrowDown}{/Shift}')
+    act(settle)
+    expect(toggle()).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+describe('the compass', () => {
+  /** The compass's needle, as the eye sees it turned. */
+  const needle = () => screen.getByRole('button', { name: 'Reset to north' }).querySelector('svg')
+
+  it('turns its needle against the heading, so it points to north on the map', () => {
+    const { gesture } = open()
+    gesture({ bearing: 70 })
+    expect(needle()).toHaveStyle({ transform: 'rotate(-70deg)' })
+    expect(screen.getByRole('button', { name: 'Reset to north' })).toHaveAccessibleDescription(
+      'Map turned away from north',
+    )
+    gesture({ bearing: -30 })
+    expect(needle()).toHaveStyle({ transform: 'rotate(30deg)' })
+  })
+
+  it('eases the map back to north, keeping its tilt, centre and zoom', async () => {
+    const user = userEvent.setup()
+    const { state, settle, gesture } = open()
+    gesture({ center: [12.6, 55.7], zoom: 14, pitch: 40, bearing: 70 })
+    await user.click(screen.getByRole('button', { name: 'Reset to north' }))
+    expect(state.bearing).toBe(70)
+    act(settle)
+    expect(state).toMatchObject({
+      zoom: 14,
+      center: { lng: 12.6, lat: 55.7 },
+      pitch: 40,
+      bearing: 0,
+    })
+    expect(screen.getByRole('button', { name: 'Reset to north' })).not.toHaveAccessibleDescription()
+  })
+})
+
+describe('the 3D toggle and the compass', () => {
+  it('are named in Danish', () => {
+    open('da')
+    const controls = screen.getByRole('toolbar', { name: 'Kortknapper' })
+    expect(
+      within(controls).getByRole('button', { name: '3D-visning', pressed: false }),
+    ).toBeVisible()
+    expect(within(controls).getByRole('button', { name: 'Drej mod nord' })).toBeVisible()
+  })
+
+  it('sit in the arrow-key order after the centre button and before the pause, in one tab stop', async () => {
+    const user = userEvent.setup()
+    open()
+    const controls = screen.getByRole('toolbar', { name: 'Map controls' })
+    screen.getByRole('button', { name: 'Centre the map' }).focus()
+    await user.keyboard('{ArrowDown}')
+    expect(screen.getByRole('button', { name: '3D view' })).toHaveFocus()
+    await user.keyboard('{ArrowDown}')
+    expect(screen.getByRole('button', { name: 'Reset to north' })).toHaveFocus()
+    await user.keyboard('{ArrowDown}')
+    expect(screen.getByRole('button', { name: 'Pause' })).toHaveFocus()
+    const stops = within(controls)
+      .getAllByRole('button')
+      .filter((button) => button.tabIndex === 0)
+    expect(stops).toHaveLength(1)
+  })
+
+  it('jump rather than ease when the system asks for reduced motion', async () => {
+    media.reducedMotion = true
+    const user = userEvent.setup()
+    const { state, gesture } = open()
+    gesture({ bearing: 70 })
+    await user.click(screen.getByRole('button', { name: '3D view' }))
+    expect(state).toMatchObject({ pitch: 50, bearing: 70, easing: undefined })
+    await user.click(screen.getByRole('button', { name: 'Reset to north' }))
+    expect(state).toMatchObject({ pitch: 50, bearing: 0, easing: undefined })
+    await user.click(screen.getByRole('button', { name: '3D view' }))
+    expect(state).toMatchObject({ pitch: 0, bearing: 0, easing: undefined })
+  })
+
+  it("don't show while the page is as narrow as a phone, and do once it widens", () => {
+    media.phone = true
+    const { gesture } = open()
+    // A link with a tilt still opens tilted there, which is how the frame rate is measured.
+    gesture({ pitch: 40, bearing: 30 })
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: '3D view' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reset to north' })).not.toBeInTheDocument()
+    widen()
+    expect(screen.getByRole('button', { name: '3D view', pressed: true })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Reset to north' })).toBeVisible()
+  })
+})
+
 describe('the controls before the map attaches', () => {
   it('dim the zoom and the reset but keep the pause', async () => {
     const user = userEvent.setup()
@@ -268,6 +440,27 @@ describe('the controls before the map attaches', () => {
     expect(pause).not.toHaveAttribute('aria-disabled', 'true')
     await user.click(pause)
     expect(motionPause.get()).toBe(true)
+  })
+})
+
+describe('the controls with no map, as without WebGL', () => {
+  it('show no 3D toggle or compass, and show them once a map attaches', () => {
+    render(
+      <Providers lang="en" dictionary={en}>
+        <MapTools />
+      </Providers>,
+    )
+    expect(screen.getByRole('button', { name: 'Zoom in' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: '3D view' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reset to north' })).not.toBeInTheDocument()
+    const fake = fakeMap()
+    mapElement = fake.container
+    act(
+      () =>
+        void (detach = mapCamera.attach(fake.map, () => ({ center: [12.565, 55.68], zoom: 11.2 }))),
+    )
+    expect(screen.getByRole('button', { name: '3D view' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Reset to north' })).toBeVisible()
   })
 })
 
