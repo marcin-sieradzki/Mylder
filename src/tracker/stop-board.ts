@@ -53,7 +53,7 @@ import type { RejseplanenShape, DepartureBoardQuery } from './rejseplanen/client
 import { callKey as standingKey, standingAt, type BoardCall } from './standing.ts'
 import type { Timetable } from './timetable.ts'
 
-/** The board call for a stop: every one of its platforms, over the departures' window, as the arrivals'. */
+/** A board call for a stop, departures or arrivals: every one of its platforms, over the window. */
 export function boardQuery(timetable: Timetable, stopIndex: number): DepartureBoardQuery {
   return {
     ids: timetable.stops.platforms.flatMap((p) => (p.stop === stopIndex ? [p.id] : [])),
@@ -68,7 +68,7 @@ export function boardQuery(timetable: Timetable, stopIndex: number): DepartureBo
 export const worthACall = (stop: StopDepartures['stop']) =>
   stop.lines.some((line) => line.mode !== 'metro')
 
-/** A row of either board: a departure, with where it goes, or an arrival, with where it comes from. */
+/** A row of either board: a departure, with where it goes, or an arrival, with where it's from. */
 type BoardEntry = Departure | Arrival
 
 /** A board row's line name, as its product gives it. */
@@ -91,7 +91,7 @@ function byPlannedTime(
   return byTime
 }
 
-/** A board row's own word on its trip's way: where a departure goes, where an arrival comes from. */
+/** A board row's word on its trip's way: where a departure goes, where an arrival comes from. */
 interface Way {
   readonly direction?: string
   readonly origin?: string
