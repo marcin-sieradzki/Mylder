@@ -37,7 +37,7 @@ Call the Skill tool with `code-review` on the ticket's branch, fixed point `orig
 
 ## 6. Verify
 
-Start a verifier in the foreground: `Read .claude/skills/factory/verifier.md and follow it. Ticket #<n>, spec #<spec>, branch factory/<n>-<slug>, round <r>, ports <4300 + 2r> and <4301 + 2r>.` It never gets the diff, the review or the implementer's notes. It returns a verdict and the paths of its evidence. Then:
+Start a verifier in the foreground: `Read .claude/skills/factory/verifier.md and follow it. Ticket #<n>, spec #<spec>, branch factory/<n>-<slug>, round <r>, ports <4300 + 2r> and <4301 + 2r>, and <4400 + r> for a recipe on another recording.` It never gets the diff, the review or the implementer's notes. It returns a verdict and the paths of its evidence. Then:
 
 1. Push the evidence to the orphan `evidence` branch under `<pr>/<round>/` (a worktree of `origin/evidence`, or `git worktree add --orphan -b evidence ../mylder-evidence` the first time), and post the verdict on the PR as a comment, each screenshot linked as `https://github.com/marcin-sieradzki/mylder/blob/evidence/<pr>/<round>/<file>?raw=true`.
 2. **FAIL**: back to step 4 as a rework round, with the verdict's failing stories and what the branch showed; the implementer adds a regression test for each. Two rework rounds on verify without a pass: stop the ticket (step 8).

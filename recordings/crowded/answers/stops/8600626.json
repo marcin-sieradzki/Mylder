@@ -1,0 +1,172 @@
+{
+  "stop": {
+    "id": "8600626",
+    "name": "København H",
+    "lines": [
+      {
+        "name": "A",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-a"
+      },
+      {
+        "name": "E",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-e"
+      },
+      {
+        "name": "RE",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      }
+    ]
+  },
+  "fetched": 1781587320000,
+  "nextDue": 1781587380000,
+  "source": {
+    "kind": "timetable"
+  },
+  "standing": [
+    {
+      "trip": "train.RE.7c3e865b99.20260616.0724",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Næstved St.",
+      "platform": "8600626",
+      "scheduled": 1781587440000,
+      "expected": 1781587440000,
+      "departs": 1781587440000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.79fbe8e1f8.20260616.0637",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hundige St.",
+      "platform": "8600626",
+      "scheduled": 1781587500000,
+      "expected": 1781587500000,
+      "departs": 1781587500000,
+      "state": "estimated"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0651",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600626",
+      "scheduled": 1781587560000,
+      "expected": 1781587560000,
+      "departs": 1781587560000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.E.e8dc141a28.20260616.0648",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Køge St.",
+      "platform": "8600626",
+      "scheduled": 1781587620000,
+      "expected": 1781587620000,
+      "departs": 1781587620000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.E.7c0294e28d.20260616.0639",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Holte St.",
+      "platform": "8600626",
+      "scheduled": 1781587680000,
+      "expected": 1781587680000,
+      "departs": 1781587680000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0654",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600626",
+      "scheduled": 1781587740000,
+      "expected": 1781587740000,
+      "departs": 1781587740000,
+      "state": "live"
+    }
+  ],
+  "departures": [
+    {
+      "trip": "train.RE.7c3e865b99.20260616.0724",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Næstved St.",
+      "platform": "8600626",
+      "scheduled": 1781587440000,
+      "expected": 1781587440000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.79fbe8e1f8.20260616.0637",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hundige St.",
+      "platform": "8600626",
+      "scheduled": 1781587500000,
+      "expected": 1781587500000,
+      "state": "estimated"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0651",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600626",
+      "scheduled": 1781587560000,
+      "expected": 1781587560000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.E.e8dc141a28.20260616.0648",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Køge St.",
+      "platform": "8600626",
+      "scheduled": 1781587620000,
+      "expected": 1781587620000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.E.7c0294e28d.20260616.0639",
+      "line": "E",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-e",
+      "headsign": "Holte St.",
+      "platform": "8600626",
+      "scheduled": 1781587680000,
+      "expected": 1781587680000,
+      "state": "live"
+    },
+    {
+      "trip": "s-tog.A.0bc307e3eb.20260616.0654",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600626",
+      "scheduled": 1781587740000,
+      "expected": 1781587740000,
+      "state": "live"
+    }
+  ],
+  "intervals": [],
+  "messages": []
+}

@@ -9,6 +9,11 @@ export interface RecordingPlan {
   /** The recording's folder in `recordings/`, and its name in `MYLDER_SOURCE=recording:<name>`. */
   readonly name: string
   readonly scenario: Scenario
+  /**
+   * The GTFS fixture its timetable is prepared from, a folder in `scripts/timetable/fixtures`:
+   * `gtfs`, the real one, when left out.
+   */
+  readonly fixture?: string
   /** The moment the recording starts, its `clock.json`. */
   readonly start: number
   /** How many minutes it runs: one tracker run, and so one `journeyPos` call, a minute. */
@@ -46,6 +51,28 @@ const failingAll = (kind: FailureKind): Scenario => ({
   name: kind,
   failures: [{ from: 0, to: 60, kind }],
 })
+
+/**
+ * A weekday on which every trip runs to its timetable, none is cancelled and no message is out,
+ * so the trips standing at a stop are the ones its timetable puts there, and nothing else shows.
+ */
+const ON_TIME: Scenario = {
+  ...WEEKDAY,
+  name: 'on-time',
+  delay: {
+    train: { from: 0, to: 0 },
+    's-tog': { from: 0, to: 0 },
+    bus: { from: 0, to: 0 },
+    'light-rail': { from: 0, to: 0 },
+    metro: { from: 0, to: 0 },
+  },
+  drift: 0,
+  silence: { share: 0, minutes: { from: 0, to: 0 }, forGood: 0 },
+  cancelled: 0,
+  cancelledCall: 0,
+  extra: 0,
+  messages: [],
+}
 
 export const RECORDINGS: readonly RecordingPlan[] = [
   {
@@ -85,5 +112,15 @@ export const RECORDINGS: readonly RecordingPlan[] = [
     start: RECORDING_START,
     minutes: 1,
     fill: MAX_JOURNEYS,
+  },
+  {
+    // Six trains standing at København H at once, from 07:20 to 07:24, on a timetable made by
+    // hand for it (scripts/timetable/fixtures/gtfs-crowded), so its standing list folds past four.
+    name: 'crowded',
+    scenario: ON_TIME,
+    fixture: 'gtfs-crowded',
+    start: RECORDING_START,
+    minutes: 5,
+    answers: { minute: 2, stops: ['8600626'] },
   },
 ]

@@ -1,0 +1,454 @@
+{
+  "Journey": [
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3836211300#PI#0#ZI#672477#TA#0#DA#160626#1S#8600769#1T#651#LS#8600683#LT#804#PU#86#RT#1#CA#S#ZE#A#ZB#S-tog A#PC#4#FR#8600769#FT#651#TO#8600683#TT#804#"
+      },
+      "lat": 55.67282451662228,
+      "lon": 12.564968147838059,
+      "name": "S-tog A",
+      "direction": "Hillerød St.",
+      "trainNumber": "611122",
+      "trainCategory": "S",
+      "Product": [
+        {
+          "name": "S-tog A",
+          "displayNumber": "A",
+          "num": "611122",
+          "line": "A",
+          "catOut": "S-tog",
+          "catIn": "S",
+          "cls": "16"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "Hundige St.",
+        "extId": "8600769",
+        "lon": 12.33339,
+        "lat": 55.59745
+      },
+      "JourneyDestination": {
+        "name": "Hillerød St.",
+        "extId": "8600683",
+        "lon": 12.31093,
+        "lat": 55.92692
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 11,
+            "lon": 12.56556,
+            "lat": 55.67306,
+            "arrTime": "07:16:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:26:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Vesterport St.",
+            "extId": "8600645",
+            "routeIdx": 12,
+            "lon": 12.56209,
+            "lat": 55.67601,
+            "arrTime": "07:27:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:27:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Nørreport St.",
+            "extId": "8600646",
+            "routeIdx": 13,
+            "lon": 12.5718,
+            "lat": 55.68345,
+            "arrTime": "07:29:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:29:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Østerport St.",
+            "extId": "8600650",
+            "routeIdx": 14,
+            "lon": 12.58779,
+            "lat": 55.6925,
+            "arrTime": "07:31:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:31:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          }
+        ]
+      }
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3836211300#PI#0#ZI#69840#TA#0#DA#160626#1S#8600769#1T#654#LS#8600683#LT#807#PU#86#RT#1#CA#S#ZE#A#ZB#S-tog A#PC#4#FR#8600769#FT#654#TO#8600683#TT#807#"
+      },
+      "lat": 55.67275955209156,
+      "lon": 12.564860748332771,
+      "name": "S-tog A",
+      "direction": "Hillerød St.",
+      "trainNumber": "612123",
+      "trainCategory": "S",
+      "Product": [
+        {
+          "name": "S-tog A",
+          "displayNumber": "A",
+          "num": "612123",
+          "line": "A",
+          "catOut": "S-tog",
+          "catIn": "S",
+          "cls": "16"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "Hundige St.",
+        "extId": "8600769",
+        "lon": 12.33339,
+        "lat": 55.59745
+      },
+      "JourneyDestination": {
+        "name": "Hillerød St.",
+        "extId": "8600683",
+        "lon": 12.31093,
+        "lat": 55.92692
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 11,
+            "lon": 12.56556,
+            "lat": 55.67306,
+            "arrTime": "07:19:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:29:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Vesterport St.",
+            "extId": "8600645",
+            "routeIdx": 12,
+            "lon": 12.56209,
+            "lat": 55.67601,
+            "arrTime": "07:30:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:30:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Nørreport St.",
+            "extId": "8600646",
+            "routeIdx": 13,
+            "lon": 12.5718,
+            "lat": 55.68345,
+            "arrTime": "07:32:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:32:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Østerport St.",
+            "extId": "8600650",
+            "routeIdx": 14,
+            "lon": 12.58779,
+            "lat": 55.6925,
+            "arrTime": "07:34:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:34:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          }
+        ]
+      }
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3836211300#PI#0#ZI#771609#TA#0#DA#160626#1S#8600803#1T#639#LS#8600677#LT#757#PU#86#RT#1#CA#S#ZE#E#ZB#S-tog E#PC#4#FR#8600803#FT#639#TO#8600677#TT#757#"
+      },
+      "lat": 55.672790613041265,
+      "lon": 12.564828944988266,
+      "name": "S-tog E",
+      "direction": "Holte St.",
+      "trainNumber": "641123",
+      "trainCategory": "S",
+      "Product": [
+        {
+          "name": "S-tog E",
+          "displayNumber": "E",
+          "num": "641123",
+          "line": "E",
+          "catOut": "S-tog",
+          "catIn": "S",
+          "cls": "16"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "Køge St.",
+        "extId": "8600803",
+        "lon": 12.18633,
+        "lat": 55.45755
+      },
+      "JourneyDestination": {
+        "name": "Holte St.",
+        "extId": "8600677",
+        "lon": 12.46882,
+        "lat": 55.80768
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 18,
+            "lon": 12.56556,
+            "lat": 55.67306,
+            "arrTime": "07:18:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:28:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Vesterport St.",
+            "extId": "8600645",
+            "routeIdx": 19,
+            "lon": 12.56209,
+            "lat": 55.67601,
+            "arrTime": "07:29:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:29:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Nørreport St.",
+            "extId": "8600646",
+            "routeIdx": 20,
+            "lon": 12.5718,
+            "lat": 55.68345,
+            "arrTime": "07:31:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:31:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Østerport St.",
+            "extId": "8600650",
+            "routeIdx": 21,
+            "lon": 12.58779,
+            "lat": 55.6925,
+            "arrTime": "07:33:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:33:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          }
+        ]
+      }
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3836211300#PI#0#ZI#672297#TA#0#DA#160626#1S#8600677#1T#648#LS#8600803#LT#806#PU#86#RT#1#CA#S#ZE#E#ZB#S-tog E#PC#4#FR#8600677#FT#648#TO#8600803#TT#806#"
+      },
+      "lat": 55.67281687969032,
+      "lon": 12.564804932985911,
+      "name": "S-tog E",
+      "direction": "Køge St.",
+      "trainNumber": "641222",
+      "trainCategory": "S",
+      "Product": [
+        {
+          "name": "S-tog E",
+          "displayNumber": "E",
+          "num": "641222",
+          "line": "E",
+          "catOut": "S-tog",
+          "catIn": "S",
+          "cls": "16"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "Holte St.",
+        "extId": "8600677",
+        "lon": 12.46882,
+        "lat": 55.80768
+      },
+      "JourneyDestination": {
+        "name": "Køge St.",
+        "extId": "8600803",
+        "lon": 12.18633,
+        "lat": 55.45755
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 13,
+            "lon": 12.56556,
+            "lat": 55.67306,
+            "arrTime": "07:17:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:27:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Dybbølsbro St.",
+            "extId": "8600634",
+            "routeIdx": 14,
+            "lon": 12.55951,
+            "lat": 55.66483,
+            "arrTime": "07:29:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:29:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Sydhavn St.",
+            "extId": "8600760",
+            "routeIdx": 15,
+            "lon": 12.53717,
+            "lat": 55.65476,
+            "arrTime": "07:32:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:32:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Sjælør St.",
+            "extId": "8600761",
+            "routeIdx": 16,
+            "lon": 12.52727,
+            "lat": 55.65174,
+            "arrTime": "07:33:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:33:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          }
+        ]
+      }
+    },
+    {
+      "JourneyDetailRef": {
+        "ref": "2|#VN#1#ST#3836211300#PI#0#ZI#892395#TA#0#DA#160626#1S#8600626#1T#724#LS#8600810#LT#829#PU#86#RT#1#CA#RE#ZE#RE#ZB#Re 2427#PC#2#FR#8600626#FT#724#TO#8600810#TT#829#"
+      },
+      "lat": 55.672697746916036,
+      "lon": 12.564959402165732,
+      "name": "Re 2427",
+      "direction": "Næstved St.",
+      "trainNumber": "2427",
+      "trainCategory": "RE",
+      "Product": [
+        {
+          "name": "Re 2427",
+          "displayNumber": "RE",
+          "num": "2427",
+          "line": "RE",
+          "catOut": "Re",
+          "catIn": "RE",
+          "cls": "4"
+        }
+      ],
+      "JourneyOrigin": {
+        "name": "København H",
+        "extId": "8600626",
+        "lon": 12.56556,
+        "lat": 55.67306
+      },
+      "JourneyDestination": {
+        "name": "Næstved St.",
+        "extId": "8600810",
+        "lon": 11.76705,
+        "lat": 55.23124
+      },
+      "Stops": {
+        "Stop": [
+          {
+            "name": "København H",
+            "extId": "8600626",
+            "routeIdx": 0,
+            "lon": 12.56556,
+            "lat": 55.67306,
+            "depTime": "07:24:00",
+            "depDate": "2026-06-16",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "København Syd St.",
+            "extId": "8600783",
+            "routeIdx": 1,
+            "lon": 12.51685,
+            "lat": 55.65263,
+            "arrTime": "07:28:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:29:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Køge Nord St.",
+            "extId": "8600797",
+            "routeIdx": 2,
+            "lon": 12.17399,
+            "lat": 55.49919,
+            "arrTime": "07:43:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:44:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          },
+          {
+            "name": "Ølby St.",
+            "extId": "8600792",
+            "routeIdx": 3,
+            "lon": 12.17576,
+            "lat": 55.47975,
+            "arrTime": "07:47:00",
+            "arrDate": "2026-06-16",
+            "depTime": "07:48:00",
+            "depDate": "2026-06-16",
+            "arrPrognosisType": "PROGNOSED",
+            "depPrognosisType": "PROGNOSED"
+          }
+        ]
+      }
+    }
+  ],
+  "serverVersion": "2.53.1.2",
+  "dialectVersion": "2.53-Rejseplanen",
+  "planRtTs": "2026-06-16T07:21:00+02:00"
+}

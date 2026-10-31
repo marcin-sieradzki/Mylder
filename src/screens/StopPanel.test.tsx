@@ -26,10 +26,10 @@ import { BOARD_GRACE } from './StopPanel'
 // A stop's departures panel from the stop route's answers saved with the weekday recording, at
 // the start of its second minute, 07:21:00 in Copenhagen. jsdom has no server: the route answers
 // from those files, and a test changes one where the recording shows no such case.
-const saved = (stop: string): StopDepartures =>
+const saved = (stop: string, recording = 'weekday'): StopDepartures =>
   JSON.parse(
     readFileSync(
-      join(process.cwd(), 'recordings', 'weekday', 'answers', 'stops', `${stop}.json`),
+      join(process.cwd(), 'recordings', recording, 'answers', 'stops', `${stop}.json`),
       'utf8',
     ),
   ) as StopDepartures
@@ -694,6 +694,34 @@ describe('the trips standing at a stop’s platforms', () => {
     expect(destinations()).toEqual([1, 2, 3, 4, 5, 6].map((n) => `Destination ${n}`))
     expect(all).toHaveAttribute('aria-expanded', 'true')
     expect(all).toHaveTextContent('Show fewer')
+  })
+
+  it('shows 4 of the six trains standing at København H on the crowded recording, and the rest on Show all', async () => {
+    // Its stop route's answer at 07:22:00, saved with the recording.
+    const crowded = saved('8600626', 'crowded')
+    vi.setSystemTime(crowded.fetched)
+    answers.set('8600626', crowded)
+    openStop('en', '?stop=8600626')
+    const section = standingSection(await panel('København H'))
+    const trains = () =>
+      within(section)
+        .getAllByRole('listitem')
+        .map((each) => within(each).getByRole('button').getAttribute('aria-label'))
+    expect(trains()).toEqual([
+      'Train RE to Næstved St.',
+      'S-tog A to Hundige St.',
+      'S-tog A to Hillerød St.',
+      'S-tog E to Køge St.',
+    ])
+    fireEvent.click(within(section).getByRole('button', { name: 'Show all 6' }))
+    expect(trains()).toEqual([
+      'Train RE to Næstved St.',
+      'S-tog A to Hundige St.',
+      'S-tog A to Hillerød St.',
+      'S-tog E to Køge St.',
+      'S-tog E to Holte St.',
+      'S-tog A to Hillerød St.',
+    ])
   })
 
   it('shows 4 with no button when 4 stand', async () => {
