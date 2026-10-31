@@ -77,8 +77,11 @@ export interface DrawnKind {
   readonly picks: string
   /** Where the `i`th dot is drawn in the canvas, by where `project` puts a point now. */
   at(i: number, project: Project): [number, number]
-  /** The layers that draw it, each dot `radiusScale` times Perron's size. */
-  layers(radiusScale: number): Layer[]
+  /**
+   * The layers that draw it, each dot `radiusScale` times Perron's size, on a map turned to
+   * `heading`, the compass direction up the canvas, clockwise from north in degrees.
+   */
+  layers(radiusScale: number, heading: number): Layer[]
 }
 
 export interface DotPicking {

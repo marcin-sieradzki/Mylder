@@ -25,13 +25,15 @@ export interface Vehicles {
   /** Longitude and latitude, two per vehicle. */
   readonly positions: Float64Array
   /**
-   * How far each vehicle is drawn off its position, in px, east and north, two per vehicle: onto
-   * its line's strand where lines share a track (Perron's map foundation, "Lines and dots").
+   * How far each vehicle is drawn off its position, in px across the canvas to the right and up
+   * it, two per vehicle: onto its line's strand where lines share a track (Perron's map
+   * foundation, "Lines and dots"), as the map's camera draws the strand (offsets.ts).
    */
   readonly offsets: Float32Array
   /**
    * Each vehicle's strand on each step of its pattern, in px to the right of its way, which its
-   * offset turns to its heading; none for a vehicle that rides on the track's centre.
+   * offset lays on the ground square to its way; none for a vehicle that rides on the track's
+   * centre.
    */
   readonly strands: readonly (Float32Array | undefined)[]
   /** How opaque each vehicle is drawn, 0 to 1: under 1 only while it fades to a far new place. */

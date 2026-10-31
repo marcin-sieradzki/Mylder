@@ -72,7 +72,7 @@ const overAircraft = (x: number, y: number, hex: string) =>
     picked: true,
     index: aircraftDrawn(aircraft).keys.indexOf(hex),
     layer: aircraftDrawn(aircraft)
-      .layers(1)
+      .layers(1, 0)
       .find((layer) => layer.id === AIRCRAFT_LAYER),
   }) as unknown as PickingInfo
 
@@ -192,7 +192,7 @@ describe('picking an aircraft', () => {
   })
 
   it("makes only the aircraft's halos pickable, which every state fills, a hollow plane too", () => {
-    const drawnLayers = aircraftDrawn(aircraft).layers(1)
+    const drawnLayers = aircraftDrawn(aircraft).layers(1, 0)
     expect(drawnLayers.map((layer) => layer.id)).toEqual([
       'aircraft-halos',
       'aircraft',

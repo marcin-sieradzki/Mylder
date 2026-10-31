@@ -1,5 +1,6 @@
 // The aircraft as the canvas draws them (docs/aircraft.md, "The browser"), above the vehicles in
-// the same overlay: Perron's aircraft glyph (aircraft-glyphs.ts), turned to each one's track, on
+// the same overlay: Perron's aircraft glyph (aircraft-glyphs.ts), turned to each one's track less
+// the map's heading, so it points along its track however the map is turned (ADR 0016), on
 // the vehicle dots' halo, in three icon layers, bottom to top: the halos, the bodies and the rims.
 // The glyphs are masks in one atlas drawn from Perron's outline at the sizes its tokens give, so
 // deck.gl tints each with its colour; a few lines of shader cut a No signal plane from the top left
@@ -45,7 +46,10 @@ export interface DrawnAircraft {
   /** Red, green, blue and alpha, four per aircraft. */
   readonly fill: Uint8ClampedArray
   readonly line: Uint8ClampedArray
-  /** Each one's turn from north, anticlockwise as deck.gl turns an icon. */
+  /**
+   * Each one's turn from north, anticlockwise as deck.gl turns an icon: its turn on the canvas
+   * while the map faces north.
+   */
   readonly angle: Float32Array
 }
 
@@ -270,10 +274,11 @@ function attributesOf(drawn: DrawnAircraft) {
   const sizes = [...drawn.size]
   const shared = {
     getSize: { value: Float32Array.from(sizes, (size) => atlas.cell.get(size) ?? 0), size: 1 },
-    getAngle: { value: drawn.angle, size: 1 },
   }
   return {
     atlas,
+    /** Each glyph's turn on the canvas, for the heading it was last drawn at. */
+    turned: { heading: 0, getAngle: { value: drawn.angle, size: 1 } },
     haloColour: [...drawn.look.halo.colour] as [number, number, number, number],
     halos: { attributes: shared, getIcon: spriteOf(sizes.map(haloOf)) },
     bodies: {
@@ -297,15 +302,29 @@ function attributesOf(drawn: DrawnAircraft) {
 
 /**
  * The layers that draw the aircraft where their positions are now, each glyph `radiusScale` times
- * Perron's size, as the vehicle dots are. deck.gl uploads an attribute again only when it is
- * handed a new one, so the positions are new on every call.
+ * Perron's size, as the vehicle dots are, on a map turned to `heading`, clockwise from north in
+ * degrees: each glyph turned to its track less the heading. deck.gl uploads an attribute again
+ * only when it is handed a new one, so the positions are new on every call, and the turns each
+ * time the heading changes.
  */
-export function aircraftLayers(drawn: DrawnAircraft, radiusScale: number): Layer[] {
+export function aircraftLayers(
+  drawn: DrawnAircraft,
+  radiusScale: number,
+  heading: number,
+): Layer[] {
   let data = binary.get(drawn)
   if (!data) binary.set(drawn, (data = attributesOf(drawn)))
   const { length } = drawn
   const { atlas } = data
-  const moving = { getPosition: { value: drawn.positions, size: 2 } }
+  if (data.turned.heading !== heading) {
+    // A track runs clockwise and deck.gl turns an icon anticlockwise, so the heading is added.
+    const value = Float32Array.from(drawn.angle, (angle) => angle + heading)
+    data.turned = { heading, getAngle: { value, size: 1 } }
+  }
+  const moving = {
+    getPosition: { value: drawn.positions, size: 2 },
+    getAngle: data.turned.getAngle,
+  }
   const icons = {
     iconAtlas: atlas.url,
     iconMapping: atlas.mapping,
@@ -356,7 +375,7 @@ export function aircraftDrawn(drawn: DrawnAircraft): DrawnKind {
       keys: drawn.keys,
       picks: AIRCRAFT_LAYER,
       at: (i, project) => drawnAt(drawn, i, project),
-      layers: (radiusScale) => aircraftLayers(drawn, radiusScale),
+      layers: (radiusScale, heading) => aircraftLayers(drawn, radiusScale, heading),
     }
     aircraftKinds.set(drawn, kind)
   }

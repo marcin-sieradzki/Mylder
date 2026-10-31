@@ -4,8 +4,9 @@
 // filters hide, are where their motion (loop.ts) moves them each frame, and the aircraft, unless
 // the Planes filter hides them, where theirs (aircraft-loop.ts) does, with each kind's glyphs made
 // again when its snapshot lands, a data state turns by the clock, a filter or the theme changes;
-// every dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap
-// on one opens its panel, and a tap that finds no dot opens the stop under it, if any.
+// every dot's size where the zoom puts it, and each one where the camera draws it however the
+// map is turned or tilted. A hover picks a dot of either kind (picking.ts), a tap on one opens its
+// panel, and a tap that finds no dot opens the stop under it, if any.
 // Each frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot while
 // the map is open, and the aircraft while the Planes filter shows them too. The numbers of
 // vehicles and aircraft drawn are on the map's container as `data-vehicles` and `data-aircraft`,
@@ -101,6 +102,9 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     },
   })
   const project = (lonLat: [number, number]) => map.project(lonLat)
+  const flatNorthUp = () => map.getBearing() === 0 && map.getPitch() === 0
+  // Whether the camera has turned or tilted since the dots' offsets were last written.
+  let reproject = false
   const overlay = new MapLibreOverlay({ interleaved: false, layers: [], ...picking.props })
   map.addControl(overlay)
   let removed = false
@@ -117,10 +121,15 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
 
   // One render a frame draws every kind, wherever their motion has placed them.
   const render = () => {
+    if (reproject) {
+      reproject = false
+      if (frames.still()) loop.reproject()
+    }
     // With nothing left to draw, such as the aircraft alone with the Planes filter turned off,
     // no layers clear what was drawn.
     const drawn = kinds()
-    overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale)) })
+    const heading = map.getBearing()
+    overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale, heading)) })
     if (vehicles) {
       container.dataset.vehicles = String(vehicles.length)
       follow.frame(vehicles, along)
@@ -132,7 +141,11 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
   const frames = frameDriver({ render })
   const follow = followCamera(map, container)
   const along = (key: string) => loop.along(key)
-  const loop = vehicleLoop({ now: () => serverNow(liveSnapshot.get()), frames })
+  const loop = vehicleLoop({
+    now: () => serverNow(liveSnapshot.get()),
+    frames,
+    projection: () => ({ project, zoom: map.getZoom(), flatNorthUp: flatNorthUp() }),
+  })
   const aircraftMotion = aircraftLoop({ now: () => serverNow(liveAircraft.get()), frames })
 
   // The snapshot's own timetable gives each line its colour; one that won't load leaves the
@@ -272,8 +285,23 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     frames.request()
   }
   map.on('zoom', onZoom)
+  // Turned or tilted, each move of the camera changes where each strand's offset falls on the
+  // canvas and which way each plane points: the next frame draws again, writing the offsets
+  // first while the dots stand still, as a frame that moves them writes them anyway. So does the
+  // move back to flat and north-up; flat and north-up, a pan or a zoom changes neither.
+  let wasFlatNorthUp = true
+  const onCamera = () => {
+    const flat = flatNorthUp()
+    if (wasFlatNorthUp && flat) return
+    wasFlatNorthUp = flat
+    reproject = true
+    frames.request()
+  }
   // The picked dot's card follows it as the map pans, even while the dots stand still.
-  const onMove = () => picking.follow(kinds(), project)
+  const onMove = () => {
+    onCamera()
+    picking.follow(kinds(), project)
+  }
   map.on('move', onMove)
   // A resized window moves the canvas on the page, which the card's point counts from.
   const onResize = () => {

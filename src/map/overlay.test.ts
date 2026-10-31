@@ -5,9 +5,11 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { stubProjection } from '../test/projection.ts'
 import { AIRCRAFT_LAYER } from './AircraftGlyphLayer.ts'
 import { liveAircraft } from './aircraft.ts'
 import { liveSnapshot } from './live.ts'
+import { motionPause } from './pause.ts'
 import { pickedVehicle } from './picking.ts'
 import { vehicleOverlay, type VehicleOverlay } from './overlay.ts'
 import { mapView } from './view.ts'
@@ -15,9 +17,11 @@ import { mapView } from './view.ts'
 // deck.gl's overlay draws with WebGL, which jsdom lacks: a stand-in keeps each set of vehicles it
 // is given, by the positions the loop moves frame by frame, and the layers of its latest render.
 const drawn = vi.hoisted(() => new Set<unknown>())
-const rendered = vi.hoisted(() => ({ ids: [] as string[], times: 0 }))
+const rendered = vi.hoisted(() => ({ ids: [] as string[], times: 0, layers: [] as unknown[] }))
 interface Moving {
   readonly getPosition: { readonly value: unknown }
+  readonly getPixelOffset?: { readonly value: Float32Array }
+  readonly getAngle?: { readonly value: Float32Array }
 }
 interface Drawn {
   readonly id: string
@@ -35,6 +39,7 @@ vi.mock('@deck.gl/maplibre', () => ({
     }
     setProps({ layers }: { layers: Drawn[] }) {
       rendered.ids = layers.map((layer) => layer.id)
+      rendered.layers = layers
       rendered.times++
       const vehicles = layers.find((layer) => layer.id === 'vehicles')
       if (vehicles) drawn.add(vehicles.props.data.attributes!.getPosition.value)
@@ -83,6 +88,8 @@ const map = {
   on() {},
   off() {},
   getZoom: () => 12,
+  getBearing: () => 0,
+  getPitch: () => 0,
   getCanvas: () => document.createElement('canvas'),
   project: ([x, y]: [number, number]) => ({ x, y }),
 } as unknown as MapLibreMap
@@ -105,8 +112,39 @@ afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
   vi.useRealTimers()
+  motionPause.set(false)
   window.history.replaceState(null, '', '/')
 })
+
+/** The moving attributes of the layer `id` as last rendered, copied. */
+const renderedOf = (id: string) => {
+  const layer = (rendered.layers as Drawn[]).find((each) => each.id === id)!
+  const { getPixelOffset, getAngle } = layer.props.data.attributes!
+  return {
+    offsets: getPixelOffset && [...getPixelOffset.value],
+    angles: getAngle && [...getAngle.value],
+  }
+}
+
+/** A map turned to face `bearing`, flat, whose moves the test makes, in the stand-in's camera. */
+function turnableMap() {
+  const camera = { bearing: 0 }
+  const handlers = new Map<string, () => void>()
+  const turnable = {
+    ...map,
+    on: (type: string, handler: () => void) => handlers.set(type, handler),
+    getBearing: () => camera.bearing,
+    project: (lonLat: [number, number]) =>
+      stubProjection({ centre: [12.57, 55.68], zoom: 12, bearing: camera.bearing }).project(lonLat),
+  } as unknown as MapLibreMap
+  /** Turns the map to `bearing`, as a rider's twist does, and lets the next frame draw. */
+  const turnTo = async (bearing: number) => {
+    camera.bearing = bearing
+    handlers.get('move')!()
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+  }
+  return { turnable, turnTo }
+}
 
 describe('the vehicles over the map', () => {
   it('draws each snapshot once when it lands', async () => {
@@ -307,5 +345,43 @@ describe('the vehicles over the map', () => {
     expect(canvas.style.cursor).toBe('pointer')
     hovering.onClick!(onPlane)
     expect(mapView.get().panel).toEqual({ kind: 'aircraft', id: hex })
+  })
+})
+
+describe('the overlay on a turned map', () => {
+  it('draws each plane along its track less the heading as the map turns', async () => {
+    motionPause.set(true)
+    const { turnable, turnTo } = turnableMap()
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(turnable, container)
+    liveAircraft.update(atFetch(aircraft))
+    await vi.waitFor(() => expect(container.dataset.aircraft).toBe('9'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    const shown = aircraft.aircraft.filter((each) => each.track !== undefined)
+    const plane = aircraft.aircraft.indexOf(shown[0])
+    const track = shown[0].track!
+    expect(renderedOf('aircraft').angles![plane]).toBeCloseTo(-track, 3)
+    await turnTo(90)
+    expect(renderedOf('aircraft').angles![plane]).toBeCloseTo(90 - track, 3)
+  })
+
+  it('keeps each dot on its strand as the map turns, though the dots stand still', async () => {
+    motionPause.set(true)
+    const { turnable, turnTo } = turnableMap()
+    const container = document.createElement('div')
+    overlay = vehicleOverlay(turnable, container)
+    liveSnapshot.update({ snapshot: minute6 })
+    await vi.waitFor(() => expect(container.dataset.vehicles).toBe('18'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    // A train on its strand, where lines share a track, half a track spacing off its centre.
+    const flat = renderedOf('vehicles').offsets!
+    const i = flat.findIndex((offset) => offset !== 0) >> 1
+    const [east, north] = flat.slice(i * 2, i * 2 + 2)
+    expect(Math.hypot(east, north)).toBeCloseTo(1.4, 3)
+    // Facing east, the ground's north lies to the left of the canvas and its east up it.
+    await turnTo(90)
+    const [right, up] = renderedOf('vehicles').offsets!.slice(i * 2, i * 2 + 2)
+    expect(right).toBeCloseTo(-north, 3)
+    expect(up).toBeCloseTo(east, 3)
   })
 })
