@@ -119,3 +119,70 @@ test('the 3D toggle tilts the map, the compass turns it back to north, and reset
   await expect(toggle).toHaveAttribute('aria-pressed', 'false')
   await expect(scale).toBeVisible()
 })
+
+test('a tilted, turned map keeps its angle in the address, a reload opens it there, and reset makes the link flat again', async ({
+  page,
+}) => {
+  await page.goto('/en?map=13.00/55.67600/12.56800')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toHaveAttribute('data-tilt', '0')
+
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  // Two steps of each, as many as the keys run ahead of the map.
+  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-tilt', '20')
+  await expect(map).toHaveAttribute('data-heading', '30')
+  await expect(page).toHaveURL(/[?&]map=13\.00\/55\.67600\/12\.56800\/30\.0\/20\.0$/)
+
+  await page.reload()
+  await expect(map).toHaveAttribute('data-tilt', '20')
+  await expect(map).toHaveAttribute('data-heading', '30')
+  await expect(scaleBar(page)).toBeHidden()
+
+  await page.getByRole('button', { name: 'Centre the map' }).click()
+  await expect(map).toHaveAttribute('data-tilt', '0')
+  await expect(page).toHaveURL(/[?&]map=[\d.]+\/[\d.]+\/[\d.]+$/)
+})
+
+for (const [device, viewport] of [
+  ['a desktop', { width: 1280, height: 720 }],
+  ['a phone', { width: 390, height: 844 }],
+] as const) {
+  test(`a five-part link opens the map at its tilt and heading with every vehicle drawn, on ${device}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport)
+    const served = servedVehicles(page)
+    await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/50.0')
+    const map = page.locator('[data-vehicles]')
+    await expect(map).toHaveAttribute('data-tilt', '50')
+    await expect(map).toHaveAttribute('data-heading', '-30')
+    await expect(scaleBar(page)).toBeHidden()
+    await expect.poll(() => served.count).toBeGreaterThan(0)
+    await expect
+      .poll(async () => Number(await map.getAttribute('data-vehicles')) === served.count)
+      .toBe(true)
+  })
+}
+
+test('a three-part link opens flat and north-up, and a tilt out of range is dropped while the map still opens', async ({
+  page,
+}) => {
+  await page.goto('/en?map=14.00/55.67600/12.56800')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toHaveAttribute('data-tilt', '0')
+  await expect(map).toHaveAttribute('data-heading', '0')
+  await expect(scaleBar(page)).toBeVisible()
+  await expect(page).toHaveURL(/[?&]map=14\.00\/55\.67600\/12\.56800$/)
+
+  // Counted from this page's snapshots on, as many as the latest served.
+  const served = servedVehicles(page)
+  await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/75.0')
+  await expect(map).toHaveAttribute('data-tilt', '0')
+  await expect(map).toHaveAttribute('data-heading', '-30')
+  await expect.poll(() => served.count).toBeGreaterThan(0)
+  await expect
+    .poll(async () => Number(await map.getAttribute('data-vehicles')) === served.count)
+    .toBe(true)
+})
