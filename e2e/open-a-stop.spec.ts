@@ -128,15 +128,12 @@ test.describe('on a phone', () => {
   }) => {
     // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23. Its dot
     // sits on the stop's marker, and a tap on a dot opens the vehicle, so the buses are hidden for
-    // the tap on the stop and shown again once its panel is open. A stop's sheet opens under the
-    // Overview's on a phone (#175), so the Overview is closed first.
+    // the tap on the stop and shown again once its panel is open. The Overview stays open at its
+    // peek, and the stop's sheet opens in front of it.
     await serveFirstMinute(page)
     await serveSavedStop(page, '48645')
     await page.goto(`/en?hide=bus&map=17.00/${REFSHALEOEN.lat}/${REFSHALEOEN.lon}`)
-    await page
-      .getByRole('dialog', { name: 'Overview' })
-      .getByRole('button', { name: 'Close' })
-      .click()
+    await expect(page.getByRole('dialog', { name: 'Overview' })).toBeVisible()
     const { width, height } = page.viewportSize()!
     const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
     await expect(async () => {
