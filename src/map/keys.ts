@@ -1,5 +1,5 @@
-// The map's keys (docs/screens.md, "Accessibility"): + and − zoom, the arrows pan, Esc closes
-// the card. The map takes + and − and the arrows only while the focus is on the page itself or
+// The map's keys (docs/screens.md, "Accessibility"): + and − zoom, the arrows pan, Shift + ← and
+// → turn the map and Shift + ↑ and ↓ tilt it, Esc closes the card. The map takes + and − and the arrows only while the focus is on the page itself or
 // on the map, so the arrows still move through a toolbar and type in a field. MapLibre's own
 // keys are off, so a press on the map moves it once.
 import 'client-only'
@@ -17,6 +17,14 @@ const MOVES: Record<string, Move> = {
   ArrowRight: (camera, input) => camera.pan(1, 0, input),
   ArrowUp: (camera, input) => camera.pan(0, -1, input),
   ArrowDown: (camera, input) => camera.pan(0, 1, input),
+}
+
+/** With Shift, the arrows turn and tilt the map instead. */
+const SHIFTED: Record<string, Move> = {
+  ArrowLeft: (camera, input) => camera.turn(-1, input),
+  ArrowRight: (camera, input) => camera.turn(1, input),
+  ArrowUp: (camera, input) => camera.tilt(1, input),
+  ArrowDown: (camera, input) => camera.tilt(-1, input),
 }
 
 /** Whether the focus is on the page itself rather than on a control. */
@@ -37,7 +45,8 @@ export function listenForMapKeys(
       picked.clear()
       return
     }
-    const move = MOVES[event.key]
+    // + is a shifted key on many keyboards, so Shift changes only what the arrows do.
+    const move = (event.shiftKey ? SHIFTED[event.key] : undefined) ?? MOVES[event.key]
     const target = event.target
     if (!move || !(onPage(target) || (target instanceof Element && camera.holds(target)))) return
     event.preventDefault()

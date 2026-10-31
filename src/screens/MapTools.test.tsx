@@ -7,6 +7,7 @@ import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
 import { mapCamera, type CameraMap } from '../map/camera'
+import { followCamera, followedVehicle, type FollowMap } from '../map/follow'
 import { motionPause } from '../map/pause'
 import { pickedVehicle } from '../map/picking'
 import { MapTools } from './MapTools'
@@ -271,6 +272,58 @@ describe("the map's keys", () => {
     expect(state.panned).toEqual([200, -100])
     await user.keyboard('{ArrowLeft}{ArrowDown}{ArrowDown}')
     expect(state.panned).toEqual([100, 100])
+  })
+
+  it('tilt the map a step with Shift + ↑ and back with Shift + ↓, never past 60°', async () => {
+    const user = userEvent.setup()
+    const { state, settle } = open()
+    const press = async (key: string) => {
+      await user.keyboard(`{Shift>}{${key}}{/Shift}`)
+      act(settle)
+    }
+    await press('ArrowUp')
+    expect(state.pitch).toBe(10)
+    await press('ArrowUp')
+    expect(state.pitch).toBe(20)
+    await press('ArrowDown')
+    expect(state.pitch).toBe(10)
+    for (let i = 0; i < 8; i++) await press('ArrowUp')
+    expect(state.pitch).toBe(60)
+    await press('ArrowDown')
+    expect(state.pitch).toBe(50)
+    // Tilting moves neither the centre nor the heading.
+    expect(state.panned).toEqual([0, 0])
+    expect(state.bearing).toBe(0)
+  })
+
+  it('turn the map a step either way with Shift + ← and →', async () => {
+    const user = userEvent.setup()
+    const { state, settle } = open()
+    const press = async (key: string) => {
+      await user.keyboard(`{Shift>}{${key}}{/Shift}`)
+      act(settle)
+    }
+    await press('ArrowRight')
+    expect(state.bearing).toBe(15)
+    await press('ArrowRight')
+    expect(state.bearing).toBe(30)
+    for (let i = 0; i < 3; i++) await press('ArrowLeft')
+    expect(state.bearing).toBe(-15)
+    // Turning moves neither the centre nor the tilt.
+    expect(state.panned).toEqual([0, 0])
+    expect(state.pitch).toBe(0)
+  })
+
+  it('end Follow with a Shift + arrow press, as with any other key move', async () => {
+    const user = userEvent.setup()
+    const { map, container } = open()
+    const follow = followCamera(map as unknown as FollowMap, container)
+    onTestFinished(() => follow.remove())
+    for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+      act(() => followedVehicle.start('bus.5C.1'))
+      await user.keyboard(`{Shift>}{${key}}{/Shift}`)
+      expect(followedVehicle.get()).toBeUndefined()
+    }
   })
 
   it('leave the arrows to the toolbar while the focus is in it', async () => {

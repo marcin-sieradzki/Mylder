@@ -3,7 +3,7 @@
 // scale bar and the zoom buttons read back. The canvas attaches its MapLibre map; until it has,
 // and where WebGL is missing, the controls have nothing to move.
 import 'client-only'
-import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { CameraOptions, Map as MapLibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
 
 /** What a view reads back for the controls. */
@@ -33,9 +33,11 @@ export type CameraMap = Pick<
   | 'zoomOut'
   | 'panBy'
   | 'easeTo'
+  | 'jumpTo'
   | 'getZoom'
   | 'getMinZoom'
   | 'getMaxZoom'
+  | 'getMaxPitch'
   | 'getCenter'
   | 'getPitch'
   | 'getBearing'
@@ -57,6 +59,10 @@ export interface Camera {
    * it answers, which the move carries, as MapLibre's own moves carry theirs, so Follow ends.
    */
   pan(across: -1 | 0 | 1, down: -1 | 0 | 1, input?: Event): void
+  /** Tilts by a step, 1 further from looking straight down or -1 back, from flat to the most. */
+  tilt(by: -1 | 1, input?: Event): void
+  /** Turns by a step, 1 clockwise or -1 anticlockwise, carrying `input` as `pan` does. */
+  turn(by: -1 | 1, input?: Event): void
   reset(): void
   /** Whether `element` is the map or inside it. */
   holds(element: Element): boolean
@@ -65,6 +71,17 @@ export interface Camera {
 /** How far one press of an arrow key pans, in CSS pixels, as MapLibre's own keys do. */
 export const PAN_STEP = 100
 
+/** How far one tilt or turn by a key moves the map, in degrees, as MapLibre's own keys do. */
+export const TILT_STEP = 10
+export const TURN_STEP = 15
+
+/** How long a tilt or turn by a key eases for, in ms, as MapLibre's own keys do. */
+const STEP_EASE = 300
+
+/** Whether the system asks for reduced motion; no where the browser has no media queries. */
+const systemReducedMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+
 /** The Earth's circumference at the equator, in metres, as Web Mercator takes it. */
 const EARTH = 40_075_016.686
 
@@ -72,8 +89,11 @@ const EARTH = 40_075_016.686
 export const metersPerPixelAt = (latitude: number, zoom: number): number =>
   (EARTH * Math.cos((latitude * Math.PI) / 180)) / (512 * 2 ** zoom)
 
-/** A camera with no map yet. */
-export function cameraStore(): Camera {
+/**
+ * A camera with no map yet. Its moves ease, unless `reducedMotion` says the system asks for
+ * reduced motion, when they jump.
+ */
+export function cameraStore(reducedMotion: () => boolean = systemReducedMotion): Camera {
   let map: CameraMap | undefined
   let home: (() => Home) | undefined
   let view: CameraView | undefined
@@ -103,6 +123,14 @@ export function cameraStore(): Camera {
     for (const listener of listeners) listener()
   }
 
+  /** Moves the attached map to `target`, carrying the viewer's `input` as MapLibre's moves do. */
+  const move = (target: CameraOptions, input: Event | undefined, duration?: number) => {
+    if (!map) return
+    const eventData = input ? { originalEvent: input } : undefined
+    if (reducedMotion()) map.jumpTo(target, eventData)
+    else map.easeTo({ ...target, ...(duration === undefined ? {} : { duration }) }, eventData)
+  }
+
   return {
     attach(attached, opened) {
       map = attached
@@ -130,6 +158,14 @@ export function cameraStore(): Camera {
         undefined,
         input ? { originalEvent: input } : undefined,
       ),
+    tilt(by, input) {
+      if (!map) return
+      const pitch = Math.min(map.getMaxPitch(), Math.max(0, map.getPitch() + by * TILT_STEP))
+      move({ pitch }, input, STEP_EASE)
+    },
+    turn(by, input) {
+      if (map) move({ bearing: map.getBearing() + by * TURN_STEP }, input, STEP_EASE)
+    },
     reset() {
       if (map && home) map.easeTo(home())
     },
