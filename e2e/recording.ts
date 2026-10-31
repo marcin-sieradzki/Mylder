@@ -67,6 +67,9 @@ export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
 export const CROWDED = 'crowded'
 export const CROWDED_PORT = 4177
 export const CROWDED_URL = `http://localhost:${CROWDED_PORT}`
+export const CROWDED_START = Date.parse(
+  (readJson(join('recordings', CROWDED, 'clock.json')) as { start: string }).start,
+)
 
 export const test = base.extend({
   page: async ({ page }, provide) => {

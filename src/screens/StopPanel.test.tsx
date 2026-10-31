@@ -25,10 +25,10 @@ import { Providers } from './Providers'
 // A stop's departures panel from the stop route's answers saved with the weekday recording, at
 // the start of its second minute, 07:21:00 in Copenhagen. jsdom has no server: the route answers
 // from those files, and a test changes one where the recording shows no such case.
-const saved = (stop: string): StopDepartures =>
+const saved = (stop: string, recording = 'weekday'): StopDepartures =>
   JSON.parse(
     readFileSync(
-      join(process.cwd(), 'recordings', 'weekday', 'answers', 'stops', `${stop}.json`),
+      join(process.cwd(), 'recordings', recording, 'answers', 'stops', `${stop}.json`),
       'utf8',
     ),
   ) as StopDepartures
@@ -633,12 +633,7 @@ describe('the trips standing at a stop’s platforms', () => {
 
   it('shows 4 of the six trains standing at København H on the crowded recording, and the rest on Show all', async () => {
     // Its stop route's answer at 07:22:00, saved with the recording.
-    const crowded = JSON.parse(
-      readFileSync(
-        join(process.cwd(), 'recordings', 'crowded', 'answers', 'stops', '8600626.json'),
-        'utf8',
-      ),
-    ) as StopDepartures
+    const crowded = saved('8600626', 'crowded')
     vi.setSystemTime(crowded.fetched)
     answers.set('8600626', crowded)
     openStop('en', '?stop=8600626')

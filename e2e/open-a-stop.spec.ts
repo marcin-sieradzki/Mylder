@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
-  CROWDED,
+  CROWDED_START,
   CROWDED_URL,
   expect,
   onScreen,
@@ -220,8 +220,7 @@ test('a stop where more than four trains stand lists four, and the rest on Show 
 }) => {
   // København H on the crowded recording, where six trains stand from 07:20 to 07:24 by its
   // server's clock, which this test's first request starts.
-  const clock = JSON.parse(readFileSync(join('recordings', CROWDED, 'clock.json'), 'utf8'))
-  expect(Date.parse(clock.start)).toBe(RECORDING_START)
+  expect(CROWDED_START).toBe(RECORDING_START)
   await page.goto(`${CROWDED_URL}/en?stop=8600626`)
   const panel = page.getByRole('dialog', { name: 'København H' })
   const standing = panel.getByRole('region', { name: 'At the platforms now' })
