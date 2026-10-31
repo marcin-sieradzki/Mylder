@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { StopDepartures } from '../tracker/index.ts'
-import { panelAnswers, type PanelDeps } from './panels.ts'
+import type { StopArrivals, StopDepartures } from '../tracker/index.ts'
+import { panelAnswers, stopArrivals, type PanelDeps } from './panels.ts'
 import { addressView } from './view.ts'
 
 // The open panel's answer against the weekday recording's saved stop answers, on fake timers.
@@ -19,10 +19,18 @@ const saved = (stop: string): StopDepartures =>
 const NORREPORT = saved('27532')
 const HILLEROD = saved('8600683')
 
+/** Nørreport St.'s arrivals, saved with the recording beside its departures. */
+const NORREPORT_ARRIVALS = JSON.parse(
+  readFileSync(
+    join(process.cwd(), 'recordings', 'weekday', 'answers', 'arrivals', '27532.json'),
+    'utf8',
+  ),
+) as StopArrivals
+
 const S = 1000
 
 /** What the route answers next: an answer, a 404, a 503, or no connection. */
-type Answer = StopDepartures | 404 | 503 | 'offline'
+type Answer = StopDepartures | StopArrivals | 404 | 503 | 'offline'
 
 let answers: Answer[]
 let asked: { url: string; at: number }[]
@@ -192,5 +200,70 @@ describe("the open panel's answer", () => {
     await landed()
     expect(store.get()?.panel).toEqual({ kind: 'trip', id: 'bus.5C.32331e0e20.20260616.0707' })
     expect(asked.map((each) => each.url)).toEqual(['/api/trips/bus.5C.32331e0e20.20260616.0707'])
+  })
+})
+
+describe("an open stop's arrivals", () => {
+  /** The page's view at `search`, the panel answers and the arrivals that follow it. */
+  function openBoth(search: string) {
+    window.history.replaceState(null, '', `/en${search}`)
+    const view = addressView()
+    const panel = panelAnswers(view, deps())
+    const arrivals = stopArrivals(view, deps())
+    panel.subscribe(() => {})
+    const stop = arrivals.subscribe(() => {})
+    return { view, arrivals, stop }
+  }
+
+  /** The routes asked, in order. */
+  const urls = () => asked.map((each) => each.url)
+
+  it('asks for nothing while the stop is on Departures', async () => {
+    const { arrivals } = openBoth('?stop=27532')
+    await landed()
+    expect(arrivals.get()).toBeUndefined()
+    expect(urls()).toEqual(['/api/stops/27532'])
+  })
+
+  it('asks the arrivals route once the stop is on Arrivals, beside its departures', async () => {
+    answers = [NORREPORT_ARRIVALS]
+    const { view, arrivals } = openBoth('?stop=27532')
+    await landed()
+    view.update({ board: 'arrivals' })
+    expect(arrivals.get()).toEqual({ panel: { kind: 'stop', id: '27532' }, status: 'loading' })
+    await landed()
+    expect(arrivals.get()).toEqual({
+      panel: { kind: 'stop', id: '27532' },
+      status: 'ok',
+      answer: NORREPORT_ARRIVALS,
+    })
+    expect(urls()).toEqual(['/api/stops/27532', '/api/stops/27532/arrivals'])
+  })
+
+  it('asks for both at once for a link that opens on Arrivals', async () => {
+    openBoth('?stop=27532&board=arrivals')
+    await landed()
+    expect(urls().toSorted()).toEqual(['/api/stops/27532', '/api/stops/27532/arrivals'])
+  })
+
+  it('stops asking once the stop is back on Departures, closes, or nothing watches it', async () => {
+    const { view, arrivals, stop } = openBoth('?stop=27532&board=arrivals')
+    await landed()
+    view.update({ board: undefined })
+    expect(arrivals.get()).toBeUndefined()
+    await vi.advanceTimersByTimeAsync(10 * 60 * S)
+    const onDepartures = urls().filter((url) => url.endsWith('/arrivals'))
+    expect(onDepartures).toEqual(['/api/stops/27532/arrivals'])
+    view.update({ board: 'arrivals' })
+    await landed()
+    view.update({ panel: undefined })
+    expect(arrivals.get()).toBeUndefined()
+    view.update({ panel: { kind: 'stop', id: '27532' }, board: 'arrivals' })
+    await landed()
+    stop()
+    const before = urls().filter((url) => url.endsWith('/arrivals')).length
+    expect(before).toBe(3)
+    await vi.advanceTimersByTimeAsync(10 * 60 * S)
+    expect(urls().filter((url) => url.endsWith('/arrivals'))).toHaveLength(before)
   })
 })
