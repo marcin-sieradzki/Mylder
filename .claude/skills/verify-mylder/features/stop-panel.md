@@ -6,6 +6,7 @@ A panel for one stop: its name, its lines as badges, "At the platforms now" with
 
 - `stop-open` opens from a stop on the map, a disruption's ringed stop, or a shared link.
 - `stop-list` lists departures with countdowns; the Metro as "every N min".
+- `stop-first-paint` opened by link, shows each countdown as "—" and no "may be out of date" until the page's first snapshot gives it the server's clock, never "Now" on every row.
 - `stop-standing` lists the trips standing at the stop's platforms above the departures, each opening its vehicle, or says none stands.
 - `stop-arrivals` switches to the Arrivals tab, which lists the trips arriving, each from where it comes, the Metro as an interval, or says none arrives; the address keeps the tab. A stop with a recorded arrival board answers from it, with its tracks and "Rejseplanen · arrivals"; the rest from the timetable.
 - `stop-language` keeps the panel open across the language switch.
@@ -36,9 +37,11 @@ Preconditions:
 - **No arrivals.** `page.goto('/en?stop=8600683&board=arrivals')` (Hillerød St.): the Arrivals panel says "No arrivals in the next 30 minutes for the vehicle types shown." and its source line `Timetable and positions <time>`.
 - **Language.** `page.getByRole('navigation', { name: 'Language' }).getByRole('link', { name: 'Dansk' }).click()`; the panel stays and its list is named `Afgange`; on `/da?stop=27532&board=arrivals` the tabs read `Afgange` and `Ankomster`, the list is named `Ankomster` and its rows read `Fra Holte St.`; Hillerød St.'s says "Ingen ankomster de næste 30 minutter for de viste transportformer."
 - **Missing.** `page.goto('/en?stop=nowhere')` opens `getByRole('dialog', { name: 'Stop not found' })`.
+- **First paint.** The browser's clock is today's, months past the recording's, until the page's first snapshot lands with the server's, under a second after it opens: too quick to catch with a screenshot, so record every paint. Before the first `page.goto`, `page.addInitScript` a `MutationObserver` on `document` (`subtree`, `childList`, `characterData`) that pushes the text of each `li` of every `[role="dialog"] ul[aria-label]` and each dialog's whole text onto arrays on `window`. Within the run's first five minutes, `page.goto('/en?stop=27532')` (Nørreport St., its first departure about 07:29) and wait until the first `Departures` row reads `N min`: across every recorded paint no row read `Now`, and some row read `—` (its hidden word `Unknown`) where the countdown goes. Then `page.goto('/en?stop=8600783&board=arrivals')` (København Syd St.) and wait for `Rejseplanen` and `arrivals <time>`: no recorded dialog text held `may be out of date`.
 
 ## Gotchas
 
+- Before the page's clock settles, every countdown reads `—`, the standing trips' too, while each row's clock time already shows; read by the device's clock, every row would read `Now` and a fresh board's source line `may be out of date`. `src/screens/StopPanel.test.tsx` covers it with the device a day ahead.
 - A stop marker sits under passing dots at times; tap again inside `toPass()` until the stop's panel, not a vehicle's, opens.
 - Every stop but København Syd St. answers from the timetable on the recording, on both tabs, its source line "From the timetable" and its rows without a track; only København Syd St. has recorded boards, a departure board and an arrival board, which answer it whenever it is opened, so its trains show a track (8, made up by the simulation, one per platform). The 991 standing at Refshaleøen and Orientkaj St. is a bus with no board and shows no track or stand.
 - "Show all N" (shown past four standing) can't be driven on any recording: the fixture timetable's twenty trips never put more than one non-Metro trip at one stop's platforms at once, at any minute of the day. `src/screens/StopPanel.test.tsx` covers it with a standing list made by hand.
