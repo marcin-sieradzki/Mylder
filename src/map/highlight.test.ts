@@ -157,6 +157,16 @@ describe('the fit', () => {
     expect(fitPadding(390, 844, { top: 100 })).toEqual(fitPadding(390, 844))
   })
 
+  it('keeps clear of a stop sheet whose peek reaches higher than the usual one on a phone', () => {
+    // The stop's sheet peeks 226px up, down to its tabs under a standing trip.
+    expect(fitPadding(390, 844, { peek: 226 })).toEqual({
+      top: 192,
+      right: 24,
+      bottom: 262,
+      left: 24,
+    })
+  })
+
   it('keeps the chip clear of a notice on a phone, where the peek already clears the legend', () => {
     // The top bar's two rows and a notice under them reach 190px down.
     expect(fitPadding(390, 844, { top: 190, bottom: 260 })).toEqual({

@@ -173,13 +173,15 @@ export interface Floating {
   readonly top?: number
   /** How far up the legend at the map's foot reaches, which counts on a desktop. */
   readonly bottom?: number
+  /** How far up a phone's open stop sheet peeks, where it measured its own (src/map/peek.ts). */
+  readonly peek?: number
 }
 
 /**
  * How far a fit keeps from the edges of a map `width` by `height`, clear of what floats over it,
  * from Perron's sizes: on a desktop the top bar and the highlight chip under it, the sheet at the
  * left and the detail panel at the right; on a phone the top bar's two rows, the chip and the
- * bottom sheet's peek. Where the screen has measured them, it keeps clear of the page notices
+ * bottom sheet's peek, an open stop sheet's own where it measured one. Where the screen has measured them, it keeps clear of the page notices
  * that push the chip down and, on a desktop, of the legend. A window too small for that pads
  * less, at the bottom first, so the highlight keeps room.
  */
@@ -201,7 +203,7 @@ export function fitPadding(width: number, height: number, floating: Floating = {
     : {
         top: Math.max(gap + 114 + chip + MARGIN, below), // the top bar's group, filters below
         right: MARGIN,
-        bottom: 182 + gap + MARGIN, // size.sheet-peek
+        bottom: (floating.peek ?? 182) + gap + MARGIN, // size.sheet-peek
         left: MARGIN,
       }
   const across = Math.min(1, Math.max(0, width - ROOM) / (padding.left + padding.right))

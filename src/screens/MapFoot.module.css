@@ -117,9 +117,13 @@
   }
 }
 
-/* On the open bottom sheet's peek on a phone, so the credit stays above it. */
+/* On the open bottom sheet's peek on a phone, so the credit stays above it: an open stop sheet's
+   own, --foot-peek, where it published one (src/map/peek.ts), else size.sheet-peek. */
 @media (max-width: 759.98px) {
-  .foot[data-sheet='open'] {
-    inset-block-end: calc(var(--perron-size-sheet-peek) + var(--perron-size-panel-gap));
+  .foot[data-sheet='open'],
+  .foot[data-peek] {
+    inset-block-end: calc(
+      var(--foot-peek, var(--perron-size-sheet-peek)) + var(--perron-size-panel-gap)
+    );
   }
 }

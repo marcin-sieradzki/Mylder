@@ -18,6 +18,7 @@ import { gesturesTiltAndTurn, mapCamera } from './camera.ts'
 import { followedVehicle } from './follow.ts'
 import { fitPadding, fitPlace, groundLens, mapHighlight, type Floating } from './highlight.ts'
 import { vehicleOverlay } from './overlay.ts'
+import { sheetPeek } from './peek.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
 import { timetables } from './timetable.ts'
@@ -171,7 +172,10 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
   return <div ref={container} className={className} />
 }
 
-/** How far down `top` reaches over `map`, and how far up `foot` does, where they are on screen. */
+/**
+ * How far down `top` reaches over `map`, and how far up `foot` does, where they are on screen, and
+ * how far a phone's open stop sheet peeks, where it published its peek.
+ */
 function floatingOver(
   map: HTMLElement,
   top: RefObject<HTMLElement | null> | undefined,
@@ -180,8 +184,10 @@ function floatingOver(
   const area = map.getBoundingClientRect()
   const topEdge = top?.current?.getBoundingClientRect()
   const footEdge = foot?.current?.getBoundingClientRect()
+  const peek = sheetPeek.get()
   return {
     ...(topEdge ? { top: topEdge.bottom - area.top } : {}),
     ...(footEdge ? { bottom: area.bottom - footEdge.top } : {}),
+    ...(peek === undefined ? {} : { peek }),
   }
 }

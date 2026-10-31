@@ -83,8 +83,125 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
   await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
 })
 
+const { defaultBrowserType: _, ...PIXEL_7 } = devices['Pixel 7']
+
+/** Perron's size.sheet-peek, as the page's token stylesheet gives it, in CSS pixels. */
+const sheetPeek = (page: Page) =>
+  page.evaluate(() =>
+    Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--perron-size-sheet-peek'),
+    ),
+  )
+
+/**
+ * A phone's stop sheet at its peek: its tablist whole on the screen, at the sheet's foot, the
+ * peek rising as far as the tabs need and no further, or to size.sheet-peek where that is more;
+ * and the map's corner credit whole above the sheet. Nothing here clicks or scrolls:
+ * toBeInViewport reads where the tablist is, as the rider sees it.
+ */
+async function expectTabsAtPeek(page: Page, panel: Locator) {
+  const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
+  await expect(tabs).toBeInViewport({ ratio: 1 })
+  const { height } = page.viewportSize()!
+  const least = await sheetPeek(page)
+  const credit = page.locator('small', { hasText: 'Transit data' })
+  await expect(credit).toBeInViewport({ ratio: 1 })
+  await expect(async () => {
+    const box = (await tabs.boundingBox())!
+    const sheet = (await panel.boundingBox())!
+    // The peek is the larger of where the tabs end, from the sheet's top, and size.sheet-peek:
+    // it ends at the tabs' foot, or, where they end higher, at the usual peek with room below.
+    const peek = height - sheet.y
+    const tabsEnd = box.y + box.height - sheet.y
+    expect(Math.abs(peek - Math.max(tabsEnd, least))).toBeLessThan(1)
+    // The credit stands on the sheet's peek, none of it under the sheet.
+    const words = (await credit.boundingBox())!
+    expect(words.y + words.height).toBeLessThanOrEqual(sheet.y)
+  }).toPass()
+}
+
+/**
+ * A phone's stop sheet opens at its peek with its tabs on the screen, whether trips stand there or
+ * not, so the rider knows the departures are there before any drag or scroll.
+ */
+function peekTests() {
+  test('a stop with a trip standing shows its tabs under the standing row', async ({ page }) => {
+    // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645')
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(
+      panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
+    ).toContainText('Teglholmen')
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop with nothing standing shows its tabs too', async ({ page }) => {
+    // Nørreport St., where nothing stands at 07:21, its many lines' badges filling the header.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '27532')
+    await page.goto('/en?stop=27532')
+    const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+    await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop with six trains standing shows its tabs under their row', async ({ page }) => {
+    // København H on the crowded recording, where six trains stand from 07:20 to 07:24.
+    await page.goto(`${CROWDED_URL}/en?stop=8600626`)
+    const panel = page.getByRole('dialog', { name: 'København H' })
+    await expect(
+      panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
+    ).toHaveCount(6)
+    await expectTabsAtPeek(page, panel)
+  })
+}
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
+
+  peekTests()
+
+  test('a stop’s sheet holds still under the finger while a trip comes to stand, then peeks to its tabs', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21 with the buses hidden, so nothing stands until the filter shows the 991.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645&hide=bus')
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    await expectTabsAtPeek(page, panel)
+    // The rider drags the sheet's header up a little and holds it there.
+    const title = (await panel.getByRole('heading', { name: 'Refshaleøen' }).boundingBox())!
+    await page.mouse.move(title.x + 4, title.y + 4)
+    await page.mouse.down()
+    await page.mouse.move(title.x + 4, title.y - 16, { steps: 8 })
+    await expect(panel).toHaveAttribute('data-swiping')
+    const held = (await panel.boundingBox())!.y
+    // The 991 comes in while the finger is down, by the filter, as the next minute's answer could.
+    await page
+      .getByRole('group', { name: 'Filters' })
+      .getByRole('button', { name: /^Bus/ })
+      .evaluate((button: HTMLButtonElement) => button.click())
+    await expect(panel.getByRole('list', { name: 'At the platforms now' })).toBeVisible()
+    // Many frames, room for a new peek to move the sheet, were it measured during the drag.
+    await page.waitForTimeout(500)
+    expect(Math.abs((await panel.boundingBox())!.y - held)).toBeLessThan(1)
+    // Let go: the sheet settles at its new peek, down to its tabs under the 991.
+    await page.mouse.up()
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test.describe('on a Pixel 7', () => {
+    test.use(PIXEL_7)
+    peekTests()
+  })
 
   const REFSHALEOEN = stops.find((stop) => stop.id === '48645')!
 
@@ -175,71 +292,6 @@ test.describe('on a phone', () => {
     await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
   })
 })
-
-// A phone's stop sheet opens at its peek with its tabs on the screen, whether trips stand there or
-// not, so the rider knows the departures are there before any drag or scroll. Nothing here clicks
-// or scrolls: toBeInViewport reads where the tablist is, as the rider sees it.
-const { defaultBrowserType: _, ...PIXEL_7 } = devices['Pixel 7']
-
-/**
- * The sheet's tablist whole on the screen, at the sheet's foot: the peek rises as far as the tabs
- * need and no further, or to size.sheet-peek where that is more.
- */
-async function expectTabsAtPeek(page: Page, panel: Locator) {
-  const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
-  await expect(tabs).toBeInViewport({ ratio: 1 })
-  const { height } = page.viewportSize()!
-  await expect(async () => {
-    const box = (await tabs.boundingBox())!
-    const sheet = (await panel.boundingBox())!
-    // The sheet stops under the tabs, unless size.sheet-peek, 182 px, reaches further.
-    expect(height - (box.y + box.height)).toBeLessThanOrEqual(Math.max(1, sheet.y - (height - 182)))
-    expect(height - sheet.y).toBeGreaterThanOrEqual(182)
-  }).toPass()
-}
-
-for (const [phone, use] of [
-  ['390×844', { viewport: { width: 390, height: 844 } }],
-  ['a Pixel 7', PIXEL_7],
-] as const) {
-  test.describe(`at its peek on ${phone}`, () => {
-    test.use(use)
-
-    test('a stop with a trip standing shows its tabs under the standing row', async ({ page }) => {
-      // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
-      await serveFirstMinute(page)
-      await serveSavedStop(page, '48645')
-      await page.goto('/en?stop=48645')
-      const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
-      await expect(
-        panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
-      ).toContainText('Teglholmen')
-      await expectTabsAtPeek(page, panel)
-    })
-
-    test('a stop with nothing standing shows its tabs too', async ({ page }) => {
-      // Nørreport St., where nothing stands at 07:21, its many lines' badges filling the header.
-      await serveFirstMinute(page)
-      await serveSavedStop(page, '27532')
-      await page.goto('/en?stop=27532')
-      const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
-      await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
-        'No vehicle of the types shown is standing at the platforms now.',
-      )
-      await expectTabsAtPeek(page, panel)
-    })
-
-    test('a stop with six trains standing shows its tabs under their row', async ({ page }) => {
-      // København H on the crowded recording, where six trains stand from 07:20 to 07:24.
-      await page.goto(`${CROWDED_URL}/en?stop=8600626`)
-      const panel = page.getByRole('dialog', { name: 'København H' })
-      await expect(
-        panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
-      ).toHaveCount(6)
-      await expectTabsAtPeek(page, panel)
-    })
-  })
-}
 
 test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
   // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its
