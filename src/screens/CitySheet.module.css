@@ -7,3 +7,9 @@
     var(--perron-space-300) + var(--perron-size-top-bar) + var(--perron-size-panel-gap)
   );
 }
+
+/* On a phone the open detail panel's bottom sheet is in front, at its peek where this one's is:
+   while one is open, this sheet drops to its own layer, under the detail panel's. */
+.viewport.viewport.behind[data-anchor='bottom'] {
+  z-index: var(--perron-z-index-sheet);
+}

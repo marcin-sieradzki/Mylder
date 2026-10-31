@@ -59,6 +59,7 @@ export function MapScreen() {
         onClose={() => setSheet('closed')}
         asked={sheet === 'reopened'}
         opener={opener}
+        behindPanel={panel !== undefined}
       />
       <MapHighlight below={top} />
       <VehicleCard />
