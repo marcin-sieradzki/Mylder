@@ -207,6 +207,46 @@ describe('the recorded layer', () => {
     }),
   )
 
+  it('answers each stop’s departure board from its own calls, and a stop it has none for as unknown', async () => {
+    // A board is asked for a stop's platforms; its calls are kept by them, so opening one stop
+    // never takes another's answer, whatever order riders open them in.
+    await madeRecording(
+      {
+        'multiDepartureBoard/8600783/0001.json': { n: 1 },
+        'multiDepartureBoard/8600783/0002.json': { n: 2 },
+        'multiDepartureBoard/27532+50461/0001.json': { n: 9 },
+      },
+      async (dir) => {
+        const board = (idList: string) =>
+          Effect.gen(function* () {
+            const client = yield* Http.HttpClient.HttpClient
+            return yield* Http.getText(
+              client,
+              'https://www.rejseplan.dk/api/multiDepartureBoard',
+              { idList, duration: 30 },
+            ).pipe(Effect.map(statusAndText), Effect.orDie)
+          })
+        const answers = await Effect.runPromise(
+          Effect.gen(function* () {
+            const made = []
+            for (const idList of ['27532|50461', '8600783', '8600783', '8600783', '8600626']) {
+              made.push(yield* board(idList))
+            }
+            return made
+          }).pipe(Effect.provide(layer(RECORDED_REJSEPLANEN, dir))),
+        )
+        expect(answers.slice(0, 4).map(({ text }) => JSON.parse(text))).toEqual([
+          { n: 9 },
+          { n: 1 },
+          { n: 2 },
+          { n: 2 },
+        ])
+        expect(answers[4].status).toBe(400)
+        expect(JSON.parse(answers[4].text)).toMatchObject({ errorCode: 'SVC_PARAM' })
+      },
+    )
+  })
+
   it.effect('hangs a timeout file past any client timeout, then answers 504', () =>
     Effect.gen(function* () {
       const client = recordedClient(

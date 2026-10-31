@@ -29,7 +29,7 @@ import type { Source } from '../source.ts'
 import { loadTimetable, type Timetable } from '../timetable.ts'
 import { Tracker } from '../tracker.ts'
 import * as RecordedHttpClient from './layer.ts'
-import { readCalls, readStart, type Calls, type Recorded } from './layer.ts'
+import { callFolder, readCalls, readStart, type Calls, type Recorded } from './layer.ts'
 import type { RecordingPlan } from './plans.ts'
 
 const MINUTE = 60_000
@@ -181,7 +181,7 @@ export function freeze(plan: RecordingPlan, timetable: Timetable): Effect.Effect
       const text = yield* Effect.orDie(response.text)
       let recorded = recordedOf(response.status, text)
       // Filed by the same rule the recorded layer replays them by.
-      const folder = RECORDED_REJSEPLANEN.folderOf(url)
+      const folder = callFolder(RECORDED_REJSEPLANEN, url)
       if (folder === 'journeyPos' && plan.fill && 'answer' in recorded) {
         recorded = { answer: fillJourneys(recorded.answer, plan.fill) }
       }

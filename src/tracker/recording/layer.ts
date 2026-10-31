@@ -2,7 +2,8 @@
 // folder, for any API that says which folder a call's URL names. Each folder's files answer its
 // calls in order (`journeyPos/0001.json`, `0002.json`, ...), a file may describe a failure
 // instead of an answer, and a folder with no files left repeats its last one, or, in the demo's
-// loop, starts again from its first.
+// loop, starts again from its first. A keyed folder keeps its calls by what each asks for, a
+// subfolder for each key, so a departure board's answers are its stop's alone.
 import 'server-only'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -35,6 +36,15 @@ export interface RecordedApi {
   readonly folders: readonly string[]
   /** The folder a request's URL calls, if any. */
   readonly folderOf: (url: URL) => string | undefined
+  /**
+   * The folders whose calls are kept by the key a call's URL names, such as the stops a departure
+   * board is asked for: in `<folder>/<key>/`, each key's calls in order, so one key's answers
+   * never answer another's. A call to such a folder with no key answers as unknown.
+   */
+  readonly keyed?: {
+    readonly folders: readonly string[]
+    readonly keyOf: (url: URL) => string | undefined
+  }
   /** Its answer to a call the recording has no folder for. */
   readonly unknown: (request: Http.Request, url: URL) => Http.Response
 }
@@ -108,6 +118,17 @@ export function answer(request: Http.Request, recorded: Recorded): Effect.Effect
 export type WhenDone = 'repeat-last' | 'loop'
 
 /**
+ * Where a call's answers are kept in a recording: the folder its URL calls, or in a keyed folder
+ * its key's subfolder, such as `multiDepartureBoard/8600783`; none when there is no such place.
+ */
+export function callFolder(api: RecordedApi, url: URL): string | undefined {
+  const folder = api.folderOf(url)
+  if (folder === undefined || !api.keyed?.folders.includes(folder)) return folder
+  const key = api.keyed.keyOf(url)
+  return key === undefined ? undefined : `${folder}/${key}`
+}
+
+/**
  * An `HttpClient` that replays calls: each folder's next one, and once none are left, as
  * `whenDone` says. A call the API files under a folder it doesn't list is the API's mistake, and
  * dies.
@@ -129,10 +150,11 @@ export function recordedClient(
           ),
         )
       }
-      const recorded = folder ? (calls.get(folder) ?? []) : []
-      if (!folder || recorded.length === 0) return Effect.succeed(api.unknown(request, url))
-      const index = made.get(folder) ?? 0
-      made.set(folder, index + 1)
+      const kept = callFolder(api, url)
+      const recorded = kept ? (calls.get(kept) ?? []) : []
+      if (!kept || recorded.length === 0) return Effect.succeed(api.unknown(request, url))
+      const index = made.get(kept) ?? 0
+      made.set(kept, index + 1)
       const at =
         whenDone === 'loop' ? index % recorded.length : Math.min(index, recorded.length - 1)
       return answer(request, recorded[at])
@@ -162,7 +184,7 @@ export const readJson = async (path: string): Promise<unknown> =>
  * from the files bundled with it.
  */
 export interface RecordingFiles {
-  /** The names of the files in a folder; none when there is no such folder. */
+  /** The names of the files and folders in a folder; none when there is no such folder. */
   readonly list: (folder: string) => Promise<readonly string[]>
   /** A file's content, parsed. */
   readonly read: (path: string) => Promise<unknown>
@@ -186,8 +208,8 @@ export const bundledFiles = (bundle: Readonly<Record<string, unknown>>): Recordi
   list: async (folder) =>
     Object.keys(bundle)
       .filter((path) => path.startsWith(`${folder}/`))
-      .map((path) => path.slice(folder.length + 1))
-      .filter((name) => !name.includes('/')),
+      .map((path) => path.slice(folder.length + 1).split('/')[0])
+      .filter((name, i, names) => names.indexOf(name) === i),
   read: async (path) => {
     if (!(path in bundle)) throw new Error(`The bundled recording has no ${path}`)
     return bundle[path]
@@ -195,9 +217,9 @@ export const bundledFiles = (bundle: Readonly<Record<string, unknown>>): Recordi
 })
 
 /**
- * A recording folder's calls to an API, each folder's files in the order their names sort, read
- * from its folder unless `files` says otherwise. A folder that isn't there has no calls; one that
- * can't be read fails.
+ * A recording folder's calls to an API, each folder's files in the order their names sort, and
+ * a keyed folder's by each of its keys' subfolders, read from its folder unless `files` says
+ * otherwise. A folder that isn't there has no calls; one that can't be read fails.
  */
 export async function readCalls(
   api: RecordedApi,
@@ -205,16 +227,25 @@ export async function readCalls(
   files: RecordingFiles = filesOnDisk,
 ): Promise<Calls> {
   const calls = new Map<string, Recorded[]>()
-  for (const name of api.folders) {
+  const read = async (name: string) => {
     const folder = join(/* turbopackIgnore: true */ dir, name)
     const names = (await files.list(folder)).filter(isCallFile).sort()
-    if (names.length === 0) continue
+    if (names.length === 0) return
     calls.set(
       name,
       await Promise.all(
         names.map(async (file) => readRecorded(await files.read(join(folder, file)))),
       ),
     )
+  }
+  for (const name of api.folders) {
+    if (!api.keyed?.folders.includes(name)) {
+      await read(name)
+      continue
+    }
+    for (const key of await files.list(join(/* turbopackIgnore: true */ dir, name))) {
+      await read(`${name}/${key}`)
+    }
   }
   return calls
 }
