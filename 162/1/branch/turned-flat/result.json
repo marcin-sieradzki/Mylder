@@ -1,0 +1,9 @@
+{
+  "journey": "turned-flat",
+  "pass": true,
+  "steps": [
+    "01-flat-north-up: flat north-up (http://localhost:4323/en?map=13.00/55.67600/12.56800)",
+    "02-turned-30-flat-five-part-address-scale-bar-shown: turned 30, flat: five-part address, scale bar shown (http://localhost:4323/en?map=13.00/55.67600/12.56800/30.0/0.0)",
+    "03-turned-back-to-north-three-part-address: turned back to north: three-part address (http://localhost:4323/en?map=13.00/55.67600/12.56800)"
+  ]
+}

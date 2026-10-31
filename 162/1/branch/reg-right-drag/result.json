@@ -1,0 +1,11 @@
+{
+  "journey": "reg-right-drag",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4323/en)",
+    "02-right-drag-turned: right-drag turned (http://localhost:4323/en?map=11.20/55.68000/12.56500/120.0/0.0)",
+    "03-right-drag-tilted: right-drag tilted (http://localhost:4323/en?map=11.20/55.68000/12.56500/120.0/30.0)",
+    "04-ctrl-drag-turned: ctrl-drag turned (http://localhost:4323/en?map=11.20/55.68000/12.56500/0.0/30.0)",
+    "05-shift-down-back-to-flat-scale-shown: shift+down back to flat, scale shown (http://localhost:4323/en?map=11.20/55.68000/12.56500)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "reg-card",
+  "pass": true,
+  "steps": [
+    "01-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4323/en?map=15.00/55.66767/12.58978)",
+    "02-hover-card-shows-the-line: hover card shows the line (http://localhost:4323/en?map=15.00/55.66767/12.58978)"
+  ]
+}

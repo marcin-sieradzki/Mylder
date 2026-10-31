@@ -1,0 +1,7 @@
+{
+  "journey": "reg-phone-drag",
+  "pass": true,
+  "steps": [
+    "01-phone-right-drag-left-it-flat-and-north-up: phone: right-drag left it flat and north-up (http://localhost:4323/en)"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "journey": "link-out-of-range",
+  "pass": true,
+  "steps": [
+    "01-tilt-75-out-of-range-map-opens-heading-30-kept: tilt 75 out of range: map opens, heading -30 kept (http://localhost:4323/en?map=14.00/55.67600/12.56800/-30.0/75.0)",
+    "02-heading-200-out-of-range-map-opens-tilt-40-kept: heading 200 out of range: map opens, tilt 40 kept (http://localhost:4323/en?map=14.00/55.67600/12.56800/200.0/40.0)",
+    "03-latitude-95-refused-map-opens-at-home-flat-north-up: latitude 95 refused: map opens at home, flat north-up (http://localhost:4323/en?map=14.00/95.00000/12.56800/-30.0/50.0)",
+    "04-three-part-latitude-95-for-comparison: three-part latitude 95, for comparison (http://localhost:4323/en?map=14.00/95.00000/12.56800)"
+  ]
+}

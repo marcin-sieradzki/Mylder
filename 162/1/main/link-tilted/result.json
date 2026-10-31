@@ -1,0 +1,9 @@
+{
+  "journey": "link-tilted",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"50\"\nReceived: \"0\"\nTimeout:  20000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 20000ms\n  - waiting for locator('[data-vehicles]')\n    37 × locator resolved to <div data-tilt=\"0\" data-heading=\"0\" data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"0\"\n",
+  "steps": [
+    "01-before-opening-the-tilted-link: before opening the tilted link (about:blank)",
+    "02-failure: failure (http://localhost:4322/en?map=14.00/55.67600/12.56800/-30.0/50.0)"
+  ]
+}

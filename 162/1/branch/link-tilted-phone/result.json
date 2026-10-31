@@ -1,0 +1,9 @@
+{
+  "journey": "link-tilted-phone",
+  "pass": true,
+  "steps": [
+    "01-before-opening-the-tilted-link: before opening the tilted link (about:blank)",
+    "02-tilted-link-opened-tilt-50-heading-30: tilted link opened: tilt 50, heading -30 (http://localhost:4323/en?map=14.00/55.67600/12.56800/-30.0/50.0)",
+    "03-every-vehicle-drawn-address-keeps-the-angle: every vehicle drawn, address keeps the angle (http://localhost:4323/en?map=14.00/55.67600/12.56800/-30.0/50.0)"
+  ]
+}

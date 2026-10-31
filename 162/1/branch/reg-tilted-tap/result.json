@@ -1,0 +1,9 @@
+{
+  "journey": "reg-tilted-tap",
+  "pass": true,
+  "steps": [
+    "01-tilted-40-turned-45-centred-on-the-bus: tilted 40, turned -45, centred on the bus (http://localhost:4323/en?map=15.00/55.66792/12.58662/-45.0/40.0)",
+    "02-hover-card-in-3d: hover card in 3D (http://localhost:4323/en?map=15.00/55.66792/12.58662/-45.0/40.0)",
+    "03-panel-opened-from-a-tilted-tap: panel opened from a tilted tap (http://localhost:4323/en?map=15.00/55.66792/12.58662/-45.0/40.0&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

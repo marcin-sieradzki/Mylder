@@ -1,0 +1,9 @@
+{
+  "journey": "reg-filter",
+  "pass": true,
+  "steps": [
+    "01-all-drawn: all drawn (http://localhost:4323/en)",
+    "02-buses-off-chip-keeps-its-count: buses off, chip keeps its count (http://localhost:4323/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4323/en)"
+  ]
+}

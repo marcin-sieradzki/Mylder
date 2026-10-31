@@ -1,0 +1,8 @@
+{
+  "journey": "reg-controls",
+  "pass": true,
+  "steps": [
+    "01-before-zoom: before zoom (http://localhost:4323/en)",
+    "02-after-zoom-in-shorter-scale: after zoom in, shorter scale (http://localhost:4323/en?map=12.20/55.68000/12.56500)"
+  ]
+}
