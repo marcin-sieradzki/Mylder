@@ -1,0 +1,8 @@
+{
+  "journey": "flat-open",
+  "pass": true,
+  "steps": [
+    "01-map-open: map open (http://localhost:4302/en)",
+    "02-zoomed-in: zoomed in (http://localhost:4302/en?map=12.20/55.68000/12.56500)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "strand-dot",
+  "pass": true,
+  "steps": [
+    "01-paused-on-the-dot: paused on the dot (http://localhost:4303/en?map=15.00/55.71935870529908/12.572263243382634)",
+    "02-hovered-card: hovered card (http://localhost:4303/en?map=15.00/55.71935870529908/12.572263243382634)",
+    "03-tapped-panel: tapped panel (http://localhost:4303/en?map=15.00/55.71936/12.57226&trip=s-tog.E.e8dc141a28.20260616.0702)"
+  ]
+}

@@ -1,0 +1,33 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+
+// Regression, vehicle-detail: trip-open (list), trip-facts, trip-follow, trip-line, trip-close, trip-missing.
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await page.getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Vehicles/ }).click()
+  await step('vehicles list')
+  await page.getByRole('table', { name: 'Vehicles' }).getByRole('link').first().click()
+  const panel = page.getByRole('dialog', { name: / to / })
+  await expect(panel).toBeVisible()
+  await expect(page).toHaveURL(/[?&]trip=/)
+  await expect(panel.getByText('Delay')).toBeVisible()
+  await expect(panel.getByText('Last seen')).toBeVisible()
+  await expect(panel.getByText('Next stop').first()).toBeVisible()
+  await expect(panel.getByRole('list', { name: 'Stops' })).toBeVisible()
+  await step('panel open')
+  await panel.getByRole('button', { name: 'Follow' }).click()
+  await page.waitForTimeout(1500)
+  await step('following')
+  await panel.getByRole('button', { name: 'Show whole line' }).click()
+  const chip = page.getByRole('button', { name: /^Showing: line .* · Clear$/ })
+  await expect(chip).toBeVisible()
+  await step('whole line')
+  await chip.click()
+  await expect(chip).toBeHidden()
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect(page).not.toHaveURL(/[?&]trip=/)
+  await step('closed')
+  await page.goto('/en?trip=nothing')
+  await expect(page.getByRole('dialog', { name: 'Trip not found' })).toBeVisible()
+  await step('missing')
+}

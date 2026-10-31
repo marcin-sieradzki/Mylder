@@ -1,0 +1,9 @@
+{
+  "journey": "parity",
+  "pass": true,
+  "steps": [
+    "01-paused-at-14-00-55-7194-12-5723: paused at 14.00/55.7194/12.5723 (http://localhost:4303/en?map=14.00/55.7194/12.5723)",
+    "02-paused-at-14-00-55-6270-12-4702: paused at 14.00/55.6270/12.4702 (http://localhost:4303/en?map=14.00/55.6270/12.4702)",
+    "03-paused-at-11-00-55-6700-12-5000: paused at 11.00/55.6700/12.5000 (http://localhost:4303/en?map=11.00/55.6700/12.5000)"
+  ]
+}

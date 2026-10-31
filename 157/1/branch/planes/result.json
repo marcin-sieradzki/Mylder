@@ -1,0 +1,9 @@
+{
+  "journey": "planes",
+  "pass": true,
+  "steps": [
+    "01-planes-drawn: planes drawn (http://localhost:4303/en)",
+    "02-planes-off: planes off (http://localhost:4303/en?hide=aircraft)",
+    "03-planes-back: planes back (http://localhost:4303/en)"
+  ]
+}

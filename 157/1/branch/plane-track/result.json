@@ -1,0 +1,8 @@
+{
+  "journey": "plane-track",
+  "pass": true,
+  "steps": [
+    "01-paused-plane-afr85yx-track-217: paused plane AFR85YX track 217 (http://localhost:4303/en?map=13.00/55.564911/12.522583)",
+    "02-plane-panel: plane panel (http://localhost:4303/en?map=13.00/55.56491/12.52258&aircraft=392af9)"
+  ]
+}

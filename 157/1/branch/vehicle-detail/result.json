@@ -1,0 +1,12 @@
+{
+  "journey": "vehicle-detail",
+  "pass": true,
+  "steps": [
+    "01-vehicles-list: vehicles list (http://localhost:4303/en?tab=vehicles)",
+    "02-panel-open: panel open (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-following: following (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-whole-line: whole line (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=10.98/55.65540/12.54031)",
+    "05-closed: closed (http://localhost:4303/en?tab=vehicles&map=10.98/55.65540/12.54031)",
+    "06-missing: missing (http://localhost:4303/en?trip=nothing)"
+  ]
+}
