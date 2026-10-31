@@ -5,7 +5,8 @@
 // the address names and keeps where it was left in the address (`view.ts`), except while Follow
 // moves it each frame. A new highlight ends Follow and fits the camera to it, clear of the top bar,
 // the notices and the legend the screen hands it. The map lives outside React: React only names
-// the canvas, and the screen's controls move it through the camera (camera.ts).
+// the canvas, and the screen's controls move it through the camera (camera.ts). Its tilt and
+// heading at rest are on its container as `data-tilt` and `data-heading`, for tests.
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl'
@@ -90,6 +91,14 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
       mapView.update({ centre: [lng, lat], zoom: created.getZoom() })
     }
     created.on('moveend', keepView)
+    // Its tilt and heading where it came to rest, to the degree, on its container for tests, as
+    // the overlay counts what it draws there.
+    const markCamera = () => {
+      element.dataset.tilt = String(Math.round(created.getPitch()))
+      element.dataset.heading = String(Math.round(created.getBearing()))
+    }
+    markCamera()
+    created.on('moveend', markCamera)
     const stopFollowing = followedVehicle.subscribe(keepView)
     // Reset returns to the view the map opens on with no view in the address.
     const detachCamera = mapCamera.attach(created, () => ({
@@ -124,6 +133,9 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
     return () => {
       disposed = true
       created.off('moveend', keepView)
+      created.off('moveend', markCamera)
+      delete element.dataset.tilt
+      delete element.dataset.heading
       stopGestures()
       stopFollowing()
       stopHighlighting()
