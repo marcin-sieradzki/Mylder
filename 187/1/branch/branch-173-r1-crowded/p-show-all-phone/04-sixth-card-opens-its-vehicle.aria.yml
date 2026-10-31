@@ -1,0 +1,195 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:20:00
+  - group "Filters":
+    - button "S-tog 5" [pressed]
+    - button "Train 0" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?trip=s-tog.A.0bc307e3eb.20260616.0654
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- button "Overview"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 3 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "A to Hillerød St.":
+  - heading "A to Hillerød St." [level=2]
+  - text: S-tog
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Estimated
+  - paragraph: Position computed by Rejseplanen
+  - term: Delay
+  - definition: On time
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: København H
+  - paragraph: At København H
+  - list "Stops":
+    - listitem:
+      - text: Hundige St. Passed
+      - time: 06:54
+      - text: On time
+    - listitem:
+      - text: Ishøj St. Passed
+      - time: 06:56
+      - text: On time
+    - listitem:
+      - text: Vallensbæk St. Passed
+      - time: 06:59
+      - text: On time
+    - listitem:
+      - text: Brøndby Strand St. Passed
+      - time: 07:01
+      - text: On time
+    - listitem:
+      - text: Avedøre St. Passed
+      - time: 07:04
+      - text: On time
+    - listitem:
+      - text: Friheden St. Passed
+      - time: 07:06
+      - text: On time
+    - listitem:
+      - text: Åmarken St. Passed
+      - time: 07:08
+      - text: On time
+    - listitem:
+      - text: København Syd St. Passed
+      - time: 07:10
+      - text: On time
+    - listitem:
+      - text: Sjælør St. Passed
+      - time: 07:12
+      - text: On time
+    - listitem:
+      - text: Sydhavn St. Passed
+      - time: 07:14
+      - text: On time
+    - listitem:
+      - text: Dybbølsbro St. Passed
+      - time: 07:16
+      - text: On time
+    - listitem:
+      - text: København H Next stop
+      - time: 07:29
+      - text: On time
+    - listitem:
+      - text: Vesterport St.
+      - time: 07:30
+      - text: On time
+    - listitem:
+      - text: Nørreport St.
+      - time: 07:32
+      - text: On time
+    - listitem:
+      - text: Østerport St.
+      - time: 07:34
+      - text: On time
+    - listitem:
+      - text: Nordhavn St.
+      - time: 07:37
+      - text: On time
+    - listitem:
+      - text: Svanemøllen St.
+      - time: 07:39
+      - text: On time
+    - listitem:
+      - text: Hellerup St.
+      - time: 07:41
+      - text: On time
+    - listitem:
+      - text: Bernstorffsvej St.
+      - time: 07:43
+      - text: On time
+    - listitem:
+      - text: Gentofte St.
+      - time: 07:44
+      - text: On time
+    - listitem:
+      - text: Jægersborg St.
+      - time: 07:45
+      - text: On time
+    - listitem:
+      - text: Lyngby St.
+      - time: 07:47
+      - text: On time
+    - listitem:
+      - text: Sorgenfri St.
+      - time: 07:48
+      - text: On time
+    - listitem:
+      - text: Virum St.
+      - time: 07:50
+      - text: On time
+    - listitem:
+      - text: Holte St.
+      - time: 07:51
+      - text: On time
+    - listitem:
+      - text: Birkerød St.
+      - time: 07:56
+      - text: On time
+    - listitem:
+      - text: Høvelte St.
+      - time: 07:57
+      - text: On time
+    - listitem:
+      - text: Allerød St.
+      - time: 08:00
+      - text: On time
+    - listitem:
+      - text: Favrholm St.
+      - time: 08:04
+      - text: On time
+    - listitem:
+      - text: Hillerød St.
+      - time: 08:07
+      - text: On time
+  - text: From the timetable
+  - paragraph:
+    - text: Rejseplanen ·
+    - time: position 07:20:00
+    - text: · times from the timetable
+- alert
+- region "Notifications"

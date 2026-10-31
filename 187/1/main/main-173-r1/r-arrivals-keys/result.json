@@ -1,0 +1,8 @@
+{
+  "journey": "r-arrivals-keys",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-arrivals: Refshaleøen arrivals (http://localhost:4302/en?stop=48645&board=arrivals)",
+    "02-keys-to-departures: keys to Departures (http://localhost:4302/en?stop=48645)"
+  ]
+}

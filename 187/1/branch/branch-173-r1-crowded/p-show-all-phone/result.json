@@ -1,0 +1,10 @@
+{
+  "journey": "p-show-all-phone",
+  "pass": true,
+  "steps": [
+    "01-link-opened-on-a-phone: link opened on a phone (http://localhost:4401/en?stop=8600626)",
+    "02-overview-closed-six-cards-no-show-all: overview closed, six cards, no Show all (http://localhost:4401/en?stop=8600626)",
+    "03-row-scrolled-to-the-sixth-card: row scrolled to the sixth card (http://localhost:4401/en?stop=8600626)",
+    "04-sixth-card-opens-its-vehicle: sixth card opens its vehicle (http://localhost:4401/en?trip=s-tog.A.0bc307e3eb.20260616.0654)"
+  ]
+}

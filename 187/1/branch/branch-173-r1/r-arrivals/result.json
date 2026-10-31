@@ -1,0 +1,9 @@
+{
+  "journey": "r-arrivals",
+  "pass": true,
+  "steps": [
+    "01-departures-no-arrivals-asked: Departures, no arrivals asked (http://localhost:4303/en?stop=27532)",
+    "02-arrivals-list: Arrivals list (http://localhost:4303/en?stop=27532&board=arrivals)",
+    "03-back-to-departures: back to Departures (http://localhost:4303/en?stop=27532)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "r-standing",
+  "pass": true,
+  "steps": [
+    "01-standing-at-refshale-en: standing at Refshaleøen (http://localhost:4303/en?stop=48645)",
+    "02-standing-row-opens-vehicle: standing row opens vehicle (http://localhost:4303/en?trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

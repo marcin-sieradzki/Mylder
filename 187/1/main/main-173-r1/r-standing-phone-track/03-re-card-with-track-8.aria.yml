@@ -1,0 +1,105 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:22:01
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?map=17.00/55.65263/12.51685&stop=8600783
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- button "Overview"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 30 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "København Syd St.":
+  - heading "København Syd St." [level=2]
+  - list "Lines":
+    - listitem: A
+    - listitem: E
+    - listitem: RE
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - list "At the platforms now":
+      - listitem:
+        - button "Train RE to Næstved St."
+        - text: RE Næstved St. Live Track 8 1 min Timetabled 07:22
+        - time: 07:23
+        - text: 1 min late
+  - tablist "Departures and arrivals":
+    - tab "Departures" [selected]
+    - tab "Arrivals"
+  - tabpanel "Departures":
+    - list "Departures":
+      - listitem:
+        - button "Train RE to Næstved St."
+        - text: RE Næstved St. Live Track 8 1 min Timetabled 07:22
+        - time: 07:23
+        - text: 1 min late
+      - listitem:
+        - button "S-tog A to Hillerød St."
+        - text: A Hillerød St. Live Track 8 5 min Timetabled 07:23
+        - time: 07:27
+        - text: 4 min late
+      - listitem:
+        - button "S-tog A to Hillerød St."
+        - text: A Hillerød St. Live Track 8 12 min Timetabled 07:33
+        - time: 07:34
+        - text: 1 min late
+      - listitem:
+        - button "S-tog E to Holte St."
+        - text: E Holte St. Estimated Track 8 15 min Timetabled 07:36
+        - time: 07:37
+        - text: 1 min late
+      - listitem:
+        - button "S-tog E to Køge St."
+        - text: E Køge St. Live Track 8 19 min Timetabled 07:39
+        - time: 07:41
+        - text: 2 min late
+    - text: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: departures 07:22:02
+- alert
+- region "Notifications"

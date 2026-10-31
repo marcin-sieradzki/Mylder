@@ -1,0 +1,8 @@
+{
+  "journey": "r-first-paint",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-first-paint: Nørreport first paint (http://localhost:4303/en?stop=27532)",
+    "02-k-benhavn-syd-first-paint: København Syd first paint (http://localhost:4303/en?stop=8600783&board=arrivals)"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "journey": "r-no-arrivals",
+  "pass": true,
+  "steps": [
+    "01-no-arrivals: no arrivals (http://localhost:4303/en?stop=8600683&board=arrivals)"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "journey": "p-show-all",
+  "pass": true,
+  "steps": [
+    "01-k-benhavn-h-open: København H open (http://localhost:4401/en?stop=8600626)",
+    "02-4-rows-and-show-all-6: 4 rows and Show all 6 (http://localhost:4401/en?stop=8600626)",
+    "03-show-all-clicked-6-rows-show-fewer: Show all clicked, 6 rows, Show fewer (http://localhost:4401/en?stop=8600626)",
+    "04-show-fewer-clicked-back-to-4: Show fewer clicked, back to 4 (http://localhost:4401/en?stop=8600626)",
+    "05-expanded-again: expanded again (http://localhost:4401/en?stop=8600626)",
+    "06-sixth-row-opens-its-vehicle: sixth row opens its vehicle (http://localhost:4401/en?trip=s-tog.A.0bc307e3eb.20260616.0654)"
+  ]
+}
