@@ -263,13 +263,13 @@ describe('the fit, however the map is tilted and turned', () => {
     ]
     for (const [, angle] of angles) {
       const camera = { ...CANVAS, pitch: angle.pitch ?? 0, bearing: angle.bearing ?? 0, fov: 36.87 }
-      const lens = groundLens(camera)(place)
+      const measured = groundLens(camera)(place)
       const stub = stubProjection({ centre: place.centre, zoom: place.zoom, ...angle })
       for (const point of ground) {
-        const drawnAt = lens.project(point)
+        const drawnAt = measured.project(point)
         expect(drawnAt.x).toBeCloseTo(stub.project(point).x, 1)
         expect(drawnAt.y).toBeCloseTo(stub.project(point).y, 1)
-        const [lon, lat] = lens.unproject(drawnAt)
+        const [lon, lat] = measured.unproject(drawnAt)
         expect(lon).toBeCloseTo(point[0], 6)
         expect(lat).toBeCloseTo(point[1], 6)
       }

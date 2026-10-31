@@ -5,9 +5,9 @@
 // the address names and keeps where it was left in the address (`view.ts`), except while Follow
 // moves it each frame. A new highlight ends Follow and fits the camera to it, clear of the top bar,
 // the notices and the legend the screen hands it, moving only the centre and zoom, so a tilted,
-// turned map keeps its tilt and heading, as Follow's does. The map lives outside React: React only names
-// the canvas, and the screen's controls move it through the camera (camera.ts). The address keeps
-// its heading and tilt too, so a link opens in 3D. Its tilt and heading at rest are on its
+// turned map keeps its tilt and heading, as it does under Follow. The map lives outside React:
+// React only names the canvas, and the screen's controls move it through the camera (camera.ts).
+// The address keeps its heading and tilt too, so a link opens in 3D. Its tilt and heading at rest are on its
 // container as `data-tilt` and `data-heading`, for tests.
 import 'client-only'
 import 'maplibre-gl/dist/maplibre-gl.css'
