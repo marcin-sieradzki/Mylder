@@ -14,6 +14,10 @@ export interface CameraView {
   readonly closest: boolean
   /** At the farthest zoom, so zooming out does nothing. */
   readonly farthest: boolean
+  /** The tilt from looking straight down, in degrees: 0 while the map is flat. */
+  readonly pitch: number
+  /** The compass heading up the canvas, clockwise from north in degrees, -180 to 180. */
+  readonly bearing: number
 }
 
 /** The view the map opened on, which reset returns to. */
@@ -33,6 +37,8 @@ export type CameraMap = Pick<
   | 'getMinZoom'
   | 'getMaxZoom'
   | 'getCenter'
+  | 'getPitch'
+  | 'getBearing'
   | 'getContainer'
   | 'on'
   | 'off'
@@ -80,6 +86,8 @@ export function cameraStore(): Camera {
       metersPerPixel: metersPerPixelAt(map.getCenter().lat, zoom),
       closest: zoom >= map.getMaxZoom(),
       farthest: zoom <= map.getMinZoom(),
+      pitch: map.getPitch(),
+      bearing: map.getBearing(),
     }
   }
   const update = () => {
@@ -87,7 +95,9 @@ export function cameraStore(): Camera {
     const same =
       next?.metersPerPixel === view?.metersPerPixel &&
       next?.closest === view?.closest &&
-      next?.farthest === view?.farthest
+      next?.farthest === view?.farthest &&
+      next?.pitch === view?.pitch &&
+      next?.bearing === view?.bearing
     if (same) return
     view = next
     for (const listener of listeners) listener()
