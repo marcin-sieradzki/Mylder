@@ -25,11 +25,19 @@ interface Target {
   readonly pitch?: number
 }
 
+/** What an ease is given besides where it goes, as MapLibre's `easeTo` takes it. */
+interface Ease extends Target {
+  readonly duration?: number
+  readonly easing?: (t: number) => number
+}
+
 /**
  * MapLibre's map, which needs WebGL that jsdom lacks: between zoom 6 and 18 and tilted up to 60°,
  * its zooms and pans move it at once, its pans in pixels at the centre, as MapLibre does under
  * reduced motion. An ease is under way until `settle` ends it, and a jump lands at once. A move
  * tells its listeners as MapLibre's does, `movestart` carrying the input the viewer made it with.
+ * As a slow renderer would, `pass` lets time go by and `frame` draws the ease under way where its
+ * curve has it by then, counted from when it last started, as MapLibre counts it.
  */
 function fakeMap() {
   const container = document.createElement('div')
@@ -43,6 +51,7 @@ function fakeMap() {
     panned: [0, 0],
     easing: undefined as Target | undefined,
   }
+  const time = { now: 0, eased: 0, from: { bearing: 0, pitch: 0 } }
   const tell = (type: string, event: object = {}) => {
     for (const listener of listeners.get(type) ?? []) listener(event)
   }
@@ -82,8 +91,10 @@ function fakeMap() {
       state.panned = [state.panned[0] + x, state.panned[1] + y]
       moved(eventData)
     },
-    easeTo: (target: Target, eventData: object = {}) => {
+    easeTo: (target: Ease, eventData: object = {}) => {
       state.easing = target
+      time.eased = time.now
+      time.from = { bearing: state.bearing, pitch: state.pitch }
       tell('movestart', eventData)
     },
     jumpTo: (target: Target, eventData?: object) => {
@@ -105,10 +116,30 @@ function fakeMap() {
     tell('move')
     tell('moveend')
   }
+  /** Lets `ms` go by, drawing nothing. */
+  const pass = (ms: number) => void (time.now += ms)
+  /** Draws a frame of the ease under way, or ends it once its time is up. */
+  const frame = () => {
+    const target = state.easing as Ease | undefined
+    if (!target) return
+    const t = (time.now - time.eased) / (target.duration ?? 500)
+    if (t >= 1) return act(settle)
+    const k = (target.easing ?? ((linear: number) => linear))(t)
+    const { from } = time
+    const between = (to: number | undefined, at: number) =>
+      to === undefined ? at : at + (to - at) * k
+    act(() => {
+      land({
+        bearing: between(target.bearing, from.bearing),
+        pitch: between(target.pitch, from.pitch),
+      })
+      tell('move')
+    })
+  }
   /** Moves the camera as a gesture would. */
   const gesture = (target: Target) =>
     act(() => map.jumpTo(target, { originalEvent: new Event('mousemove') }))
-  return { map: map as unknown as CameraMap, state, container, settle, gesture }
+  return { map: map as unknown as CameraMap, state, container, settle, pass, frame, gesture }
 }
 
 /** The page's media queries as each test sets them: as narrow as a phone, and reduced motion. */
@@ -608,6 +639,42 @@ describe("the map's keys", () => {
     keydown('ArrowUp', true)
     act(settle)
     expect(state).toMatchObject({ bearing: 60, pitch: 30 })
+  })
+
+  it('keep turning the map while Shift + → is held, however slowly the map draws', () => {
+    const { state, pass, frame } = open()
+    const keydown = (repeat: boolean) =>
+      act(
+        () =>
+          void document.body.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key: 'ArrowRight',
+              shiftKey: true,
+              repeat,
+              bubbles: true,
+            }),
+          ),
+      )
+    // A renderer drawing three frames a second: each frame takes the page a third of a second, so
+    // the key's repeats, 30 a second, all land between two frames, just before the next.
+    keydown(false)
+    for (let i = 0; i < 9; i++) {
+      for (let r = 0; r < 10; r++) keydown(true)
+      pass(1)
+      frame()
+      pass(330)
+    }
+    // Held for 3 s, it has turned well past a step, rather than starting each ease over and over.
+    const atRelease = state.bearing
+    expect(atRelease).toBeGreaterThanOrEqual(90)
+    // Let go, it comes to rest no more than two steps on.
+    for (let i = 0; i < 4; i++) {
+      frame()
+      pass(330)
+    }
+    expect(state.easing).toBeUndefined()
+    expect(state.bearing).toBeGreaterThanOrEqual(atRelease)
+    expect(state.bearing).toBeLessThanOrEqual(atRelease + 30)
   })
 
   it('end Follow with a Shift + arrow press, as with any other key move', async () => {

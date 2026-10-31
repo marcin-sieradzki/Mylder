@@ -93,6 +93,11 @@ export const VIEW_3D_PITCH = 50
 /** How long a tilt or turn by a key eases for, in ms, as MapLibre's own keys do. */
 const STEP_EASE = 300
 const STEP = 'mylder-step'
+/**
+ * The curve a step eases along, MapLibre's keys' own: fastest at the start, so a step chained onto
+ * one under way carries the map on at speed rather than starting it again from rest.
+ */
+const easeOut = (t: number) => t * (2 - t)
 
 /**
  * The furthest the keys turn the map ahead of where it is, in degrees: short of half a turn, so it
@@ -103,15 +108,14 @@ const MOST_TURN = 180 - TURN_STEP
 /**
  * How far ahead of the map a step `by` sets the aim, on one axis, when it is `ahead` already. A
  * press steps on from the aim, so quick presses all count. A key `held` down repeats faster than
- * a step eases, so its repeats keep the aim at most two steps ahead of the map, and it stops soon
- * after it is let go; a repeat never pulls back an aim quick presses set further on.
+ * a step eases, so a repeat leaves the aim be while the map is more than a step from it that way,
+ * and steps it on from there once the map is within a step: the aim stays at most two steps
+ * ahead, so the map stops soon after the key is let go, and each ease runs on rather than starting
+ * over at every repeat, which on a slow renderer would barely move the map at all.
  */
 function further(ahead: number, by: number, held: boolean): number {
-  if (!held || by === 0) return ahead + by
-  const most = 2 * by
-  return by > 0
-    ? Math.max(ahead, Math.min(ahead + by, most))
-    : Math.min(ahead, Math.max(ahead + by, most))
+  if (held && ahead * Math.sign(by) > Math.abs(by)) return ahead
+  return ahead + by
 }
 
 /** Whether the system asks for reduced motion; not where the browser has no media queries. */
@@ -179,14 +183,14 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
     const held = input !== undefined && 'repeat' in input && input.repeat === true
     // The turn the aim is ahead of the map, the shorter way round, as MapLibre eases a heading.
     const turned = ((((from.bearing - now.bearing + 180) % 360) + 360) % 360) - 180
-    const turn = further(turned, by.bearing ?? 0, held)
+    const turn = Math.min(MOST_TURN, Math.max(-MOST_TURN, further(turned, by.bearing ?? 0, held)))
     const tilt = further(from.pitch - now.pitch, by.pitch ?? 0, held)
-    aim = {
-      pitch: Math.min(map.getMaxPitch(), Math.max(0, now.pitch + tilt)),
-      bearing: now.bearing + Math.min(MOST_TURN, Math.max(-MOST_TURN, turn)),
-    }
+    const pitch = Math.min(map.getMaxPitch(), Math.max(0, now.pitch + tilt))
+    // Aimed where it was going already, as at the most tilt, the ease under way runs on.
+    if (aim && pitch === aim.pitch && turn === turned) return
+    aim = { pitch, bearing: now.bearing + turn }
     // One ease id, as MapLibre's own keys give theirs, chains each step onto the one under way.
-    move(aim, input, { duration: STEP_EASE, easeId: STEP })
+    move(aim, input, { duration: STEP_EASE, easeId: STEP, easing: easeOut })
   }
 
   return {
