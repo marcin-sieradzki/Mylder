@@ -86,7 +86,7 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
 const { defaultBrowserType: _, ...PIXEL_7 } = devices['Pixel 7']
 
 /** Perron's size.sheet-peek, as the page's token stylesheet gives it, in CSS pixels. */
-const sheetPeek = (page: Page) =>
+const leastPeekOf = (page: Page) =>
   page.evaluate(() =>
     Number.parseFloat(
       getComputedStyle(document.documentElement).getPropertyValue('--perron-size-sheet-peek'),
@@ -103,7 +103,7 @@ async function expectTabsAtPeek(page: Page, panel: Locator) {
   const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
   await expect(tabs).toBeInViewport({ ratio: 1 })
   const { height } = page.viewportSize()!
-  const least = await sheetPeek(page)
+  const least = await leastPeekOf(page)
   const credit = page.locator('small', { hasText: 'Transit data' })
   await expect(credit).toBeInViewport({ ratio: 1 })
   await expect(async () => {
@@ -196,6 +196,46 @@ test.describe('on a phone', () => {
     // Let go: the sheet settles at its new peek, down to its tabs under the 991.
     await page.mouse.up()
     await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop not found after one with a trip standing peeks as little as any', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21, where the 991 stands, its row lifting the tabs and the peek with them.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645')
+    const found = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(found.getByRole('list', { name: 'At the platforms now' })).toBeVisible()
+    await expectTabsAtPeek(page, found)
+    const { height } = page.viewportSize()!
+    const least = await leastPeekOf(page)
+    const lifted = (await found.boundingBox())!
+    expect(height - lifted.y).toBeGreaterThan(least + 1)
+    const credit = page.locator('small', { hasText: 'Transit data' })
+    const words = (await credit.boundingBox())!
+    const clear = lifted.y - words.y - words.height
+    // While the rider holds the sheet up a little, so the next stop's loading measures no peek of
+    // its own first, a step forward in the page's own history opens, in the same sheet, a stop
+    // that isn't there: it has no tabs to peek down to.
+    await page.evaluate(() => history.pushState(null, '', '/en?stop=nowhere'))
+    await page.goBack()
+    const title = (await found.getByRole('heading', { name: 'Refshaleøen' }).boundingBox())!
+    await page.mouse.move(title.x + 4, title.y + 4)
+    await page.mouse.down()
+    await page.mouse.move(title.x + 4, title.y - 16, { steps: 8 })
+    await expect(found).toHaveAttribute('data-swiping')
+    await page.goForward()
+    const lost = page.getByRole('dialog', { name: 'Stop not found' })
+    await expect(lost).toBeVisible()
+    // Let go: the sheet peeks as little as any, and the credit follows it down.
+    await page.mouse.up()
+    await expect(async () => {
+      const sheet = (await lost.boundingBox())!
+      expect(Math.abs(height - sheet.y - least)).toBeLessThan(1)
+      const below = (await credit.boundingBox())!
+      expect(Math.abs(sheet.y - below.y - below.height - clear)).toBeLessThan(1)
+    }).toPass()
   })
 
   test.describe('on a Pixel 7', () => {

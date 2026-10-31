@@ -46,7 +46,8 @@ export interface PeekTo {
  * left out, but never while the rider drags the sheet: a new peek waits until the drag ends, so
  * the sheet doesn't move under the finger. The peek is published (src/map/peek.ts) while the sheet
  * is open, so the map's foot stands on it and a fit keeps clear of it. Until it is measured, and
- * off a phone, the panel keeps Perron's own snap points.
+ * off a phone, and while the body has no `until`, such as a stop not found, the panel keeps
+ * Perron's own snap points and publishes none.
  */
 export function usePeekTo(bottom: boolean): PeekTo {
   const [popup, setPopup] = useState<HTMLElement | null>(null)
@@ -76,7 +77,8 @@ export function usePeekTo(bottom: boolean): PeekTo {
       swipe.disconnect()
     }
   }, [bottom, popup, content, above, until])
-  const shown = bottom ? peek : undefined
+  // Nothing to peek down to, as on a stop not found: the peek falls back to Perron's.
+  const shown = bottom && until ? peek : undefined
   useEffect(() => {
     if (shown === undefined) return
     sheetPeek.set(shown)
