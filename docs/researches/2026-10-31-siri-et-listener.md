@@ -9,7 +9,7 @@ It builds on the delivery research of 2026-10-25, [`2026-10-25-siri-et-netex-del
 - **Unconfirmed**: no source found, sources disagree, or an estimate.
 - **Estimate**: worked out here from other figures; the working is shown.
 
-Research caveat: this environment still cannot open labs.rejseplanen.dk, any dataudveksler.app.vd.dk host (including the anonymous catalogue API) or vejdirektoratet.atlassian.net; they are refused by the sandbox's proxy. Every fact about the feed's account, broker and datasets rests on the earlier research, a public example client read in full [1], and a public survey note read in full [2]. The four facts that decide the design, listed under [Unknowns until the account exists](#unknowns-until-the-account-exists), are only visible after login.
+Research caveat: this environment still cannot open labs.rejseplanen.dk, any dataudveksler.app.vd.dk host (including the anonymous catalogue API) or vejdirektoratet.atlassian.net; they are refused by the sandbox's proxy. Facts about the broker rest on the earlier research, a public example client read in full [1] and a public survey note read in full [2]. The dataset list, address format and guides were then checked on the maintainer's logged-in account ([Seen on the portal after login](#seen-on-the-portal-after-login)). The four facts that decide the design are on no page and need a first recording ([Unknowns the first recording answers](#unknowns-the-first-recording-answers)).
 
 ## Short answers
 
@@ -19,15 +19,15 @@ Research caveat: this environment still cannot open labs.rejseplanen.dk, any dat
 
 **Which datasets cover Copenhagen.**
 
-| Mode                       | Dataset                                          | Status                                                                                                                |
-| -------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| Bus (Movia, all operators) | Realtime data for Movia, #788                    | Reported; 20 subscribers in May 2026 [2]                                                                              |
-| S-tog                      | Realtime data for DSB S-trains, number not found | Snippet only (earlier research)                                                                                       |
-| Train (DSB)                | Realtime data for DSB, #785                      | Confirmed (earlier research)                                                                                          |
-| Train (complete)           | Banedanmark Journeys, number not found           | Named by #785 as needed for complete train data; contents unknown                                                     |
-| Train (Lokaltog)           | Realtime data for Lokaltog on Zealand, #799      | Reported [2]                                                                                                          |
-| Metro                      | none found                                       | Treat as absent; the Metro stays an interval line (ADR 0006)                                                          |
-| Light rail (Letbane)       | none found                                       | Unconfirmed; the line opened on 2026-08-22 and is not one of Rejseplanen's owners, so it would need its own agreement |
+| Mode                       | Dataset                                     | Status                                                                                                                  |
+| -------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Bus (Movia, all operators) | Realtime data for Movia, #788               | Reported; 20 subscribers in May 2026 [2]                                                                                |
+| S-tog                      | Realtime data for DSB S-trains, #801        | Confirmed: seen in the catalogue after login, 2026-10-31                                                                |
+| Train (DSB)                | Realtime data for DSB, #785                 | Confirmed (earlier research)                                                                                            |
+| Train (complete)           | Banedanmark Journeys                        | Not in the catalogue on 2026-10-31: the DSB and Lokaltog pages name it, but no dataset by that name exists              |
+| Train (Lokaltog)           | Realtime data for Lokaltog on Zealand, #799 | Reported [2]                                                                                                            |
+| Metro                      | none                                        | Confirmed absent: no Metroselskabet dataset in the catalogue on 2026-10-31. The Metro stays an interval line (ADR 0006) |
+| Light rail (Letbane)       | none                                        | Confirmed absent: no Hovedstadens Letbane dataset on 2026-10-31 (only Aarhus Letbane, inside Midttrafik's #783)         |
 
 Arriva and the other bus operators on Zealand run under contract to Movia, so their trips should be in #788 (Unconfirmed, inference). The datasets carry expected arrival and departure times and cancellations (the SIRI `EstimatedVehicleJourney` with its `EstimatedCalls` and `Cancellation`), and no positions: the access point's records exclude vehicle monitoring (Reported [2]). Updates for a trip start about 1 hour before its first departure (Confirmed, earlier research).
 
@@ -52,7 +52,7 @@ Arriva and the other bus operators on Zealand run under contract to Movia, so th
 
 The store adds nothing if it stays inside the free Redis tier ([The store's budget](#the-stores-budget)). So Fly.io with prepaid credits, about $2.20 a month, is the one host under €4 with a hard cap. Hetzner was the preferred host when the price was €4; it no longer is.
 
-**Licence.** The Movia and Lokaltog SIRI datasets are CC BY 4.0 (Reported [2]); DSB's showed "None" in a snippet (Unconfirmed). Credit "Rejsekort & Rejseplan A/S, CC BY 4.0" in the About dialog and the map's credits, as for the timetable.
+**Licence.** Every Rejseplan SIRI dataset page shows "Licence: None" after login (Confirmed, 2026-10-31), although an earlier catalogue capture recorded Movia and Lokaltog as CC BY 4.0 (Reported [2]) and the Labs guidelines put Rejseplan data under CC BY 4.0. Ask Rejseplanen which applies before launch. Until then, credit "Rejsekort & Rejseplan A/S" in the About dialog and the map's credits, as for the timetable.
 
 ## Where the listener runs
 
@@ -75,7 +75,17 @@ Spec #56 puts the server store on Upstash's free Redis: 500,000 commands and 10 
 - No trip is ever **Live** or **Ageing** from SIRI-ET: it carries no positions (ADR 0005).
 - When the key arrives, positions from `journeyPos` sit on top: a trip with a report is Live or Ageing, and SIRI-ET still gives its expected times and cancellations, saving the on-demand `departureBoard` and `journeyDetail` calls the budget now pays for.
 
-## Unknowns until the account exists
+## Seen on the portal after login
+
+Checked on 2026-10-31 on the maintainer's account (Confirmed):
+
+- Each subscription's AMQP address has the form `amqps://sb-duvproddistribution.servicebus.windows.net/t-distribution-<dataset>/<subscription id>`: one Azure Service Bus topic per dataset, and a subscription of the subscriber's own on it. Authentication uses the service account's id (an Entra client id), the tenant id and the service account's password.
+- The Rejsekort & Rejseplan realtime datasets are 783 Midttrafik and Aarhus Letbane, 785 DSB, 786 Sydtrafik, 787 NT, 788 Movia, 789 DSB Vores Tog, 790 Fynbus, 799 Lokaltog on Zealand, 800 Öresundståg and Skånetrafiken, 801 DSB S-trains and 808 BAT; 242 is the NeTEx timetable. For Copenhagen: 788, 801, 785 and 799, and 800 for the Øresund trains.
+- The guides describe the feed as SIRI-ET for the current day, split by operator, reachable only by linking a service account to each event dataset. The HTTP download with a client-credentials token covers static, dynamic and geodata datasets only, never event datasets. So there is no HTTP way to the feed beyond what Azure Service Bus itself offers.
+- No guide or dataset page says anything about message lifetime, subscription size, a snapshot on subscribe or the update rate.
+- A lost service account password cannot be reset; a new account has to be made and subscribed again.
+
+## Unknowns the first recording answers
 
 These decide the design and can only be read after login, or measured with a first recording:
 
