@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { clockTime } from '../timetable/time'
 import type { PlannedTrip } from '../timetable/trips'
 import { findStop, type SnapshotDelays } from './answers'
-import type { Departure, Message } from './rejseplanen/answers'
+import type { Arrival, Departure, Message } from './rejseplanen/answers'
 import type { SnapshotTrip } from './snapshot'
 import type { Corrections } from './join'
 import { journeyRef, referenceDay } from './simulation/journeys'
-import { departuresFromBoard } from './stop-board'
+import { arrivalsFromBoard, departuresFromBoard } from './stop-board'
 import { fixtureTimetable, startingAtMidnight } from './testing'
 
 // A stop's departures from its board answer, made by hand where the simulation shows no such
@@ -103,6 +103,83 @@ describe('a stop’s departures from its board', () => {
 
   it('joins two departures alike in line, time and way to the trip once', () => {
     expect(fromBoard([departure(), departure()]).map((row) => row.trip)).toEqual([trip.key])
+  })
+})
+
+describe('a stop’s arrivals from its arrival board', () => {
+  const arrives = trip.calls[index].arrival
+  const origin = timetable.stops.stops[timetable.stops.platforms[trip.calls[0].platform].stop].name
+
+  /** The trip's arrival on the board, two minutes late, with no reference the join can read. */
+  const arrival = (change: Partial<Arrival> = {}): Arrival => ({
+    JourneyDetailRef: { ref: 'unreadable' },
+    name: trip.line.name,
+    stop: platform.name,
+    stopExtId: platform.id,
+    date: today,
+    time: clockTime(arrives, ZONE, { seconds: true }),
+    rtDate: today,
+    rtTime: clockTime(arrives + 120_000, ZONE, { seconds: true }),
+    rtTrack: '4',
+    prognosisType: 'PROGNOSED',
+    origin,
+    ProductAtStop: { line: trip.line.name },
+    ...change,
+  })
+
+  const arrivalsFrom = (arrivals: readonly Arrival[], snapshot = at()) =>
+    arrivalsFromBoard(
+      timetable,
+      snapshot,
+      findStop(timetable, stop.id)!,
+      { answer: { Arrival: arrivals }, at: MOMENT },
+      MOMENT,
+    )
+
+  it('joins an arrival by its line, where it comes from, its platform and its planned arrival', () => {
+    const answer = arrivalsFrom([arrival()])
+    expect(answer.source).toEqual({ kind: 'rejseplanen', at: MOMENT })
+    expect(answer.arrivals).toEqual([
+      {
+        trip: trip.key,
+        line: trip.line.name,
+        mode: trip.line.mode,
+        colour: trip.line.colour,
+        headsign: trip.headsign,
+        origin,
+        platform: platform.id,
+        scheduled: arrives,
+        expected: arrives + 120_000,
+        track: '4',
+        // Realtime on the board for a trip off the map.
+        state: 'estimated',
+      },
+    ])
+  })
+
+  it('joins an arrival only to a trip coming from where it says', () => {
+    expect(arrivalsFrom([arrival({ origin: 'Somewhere else' })]).arrivals).toEqual([])
+  })
+
+  it('keeps a cancelled arrival, marked, with no expected time', () => {
+    const cancelled = arrival({
+      cancelled: true,
+      reachable: false,
+      rtTime: undefined,
+      rtDate: undefined,
+      prognosisType: undefined,
+    })
+    const [row] = arrivalsFrom(
+      [cancelled],
+      at([{ key: trip.key, state: 'live', hadRealtime: true, delay: 60 }]),
+    ).arrivals
+    expect(row).toMatchObject({
+      trip: trip.key,
+      cancelled: true,
+      scheduled: arrives,
+      state: 'live',
+    })
+    expect(row.expected).toBeUndefined()
   })
 })
 

@@ -148,7 +148,7 @@ function boardCalls<R extends { readonly name: string }>(
   request: DepartureBoardRequest,
   now: number,
   side: Side,
-  row: (simulated: SimulatedTrip, i: number) => R,
+  rowOf: (simulated: SimulatedTrip, i: number) => R,
 ): R[] {
   const platforms = new Set(platformsOfStops(settings.timetable, request.ids))
   const until = request.from + request.duration * MINUTE
@@ -167,7 +167,7 @@ function boardCalls<R extends { readonly name: string }>(
       for (let i = first; i <= last; i++) {
         const at = simulated.calls[i][side]
         if (!platforms.has(trip.calls[i].platform) || at < request.from || at >= until) continue
-        found.push({ at, row: row(simulated, i) })
+        found.push({ at, row: rowOf(simulated, i) })
       }
     }
   }

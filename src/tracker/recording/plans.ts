@@ -16,8 +16,9 @@ export interface RecordingPlan {
   /** Fill every `journeyPos` answer to this many journeys, as a full box at a peak would be. */
   readonly fill?: number
   /**
-   * Stops a rider opens at the plan's `minute`, counted from 0, so the recording keeps each one's
-   * departure board, which answers that stop whenever it is opened on the recording.
+   * Stops a rider opens at the plan's `minute`, counted from 0, on Departures and then on Arrivals,
+   * so the recording keeps each one's departure board and arrival board, which answer that stop
+   * whenever it is opened on the recording.
    */
   readonly boards?: {
     readonly minute: number
@@ -70,7 +71,8 @@ export const RECORDINGS: readonly RecordingPlan[] = [
         'bus.991.7ce514fd98.20260616.0730',
       ],
     },
-    // København Syd St. at 07:22, while the RE to Næstved stands at its track until 07:23.
+    // København Syd St. at 07:22, while the RE to Næstved stands at its track until 07:23, and the
+    // trains arriving there on its arrival board.
     boards: { minute: 2, stops: ['8600783'] },
   },
   { name: 'empty', scenario: failingAll('empty'), start: RECORDING_START, minutes: 3 },

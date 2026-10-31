@@ -116,13 +116,13 @@ describe('the simulated multiArrivalBoard', () => {
         const [day] = timetable.serviceDaysAt(MOMENT).slice(-1)
         const from = Math.floor(MOMENT / 60_000) * 60_000
         const planned = timetable.tripsOn(day).flatMap((trip) =>
-          trip.calls.flatMap((call, i) =>
-            i > 0 && stops[platforms[call.platform].stop].name === 'Nørreport St.'
+          trip.calls.flatMap((each, i) =>
+            i > 0 && stops[platforms[each.platform].stop].name === 'Nørreport St.'
               ? [
                   {
                     line: trip.line.name,
                     origin: stops[platforms[trip.calls[0].platform].stop].name,
-                    time: clockTime(call.arrival, timezone, { seconds: true }),
+                    time: clockTime(each.arrival, timezone, { seconds: true }),
                   },
                 ]
               : [],
