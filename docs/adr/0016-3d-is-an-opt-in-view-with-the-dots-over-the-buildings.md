@@ -18,4 +18,4 @@ Mylder's map can tilt and turn into a 3D view, with OpenFreeMap's buildings extr
 - The scale bar hides while the map is tilted, since one bar can't be true across a tilted view.
 - Building heights are approximate, as OpenStreetMap's are, and the About dialog says so.
 - The building colours, the 3D toggle and the compass come from Perron (perron#184, #185, #186).
-- On a phone, 3D waits for a measured frame rate with the buildings on.
+- On a phone, 3D waits for a measured frame rate with the buildings on: until then a phone has no toggle and its gestures don't tilt, but a link with a tilt opens tilted, so the measurement can be taken.
