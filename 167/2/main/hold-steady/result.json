@@ -1,0 +1,12 @@
+{
+  "journey": "hold-steady",
+  "pass": false,
+  "error": "1000 ms hold (repeat 33 ms): turned only 1° while held (1°/s); 1000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1; 2000 ms hold (repeat 33 ms): turned only 2° while held (1°/s); 2000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1,1; 4000 ms hold (repeat 33 ms): turned only 5° while held (1°/s); 4000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1,0,1,1,0,1,1; 4000 ms hold (repeat 33 ms): uneven, per 500 ms 0,1,0,1,1,0,1,1; 3000 ms hold (repeat 90 ms): turned only 3° while held (1°/s); 3000 ms hold (repeat 90 ms): stalled while held, per 500 ms 0,1,1,0,1,0; 3000 ms hold (repeat 90 ms): uneven, per 500 ms 0,1,1,0,1,0; pace differs between 1, 2 and 4 s holds: 28, 16, 9 °/s\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 13\n\n- Array []\n+ Array [\n+   \"1000 ms hold (repeat 33 ms): turned only 1° while held (1°/s)\",\n+   \"1000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1\",\n+   \"2000 ms hold (repeat 33 ms): turned only 2° while held (1°/s)\",\n+   \"2000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1,1\",\n+   \"4000 ms hold (repeat 33 ms): turned only 5° while held (1°/s)\",\n+   \"4000 ms hold (repeat 33 ms): stalled while held, per 500 ms 0,1,0,1,1,0,1,1\",\n+   \"4000 ms hold (repeat 33 ms): uneven, per 500 ms 0,1,0,1,1,0,1,1\",\n+   \"3000 ms hold (repeat 90 ms): turned only 3° while held (1°/s)\",\n+   \"3000 ms hold (repeat 90 ms): stalled while held, per 500 ms 0,1,1,0,1,0\",\n+   \"3000 ms hold (repeat 90 ms): uneven, per 500 ms 0,1,1,0,1,0\",\n+   \"pace differs between 1, 2 and 4 s holds: 28, 16, 9 °/s\",\n+ ]",
+  "steps": [
+    "01-held-1000-ms-every-33-ms-1-at-release-rests-at-31: held 1000 ms every 33 ms: 1 at release, rests at 31 (http://localhost:4362/en?map=11.20/55.68000/12.56500/31.1/0.0)",
+    "02-held-2000-ms-every-33-ms-2-at-release-rests-at-32: held 2000 ms every 33 ms: 2 at release, rests at 32 (http://localhost:4362/en?map=11.20/55.68000/12.56500/32.5/0.0)",
+    "03-held-4000-ms-every-33-ms-5-at-release-rests-at-35: held 4000 ms every 33 ms: 5 at release, rests at 35 (http://localhost:4362/en?map=11.20/55.68000/12.56500/35.2/0.0)",
+    "04-held-3000-ms-every-90-ms-3-at-release-rests-at-33: held 3000 ms every 90 ms: 3 at release, rests at 33 (http://localhost:4362/en?map=11.20/55.68000/12.56500/33.4/0.0)",
+    "05-failure: failure (http://localhost:4362/en?map=11.20/55.68000/12.56500/33.4/0.0)"
+  ]
+}

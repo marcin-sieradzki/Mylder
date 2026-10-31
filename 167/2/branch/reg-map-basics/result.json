@@ -1,0 +1,12 @@
+{
+  "journey": "reg-map-basics",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-17-dots: map drawn, 17 dots (http://localhost:4363/en)",
+    "02-buses-off: buses off (http://localhost:4363/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4363/en)",
+    "04-zoomed-in-scale-scale-1-km-to-scale-500-m: zoomed in, scale Scale 1 km to Scale 500 m (http://localhost:4363/en?map=12.20/55.68000/12.56500)",
+    "05-paused-near-5c: paused near 5C (http://localhost:4363/en?map=15.00/55.704857292361034/12.502634164111566)",
+    "06-card-bus-5c-to-sundbyvester-pladslivereported-29-s-ago: card: Bus 5C to Sundbyvester PladsLiveReported 29 s ago (http://localhost:4363/en?map=15.00/55.704857292361034/12.502634164111566)"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "journey": "quick-turn",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"45\"\nReceived: \"30\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    23 × locator resolved to <div data-tilt=\"0\" data-heading=\"30\" data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"30\"\n",
+  "steps": [
+    "01-north-up-map-focused: north-up, map focused (http://localhost:4362/en)",
+    "02-after-three-quick-shift-right: after three quick Shift+Right (http://localhost:4362/en?map=11.20/55.68000/12.56500/30.4/0.0)",
+    "03-failure: failure (http://localhost:4362/en?map=11.20/55.68000/12.56500/30.4/0.0)"
+  ]
+}

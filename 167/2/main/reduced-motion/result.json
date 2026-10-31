@@ -1,0 +1,12 @@
+{
+  "journey": "reduced-motion",
+  "pass": true,
+  "steps": [
+    "01-turned-to-45: turned to 45 (http://localhost:4362/en?map=11.20/55.68000/12.56500/45.0/0.0)",
+    "02-compass-back-to-north: compass: back to north (http://localhost:4362/en?map=11.20/55.68000/12.56500)",
+    "03-3d-toggle-tilted-50: 3D toggle: tilted 50 (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "04-tilted-50-turned-30: tilted 50, turned 30 (http://localhost:4362/en?map=11.20/55.68000/12.56500/30.0/50.0)",
+    "05-centred-flat-and-north-up: centred: flat and north-up (http://localhost:4362/en?map=11.20/55.68000/12.56500)",
+    "06-three-quick-shift-up-tilt-30: three quick Shift+Up: tilt 30 (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/30.0)"
+  ]
+}

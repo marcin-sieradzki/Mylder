@@ -1,0 +1,43 @@
+{
+  "reduced": false,
+  "Shift+Right once": {
+    "msToAttr": 732,
+    "framesToAttr": 2,
+    "needleAngles": [
+      0,
+      15
+    ],
+    "needleBetween": 0
+  },
+  "compass": {
+    "msToAttr": 728,
+    "framesToAttr": 5,
+    "needleAngles": [
+      45,
+      24,
+      6,
+      0
+    ],
+    "needleBetween": 2
+  },
+  "3D toggle on": {
+    "msToAttr": 779,
+    "framesToAttr": 5,
+    "needleAngles": [
+      0
+    ],
+    "needleBetween": 0
+  },
+  "Centre the map": {
+    "msToAttr": 746,
+    "framesToAttr": 6,
+    "needleAngles": [
+      30,
+      16,
+      6,
+      1,
+      0
+    ],
+    "needleBetween": 3
+  }
+}

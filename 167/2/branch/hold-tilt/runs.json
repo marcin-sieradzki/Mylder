@@ -1,0 +1,32 @@
+[
+  {
+    "holdMs": 1000,
+    "heldMs": 1082,
+    "framesDuringHold": 6,
+    "dataTiltChanges": [
+      [
+        1596,
+        "40"
+      ]
+    ],
+    "restMsAfterRelease": 514,
+    "tilt": "40",
+    "url": "http://localhost:4363/en?map=11.20/55.68000/12.56500/0.0/40.0",
+    "toggle": "true"
+  },
+  {
+    "holdMs": 4000,
+    "heldMs": 4060,
+    "framesDuringHold": 30,
+    "dataTiltChanges": [
+      [
+        2420,
+        "60"
+      ]
+    ],
+    "restMsAfterRelease": -1640,
+    "tilt": "60",
+    "url": "http://localhost:4363/en?map=11.20/55.68000/12.56500/0.0/60.0",
+    "toggle": "true"
+  }
+]

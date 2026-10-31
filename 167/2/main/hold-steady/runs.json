@@ -1,0 +1,97 @@
+[
+  {
+    "holdMs": 1000,
+    "everyMs": 33,
+    "keydownsSent": 31,
+    "keydownsSeen": 31,
+    "heldMs": 1111,
+    "framesDuringHold": 6,
+    "headingAtRelease": 1,
+    "finalHeading": 31,
+    "dataHeading": "31",
+    "degPerSecWhileHeld": 1,
+    "degPerSecHeld": 28,
+    "degAfterRelease": 30,
+    "msReleaseToRest": 451,
+    "firstHalf": 0,
+    "secondHalf": 1,
+    "per500ms": [
+      0,
+      1
+    ]
+  },
+  {
+    "holdMs": 2000,
+    "everyMs": 33,
+    "keydownsSent": 60,
+    "keydownsSeen": 60,
+    "heldMs": 1990,
+    "framesDuringHold": 13,
+    "headingAtRelease": 2,
+    "finalHeading": 32,
+    "dataHeading": "32",
+    "degPerSecWhileHeld": 1,
+    "degPerSecHeld": 16,
+    "degAfterRelease": 30,
+    "msReleaseToRest": 411,
+    "firstHalf": 1,
+    "secondHalf": 1,
+    "per500ms": [
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "holdMs": 4000,
+    "everyMs": 33,
+    "keydownsSent": 119,
+    "keydownsSeen": 119,
+    "heldMs": 4094,
+    "framesDuringHold": 29,
+    "headingAtRelease": 5,
+    "finalHeading": 35,
+    "dataHeading": "35",
+    "degPerSecWhileHeld": 1,
+    "degPerSecHeld": 9,
+    "degAfterRelease": 30,
+    "msReleaseToRest": 399,
+    "firstHalf": 2,
+    "secondHalf": 3,
+    "per500ms": [
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1
+    ]
+  },
+  {
+    "holdMs": 3000,
+    "everyMs": 90,
+    "keydownsSent": 34,
+    "keydownsSeen": 34,
+    "heldMs": 3103,
+    "framesDuringHold": 22,
+    "headingAtRelease": 3,
+    "finalHeading": 33,
+    "dataHeading": "33",
+    "degPerSecWhileHeld": 1,
+    "degPerSecHeld": 11,
+    "degAfterRelease": 30,
+    "msReleaseToRest": 415,
+    "firstHalf": 2,
+    "secondHalf": 1,
+    "per500ms": [
+      0,
+      1,
+      1,
+      0,
+      1,
+      0
+    ]
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "journey": "quick-tilt",
+  "pass": true,
+  "steps": [
+    "01-flat-map-focused: flat, map focused (http://localhost:4363/en)",
+    "02-after-three-quick-shift-up: after three quick Shift+Up (http://localhost:4363/en?map=11.20/55.68000/12.56500/0.0/30.0)",
+    "03-rests-at-30-tilt: rests at 30 tilt (http://localhost:4363/en?map=11.20/55.68000/12.56500/0.0/30.0)"
+  ]
+}

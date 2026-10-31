@@ -1,0 +1,10 @@
+{
+  "journey": "hold-steady",
+  "pass": true,
+  "steps": [
+    "01-held-1000-ms-every-33-ms-36-at-release-rests-at-60: held 1000 ms every 33 ms: 36 at release, rests at 60 (http://localhost:4363/en?map=11.20/55.68000/12.56500/60.0/0.0)",
+    "02-held-2000-ms-every-33-ms-84-at-release-rests-at-105: held 2000 ms every 33 ms: 84 at release, rests at 105 (http://localhost:4363/en?map=11.20/55.68000/12.56500/105.0/0.0)",
+    "03-held-4000-ms-every-33-ms-233-at-release-rests-at-255: held 4000 ms every 33 ms: 233 at release, rests at 255 (http://localhost:4363/en?map=11.20/55.68000/12.56500/-105.0/0.0)",
+    "04-held-3000-ms-every-90-ms-129-at-release-rests-at-150: held 3000 ms every 90 ms: 129 at release, rests at 150 (http://localhost:4363/en?map=11.20/55.68000/12.56500/150.0/0.0)"
+  ]
+}

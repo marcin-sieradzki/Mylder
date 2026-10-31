@@ -1,0 +1,9 @@
+{
+  "journey": "quick-turn",
+  "pass": true,
+  "steps": [
+    "01-north-up-map-focused: north-up, map focused (http://localhost:4363/en)",
+    "02-after-three-quick-shift-right: after three quick Shift+Right (http://localhost:4363/en?map=11.20/55.68000/12.56500/45.0/0.0)",
+    "03-rests-at-45-heading: rests at 45 heading (http://localhost:4363/en?map=11.20/55.68000/12.56500/45.0/0.0)"
+  ]
+}

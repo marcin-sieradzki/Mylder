@@ -1,0 +1,12 @@
+{
+  "journey": "hold-tilt",
+  "pass": false,
+  "error": "a 4 s hold reaches the 60° limit\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: \"60\"\nReceived: \"23\"",
+  "steps": [
+    "01-flat-before-a-1000-ms-hold: flat before a 1000 ms hold (http://localhost:4362/en)",
+    "02-held-1000-ms-rests-at-tilt-21: held 1000 ms, rests at tilt 21 (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/20.9)",
+    "03-flat-before-a-4000-ms-hold: flat before a 4000 ms hold (http://localhost:4362/en)",
+    "04-held-4000-ms-rests-at-tilt-23: held 4000 ms, rests at tilt 23 (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/23.1)",
+    "05-failure: failure (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/23.1)"
+  ]
+}
