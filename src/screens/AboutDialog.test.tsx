@@ -79,6 +79,9 @@ describe('the About dialog', () => {
     expect(dialog).toHaveTextContent(
       'Map: © OpenStreetMap contributors under the ODbL, © OpenMapTiles, OpenFreeMap.',
     )
+    expect(dialog).toHaveTextContent(
+      'OpenFreeMap.Building heights come from OpenStreetMap and are approximate.',
+    )
     expect(dialog).toHaveTextContent('no advertising, no paid tier')
     expect(within(dialog).getByRole('link', { name: 'ODbL' })).toHaveAttribute(
       'href',
@@ -126,6 +129,9 @@ describe('the About dialog', () => {
     const dialog = openDialog('Om Mylder')
     expect(dialog).toHaveTextContent(
       'Realtidsdata og køreplan: Rejseplanen, under CC BY 4.0. Køreplan fra 2. juni.',
+    )
+    expect(dialog).toHaveTextContent(
+      'OpenFreeMap.Bygningshøjderne kommer fra OpenStreetMap og er omtrentlige.',
     )
     for (const sentence of STATE_KEYS.map((key) => da.about.states[key])) {
       expect(dialog).toHaveTextContent(sentence)
@@ -178,7 +184,7 @@ describe('the About dialog', () => {
     show('en', weekday)
     const dialog = openDialog('About Mylder')
     expect(dialog).toHaveTextContent(
-      'Map: © OpenStreetMap contributors under the ODbL, © OpenMapTiles, OpenFreeMap.Aircraft: © adsb.lol contributors under the ODbL.',
+      'Building heights come from OpenStreetMap and are approximate.Aircraft: © adsb.lol contributors under the ODbL.',
     )
     expect(within(dialog).getByRole('link', { name: 'adsb.lol contributors' })).toHaveAttribute(
       'href',
@@ -219,7 +225,7 @@ describe('the About dialog', () => {
     liveAircraft.update({ snapshot: { ...aircraft, provider: 'adsb.fi' } })
     show('en', weekday)
     const dialog = openDialog('About Mylder')
-    expect(dialog).toHaveTextContent('OpenFreeMap.Aircraft: © adsb.fi.')
+    expect(dialog).toHaveTextContent('approximate.Aircraft: © adsb.fi.')
     expect(dialog).not.toHaveTextContent('adsb.lol')
     expect(within(dialog).getByRole('link', { name: 'adsb.fi' })).toHaveAttribute(
       'href',
@@ -228,7 +234,7 @@ describe('the About dialog', () => {
     act(() => aboutDialog.close())
     cleanup()
     show('da', weekday)
-    expect(openDialog('Om Mylder')).toHaveTextContent('OpenFreeMap.Fly: © adsb.fi.')
+    expect(openDialog('Om Mylder')).toHaveTextContent('omtrentlige.Fly: © adsb.fi.')
   })
 
   it('names no aircraft credit while the page has none', () => {

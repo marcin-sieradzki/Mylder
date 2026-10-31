@@ -1,6 +1,6 @@
 # Licence of the basemap style
 
-`positron.json` is a fork of OpenFreeMap's Positron (https://tiles.openfreemap.org/styles/positron, from https://github.com/hyperknot/openfreemap-styles), itself a fork of OpenMapTiles' Positron GL Style (https://github.com/openmaptiles/positron-gl-style). Mylder's changes: the Natural Earth raster and the road shields are removed, and `basemap.ts` repaints every layer from Perron's map tokens at run time.
+`positron.json` is a fork of OpenFreeMap's Positron (https://tiles.openfreemap.org/styles/positron, from https://github.com/hyperknot/openfreemap-styles), itself a fork of OpenMapTiles' Positron GL Style (https://github.com/openmaptiles/positron-gl-style). Mylder's changes: the Natural Earth raster and the road shields are removed, the buildings are raised from zoom 14 (a `fill-extrusion` layer from OpenFreeMap's building heights, where the flat footprints stop), and `basemap.ts` repaints every layer from Perron's map tokens at run time.
 
 OpenFreeMap's styles are released under the MIT licence. The map data is © OpenStreetMap contributors (https://www.openstreetmap.org/copyright), served in the OpenMapTiles schema (© OpenMapTiles, https://openmaptiles.org/), and both are credited on the map.
 
