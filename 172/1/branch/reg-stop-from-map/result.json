@@ -1,0 +1,9 @@
+{
+  "journey": "reg-stop-from-map",
+  "pass": true,
+  "steps": [
+    "01-map-centred-on-sterport-st-: map centred on Østerport St. (http://localhost:4303/en?map=15.00/55.6925/12.58779)",
+    "02--sterport-st-panel-open-from-the-map: Østerport St. panel open from the map (http://localhost:4303/en?map=15.00/55.69250/12.58779&stop=8600650)",
+    "03-departures-listed: departures listed (http://localhost:4303/en?map=15.00/55.69250/12.58779&stop=8600650)"
+  ]
+}

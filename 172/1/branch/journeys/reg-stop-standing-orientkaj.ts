@@ -1,0 +1,21 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en?stop=54307')
+  const panel = page.getByRole('dialog', { name: 'Orientkaj St.' })
+  const standing = panel.getByRole('region', { name: 'At the platforms now' })
+  await expect(standing).toBeVisible()
+  const row = standing.getByRole('listitem').first()
+  await expect(row).toContainText('991')
+  await expect(row).toContainText('Teglholmen')
+  await expect(row).toContainText(/Live|Ageing|Estimated|Timetable only|No signal/)
+  await expect(row).toContainText(/\d+ min|Now/)
+  await expect(row.getByRole('time')).toHaveText(/^\d\d:\d\d$/)
+  const a = await standing.boundingBox(), b = await panel.getByRole('region', { name: 'Departures' }).boundingBox()
+  expect(a!.y).toBeLessThan(b!.y)
+  await step('Orientkaj St. standing row')
+  await standing.getByRole('button', { name: 'Bus 991 to Teglholmen' }).click()
+  await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
+  await expect(page).toHaveURL(/[?&]trip=/)
+  expect(page.url()).not.toMatch(/[?&]stop=/)
+  await step('vehicle opened')
+}

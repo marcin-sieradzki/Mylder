@@ -1,0 +1,8 @@
+{
+  "journey": "pr1-standing-row",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-opened: Refshaleøen opened (http://localhost:4303/en?stop=48645)",
+    "02-standing-row-above-departures: standing row above departures (http://localhost:4303/en?stop=48645)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "pr1b-standing-platform",
+  "pass": false,
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('listitem').first()\nExpected pattern: /Platform|Track|Stop position|Stander|Pos\\./i\nReceived string:  \"991TeglholmenEstimated~2 min~07:23On time\"\nTimeout: 3000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('listitem').first() with timeout 3000ms\n  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('listitem').first()\n    8 × locator resolved to <li class=\"sLt2-q_departure\">…</li>\n      - unexpected value \"991TeglholmenEstimated~2 min~07:23On time\"\n",
+  "steps": [
+    "01-refshale-en-opened: Refshaleøen opened (http://localhost:4303/en?stop=48645)",
+    "02-failure: failure (http://localhost:4303/en?stop=48645)"
+  ]
+}

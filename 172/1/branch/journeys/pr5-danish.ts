@@ -1,0 +1,22 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/da?stop=48645')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'da')
+  const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+  const standing = panel.getByRole('region', { name: 'Ved perronerne nu' })
+  await expect(standing).toBeVisible()
+  await expect(standing.getByRole('heading', { name: 'Ved perronerne nu' })).toBeVisible()
+  const row = standing.getByRole('listitem').first()
+  await expect(row).toContainText('991')
+  await expect(row).not.toContainText(/Estimated|Scheduled|On time/)
+  await step('Danish standing row')
+  console.log('DA ROW:', await row.innerText())
+  await page.goto('/da?stop=27532')
+  const empty = page.getByRole('dialog', { name: 'Nørreport St.' }).getByRole('region', { name: 'Ved perronerne nu' })
+  await expect(empty).toBeVisible()
+  await expect(empty.getByRole('list')).toHaveCount(0)
+  await expect(empty).not.toContainText('No vehicle')
+  await expect(empty).toContainText(/\w+/)
+  console.log('DA EMPTY:', await empty.innerText())
+  await step('Danish none standing')
+}

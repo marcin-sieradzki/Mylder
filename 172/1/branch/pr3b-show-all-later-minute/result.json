@@ -1,0 +1,9 @@
+{
+  "journey": "pr3b-show-all-later-minute",
+  "pass": false,
+  "error": "Precondition not in the recording: of 109 stops, the most trips standing at one stop now is 1 (stop 54307); \"Show all N\" needs more than 4",
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4303/en)",
+    "02-failure: failure (http://localhost:4303/en)"
+  ]
+}
