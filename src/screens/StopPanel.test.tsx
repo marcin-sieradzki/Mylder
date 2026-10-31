@@ -21,6 +21,7 @@ import type {
 } from '../tracker/index'
 import { MapScreen } from './MapScreen'
 import { Providers } from './Providers'
+import { BOARD_GRACE } from './StopPanel'
 
 // A stop's departures panel from the stop route's answers saved with the weekday recording, at
 // the start of its second minute, 07:21:00 in Copenhagen. jsdom has no server: the route answers
@@ -443,32 +444,43 @@ describe("a stop's departures from its board", () => {
 })
 
 describe('a board’s source line as its minute runs out', () => {
-  // Each board is called at the answers' moment, 07:21:00, and due again a minute later. The
-  // panel asks again up to 4 s after that, and when the CDN still has the old answer, again 5 s
-  // and up to 4 s later (src/map/panels.ts); here the next answer never lands.
+  // Each board is called at the answers' moment, 07:21:00, and due again a minute later; here the
+  // next answer never lands. How long the panel may take to bring it is `BOARD_GRACE`.
+  const MINUTE = 60_000
+
+  // The panel's second ticks on fake timers, so the clock moves with no wait.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'], now: NORREPORT.fetched })
+  })
+
+  /** Opens `search` in English and lets the stop's answers land. */
+  async function open(search: string) {
+    openStop('en', search)
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    return screen.getByRole('dialog', { name: 'Nørreport St.' })
+  }
 
   /**
-   * Moves the server's clock to `after` ms past the answers' moment, and waits out the panel's
-   * next second, when it reads the clock again.
+   * Moves the server's clock to `after` ms past the answers' moment, then on to the panel's next
+   * second, when it reads the clock again.
    */
   async function moveClock(after: number) {
     vi.setSystemTime(NORREPORT.fetched + after)
-    await act(() => new Promise((resolve) => setTimeout(resolve, 1_100)))
+    await act(() => vi.advanceTimersByTimeAsync(1_000))
   }
 
   it('keeps a fresh departure board unmarked past its minute while the next is on its way', async () => {
     answers.set('27532', fromBoard(NORREPORT))
-    openStop('en', '?stop=27532')
-    const stop = await panel('Nørreport St.')
+    const stop = await open('?stop=27532')
     const koge = row(stop, 'Køge St.')
     expect(koge).toHaveTextContent('8 min')
     // The panel's first ask again, at its latest.
-    await moveClock(64_000)
+    await moveClock(MINUTE + 4_000)
     expect(koge).toHaveTextContent('7 min')
     expect(stop).toHaveTextContent('Rejseplanen · departures 07:21:00')
     expect(stop).not.toHaveTextContent('may be out of date')
     // Its second, when the CDN gave the first the old answer.
-    await moveClock(73_000)
+    await moveClock(MINUTE + 13_000)
     expect(stop).not.toHaveTextContent('may be out of date')
   })
 
@@ -477,12 +489,11 @@ describe('a board’s source line as its minute runs out', () => {
       ...NORREPORT_ARRIVALS,
       source: { kind: 'rejseplanen', at: NORREPORT_ARRIVALS.fetched },
     })
-    openStop('en', '?stop=27532&board=arrivals')
-    const arrivals = within(await panel('Nørreport St.')).getByRole('tabpanel', {
+    const arrivals = within(await open('?stop=27532&board=arrivals')).getByRole('tabpanel', {
       name: 'Arrivals',
     })
-    await within(arrivals).findByRole('list', { name: 'Arrivals' })
-    await moveClock(64_000)
+    expect(within(arrivals).getByRole('list', { name: 'Arrivals' })).toBeInTheDocument()
+    await moveClock(MINUTE + 4_000)
     expect(arrivals).toHaveTextContent('Rejseplanen · arrivals 07:21:00')
     expect(arrivals).not.toHaveTextContent('may be out of date')
   })
@@ -490,9 +501,8 @@ describe('a board’s source line as its minute runs out', () => {
   it('says a board whose next answer is overdue may be out of date', async () => {
     // A failed ask keeps the answer it had, so it ages past the same mark.
     answers.set('27532', fromBoard(NORREPORT))
-    openStop('en', '?stop=27532')
-    const stop = await panel('Nørreport St.')
-    await moveClock(81_000)
+    const stop = await open('?stop=27532')
+    await moveClock(MINUTE + BOARD_GRACE + 1_000)
     expect(stop).toHaveTextContent('Rejseplanen · departures 07:21:00, may be out of date')
   })
 })

@@ -61,12 +61,15 @@ const SHOWN_DEPARTURES = 30
 const SHOWN_STANDING = 4
 
 /**
- * A board answer older than this may be out of date (docs/screens.md, "Sources and times"): its
- * minute, then room for the panel to bring the next, so the line doesn't flash the warning while
- * that is on its way. The panel asks up to 4 s after an answer falls due, and when the CDN still
- * has the old one, again 5 s and up to 4 s later (src/map/panels.ts), each ask taking a moment.
+ * How long past its minute a board answer may be before its source line says so: room for the
+ * panel to bring the next, so the line doesn't flash the warning while that is on its way. The
+ * panel asks up to 4 s after an answer falls due, and when the CDN still has the old one, again
+ * 5 s and up to 4 s later (src/map/panels.ts), each ask taking a moment.
  */
-const BOARD_FRESH_FOR = 60_000 + 20_000
+export const BOARD_GRACE = 20_000
+
+/** A board answer older than this may be out of date (docs/screens.md, "Sources and times"). */
+const BOARD_FRESH_FOR = 60_000 + BOARD_GRACE
 
 /** The modes whose platforms are tracks; a bus leaves from a stand. */
 const ON_TRACKS: ReadonlySet<StopDeparture['mode']> = new Set([
