@@ -1,0 +1,51 @@
+- main
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated —
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da
+  - button "About Mylder"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+- text: Scale Unknown
+- toolbar "Map controls":
+  - button "Zoom in" [disabled]
+  - button "Zoom out" [disabled]
+  - separator
+  - button "Centre the map" [disabled]
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ) ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move Unknown
+      - paragraph
+- alert
+- region "Notifications"

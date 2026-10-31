@@ -1,0 +1,11 @@
+snapshot fetched 2026-06-16T05:22:00.777Z
+PAINTS (5):
+292ms mutation: 
+2311ms mutation: [Stop] 
+2444ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Live | — | Unknown | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | — | Unknown | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | — | Unknown | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+6473ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Live | 7 min | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | ~16 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | ~16 min | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+15777ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Live | 6 min | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | ~15 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | ~15 min | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+SETTLED ROWS: [[{"label":"Lines","rows":["5C","M1","A","E"]},{"label":"Departures","rows":["E\nKøge St.\nLive\n6 min\nTimetabled 07:27\n07:27\n07:29\n+2 min\n2 min late","5C\nHusum Torv\nEstimated\n~15 min\nTimetabled 07:36\n07:36\n~07:38\n+2 min\n2 min late","5C\nSundbyvester Plads\nEstimated\n~15 min\nTimetabled 07:39\n07:39\n~07:38\n−1 min\n1 min early","A\nHillerød St.\nLive\n17 min\nTimetabled 07:36\n07:36\n07:40\n+4 min\n4 min late","A\nHundige St.\nLive\n18 min\nTimetabled 07:39\n07:39\n07:41\n+2 min\n2 min late","5C\nHusum Torv\nEstimated\n~22 min\n~07:45\nOn time","5C\nSundbyvester Plads\nLive\n23 min\nTimetabled 07:44\n07:44\n07:46\n+2 min\n2 min late","A\nHillerød St.\nLive\n24 min\nTimetabled 07:46\n07:46\n07:47\n+1 min\n1 min late","E\nHolte St.\nEstimated\n~26 min\nTimetabled 07:48\n07:48\n~07:49\n+1 min\n1 min late","A\nHundige St.\nLive\n28 min\nTimetabled 07:49\n07:49\n07:51\n+2 min\n2 min late"]}]]
+any row read Now in any paint: false
+a row read — in some paint: true
+PASS pr1-dep-norreport: 2 steps in .verify/branch-179-r2/pr1-dep-norreport/

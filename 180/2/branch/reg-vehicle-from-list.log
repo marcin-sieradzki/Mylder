@@ -1,0 +1,3 @@
+first row link: Vestamager St. (Metro)
+PANEL: M1 | M1 | to Vestamager St. (Metro) | Metro | Follow | Show whole line | Close | Timetable only |  | Runs to an interval |  | Delay | Runs to an interval | Last seen | — | Unknown | Next stop | Vestamager St. (Metro) |  | Between Ørestad St. (Metro) and Vestamager St. (Metro) |  | Every 4 min |  | Vanløse St. (Metro) | Passed | Flintholm St. (Metro) | Passed | Lindevang St. (Metro) | Passed | Fasanvej St. (Metro) | Passed | Frederiksberg St. (Metro) | Passed | Forum St. (Metro) | Passed | Nørreport St. (Metro) | Passed | Kongens Nytorv St. (Metro) | Passed | Christianshavn St. (Metro) | Passed
+PASS reg-vehicle-from-list: 4 steps in .verify/branch-179-r2/reg-vehicle-from-list/

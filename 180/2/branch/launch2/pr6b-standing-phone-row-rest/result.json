@@ -1,0 +1,11 @@
+{
+  "journey": "pr6b-standing-phone-row-rest",
+  "pass": true,
+  "steps": [
+    "01-map-at-refshale-en-buses-hidden: map at Refshaleøen, buses hidden (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "02-overview-closed: Overview closed (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "03-refshale-en-sheet-buses-hidden-none-standing: Refshaleøen sheet, buses hidden: none standing (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "04-buses-shown-one-sideways-card-above-the-tabs: buses shown: one sideways card above the tabs (http://localhost:4311/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "05-vehicle-opened-from-the-card: vehicle opened from the card (http://localhost:4311/en?map=17.00/55.69105/12.60675&trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

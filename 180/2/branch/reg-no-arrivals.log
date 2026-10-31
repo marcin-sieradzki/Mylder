@@ -1,0 +1,8 @@
+TABPANEL:
+No arrivals in the next 30 minutes for the vehicle types shown.
+
+Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.
+From the timetable
+
+Timetable and positions 07:25:05
+PASS reg-no-arrivals: 2 steps in .verify/branch-179-r2/reg-no-arrivals/

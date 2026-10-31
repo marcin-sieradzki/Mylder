@@ -1,0 +1,7 @@
+snapshot fetched 2026-06-16T05:20:00.023Z
+list {"x":17,"y":761.296875,"width":378,"height":72.390625} card {"x":17,"y":761.296875,"width":340.1875,"height":72.390625} tablist {"x":17,"y":845.6875,"width":378,"height":37} viewport h 839
+FAIL pr6-standing-phone-row: 4 steps in .verify/branch-179-r2/pr6-standing-phone-row/
+expect(received).toBeLessThan(expected)
+
+Expected: < 839
+Received:   845.6875

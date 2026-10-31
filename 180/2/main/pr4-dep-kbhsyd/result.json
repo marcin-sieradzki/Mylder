@@ -1,0 +1,10 @@
+{
+  "journey": "pr4-dep-kbhsyd",
+  "pass": false,
+  "error": "paints saying may be out of date\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 7\n\n- Array []\n+ Array [\n+   Object {\n+     \"dialog\": \"København Syd St.\",\n+     \"t\": 1608.2000000029802,\n+     \"text\": \"7:36 | ~07:37 | +1 min | 1 min late | E | Køge St. | Estimated | Track 8 | Now | Timetabled 07:39 | 07:39 | ~07:41 | +2 min | 2 min late | Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. |  | Rejseplanen · departures 07:20:34, may be out of date\",\n+   },\n+ ]",
+  "steps": [
+    "01-link-opened-earliest-screen: link opened, earliest screen (http://localhost:4310/en?stop=8600783)",
+    "02-clock-settled-rejseplanen-source-line: clock settled, Rejseplanen source line (http://localhost:4310/en?stop=8600783)",
+    "03-failure: failure (http://localhost:4310/en?stop=8600783)"
+  ]
+}

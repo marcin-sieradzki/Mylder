@@ -1,0 +1,27 @@
+snapshot fetched 2026-06-16T05:20:00.016Z
+PAINTS (5):
+89ms mutation: 
+1540ms mutation: [Stop] 
+2193ms mutation: [København Syd St.] Lines{ A // E // RE }
+2303ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ RE | From København H | Estimated | Track 8 | Now | Timetabled 07:21 | 07:21 | ~07:22 | +1 min | 1 min late // A | From Hundige St. | Estimated | Track 8 | Now | Timetabled 07:23 | 07:23 | ~07:27 | +4 min | 4 min late // A | From Hundige St. | Estimated | Track 8 | Now | Timetabled 07:33 | 07:33 | ~07:34 | +1 min | 1 min late }
+4779ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ RE | From København H | Estimated | Track 8 | ~1 min | Timetabled 07:21 | 07:21 | ~07:22 | +1 min | 1 min late // A | From Hundige St. | Estimated | Track 8 | ~6 min | Timetabled 07:23 | 07:23 | ~07:27 | +4 min | 4 min late // A | From Hundige St. | Estimated | Track 8 | ~13 min | Timetabled 07:33 | 07:33 | ~07:34 | +1 min | 1 min late }
+SETTLED SOURCE: [
+  "E | From Holte St. | Estimated | Track 8 | ~20 min | Timetabled 07:39 | 07:39 | ~07:41 | +2 min | 2 min late | Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. |  | Rejseplanen · arrivals 07:20:36"
+]
+SETTLED ROWS: [[{"label":"Lines","rows":["A","E","RE"]},{"label":"Arrivals","rows":["RE\nFrom København H\nEstimated\nTrack 8\n~1 min\nTimetabled 07:21\n07:21\n~07:22\n+1 min\n1 min late","A\nFrom Hundige St.\nEstimated\nTrack 8\n~6 min\nTimetabled 07:23\n07:23\n~07:27\n+4 min\n4 min late","A\nFrom Hundige St.\nEstimated\nTrack 8\n~13 min\nTimetabled 07:33\n07:33\n~07:34\n+1 min\n1 min late","E\nFrom Køge St.\nEstimated\nTrack 8\n~16 min\nTimetabled 07:36\n07:36\n~07:37\n+1 min\n1 min late","E\nFrom Holte St.\nEstimated\nTrack 8\n~20 min\nTimetabled 07:39\n07:39\n~07:41\n+2 min\n2 min late"]}]]
+FAIL pr5-arr-kbhsyd-phone: 3 steps in .verify/main-179-r2/pr5-arr-kbhsyd-phone/
+paints saying may be out of date
+
+expect(received).toEqual(expected) // deep equality
+
+- Expected  - 1
++ Received  + 7
+
+- Array []
++ Array [
++   Object {
++     "dialog": "København Syd St.",
++     "t": 2303.199999999255,
++     "text": " | ~07:37 | +1 min | 1 min late | E | From Holte St. | Estimated | Track 8 | Now | Timetabled 07:39 | 07:39 | ~07:41 | +2 min | 2 min late | Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. |  | Rejseplanen · arrivals 07:20:36, may be out of date",
++   },
++ ]

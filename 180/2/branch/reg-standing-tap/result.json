@@ -1,0 +1,8 @@
+{
+  "journey": "reg-standing-tap",
+  "pass": true,
+  "steps": [
+    "01-standing-row-before-tap: standing row before tap (http://localhost:4311/en?stop=48645)",
+    "02-vehicle-panel-opened-from-standing-row: vehicle panel opened from standing row (http://localhost:4311/en?trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

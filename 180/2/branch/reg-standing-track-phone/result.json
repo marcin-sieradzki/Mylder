@@ -1,0 +1,8 @@
+{
+  "journey": "reg-standing-track-phone",
+  "pass": true,
+  "steps": [
+    "01-map-at-k-benhavn-syd-st-: map at København Syd St. (http://localhost:4311/en?map=17.00/55.65263/12.51685)",
+    "02-re-to-n-stved-st-card-on-track-8: RE to Næstved St. card on Track 8 (http://localhost:4311/en?map=17.00/55.65263/12.51685&stop=8600783)"
+  ]
+}

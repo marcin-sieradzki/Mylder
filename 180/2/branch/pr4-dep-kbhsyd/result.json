@@ -1,0 +1,8 @@
+{
+  "journey": "pr4-dep-kbhsyd",
+  "pass": true,
+  "steps": [
+    "01-link-opened-earliest-screen: link opened, earliest screen (http://localhost:4311/en?stop=8600783)",
+    "02-clock-settled-rejseplanen-source-line: clock settled, Rejseplanen source line (http://localhost:4311/en?stop=8600783)"
+  ]
+}

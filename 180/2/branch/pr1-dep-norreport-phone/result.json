@@ -1,0 +1,8 @@
+{
+  "journey": "pr1-dep-norreport-phone",
+  "pass": true,
+  "steps": [
+    "01-link-opened-earliest-screen: link opened, earliest screen (http://localhost:4311/en?stop=27532)",
+    "02-clock-settled-countdowns-in-minutes: clock settled, countdowns in minutes (http://localhost:4311/en?stop=27532)"
+  ]
+}

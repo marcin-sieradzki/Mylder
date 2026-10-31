@@ -1,0 +1,12 @@
+snapshot fetched 2026-06-16T05:23:03.891Z
+PAINTS (5):
+83ms mutation: 
+1347ms mutation: [Stop] 
+1609ms mutation: [København Syd St.] Lines{ A // E // RE }
+2211ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | — | Unknown | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | From Hundige St. | Live | Track 8 | — | Unknown | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | — | Unknown | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late }
+5877ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | From Hundige St. | Live | Track 8 | 11 min | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | ~14 min | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late }
+SETTLED SOURCE: [
+  "late | E | From Holte St. | Live | Track 8 | 18 min | Timetabled 07:39 | 07:39 | 07:41 | +2 min | 2 min late | Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. |  | Rejseplanen · arrivals 07:22:54"
+]
+SETTLED ROWS: [[{"label":"Lines","rows":["A","E","RE"]},{"label":"Arrivals","rows":["A\nFrom Hundige St.\nLive\nTrack 8\n4 min\nTimetabled 07:23\n07:23\n07:27\n+4 min\n4 min late","A\nFrom Hundige St.\nLive\nTrack 8\n11 min\nTimetabled 07:33\n07:33\n07:34\n+1 min\n1 min late","E\nFrom Køge St.\nEstimated\nTrack 8\n~14 min\nTimetabled 07:36\n07:36\n~07:37\n+1 min\n1 min late","E\nFrom Holte St.\nLive\nTrack 8\n18 min\nTimetabled 07:39\n07:39\n07:41\n+2 min\n2 min late"]}]]
+PASS pr5-arr-kbhsyd: 2 steps in .verify/branch-179-r2/pr5-arr-kbhsyd/

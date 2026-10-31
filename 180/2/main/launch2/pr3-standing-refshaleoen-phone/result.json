@@ -1,0 +1,10 @@
+{
+  "journey": "pr3-standing-refshaleoen-phone",
+  "pass": false,
+  "error": "rows reading Now before the clock settled\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 12\n\n- Array []\n+ Array [\n+   Object {\n+     \"list\": \"At the platforms now\",\n+     \"row\": \"991 | Teglholmen | Estimated | Now | ~07:23 | On time\",\n+     \"t\": 2033,\n+   },\n+   Object {\n+     \"list\": \"Departures\",\n+     \"row\": \"991 | Teglholmen | Estimated | Now | ~07:23 | On time\",\n+     \"t\": 2033,\n+   },\n+ ]",
+  "steps": [
+    "01-link-opened-earliest-screen: link opened, earliest screen (http://localhost:4310/en?stop=48645)",
+    "02-clock-settled-countdowns-in-minutes: clock settled, countdowns in minutes (http://localhost:4310/en?stop=48645)",
+    "03-failure: failure (http://localhost:4310/en?stop=48645)"
+  ]
+}

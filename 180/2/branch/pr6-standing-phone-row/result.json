@@ -1,0 +1,11 @@
+{
+  "journey": "pr6-standing-phone-row",
+  "pass": false,
+  "error": "expect(received).toBeLessThan(expected)\n\nExpected: < 839\nReceived:   845.6875",
+  "steps": [
+    "01-map-at-refshale-en-buses-hidden: map at Refshaleøen, buses hidden (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "02-overview-closed: Overview closed (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "03-refshale-en-sheet-buses-hidden-none-standing: Refshaleøen sheet, buses hidden: none standing (http://localhost:4311/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "04-failure: failure (http://localhost:4311/en?map=17.00/55.69105/12.60675&stop=48645)"
+  ]
+}

@@ -1,0 +1,12 @@
+snapshot fetched 2026-06-16T05:22:00.777Z
+PAINTS (6):
+420ms mutation: 
+1312ms mutation: [Stop] 
+1525ms mutation: [Nørreport St.] Lines{ 5C // M1 // A }
+1725ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Arrivals{ E | From Holte St. | Live | — | Unknown | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | From Sundbyvester Plads | Estimated | — | Unknown | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | From Herlev Hospital, Sløjfen | Estimated | — | Unknown | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+6719ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Arrivals{ E | From Holte St. | Live | 7 min | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | From Sundbyvester Plads | Estimated | ~16 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | From Herlev Hospital, Sløjfen | Estimated | ~16 min | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+15209ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Arrivals{ E | From Holte St. | Live | 6 min | Timetabled 07:27 | 07:27 | 07:29 | +2 min | 2 min late // 5C | From Sundbyvester Plads | Estimated | ~15 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | From Herlev Hospital, Sløjfen | Estimated | ~15 min | Timetabled 07:39 | 07:39 | ~07:38 | −1 min | 1 min early }
+SETTLED ROWS: [[{"label":"Lines","rows":["5C","M1","A","E"]},{"label":"Arrivals","rows":["E\nFrom Holte St.\nLive\n6 min\nTimetabled 07:27\n07:27\n07:29\n+2 min\n2 min late","5C\nFrom Sundbyvester Plads\nEstimated\n~15 min\nTimetabled 07:36\n07:36\n~07:38\n+2 min\n2 min late","5C\nFrom Herlev Hospital, Sløjfen\nEstimated\n~15 min\nTimetabled 07:39\n07:39\n~07:38\n−1 min\n1 min early","A\nFrom Hundige St.\nLive\n17 min\nTimetabled 07:36\n07:36\n07:40\n+4 min\n4 min late","A\nFrom Hillerød St.\nLive\n18 min\nTimetabled 07:39\n07:39\n07:41\n+2 min\n2 min late","5C\nFrom Sundbyvester Plads\nEstimated\n~22 min\n~07:45\nOn time","5C\nFrom Husum Torv, Sløjfen\nLive\n23 min\nTimetabled 07:44\n07:44\n07:46\n+2 min\n2 min late","A\nFrom Hundige St.\nLive\n24 min\nTimetabled 07:46\n07:46\n07:47\n+1 min\n1 min late","E\nFrom Køge St.\nEstimated\n~26 min\nTimetabled 07:48\n07:48\n~07:49\n+1 min\n1 min late","A\nFrom Hillerød St.\nLive\n28 min\nTimetabled 07:49\n07:49\n07:51\n+2 min\n2 min late"]}]]
+any row read Now in any paint: false
+a row read — in some paint: true
+PASS pr2-arr-norreport: 2 steps in .verify/branch-179-r2/pr2-arr-norreport/

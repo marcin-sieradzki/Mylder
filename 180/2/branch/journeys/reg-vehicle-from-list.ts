@@ -1,0 +1,28 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+// Feature vehicle-detail, recipes "From the list", "Facts" and "Close".
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.getByRole('banner').getByText(/^Updated /)).toBeVisible()
+  await step('map loaded')
+  await page.getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Vehicles/ }).click()
+  const table = page.getByRole('table', { name: 'Vehicles' })
+  await expect(table).toBeVisible()
+  await step('Vehicles list')
+  const link = table.getByRole('link').first()
+  const label = await link.innerText()
+  console.log('first row link:', label)
+  await link.click()
+  const panel = page.getByRole('dialog', { name: / to / })
+  await expect(panel).toBeVisible()
+  await expect(page).toHaveURL(/[?&]trip=/)
+  await expect(panel).toContainText(/Live|Ageing|Estimated|Timetable only|No signal/)
+  for (const w of ['Delay', 'Last seen', 'Next stop']) await expect(panel).toContainText(w)
+  await expect(panel.getByRole('list', { name: 'Stops' })).toBeVisible()
+  await expect(panel).toContainText(/times from the timetable|clock|Timetable\s*·\s*updated \d\d:\d\d/i)
+  console.log('PANEL:', (await panel.innerText()).replace(/\n/g, ' | ').slice(0, 600))
+  await step('vehicle panel with its facts')
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  expect(page.url()).not.toMatch(/[?&]trip=/)
+  await step('closed with Escape')
+}

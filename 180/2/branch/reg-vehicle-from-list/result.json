@@ -1,0 +1,10 @@
+{
+  "journey": "reg-vehicle-from-list",
+  "pass": true,
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4311/en)",
+    "02-vehicles-list: Vehicles list (http://localhost:4311/en?tab=vehicles)",
+    "03-vehicle-panel-with-its-facts: vehicle panel with its facts (http://localhost:4311/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-closed-with-escape: closed with Escape (http://localhost:4311/en?tab=vehicles)"
+  ]
+}

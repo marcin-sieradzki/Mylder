@@ -1,0 +1,77 @@
+- main
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated —
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?stop=48645
+  - button "About Mylder"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+- text: Scale Unknown
+- toolbar "Map controls":
+  - button "Zoom in" [disabled]
+  - button "Zoom out" [disabled]
+  - separator
+  - button "Centre the map" [disabled]
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ) ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move Unknown
+      - paragraph
+- dialog "Refshaleøen":
+  - heading "Refshaleøen" [level=2]
+  - list "Lines":
+    - listitem: "991"
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - list "At the platforms now":
+      - listitem:
+        - button "Bus 991 to Teglholmen"
+        - text: 991 Teglholmen Estimated Now
+        - time: 07:23
+        - text: On time
+  - tablist "Departures and arrivals":
+    - tab "Departures" [selected]
+    - tab "Arrivals"
+  - tabpanel "Departures":
+    - list "Departures":
+      - listitem:
+        - button "Bus 991 to Teglholmen"
+        - text: 991 Teglholmen Estimated Now
+        - time: 07:23
+        - text: On time
+    - text: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. From the timetable
+    - paragraph:
+      - time: Timetable and positions 07:20:00
+- alert
+- region "Notifications"

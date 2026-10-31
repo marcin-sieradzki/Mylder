@@ -1,0 +1,74 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated —
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?stop=8603313
+  - button "About Mylder"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ) ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move Unknown
+      - paragraph
+- dialog "Bella Center St.":
+  - heading "Bella Center St." [level=2]
+  - list "Lines":
+    - listitem: M1
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - paragraph: No vehicle of the types shown is standing at the platforms now.
+  - tablist "Departures and arrivals":
+    - tab "Departures" [selected]
+    - tab "Arrivals"
+  - tabpanel "Departures":
+    - list "Departures":
+      - listitem:
+        - text: M1 Vestamager St. (Metro) Timetable only Every 4 min
+        - paragraph: "Metro: planned times"
+    - text: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. From the timetable
+    - paragraph:
+      - time: Timetable and positions 07:22:00
+- alert
+- region "Notifications"
