@@ -4,6 +4,7 @@ import { TestClock } from 'effect/testing'
 import { clockMoment, clockTime } from '../timetable/time'
 import { stopDeparturesFrom, type SnapshotDelays } from './answers'
 import { pacing } from './budget'
+import type { History } from './build'
 import * as Http from './http'
 import type { DepartureBoardAnswer } from './rejseplanen/answers'
 import { callsKey } from './rejseplanen/client'
@@ -39,6 +40,21 @@ const standingAt = (stopId: string) =>
 const tripDetail = (tripKey: string) =>
   Effect.gen(function* () {
     return (yield* (yield* Tracker).getTripDetail(tripKey))!
+  })
+
+/** What the tracker's history remembers of a trip, as its last run stored it. */
+const remembered = (tripKey: string) =>
+  Effect.gen(function* () {
+    const history = (yield* (yield* Store).get(`${keyPrefixOf(recording)}:history`)) as
+      History | undefined
+    return history?.[tripKey]
+  })
+
+/** A trip as the snapshot draws it, or undefined when it is not on the map. */
+const onTheMap = (tripKey: string) =>
+  Effect.gen(function* () {
+    const { trips } = yield* (yield* Tracker).getSnapshot
+    return trips.find((trip) => trip.key === tripKey)
   })
 
 /** Refshaleøen, where the 991 from 07:00 stands from 07:17 to 07:23 by its timetable. */
@@ -92,23 +108,35 @@ describe('the trips standing at a stop', () => {
   )
 
   it.effect(
-    'keeps a trip that ends here for 2 minutes after its shown arrival, then drops it',
+    'keeps a late trip that ends here for 2 minutes after its delayed arrival, Estimated, then drops it',
     () =>
       Effect.gen(function* () {
-        // Its panel's expected arrival at its last stop, while it is underway.
+        // Its panel's expected arrival at its last stop, and its delay, while it is underway.
         yield* TestClock.setTime(at(8, 0))
         const arrives = (yield* tripDetail(A_0707)).calls.at(-1)!.expectedArrival!
         expect(arrives).toBeGreaterThan(at(8, 11))
+        const { delay } = (yield* onTheMap(A_0707))!
+        expect(delay).toBe((arrives - at(8, 11)) / 1000)
         yield* TestClock.setTime(arrives - 30_000)
         expect(yield* standingAt(HILLEROD)).toEqual([])
         yield* TestClock.setTime(arrives)
         const [ended] = yield* standingAt(HILLEROD)
-        expect(ended).toMatchObject({ trip: A_0707, line: 'A', ends: true })
+        expect(ended).toMatchObject({ trip: A_0707, line: 'A', ends: true, state: 'estimated' })
         expect(ended).not.toHaveProperty('departs')
+        // A run after it arrived has taken it off the map; the history keeps its delay, so it
+        // still stands at its delayed arrival, Estimated.
         yield* TestClock.setTime(arrives + 119_000)
-        expect((yield* standingAt(HILLEROD)).map((each) => each.trip)).toEqual([A_0707])
+        expect(yield* onTheMap(A_0707)).toBeUndefined()
+        expect((yield* remembered(A_0707))?.delay).toBe(delay)
+        expect(yield* standingAt(HILLEROD)).toEqual([
+          expect.objectContaining({ trip: A_0707, ends: true, state: 'estimated' }),
+        ])
         yield* TestClock.setTime(arrives + 120_000)
         expect(yield* standingAt(HILLEROD)).toEqual([])
+        // The next run, past the 2 minutes, forgets it.
+        yield* TestClock.adjust('1 minute')
+        expect(yield* standingAt(HILLEROD)).toEqual([])
+        expect(yield* remembered(A_0707)).toBeUndefined()
       }).pipe(Effect.provide(onTheRecording)),
   )
 
