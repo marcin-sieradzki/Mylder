@@ -1,0 +1,4 @@
+"route_id","agency_id","route_short_name","route_long_name","route_type","route_color","route_text_color","route_desc"
+"16452_109",318,"E","",109,"","",""
+"16448_109",318,"A","",109,"","",""
+"11748_2",203,"RE","",2,"","",""

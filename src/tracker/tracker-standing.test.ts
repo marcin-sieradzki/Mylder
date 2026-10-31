@@ -8,12 +8,13 @@ import type { History } from './build'
 import * as Http from './http'
 import type { DepartureBoardAnswer } from './rejseplanen/answers'
 import { callsKey } from './rejseplanen/client'
-import { keyPrefixOf, trackerLayer } from './runtime'
+import { keyPrefixOf, timetableDirOf, trackerLayer } from './runtime'
 import type { SnapshotTrip } from './snapshot'
 import { readSource } from './source'
 import { simulatedClient } from './simulation/layer'
 import { Store } from './store'
 import { fixtureTimetable } from './testing'
+import { loadTimetable } from './timetable'
 import { Tracker } from './tracker'
 
 // The trips standing at a stop's platforms now (docs/screens.md, "Stop panel"), worked out from
@@ -173,6 +174,37 @@ describe('the trips standing at a stop', () => {
       yield* TestClock.setTime(at(7, 26, 30))
       expect(yield* standingAt(VESTAMAGER)).toEqual([])
     }).pipe(Effect.provide(onTheRecording)),
+  )
+})
+
+// The crowded recording: a timetable made by hand from the fixture's trains, which holds six of
+// them at København H's platforms at once, on a weekday with no delay, from 07:20 in Copenhagen
+// on the same Tuesday (recordings/crowded, scripts/timetable/fixtures/gtfs-crowded).
+const crowded = readSource('recording:crowded')
+const onTheCrowdedRecording = trackerLayer({
+  timetable: await loadTimetable(timetableDirOf(crowded)),
+  source: crowded,
+})
+
+describe('the trips standing at a stop, on the crowded recording', () => {
+  it.effect('lists all six trains standing at København H at once, soonest to leave first', () =>
+    Effect.gen(function* () {
+      for (const moment of [at(7, 20), at(7, 22), at(7, 23, 59)]) {
+        yield* TestClock.setTime(moment)
+        const standing = yield* standingAt(KOBENHAVN_H)
+        expect(standing.map(({ line, headsign, departs }) => [line, headsign, departs])).toEqual([
+          ['RE', 'Næstved St.', at(7, 24)],
+          ['A', 'Hundige St.', at(7, 25)],
+          ['A', 'Hillerød St.', at(7, 26)],
+          ['E', 'Køge St.', at(7, 27)],
+          ['E', 'Holte St.', at(7, 28)],
+          ['A', 'Hillerød St.', at(7, 29)],
+        ])
+      }
+      // The RE to Næstved leaves at 07:24, and five stand on.
+      yield* TestClock.setTime(at(7, 24))
+      expect(yield* standingAt(KOBENHAVN_H)).toHaveLength(5)
+    }).pipe(Effect.provide(onTheCrowdedRecording)),
   )
 })
 

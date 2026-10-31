@@ -1,6 +1,6 @@
 // Freezes the recordings in `recordings/` from their plans (src/tracker/recording/plans.ts), and
 // with them the saved snapshots screen tests use: `npm run recordings`. Each folder is rewritten
-// whole: the fixture timetable prepared into `timetable/`, `clock.json`, each service's answers
+// whole: its plan's fixture timetable prepared into `timetable/`, `clock.json`, each service's answers
 // in call order, the tracker's snapshot of every minute in `snapshots/`, and in `answers/` its
 // disruption list of every minute and the stop answers the plan saves. Its `aircraft/` folder is
 // kept as it is, and the aircraft snapshot of each of its calls saved in `answers/aircraft/`.
@@ -24,7 +24,7 @@ import {
 import { RECORDINGS } from '../../src/tracker/recording/plans.ts'
 import { loadTimetable } from '../../src/tracker/timetable.ts'
 import { prepareTimetable } from '../timetable/prepare.ts'
-import { FIXTURE, FIXTURE_HASH } from '../timetable/testing.ts'
+import { fixtureDir, fixtureHash } from '../timetable/testing.ts'
 
 const writeJson = async (path: string, value: unknown) => {
   await mkdir(join(path, '..'), { recursive: true })
@@ -38,10 +38,11 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
   for (const entry of entries.filter((name) => !UNFROZEN.includes(name))) {
     await rm(join(dir, entry), { recursive: true, force: true })
   }
+  const fixture = plan.fixture ?? 'gtfs'
   await prepareTimetable({
-    gtfs: FIXTURE,
+    gtfs: fixtureDir(fixture),
     out: join(dir, 'timetable'),
-    sourceHash: FIXTURE_HASH,
+    sourceHash: await fixtureHash(fixture),
     preparedDate: '2026-06-02',
     log: () => {},
   })
