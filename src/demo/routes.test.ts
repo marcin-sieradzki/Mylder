@@ -54,6 +54,16 @@ describe("the demo's routes", () => {
     expect((await route('/api/stops/nowhere')).status).toBe(404)
   })
 
+  it("answer a stop's arrivals, and 404 for a stop the timetable doesn't know", async () => {
+    const stop = await route('/api/stops/27532/arrivals')
+    expect(stop.status).toBe(200)
+    const arrivals = (await stop.json()) as { stop: { name: string }; arrivals: unknown[] }
+    expect(arrivals.stop.name).toBe('Nørreport St.')
+    expect(arrivals).toHaveProperty('arrivals')
+    expect((await route('/api/stops/nowhere/arrivals')).status).toBe(404)
+    expect((await route('/api/stops/27532/departures')).status).toBe(404)
+  })
+
   it('answer the disruption list', async () => {
     const response = await route('/api/disruptions')
     expect(response.status).toBe(200)

@@ -1,5 +1,6 @@
 import '@mylder/perron/tokens.css'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -12,6 +13,8 @@ import type {
   Disruption,
   Snapshot,
   StandingTrip,
+  StopArrival,
+  StopArrivals,
   StopDeparture,
   StopDepartures,
 } from '../tracker/index'
@@ -40,12 +43,36 @@ const BELLA_CENTER = saved('8603313')
 /** Refshaleøen: the 991 to Teglholmen standing at the stop until 07:23, Estimated. */
 const REFSHALEOEN = saved('48645')
 
+/** A stop's arrivals, saved with the recording beside its departures at the same moment. */
+const savedArrivals = (stop: string): StopArrivals =>
+  JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'recordings', 'weekday', 'answers', 'arrivals', `${stop}.json`),
+      'utf8',
+    ),
+  ) as StopArrivals
+
+/** Nørreport St.'s arrivals: Live and Estimated buses and S-tog, each from where it comes. */
+const NORREPORT_ARRIVALS = savedArrivals('27532')
+/** Bella Center St.'s arrivals: the Metro alone, every 4 minutes from Vanløse. */
+const BELLA_CENTER_ARRIVALS = savedArrivals('8603313')
+/** Hillerød St.'s arrivals: none in the next 30 minutes. */
+const HILLEROD_ARRIVALS = savedArrivals('8600683')
+/** Refshaleøen's arrivals: the 991 from Orientkaj St. at 07:47, Timetable only. */
+const REFSHALEOEN_ARRIVALS = savedArrivals('48645')
+
 /** The stop route's answers by stop id; a stop missing here is a 404. */
 let answers: Map<string, StopDepartures>
+/** The arrivals route's answers by stop id; a stop missing here is a 404. */
+let arrivalAnswers: Map<string, StopArrivals>
+/** Every route the page asked, in order. */
+let asked: string[]
 
 const routes = async (input: RequestInfo | URL): Promise<Response> => {
-  const [, id] = /^\/api\/stops\/([^/]+)$/.exec(String(input)) ?? []
-  const answer = id === undefined ? undefined : answers.get(decodeURIComponent(id))
+  asked.push(String(input))
+  const [, id, arrivals] = /^\/api\/stops\/([^/]+)(\/arrivals)?$/.exec(String(input)) ?? []
+  const stop = id === undefined ? undefined : decodeURIComponent(id)
+  const answer = stop === undefined ? undefined : (arrivals ? arrivalAnswers : answers).get(stop)
   if (!answer) return Response.json({ error: 'unknown stop' }, { status: 404 })
   return Response.json(answer)
 }
@@ -91,6 +118,13 @@ beforeEach(() => {
     ['8603313', BELLA_CENTER],
     ['48645', REFSHALEOEN],
   ])
+  arrivalAnswers = new Map([
+    ['27532', NORREPORT_ARRIVALS],
+    ['8603313', BELLA_CENTER_ARRIVALS],
+    ['8600683', HILLEROD_ARRIVALS],
+    ['48645', REFSHALEOEN_ARRIVALS],
+  ])
+  asked = []
   vi.stubGlobal('fetch', routes)
 })
 
@@ -509,8 +543,8 @@ describe('the trips standing at a stop’s platforms', () => {
     expect(bus).toHaveTextContent('Estimated')
     expect(bus).toHaveTextContent('2 min')
     expect(within(bus).getByText('07:23')).toHaveTextContent(/^~07:23$/)
-    // Above the departures, which are a section of their own, named.
-    const departures = within(stop).getByRole('region', { name: 'Departures' })
+    // Above the departures, which are a tab's panel of their own, named.
+    const departures = within(stop).getByRole('tabpanel', { name: 'Departures' })
     expect(section.compareDocumentPosition(departures)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     expect(within(departures).getByRole('list', { name: 'Departures' })).toHaveTextContent(
       'Teglholmen',
@@ -623,5 +657,244 @@ describe('the trips standing at a stop’s platforms', () => {
     expect(standingSection(await panel('Nørreport St.'), 'Ved perronerne nu')).toHaveTextContent(
       'Intet køretøj af de viste typer holder ved perronerne nu.',
     )
+  })
+})
+
+/** `answer` with the arrival of `trip` changed by `change`. */
+const withArrival = (
+  answer: StopArrivals,
+  trip: string,
+  change: Partial<StopArrival>,
+): StopArrivals => ({
+  ...answer,
+  arrivals: answer.arrivals.map((each) => (each.trip === trip ? { ...each, ...change } : each)),
+})
+
+const E_FROM_HOLTE = E_TO_KOGE
+
+/** The stop panel's tabs. */
+const tabs = (stop: HTMLElement, name = 'Departures and arrivals') =>
+  within(stop).getByRole('tablist', { name })
+
+/** Chooses a tab of the stop panel by its name, and waits for its panel. */
+async function choose(stop: HTMLElement, name: string, list = 'Departures and arrivals') {
+  fireEvent.click(within(tabs(stop, list)).getByRole('tab', { name }))
+  return within(stop).findByRole('tabpanel', { name })
+}
+
+describe('the Departures and Arrivals tabs', () => {
+  it('open on Departures, with today’s list under it, below the standing trips', async () => {
+    openStop('en', '?stop=48645')
+    const stop = await panel('Refshaleøen')
+    const list = tabs(stop)
+    expect(
+      within(list)
+        .getAllByRole('tab')
+        .map((tab) => tab.textContent),
+    ).toEqual(['Departures', 'Arrivals'])
+    expect(within(list).getByRole('tab', { name: 'Departures' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    const departures = within(stop).getByRole('tabpanel', { name: 'Departures' })
+    expect(within(departures).getByRole('list', { name: 'Departures' })).toHaveTextContent(
+      'Teglholmen',
+    )
+    expect(standingSection(stop).compareDocumentPosition(list)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+    expect(window.location.search).toBe('?stop=48645')
+    // Arrivals are asked for only once their tab opens.
+    expect(asked.filter((url) => url.endsWith('/arrivals'))).toEqual([])
+  })
+
+  it('list the trips arriving in the next 30 minutes, each from where it comes', async () => {
+    openStop('en', '?stop=27532')
+    const stop = await panel('Nørreport St.')
+    const arrivals = await choose(stop, 'Arrivals')
+    expect(window.location.search).toBe('?stop=27532&board=arrivals')
+    expect(asked).toContain('/api/stops/27532/arrivals')
+    const list = await within(arrivals).findByRole('list', { name: 'Arrivals' })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(10)
+    // The soonest: line E from Holte, two minutes late, its timetabled time struck.
+    const first = within(list).getAllByRole('listitem')[0]
+    expect(first).toHaveTextContent('E')
+    expect(first).toHaveTextContent('From Holte St.')
+    expect(first).not.toHaveTextContent('Køge St.')
+    expect(first).toHaveTextContent('Live')
+    expect(first).toHaveTextContent('8 min')
+    expect(first).toHaveTextContent('+2')
+    expect(getComputedStyle(within(first).getByText('07:27')).textDecorationLine).toBe(
+      'line-through',
+    )
+    expect(within(first).getByText('07:29')).toBeInTheDocument()
+    // An Estimated arrival's time reads "~".
+    const herlev = row(list, 'From Herlev Hospital, Sløjfen')
+    expect(herlev).toHaveTextContent('Estimated')
+    expect(within(herlev).getByText('07:39')).toHaveTextContent(/^~07:39$/)
+    // The departures are gone from view.
+    expect(within(stop).queryByRole('list', { name: 'Departures' })).not.toBeInTheDocument()
+  })
+
+  it('give an arrival “Now” under 45 s, and a Timetable only one its timetabled time and an unknown delay', async () => {
+    arrivalAnswers.set(
+      '27532',
+      withArrival(NORREPORT_ARRIVALS, E_FROM_HOLTE, {
+        scheduled: NORREPORT_ARRIVALS.fetched,
+        expected: NORREPORT_ARRIVALS.fetched + 30_000,
+      }),
+    )
+    openStop('en', '?stop=27532&board=arrivals')
+    const arrivals = await within(await panel('Nørreport St.')).findByRole('list', {
+      name: 'Arrivals',
+    })
+    expect(row(arrivals, 'From Holte St.')).toHaveTextContent('Now')
+    act(() => openPanel({ kind: 'stop', id: '48645' }))
+    const refshaleoen = await panel('Refshaleøen')
+    const bus = row(
+      await within(await choose(refshaleoen, 'Arrivals')).findByRole('list', { name: 'Arrivals' }),
+      'From Orientkaj St.',
+    )
+    expect(bus).toHaveTextContent('Timetable only')
+    expect(within(bus).getByText('07:47')).toBeInTheDocument()
+    expect(bus).toHaveTextContent('—')
+  })
+
+  it('read the Metro’s arrivals as an interval with the note, and no clock time', async () => {
+    openStop('en', '?stop=8603313&board=arrivals')
+    const stop = await panel('Bella Center St.')
+    const list = await within(stop).findByRole('list', { name: 'Arrivals' })
+    const metro = row(list, 'From Vanløse St.')
+    expect(metro).toHaveTextContent('M1')
+    expect(metro).toHaveTextContent('Every 4 min')
+    expect(metro).toHaveTextContent('Metro: planned times')
+    expect(metro).not.toHaveTextContent(/\d\d:\d\d/)
+    expect(metro.querySelector('time')).toBeNull()
+  })
+
+  it('say so when nothing arrives, and where the times came from', async () => {
+    openStop('en', '?stop=8600683&board=arrivals')
+    const stop = await panel('Hillerød St.')
+    const arrivals = within(stop).getByRole('tabpanel', { name: 'Arrivals' })
+    expect(
+      await within(arrivals).findByText(
+        'No arrivals in the next 30 minutes for the vehicle types shown.',
+      ),
+    ).toBeInTheDocument()
+    expect(arrivals).toHaveTextContent('From the timetable')
+    expect(arrivals).toHaveTextContent('Timetable and positions 07:21:00')
+    // The note says where these times come from: no arrival board was asked.
+    expect(arrivals).toHaveTextContent(
+      'Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.',
+    )
+    expect(arrivals).not.toHaveTextContent('Rejseplanen')
+  })
+
+  it('give an arrival board’s answer the departures’ note, of Rejseplanen’s expected times', async () => {
+    arrivalAnswers.set('27532', {
+      ...NORREPORT_ARRIVALS,
+      source: { kind: 'rejseplanen', at: NORREPORT_ARRIVALS.fetched },
+    })
+    openStop('en', '?stop=27532&board=arrivals')
+    const arrivals = within(await panel('Nørreport St.')).getByRole('tabpanel', {
+      name: 'Arrivals',
+    })
+    expect(
+      await within(arrivals).findByText(
+        "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('leave out the modes the filters hide', async () => {
+    openStop('en', '?stop=27532&board=arrivals&hide=s-tog')
+    const stop = await panel('Nørreport St.')
+    const list = await within(stop).findByRole('list', { name: 'Arrivals' })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(4)
+    expect(list).not.toHaveTextContent('Holte St.')
+  })
+
+  it('show each list’s own messages under its own tab', async () => {
+    answers.set('27532', { ...NORREPORT, messages: [WORKS] })
+    arrivalAnswers.set('27532', { ...NORREPORT_ARRIVALS, messages: [CLOSED] })
+    openStop('en', '?stop=27532')
+    const stop = await panel('Nørreport St.')
+    const departures = within(stop).getByRole('tabpanel', { name: 'Departures' })
+    expect(departures).toHaveTextContent('Sporarbejde ved Nørreport')
+    const arrivals = await choose(stop, 'Arrivals')
+    const cards = await within(arrivals).findByRole('region', { name: 'Messages' })
+    expect(cards).toHaveTextContent('Nørreport lukket for busser')
+    expect(cards).not.toHaveTextContent('Sporarbejde ved Nørreport')
+  })
+
+  it('open an arrival’s trip, in place of the stop', async () => {
+    openStop('en', '?stop=27532&board=arrivals&hide=train')
+    const list = await within(await panel('Nørreport St.')).findByRole('list', { name: 'Arrivals' })
+    fireEvent.click(
+      within(row(list, 'From Holte St.')).getByRole('button', { name: 'S-tog E from Holte St.' }),
+    )
+    expect(window.location.search).toBe(`?hide=train&trip=${E_FROM_HOLTE}`)
+  })
+
+  it('name an arrival’s button for where it comes from, as its row reads', async () => {
+    openStop('en', '?stop=48645&board=arrivals')
+    const list = await within(await panel('Refshaleøen')).findByRole('list', { name: 'Arrivals' })
+    const bus = row(list, 'From Orientkaj St.')
+    expect(within(bus).getByRole('button')).toHaveAccessibleName('Bus 991 from Orientkaj St.')
+  })
+
+  it('move between the tabs with the arrow keys, and go back to Departures in the address', async () => {
+    openStop('en', '?stop=27532&board=arrivals')
+    const stop = await panel('Nørreport St.')
+    const arrivals = within(tabs(stop)).getByRole('tab', { name: 'Arrivals' })
+    expect(arrivals).toHaveAttribute('aria-selected', 'true')
+    const user = userEvent.setup()
+    act(() => arrivals.focus())
+    await user.keyboard('{ArrowLeft}')
+    const departures = within(tabs(stop)).getByRole('tab', { name: 'Departures' })
+    expect(departures).toHaveFocus()
+    await user.keyboard('{ArrowRight}')
+    expect(arrivals).toHaveFocus()
+    fireEvent.click(departures)
+    expect(window.location.search).toBe('?stop=27532')
+    expect(within(stop).getByRole('tabpanel', { name: 'Departures' })).toBeInTheDocument()
+  })
+
+  it('say the same in Danish', async () => {
+    openStop('da', '?stop=27532')
+    const stop = await panel('Nørreport St.')
+    const list = tabs(stop, 'Afgange og ankomster')
+    expect(
+      within(list)
+        .getAllByRole('tab')
+        .map((tab) => tab.textContent),
+    ).toEqual(['Afgange', 'Ankomster'])
+    const arrivals = await choose(stop, 'Ankomster', 'Afgange og ankomster')
+    const rows = await within(arrivals).findByRole('list', { name: 'Ankomster' })
+    const first = within(rows).getAllByRole('listitem')[0]
+    expect(first).toHaveTextContent('Fra Holte St.')
+    expect(row(rows, 'Fra Herlev Hospital, Sløjfen')).toHaveTextContent('Beregnet')
+    expect(within(first).getByRole('button')).toHaveAccessibleName('S-tog E fra Holte St.')
+    expect(arrivals).toHaveTextContent('Køreplan og positioner 07:21:00')
+    expect(arrivals).toHaveTextContent(
+      'Nedtællinger bruger køreplanen, rykket med den forsinkelse, positionerne viser, hvor en tur har en; resten bruger køreplanen alene og siger det.',
+    )
+    act(() => openPanel({ kind: 'stop', id: '8603313' }))
+    const bellaCenter = await panel('Bella Center St.')
+    const metro = row(
+      await within(await choose(bellaCenter, 'Ankomster', 'Afgange og ankomster')).findByRole(
+        'list',
+        { name: 'Ankomster' },
+      ),
+      'Fra Vanløse St.',
+    )
+    expect(metro).toHaveTextContent('Hvert 4. min')
+    act(() => openPanel({ kind: 'stop', id: '8600683' }))
+    const hillerod = await panel('Hillerød St.')
+    expect(
+      await within(await choose(hillerod, 'Ankomster', 'Afgange og ankomster')).findByText(
+        'Ingen ankomster de næste 30 minutter for de viste transportformer.',
+      ),
+    ).toBeInTheDocument()
   })
 })

@@ -108,6 +108,42 @@ export interface StopDepartures {
   readonly messages: readonly Disruption[]
 }
 
+/**
+ * One arrival at a stop (docs/screens.md, "Stop panel"): a call seen from the stop's side as its
+ * trip comes in, with a departure's fields, its times the call's arrival, and where the trip comes
+ * from. Its delay is `expected - scheduled`.
+ */
+export interface StopArrival extends StopDeparture {
+  /** The stop the trip starts from, as the timetable names it. */
+  readonly origin: string
+}
+
+/**
+ * An interval line's arrivals at a stop in one direction (ADR 0006): how often it arrives, from
+ * the planned arrivals in the current hour, and where the next one comes from.
+ */
+export interface ArrivalInterval extends StopInterval {
+  /** Where the next planned arrival in this direction comes from. */
+  readonly origin: string
+}
+
+/**
+ * A stop's arrivals, the second answer of the stop panel, asked for only while its Arrivals tab is
+ * open: the same shape as its departures, seen from the other side, without the standing trips.
+ */
+export interface StopArrivals extends Omit<
+  StopDepartures,
+  'standing' | 'departures' | 'intervals'
+> {
+  /**
+   * The trips arriving in the next 30 minutes, soonest shown arrival first, the interval lines'
+   * aside.
+   */
+  readonly arrivals: readonly StopArrival[]
+  /** The interval lines' rows, one per line and direction arriving in the window, by line. */
+  readonly intervals: readonly ArrivalInterval[]
+}
+
 export interface TripCall {
   readonly index: number
   readonly stop: string
@@ -236,17 +272,28 @@ export interface StopCall {
   readonly index: number
 }
 
+/** Which side of its calls a stop's list reads: the trips leaving it, or the trips arriving. */
+export type Side = 'departure' | 'arrival'
+
 /**
- * Every departing call at a stop's platforms, a trip's last call aside, on the service days whose
- * trips may leave in the departures' window from a moment.
+ * Every call at a stop's platforms on `side`, departing calls by default: a trip's last call aside
+ * for its departures, its first for its arrivals, on the service days whose trips may call in the
+ * window from a moment.
  */
-export function callsAt(timetable: Timetable, stopIndex: number, now: number): StopCall[] {
+export function callsAt(
+  timetable: Timetable,
+  stopIndex: number,
+  now: number,
+  side: Side = 'departure',
+): StopCall[] {
   const { platforms } = timetable.stops
   const calls: StopCall[] = []
   for (const day of serviceDaysAhead(timetable, now)) {
     for (const trip of timetable.tripsOn(day)) {
+      const first = side === 'departure' ? 0 : 1
+      const last = side === 'departure' ? trip.calls.length - 2 : trip.calls.length - 1
       trip.calls.forEach((call, index) => {
-        if (index < trip.calls.length - 1 && platforms[call.platform].stop === stopIndex) {
+        if (index >= first && index <= last && platforms[call.platform].stop === stopIndex) {
           calls.push({ trip, index })
         }
       })
@@ -257,8 +304,9 @@ export function callsAt(timetable: Timetable, stopIndex: number, now: number): S
 
 /**
  * How often a line leaves a stop in one direction, in whole minutes, from its planned departures
- * among the stop's calls (`callsAt`) in the current hour on the timetable's clock; none for an hour
- * that plans fewer than two. A stop's interval rows and an interval trip's panel both read it.
+ * among the stop's calls (`callsAt`) in the current hour on the timetable's clock, or how often it
+ * arrives, from its planned arrivals, for the `arrival` side; none for an hour that plans fewer
+ * than two. A stop's interval rows and an interval trip's panel both read it.
  */
 export function intervalAtStop(
   timetable: Timetable,
@@ -266,9 +314,10 @@ export function intervalAtStop(
   line: string,
   direction: number,
   now: number,
+  side: Side = 'departure',
 ): Interval | undefined {
   const times = calls.flatMap(({ trip, index }) =>
-    trip.line.name === line && trip.direction === direction ? [trip.calls[index].departure] : [],
+    trip.line.name === line && trip.direction === direction ? [trip.calls[index][side]] : [],
   )
   const hour = hourStart(now, timetable.manifest.timezone)
   return intervalOf(times, hour, hour + INTERVAL_HOUR)
@@ -315,10 +364,10 @@ function* lineTrips(
 }
 
 /**
- * A stop's rows as its answer lists them: its interval lines' departures taken out and read as
- * one interval row per line and direction that leaves in the departures' window, from the stop's
- * calls (`callsAt`); the rest soonest first by the time each row's state shows, `MAX_DEPARTURES`
- * of each mode.
+ * A stop's departures as its answer lists them: its interval lines' departures taken out and read
+ * as one interval row per line and direction that leaves in the departures' window, from the
+ * stop's calls (`callsAt`); the rest soonest first by the time each row's state shows,
+ * `MAX_DEPARTURES` of each mode.
  */
 export function listed(
   timetable: Timetable,
@@ -328,11 +377,30 @@ export function listed(
   calls: readonly StopCall[],
   now: number,
 ): Pick<StopDepartures, 'departures' | 'intervals'> {
+  const { rows: departures, intervals } = listedBy(timetable, snapshot, stop, rows, calls, now)
+  return { departures, intervals: intervals.map(({ row }) => row) }
+}
+
+/**
+ * A stop's rows on `side` as its answer lists them: its interval lines' rows taken out and read as
+ * one interval row per line and direction that calls in the window, each with the trip whose call
+ * is the first, from the stop's calls on that side (`callsAt`); the rest soonest first by the time
+ * each row's state shows, `MAX_DEPARTURES` of each mode.
+ */
+function listedBy<R extends StopDeparture>(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  stop: StopDepartures['stop'],
+  rows: readonly R[],
+  calls: readonly StopCall[],
+  now: number,
+  side: Side = 'departure',
+): { rows: R[]; intervals: { row: StopInterval; trip: PlannedTrip }[] } {
   const intervalLines = new Set(
     stop.lines.filter((line) => lineRunsToInterval(snapshot, rows, line)).map((line) => line.name),
   )
   const perMode = new Map<Mode, number>()
-  const departures = rows
+  const listedRows = rows
     .filter((row) => !(row.mode === 'metro' && intervalLines.has(row.line)))
     .sort((a, b) => shownAt(a, a.state) - shownAt(b, b.state))
     .filter((row) => {
@@ -340,32 +408,32 @@ export function listed(
       perMode.set(row.mode, listedSoFar + 1)
       return listedSoFar < MAX_DEPARTURES
     })
-  if (intervalLines.size === 0) return { departures, intervals: [] }
+  if (intervalLines.size === 0) return { rows: listedRows, intervals: [] }
   const { platforms } = timetable.stops
   /** Each interval line and direction's first call in the window. */
   const firsts = new Map<string, { at: number; call: StopCall }>()
   for (const call of calls) {
     const { trip, index } = call
     if (trip.line.mode !== 'metro' || !intervalLines.has(trip.line.name)) continue
-    const at = trip.calls[index].departure
+    const at = trip.calls[index][side]
     if (at < now || at > now + DEPARTURES_AHEAD) continue
     const key = `${trip.line.name} ${trip.direction}`
     const first = firsts.get(key)
     if (!first || at < first.at) firsts.set(key, { at, call })
   }
-  const intervals = [...firsts.values()].map(({ call: { trip, index } }): StopInterval => {
+  const intervals = [...firsts.values()].map(({ call: { trip, index } }) => {
     const { name, mode, colour } = trip.line
     const platform = platforms[trip.calls[index].platform].id
-    const row = { line: name, mode, colour, headsign: trip.headsign, platform }
-    const every = intervalAtStop(timetable, calls, name, trip.direction, now)
-    return every ? { ...row, every } : row
+    const row: StopInterval = { line: name, mode, colour, headsign: trip.headsign, platform }
+    const every = intervalAtStop(timetable, calls, name, trip.direction, now, side)
+    return { row: every ? { ...row, every } : row, trip }
   })
   intervals.sort(
     (a, b) =>
-      a.line.localeCompare(b.line, 'da', { numeric: true }) ||
-      a.headsign.localeCompare(b.headsign, 'da'),
+      a.row.line.localeCompare(b.row.line, 'da', { numeric: true }) ||
+      a.row.headsign.localeCompare(b.row.headsign, 'da'),
   )
-  return { departures, intervals }
+  return { rows: listedRows, intervals }
 }
 
 /** A planned trip of the service days that may run in the departures' window from a moment, by its key. */
@@ -393,36 +461,9 @@ export function departuresAt(
   { index, stop }: FoundStop,
   standing: StandingInput = { now: snapshot.fetched },
 ): StopDepartures {
-  const { platforms } = timetable.stops
   const now = snapshot.fetched
-  const onMap = tripsByKey(snapshot)
   const calls = callsAt(timetable, index, now)
-  // Each trip's calls shifted once, and only for a trip that calls here.
-  const shifted = new Map<PlannedTrip, ReturnType<typeof withDelay>>()
-  const departures: StopDeparture[] = []
-  for (const { trip, index: i } of calls) {
-    const live = onMap.get(trip.key)
-    if (!shifted.has(trip)) shifted.set(trip, withDelay(trip, live?.delay))
-    const call = trip.calls[i]
-    const times = { scheduled: call.departure, expected: shifted.get(trip)?.[i].departure }
-    const state = live?.state ?? 'timetable-only'
-    // In the window by the time its state shows: a No signal row's is the timetabled time.
-    const leaves = shownAt(times, state)
-    if (leaves < now || leaves > now + DEPARTURES_AHEAD) continue
-    const cancelled = live?.cancelled || live?.cancelledCalls?.includes(i)
-    departures.push({
-      trip: trip.key,
-      line: trip.line.name,
-      mode: trip.line.mode,
-      colour: trip.line.colour,
-      headsign: trip.headsign,
-      platform: platforms[call.platform].id,
-      scheduled: call.departure,
-      ...(times.expected === undefined ? {} : { expected: times.expected }),
-      state,
-      ...(cancelled ? { cancelled: true as const } : {}),
-    })
-  }
+  const departures = timedRows(timetable, snapshot, calls, 'departure').map(({ row }) => row)
   return {
     stop,
     fetched: now,
@@ -432,6 +473,89 @@ export function departuresAt(
     ...listed(timetable, snapshot, stop, departures, calls, now),
     messages: [],
   }
+}
+
+/** The stop a trip starts from, as the timetable names it: where an arrival comes from. */
+const originOf = (timetable: Timetable, trip: PlannedTrip): string => {
+  const { platforms, stops } = timetable.stops
+  return stops[platforms[trip.calls[0].platform].stop].name
+}
+
+/**
+ * A found stop's arrivals in the 30 minutes after the snapshot, across its platforms, soonest
+ * first, each at its timetabled arrival shifted by the snapshot's delay for its trip, with where
+ * the trip comes from, a cancelled one kept and marked, and its interval lines as intervals worked
+ * out from their planned arrivals.
+ */
+export function arrivalsAt(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  { index, stop }: FoundStop,
+): StopArrivals {
+  const now = snapshot.fetched
+  const calls = callsAt(timetable, index, now, 'arrival')
+  const rows = timedRows(timetable, snapshot, calls, 'arrival').map(
+    ({ row, trip }): StopArrival => ({ ...row, origin: originOf(timetable, trip) }),
+  )
+  const listedRows = listedBy(timetable, snapshot, stop, rows, calls, now, 'arrival')
+  return {
+    stop,
+    fetched: now,
+    nextDue: snapshot.nextDue,
+    source: FROM_TIMETABLE,
+    arrivals: listedRows.rows,
+    intervals: listedRows.intervals.map(({ row, trip }) => ({
+      ...row,
+      origin: originOf(timetable, trip),
+    })),
+    messages: [],
+  }
+}
+
+/**
+ * A stop's calls on `side` in the 30 minutes after the snapshot as rows, each with its trip: at
+ * the call's timetabled time shifted by the snapshot's delay for its trip, in the window by the
+ * time its state shows, a cancelled one kept and marked.
+ */
+function timedRows(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  calls: readonly StopCall[],
+  side: Side,
+): { row: StopDeparture; trip: PlannedTrip }[] {
+  const { platforms } = timetable.stops
+  const now = snapshot.fetched
+  const onMap = tripsByKey(snapshot)
+  // Each trip's calls shifted once, and only for a trip that calls here.
+  const shifted = new Map<PlannedTrip, ReturnType<typeof withDelay>>()
+  const rows: { row: StopDeparture; trip: PlannedTrip }[] = []
+  for (const { trip, index: i } of calls) {
+    const live = onMap.get(trip.key)
+    if (!shifted.has(trip)) shifted.set(trip, withDelay(trip, live?.delay))
+    const call = trip.calls[i]
+    const times = { scheduled: call[side], expected: shifted.get(trip)?.[i][side] }
+    const state = live?.state ?? 'timetable-only'
+    // In the window by the time its state shows: a No signal row's is the timetabled time.
+    const shown = shownAt(times, state)
+    if (shown < now || shown > now + DEPARTURES_AHEAD) continue
+    const cancelled = live?.cancelled || live?.cancelledCalls?.includes(i)
+    rows.push({
+      row: {
+        trip: trip.key,
+        line: trip.line.name,
+        mode: trip.line.mode,
+        colour: trip.line.colour,
+        headsign: trip.headsign,
+        platform: platforms[call.platform].id,
+        scheduled: call[side],
+        ...(times.expected === undefined ? {} : { expected: times.expected }),
+        state,
+        ...(cancelled ? { cancelled: true as const } : {}),
+      },
+      trip,
+    })
+  }
+  return rows
 }
 
 /**
@@ -445,6 +569,19 @@ export function stopDeparturesFrom(
 ): StopDepartures | undefined {
   const found = findStop(timetable, stopId)
   return found && departuresAt(timetable, snapshot, found)
+}
+
+/**
+ * A stop's arrivals from the timetable and the snapshot (`arrivalsAt`); undefined for a stop the
+ * timetable doesn't know, by its own id or a platform's.
+ */
+export function stopArrivalsFrom(
+  timetable: Timetable,
+  snapshot: SnapshotDelays,
+  stopId: string,
+): StopArrivals | undefined {
+  const found = findStop(timetable, stopId)
+  return found && arrivalsAt(timetable, snapshot, found)
 }
 
 /**

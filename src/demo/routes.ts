@@ -65,7 +65,10 @@ function segmentsOf(path: string): string[] | undefined {
   }
 }
 
-/** The demo's routes, answering a path such as `/api/snapshot` or `/api/stops/<id>`. */
+/**
+ * The demo's routes, answering a path such as `/api/snapshot`, `/api/stops/<id>` or
+ * `/api/stops/<id>/arrivals`.
+ */
 export function demoRoutes({ read: readFolder, aircraft, beneath = Layer.empty }: DemoSettings) {
   // The manifest is read once, so the tracker and the network's files hold the same version for
   // the page's life, as the deployment it opened on; a read that fails is tried again.
@@ -97,6 +100,8 @@ export function demoRoutes({ read: readFolder, aircraft, beneath = Layer.empty }
     if (name === 'snapshot' && rest.length === 0) return answers.snapshot()
     if (name === 'disruptions' && rest.length === 0) return answers.disruptions()
     if (name === 'stops' && rest.length === 1) return answers.stop(rest[0])
+    if (name === 'stops' && rest.length === 2 && rest[1] === 'arrivals')
+      return answers.arrivals(rest[0])
     if (name === 'trips' && rest.length === 1) return answers.trip(rest[0])
     if (name === 'aircraft' && rest.length === 0) return planes.snapshot()
     // The network's files come straight from the folder, so the map draws its lines without

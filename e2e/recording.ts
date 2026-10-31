@@ -84,6 +84,18 @@ export async function serveSavedStop(page: Page, stopId: string) {
   )
 }
 
+/**
+ * Serves a stop's arrivals as the arrivals route gave them at the recording's second minute, saved
+ * with the recording beside its departures, whenever the page asks for them, so a test that opens
+ * Arrivals makes the server no run of its own.
+ */
+export async function serveSavedArrivals(page: Page, stopId: string) {
+  const answer = readJson(join(RECORDING_DIR, 'answers', 'arrivals', `${stopId}.json`))
+  await page.route(`**/api/stops/${stopId}/arrivals`, (route) =>
+    route.fulfill({ json: answer, headers: { 'cache-control': 'no-store' } }),
+  )
+}
+
 /** Where a point is drawn at the map's opening view on a desktop: zoom 11.2 on the centre. */
 export function onScreen([lat, lon]: readonly [number, number], width: number, height: number) {
   const world = 512 * 2 ** 11.2

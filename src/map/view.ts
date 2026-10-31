@@ -1,6 +1,7 @@
 // What the viewer has made of the map: its centre and zoom, its heading and tilt while it isn't
 // flat and north-up (docs/screens.md, "The 3D view"), what its filters keep off it, the open panel
-// (`?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`, one at a time) and the sheet's open tab, kept
+// (`?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`, one at a time), an open stop's list
+// (`&board=arrivals`) and the sheet's open tab, kept
 // in the address's query so a reload, a shared link and the language switch keep them
 // (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads it
 // back and writes it in place, without a new history entry, and leaves every other parameter as
@@ -38,6 +39,8 @@ export interface MapView {
   readonly aircraftHidden?: boolean
   /** The open panel, a stop's departures, a vehicle's detail or an aircraft's card; one at a time. */
   readonly panel?: Panel
+  /** An open stop's list, when it isn't the first, Departures. */
+  readonly board?: StopBoard
   /** The sheet's open tab, when it isn't the first, City pulse. */
   readonly tab?: SheetTab
 }
@@ -58,6 +61,17 @@ const hides = (view: MapView, filter: MapFilter): boolean =>
 export const SHEET_TABS = ['pulse', 'vehicles', 'disruptions'] as const
 export type SheetTab = (typeof SHEET_TABS)[number]
 
+/**
+ * A stop panel's two lists, in their tabs' order (docs/screens.md, "Stop panel"); the first is open
+ * unless the address names the other.
+ */
+export const STOP_BOARDS = ['departures', 'arrivals'] as const
+export type StopBoard = (typeof STOP_BOARDS)[number]
+
+/** Whether `value` names one of a stop panel's lists. */
+export const isStopBoard = (value: string | null): value is StopBoard =>
+  (STOP_BOARDS as readonly (string | null)[]).includes(value)
+
 export interface ViewStore {
   get(): MapView
   /** Writes what changed into the address and tells every subscriber. */
@@ -71,6 +85,7 @@ export interface ViewStore {
 const MAP = 'map'
 const HIDE = 'hide'
 const TAB = 'tab'
+const BOARD = 'board'
 /** Each panel's parameter, by what it shows. */
 const PANELS: Readonly<Record<PanelKind, string>> = {
   stop: 'stop',
@@ -98,6 +113,7 @@ export function viewOf(search: string): MapView {
   const hidden = new Set(hide.filter((mode): mode is Mode => isMode(mode)))
   const panel = panelOf(query)
   const tab = query.get(TAB) ?? ''
+  const board = query.get(BOARD)
   return {
     ...(placed ? { centre: [lon, lat] as const, zoom } : {}),
     ...(angled && within(bearing, -180, 180) ? { bearing } : {}),
@@ -105,6 +121,7 @@ export function viewOf(search: string): MapView {
     hidden,
     ...(hide.includes('aircraft') ? { aircraftHidden: true } : {}),
     ...(panel ? { panel } : {}),
+    ...(panel?.kind === 'stop' && isStopBoard(board) && board !== STOP_BOARDS[0] ? { board } : {}),
     ...(isTab(tab) && tab !== SHEET_TABS[0] ? { tab } : {}),
   }
 }
@@ -141,6 +158,9 @@ export function searchWith(search: string, view: MapView): string {
   put(MAP, placeOf(view))
   put(HIDE, MAP_FILTERS.filter((filter) => hides(view, filter)).join(','))
   for (const kind of KINDS) put(PANELS[kind], view.panel?.kind === kind ? view.panel.id : undefined)
+  // After the panel's own, so a link reads `?stop=<id>&board=arrivals`.
+  query.delete(BOARD)
+  put(BOARD, view.panel?.kind === 'stop' && view.board !== STOP_BOARDS[0] ? view.board : undefined)
   put(TAB, view.tab === SHEET_TABS[0] ? undefined : view.tab)
   const written = readableQuery(query)
   return written ? `?${written}` : ''
@@ -252,9 +272,24 @@ export function usePanel(store: ViewStore = mapView): Panel | undefined {
   )
 }
 
-/** Opens a panel in the address, closing whichever was open; none closes it. */
+/**
+ * Opens a panel in the address, closing whichever was open, a stop on its first list, Departures;
+ * none closes it.
+ */
 export const openPanel = (panel: Panel | undefined, store: ViewStore = mapView): void =>
-  store.update({ panel })
+  store.update({ panel, board: undefined })
+
+/**
+ * The open stop's list, for a component: it renders again when the list changes, not when the map
+ * moves. The prerendered page opens on the first, Departures.
+ */
+export function useStopBoard(store: ViewStore = mapView): StopBoard {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.get().board ?? STOP_BOARDS[0],
+    () => STOP_BOARDS[0],
+  )
+}
 
 /** The sheet's open tab, for a component: it renders again when the tab changes. */
 export function useSheetTab(store: ViewStore = mapView): SheetTab {

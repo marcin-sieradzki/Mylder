@@ -5,13 +5,14 @@ import {
   onScreen,
   RECORDING_DIR,
   serveFirstMinute,
+  serveSavedArrivals,
   serveSavedStop,
   test,
 } from './recording'
 
 // Opening a stop: a tap on its marker opens its departures, the address keeps it through a reload
-// and the language switch, and Esc closes it. The page sees the recording's first minute; the
-// stop route answers from the server's own snapshot on the recording.
+// and the language switch, its Arrivals tab too, and Esc closes it. The page sees the recording's
+// first minute; the stop route answers from the server's own snapshot on the recording.
 
 interface Stop {
   id: string
@@ -76,6 +77,41 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
   await bus.getByRole('button', { name: 'Bus 991 to Teglholmen' }).click()
   await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
   await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
+})
+
+test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
+  // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its
+  // departures and arrivals are the saved answers: either route asked of the server could make
+  // its snapshot's run, and take the first run the snapshot route's test counts on making.
+  await serveFirstMinute(page)
+  await serveSavedStop(page, '27532')
+  await serveSavedArrivals(page, '27532')
+  await page.goto('/en?stop=27532')
+  const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+  const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
+  await expect(tabs.getByRole('tab', { name: 'Departures' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  await expect(panel.getByRole('list', { name: 'Departures' })).toBeVisible()
+  await tabs.getByRole('tab', { name: 'Arrivals' }).click()
+  await expect(page).toHaveURL(/[?&]stop=27532&board=arrivals(&|$)/)
+  const arrivals = panel.getByRole('tabpanel', { name: 'Arrivals' })
+  const first = arrivals.getByRole('list', { name: 'Arrivals' }).getByRole('listitem').first()
+  await expect(first).toContainText(/From \S/)
+  await expect(first).toContainText(/\d+ min|Now/)
+  await expect(arrivals).toContainText('Timetable and positions')
+
+  await page.reload()
+  await expect(panel.getByRole('tab', { name: 'Arrivals' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  await expect(panel.getByRole('list', { name: 'Arrivals' })).toBeVisible()
+
+  await panel.getByRole('tab', { name: 'Departures' }).click()
+  await expect(page).not.toHaveURL(/board=/)
+  await expect(panel.getByRole('list', { name: 'Departures' })).toBeVisible()
 })
 
 test('the pointer turns over a stop’s marker, as over a dot', async ({ page }) => {

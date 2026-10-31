@@ -24,13 +24,14 @@ export interface RecordingPlan {
     readonly stops: readonly string[]
   }
   /**
-   * Route answers saved beside the snapshots, for screen tests: these stops' departures and these
-   * trips' details as the stop and trip routes answer them from the timetable and the snapshot of
-   * the plan's `minute`, counted from 0.
+   * Route answers saved beside the snapshots, for screen tests: these stops' departures, these
+   * stops' arrivals and these trips' details as the stop, arrivals and trip routes answer them from
+   * the timetable and the snapshot of the plan's `minute`, counted from 0.
    */
   readonly answers?: {
     readonly minute: number
     readonly stops: readonly string[]
+    readonly arrivals?: readonly string[]
     readonly trips?: readonly string[]
   }
 }
@@ -58,6 +59,10 @@ export const RECORDINGS: readonly RecordingPlan[] = [
     answers: {
       minute: 1,
       stops: ['27532', '54307', '8600683', '8603313', '48645'],
+      // Nørreport's buses and S-tog, from where each comes; Bella Center St.'s Metro as an
+      // interval; Hillerød St., where nothing arrives in the next 30 minutes; Refshaleøen's bus,
+      // Timetable only, at its arrival before it stands.
+      arrivals: ['27532', '8603313', '8600683', '48645'],
       trips: [
         's-tog.A.0bc307e3eb.20260616.0707',
         'bus.5C.32331e0e20.20260616.0707',

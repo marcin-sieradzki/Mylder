@@ -29,7 +29,7 @@ Each feature file starts with an H1 and one paragraph on what the rider sees, th
 
 - [The moving map](./moving-map.md): dots, the hover card, the legend, the controls, the mode filters, the banner and the credit, and the 3D view that tilts and turns it.
 - [Vehicle detail](./vehicle-detail.md): one trip's panel, from a dot or a Vehicles list row, with Follow and Show whole line.
-- [Stop panel](./stop-panel.md): a stop's panel with the trips standing at its platforms and its departures.
+- [Stop panel](./stop-panel.md): a stop's panel with the trips standing at its platforms, and its departures and arrivals as two tabs.
 - [The overview sheet](./overview-sheet.md): City pulse and the Vehicles list.
 - [Disruptions](./disruptions.md): the messages, Show on map and the highlight chip.
 - [Planes](./planes.md): the aircraft, their card and the Planes filter.

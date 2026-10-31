@@ -1,6 +1,16 @@
 'use client'
 
-import { Button, EmptyState, LineBadge, Section, Text } from '@mylder/perron'
+import {
+  Button,
+  EmptyState,
+  LineBadge,
+  Section,
+  Tab,
+  Tabs,
+  TabsList,
+  TabsPanel,
+  Text,
+} from '@mylder/perron'
 import {
   DepartureRow,
   DetailPanel,
@@ -13,16 +23,24 @@ import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
-import type { PanelStateOf } from '../map/panels'
+import { useStopArrivals, type PanelStateOf, type PanelStatus } from '../map/panels'
 import { useDataStates } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
-import { useHiddenModes } from '../map/view'
+import {
+  isStopBoard,
+  mapView,
+  STOP_BOARDS,
+  useHiddenModes,
+  useStopBoard,
+  type StopBoard,
+} from '../map/view'
+import type { Mode } from '../timetable/format'
 import { clockTime } from '../timetable/time'
 import type {
   AnswerSource,
+  Disruption,
   StandingTrip,
   StopDeparture,
-  StopDepartures,
   StopInterval,
 } from '../tracker/index'
 import type { PanelFrame } from './DetailPanels'
@@ -61,9 +79,9 @@ export interface StopPanelProps {
 
 /**
  * The stop panel (docs/screens.md): the stop's name and lines, the trips standing at its platforms
- * now, its departures in the next 30 minutes across its platforms, both in the modes the filters
- * show, and where their times came from. Its title names the stop from the timetable while the
- * answer is on its way.
+ * now, then its departures and its arrivals in the next 30 minutes across its platforms as two
+ * tabs, all in the modes the filters show, each list with where its times came from. Its title
+ * names the stop from the timetable while the answer is on its way.
  */
 export function StopPanel({ state, frame }: StopPanelProps) {
   const { dictionary, lang } = useI18n()
@@ -93,61 +111,194 @@ export function StopPanel({ state, frame }: StopPanelProps) {
         )
       }
     >
-      {answer ? (
-        <Departures answer={answer} timezone={timezoneOf(network)} lang={lang} words={words} />
+      {status === 'not-found' ? (
+        <EmptyState title={words.notFound}>{words.notFoundDetail}</EmptyState>
       ) : (
-        <Pending status={status} words={words} />
+        <StopLists state={state} timezone={timezoneOf(network)} lang={lang} words={words} />
       )}
     </DetailPanel>
   )
 }
 
-/** What the panel shows before it has an answer: on its way, not found, or failed. */
-function Pending({ status, words }: { status: PanelStateOf<'stop'>['status']; words: Words }) {
+/** What a list's tab shows before it has an answer: on its way, not found, or failed. */
+function Pending({ status, loading, failed, words }: PendingProps) {
   switch (status) {
     case 'not-found':
       return <EmptyState title={words.notFound}>{words.notFoundDetail}</EmptyState>
     case 'error':
-      return <EmptyState title={words.failed}>{words.failedDetail}</EmptyState>
+      return <EmptyState title={failed}>{words.failedDetail}</EmptyState>
     default:
       return (
         <Text variant="body-sm" emphasis="secondary" render={<output />}>
-          {words.loading}
+          {loading}
         </Text>
       )
   }
 }
 
-interface DeparturesProps {
-  answer: StopDepartures
+interface PendingProps {
+  status: PanelStatus
+  /** What it says while the answer is on its way, and when it failed. */
+  loading: string
+  failed: string
+  words: Words
+}
+
+/** What the panel's lists read: the filters, the trips' states on the map, the server's second. */
+interface ListContext {
+  readonly hidden: ReadonlySet<Mode>
+  readonly states: ReadonlyMap<string, DataState>
+  readonly now: number
+  readonly timezone: string
+  readonly lang: Lang
+  readonly words: Words
+}
+
+interface StopListsProps {
+  state: PanelStateOf<'stop'>
   timezone: string
   lang: Lang
   words: Words
 }
 
 /**
- * The trips standing at the stop's platforms, then its messages, then its departures in the modes
- * the filters show, under their own title, the interval lines' first and the rest aged by the
- * server's clock, then the note and the source line.
+ * The trips standing at the stop's platforms, once its answer is in, then Departures and Arrivals
+ * as two tabs following the ARIA tabs pattern, the open one kept in the address. Departures opens
+ * first, from the stop's answer; Arrivals asks for its own while it is open.
  */
-function Departures({ answer, timezone, lang, words }: DeparturesProps) {
+function StopLists({ state, timezone, lang, words }: StopListsProps) {
   const hidden = useHiddenModes()
   const states = useDataStates()
   const now = useServerSecond(useClockOffset())
-  const intervals = answer.intervals.filter((row) => !hidden.has(row.mode))
-  const shown = answer.departures.filter((row) => !hidden.has(row.mode)).slice(0, SHOWN_DEPARTURES)
+  const board = useStopBoard()
+  const context: ListContext = { hidden, states, now, timezone, lang, words }
+  const { answer, status } = state
   return (
     <>
-      <Standing
-        // A new stop opens with its standing trips folded again.
-        key={answer.stop.id}
-        trips={answer.standing.filter((trip) => !hidden.has(trip.mode))}
-        source={answer.source}
-        states={states}
-        now={now}
-        timezone={timezone}
+      {answer ? (
+        <Standing
+          // A new stop opens with its standing trips folded again.
+          key={answer.stop.id}
+          trips={answer.standing.filter((trip) => !hidden.has(trip.mode))}
+          source={answer.source}
+          states={states}
+          now={now}
+          timezone={timezone}
+          words={words}
+        />
+      ) : null}
+      <Tabs
+        value={board}
+        onChange={(_event, value) => {
+          if (isStopBoard(value)) mapView.update({ board: value })
+        }}
+      >
+        <TabsList aria-label={words.boards}>
+          {STOP_BOARDS.map((value) => (
+            <Tab key={value} value={value}>
+              {words[value]}
+            </Tab>
+          ))}
+        </TabsList>
+        <TabsPanel value="departures" className={styles.board}>
+          {answer ? (
+            <Board
+              board="departures"
+              rows={answer.departures}
+              intervals={answer.intervals}
+              answer={answer}
+              {...context}
+            />
+          ) : (
+            <Pending status={status} loading={words.loading} failed={words.failed} words={words} />
+          )}
+        </TabsPanel>
+        <TabsPanel value="arrivals" className={styles.board}>
+          <Arrivals {...context} />
+        </TabsPanel>
+      </Tabs>
+    </>
+  )
+}
+
+/**
+ * The Arrivals tab's list, from the stop's arrivals, which are asked for while this shows (the
+ * tab's panel is only mounted while it is open) and the address has the stop on Arrivals.
+ */
+function Arrivals(context: ListContext) {
+  const state = useStopArrivals()
+  const { words } = context
+  if (!state?.answer) {
+    return (
+      <Pending
+        status={state?.status ?? 'loading'}
+        loading={words.arrivalsLoading}
+        failed={words.arrivalsFailed}
         words={words}
       />
+    )
+  }
+  const { answer } = state
+  return (
+    <Board
+      board="arrivals"
+      rows={answer.arrivals}
+      intervals={answer.intervals}
+      answer={answer}
+      {...context}
+    />
+  )
+}
+
+/**
+ * Each list's words: its name, its empty text, its note while its times come from the timetable,
+ * and its source's label once Rejseplanen answers.
+ */
+const BOARD_WORDS = {
+  departures: { name: 'departures', empty: 'empty', note: 'note', at: 'departuresAt' },
+  arrivals: { name: 'arrivals', empty: 'arrivalsEmpty', note: 'arrivalsNote', at: 'arrivalsAt' },
+} as const satisfies Record<StopBoard, Record<string, keyof Words>>
+
+/** A row of either list: a departure, or an arrival with where it comes from. */
+type BoardRow = StopDeparture & { readonly origin?: string }
+type BoardInterval = StopInterval & { readonly origin?: string }
+
+interface BoardProps extends ListContext {
+  board: StopBoard
+  rows: readonly BoardRow[]
+  intervals: readonly BoardInterval[]
+  /** Where its times came from, and the messages it brought. */
+  answer: {
+    readonly source: AnswerSource
+    readonly fetched: number
+    readonly messages: readonly Disruption[]
+  }
+}
+
+/**
+ * One of the stop's lists: its messages, then its rows in the modes the filters show, the interval
+ * lines' first and the rest aged by the server's clock, then the note and the source line. An
+ * arrival names where it comes from in place of where it goes.
+ */
+function Board({
+  board,
+  rows,
+  intervals,
+  answer,
+  hidden,
+  states,
+  now,
+  timezone,
+  lang,
+  words,
+}: BoardProps) {
+  const named = BOARD_WORDS[board]
+  const shownIntervals = intervals.filter((row) => !hidden.has(row.mode))
+  const shown = rows.filter((row) => !hidden.has(row.mode)).slice(0, SHOWN_DEPARTURES)
+  const placeOf = (row: BoardRow | BoardInterval) =>
+    row.origin === undefined ? row.headsign : fill(words.from, { origin: row.origin })
+  return (
+    <>
       <Messages
         messages={answer.messages}
         now={now}
@@ -156,35 +307,36 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
         words={words}
         source={words.messagesSource}
       />
-      <Section title={words.departures}>
-        {shown.length + intervals.length === 0 ? (
-          <Text variant="body-sm" emphasis="secondary">
-            {words.empty}
-          </Text>
-        ) : (
-          <ul className={styles.departures} aria-label={words.departures}>
-            {intervals.map((row) => (
-              <Interval
-                key={`${row.line} ${row.headsign} ${row.platform}`}
-                row={row}
-                words={words}
-              />
-            ))}
-            {shown.map((row) => (
-              <Departure
-                key={`${row.trip} ${row.platform} ${row.scheduled}`}
-                row={row}
-                state={departureState(row, answer.source, states.get(row.trip))}
-                now={now}
-                timezone={timezone}
-                words={words}
-              />
-            ))}
-          </ul>
-        )}
-      </Section>
+      {shown.length + shownIntervals.length === 0 ? (
+        <Text variant="body-sm" emphasis="secondary">
+          {words[named.empty]}
+        </Text>
+      ) : (
+        <ul className={styles.departures} aria-label={words[named.name]}>
+          {shownIntervals.map((row) => (
+            <Interval
+              key={`${row.line} ${row.headsign} ${row.platform}`}
+              row={row}
+              place={placeOf(row)}
+              words={words}
+            />
+          ))}
+          {shown.map((row) => (
+            <Departure
+              key={`${row.trip} ${row.platform} ${row.scheduled}`}
+              row={row}
+              place={placeOf(row)}
+              state={departureState(row, answer.source, states.get(row.trip))}
+              now={now}
+              timezone={timezone}
+              words={words}
+            />
+          ))}
+        </ul>
+      )}
       <Text variant="caption" emphasis="secondary">
-        {words.note}
+        {/* A board's answer carries Rejseplanen's expected times, whichever list it fills. */}
+        {answer.source.kind === 'rejseplanen' ? words.note : words[named.note]}
       </Text>
       {answer.source.kind === 'timetable' ? (
         <Text variant="caption" emphasis="secondary">
@@ -196,14 +348,14 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
           sources={[
             {
               name: 'Rejseplanen',
-              label: words.departuresAt,
+              label: words[named.at],
               time: clockTime(answer.source.at, timezone, { seconds: true }),
               outOfDate: now - answer.source.at > BOARD_FRESH_FOR,
             },
           ]}
         />
       ) : (
-        <SourceLine sources={[timetableSource(answer, timezone, words)]} />
+        <SourceLine sources={[timetableSource(answer.fetched, timezone, words)]} />
       )}
     </>
   )
@@ -213,17 +365,20 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
  * The timetable's source, named by its phrase alone: "Timetable and positions 08:14:05", the
  * positions' time of the snapshot its times were shifted by.
  */
-const timetableSource = (
-  answer: StopDepartures,
-  timezone: string,
-  words: Words,
-): SourceLineSource => ({
+const timetableSource = (fetched: number, timezone: string, words: Words): SourceLineSource => ({
   label: words.timetableAndPositions,
-  time: clockTime(answer.fetched, timezone, { seconds: true }),
+  time: clockTime(fetched, timezone, { seconds: true }),
 })
 
+interface IntervalProps {
+  row: StopInterval
+  /** Where it goes, or for an arrival where it comes from, as the row names it. */
+  place: string
+  words: Words
+}
+
 /** An interval line in one direction: Perron's row in its interval form, and the note under it. */
-function Interval({ row, words }: { row: StopInterval; words: Words }) {
+function Interval({ row, place, words }: IntervalProps) {
   const { every } = row
   return (
     <li className={styles.departure}>
@@ -231,7 +386,7 @@ function Interval({ row, words }: { row: StopInterval; words: Words }) {
         variant="timetable-only"
         line={badgeLine(row.colour, row.mode)}
         lineName={row.line}
-        destination={row.headsign}
+        destination={place}
         // No interval to tell shows "—".
         interval={
           every === undefined
@@ -247,15 +402,17 @@ function Interval({ row, words }: { row: StopInterval; words: Words }) {
 }
 
 interface DepartureProps {
-  row: StopDeparture
+  row: BoardRow
+  /** Where it goes, or for an arrival where it comes from, as the row names it. */
+  place: string
   state: DataState
   now: number
   timezone: string
   words: Words
 }
 
-/** One departure: Perron's row, with the times its state shows. */
-function Departure({ row, state, now, timezone, words }: DepartureProps) {
+/** One departure or arrival: Perron's row, with the times its state shows. */
+function Departure({ row, place, state, now, timezone, words }: DepartureProps) {
   const times = departureTimes(row, state, now, timezone)
   const cancelled = row.cancelled === true
   return (
@@ -265,7 +422,7 @@ function Departure({ row, state, now, timezone, words }: DepartureProps) {
         variant={state}
         line={badgeLine(row.colour, row.mode)}
         lineName={row.line}
-        destination={row.headsign}
+        destination={place}
         countdown={times.countdown}
         time={times.time}
         {...(times.expected === undefined ? {} : { expected: times.expected })}

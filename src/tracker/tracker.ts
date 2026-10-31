@@ -16,12 +16,13 @@ import {
   findStop,
   plannedTrip,
   serviceDaysAhead,
+  type StopArrivals,
   type StopDepartures,
   type TripDetail,
 } from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
 import { onDemand } from './on-demand.ts'
-import { stopAnswer } from './stop-board.ts'
+import { stopAnswer, stopArrivalsAnswer } from './stop-board.ts'
 import { tripAnswer } from './trip-detail.ts'
 import { correctionsIn } from './corrections.ts'
 import {
@@ -94,6 +95,8 @@ interface RunOutcome {
 export interface TrackerShape {
   readonly getSnapshot: Effect.Effect<Snapshot>
   readonly getStopDepartures: (stopId: string) => Effect.Effect<StopDepartures | undefined>
+  /** A stop's arrivals, the stop panel's second answer, asked for only while its tab is open. */
+  readonly getStopArrivals: (stopId: string) => Effect.Effect<StopArrivals | undefined>
   readonly getTripDetail: (tripKey: string) => Effect.Effect<TripDetail | undefined>
   readonly getDisruptions: Effect.Effect<Disruptions>
   /** The tracker's own clock, which a recording sets, for the routes' cache headers. */
@@ -415,6 +418,17 @@ export const layer: Layer.Layer<
         )
       })
 
+    // From the timetable plus the snapshot's delays, so they spend no call of their own; the
+    // snapshot's run, when one is due, is the call any route makes.
+    const getStopArrivals = (stopId: string) =>
+      Effect.gen(function* () {
+        const found = findStop(timetable, stopId)
+        if (!found) return undefined
+        const snapshot = yield* getSnapshot
+        const list = yield* storedDisruptions
+        return stopArrivalsAnswer({ timetable, snapshot, list }, found)
+      })
+
     /** A trip's journey reference, from the history, once an answer has carried it. */
     const refOf = (tripKey: string) =>
       storedHistory.pipe(Effect.map((history) => history?.[tripKey]?.ref))
@@ -439,6 +453,7 @@ export const layer: Layer.Layer<
     return {
       getSnapshot,
       getStopDepartures,
+      getStopArrivals,
       getTripDetail,
       getDisruptions,
       now: Clock.currentTimeMillis,

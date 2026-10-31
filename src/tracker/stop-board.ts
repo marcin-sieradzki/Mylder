@@ -13,6 +13,7 @@ import { shownAt, updatedState } from '../domain/departure.ts'
 import { platformId } from '../timetable/stops.ts'
 import { clockMoment } from '../timetable/time.ts'
 import {
+  arrivalsAt,
   callsAt,
   DEPARTURES_AHEAD,
   departuresAt,
@@ -21,6 +22,7 @@ import {
   type FoundStop,
   type SnapshotDelays,
   type StopCall,
+  type StopArrivals,
   type StopDeparture,
   type StopDepartures,
 } from './answers.ts'
@@ -276,3 +278,15 @@ export const stopAnswer = (
       : dueBy(departuresAt(timetable, snapshot, found, { now, history }), askAgain)
     return { ...answer, messages: stopMessages(timetable, stop.id, answer.messages, list) }
   })
+
+/**
+ * A found stop's arrivals (docs/screens.md, "Stop panel"): from the timetable plus the snapshot's
+ * delays, spending no call, with the disruption list's messages that name the stop.
+ */
+export const stopArrivalsAnswer = (
+  { timetable, snapshot, list }: Pick<StopAnswerInput, 'timetable' | 'snapshot' | 'list'>,
+  found: FoundStop,
+): StopArrivals => {
+  const answer = arrivalsAt(timetable, snapshot, found)
+  return { ...answer, messages: stopMessages(timetable, found.stop.id, answer.messages, list) }
+}

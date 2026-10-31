@@ -1,6 +1,7 @@
-/* Stop panel: the lines' badges in a row under the stop's name, then the stop's messages
-   (Messages.module.css), then the departures, each Perron's DepartureRow, an interval line's with
-   its note under it, a divider between. */
+/* Stop panel: the lines' badges in a row under the stop's name, then the trips standing at its
+   platforms, then Departures and Arrivals as tabs, each with its messages (Messages.module.css)
+   and its rows, each Perron's DepartureRow, an interval line's with its note under it, a divider
+   between. */
 .lines {
   display: flex;
   flex-wrap: wrap;
@@ -28,4 +29,13 @@
   letter-spacing: var(--perron-typography-data-sm-tracking);
   color: var(--perron-color-text-secondary);
   text-align: end;
+}
+
+/* A list's tab: its messages, rows, note and source line, in one column space.300 apart, as the
+   panel's own blocks are. Not while hidden: the hidden attribute keeps a closed tab's panel away. */
+.board:not([hidden]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  row-gap: var(--perron-space-300);
 }
