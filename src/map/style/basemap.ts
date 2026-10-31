@@ -25,6 +25,7 @@ type MapColour =
   | 'airport'
   | 'runway'
   | 'building'
+  | 'building-3d'
   | 'rail'
   | 'label'
   | 'water-label'
@@ -32,11 +33,10 @@ type MapColour =
 const map = (colour: MapColour) => `perron-color-map-${colour}`
 
 /**
- * How opaque the raised buildings are drawn: faint enough that a vehicle on the street behind a
- * block reads as on the street (ADR 0016). A stand-in, with `color.map.building` for the colour,
- * until Mylder reads Perron's building tokens (perron#184).
+ * How opaque the raised buildings are drawn, from Perron's token: see-through, with the vehicles,
+ * lines and stops drawn over them (ADR 0016).
  */
-const BUILDING_OPACITY = 0.6
+const BUILDING_OPACITY = 'perron-opacity-map-building-3d'
 
 // Which map colour paints which Positron layer, as the map-layer prototype (#14) settled it.
 // Casings and building outlines have no token of their own and take `runway`, the mid neutral
@@ -195,6 +195,8 @@ export function paintTokens(network?: Network, highlight?: Highlight): string[] 
     ...LINE.map(([, colour]) => map(colour)),
     map('label'),
     map('water-label'),
+    map('building-3d'),
+    BUILDING_OPACITY,
     ...RAIL.flatMap(({ width, opacity }) => [width, opacity]),
     modeColour('bus'),
     modeColour('train'),
@@ -228,8 +230,8 @@ export function basemapStyle(
       if (hit) p['fill-color'] = colour(hit[1])
       if (layer.id === 'building') p['fill-outline-color'] = colour('runway')
     } else if (layer.type === 'fill-extrusion') {
-      p['fill-extrusion-color'] = colour('building')
-      p['fill-extrusion-opacity'] = BUILDING_OPACITY
+      p['fill-extrusion-color'] = colour('building-3d')
+      p['fill-extrusion-opacity'] = numberOf(paint, BUILDING_OPACITY)
     } else if (layer.type === 'line') {
       const hit = LINE.find(([pattern]) => pattern.test(layer.id))
       if (hit) p['line-color'] = colour(hit[1])

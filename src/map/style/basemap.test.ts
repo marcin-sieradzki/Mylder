@@ -113,6 +113,7 @@ function acrossOf(
 
 afterEach(() => {
   delete document.documentElement.dataset.theme
+  document.documentElement.removeAttribute('style')
 })
 
 describe('the basemap', () => {
@@ -333,14 +334,19 @@ describe('the basemap', () => {
     })
   })
 
-  it("paints the buildings faint in Perron's map building colour, in light and dark", () => {
+  it("paints the buildings in Perron's 3D building colour, in light and dark", () => {
     const light = layer(styleNow(), 'building-3d').paint
-    expect(light['fill-extrusion-color']).toBe('#E2E5E0')
+    expect(light['fill-extrusion-color']).toBe('#D3D9D4')
     expect(light['fill-extrusion-opacity']).toBe(0.6)
     document.documentElement.dataset.theme = 'dark'
     const dark = layer(styleNow(), 'building-3d').paint
-    expect(dark['fill-extrusion-color']).toBe('#1A2125')
+    expect(dark['fill-extrusion-color']).toBe('#2A3338')
     expect(dark['fill-extrusion-opacity']).toBe(0.6)
+  })
+
+  it("draws the buildings at Perron's 3D building opacity, with no stand-in of its own", () => {
+    document.documentElement.style.setProperty('--perron-opacity-map-building-3d', '0.35')
+    expect(layer(styleNow(), 'building-3d').paint['fill-extrusion-opacity']).toBe(0.35)
   })
 
   it('draws the buildings over the streets and rail, and under the lines, stops and highlight', () => {
