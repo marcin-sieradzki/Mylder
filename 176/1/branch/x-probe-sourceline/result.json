@@ -1,0 +1,7 @@
+{
+  "journey": "x-probe-sourceline",
+  "pass": true,
+  "steps": [
+    "01-source-line: source line (http://localhost:4307/en?stop=8600783&board=arrivals)"
+  ]
+}

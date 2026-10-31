@@ -1,0 +1,11 @@
+{
+  "journey": "pr2-same-minute",
+  "pass": true,
+  "steps": [
+    "01-first-open-call-time-07-21-01: first open, call time 07:21:01 (http://localhost:4307/en?stop=8600783&board=arrivals)",
+    "02-left-arrivals-for-departures: left Arrivals for Departures (http://localhost:4307/en?stop=8600783)",
+    "03-second-open-within-the-minute-call-time-07-21-01: second open within the minute, call time 07:21:01 (http://localhost:4307/en?stop=8600783&board=arrivals)",
+    "04-opened-again-by-link-call-time-07-21-01: opened again by link, call time 07:21:01 (http://localhost:4307/en?stop=8600783&board=arrivals)",
+    "05-about-calls-this-month: About: calls this month (http://localhost:4307/en?stop=8600783&board=arrivals)"
+  ]
+}

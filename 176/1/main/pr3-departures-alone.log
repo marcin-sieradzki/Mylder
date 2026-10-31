@@ -1,0 +1,18 @@
+s0 07:24:02 calls 7
+s1 07:25:03 calls 9 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":1}] departure calls [ '07:24:02' ] arrival calls []
+requests so far:
+21:16:49 /api/stops/8600783
+21:16:55 /api/stops/8600783
+ARRIVALS source line:  | Timetable and positions 07:25:03
+s2 07:26:03 calls 11 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":2}] departure calls [ '07:25:03' ] arrival calls []
+all requests:
+21:16:49 /api/stops/8600783
+21:16:55 /api/stops/8600783
+21:17:50 /api/stops/8600783
+21:17:51 /api/stops/8600783/arrivals
+FAIL pr3-departures-alone: 4 steps in .verify/main-170-r1/pr3-departures-alone/
+expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 0
+Received array:  []

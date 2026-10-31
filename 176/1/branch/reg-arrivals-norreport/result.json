@@ -1,0 +1,9 @@
+{
+  "journey": "reg-arrivals-norreport",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-st-on-departures: Nørreport St. on Departures (http://localhost:4307/en?stop=27532)",
+    "02-arrivals-listed: Arrivals listed (http://localhost:4307/en?stop=27532&board=arrivals)",
+    "03-back-on-departures-board-dropped: back on Departures, board dropped (http://localhost:4307/en?stop=27532)"
+  ]
+}

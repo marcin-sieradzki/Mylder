@@ -1,0 +1,10 @@
+{
+  "journey": "pr3-departures-alone",
+  "pass": true,
+  "steps": [
+    "01-k-benhavn-syd-st-on-departures: København Syd St. on Departures (http://localhost:4307/en?stop=8600783)",
+    "02-a-whole-minute-on-departures-no-arrival-call: a whole minute on Departures: no arrival call (http://localhost:4307/en?stop=8600783)",
+    "03-arrivals-chosen: Arrivals chosen (http://localhost:4307/en?stop=8600783&board=arrivals)",
+    "04-about-calls-this-month: About: calls this month (http://localhost:4307/en?stop=8600783&board=arrivals)"
+  ]
+}

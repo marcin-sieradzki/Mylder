@@ -1,0 +1,7 @@
+{
+  "journey": "x-probe-about",
+  "pass": true,
+  "steps": [
+    "01-about: about (http://localhost:4307/en)"
+  ]
+}

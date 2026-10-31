@@ -1,0 +1,7 @@
+{
+  "journey": "x-probe-calls",
+  "pass": true,
+  "steps": [
+    "01-arr: arr (http://localhost:4307/en?stop=8600783&board=arrivals)"
+  ]
+}

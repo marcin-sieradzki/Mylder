@@ -1,0 +1,48 @@
+TABPANEL:
+A
+From Hundige St.
+Live
+Track 8
+Now
+Timetabled 07:23
+07:23
+07:27
++4 min
+4 min late
+A
+From Hundige St.
+Live
+Track 8
+7 min
+Timetabled 07:33
+07:33
+07:34
++1 min
+1 min late
+E
+From Køge St.
+Estimated
+Track 8
+~10 min
+Timetabled 07:36
+07:36
+~07:37
++1 min
+1 min late
+E
+From Holte St.
+Live
+Track 8
+14 min
+Timetabled 07:39
+07:39
+07:41
++2 min
+2 min late
+Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.
+
+Rejseplanen · arrivals 07:26:50
+arrival answers source: [{"kind":"rejseplanen","at":1781587610228}]
+07:39 decoration: line-through
+source line time 07:26:50 answer at (CEST) 07:26:50
+PASS pr1-board-arrivals: 2 steps in .verify/branch-170-r1/pr1-board-arrivals/

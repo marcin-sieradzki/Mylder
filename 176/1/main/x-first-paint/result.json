@@ -1,0 +1,12 @@
+{
+  "journey": "x-first-paint",
+  "pass": true,
+  "steps": [
+    "01--en-stop-8600783-first-paint: /en?stop=8600783 first paint (http://localhost:4306/en?stop=8600783)",
+    "02--en-stop-8600783-3-s-later: /en?stop=8600783 3 s later (http://localhost:4306/en?stop=8600783)",
+    "03--en-stop-8600783-board-arrivals-first-paint: /en?stop=8600783&board=arrivals first paint (http://localhost:4306/en?stop=8600783&board=arrivals)",
+    "04--en-stop-8600783-board-arrivals-3-s-later: /en?stop=8600783&board=arrivals 3 s later (http://localhost:4306/en?stop=8600783&board=arrivals)",
+    "05--en-stop-27532-board-arrivals-first-paint: /en?stop=27532&board=arrivals first paint (http://localhost:4306/en?stop=27532&board=arrivals)",
+    "06--en-stop-27532-board-arrivals-3-s-later: /en?stop=27532&board=arrivals 3 s later (http://localhost:4306/en?stop=27532&board=arrivals)"
+  ]
+}

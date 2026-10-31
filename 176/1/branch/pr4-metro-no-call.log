@@ -1,0 +1,23 @@
+s0 07:23:02 calls 8
+TABPANEL:
+M1
+From Vanløse St.
+Timetable only
+Every 4 min
+
+Metro: planned times
+
+Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.
+From the timetable
+
+Timetable and positions 07:23:02
+s1 07:24:02 calls 9 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":3}]
+requests:
+21:15:46 /api/stops/8603313
+21:15:51 /api/stops/8603313/arrivals
+21:15:53 /api/stops/8603313
+sources:
+/api/stops/8603313 {"kind":"timetable"}
+/api/stops/8603313/arrivals {"kind":"timetable"}
+/api/stops/8603313 {"kind":"timetable"}
+PASS pr4-metro-no-call: 3 steps in .verify/branch-170-r1/pr4-metro-no-call/

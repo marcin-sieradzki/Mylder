@@ -1,0 +1,15 @@
+s0 07:25:02 calls 10
+s1 07:26:03 calls 12 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":3}] departure calls [ '07:25:03' ] arrival calls []
+requests so far:
+21:17:46 /api/stops/8600783
+21:17:55 /api/stops/8600783
+ARRIVALS source line:  | Rejseplanen · arrivals 07:26:04
+s2 07:27:03 calls 15 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":2}] departure calls [ '07:26:07' ] arrival calls [ '07:26:04' ]
+all requests:
+21:17:46 /api/stops/8600783
+21:17:55 /api/stops/8600783
+21:18:47 /api/stops/8600783/arrivals
+21:18:51 /api/stops/8600783
+About: Calls this month
+12
+PASS pr3-departures-alone: 4 steps in .verify/branch-170-r1/pr3-departures-alone/

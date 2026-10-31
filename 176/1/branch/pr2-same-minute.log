@@ -1,0 +1,18 @@
+s0 07:21:00 calls 3
+first open: arrivals 07:21:01
+second open: arrivals 07:21:01
+third open (link again): arrivals 07:21:01
+s1 07:22:01 calls 6 run calls [{"service":"journeyPos","outcome":"ok","attempts":1,"ms":3}]
+departure calls [ '07:21:01' ] arrival calls [ '07:21:01' ]
+requests:
+21:13:44 /api/stops/8600783
+21:13:44 /api/stops/8600783/arrivals
+21:13:51 /api/stops/8600783
+21:14:00 /api/stops/8600783/arrivals
+21:14:00 /api/stops/8600783
+21:14:00 /api/stops/8600783/arrivals
+21:14:07 /api/stops/8600783
+21:14:08 /api/stops/8600783/arrivals
+About: Calls this month
+3
+PASS pr2-same-minute: 5 steps in .verify/branch-170-r1/pr2-same-minute/
