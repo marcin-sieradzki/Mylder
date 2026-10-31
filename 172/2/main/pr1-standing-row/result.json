@@ -1,0 +1,9 @@
+{
+  "journey": "pr1-standing-row",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' })\n",
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4304/en)",
+    "02-failure: failure (http://localhost:4304/en?stop=48645)"
+  ]
+}

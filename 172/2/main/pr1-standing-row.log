@@ -1,0 +1,12 @@
+FAIL pr1-standing-row: 2 steps in .verify/main-168-r2/pr1-standing-row/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'Departures' })
+

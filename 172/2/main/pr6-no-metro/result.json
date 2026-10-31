@@ -1,0 +1,8 @@
+{
+  "journey": "pr6-no-metro",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('region', { name: 'At the platforms now' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('region', { name: 'At the platforms now' }) with timeout 5000ms\n  - waiting for getByRole('region', { name: 'At the platforms now' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4304/en?stop=27532)"
+  ]
+}

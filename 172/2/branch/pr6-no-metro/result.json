@@ -1,0 +1,8 @@
+{
+  "journey": "pr6-no-metro",
+  "pass": true,
+  "steps": [
+    "01-metro-stop-27532-standing-has-no-metro: metro stop 27532 standing has no Metro (http://localhost:4305/en?stop=27532)",
+    "02-metro-stop-8603308-standing-has-no-metro: metro stop 8603308 standing has no Metro (http://localhost:4305/en?stop=8603308)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "pr4-none-standing",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Nørreport St.' }).getByRole('region', { name: 'Departures' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Nørreport St.' }).getByRole('region', { name: 'Departures' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByRole('region', { name: 'Departures' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4304/en?stop=27532)"
+  ]
+}

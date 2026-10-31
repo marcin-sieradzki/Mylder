@@ -1,0 +1,12 @@
+FAIL pr6-no-metro: 1 steps in .verify/main-168-r2/pr6-no-metro/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('region', { name: 'At the platforms now' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('region', { name: 'At the platforms now' }) with timeout 5000ms
+  - waiting for getByRole('region', { name: 'At the platforms now' })
+

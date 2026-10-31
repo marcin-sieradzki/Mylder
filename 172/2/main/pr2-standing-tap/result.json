@@ -1,0 +1,8 @@
+{
+  "journey": "pr2-standing-tap",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4304/en?stop=48645)"
+  ]
+}

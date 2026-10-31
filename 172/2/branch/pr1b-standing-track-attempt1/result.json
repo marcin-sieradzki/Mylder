@@ -1,0 +1,9 @@
+{
+  "journey": "pr1b-standing-track",
+  "pass": false,
+  "error": "expect(received).toBeGreaterThanOrEqual(expected)\n\nExpected: >= 1781587320000\nReceived:    NaN\n\nCall Log:\n- Timeout 200000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4305/en)",
+    "02-failure: failure (http://localhost:4305/en)"
+  ]
+}

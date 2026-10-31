@@ -1,0 +1,12 @@
+FAIL pr2-standing-tap: 1 steps in .verify/main-168-r2/pr2-standing-tap/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('region', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+

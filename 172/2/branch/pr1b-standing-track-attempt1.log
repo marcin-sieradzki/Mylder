@@ -1,0 +1,8 @@
+FAIL pr1b-standing-track: 2 steps in .verify/branch-168-r2/pr1b-standing-track/
+expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 1781587320000
+Received:    NaN
+
+Call Log:
+- Timeout 200000ms exceeded while waiting on the predicate

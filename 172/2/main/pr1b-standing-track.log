@@ -1,0 +1,13 @@
+snapshot fetched 2026-06-16T05:22:01.616Z
+FAIL pr1b-standing-track: 2 steps in .verify/main-168-r2/pr1b-standing-track/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'København Syd St.' }).getByRole('region', { name: 'Departures' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'København Syd St.' }).getByRole('region', { name: 'Departures' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'København Syd St.' }).getByRole('region', { name: 'Departures' })
+

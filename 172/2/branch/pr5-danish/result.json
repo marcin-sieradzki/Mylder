@@ -1,0 +1,9 @@
+{
+  "journey": "pr5-danish",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-in-danish: Refshaleøen in Danish (http://localhost:4305/da?stop=48645)",
+    "02-danish-standing-row: Danish standing row (http://localhost:4305/da?stop=48645)",
+    "03-danish-none-standing: Danish none standing (http://localhost:4305/da?stop=27532)"
+  ]
+}

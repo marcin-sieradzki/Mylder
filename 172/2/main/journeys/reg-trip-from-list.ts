@@ -1,0 +1,20 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.getByRole('banner').getByText(/^Updated /)).toBeVisible()
+  await step('map loaded')
+  await page.getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Vehicles/ }).click()
+  await step('vehicles tab')
+  await page.getByRole('table', { name: 'Vehicles' }).getByRole('link').first().click()
+  const panel = page.getByRole('dialog', { name: / to / })
+  await expect(panel).toBeVisible()
+  await expect(page).toHaveURL(/[?&]trip=/)
+  await expect(panel).toContainText('Delay')
+  await expect(panel).toContainText('Last seen')
+  await expect(panel.getByRole('list', { name: 'Stops' })).toBeVisible()
+  await step('trip panel with facts')
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  expect(page.url()).not.toMatch(/[?&]trip=/)
+  await step('closed')
+}
