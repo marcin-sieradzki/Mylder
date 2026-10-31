@@ -1,0 +1,12 @@
+== 22:45:11 branch-186-r2 r-standing-phone --phone (rec "fetched":1781587200020)
+card {"x":17,"y":717.296875,"width":340.1875,"height":72.390625} list {"x":17,"y":717.296875,"width":378,"height":72.390625} tablist {"x":17,"y":801.6875,"width":378,"height":37} vp {"width":412,"height":839}
+PASS r-standing-phone: 4 steps in .verify/branch-186-r2/r-standing-phone/
+== 22:45:28 branch-186-r2 r-standing-phone-track --phone (rec "fetched":1781587261297)
+PASS r-standing-phone-track: 2 steps in .verify/branch-186-r2/r-standing-phone-track/
+== 22:46:28 branch-186-r2 r-vehicle-phone --phone (rec "fetched":1781587322565)
+trip bus.5C.32331e0e20.20260616.0707 5C Husum Torv [55.668370436960345,12.58399914870426]
+FOOT {"label":"vehicle sheet","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"5C to Husum Torv","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":50.546875,"y":747.5,"tag":"SPAN","text":"Follow","dialog":"5C to Husum Torv","insideTarget":true}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"5C to Husum Torv","insideTarget":true}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"5C to Husum Torv","insideTarget":true}
+PASS r-vehicle-phone: 8 steps in .verify/branch-186-r2/r-vehicle-phone/

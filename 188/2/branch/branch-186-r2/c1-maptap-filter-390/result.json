@@ -1,0 +1,12 @@
+{
+  "journey": "c1-maptap-filter-390",
+  "pass": true,
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4304/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "02-map-tap-overview-open-none-standing-bus-hidden-: map tap, Overview open, none standing (Bus hidden) (http://localhost:4304/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "03-bus-shown-991-card-appears: Bus shown: 991 card appears (http://localhost:4304/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "04-sheet-dragged-to-full-height: sheet dragged to full height (http://localhost:4304/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "05-sheet-dragged-back-to-its-peek: sheet dragged back to its peek (http://localhost:4304/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "06-stop-closed-foot-back: stop closed, foot back (http://localhost:4304/en?map=17.00/55.69105/12.60675)"
+  ]
+}

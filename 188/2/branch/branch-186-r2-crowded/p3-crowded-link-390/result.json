@@ -1,0 +1,8 @@
+{
+  "journey": "p3-crowded-link-390",
+  "pass": true,
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4402/en)",
+    "02-k-benhavn-h-six-standing-at-its-peek: København H, six standing, at its peek (http://localhost:4402/en?stop=8600626)"
+  ]
+}

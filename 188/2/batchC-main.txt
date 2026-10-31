@@ -1,0 +1,34 @@
+== 22:44:19 main-186-r2 n2-frames-pixel7 --phone (rec "fetched":1781587200016)
+FRAMES {"label":"Bus on: row appears, sheet rises","n":60,"first":[6184,657,645,558],"last":[9584,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+SOFT-FAIL sheet rose |  | expect(received).toBeLessThan(expected) |  | Expected: < 652 | Received:   657
+FRAMES {"label":"Bus off: row empties, sheet lowers","n":61,"first":[10684,657,645,558],"last":[14034,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+SOFT-FAIL sheet lowered |  | expect(received).toBeGreaterThan(expected) |  | Expected: > 662 | Received:   657
+FRAMES {"label":"Bus on again","n":59,"first":[15217,657,645,558],"last":[18517,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FRAMES {"label":"stop sheet closed","n":67,"first":[19434,657,645,558],"last":[22900,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+FAIL n2-frames-pixel7: 6 steps in .verify/main-186-r2/n2-frames-pixel7/
+2 check(s) failed:
+- sheet rose |  | expect(received).toBeLessThan(expected) |  | Expected: < 652 | Received:   657
+- sheet lowered |  | expect(received).toBeGreaterThan(expected) |  | Expected: > 662 | Received:   657
+== 22:44:45 main-186-r2 n2-frames-390 --phone (rec "fetched":1781587200016)
+FRAMES {"label":"Bus on: row appears, sheet rises","n":64,"first":[5953,662,650,563],"last":[9303,662,650,563],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+SOFT-FAIL sheet rose |  | expect(received).toBeLessThan(expected) |  | Expected: < 657 | Received:   662
+FRAMES {"label":"Bus off: row empties, sheet lowers","n":61,"first":[10370,662,650,563],"last":[13670,662,650,563],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+SOFT-FAIL sheet lowered |  | expect(received).toBeGreaterThan(expected) |  | Expected: > 667 | Received:   662
+FRAMES {"label":"Bus on again","n":61,"first":[14753,662,650,563],"last":[18103,662,650,563],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+hit {"x":356,"y":696,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FRAMES {"label":"stop sheet closed","n":64,"first":[19103,662,650,563],"last":[22386,662,650,563],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+FAIL n2-frames-390: 6 steps in .verify/main-186-r2/n2-frames-390/
+2 check(s) failed:
+- sheet rose |  | expect(received).toBeLessThan(expected) |  | Expected: < 657 | Received:   662
+- sheet lowered |  | expect(received).toBeGreaterThan(expected) |  | Expected: > 667 | Received:   662
+== 22:45:11 main-186-r2 c2-held-drag-390 --phone (rec "fetched":1781587200016)
+t0 662 held 649.5
+HELD samples [649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5]
+after release 662
+TABS {"label":"after held drag released","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":850.6875,"width":356,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":850.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":850.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL after held drag released: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+FOOT {"label":"after held drag released","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL c2-held-drag-390: 5 steps in .verify/main-186-r2/c2-held-drag-390/
+1 check(s) failed:
+- after held drag released: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875

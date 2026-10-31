@@ -1,0 +1,9 @@
+{
+  "journey": "c3-natural-held",
+  "pass": false,
+  "error": "Orientkaj before: tablist bottom on screen (vp 839)\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 839.5\nReceived:    849.296875",
+  "steps": [
+    "01-orientkaj-none-standing-yet-at-its-peek: Orientkaj, none standing yet, at its peek (http://localhost:4305/en?stop=54307)",
+    "02-failure: failure (http://localhost:4305/en?stop=54307)"
+  ]
+}

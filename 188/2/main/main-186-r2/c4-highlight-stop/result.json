@@ -1,0 +1,10 @@
+{
+  "journey": "c4-highlight-stop",
+  "pass": false,
+  "error": "Klaksvigsgade: tablist bottom on screen (vp 839)\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 839.5\nReceived:    849.296875",
+  "steps": [
+    "01-5c-stretch-shown-on-map: 5C stretch shown on map (http://localhost:4305/en?tab=disruptions&map=15.00/55.66885/12.58226)",
+    "02-ringed-stop-tapped-its-sheet-at-the-peek: ringed stop tapped, its sheet at the peek (http://localhost:4305/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807)",
+    "03-failure: failure (http://localhost:4305/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807)"
+  ]
+}

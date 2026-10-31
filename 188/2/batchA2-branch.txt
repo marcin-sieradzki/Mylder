@@ -1,0 +1,26 @@
+== 22:38:16 branch-186-r2 n1-missing-pixel7 --phone (rec "fetched":1781587326900)
+REF not found by link {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+A Refshaleøen standing {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+B after pushState nowhere (no popstate) {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839} http://localhost:4304/en?stop=nowhere
+B2 back {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839} http://localhost:4304/en?stop=48645
+B3 forward to nowhere {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839} http://localhost:4304/en?stop=nowhere
+FOOT {"label":"first forward to nowhere","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+C back to Refshaleøen {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+D forward nowhere {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+FOOT {"label":"forward nowhere","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+E back to Refshaleøen (2) {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+F held on Refshaleøen {"name":"Refshaleøen","top":600.5,"peek":238.5,"creditBottom":601,"gap":-0.5,"vh":839}
+G held while forward to nowhere, tops [644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5]
+H released on not found {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+FOOT {"label":"forward while held, released","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+I held while back to Refshaleøen, tops [600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5]
+J released on Refshaleøen {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+FOOT {"label":"back while held, released","vp":{"width":412,"height":839},"credit":{"top":543,"bottom":601,"left":12,"right":400},"legend":{"top":439.625,"bottom":514},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":613}],"sheetTop":613,"covered":[],"gap":12}
+PASS n1-missing-pixel7: 10 steps in .verify/branch-186-r2/n1-missing-pixel7/
+== 22:39:00 branch-186-r2 c2-held-drag-pixel7 --phone (rec "fetched":1781587389277)
+t0 646 held 633.5
+HELD samples [633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5,633.5]
+after release 613
+TABS {"label":"after held drag released","vp":{"width":412,"height":839},"sheetTop":613,"peek":226,"tablist":{"x":17,"y":801.6875,"width":378,"height":37},"tablistBottomGap":0.3125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.6875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.6875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FOOT {"label":"after held drag released","vp":{"width":412,"height":839},"credit":{"top":543,"bottom":601,"left":12,"right":400},"legend":{"top":439.625,"bottom":514},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":613}],"sheetTop":613,"covered":[],"gap":12}
+PASS c2-held-drag-pixel7: 4 steps in .verify/branch-186-r2/c2-held-drag-pixel7/

@@ -1,0 +1,8 @@
+{
+  "journey": "n3-natural-frames",
+  "pass": true,
+  "steps": [
+    "01-orientkaj-none-standing-yet: Orientkaj, none standing yet (http://localhost:4304/en?stop=54307)",
+    "02-991-standing-at-orientkaj-sheet-risen: 991 standing at Orientkaj, sheet risen (http://localhost:4304/en?stop=54307)"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "journey": "n2-frames-390",
+  "pass": false,
+  "error": "2 check(s) failed:\n- sheet rose |  | expect(received).toBeLessThan(expected) |  | Expected: < 657 | Received:   662\n- sheet lowered |  | expect(received).toBeGreaterThan(expected) |  | Expected: > 667 | Received:   662",
+  "steps": [
+    "01-bus-hidden-none-standing-at-its-peek: Bus hidden, none standing, at its peek (http://localhost:4305/en?hide=bus&stop=48645)",
+    "02-bus-on-991-standing-sheet-risen: Bus on: 991 standing, sheet risen (http://localhost:4305/en?stop=48645)",
+    "03-bus-off-none-standing-sheet-lowered: Bus off: none standing, sheet lowered (http://localhost:4305/en?stop=48645&hide=bus)",
+    "04-bus-on-again: Bus on again (http://localhost:4305/en?stop=48645)",
+    "05-stop-closed-overview-at-peek: stop closed, Overview at peek (http://localhost:4305/en)",
+    "06-failure: failure (http://localhost:4305/en)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "c6-desktop",
+  "pass": true,
+  "steps": [
+    "01-desktop-refshale-en: desktop Refshaleøen (http://localhost:4304/en?stop=48645)",
+    "02-desktop-n-rreport-st-: desktop Nørreport St. (http://localhost:4304/en?stop=27532)",
+    "03-desktop-arrivals: desktop Arrivals (http://localhost:4304/en?stop=27532&board=arrivals)"
+  ]
+}

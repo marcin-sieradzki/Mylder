@@ -1,0 +1,14 @@
+{
+  "journey": "r-vehicle-phone",
+  "pass": true,
+  "steps": [
+    "01-map-on-a-bus-paused: map on a bus, paused (http://localhost:4304/en?map=15.00/55.66837/12.58400)",
+    "02-vehicle-from-a-dot-facts: vehicle from a dot, facts (http://localhost:4304/en?map=15.00/55.66837/12.58400&trip=bus.5C.32331e0e20.20260616.0707)",
+    "03-follow: Follow (http://localhost:4304/en?map=15.00/55.66837/12.58400&trip=bus.5C.32331e0e20.20260616.0707)",
+    "04-show-whole-line-chip: Show whole line, chip (http://localhost:4304/en?map=10.81/55.68184/12.54282&trip=bus.5C.32331e0e20.20260616.0707)",
+    "05-chip-cleared: chip cleared (http://localhost:4304/en?map=10.81/55.68184/12.54282&trip=bus.5C.32331e0e20.20260616.0707)",
+    "06-closed-with-close: closed with Close (http://localhost:4304/en?map=10.81/55.68184/12.54282)",
+    "07-link-closed-with-escape: link, closed with Escape (http://localhost:4304/en)",
+    "08-trip-not-found: trip not found (http://localhost:4304/en?trip=nothing)"
+  ]
+}

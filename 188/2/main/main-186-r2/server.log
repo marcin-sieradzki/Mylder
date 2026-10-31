@@ -1,0 +1,11 @@
+▲ Next.js 16.4.3
+- Local:         http://localhost:4305
+- Network:       http://192.0.2.2:4305
+✓ Ready in 148ms
+✓ Running next.config.ts took 50ms
+{"message":["Tracker run",{"source":{"kind":"recording","name":"weekday"},"positionMode":"alternating","answerMode":"CALC_REPORT","budget":{"level":"normal","calls":2},"store":"ok","calls":[{"service":"journeyPos","outcome":"ok","attempts":1,"ms":14},{"service":"himsearch","outcome":"ok","attempts":1,"ms":2}],"unmatched":0,"modes":{"bus":6,"metro":4,"s-tog":6,"train":1},"states":{"estimated":13,"timetable-only":4},"cpuMs":32,"timetable":{"prepared":"2026-06-02","last":"2026-08-26","daysLeft":72,"daysOld":14}}],"level":"INFO","timestamp":"2026-06-16T05:20:00.053Z","annotations":{},"spans":{},"fiberId":"#4"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:03.391Z","annotations":{},"spans":{},"fiberId":"#20"}
+{"message":"On-demand call: journeyDetail answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:12.565Z","annotations":{},"spans":{},"fiberId":"#36"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:23.620Z","annotations":{},"spans":{},"fiberId":"#48"}
+{"message":["Tracker run",{"source":{"kind":"recording","name":"weekday"},"positionMode":"alternating","answerMode":"REPORT_ONLY","budget":{"level":"normal","calls":6},"store":"ok","calls":[{"service":"journeyPos","outcome":"ok","attempts":1,"ms":4}],"unmatched":0,"modes":{"bus":6,"metro":4,"s-tog":6,"train":1},"states":{"estimated":6,"live":7,"timetable-only":4},"cpuMs":16,"timetable":{"prepared":"2026-06-02","last":"2026-08-26","daysLeft":72,"daysOld":14}}],"level":"INFO","timestamp":"2026-06-16T05:21:04.192Z","annotations":{},"spans":{},"fiberId":"#71"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:21:14.396Z","annotations":{},"spans":{},"fiberId":"#85"}

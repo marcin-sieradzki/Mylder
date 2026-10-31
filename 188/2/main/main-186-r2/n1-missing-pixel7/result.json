@@ -1,0 +1,16 @@
+{
+  "journey": "n1-missing-pixel7",
+  "pass": true,
+  "steps": [
+    "01-reference-stop-nowhere-by-link: reference: ?stop=nowhere by link (http://localhost:4305/en?stop=nowhere)",
+    "02-refshale-en-991-standing-at-its-peek: Refshaleøen, 991 standing, at its peek (http://localhost:4305/en?stop=48645)",
+    "03-pushstate-stop-nowhere-address-only-: pushState ?stop=nowhere (address only) (http://localhost:4305/en?stop=nowhere)",
+    "04-back-forward-stop-not-found: back, forward: Stop not found (http://localhost:4305/en?stop=nowhere)",
+    "05-back-refshale-en: back: Refshaleøen (http://localhost:4305/en?stop=48645)",
+    "06-forward-stop-not-found: forward: Stop not found (http://localhost:4305/en?stop=nowhere)",
+    "07-finger-holds-refshale-en-30-px-up: finger holds Refshaleøen 30 px up (http://localhost:4305/en?stop=48645)",
+    "08-forward-while-held-stop-not-found-under-the-finger: forward while held: Stop not found under the finger (http://localhost:4305/en?stop=nowhere)",
+    "09-released-not-found-sheet-settles: released: not-found sheet settles (http://localhost:4305/en?stop=nowhere)",
+    "10-back-while-held-released-refshale-en: back while held, released: Refshaleøen (http://localhost:4305/en?stop=48645)"
+  ]
+}

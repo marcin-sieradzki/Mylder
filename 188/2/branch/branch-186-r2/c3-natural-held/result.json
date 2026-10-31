@@ -1,0 +1,9 @@
+{
+  "journey": "c3-natural-held",
+  "pass": true,
+  "steps": [
+    "01-orientkaj-none-standing-yet-at-its-peek: Orientkaj, none standing yet, at its peek (http://localhost:4304/en?stop=54307)",
+    "02-991-came-to-stand-while-the-finger-holds: 991 came to stand while the finger holds (http://localhost:4304/en?stop=54307)",
+    "03-released-sheet-on-the-taller-peek: released: sheet on the taller peek (http://localhost:4304/en?stop=54307)"
+  ]
+}

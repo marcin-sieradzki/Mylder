@@ -1,0 +1,61 @@
+== 22:36:03 main-186-r2 n1-missing-pixel7 --phone (rec "fetched":1781587200016)
+REF not found by link {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+A Refshaleøen standing {"name":"Refshaleøen","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+FAIL n1-missing-pixel7: 3 steps in .verify/main-186-r2/n1-missing-pixel7/
+expect(locator).toBeVisible() failed
+Locator: getByRole('dialog', { name: 'Stop not found' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Stop not found' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Stop not found' })
+== 22:36:21 main-186-r2 p1-standing-link-pixel7 --phone (rec "fetched":1781587200016)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"standing link","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":845.6875,"width":378,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":845.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":845.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+FOOT {"label":"standing link","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":187.09375,"y":797.4921875,"tag":"BUTTON","text":"","dialog":"Refshaleøen","insideTarget":true}
+FOOT {"label":"vehicle from standing card","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"991 to Teglholmen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"991 to Teglholmen","insideTarget":true}
+URL after fit http://localhost:4305/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901
+FOOT {"label":"after Show whole line","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"991 to Teglholmen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"991 to Teglholmen","insideTarget":true}
+FOOT {"label":"vehicle closed","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FAIL p1-standing-link-pixel7: 6 steps in .verify/main-186-r2/p1-standing-link-pixel7/
+1 check(s) failed:
+- standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+== 22:36:58 main-186-r2 n1-missing-390 --phone (rec "fetched":1781587262201)
+REF not found by link {"name":"Stop not found","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+A Refshaleøen standing {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+B after pushState nowhere (no popstate) {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844} http://localhost:4305/en?stop=nowhere
+B2 back {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844} http://localhost:4305/en?stop=48645
+B3 forward to nowhere {"name":"Stop not found","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844} http://localhost:4305/en?stop=nowhere
+FOOT {"label":"first forward to nowhere","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Stop not found","top":662}],"sheetTop":662,"covered":[],"gap":12}
+C back to Refshaleøen {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+D forward nowhere {"name":"Stop not found","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+FOOT {"label":"forward nowhere","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Stop not found","top":662}],"sheetTop":662,"covered":[],"gap":12}
+E back to Refshaleøen (2) {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+F held on Refshaleøen {"name":"Refshaleøen","top":649.5,"peek":194.5,"creditBottom":650,"gap":-0.5,"vh":844}
+G held while forward to nowhere, tops [649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5]
+H released on not found {"name":"Stop not found","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+FOOT {"label":"forward while held, released","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Stop not found","top":662}],"sheetTop":662,"covered":[],"gap":12}
+I held while back to Refshaleøen, tops [649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5]
+J released on Refshaleøen {"name":"Refshaleøen","top":662,"peek":182,"creditBottom":650,"gap":12,"vh":844}
+FOOT {"label":"back while held, released","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+PASS n1-missing-390: 10 steps in .verify/main-186-r2/n1-missing-390/
+== 22:37:40 main-186-r2 p1-standing-link-390 --phone (rec "fetched":1781587262201)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"standing link","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":850.6875,"width":356,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":850.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":850.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+FOOT {"label":"standing link","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":177.1953125,"y":802.4921875,"tag":"BUTTON","text":"","dialog":"Refshaleøen","insideTarget":true}
+FOOT {"label":"vehicle from standing card","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"991 to Teglholmen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":155.921875,"y":752.5,"tag":"SPAN","text":"Show whole line","dialog":"991 to Teglholmen","insideTarget":true}
+URL after fit http://localhost:4305/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.21/55.68142/12.57901
+FOOT {"label":"after Show whole line","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"991 to Teglholmen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":356,"y":696,"tag":"path","text":"","dialog":"991 to Teglholmen","insideTarget":true}
+FOOT {"label":"vehicle closed","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL p1-standing-link-390: 6 steps in .verify/main-186-r2/p1-standing-link-390/
+1 check(s) failed:
+- standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875

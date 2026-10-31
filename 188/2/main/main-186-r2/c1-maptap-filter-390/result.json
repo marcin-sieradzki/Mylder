@@ -1,0 +1,14 @@
+{
+  "journey": "c1-maptap-filter-390",
+  "pass": false,
+  "error": "3 check(s) failed:\n- map tap, none standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875\n- after Bus filter, standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875\n- dragged back to peek: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875",
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4305/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "02-map-tap-overview-open-none-standing-bus-hidden-: map tap, Overview open, none standing (Bus hidden) (http://localhost:4305/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "03-bus-shown-991-card-appears: Bus shown: 991 card appears (http://localhost:4305/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "04-sheet-dragged-to-full-height: sheet dragged to full height (http://localhost:4305/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "05-sheet-dragged-back-to-its-peek: sheet dragged back to its peek (http://localhost:4305/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "06-stop-closed-foot-back: stop closed, foot back (http://localhost:4305/en?map=17.00/55.69105/12.60675)",
+    "07-failure: failure (http://localhost:4305/en?map=17.00/55.69105/12.60675)"
+  ]
+}

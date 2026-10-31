@@ -1,0 +1,39 @@
+== 22:39:39 main-186-r2 n3-natural-frames --phone (rec "fetched":1781587386958)
+fetched 2026-06-16T05:24:07.109Z
+arrived at 2026-06-16T05:25:08.733Z
+FRAMES {"label":"991 arrives by the minute","n":689,"first":[8681,657,645,558],"last":[64479,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":[]}
+FAIL n3-natural-frames: 3 steps in .verify/main-186-r2/n3-natural-frames/
+sheet rose
+expect(received).toBeLessThan(expected)
+Expected: < 652
+Received:   657
+== 22:41:04 main-186-r2 p2-none-link-pixel7 --phone (rec "fetched":1781587508733)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+SOFT-FAIL none standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+FOOT {"label":"none standing link","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Nørreport St.","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FAIL p2-none-link-pixel7: 4 steps in .verify/main-186-r2/p2-none-link-pixel7/
+1 check(s) failed:
+- none standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+== 22:41:32 main-186-r2 p2-none-link-390 --phone (rec "fetched":1781587508733)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":817.296875,"width":356,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":817.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":817.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+SOFT-FAIL none standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+FOOT {"label":"none standing link","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Nørreport St.","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":356,"y":696,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL p2-none-link-390: 4 steps in .verify/main-186-r2/p2-none-link-390/
+1 check(s) failed:
+- none standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+== 22:41:56 main-186-r2 c4-highlight-stop --phone (rec "fetched":1781587508733)
+URL after fit http://localhost:4305/en?tab=disruptions&map=15.00/55.66885/12.58226
+FOOT {"label":"after Show on map","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+stop top 657 URL http://localhost:4305/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807
+TABS {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"otherScrolled":["DIV.pn-Sheet-content"],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+FAIL c4-highlight-stop: 3 steps in .verify/main-186-r2/c4-highlight-stop/
+Klaksvigsgade: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    849.296875

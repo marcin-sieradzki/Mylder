@@ -1,0 +1,34 @@
+== 22:48:11 branch-186-r2 n1-missing-pixel7 --phone (rec "fetched":1781587200024)
+REF not found by link {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+A Refshaleøen standing {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+B after pushState nowhere (no popstate) {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839} http://localhost:4304/en?stop=nowhere
+B2 back {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839} http://localhost:4304/en?stop=48645
+B3 forward to nowhere {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839} http://localhost:4304/en?stop=nowhere
+FOOT {"label":"first forward to nowhere","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FRAMES {"label":"back to Refshaleøen: sheet rises","n":15,"first":[17642,657,645,558],"last":[19376,613,601,514],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["18476:613.2/601.2=12","18676:613/601=12"]}
+C back to Refshaleøen {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+FRAMES {"label":"forward to not found: sheet lowers","n":20,"first":[21859,613,601,514],"last":[23642,657,645,558],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["22276:651.8/639.8=12","22376:656.3/644.3=12","22392:656.5/644.5=12","22542:657/645=12"]}
+D forward nowhere {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+FOOT {"label":"forward nowhere","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+E back to Refshaleøen (2) {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+F held on Refshaleøen {"name":"Refshaleøen","top":600.5,"peek":238.5,"creditBottom":601,"gap":-0.5,"vh":839}
+G held while forward to nowhere, tops [644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5,644.5]
+H released on not found {"name":"Stop not found","top":657,"peek":182,"creditBottom":645,"gap":12,"vh":839}
+FOOT {"label":"forward while held, released","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Stop not found","top":657}],"sheetTop":657,"covered":[],"gap":12}
+I held while back to Refshaleøen, tops [600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5,600.5]
+J released on Refshaleøen {"name":"Refshaleøen","top":613,"peek":226,"creditBottom":601,"gap":12,"vh":839}
+FOOT {"label":"back while held, released","vp":{"width":412,"height":839},"credit":{"top":543,"bottom":601,"left":12,"right":400},"legend":{"top":439.625,"bottom":514},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":613}],"sheetTop":613,"covered":[],"gap":12}
+PASS n1-missing-pixel7: 10 steps in .verify/branch-186-r2/n1-missing-pixel7/
+== 22:49:13 branch-186-r2 c5-line-taller-sheet --phone (rec "fetched":1781587261849)
+hit {"x":187.09375,"y":753.4921875,"tag":"BUTTON","text":"","dialog":"Refshaleøen","insideTarget":true}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"991 to Teglholmen","insideTarget":true}
+fit URL http://localhost:4304/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"991 to Teglholmen","insideTarget":true}
+Refshaleøen projected {"x":298.172118270965,"y":362.85654906835197}
+stop top none standing 646 http://localhost:4304/en?map=11.19/55.68144/12.57901&hide=bus&stop=48645
+stop top standing 613 chip 1 http://localhost:4304/en?map=11.19/55.68144/12.57901&stop=48645
+TABS {"label":"line + taller sheet","vp":{"width":412,"height":839},"sheetTop":613,"peek":226,"tablist":{"x":17,"y":801.6875,"width":378,"height":37},"tablistBottomGap":0.3125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.6875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_1a_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.6875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_1a_"}}]}
+FOOT {"label":"line + taller sheet","vp":{"width":412,"height":839},"credit":{"top":543,"bottom":601,"left":12,"right":400},"legend":{"top":439.625,"bottom":514},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":613}],"sheetTop":613,"covered":[],"gap":12}
+PASS c5-line-taller-sheet: 4 steps in .verify/branch-186-r2/c5-line-taller-sheet/
+== 22:49:50 branch-186-r2 r-in-front-phone --phone (rec "fetched":1781587261849)
+PASS r-in-front-phone: 4 steps in .verify/branch-186-r2/r-in-front-phone/

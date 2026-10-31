@@ -1,0 +1,21 @@
+== 22:44:19 branch-186-r2 n2-frames-pixel7 --phone (rec "fetched":1781587200020)
+FRAMES {"label":"Bus on: row appears, sheet rises","n":59,"first":[6046,646,634,547],"last":[9396,613,601,514],"gapMin":11.9,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["6980:622.9/611=11.9","7080:614.6/602.6=12","7146:613.4/601.4=12","7196:613.1/601.1=12","7263:613/601=12"]}
+FRAMES {"label":"Bus off: row empties, sheet lowers","n":60,"first":[10513,613,601,514],"last":[13863,646,634,547],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["11430:636.1/624.1=12","11496:643.1/631.1=12","11546:644.9/632.9=12","11613:645.8/633.8=12","11696:646/634=12"]}
+FRAMES {"label":"Bus on again","n":56,"first":[15046,646,634,547],"last":[18196,613,601,514],"gapMin":11.9,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["15813:620.2/608.2=12","15879:615.1/603.2=11.9","15946:613.5/601.5=12","16013:613.1/601.1=12","16063:613/601=12"]}
+hit {"x":378,"y":647,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FRAMES {"label":"stop sheet closed","n":66,"first":[19246,613,601,514],"last":[22679,657,645,558],"gapMin":12,"gapMax":56,"coveredFrames":0,"covered":[],"motion":["20563:657/601=56","20663:657/638=19","20746:657/643.5=13.5","20796:657/644.5=12.5","20846:657/644.9=12.1","20896:657/645=12"]}
+PASS n2-frames-pixel7: 5 steps in .verify/branch-186-r2/n2-frames-pixel7/
+== 22:44:44 branch-186-r2 n2-frames-390 --phone (rec "fetched":1781587200020)
+FRAMES {"label":"Bus on: row appears, sheet rises","n":64,"first":[6137,651,639,552],"last":[9504,618,606,519],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["7104:623.3/611.3=12","7171:619.6/607.6=12","7254:618.2/606.2=12","7321:618/606=12"]}
+FRAMES {"label":"Bus off: row empties, sheet lowers","n":60,"first":[10654,618,606,519],"last":[13970,651,639,552],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["11570:641.1/629.1=12","11637:648.1/636.1=12","11687:649.9/637.9=12","11754:650.8/638.8=12","11820:651/639=12"]}
+FRAMES {"label":"Bus on again","n":58,"first":[15070,651,639,552],"last":[18403,618,606,519],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["16020:625.2/613.2=12","16104:619.6/607.6=12","16170:618.4/606.4=12","16237:618/606=12"]}
+hit {"x":356,"y":652,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FRAMES {"label":"stop sheet closed","n":68,"first":[19420,618,606,519],"last":[22887,662,650,563],"gapMin":12,"gapMax":56,"coveredFrames":0,"covered":[],"motion":["20803:662/606=56","20887:662/640.4=21.6","20953:662/647.2=14.8","21003:662/648.9=13.1","21053:662/649.7=12.3","21103:662/650=12"]}
+PASS n2-frames-390: 5 steps in .verify/branch-186-r2/n2-frames-390/
+== 22:45:09 branch-186-r2 c2-held-drag-390 --phone (rec "fetched":1781587200020)
+t0 651 held 638.5
+HELD samples [638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5]
+after release 618
+TABS {"label":"after held drag released","vp":{"width":390,"height":844},"sheetTop":618,"peek":226,"tablist":{"x":17,"y":806.6875,"width":356,"height":37},"tablistBottomGap":0.3125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":806.6875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":806.6875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FOOT {"label":"after held drag released","vp":{"width":390,"height":844},"credit":{"top":548,"bottom":606,"left":12,"right":378},"legend":{"top":425.03125,"bottom":519},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":618}],"sheetTop":618,"covered":[],"gap":12}
+PASS c2-held-drag-390: 4 steps in .verify/branch-186-r2/c2-held-drag-390/

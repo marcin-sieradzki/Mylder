@@ -1,0 +1,7 @@
+{
+  "journey": "r-missing",
+  "pass": true,
+  "steps": [
+    "01-stop-not-found: stop not found (http://localhost:4304/en?stop=nowhere)"
+  ]
+}

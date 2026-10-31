@@ -1,0 +1,15 @@
+== 22:42:38 branch-186-r2 r-vehicle-phone --phone (rec "fetched":1781587578680)
+trip bus.5C.32331e0e20.20260616.0707 5C Husum Torv [55.67073,12.57374]
+FAIL r-vehicle-phone: 2 steps in .verify/branch-186-r2/r-vehicle-phone/
+expect(locator).toBeVisible() failed
+Locator: getByRole('dialog', { name: / to / })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: / to / }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: / to / })
+== 22:43:23 branch-186-r2 r-vehicle-list-phone --phone (rec "fetched":1781587641937)
+PASS r-vehicle-list-phone: 6 steps in .verify/branch-186-r2/r-vehicle-list-phone/
+== 22:43:40 branch-186-r2 r-missing-phone --phone (rec "fetched":1781587641937)
+PASS r-missing-phone: 1 steps in .verify/branch-186-r2/r-missing-phone/

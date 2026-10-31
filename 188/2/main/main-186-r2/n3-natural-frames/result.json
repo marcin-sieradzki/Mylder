@@ -1,0 +1,10 @@
+{
+  "journey": "n3-natural-frames",
+  "pass": false,
+  "error": "sheet rose\n\nexpect(received).toBeLessThan(expected)\n\nExpected: < 652\nReceived:   657",
+  "steps": [
+    "01-orientkaj-none-standing-yet: Orientkaj, none standing yet (http://localhost:4305/en?stop=54307)",
+    "02-991-standing-at-orientkaj-sheet-risen: 991 standing at Orientkaj, sheet risen (http://localhost:4305/en?stop=54307)",
+    "03-failure: failure (http://localhost:4305/en?stop=54307)"
+  ]
+}

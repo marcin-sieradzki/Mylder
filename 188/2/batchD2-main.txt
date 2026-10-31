@@ -1,0 +1,14 @@
+== 22:48:11 main-186-r2 c5-line-taller-sheet --phone (rec "fetched":1781587200021)
+hit {"x":187.09375,"y":797.4921875,"tag":"BUTTON","text":"","dialog":"Refshaleøen","insideTarget":true}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"991 to Teglholmen","insideTarget":true}
+fit URL http://localhost:4305/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"991 to Teglholmen","insideTarget":true}
+Refshaleøen projected {"x":298.172118270965,"y":362.85654906835197}
+stop top none standing 657 http://localhost:4305/en?map=11.19/55.68144/12.57901&hide=bus&stop=48645
+stop top standing 657 chip 1 http://localhost:4305/en?map=11.19/55.68144/12.57901&stop=48645
+TABS {"label":"line + taller sheet","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":845.6875,"width":378,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":845.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":845.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+FAIL c5-line-taller-sheet: 5 steps in .verify/main-186-r2/c5-line-taller-sheet/
+line + taller sheet: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    882.6875

@@ -1,0 +1,14 @@
+== 22:39:39 main-186-r2 c3-natural-held --phone (rec "fetched":1781587386958)
+fetched 2026-06-16T05:24:07.109Z t0 657
+TABS {"label":"Orientkaj before","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FAIL c3-natural-held: 2 steps in .verify/main-186-r2/c3-natural-held/
+Orientkaj before: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    849.296875
+== 22:40:13 main-186-r2 c6-desktop  (rec "fetched":1781587447109)
+DESKTOP Refshaleøen {"panel":{"x":904,"y":70,"width":364,"height":638},"anchor":"right","tablist":{"x":921,"y":225.296875,"width":330,"height":37},"credit":{"x":400,"y":668,"width":492,"height":40},"legend":{"x":417,"y":584.21875,"width":188.21875,"height":54.78125},"overview":{"x":12,"y":70,"width":376,"height":638}}
+DESKTOP Nørreport St. {"panel":{"x":904,"y":70,"width":364,"height":638},"anchor":"right","tablist":{"x":921,"y":225.296875,"width":330,"height":37},"credit":{"x":400,"y":668,"width":492,"height":40},"legend":{"x":417,"y":584.21875,"width":188.21875,"height":54.78125},"overview":{"x":12,"y":70,"width":376,"height":638}}
+PASS c6-desktop: 3 steps in .verify/main-186-r2/c6-desktop/
+== 22:40:30 main-186-r2 r-missing  (rec "fetched":1781587447109)
+PASS r-missing: 1 steps in .verify/main-186-r2/r-missing/

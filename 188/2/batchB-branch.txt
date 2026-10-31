@@ -1,0 +1,26 @@
+== 22:39:39 branch-186-r2 n3-natural-frames --phone (rec "fetched":1781587389277)
+fetched 2026-06-16T05:24:11.211Z
+arrived at 2026-06-16T05:25:14.095Z
+FRAMES {"label":"991 arrives by the minute","n":96,"first":[59876,646,634,547],"last":[66459,613,601,514],"gapMin":12,"gapMax":12,"coveredFrames":0,"covered":[],"motion":["64009:623/611=12","64075:615.9/603.9=12","64175:613.4/601.4=12","64259:613/601=12"]}
+PASS n3-natural-frames: 2 steps in .verify/branch-186-r2/n3-natural-frames/
+== 22:41:09 branch-186-r2 p2-none-link-pixel7 --phone (rec "fetched":1781587514095)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":412,"height":839},"sheetTop":646,"peek":193,"tablist":{"x":17,"y":801.296875,"width":378,"height":37},"tablistBottomGap":0.703125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FOOT {"label":"none standing link","vp":{"width":412,"height":839},"credit":{"top":576,"bottom":634,"left":12,"right":400},"legend":{"top":472.625,"bottom":547},"sheets":[{"name":"Overview","top":657},{"name":"Nørreport St.","top":646}],"sheetTop":646,"covered":[],"gap":12}
+hit {"x":378,"y":680,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+PASS p2-none-link-pixel7: 3 steps in .verify/branch-186-r2/p2-none-link-pixel7/
+== 22:41:35 branch-186-r2 p2-none-link-390 --phone (rec "fetched":1781587514095)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":390,"height":844},"sheetTop":651,"peek":193,"tablist":{"x":17,"y":806.296875,"width":356,"height":37},"tablistBottomGap":0.703125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":806.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":806.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FOOT {"label":"none standing link","vp":{"width":390,"height":844},"credit":{"top":581,"bottom":639,"left":12,"right":378},"legend":{"top":458.03125,"bottom":552},"sheets":[{"name":"Overview","top":662},{"name":"Nørreport St.","top":651}],"sheetTop":651,"covered":[],"gap":12}
+hit {"x":356,"y":685,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+PASS p2-none-link-390: 3 steps in .verify/branch-186-r2/p2-none-link-390/
+== 22:41:58 branch-186-r2 c4-highlight-stop --phone (rec "fetched":1781587514095)
+URL after fit http://localhost:4304/en?tab=disruptions&map=15.00/55.66885/12.58226
+FOOT {"label":"after Show on map","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+stop top 646 URL http://localhost:4304/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807
+TABS {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"sheetTop":646,"peek":193,"tablist":{"x":17,"y":801.296875,"width":378,"height":37},"tablistBottomGap":0.703125,"scrolledBoxes":[],"otherScrolled":["DIV.pn-Sheet-content"],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+FOOT {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"credit":{"top":576,"bottom":634,"left":12,"right":400},"legend":{"top":472.625,"bottom":547},"sheets":[{"name":"Overview","top":657},{"name":"Klaksvigsgade","top":646}],"sheetTop":646,"covered":[],"gap":12}
+PASS c4-highlight-stop: 2 steps in .verify/branch-186-r2/c4-highlight-stop/

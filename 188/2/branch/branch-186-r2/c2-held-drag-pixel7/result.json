@@ -1,0 +1,10 @@
+{
+  "journey": "c2-held-drag-pixel7",
+  "pass": true,
+  "steps": [
+    "01-bus-hidden-none-standing-at-its-peek: Bus hidden, none standing, at its peek (http://localhost:4304/en?hide=bus&stop=48645)",
+    "02-finger-holding-the-sheet-30-px-up: finger holding the sheet 30 px up (http://localhost:4304/en?hide=bus&stop=48645)",
+    "03-991-standing-while-the-finger-still-holds: 991 standing while the finger still holds (http://localhost:4304/en?stop=48645)",
+    "04-released-sheet-settles: released: sheet settles (http://localhost:4304/en?stop=48645)"
+  ]
+}

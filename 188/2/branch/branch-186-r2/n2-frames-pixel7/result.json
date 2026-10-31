@@ -1,0 +1,11 @@
+{
+  "journey": "n2-frames-pixel7",
+  "pass": true,
+  "steps": [
+    "01-bus-hidden-none-standing-at-its-peek: Bus hidden, none standing, at its peek (http://localhost:4304/en?hide=bus&stop=48645)",
+    "02-bus-on-991-standing-sheet-risen: Bus on: 991 standing, sheet risen (http://localhost:4304/en?stop=48645)",
+    "03-bus-off-none-standing-sheet-lowered: Bus off: none standing, sheet lowered (http://localhost:4304/en?stop=48645&hide=bus)",
+    "04-bus-on-again: Bus on again (http://localhost:4304/en?stop=48645)",
+    "05-stop-closed-overview-at-peek: stop closed, Overview at peek (http://localhost:4304/en)"
+  ]
+}
