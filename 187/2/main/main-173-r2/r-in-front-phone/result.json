@@ -1,0 +1,10 @@
+{
+  "journey": "r-in-front-phone",
+  "pass": true,
+  "steps": [
+    "01-stop-link-overview-at-peek: stop link, Overview at peek (http://localhost:4305/en?stop=27532)",
+    "02-arrivals-clicked: Arrivals clicked (http://localhost:4305/en?stop=27532&board=arrivals)",
+    "03-refshale-en-on-arrivals: Refshaleøen on Arrivals (http://localhost:4305/en?stop=48645&board=arrivals)",
+    "04-card-opens-vehicle: card opens vehicle (http://localhost:4305/en?trip=bus.991.7ce514fd98.20260616.0700)"
+  ]
+}

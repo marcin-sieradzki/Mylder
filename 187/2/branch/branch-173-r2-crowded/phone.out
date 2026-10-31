@@ -1,0 +1,47 @@
+cards
+RE
+Næstved St.
+Estimated
+~4 min
+~07:24
+On time
+---
+A
+Hundige St.
+Estimated
+~5 min
+~07:25
+On time
+---
+A
+Hillerød St.
+Estimated
+~6 min
+~07:26
+On time
+---
+E
+Køge St.
+Estimated
+~7 min
+~07:27
+On time
+---
+E
+Holte St.
+Estimated
+~8 min
+~07:28
+On time
+---
+A
+Hillerød St.
+Estimated
+~9 min
+~07:29
+On time
+first card hit belongs to København H
+vp {"width":412,"height":839} list {"x":17,"y":761.296875,"width":378,"height":72.390625} card {"x":17,"y":761.296875,"width":340.1875,"height":72.390625} scroll {"scrollWidth":2081,"clientWidth":378} tablist {"x":17,"y":845.6875,"width":378,"height":37}
+scrollLeft after swipes 1703
+sixth card hit belongs to København H
+PASS p-show-all-phone: 3 steps in .verify/branch-173-r2-crowded/p-show-all-phone/

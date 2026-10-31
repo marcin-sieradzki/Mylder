@@ -1,0 +1,9 @@
+{
+  "journey": "p-show-all-phone",
+  "pass": true,
+  "steps": [
+    "01-stop-sheet-in-front-of-the-overview-six-cards-no-show-all: stop sheet in front of the Overview, six cards, no Show all (http://localhost:4402/en?stop=8600626)",
+    "02-row-swiped-to-the-sixth-card: row swiped to the sixth card (http://localhost:4402/en?stop=8600626)",
+    "03-sixth-card-opens-its-vehicle: sixth card opens its vehicle (http://localhost:4402/en?trip=s-tog.A.0bc307e3eb.20260616.0654)"
+  ]
+}
