@@ -79,8 +79,11 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
 })
 
 test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
-  // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour.
+  // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its
+  // departures are the saved answer, so the test spends none of the server's calls, which the
+  // snapshot route's test counts; its arrivals spend none either way.
   await serveFirstMinute(page)
+  await serveSavedStop(page, '27532')
   await page.goto('/en?stop=27532')
   const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
   const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
