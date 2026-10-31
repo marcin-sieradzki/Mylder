@@ -53,8 +53,8 @@ const failingAll = (kind: FailureKind): Scenario => ({
 })
 
 /**
- * A weekday on which every trip runs to its timetable and none is cancelled, so the trips
- * standing at a stop are the ones its timetable puts there.
+ * A weekday on which every trip runs to its timetable, none is cancelled and no message is out,
+ * so the trips standing at a stop are the ones its timetable puts there, and nothing else shows.
  */
 const ON_TIME: Scenario = {
   ...WEEKDAY,
@@ -71,6 +71,7 @@ const ON_TIME: Scenario = {
   cancelled: 0,
   cancelledCall: 0,
   extra: 0,
+  messages: [],
 }
 
 export const RECORDINGS: readonly RecordingPlan[] = [
