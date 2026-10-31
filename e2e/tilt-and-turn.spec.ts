@@ -37,11 +37,55 @@ test('Shift + ↑ tilts the map, hiding the scale bar with every vehicle still d
   await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
   for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
   await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '15')
   await expect(scale).toBeHidden()
   await expect.poll(drawsAll).toBe(true)
 
   await page.getByRole('button', { name: 'Centre the map' }).click()
   await expect(scale).toBeVisible()
+})
+
+test('holding Shift + → keeps turning the map, and it stops soon after the key is let go', async ({
+  page,
+}) => {
+  await page.goto('/en')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toHaveAttribute('data-heading', '0')
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  // A held key as the keyboard sends it: trusted keydowns, repeating every 33 ms, sent without
+  // waiting for the page, so they pile up while a slow renderer draws a frame.
+  const cdp = await page.context().newCDPSession(page)
+  const shift = { key: 'Shift', code: 'ShiftLeft', windowsVirtualKeyCode: 16 }
+  const right = { key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 }
+  const key = (type: 'rawKeyDown' | 'keyUp', which: object, autoRepeat = false) =>
+    cdp.send('Input.dispatchKeyEvent', { type, modifiers: 8, autoRepeat, ...which })
+  const sent = [key('rawKeyDown', shift), key('rawKeyDown', right)]
+  const letGo = new AbortController()
+  const repeating = (async () => {
+    while (!letGo.signal.aborted) {
+      await page.waitForTimeout(33)
+      sent.push(key('rawKeyDown', right, true))
+    }
+  })()
+
+  // While the key is still down, the map turns well past the two steps a held key used to stall
+  // at. Measured either way round, since the heading wraps at ±180° and how fast it turns depends
+  // on how fast the map draws.
+  const heading = async () => Number(await map.getAttribute('data-heading'))
+  await expect
+    .poll(async () => Math.abs(await heading()), { timeout: 4_000 })
+    .toBeGreaterThanOrEqual(45)
+  letGo.abort()
+  await repeating
+  sent.push(key('keyUp', right), key('keyUp', shift))
+  await Promise.all(sent)
+
+  // Let go, it comes to rest soon after and stays there.
+  await page.waitForTimeout(1_000)
+  const rested = await heading()
+  await page.waitForTimeout(1_000)
+  expect(await heading()).toBe(rested)
 })
 
 test('a sideways right-drag turns the map, an upward one tilts it, and Shift + ↓ brings it back flat', async ({
@@ -128,16 +172,16 @@ test('a tilted, turned map keeps its angle in the address, a reload opens it the
   await expect(map).toHaveAttribute('data-tilt', '0')
 
   await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
-  // Two steps of each, as many as the keys run ahead of the map.
-  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowUp')
-  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowRight')
-  await expect(map).toHaveAttribute('data-tilt', '20')
-  await expect(map).toHaveAttribute('data-heading', '30')
-  await expect(page).toHaveURL(/[?&]map=13\.00\/55\.67600\/12\.56800\/30\.0\/20\.0$/)
+  // Quick presses, each one counted however slowly the map draws.
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '45')
+  await expect(page).toHaveURL(/[?&]map=13\.00\/55\.67600\/12\.56800\/45\.0\/30\.0$/)
 
   await page.reload()
-  await expect(map).toHaveAttribute('data-tilt', '20')
-  await expect(map).toHaveAttribute('data-heading', '30')
+  await expect(map).toHaveAttribute('data-tilt', '30')
+  await expect(map).toHaveAttribute('data-heading', '45')
   await expect(scaleBar(page)).toBeHidden()
 
   await page.getByRole('button', { name: 'Centre the map' }).click()

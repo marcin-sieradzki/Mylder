@@ -25,11 +25,19 @@ interface Target {
   readonly pitch?: number
 }
 
+/** What an ease is given besides where it goes, as MapLibre's `easeTo` takes it. */
+interface Ease extends Target {
+  readonly duration?: number
+  readonly easing?: (t: number) => number
+}
+
 /**
  * MapLibre's map, which needs WebGL that jsdom lacks: between zoom 6 and 18 and tilted up to 60°,
  * its zooms and pans move it at once, its pans in pixels at the centre, as MapLibre does under
  * reduced motion. An ease is under way until `settle` ends it, and a jump lands at once. A move
  * tells its listeners as MapLibre's does, `movestart` carrying the input the viewer made it with.
+ * As a slow renderer would, `pass` lets time go by and `frame` draws the ease under way where its
+ * curve has it by then, counted from when it last started, as MapLibre counts it.
  */
 function fakeMap() {
   const container = document.createElement('div')
@@ -43,6 +51,7 @@ function fakeMap() {
     panned: [0, 0],
     easing: undefined as Target | undefined,
   }
+  const time = { now: 0, eased: 0, from: { bearing: 0, pitch: 0 } }
   const tell = (type: string, event: object = {}) => {
     for (const listener of listeners.get(type) ?? []) listener(event)
   }
@@ -82,8 +91,10 @@ function fakeMap() {
       state.panned = [state.panned[0] + x, state.panned[1] + y]
       moved(eventData)
     },
-    easeTo: (target: Target, eventData: object = {}) => {
+    easeTo: (target: Ease, eventData: object = {}) => {
       state.easing = target
+      time.eased = time.now
+      time.from = { bearing: state.bearing, pitch: state.pitch }
       tell('movestart', eventData)
     },
     jumpTo: (target: Target, eventData?: object) => {
@@ -105,10 +116,30 @@ function fakeMap() {
     tell('move')
     tell('moveend')
   }
+  /** Lets `ms` go by, drawing nothing. */
+  const pass = (ms: number) => void (time.now += ms)
+  /** Draws a frame of the ease under way, or ends it once its time is up. */
+  const frame = () => {
+    const target = state.easing as Ease | undefined
+    if (!target) return
+    const t = (time.now - time.eased) / (target.duration ?? 500)
+    if (t >= 1) return act(settle)
+    const k = (target.easing ?? ((linear: number) => linear))(t)
+    const { from } = time
+    const between = (to: number | undefined, at: number) =>
+      to === undefined ? at : at + (to - at) * k
+    act(() => {
+      land({
+        bearing: between(target.bearing, from.bearing),
+        pitch: between(target.pitch, from.pitch),
+      })
+      tell('move')
+    })
+  }
   /** Moves the camera as a gesture would. */
   const gesture = (target: Target) =>
     act(() => map.jumpTo(target, { originalEvent: new Event('mousemove') }))
-  return { map: map as unknown as CameraMap, state, container, settle, gesture }
+  return { map: map as unknown as CameraMap, state, container, settle, pass, frame, gesture }
 }
 
 /** The page's media queries as each test sets them: as narrow as a phone, and reduced motion. */
@@ -543,27 +574,107 @@ describe("the map's keys", () => {
     expect(state.pitch).toBe(0)
   })
 
-  it('add up steps pressed while the last one is still easing, at most two ahead of the map', async () => {
+  it('count every step pressed while the last one is still easing, however slowly the map draws', async () => {
     const user = userEvent.setup()
     const { state, settle, map } = open()
     const shift = (keys: string) => user.keyboard(`{Shift>}${keys}{/Shift}`)
-    await shift('{ArrowRight}{ArrowRight}')
+    await shift('{ArrowUp}'.repeat(3))
     act(settle)
-    expect(state.bearing).toBe(30)
-    // A held key repeats faster than a step eases: it turns the map on two steps ahead of it,
-    // rather than spinning it.
-    await shift('{ArrowRight}'.repeat(6))
+    expect(state.pitch).toBe(30)
+    await shift('{ArrowRight}'.repeat(3))
     act(settle)
-    expect(state.bearing).toBe(60)
-    await shift('{ArrowUp}'.repeat(4))
+    expect(state).toMatchObject({ bearing: 45, pitch: 30 })
+    // Never past 60°, and back down by as many steps as pressed.
+    await shift('{ArrowUp}'.repeat(5))
     act(settle)
-    expect(state.pitch).toBe(20)
-    expect(state.bearing).toBe(60)
+    expect(state.pitch).toBe(60)
+    await shift('{ArrowDown}'.repeat(4))
+    act(settle)
+    expect(state).toMatchObject({ bearing: 45, pitch: 20 })
     // Once it has come to rest, a step starts from where it is, however a gesture left it.
     act(() => void map.jumpTo({ bearing: 170, pitch: 33 }))
     await shift('{ArrowRight}{ArrowDown}')
     act(settle)
     expect(state).toMatchObject({ bearing: -175, pitch: 23 })
+  })
+
+  it('turn the map no more than half a turn ahead of it, so it eases the way it was turned', async () => {
+    const user = userEvent.setup()
+    const { state, settle } = open()
+    await user.keyboard(`{Shift>}${'{ArrowRight}'.repeat(14)}{/Shift}`)
+    expect(state.easing?.bearing).toBe(165)
+    act(settle)
+    expect(state.bearing).toBe(165)
+    await user.keyboard(`{Shift>}${'{ArrowLeft}'.repeat(14)}{/Shift}`)
+    act(settle)
+    expect(state.bearing).toBe(0)
+  })
+
+  it('turn the map at a steady pace while Shift + → is held, stopping soon after it is let go', async () => {
+    const { state, settle } = open()
+    /** A keydown of Shift + `key` on the page, `repeat` while it is held down. */
+    const keydown = (key: string, repeat: boolean) =>
+      act(
+        () =>
+          void document.body.dispatchEvent(
+            new KeyboardEvent('keydown', { key, shiftKey: true, repeat, bubbles: true }),
+          ),
+      )
+    // A held key repeats faster than a step eases: each time the map catches up, it has turned on
+    // two steps, rather than spinning away from the key.
+    keydown('ArrowRight', false)
+    for (let i = 0; i < 6; i++) keydown('ArrowRight', true)
+    act(settle)
+    expect(state.bearing).toBe(30)
+    for (let i = 0; i < 6; i++) keydown('ArrowRight', true)
+    act(settle)
+    expect(state.bearing).toBe(60)
+    // Let go, the map stops where the last ease was going.
+    act(settle)
+    expect(state.bearing).toBe(60)
+    // A held key never pulls back an aim quick presses set further on.
+    keydown('ArrowUp', false)
+    keydown('ArrowUp', false)
+    keydown('ArrowUp', false)
+    keydown('ArrowUp', true)
+    act(settle)
+    expect(state).toMatchObject({ bearing: 60, pitch: 30 })
+  })
+
+  it('keep turning the map while Shift + → is held, however slowly the map draws', () => {
+    const { state, pass, frame } = open()
+    const keydown = (repeat: boolean) =>
+      act(
+        () =>
+          void document.body.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key: 'ArrowRight',
+              shiftKey: true,
+              repeat,
+              bubbles: true,
+            }),
+          ),
+      )
+    // A renderer drawing three frames a second: each frame takes the page a third of a second, so
+    // the key's repeats, 30 a second, all land between two frames, just before the next.
+    keydown(false)
+    for (let i = 0; i < 9; i++) {
+      for (let r = 0; r < 10; r++) keydown(true)
+      pass(1)
+      frame()
+      pass(330)
+    }
+    // Held for 3 s, it has turned well past a step, rather than starting each ease over and over.
+    const atRelease = state.bearing
+    expect(atRelease).toBeGreaterThanOrEqual(90)
+    // Let go, it comes to rest no more than two steps on.
+    for (let i = 0; i < 4; i++) {
+      frame()
+      pass(330)
+    }
+    expect(state.easing).toBeUndefined()
+    expect(state.bearing).toBeGreaterThanOrEqual(atRelease)
+    expect(state.bearing).toBeLessThanOrEqual(atRelease + 30)
   })
 
   it('end Follow with a Shift + arrow press, as with any other key move', async () => {

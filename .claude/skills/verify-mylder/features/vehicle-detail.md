@@ -6,8 +6,8 @@ A panel for one trip: line badge and destination, its data state with one line o
 
 - `trip-open` opens from a dot, a Vehicles list row, or a shared link.
 - `trip-facts` shows state, delay, last seen, next stop and the next stops.
-- `trip-follow` keeps the camera on the dot until the rider pans.
-- `trip-line` shows the whole line and raises the highlight chip.
+- `trip-follow` keeps the camera on the dot until the rider pans, at the map's tilt and heading.
+- `trip-line` fits the whole line clear of the top bar, the notices and the legend, at the map's tilt and heading, and raises the highlight chip.
 - `trip-close` closes with Esc or the close button and drops `?trip=`.
 - `trip-missing` opens a not-found panel for an unknown trip.
 
@@ -27,6 +27,7 @@ Preconditions:
 - **From a dot.** Centre the map on a trip's `position` from `/api/snapshot` with `?map=15.00/<lat>/<lon>` and tap the middle until the dialog named `/to <headsign>/` is visible.
 - **Facts.** The panel shows the mode, the state word, `Delay`, `Last seen`, `Next stop`, and `getByRole('list', { name: 'Stops' })`; its source line ends "times from the timetable" or names a times clock.
 - **Follow and line.** `panel.getByRole('button', { name: 'Follow' })`; `panel.getByRole('button', { name: 'Show whole line' })` raises `page.getByRole('button', { name: /^Showing: line .* · Clear$/ })`, whose click takes it down.
+- **Follow and line, tilted.** Open `/en?map=14.00/<lat>/<lon>/-30.0/50.0&trip=<key>` on a trip's `position` from `/api/snapshot`. After Follow, hovering the viewport's middle shows the trip's card for seconds while `[data-vehicles]` keeps `data-tilt="50"` and `data-heading="-30"`. After Show whole line, once the address's zoom has dropped, it still ends `/-30.0/50.0`, and the screenshot shows the whole line between the top bar's chip and the legend, clear of the sheet and the panel.
 - **Close.** `page.keyboard.press('Escape')`; the panel is hidden and `?trip=` gone.
 - **Missing.** `page.goto('/en?trip=nothing')` opens `getByRole('dialog', { name: 'Trip not found' })`.
 
