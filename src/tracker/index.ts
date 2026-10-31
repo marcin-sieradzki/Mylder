@@ -1,10 +1,10 @@
 // The tracker's entry point. It runs on the server only: importing it from a client component
-// fails the build. Four plain promise-returning functions, so no Effect type crosses this line
+// fails the build. Plain promise-returning functions, so no Effect type crosses this line
 // and the tracker can move to an always-on service later without a rewrite (ADR 0011).
 import 'server-only'
 import { runTracker as run } from './runtime.ts'
 import type { Disruptions } from './disruptions.ts'
-import type { StopDepartures, TripDetail } from './answers.ts'
+import type { StopArrivals, StopDepartures, TripDetail } from './answers.ts'
 export type { StandingTrip } from './standing.ts'
 import type { Snapshot } from './snapshot.ts'
 
@@ -13,6 +13,9 @@ export type { Disruption, Disruptions } from './disruptions.ts'
 export type {
   AnswerLine,
   AnswerSource,
+  ArrivalInterval,
+  StopArrival,
+  StopArrivals,
   StopDepartures,
   StopDeparture,
   StopInterval,
@@ -27,6 +30,10 @@ export const getSnapshot = (): Promise<Snapshot> => run((tracker) => tracker.get
 /** A stop's departures by its id, or undefined for a stop the timetable doesn't know. */
 export const getStopDepartures = (stopId: string): Promise<StopDepartures | undefined> =>
   run((tracker) => tracker.getStopDepartures(stopId))
+
+/** A stop's arrivals by its id, or undefined for a stop the timetable doesn't know. */
+export const getStopArrivals = (stopId: string): Promise<StopArrivals | undefined> =>
+  run((tracker) => tracker.getStopArrivals(stopId))
 
 /** A trip's calls by its key, or undefined for a trip not running today. */
 export const getTripDetail = (tripKey: string): Promise<TripDetail | undefined> =>

@@ -20,7 +20,7 @@ import {
 } from './timetable.ts'
 import type { TrackerShape } from './tracker.ts'
 
-/** The tracker's four answers, each run by `run`: this instance's runtime, or the demo's (ADR 0013). */
+/** The tracker's answers, each run by `run`: this instance's runtime, or the demo's (ADR 0013). */
 export function trackerAnswers(run: RunTracker) {
   /**
    * Answers with what `get` reads from the tracker, dated on the tracker's clock: under a
@@ -39,6 +39,7 @@ export function trackerAnswers(run: RunTracker) {
   return {
     snapshot: () => answer('snapshot', (tracker) => tracker.getSnapshot),
     stop: (stopId: string) => answer('stop', (tracker) => tracker.getStopDepartures(stopId)),
+    arrivals: (stopId: string) => answer('arrivals', (tracker) => tracker.getStopArrivals(stopId)),
     trip: (tripKey: string) => answer('trip', (tracker) => tracker.getTripDetail(tripKey)),
     disruptions: () => answer('disruptions', (tracker) => tracker.getDisruptions),
   }
@@ -49,6 +50,8 @@ const answers = trackerAnswers(runTracker)
 export const snapshotResponse = answers.snapshot
 
 export const stopResponse = answers.stop
+
+export const stopArrivalsResponse = answers.arrivals
 
 export const tripResponse = answers.trip
 
