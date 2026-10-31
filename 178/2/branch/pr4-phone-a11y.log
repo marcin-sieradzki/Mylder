@@ -1,0 +1,13 @@
+REGION ARIA:
+- region "At the platforms now":
+  - heading "At the platforms now" [level=3]
+  - list "At the platforms now":
+    - listitem:
+      - button "Bus 991 to Teglholmen"
+      - text: 991 Teglholmen Timetable only 4 min
+      - time: 07:30
+      - text: Delay unknown
+TAB TRAIL:
+DIV  At the platforms now991TeglholmenTimetab
+BUTTON Bus 991 to Teglholmen 
+PASS pr4-phone-a11y: 4 steps in .verify/branch-171-r2/pr4-phone-a11y/

@@ -1,0 +1,56 @@
+snapshot fetched 2026-06-16T05:20:00.020Z
+TABPANEL:
+RE
+From København H
+Estimated
+Track 8
+Now
+Timetabled 07:21
+07:21
+~07:22
++1 min
+1 min late
+A
+From Hundige St.
+Estimated
+Track 8
+Now
+Timetabled 07:23
+07:23
+~07:27
++4 min
+4 min late
+A
+From Hundige St.
+Estimated
+Track 8
+Now
+Timetabled 07:33
+07:33
+~07:34
++1 min
+1 min late
+E
+From Køge St.
+Estimated
+Track 8
+Now
+Timetabled 07:36
+07:36
+~07:37
++1 min
+1 min late
+E
+From Holte St.
+Estimated
+Track 8
+Now
+Timetabled 07:39
+07:39
+~07:41
++2 min
+2 min late
+Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.
+
+Rejseplanen · arrivals 07:20:14, may be out of date
+PASS reg-d-arrivals-board: 2 steps in .verify/branch-171-r2/reg-d-arrivals-board/

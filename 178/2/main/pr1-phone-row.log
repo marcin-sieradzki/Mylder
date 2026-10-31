@@ -1,0 +1,5 @@
+FAIL pr1-phone-row: 5 steps in .verify/main-171-r2/pr1-phone-row/
+expect(received).toBe(expected) // Object.is equality
+
+Expected: "auto"
+Received: "visible"

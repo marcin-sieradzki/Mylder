@@ -1,0 +1,11 @@
+REGION ARIA:
+- region "At the platforms now":
+  - heading "At the platforms now" [level=3]
+  - list "At the platforms now":
+    - listitem:
+      - button "Bus 991 to Teglholmen"
+      - text: 991 Teglholmen Estimated 3 min
+      - time: 07:23
+      - text: On time
+horizontal scrollers in region: 0
+PASS reg-d-standing: 2 steps in .verify/branch-171-r2/reg-d-standing/

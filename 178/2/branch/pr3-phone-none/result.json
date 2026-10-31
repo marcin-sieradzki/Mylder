@@ -1,0 +1,7 @@
+{
+  "journey": "pr3-phone-none",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-empty-text-above-the-tabs: Nørreport: empty text above the tabs (http://localhost:4305/en?stop=27532)"
+  ]
+}

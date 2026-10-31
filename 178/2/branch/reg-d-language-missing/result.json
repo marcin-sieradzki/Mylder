@@ -1,0 +1,10 @@
+{
+  "journey": "reg-d-language-missing",
+  "pass": true,
+  "steps": [
+    "01-english: english (http://localhost:4305/en?stop=27532)",
+    "02-dansk: dansk (http://localhost:4305/da?stop=27532)",
+    "03-ankomster: ankomster (http://localhost:4305/da?stop=27532&board=arrivals)",
+    "04-missing: missing (http://localhost:4305/en?stop=nowhere)"
+  ]
+}

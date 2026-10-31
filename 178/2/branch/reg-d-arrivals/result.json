@@ -1,0 +1,9 @@
+{
+  "journey": "reg-d-arrivals",
+  "pass": true,
+  "steps": [
+    "01-departures: departures (http://localhost:4305/en?stop=27532)",
+    "02-arrivals: arrivals (http://localhost:4305/en?stop=27532&board=arrivals)",
+    "03-back-to-departures: back to departures (http://localhost:4305/en?stop=27532)"
+  ]
+}

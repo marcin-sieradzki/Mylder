@@ -1,0 +1,8 @@
+{
+  "journey": "pr4-phone-a11y",
+  "pass": false,
+  "error": "expect(received).toBeGreaterThanOrEqual(expected)\n\nExpected: >= 1781587530000\nReceived:    1781587510549\n\nCall Log:\n- Timeout 150000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-failure: failure (about:blank)"
+  ]
+}

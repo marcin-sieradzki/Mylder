@@ -1,0 +1,8 @@
+FAIL pr4-phone-a11y: 1 steps in .verify/main-171-r2/pr4-phone-a11y/
+expect(received).toBeGreaterThanOrEqual(expected)
+
+Expected: >= 1781587530000
+Received:    1781587510549
+
+Call Log:
+- Timeout 150000ms exceeded while waiting on the predicate

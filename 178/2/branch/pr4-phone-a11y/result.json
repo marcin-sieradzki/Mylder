@@ -1,0 +1,10 @@
+{
+  "journey": "pr4-phone-a11y",
+  "pass": true,
+  "steps": [
+    "01-link-opened: link opened (http://localhost:4305/en?stop=54307)",
+    "02-overview-closed-stop-sheet: overview closed, stop sheet (http://localhost:4305/en?stop=54307)",
+    "03-card-focused-by-tab: card focused by Tab (http://localhost:4305/en?stop=54307)",
+    "04-enter-opened-the-vehicle: Enter opened the vehicle (http://localhost:4305/en?trip=bus.991.7ce514fd98.20260616.0730)"
+  ]
+}

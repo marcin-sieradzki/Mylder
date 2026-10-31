@@ -1,0 +1,4 @@
+list {"x":17,"y":761.296875,"width":378,"height":72.390625} card {"x":17,"y":761.296875,"width":340.1875,"height":72.390625} viewport {"width":412,"height":839}
+list layout: flex row row
+tablist top 845.6875, viewport height 839: tabs start below the peek
+PASS pr1-phone-row: 5 steps in .verify/branch-171-r2/pr1-phone-row/

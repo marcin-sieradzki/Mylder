@@ -1,0 +1,9 @@
+{
+  "journey": "pr2-phone-track",
+  "pass": true,
+  "steps": [
+    "01-map-at-k-benhavn-syd: map at København Syd (http://localhost:4305/en?map=17.00/55.65263/12.51685)",
+    "02-stop-sheet-open: stop sheet open (http://localhost:4305/en?map=17.00/55.65263/12.51685&stop=8600783)",
+    "03-re-to-n-stved-track-8: RE to Næstved, Track 8 (http://localhost:4305/en?map=17.00/55.65263/12.51685&stop=8600783)"
+  ]
+}

@@ -1,0 +1,6 @@
+snapshot fetched 2026-06-16T05:22:00.449Z
+FAIL pr2-phone-track: 3 steps in .verify/main-171-r2/pr2-phone-track/
+expect(received).toBe(expected) // Object.is equality
+
+Expected: "auto"
+Received: "visible"

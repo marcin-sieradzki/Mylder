@@ -1,0 +1,10 @@
+{
+  "journey": "pr4-phone-a11y",
+  "pass": false,
+  "error": "the standing trips as a sideways row\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: \"auto\"\nReceived: \"visible\"",
+  "steps": [
+    "01-link-opened: link opened (http://localhost:4304/en?stop=54307)",
+    "02-overview-closed-stop-sheet: overview closed, stop sheet (http://localhost:4304/en?stop=54307)",
+    "03-failure: failure (http://localhost:4304/en?stop=54307)"
+  ]
+}

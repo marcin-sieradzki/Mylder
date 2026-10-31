@@ -1,0 +1,7 @@
+FAIL pr4-phone-a11y: 3 steps in .verify/main-171-r2/pr4-phone-a11y/
+the standing trips as a sideways row
+
+expect(received).toBe(expected) // Object.is equality
+
+Expected: "auto"
+Received: "visible"

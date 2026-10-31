@@ -1,0 +1,12 @@
+{
+  "journey": "pr1-phone-row",
+  "pass": false,
+  "error": "expect(received).toBe(expected) // Object.is equality\n\nExpected: \"auto\"\nReceived: \"visible\"",
+  "steps": [
+    "01-map-at-refshale-en-buses-hidden: map at Refshaleøen, buses hidden (http://localhost:4304/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "02-overview-closed: overview closed (http://localhost:4304/en?hide=bus&map=17.00/55.69105/12.60675)",
+    "03-stop-sheet-open-buses-hidden: stop sheet open, buses hidden (http://localhost:4304/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "04-buses-shown-standing-row: buses shown: standing row (http://localhost:4304/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "05-failure: failure (http://localhost:4304/en?map=17.00/55.69105/12.60675&stop=48645)"
+  ]
+}

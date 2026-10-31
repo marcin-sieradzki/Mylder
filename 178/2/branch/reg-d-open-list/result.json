@@ -1,0 +1,8 @@
+{
+  "journey": "reg-d-open-list",
+  "pass": true,
+  "steps": [
+    "01-map-at-sterport: map at Østerport (http://localhost:4305/en?map=15.00/55.6925/12.58779)",
+    "02--sterport-panel-departures: Østerport panel, departures (http://localhost:4305/en?map=15.00/55.69250/12.58779&stop=8600650)"
+  ]
+}
