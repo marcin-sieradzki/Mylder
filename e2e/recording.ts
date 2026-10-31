@@ -55,7 +55,7 @@ export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
  * A third server on the same build and recording, which only the snapshot route's tests ask, so
  * its runs, and the calls it counts, are theirs alone, whatever the other tests open and when.
  */
-export const SNAPSHOT_PORT = 4175
+export const SNAPSHOT_PORT = 4176
 export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
 
 export const test = base.extend({
