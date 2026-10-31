@@ -3,7 +3,8 @@
 // under the place names (docs/screens.md, "The moving map"; ADR 0003), and the map's highlight
 // over them, with everything outside it dimmed (Perron's map foundation, "Focus and dimming").
 // Positron's layers, filters, widths and zooms stay; only the paint changes, so light and dark
-// are one map.
+// are one map. The fork adds one layer: the buildings raised from zoom 14, over the streets and
+// under the lines and stops (ADR 0016), where the flat footprints stop.
 import 'client-only'
 import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
@@ -29,6 +30,13 @@ type MapColour =
   | 'water-label'
 
 const map = (colour: MapColour) => `perron-color-map-${colour}`
+
+/**
+ * How opaque the raised buildings are drawn: faint enough that a vehicle on the street behind a
+ * block reads as on the street (ADR 0016). A stand-in, with `color.map.building` for the colour,
+ * until Mylder reads Perron's building tokens (perron#184).
+ */
+const BUILDING_OPACITY = 0.6
 
 // Which map colour paints which Positron layer, as the map-layer prototype (#14) settled it.
 // Casings and building outlines have no token of their own and take `runway`, the mid neutral
@@ -219,6 +227,9 @@ export function basemapStyle(
       const hit = FILL.find(([pattern]) => pattern.test(layer.id))
       if (hit) p['fill-color'] = colour(hit[1])
       if (layer.id === 'building') p['fill-outline-color'] = colour('runway')
+    } else if (layer.type === 'fill-extrusion') {
+      p['fill-extrusion-color'] = colour('building')
+      p['fill-extrusion-opacity'] = BUILDING_OPACITY
     } else if (layer.type === 'line') {
       const hit = LINE.find(([pattern]) => pattern.test(layer.id))
       if (hit) p['line-color'] = colour(hit[1])

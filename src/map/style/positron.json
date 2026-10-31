@@ -121,6 +121,7 @@
       "source": "openmaptiles",
       "source-layer": "building",
       "minzoom": 12,
+      "maxzoom": 14,
       "paint": {
         "fill-antialias": true,
         "fill-color": "rgb(234, 234, 229)",
@@ -665,6 +666,20 @@
         "line-color": "hsl(0,0%,70%)",
         "line-dasharray": [1, 2],
         "line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 5, 1.2, 12, 3]
+      }
+    },
+    {
+      "id": "building-3d",
+      "type": "fill-extrusion",
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "minzoom": 14,
+      "filter": ["!=", ["get", "hide_3d"], true],
+      "paint": {
+        "fill-extrusion-color": "rgb(234, 234, 229)",
+        "fill-extrusion-height": ["get", "render_height"],
+        "fill-extrusion-base": ["get", "render_min_height"],
+        "fill-extrusion-opacity": 0.6
       }
     },
     {

@@ -189,6 +189,7 @@ export function AboutDialog() {
               openFreeMap: <Link href={OPENFREEMAP}>OpenFreeMap</Link>,
             })}
           </Text>
+          <Text render={<p />}>{words.credits.buildings}</Text>
           <AircraftCredit words={words.credits} />
           <RecordedAircraft words={words.credits} />
           <Text render={<p />} emphasis="secondary">
