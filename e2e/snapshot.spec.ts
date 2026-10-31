@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { RECORDING, savedSnapshots, SIMULATED_URL } from './recording'
+import { RECORDING, savedSnapshots, SIMULATED_URL, SNAPSHOT_URL } from './recording'
 
 interface SnapshotLike {
   readonly source: unknown
@@ -12,9 +12,11 @@ interface SnapshotLike {
 
 const keys = (snapshot: SnapshotLike) => snapshot.trips.map((trip) => trip.key)
 
-// In order, on one server: a request that comes while another holds the first run gets the
-// timetable alone, so the first request must make the run these tests read.
+// In order, on a server of their own that no other test asks: a request that comes while another
+// holds the first run gets the timetable alone, so the first request must make the run these
+// tests read, and a stop or vehicle opened there would spend a call the count below doesn't expect.
 test.describe.configure({ mode: 'default' })
+test.use({ baseURL: SNAPSHOT_URL })
 
 test('the snapshot route serves the recording, cached until the next one is due', async ({
   request,
@@ -27,7 +29,7 @@ test('the snapshot route serves the recording, cached until the next one is due'
   expect(snapshot.positionMode).toBe('alternating')
   // Each run replays the next minute's answer, and the server's clock started at the
   // recording's moment, so the snapshot is the frozen one for as many runs as it has made: one
-  // call each, and the first run's disruption list.
+  // call each, and the first run's disruption list, with no stop or vehicle opened on this server.
   const saved = savedSnapshots() as SnapshotLike[]
   const frozen = saved[Math.min(snapshot.budget.calls - 1, saved.length) - 1]
   expect(snapshot.fetched - frozen.fetched).toBeLessThan(60_000)

@@ -19,8 +19,11 @@ const STRIKE_FROM = 60_000
 
 /** A departure's times as DepartureRow takes them. */
 export interface DepartureTimes {
-  /** Seconds until it leaves, from the time the state shows; negative once that has passed. */
-  readonly countdown: number
+  /**
+   * Seconds until it leaves, from the time the state shows; negative once that has passed. None
+   * while the server's clock isn't known.
+   */
+  readonly countdown?: number
   /**
    * The row's timetabled time, `HH:MM`: the timetable's where an expected time a minute or more
    * from it strikes it, or the row is cancelled, else the time the state shows, so a smaller
@@ -36,18 +39,21 @@ export interface DepartureTimes {
   readonly delay?: number
 }
 
-/** A departure's times in `state` at `now`, read on the clock of `timezone`, the timetable's. */
+/**
+ * A departure's times in `state` at `now`, read on the clock of `timezone`, the timetable's; no
+ * countdown without a `now`.
+ */
 export function departureTimes(
   row: Pick<StopDeparture, 'scheduled' | 'expected' | 'cancelled'>,
   state: DataState,
-  now: number,
+  now: number | undefined,
   timezone: string,
 ): DepartureTimes {
   const expected = followsExpected(state) ? row.expected : undefined
   const shown = shownAt(row, state)
   const strike = expected !== undefined && Math.abs(expected - row.scheduled) >= STRIKE_FROM
   return {
-    countdown: (shown - now) / 1000,
+    ...(now === undefined ? {} : { countdown: (shown - now) / 1000 }),
     time: clockTime(strike || row.cancelled === true ? row.scheduled : shown, timezone),
     ...(followsExpected(state) ? { expected: clockTime(shown, timezone) } : {}),
     ...(expected === undefined ? {} : { delay: Math.round((expected - row.scheduled) / 60_000) }),

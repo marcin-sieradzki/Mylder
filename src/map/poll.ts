@@ -146,11 +146,12 @@ export function snapshotPoller<S extends Polled>(
     const received = now()
     // The answer was made about halfway through the round trip, or, when the CDN kept it, its
     // age before that. The header counts whole seconds, so the server's clock reads up to a
-    // second behind: a poll lands just after its due time, never before it.
+    // second behind: a poll lands just after its due time, never before it. An answer with no
+    // date keeps the offset before, or takes this device's clock as the best there is.
     const made = Date.parse(headers.get('Date') ?? '')
     const age = Number(headers.get('Age') ?? 0) * S
     const clockOffset = Number.isNaN(made)
-      ? store.get().clockOffset
+      ? (store.get().clockOffset ?? 0)
       : made + (Number.isFinite(age) ? age : 0) - (sent + received) / 2
     const held = store.get().snapshot
     const isNew = held?.fetched !== snapshot.fetched

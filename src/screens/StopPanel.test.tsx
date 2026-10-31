@@ -135,8 +135,10 @@ function matchMedia(query: string) {
 beforeEach(() => {
   phone = false
   vi.stubGlobal('matchMedia', matchMedia)
-  // The server's clock reads the answers' moment; this device's is the server's.
+  // The server's clock reads the answers' moment; this device's is the server's, as the page's
+  // first snapshot has said.
   vi.useFakeTimers({ toFake: ['Date'], now: NORREPORT.fetched })
+  liveSnapshot.update({ clockOffset: 0 })
   answers = new Map([
     ['27532', NORREPORT],
     ['54307', ORIENTKAJ],
@@ -1015,6 +1017,83 @@ describe('the Departures and Arrivals tabs', () => {
         'Ingen ankomster de næste 30 minutter for de viste transportformer.',
       ),
     ).toBeInTheDocument()
+  })
+})
+
+describe('a stop opened by link before the page’s clock settles', () => {
+  // This device's clock runs a day ahead of the server's, and no snapshot has landed yet to say
+  // by how much: a row read by it would say "Now", and a board answer "may be out of date".
+  const AHEAD = 24 * HOUR
+
+  /**
+   * Opens `search` on a page as it first paints, its modules loaded afresh so that no snapshot has
+   * landed; returns the page's live store, whose update stands in for the first one landing.
+   */
+  async function openFresh(search: string) {
+    vi.setSystemTime(NORREPORT.fetched + AHEAD)
+    vi.resetModules()
+    const [{ MapScreen: Screen }, { Providers: Fresh }, live] = await Promise.all([
+      import('./MapScreen'),
+      import('./Providers'),
+      import('../map/live'),
+    ])
+    window.history.replaceState(null, '', `/en${search}`)
+    const { unmount } = render(
+      <Fresh lang="en" dictionary={en}>
+        <Screen />
+      </Fresh>,
+    )
+    const settle = () => act(() => live.liveSnapshot.update({ clockOffset: -AHEAD }))
+    return { settle, unmount }
+  }
+
+  /** The countdowns of `list`'s rows, as they read. */
+  const countdowns = (list: HTMLElement) =>
+    [...list.querySelectorAll('.pn-DepartureRow-countdown')].map((each) => each.textContent)
+
+  it('shows Departures with no countdown and a fresh source line until it settles', async () => {
+    answers.set('27532', { ...fromBoard(NORREPORT), messages: [CLOSED] })
+    const { settle, unmount } = await openFresh('?stop=27532')
+    const stop = await panel('Nørreport St.')
+    const departures = within(stop).getByRole('list', { name: 'Departures' })
+    expect(countdowns(departures)).toEqual(Array(10).fill('—Unknown'))
+    expect(within(departures).getByText('07:29')).toBeInTheDocument()
+    expect(stop).toHaveTextContent('Rejseplanen · departures 07:21:00')
+    expect(stop).not.toHaveTextContent('may be out of date')
+    // The stop's messages read as at the moment of its answer.
+    expect(within(stop).getByRole('region', { name: 'Messages' })).toHaveTextContent(
+      'Nørreport lukket for busser',
+    )
+    settle()
+    expect(countdowns(departures)[0]).toBe('8 min')
+    expect(countdowns(departures)).not.toContain('—Unknown')
+    unmount()
+  })
+
+  it('shows a standing trip with no countdown until it settles', async () => {
+    const { settle, unmount } = await openFresh('?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(countdowns(section)).toEqual(['—Unknown'])
+    expect(within(section).getByText('07:23')).toBeInTheDocument()
+    settle()
+    expect(countdowns(section)).toEqual(['~2 min'])
+    unmount()
+  })
+
+  it('shows Arrivals with no countdown and a fresh source line until it settles', async () => {
+    arrivalAnswers.set('27532', {
+      ...NORREPORT_ARRIVALS,
+      source: { kind: 'rejseplanen', at: NORREPORT_ARRIVALS.fetched },
+    })
+    const { settle, unmount } = await openFresh('?stop=27532&board=arrivals')
+    const stop = await panel('Nørreport St.')
+    const arrivals = await within(stop).findByRole('list', { name: 'Arrivals' })
+    expect(countdowns(arrivals)).toEqual(Array(10).fill('—Unknown'))
+    expect(stop).toHaveTextContent('Rejseplanen · arrivals 07:21:00')
+    expect(stop).not.toHaveTextContent('may be out of date')
+    settle()
+    expect(countdowns(arrivals)[0]).toBe('8 min')
+    unmount()
   })
 })
 
