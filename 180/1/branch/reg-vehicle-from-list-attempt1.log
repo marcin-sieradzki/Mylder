@@ -1,0 +1,15 @@
+first row link: Vestamager St. (Metro)
+FAIL reg-vehicle-from-list: 3 steps in .verify/branch-179-r1/reg-vehicle-from-list/
+expect(locator).toContainText(expected) failed
+
+Locator: getByRole('dialog', { name: / to / })
+Expected pattern: /times from the timetable|clock/i
+Received string:  "M1M1 to Vestamager St. (Metro)MetroFollowShow whole lineCloseTimetable onlyRuns to an intervalDelayRuns to an intervalLast seen—UnknownNext stopBella Center St. (Metro)Between Bella Center St. (Metro) and Ørestad St. (Metro)Every 4 minVanløse St. (Metro) PassedFlintholm St. (Metro) PassedLindevang St. (Metro) PassedFasanvej St. (Metro) PassedFrederiksberg St. (Metro) PassedForum St. (Metro) PassedNørreport St. (Metro) PassedKongens Nytorv St. (Metro) PassedChristianshavn St. (Metro) PassedIslands Brygge St. (Metro) PassedDR Byen St. (Metro) PassedSundby St. (Metro) PassedBella Center St. (Metro)Next stopØrestad St. (Metro)Vestamager St. (Metro)From the timetableTimetable · updated 07:26:46"
+Timeout: 5000ms
+
+Call log:
+  - Expect "toContainText" getByRole('dialog', { name: / to / }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: / to / })
+    13 × locator resolved to <div id="_r_10_" data-open="" role="dialog" tabindex="-1" data-variant="line" data-anchor="right" aria-labelledby="_r_v_" data-base-ui-focusable="" data-swipe-direction="right" class="pn-Sheet pn-DetailPanel">…</div>
+       - unexpected value "M1M1 to Vestamager St. (Metro)MetroFollowShow whole lineCloseTimetable onlyRuns to an intervalDelayRuns to an intervalLast seen—UnknownNext stopBella Center St. (Metro)Between Bella Center St. (Metro) and Ørestad St. (Metro)Every 4 minVanløse St. (Metro) PassedFlintholm St. (Metro) PassedLindevang St. (Metro) PassedFasanvej St. (Metro) PassedFrederiksberg St. (Metro) PassedForum St. (Metro) PassedNørreport St. (Metro) PassedKongens Nytorv St. (Metro) PassedChristianshavn St. (Metro) PassedIslands Brygge St. (Metro) PassedDR Byen St. (Metro) PassedSundby St. (Metro) PassedBella Center St. (Metro)Next stopØrestad St. (Metro)Vestamager St. (Metro)From the timetableTimetable · updated 07:26:46"
+

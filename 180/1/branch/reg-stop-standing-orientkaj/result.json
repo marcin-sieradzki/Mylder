@@ -1,0 +1,8 @@
+{
+  "journey": "reg-stop-standing-orientkaj",
+  "pass": true,
+  "steps": [
+    "01-orientkaj-st-standing-row: Orientkaj St. standing row (http://localhost:4307/en?stop=54307)",
+    "02-vehicle-opened: vehicle opened (http://localhost:4307/en?trip=bus.991.7ce514fd98.20260616.0730)"
+  ]
+}

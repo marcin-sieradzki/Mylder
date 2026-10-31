@@ -1,0 +1,19 @@
+start snapshot 2026-06-16T05:22:06.772Z
+t+10s snapshot 2026-06-16T05:22:06.772Z
+t+20s snapshot 2026-06-16T05:23:08.940Z
+t+30s snapshot 2026-06-16T05:23:08.940Z
+t+40s snapshot 2026-06-16T05:23:08.940Z
+t+50s snapshot 2026-06-16T05:23:08.940Z
+t+60s snapshot 2026-06-16T05:23:08.940Z
+t+70s snapshot 2026-06-16T05:23:08.940Z
+t+80s snapshot 2026-06-16T05:24:11.243Z
+t+90s snapshot 2026-06-16T05:24:11.243Z
+1.9s mutation:  :: undefined
+1.9s mutation:  :: A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+3.7s mutation:  :: A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+21.7s mutation:  :: A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+23.7s mutation:  :: A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+43.3s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+83.3s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+84.0s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+PASS x-probe-source-aging: 2 steps in .verify/main-179-r1/x-probe-source-aging/

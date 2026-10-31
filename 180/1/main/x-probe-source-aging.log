@@ -1,0 +1,19 @@
+start snapshot 2026-06-16T05:24:11.243Z
+t+10s snapshot 2026-06-16T05:24:11.243Z
+t+20s snapshot 2026-06-16T05:24:11.243Z
+t+30s snapshot 2026-06-16T05:25:14.796Z
+t+40s snapshot 2026-06-16T05:25:14.796Z
+t+50s snapshot 2026-06-16T05:25:14.796Z
+t+60s snapshot 2026-06-16T05:25:14.796Z
+t+70s snapshot 2026-06-16T05:25:14.796Z
+t+80s snapshot 2026-06-16T05:25:14.796Z
+t+90s snapshot 2026-06-16T05:26:18.670Z
+1.3s mutation: ? :: undefined
+1.4s mutation: Rejseplanen · arrivals 07:24:11, may be out of date :: A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+2.7s mutation: Rejseplanen · arrivals 07:24:11 :: A | From Hundige St. | Live | Track 8 | 2 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+31.1s mutation: Rejseplanen · arrivals 07:24:11, may be out of date :: A | From Hundige St. | Live | Track 8 | 2 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+32.8s mutation: Rejseplanen · arrivals 07:25:14 :: A | From Hundige St. | Live | Track 8 | 2 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+48.7s mutation: Rejseplanen · arrivals 07:25:14 :: A | From Hundige St. | Live | Track 8 | 1 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+93.8s mutation: Rejseplanen · arrivals 07:25:14, may be out of date :: A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+97.0s mutation: Rejseplanen · arrivals 07:26:18 :: A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+PASS x-probe-source-aging: 2 steps in .verify/main-179-r1/x-probe-source-aging/

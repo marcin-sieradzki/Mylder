@@ -1,0 +1,11 @@
+snapshot fetched 2026-06-16T05:26:09.799Z
+PAINTS (7, first paint ends at #4, 2469 ms):
+39ms mutation: 
+697ms mutation: [Stop] 
+1124ms mutation: [København Syd St.] Lines{ A // E // RE }
+1212ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | — | Unknown | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | From Hundige St. | Live | Track 8 | — | Unknown | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | — | Unknown | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late }
+2469ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | From Hundige St. | Live | Track 8 | 7 min | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | ~10 min | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late }
+9111ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | Now | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | From Hundige St. | Live | Track 8 | 7 min | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | ~10 min | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late }
+9115ms mutation: [København Syd St.] Lines{ A // E // RE } Arrivals{ A | From Hundige St. | Live | Track 8 | 7 min | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late // E | From Køge St. | Estimated | Track 8 | ~10 min | Timetabled 07:36 | 07:36 | ~07:37 | +1 min | 1 min late // E | From Holte St. | Live | Track 8 | 14 min | Timetabled 07:39 | 07:39 | 07:41 | +2 min | 2 min late }
+later out-of-date (not judged): [[9110.5,"so. |  | Rejseplanen · arrivals 07:26:00, may be out of date"]]
+PASS pr4-arrivals-kbhsyd-phone-run2: 2 steps in .verify/branch-179-r1/pr4-arrivals-kbhsyd-phone-run2/

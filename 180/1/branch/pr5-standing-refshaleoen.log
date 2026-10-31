@@ -1,0 +1,10 @@
+snapshot fetched 2026-06-16T05:20:00.135Z
+PAINTS (4):
+151ms mutation: 
+1055ms mutation: [Stop] 
+1288ms mutation: [Refshaleøen] Lines{ 991 } At the platforms now{ 991 | Teglholmen | Estimated | — | Unknown | ~07:23 | On time } Departures{ 991 | Teglholmen | Estimated | — | Unknown | ~07:23 | On time }
+3111ms mutation: [Refshaleøen] Lines{ 991 } At the platforms now{ 991 | Teglholmen | Estimated | ~3 min | ~07:23 | On time } Departures{ 991 | Teglholmen | Estimated | ~3 min | ~07:23 | On time }
+SETTLED ROWS: [[{"label":"Lines","rows":["991"]},{"label":"At the platforms now","rows":["991\nTeglholmen\nEstimated\n~3 min\n~07:23\nOn time"]},{"label":"Departures","rows":["991\nTeglholmen\nEstimated\n~3 min\n~07:23\nOn time"]}]]
+any row read Now in any paint: false
+a row read — in some paint: true
+PASS pr5-standing-refshaleoen: 2 steps in .verify/branch-179-r1/pr5-standing-refshaleoen/

@@ -1,0 +1,30 @@
+snapshot fetched 2026-06-16T05:20:00.019Z
+PAINTS (4):
+92ms mutation: 
+899ms mutation: [Stop] 
+1074ms mutation: [Refshaleøen] Lines{ 991 } At the platforms now{ 991 | Teglholmen | Estimated | Now | ~07:23 | On time } Departures{ 991 | Teglholmen | Estimated | Now | ~07:23 | On time }
+2577ms mutation: [Refshaleøen] Lines{ 991 } At the platforms now{ 991 | Teglholmen | Estimated | ~3 min | ~07:23 | On time } Departures{ 991 | Teglholmen | Estimated | ~3 min | ~07:23 | On time }
+SETTLED ROWS: [[{"label":"Lines","rows":["991"]},{"label":"At the platforms now","rows":["991\nTeglholmen\nEstimated\n~3 min\n~07:23\nOn time"]},{"label":"Departures","rows":["991\nTeglholmen\nEstimated\n~3 min\n~07:23\nOn time"]}]]
+any row read Now in any paint: true
+a row read — in some paint: false
+FAIL pr5-standing-refshaleoen: 3 steps in .verify/main-179-r1/pr5-standing-refshaleoen/
+rows reading Now before the clock settled
+
+expect(received).toEqual(expected) // deep equality
+
+- Expected  -  1
++ Received  + 12
+
+- Array []
++ Array [
++   Object {
++     "list": "At the platforms now",
++     "row": "991 | Teglholmen | Estimated | Now | ~07:23 | On time",
++     "t": 1074.2000000011176,
++   },
++   Object {
++     "list": "Departures",
++     "row": "991 | Teglholmen | Estimated | Now | ~07:23 | On time",
++     "t": 1074.2000000011176,
++   },
++ ]

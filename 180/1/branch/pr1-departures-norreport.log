@@ -1,0 +1,10 @@
+snapshot fetched 2026-06-16T05:20:00.033Z
+PAINTS (4):
+247ms mutation: 
+1066ms mutation: [Stop] 
+1237ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Estimated | — | Unknown | Timetabled 07:27 | 07:27 | ~07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | — | Unknown | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | — | Unknown | ~07:39 | On time }
+3455ms mutation: [Nørreport St.] Lines{ 5C // M1 // A } Departures{ E | Køge St. | Estimated | ~9 min | Timetabled 07:27 | 07:27 | ~07:29 | +2 min | 2 min late // 5C | Husum Torv | Estimated | ~18 min | Timetabled 07:36 | 07:36 | ~07:38 | +2 min | 2 min late // 5C | Sundbyvester Plads | Estimated | ~19 min | ~07:39 | On time }
+SETTLED ROWS: [[{"label":"Lines","rows":["5C","M1","A","E"]},{"label":"Departures","rows":["E\nKøge St.\nEstimated\n~9 min\nTimetabled 07:27\n07:27\n~07:29\n+2 min\n2 min late","5C\nHusum Torv\nEstimated\n~18 min\nTimetabled 07:36\n07:36\n~07:38\n+2 min\n2 min late","5C\nSundbyvester Plads\nEstimated\n~19 min\n~07:39\nOn time","A\nHillerød St.\nEstimated\n~20 min\nTimetabled 07:36\n07:36\n~07:40\n+4 min\n4 min late","A\nHundige St.\nEstimated\n~21 min\nTimetabled 07:39\n07:39\n~07:41\n+2 min\n2 min late","5C\nHusum Torv\nEstimated\n~24 min\nTimetabled 07:45\n07:45\n~07:44\n−1 min\n1 min early","5C\nSundbyvester Plads\nEstimated\n~26 min\nTimetabled 07:44\n07:44\n~07:46\n+2 min\n2 min late","A\nHillerød St.\nEstimated\n~27 min\nTimetabled 07:46\n07:46\n~07:47\n+1 min\n1 min late","E\nHolte St.\nEstimated\n~29 min\nTimetabled 07:48\n07:48\n~07:49\n+1 min\n1 min late"]}]]
+any row read Now in any paint: false
+a row read — in some paint: true
+PASS pr1-departures-norreport: 2 steps in .verify/branch-179-r1/pr1-departures-norreport/

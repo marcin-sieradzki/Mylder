@@ -1,0 +1,18 @@
+start snapshot 2026-06-16T05:22:05.233Z
+t+10s snapshot 2026-06-16T05:23:07.502Z
+t+20s snapshot 2026-06-16T05:23:07.502Z
+t+30s snapshot 2026-06-16T05:23:07.502Z
+t+40s snapshot 2026-06-16T05:23:07.502Z
+t+50s snapshot 2026-06-16T05:23:07.502Z
+t+60s snapshot 2026-06-16T05:23:07.502Z
+t+70s snapshot 2026-06-16T05:24:07.812Z
+t+80s snapshot 2026-06-16T05:24:07.812Z
+t+90s snapshot 2026-06-16T05:24:07.812Z
+2.1s mutation:  :: undefined
+2.5s mutation:  :: A | From Hundige St. | Live | Track 8 | — | Unknown | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+3.7s mutation:  :: A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+21.5s mutation:  :: A | From Hundige St. | Live | Track 8 | 4 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+44.4s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+63.3s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+64.8s mutation:  :: A | From Hundige St. | Live | Track 8 | 3 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late
+PASS x-probe-source-aging: 2 steps in .verify/branch-179-r1/x-probe-source-aging/

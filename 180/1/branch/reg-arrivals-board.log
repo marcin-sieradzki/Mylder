@@ -1,0 +1,50 @@
+snapshot fetched 2026-06-16T05:25:41.991Z
+TABPANEL:
+A
+From Hundige St.
+Live
+Track 8
+—
+Unknown
+Timetabled 07:23
+07:23
+07:27
++4 min
+4 min late
+A
+From Hundige St.
+Live
+Track 8
+—
+Unknown
+Timetabled 07:33
+07:33
+07:34
++1 min
+1 min late
+E
+From Køge St.
+Estimated
+Track 8
+—
+Unknown
+Timetabled 07:36
+07:36
+~07:37
++1 min
+1 min late
+E
+From Holte St.
+Live
+Track 8
+—
+Unknown
+Timetabled 07:39
+07:39
+07:41
++2 min
+2 min late
+Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.
+
+Rejseplanen · arrivals 07:26:24
+PASS reg-arrivals-board: 2 steps in .verify/branch-179-r1/reg-arrivals-board/

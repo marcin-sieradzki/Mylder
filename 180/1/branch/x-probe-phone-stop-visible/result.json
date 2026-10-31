@@ -1,0 +1,7 @@
+{
+  "journey": "x-probe-phone-stop-visible",
+  "pass": true,
+  "steps": [
+    "01-phone-4-s-after-settling: phone, 4 s after settling (http://localhost:4307/en?stop=27532)"
+  ]
+}

@@ -1,0 +1,163 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:21:00
+  - group "Filters":
+    - button "Planes 9" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?stop=27532&board=arrivals
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 3 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 17"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 17
+      - paragraph: of 17 in service
+    - group "Reported this minute":
+      - text: Reported this minute 7
+      - paragraph: vehicles that reported their position
+    - group "Average delay":
+      - text: Average delay Unknown
+      - paragraph: Too few vehicles with a known delay
+    - list "On the map now":
+      - listitem: Live 7
+      - listitem: Ageing 0
+      - listitem: Estimated 6
+      - listitem: Timetable only 4
+      - listitem: No signal 0
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: 1/6 · Movia
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: 5/6 · DSB
+      - meter "Train": Train x
+      - paragraph: 1/1 · DSB
+    - status:
+      - paragraph: Loading
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 7 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 6 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 4 No realtime for this trip today; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- dialog "Nørreport St.":
+  - heading "Nørreport St." [level=2]
+  - list "Lines":
+    - listitem: 5C
+    - listitem: M1
+    - listitem: A
+    - listitem: E
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - paragraph: No vehicle of the types shown is standing at the platforms now.
+  - tablist "Departures and arrivals":
+    - tab "Departures"
+    - tab "Arrivals" [selected]
+  - tabpanel "Arrivals":
+    - list "Arrivals":
+      - listitem:
+        - button "S-tog E from Holte St."
+        - text: E From Holte St. Live 8 min Timetabled 07:27
+        - time: 07:29
+        - text: 2 min late
+      - listitem:
+        - button "Bus 5C from Sundbyvester Plads"
+        - text: 5C From Sundbyvester Plads Estimated 17 min Timetabled 07:36
+        - time: 07:38
+        - text: 2 min late
+      - listitem:
+        - button "Bus 5C from Herlev Hospital, Sløjfen"
+        - text: 5C From Herlev Hospital, Sløjfen Estimated 18 min
+        - time: 07:39
+        - text: On time
+      - listitem:
+        - button "S-tog A from Hundige St."
+        - text: A From Hundige St. Live 19 min Timetabled 07:36
+        - time: 07:40
+        - text: 4 min late
+      - listitem:
+        - button "S-tog A from Hillerød St."
+        - text: A From Hillerød St. Live 20 min Timetabled 07:39
+        - time: 07:41
+        - text: 2 min late
+      - listitem:
+        - button "Bus 5C from Sundbyvester Plads"
+        - text: 5C From Sundbyvester Plads Estimated 23 min Timetabled 07:45
+        - time: 07:44
+        - text: 1 min early
+      - listitem:
+        - button "Bus 5C from Husum Torv, Sløjfen"
+        - text: 5C From Husum Torv, Sløjfen Live 25 min Timetabled 07:44
+        - time: 07:46
+        - text: 2 min late
+      - listitem:
+        - button "S-tog A from Hundige St."
+        - text: A From Hundige St. Live 26 min Timetabled 07:46
+        - time: 07:47
+        - text: 1 min late
+      - listitem:
+        - button "S-tog E from Køge St."
+        - text: E From Køge St. Estimated 28 min Timetabled 07:48
+        - time: 07:49
+        - text: 1 min late
+      - listitem:
+        - button "S-tog A from Hillerød St."
+        - text: A From Hillerød St. Live 30 min Timetabled 07:49
+        - time: 07:51
+        - text: 2 min late
+    - text: Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so. From the timetable
+    - paragraph:
+      - time: Timetable and positions 07:21:00
+- alert
+- region "Notifications"

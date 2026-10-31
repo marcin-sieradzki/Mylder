@@ -1,0 +1,11 @@
+snapshot fetched 2026-06-16T05:21:00.395Z
+PAINTS (4):
+124ms mutation: 
+921ms mutation: [Stop] 
+1364ms mutation: [København Syd St.] Lines{ A // E // RE } Departures{ RE | Næstved St. | Live | Track 8 | — | Unknown | Timetabled 07:22 | 07:22 | 07:23 | +1 min | 1 min late // A | Hillerød St. | Live | Track 8 | — | Unknown | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | Hillerød St. | Live | Track 8 | — | Unknown | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late }
+3601ms mutation: [København Syd St.] Lines{ A // E // RE } Departures{ RE | Næstved St. | Live | Track 8 | 1 min | Timetabled 07:22 | 07:22 | 07:23 | +1 min | 1 min late // A | Hillerød St. | Live | Track 8 | 5 min | Timetabled 07:23 | 07:23 | 07:27 | +4 min | 4 min late // A | Hillerød St. | Live | Track 8 | 12 min | Timetabled 07:33 | 07:33 | 07:34 | +1 min | 1 min late }
+SETTLED SOURCE: [
+  "min late | E | Køge St. | Live | Track 8 | 19 min | Timetabled 07:39 | 07:39 | 07:41 | +2 min | 2 min late | Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. |  | Rejseplanen · departures 07:20:45"
+]
+SETTLED ROWS: [[{"label":"Lines","rows":["A","E","RE"]},{"label":"Departures","rows":["RE\nNæstved St.\nLive\nTrack 8\n1 min\nTimetabled 07:22\n07:22\n07:23\n+1 min\n1 min late","A\nHillerød St.\nLive\nTrack 8\n5 min\nTimetabled 07:23\n07:23\n07:27\n+4 min\n4 min late","A\nHillerød St.\nLive\nTrack 8\n12 min\nTimetabled 07:33\n07:33\n07:34\n+1 min\n1 min late","E\nHolte St.\nEstimated\nTrack 8\n~15 min\nTimetabled 07:36\n07:36\n~07:37\n+1 min\n1 min late","E\nKøge St.\nLive\nTrack 8\n19 min\nTimetabled 07:39\n07:39\n07:41\n+2 min\n2 min late"]}]]
+PASS pr3-departures-kbhsyd-phone: 2 steps in .verify/branch-179-r1/pr3-departures-kbhsyd-phone/

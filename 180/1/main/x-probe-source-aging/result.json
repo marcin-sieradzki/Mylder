@@ -1,0 +1,8 @@
+{
+  "journey": "x-probe-source-aging",
+  "pass": true,
+  "steps": [
+    "01-settled: settled (http://localhost:4306/en?stop=8600783&board=arrivals)",
+    "02-90-s-later: 90 s later (http://localhost:4306/en?stop=8600783&board=arrivals)"
+  ]
+}
