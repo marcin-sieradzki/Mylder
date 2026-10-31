@@ -3,7 +3,9 @@ import type { Page } from '@playwright/test'
 
 // Following a vehicle: tap a Metro train's dot, press Follow, and the camera keeps the train
 // under the map's centre as it runs on, through a zoom; a pan ends it. Show whole line raises the
-// highlight chip, which clears it. The page sees the recording's first minute.
+// highlight chip, which clears it. On a tilted, turned map, opened from a link with the train's
+// panel open, Follow and Show whole line keep the tilt and heading. The page sees the recording's
+// first minute.
 
 interface Trip {
   key: string
@@ -83,4 +85,47 @@ test("Show whole line raises the chip, and the chip clears the train's line", as
   await expect(chip).toBeVisible()
   await chip.click()
   await expect(chip).toBeHidden()
+})
+
+/** Opens the M1 train's detail from a link to it on a map tilted 50° and turned 30° anticlockwise. */
+async function openTheTrainTilted(page: Page) {
+  await serveFirstMinute(page)
+  await page.goto(`/en?map=14.00/55.68330/12.57160/-30.0/50.0&trip=${M1.key}`)
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toHaveAttribute('data-vehicles', '17')
+  await expect(map).toHaveAttribute('data-tilt', '50')
+  await expect(map).toHaveAttribute('data-heading', '-30')
+  const panel = page.getByRole('dialog', { name: /to Vanløse St\./ })
+  await expect(panel).toBeVisible()
+  return { map, panel }
+}
+
+test('Follow on a tilted, turned map keeps the tilt and heading with the train under the centre', async ({
+  page,
+}) => {
+  test.slow()
+  const { map, panel } = await openTheTrainTilted(page)
+  const follow = panel.getByRole('button', { name: 'Follow' })
+  await follow.click()
+  await expect(follow).toHaveAttribute('aria-pressed', 'true')
+  for (const [i, wait] of [0, 4_000].entries()) {
+    await page.waitForTimeout(wait)
+    const card = await cardAtCentre(page, i % 2 === 0 ? 1 : -1)
+    await expect(card).toContainText('M1 to Vanløse St.')
+  }
+  await expect(follow).toHaveAttribute('aria-pressed', 'true')
+  await expect(map).toHaveAttribute('data-tilt', '50')
+  await expect(map).toHaveAttribute('data-heading', '-30')
+})
+
+test('Show whole line on a tilted, turned map fits the line and keeps the tilt and heading', async ({
+  page,
+}) => {
+  const { map, panel } = await openTheTrainTilted(page)
+  await panel.getByRole('button', { name: 'Show whole line' }).click()
+  await expect(page.getByRole('button', { name: 'Showing: line M1 · Clear' })).toBeVisible()
+  // Once the camera has come to rest further out, on the whole line, the address keeps the angle.
+  await expect(page).toHaveURL(/[?&]map=1[0-3]\.\d\d\/[\d.]+\/[\d.]+\/-30\.0\/50\.0(&|$)/)
+  await expect(map).toHaveAttribute('data-tilt', '50')
+  await expect(map).toHaveAttribute('data-heading', '-30')
 })

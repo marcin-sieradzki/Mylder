@@ -13,8 +13,10 @@ export interface StubCamera {
   readonly pitch?: number
 }
 
-const WIDTH = 800
-const HEIGHT = 600
+/** The canvas the stub draws onto, in px. */
+export const CANVAS = { width: 800, height: 600 } as const
+const WIDTH = CANVAS.width
+const HEIGHT = CANVAS.height
 /** The camera's distance from the centre in px, as MapLibre's default field of view puts it. */
 const DISTANCE = 1.5 * HEIGHT
 
@@ -28,9 +30,21 @@ export function worldOf([lon, lat]: readonly [number, number], zoom: number): [n
   ]
 }
 
+/** The longitude and latitude of a point in MapLibre's world at `zoom`, the inverse of `worldOf`. */
+export function lonLatOf([x, y]: readonly [number, number], zoom: number): [number, number] {
+  const size = 512 * 2 ** zoom
+  const mercator = (0.5 - y / size) * 2 * Math.PI
+  return [
+    (x / size) * 360 - 180,
+    (2 * Math.atan(Math.exp(mercator)) - Math.PI / 2) * (180 / Math.PI),
+  ]
+}
+
 export interface StubProjection extends Projection {
   /** Where a point of the world at the camera's zoom is drawn, in px from the canvas's top left. */
   projectWorld(world: readonly [number, number]): { x: number; y: number }
+  /** The longitude and latitude of the ground drawn at a point of the canvas. */
+  unproject(point: { readonly x: number; readonly y: number }): [number, number]
 }
 
 /** The camera `camera` as the map's projection. */
@@ -56,10 +70,21 @@ export function stubProjection({
       y: HEIGHT / 2 - (up * Math.cos(p) * DISTANCE) / depth,
     }
   }
+  const unproject = ({ x, y }: { readonly x: number; readonly y: number }) => {
+    const across = x - WIDTH / 2
+    const above = HEIGHT / 2 - y
+    // Back along the ray: the ground up the canvas, then across it at that depth.
+    const up = (above * DISTANCE) / (DISTANCE * Math.cos(p) - above * Math.sin(p))
+    const right = (across * (DISTANCE + up * Math.sin(p))) / DISTANCE
+    const east = right * Math.cos(b) + up * Math.sin(b)
+    const north = -right * Math.sin(b) + up * Math.cos(b)
+    return lonLatOf([cx + east, cy - north], zoom)
+  }
   return {
     zoom,
     flatNorthUp: bearing === 0 && pitch === 0,
     projectWorld,
     project: (lonLat) => projectWorld(worldOf(lonLat, zoom)),
+    unproject,
   }
 }
