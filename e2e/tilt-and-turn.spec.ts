@@ -142,8 +142,13 @@ test('a three-part link opens flat and north-up, and a tilt out of range is drop
   await expect(scaleBar(page)).toBeVisible()
   await expect(page).toHaveURL(/[?&]map=14\.00\/55\.67600\/12\.56800$/)
 
+  // Counted from this page's snapshots on, as many as the latest served.
+  const served = servedVehicles(page)
   await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/75.0')
   await expect(map).toHaveAttribute('data-tilt', '0')
   await expect(map).toHaveAttribute('data-heading', '-30')
-  await expect(map).not.toHaveAttribute('data-vehicles', '0')
+  await expect.poll(() => served.count).toBeGreaterThan(0)
+  await expect
+    .poll(async () => Number(await map.getAttribute('data-vehicles')) === served.count)
+    .toBe(true)
 })

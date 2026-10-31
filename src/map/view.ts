@@ -1,8 +1,10 @@
-// What the viewer has made of the map: its centre and zoom, what its filters keep off it, the open
-// panel (`?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`, one at a time) and the sheet's open tab, kept in the address's query so a reload, a
-// shared link and the language switch keep them (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads
-// it back and writes it in place, without a new history entry, and leaves every other parameter
-// as it was.
+// What the viewer has made of the map: its centre and zoom, its heading and tilt while it isn't
+// flat and north-up (docs/screens.md, "The 3D view"), what its filters keep off it, the open panel
+// (`?stop=<id>`, `?trip=<key>` or `?aircraft=<hex>`, one at a time) and the sheet's open tab, kept
+// in the address's query so a reload, a shared link and the language switch keep them
+// (docs/screens.md, "The moving map"). The query is the one place it lives: the store reads it
+// back and writes it in place, without a new history entry, and leaves every other parameter as
+// it was.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { MODES, type Mode } from '../timetable/format.ts'
