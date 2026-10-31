@@ -9,7 +9,7 @@ It builds on the delivery research of 2026-10-25, [`2026-10-25-siri-et-netex-del
 - **Unconfirmed**: no source found, sources disagree, or an estimate.
 - **Estimate**: worked out here from other figures; the working is shown.
 
-Research caveat: this environment still cannot open labs.rejseplanen.dk, any dataudveksler.app.vd.dk host (including the anonymous catalogue API) or vejdirektoratet.atlassian.net; they are refused by the sandbox's proxy. Facts about the broker rest on the earlier research, a public example client read in full [1] and a public survey note read in full [2]. The dataset list, address format and guides were then checked on the maintainer's logged-in account ([Seen on the portal after login](#seen-on-the-portal-after-login)). The four facts that decide the design are on no page and need a first recording ([Unknowns the first recording answers](#unknowns-the-first-recording-answers)).
+Research caveat: this environment still cannot open labs.rejseplanen.dk, any dataudveksler.app.vd.dk host (including the anonymous catalogue API) or vejdirektoratet.atlassian.net; they are refused by the sandbox's proxy. Facts about the broker rest on the earlier research, a public example client read in full [1] and a public survey note read in full [2]. The dataset list, address format and guides were then checked on the maintainer's logged-in account ([Seen on the portal after login](#seen-on-the-portal-after-login)). The facts no page gives were then measured with a short recording ([Measured on 2026-10-31](#measured-on-2026-10-31)).
 
 ## Short answers
 
@@ -85,16 +85,46 @@ Checked on 2026-10-31 on the maintainer's account (Confirmed):
 - No guide or dataset page says anything about message lifetime, subscription size, a snapshot on subscribe or the update rate.
 - A lost service account password cannot be reset; a new account has to be made and subscribed again.
 
-## Unknowns the first recording answers
+## Measured on 2026-10-31
 
-These decide the design and can only be read after login, or measured with a first recording:
+A probe (`scripts/siri-et/`) ran on the maintainer's Mac on Saturday 31 October 2026, 09:40 to 09:56 Copenhagen time: 5 minutes connected to all four subscriptions, 10 minutes disconnected, then 1 minute reconnected. Sign-in worked first time on all four. Saturday morning is quiet, so the rates are a floor, not the weekday peak. Everything below is Confirmed by that run.
 
-1. **Message lifetime and size limit of the subscription**, and what the access point does when a subscriber falls behind. Decides whether shape 2 can work, and how the listener must behave after a restart.
-2. **Whether a new or reconnecting subscriber gets a snapshot** of every current trip, or only changes from then on. Without one, the map fills in over the first hour after a restart.
-3. **The real message rate and size**, at the morning peak and over a day.
-4. **The real identifiers**: what `LineRef`, `StopPointRef`, `DatedVehicleJourneyRef` and `OperatorRef` look like, and whether trains carry a train number. Decides the join's first key.
+**Messages are kept while the subscriber is away.** Nothing was lost across the 10-minute gap: on reconnecting, every subscription delivered all its messages from the moment of the disconnect, within the first 30 seconds. The first connection also received everything since each subscription was made, 40 to 55 minutes earlier. So there is no snapshot on subscribe, but a backlog: a restarted listener catches up rather than starting blank. How long a subscription keeps messages, and how many, is still unknown beyond about an hour.
 
-A first ticket records an hour of the feed at the morning peak, as #12 does for `journeyPos`, and answers all four.
+**Rates and sizes,** counting only messages sent after connecting:
+
+| Dataset      | Messages a second | XML a second | Median message      | Journeys a message | Calls a journey |
+| ------------ | ----------------- | ------------ | ------------------- | ------------------ | --------------- |
+| 785 DSB      | 0.4 to 0.6        | about 2 KB   | 3 KB                | 1.6                | 3.3             |
+| 788 Movia    | 0.2 to 0.3        | about 39 KB  | 125 KB (max 930 KB) | 35                 | 11              |
+| 799 Lokaltog | 0.1 to 0.2        | about 0.5 KB | 3.5 KB              | 1.1                | 5.4             |
+| 801 S-tog    | 0.2 to 0.3        | about 1 KB   | 2 KB                | 1.4                | 4.3             |
+
+Movia batches about 35 journeys a message and is 95 % of the volume. In all, about 45 KB of XML a second on a Saturday morning, so perhaps 100 to 150 KB/s at a weekday peak and 4 to 8 GB a day: an always-on listener on a small machine handles it easily. From sent to received took under 25 ms at the median and 1.9 s at most. Bodies are plain, single-line SIRI 2.0 XML, not compressed; `ProducerRef` `RKRP_RTH`, one `SubscriptionRef` per operator (`dsb-et`, `movia-et`, `sj-et`, `dsb-s-tog-et`).
+
+**What a journey carries.** `RecordedAtTime`, `LineRef`, `DirectionRef`, `FramedVehicleJourneyRef` (`DataFrameRef` the service day, `DatedVehicleJourneyRef` such as `2727-8600351300000`), `PublishedLineName`, `OriginRef`, `DestinationRef`, `OperatorRef`, `ProductCategoryRef`, `Monitored`, `PredictionInaccurate`, `TrainNumbers`, and `RecordedCalls` and `EstimatedCalls` with `StopPointRef` and aimed and expected arrival and departure times (local time with offset). Cancellations come as `Cancellation` (94 Movia journey updates in 5 minutes). No positions.
+
+**`IsCompleteStopSequence` is false.** A message carries only the calls that changed or are near, not the whole trip: 3 to 11 calls a journey. A journey's first call in a message is often not its first stop. This changes the join (below) and means the listener must merge each message's calls into what it already holds for the journey.
+
+**Identifiers.**
+
+- `LineRef` is the public line name for buses, S-tog and Lokaltog (`5C`-style: `365R`, `68`, `C`, `210R`). For DSB trains it is the train number (`2727`); `PublishedLineName` then reads `Re 2727` or `IC 4128`, so the GTFS route name comes from its product prefix.
+- `TrainNumberRef` is present on every journey, trains and buses alike (`36500016` for a Movia trip); for trains it should equal GTFS `trip_short_name`.
+- Train and S-tog stops are seven-digit `86xxxxx` numbers, as in the API; Movia's are its own stop numbers (`6120`, `45880`). Both should equal the Labs GTFS `stop_id` with its leading zeros removed; the timetable job's stops confirm it.
+- `OriginRef` and `DestinationRef` name the trip's first and last stops even when those calls are not in the message.
+
+**What it changes.**
+
+- **The join** cannot rely on the first call's aimed departure. It keys on (line, origin, destination, service day) and then on any call in the message: the trip whose pattern has that stop at that aimed time. For trains, the train number first.
+- **Draining from Vercel (shape 2)** is no longer ruled out by lost messages, since they are kept. It is still ruled out for now by size: an evening with nobody watching leaves hours of Movia backlog, about 140 MB of XML an hour, for the first poll of the morning to read. The listener stays the plan.
+- **The listener restarts cheaply:** it reconnects and reads what it missed.
+
+## Still unknown
+
+1. **How long a subscription keeps messages, and how many**, beyond the hour measured. Decides how long the listener may be down before it loses updates, and whether draining from Vercel could ever work.
+2. **The weekday peak rate**, which the listener's minute log line measures once it runs.
+3. **How often an active trip is updated** when nothing changes. Decides whether silence can ever be judged per trip.
+4. **Whether every Movia `StopPointRef` is a Labs GTFS `stop_id`**, which the reader's tests check against the timetable.
 
 ## Sources
 
