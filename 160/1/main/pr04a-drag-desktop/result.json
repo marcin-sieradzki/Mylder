@@ -1,0 +1,10 @@
+{
+  "journey": "pr04a-drag-desktop",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"0\"\nReceived: \"\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 5000ms\n  - waiting for locator('[data-vehicles]')\n    14 × locator resolved to <div data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n",
+  "steps": [
+    "01-flat-north-up: flat, north-up (http://localhost:4302/en)",
+    "02-right-drag-sideways-turned-still-flat: right-drag sideways: turned, still flat (http://localhost:4302/en)",
+    "03-failure: failure (http://localhost:4302/en)"
+  ]
+}

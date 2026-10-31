@@ -1,0 +1,28 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { ready } from './lib.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await ready(page, expect)
+  await page.getByRole('button', { name: 'About Mylder' }).click()
+  const about = page.getByRole('dialog', { name: 'About Mylder' })
+  await expect(about).toBeVisible()
+  const keys = about.getByRole('region', { name: 'Keys' })
+  await keys.scrollIntoViewIfNeeded()
+  await step('About, Keys (English)')
+  console.log(await keys.innerText())
+  await expect(keys).toContainText('Shift + ← and → turn the map.')
+  await expect(keys).toContainText('Shift + ↑ and ↓ tilt it.')
+  await page.keyboard.press('Escape')
+  await page.goto('/da')
+  await ready(page, expect)
+  await page.getByRole('button', { name: 'Om Mylder' }).click()
+  const om = page.getByRole('dialog', { name: 'Om Mylder' })
+  await expect(om).toBeVisible()
+  const taster = om.getByRole('region').last()
+  await taster.scrollIntoViewIfNeeded()
+  await step('Om Mylder, keys (Danish)')
+  const text = await taster.innerText()
+  console.log(text)
+  expect(text).toMatch(/(Skift|Shift) \+ ← og → drejer kortet/)
+  expect(text).toMatch(/(Skift|Shift) \+ ↑ og ↓ vipper det/)
+}

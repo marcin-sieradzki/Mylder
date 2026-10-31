@@ -1,0 +1,11 @@
+{
+  "journey": "reg-moving-map",
+  "pass": true,
+  "steps": [
+    "01-draw-17-dots: draw: 17 dots (http://localhost:4303/en)",
+    "02-filter-bus-off: filter: bus off (http://localhost:4303/en?hide=bus)",
+    "03-filter-bus-back: filter: bus back (http://localhost:4303/en)",
+    "04-controls-zoomed-in-shorter-scale: controls: zoomed in, shorter scale (http://localhost:4303/en?map=12.20/55.68000/12.56500)",
+    "05-card-on-hover: card on hover (http://localhost:4303/en?map=15.00/55.62342/12.44659)"
+  ]
+}

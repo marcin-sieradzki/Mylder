@@ -1,0 +1,25 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { ready, map, scale, focusMap, press, camera } from './lib.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await ready(page, expect)
+  await focusMap(page)
+  await step('north-up, map focused')
+  await press(page, 'Shift+ArrowRight')
+  await page.waitForTimeout(800)
+  await expect(map(page)).not.toHaveAttribute('data-heading', '0', { timeout: 10000 })
+  const right = await camera(page)
+  console.log('after Shift+Right', JSON.stringify(right))
+  await step('Shift+Right: turned one step')
+  expect(Math.abs(Number(right.heading))).toBe(15)
+  await expect(map(page)).toHaveAttribute('data-tilt', '0')
+  await expect(scale(page)).toBeVisible()
+  await press(page, 'Shift+ArrowLeft', 2, 700)
+  await page.waitForTimeout(1000)
+  const left = await camera(page)
+  console.log('after 2x Shift+Left', JSON.stringify(left))
+  await step('Shift+Left twice: turned one step the other way')
+  expect(Math.abs(Number(left.heading))).toBe(15)
+  expect(Math.sign(Number(left.heading))).toBe(-Math.sign(Number(right.heading)))
+  await expect(scale(page)).toBeVisible()
+}

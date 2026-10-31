@@ -1,0 +1,11 @@
+{
+  "journey": "reg-vehicle-detail",
+  "pass": true,
+  "steps": [
+    "01-trip-panel-from-the-list: trip panel from the list (http://localhost:4303/en?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717)",
+    "02-following: following (http://localhost:4303/en?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717)",
+    "03-whole-line-shown: whole line shown (http://localhost:4303/en?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717&map=8.70/55.77251/12.44068)",
+    "04-closed: closed (http://localhost:4303/en?tab=vehicles&map=8.70/55.77251/12.44068)",
+    "05-trip-not-found: trip not found (http://localhost:4303/en?trip=nothing)"
+  ]
+}

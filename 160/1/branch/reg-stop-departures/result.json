@@ -1,0 +1,9 @@
+{
+  "journey": "reg-stop-departures",
+  "pass": true,
+  "steps": [
+    "01--sterport-st-from-the-map: Østerport St. from the map (http://localhost:4303/en?map=15.00/55.69250/12.58779&stop=8600650)",
+    "02-danish-panel-stays-afgange: Danish: panel stays, Afgange (http://localhost:4303/da?map=15.00/55.69250/12.58779&stop=8600650)",
+    "03-stop-not-found: stop not found (http://localhost:4303/en?stop=nowhere)"
+  ]
+}

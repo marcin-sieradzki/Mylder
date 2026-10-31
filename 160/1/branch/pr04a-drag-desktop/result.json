@@ -1,0 +1,12 @@
+{
+  "journey": "pr04a-drag-desktop",
+  "pass": true,
+  "steps": [
+    "01-flat-north-up: flat, north-up (http://localhost:4303/en)",
+    "02-right-drag-sideways-turned-still-flat: right-drag sideways: turned, still flat (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "03-right-drag-up-tilted-heading-kept-scale-bar-hidden: right-drag up: tilted, heading kept, scale bar hidden (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "04-reset: reset (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "05-ctrl-drag-sideways-turned: Ctrl-drag sideways: turned (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "06-ctrl-drag-up-tilted: Ctrl-drag up: tilted (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

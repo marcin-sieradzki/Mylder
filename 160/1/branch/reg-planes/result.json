@@ -1,0 +1,9 @@
+{
+  "journey": "reg-planes",
+  "pass": true,
+  "steps": [
+    "01-planes-drawn-chip-count-credit: planes drawn, chip count, credit (http://localhost:4303/en)",
+    "02-planes-off: planes off (http://localhost:4303/en?hide=aircraft)",
+    "03-plane-panel: plane panel (http://localhost:4303/en?map=13.00/55.61184/12.64218&aircraft=45ab23)"
+  ]
+}

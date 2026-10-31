@@ -1,0 +1,8 @@
+{
+  "journey": "probe-dot-at-snapshot",
+  "pass": true,
+  "steps": [
+    "01-flat-centred-on-the-snapshot-position-paused: flat, centred on the snapshot position, paused (http://localhost:4303/en?map=15.00/55.66767/12.58978)",
+    "02-searched: searched (http://localhost:4303/en?map=15.00/55.66767/12.58978)"
+  ]
+}

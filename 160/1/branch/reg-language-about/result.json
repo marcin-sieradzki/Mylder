@@ -1,0 +1,9 @@
+{
+  "journey": "reg-language-about",
+  "pass": true,
+  "steps": [
+    "01-danish-query-kept: Danish, query kept (http://localhost:4303/da?line=5C)",
+    "02-about: About (http://localhost:4303/en?line=5C)",
+    "03-about-closed: About closed (http://localhost:4303/en?line=5C)"
+  ]
+}

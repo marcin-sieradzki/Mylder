@@ -1,0 +1,10 @@
+{
+  "journey": "pr09-scale-bar",
+  "pass": true,
+  "steps": [
+    "01-flat-scale-bar: flat: scale bar (http://localhost:4303/en)",
+    "02-turned-30-flat-scale-bar-shows: turned 30, flat: scale bar shows (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "03-tilted-20-turned-scale-bar-hidden: tilted 20, turned: scale bar hidden (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "04-flat-again-still-turned-scale-bar-back: flat again, still turned: scale bar back (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

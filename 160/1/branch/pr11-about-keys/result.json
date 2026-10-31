@@ -1,0 +1,8 @@
+{
+  "journey": "pr11-about-keys",
+  "pass": true,
+  "steps": [
+    "01-about-keys-english-: About, Keys (English) (http://localhost:4303/en)",
+    "02-om-mylder-keys-danish-: Om Mylder, keys (Danish) (http://localhost:4303/da)"
+  ]
+}

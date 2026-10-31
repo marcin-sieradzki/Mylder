@@ -1,0 +1,11 @@
+{
+  "journey": "pr02-tilt-keys",
+  "pass": true,
+  "steps": [
+    "01-flat-map-focused: flat, map focused (http://localhost:4303/en)",
+    "02-shift-up-tilted-one-step-10-: Shift+Up: tilted one step (10) (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "03-shift-down-flat-again-scale-bar-back: Shift+Down: flat again, scale bar back (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "04-eight-shift-up-tilt-stops-at-60: eight Shift+Up: tilt stops at 60 (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "05-two-more-shift-up-still-60: two more Shift+Up: still 60 (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

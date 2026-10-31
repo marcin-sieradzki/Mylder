@@ -1,0 +1,9 @@
+{
+  "journey": "pr11-about-keys",
+  "pass": false,
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'About Mylder' }).getByRole('region', { name: 'Keys' })\nExpected substring: \"Shift + ← and → turn the map.\"\nReceived string:    \"Keys+ and − zoom the map.← → ↑ ↓ move it.Esc closes the vehicle card or panel.The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again.\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('dialog', { name: 'About Mylder' }).getByRole('region', { name: 'Keys' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'About Mylder' }).getByRole('region', { name: 'Keys' })\n    14 × locator resolved to <section class=\"pn-Section\" aria-labelledby=\"_r_v_\">…</section>\n       - unexpected value \"Keys+ and − zoom the map.← → ↑ ↓ move it.Esc closes the vehicle card or panel.The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again.\"\n",
+  "steps": [
+    "01-about-keys-english-: About, Keys (English) (http://localhost:4302/en)",
+    "02-failure: failure (http://localhost:4302/en)"
+  ]
+}

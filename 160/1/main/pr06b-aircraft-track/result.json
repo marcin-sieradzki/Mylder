@@ -1,0 +1,9 @@
+{
+  "journey": "pr06b-aircraft-track",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"90\"\nReceived: \"\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    3 × locator resolved to <div data-aircraft=\"9\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n      - unexpected value \"null\"\n    20 × locator resolved to <div data-aircraft=\"10\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n",
+  "steps": [
+    "01-plane-sas506-track-72-flat-north-up: plane SAS506 track 72 flat north-up (http://localhost:4302/en?map=12.00/55.74300/12.61213)",
+    "02-failure: failure (http://localhost:4302/en?map=12.00/55.74300/12.71513)"
+  ]
+}

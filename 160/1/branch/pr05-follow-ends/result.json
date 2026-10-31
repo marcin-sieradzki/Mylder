@@ -1,0 +1,11 @@
+{
+  "journey": "pr05-follow-ends",
+  "pass": true,
+  "steps": [
+    "01-following: following (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "02-map-focused-still-following: map focused, still following (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-shift-up-pressed: Shift+Up pressed (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=11.20/55.63721/12.58258)",
+    "04-following-again: following again (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=11.20/55.63721/12.58258)",
+    "05-shift-left-pressed: Shift+Left pressed (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=11.20/55.63688/12.58245)"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "journey": "pr05-follow-ends",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"10\"\nReceived: \"\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 5000ms\n  - waiting for locator('[data-vehicles]')\n    14 × locator resolved to <div data-aircraft=\"9\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n",
+  "steps": [
+    "01-following: following (http://localhost:4302/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "02-map-focused-still-following: map focused, still following (http://localhost:4302/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-shift-up-pressed: Shift+Up pressed (http://localhost:4302/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=11.20/55.66144/12.58547)",
+    "04-failure: failure (http://localhost:4302/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=11.20/55.66144/12.58547)"
+  ]
+}

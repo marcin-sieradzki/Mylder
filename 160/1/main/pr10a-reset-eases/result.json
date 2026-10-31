@@ -1,0 +1,9 @@
+{
+  "journey": "pr10a-reset-eases",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"40\"\nReceived: \"\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    22 × locator resolved to <div data-aircraft=\"7\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n    - locator resolved to <div data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n    - unexpected value \"null\"\n",
+  "steps": [
+    "01-opening-place: opening place (http://localhost:4302/en)",
+    "02-failure: failure (http://localhost:4302/en?map=12.20/55.71369/12.65409)"
+  ]
+}

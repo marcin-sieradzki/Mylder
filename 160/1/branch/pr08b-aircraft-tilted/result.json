@@ -1,0 +1,9 @@
+{
+  "journey": "pr08b-aircraft-tilted",
+  "pass": true,
+  "steps": [
+    "01-tilted-40-turned-45-near-plane-sas506: tilted 40, turned -45, near plane SAS506 (http://localhost:4303/en?map=12.00/55.74756/12.63245)",
+    "02-hover-card-for-the-plane-pointed-at: hover: card for the plane pointed at (http://localhost:4303/en?map=12.00/55.74756/12.63245)",
+    "03-tap-its-panel-aircraft-in-the-address: tap: its panel, ?aircraft= in the address (http://localhost:4303/en?map=12.00/55.74756/12.63245&aircraft=4caf7e)"
+  ]
+}

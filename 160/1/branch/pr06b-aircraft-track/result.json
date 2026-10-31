@@ -1,0 +1,9 @@
+{
+  "journey": "pr06b-aircraft-track",
+  "pass": true,
+  "steps": [
+    "01-plane-sas506-track-72-flat-north-up: plane SAS506 track 72 flat north-up (http://localhost:4303/en?map=12.00/55.72131/12.49240)",
+    "02-plane-sas506-track-72-turned-90-flat: plane SAS506 track 72 turned 90 flat (http://localhost:4303/en?map=12.00/55.72131/12.49240)",
+    "03-plane-sas506-track-72-turned-90-tilted-30: plane SAS506 track 72 turned 90 tilted 30 (http://localhost:4303/en?map=12.00/55.72131/12.49240)"
+  ]
+}

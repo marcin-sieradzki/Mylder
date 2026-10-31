@@ -1,0 +1,9 @@
+{
+  "journey": "pr09-scale-bar",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"30\"\nReceived: \"\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    19 × locator resolved to <div data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n    4 × locator resolved to <div data-aircraft=\"7\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n      - unexpected value \"null\"\n",
+  "steps": [
+    "01-flat-scale-bar: flat: scale bar (http://localhost:4302/en)",
+    "02-failure: failure (http://localhost:4302/en?map=11.20/55.68000/12.62478)"
+  ]
+}

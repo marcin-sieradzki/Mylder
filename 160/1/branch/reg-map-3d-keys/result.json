@@ -1,0 +1,9 @@
+{
+  "journey": "reg-map-3d-keys",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4303/en)",
+    "02-tilted-30-turned-30: tilted 30, turned 30 (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "03-centre-the-map-flat-north-up-scale-bar-back: Centre the map: flat, north-up, scale bar back (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

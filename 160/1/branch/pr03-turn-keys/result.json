@@ -1,0 +1,9 @@
+{
+  "journey": "pr03-turn-keys",
+  "pass": true,
+  "steps": [
+    "01-north-up-map-focused: north-up, map focused (http://localhost:4303/en)",
+    "02-shift-right-turned-one-step: Shift+Right: turned one step (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "03-shift-left-twice-turned-one-step-the-other-way: Shift+Left twice: turned one step the other way (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

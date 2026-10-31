@@ -1,0 +1,10 @@
+{
+  "journey": "pr03-turn-keys",
+  "pass": false,
+  "error": "expect(received).toBe(expected) // Object.is equality\n\nExpected: 15\nReceived: 0",
+  "steps": [
+    "01-north-up-map-focused: north-up, map focused (http://localhost:4302/en)",
+    "02-shift-right-turned-one-step: Shift+Right: turned one step (http://localhost:4302/en?map=11.20/55.68000/12.59489)",
+    "03-failure: failure (http://localhost:4302/en?map=11.20/55.68000/12.59489)"
+  ]
+}

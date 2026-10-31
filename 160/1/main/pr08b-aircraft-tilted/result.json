@@ -1,0 +1,8 @@
+{
+  "journey": "pr08b-aircraft-tilted",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"40\"\nReceived: \"\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    22 × locator resolved to <div data-aircraft=\"10\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n    - locator resolved to <div data-aircraft=\"10\" data-vehicles=\"18\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n    - unexpected value \"null\"\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4302/en?map=12.00/55.78619/12.58095)"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "journey": "pr04b-touch-tablet",
+  "pass": true,
+  "steps": [
+    "01-desktop-page-unused-: desktop page (unused) (http://localhost:4303/en)"
+  ]
+}

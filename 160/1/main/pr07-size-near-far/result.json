@@ -1,0 +1,9 @@
+{
+  "journey": "pr07-size-near-far",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"60\"\nReceived: \"\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    24 × locator resolved to <div data-aircraft=\"10\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"null\"\n",
+  "steps": [
+    "01-12-50-55-66000-12-57000-flat: 12.50/55.66000/12.57000 flat (http://localhost:4302/en?map=12.50/55.66000/12.57000)",
+    "02-failure: failure (http://localhost:4302/en?map=12.50/55.70106/12.57000)"
+  ]
+}

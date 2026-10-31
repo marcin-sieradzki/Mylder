@@ -1,0 +1,10 @@
+{
+  "journey": "pr04c-phone-no-gestures",
+  "pass": true,
+  "steps": [
+    "01-phone-flat: phone, flat (http://localhost:4303/en)",
+    "02-after-two-finger-drag-up-still-flat: after two-finger drag up: still flat (http://localhost:4303/en?map=10.40/55.62127/12.56500)",
+    "03-after-two-finger-twist-still-north-up: after two-finger twist: still north-up (http://localhost:4303/en?map=10.50/55.62301/12.56500)",
+    "04-after-right-drag-still-flat-and-north-up: after right-drag: still flat and north-up (http://localhost:4303/en?map=10.50/55.62301/12.56500)"
+  ]
+}

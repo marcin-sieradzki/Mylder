@@ -1,0 +1,10 @@
+{
+  "journey": "pr08a-vehicle-tilted",
+  "pass": true,
+  "steps": [
+    "01-bus-centred-by-follow-paused-zoomed-in: bus centred by Follow, paused, zoomed in (http://localhost:4303/en?map=15.20/55.66771/12.58905)",
+    "02-tilted-40-turned-45: tilted 40, turned -45 (http://localhost:4303/en?map=15.20/55.66771/12.58905)",
+    "03-hover-card-for-the-bus-pointed-at: hover: card for the bus pointed at (http://localhost:4303/en?map=15.20/55.66771/12.58905)",
+    "04-tap-its-panel-trip-in-the-address: tap: its panel, ?trip= in the address (http://localhost:4303/en?map=15.20/55.66771/12.58905&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

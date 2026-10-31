@@ -1,0 +1,12 @@
+{
+  "journey": "pr06a-strands",
+  "pass": true,
+  "steps": [
+    "01-e-flat: E flat (http://localhost:4303/en?map=15.20/55.72231/12.57061)",
+    "02-e-tilted-40: E tilted 40 (http://localhost:4303/en?map=15.20/55.72231/12.57061)",
+    "03-e-tilted-40-turned-45: E tilted 40 turned -45 (http://localhost:4303/en?map=15.20/55.72231/12.57061)",
+    "04-m1-flat: M1 flat (http://localhost:4303/en?map=15.20/55.63805/12.58291)",
+    "05-m1-tilted-40: M1 tilted 40 (http://localhost:4303/en?map=15.20/55.63805/12.58291)",
+    "06-m1-tilted-40-turned-45: M1 tilted 40 turned -45 (http://localhost:4303/en?map=15.20/55.63805/12.58291)"
+  ]
+}

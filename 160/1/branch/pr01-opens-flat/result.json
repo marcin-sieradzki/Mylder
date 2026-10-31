@@ -1,0 +1,7 @@
+{
+  "journey": "pr01-opens-flat",
+  "pass": true,
+  "steps": [
+    "01-opened-flat-and-north-up: opened: flat and north-up (http://localhost:4303/en)"
+  ]
+}

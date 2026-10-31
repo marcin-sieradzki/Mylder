@@ -1,0 +1,8 @@
+{
+  "journey": "pr04b-touch-tablet",
+  "pass": false,
+  "error": "expect(locator).toBeHidden() failed\n\nLocator:  getByText(/\\d+\\s(m|km)$/)\nExpected: hidden\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeHidden\" getByText(/\\d+\\s(m|km)$/) with timeout 5000ms\n  - waiting for getByText(/\\d+\\s(m|km)$/)\n    14 × locator resolved to <span class=\"pn-ScaleBar-label\">…</span>\n       - unexpected value \"visible\"\n",
+  "steps": [
+    "01-failure: failure (about:blank)"
+  ]
+}

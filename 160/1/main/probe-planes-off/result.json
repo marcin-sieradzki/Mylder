@@ -1,0 +1,7 @@
+{
+  "journey": "probe-planes-off",
+  "pass": true,
+  "steps": [
+    "01-planes-off: planes off (http://localhost:4302/en?hide=aircraft)"
+  ]
+}

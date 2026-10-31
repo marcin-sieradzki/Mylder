@@ -1,0 +1,9 @@
+{
+  "journey": "pr10b-reset-reduced-motion",
+  "pass": true,
+  "steps": [
+    "01-opening-place: opening place (http://localhost:4303/en)",
+    "02-zoomed-panned-tilted-40-turned-45: zoomed, panned, tilted 40, turned 45 (http://localhost:4303/en?map=12.20/55.68000/12.60983)",
+    "03-reset-flat-north-up-opening-place: reset: flat, north-up, opening place (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}
