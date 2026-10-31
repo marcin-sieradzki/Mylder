@@ -26,6 +26,7 @@
   },
   "vehicle": {
     "title": "{mode} {line} mod {headsign}",
+    "titleFrom": "{mode} {line} fra {origin}",
     "reported": "Meldt for {age} siden",
     "lastSeen": "Sidst set for {age} siden",
     "estimated": "Beregnet ud fra køreplanen",
@@ -120,6 +121,7 @@
     "failedDetail": "Prøver igen om lidt.",
     "arrivalsFailed": "Ankomsterne kunne ikke hentes",
     "note": "Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.",
+    "arrivalsNote": "Nedtællinger bruger køreplanen, rykket med den forsinkelse, positionerne viser, hvor en tur har en; resten bruger køreplanen alene og siger det.",
     "fromTimetable": "Fra køreplanen",
     "timetableAndPositions": "Køreplan og positioner {time}",
     "track": "Spor {track}",

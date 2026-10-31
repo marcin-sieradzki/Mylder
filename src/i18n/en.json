@@ -26,6 +26,7 @@
   },
   "vehicle": {
     "title": "{mode} {line} to {headsign}",
+    "titleFrom": "{mode} {line} from {origin}",
     "reported": "Reported {age} ago",
     "lastSeen": "Last seen {age} ago",
     "estimated": "Estimated from schedule",
@@ -120,6 +121,7 @@
     "failedDetail": "Trying again shortly.",
     "arrivalsFailed": "The arrivals could not be loaded",
     "note": "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.",
+    "arrivalsNote": "Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so.",
     "fromTimetable": "From the timetable",
     "timetableAndPositions": "Timetable and positions {time}",
     "track": "Track {track}",

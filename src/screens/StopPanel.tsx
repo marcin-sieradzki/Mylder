@@ -144,7 +144,7 @@ interface PendingProps {
   words: Words
 }
 
-/** What the panel's lists read: the filters, the trips' states on the map, and the server's second. */
+/** What the panel's lists read: the filters, the trips' states on the map, the server's second. */
 interface ListContext {
   readonly hidden: ReadonlySet<Mode>
   readonly states: ReadonlyMap<string, DataState>
@@ -250,10 +250,13 @@ function Arrivals(context: ListContext) {
   )
 }
 
-/** Each list's words: its name, its empty text and its source's label once Rejseplanen answers. */
+/**
+ * Each list's words: its name, its empty text, its note while its times come from the timetable,
+ * and its source's label once Rejseplanen answers.
+ */
 const BOARD_WORDS = {
-  departures: { name: 'departures', empty: 'empty', at: 'departuresAt' },
-  arrivals: { name: 'arrivals', empty: 'arrivalsEmpty', at: 'arrivalsAt' },
+  departures: { name: 'departures', empty: 'empty', note: 'note', at: 'departuresAt' },
+  arrivals: { name: 'arrivals', empty: 'arrivalsEmpty', note: 'arrivalsNote', at: 'arrivalsAt' },
 } as const satisfies Record<StopBoard, Record<string, keyof Words>>
 
 /** A row of either list: a departure, or an arrival with where it comes from. */
@@ -332,7 +335,8 @@ function Board({
         </ul>
       )}
       <Text variant="caption" emphasis="secondary">
-        {words.note}
+        {/* A board's answer carries Rejseplanen's expected times, whichever list it fills. */}
+        {answer.source.kind === 'rejseplanen' ? words.note : words[named.note]}
       </Text>
       {answer.source.kind === 'timetable' ? (
         <Text variant="caption" emphasis="secondary">
@@ -398,7 +402,7 @@ function Interval({ row, place, words }: IntervalProps) {
 }
 
 interface DepartureProps {
-  row: StopDeparture
+  row: BoardRow
   /** Where it goes, or for an arrival where it comes from, as the row names it. */
   place: string
   state: DataState

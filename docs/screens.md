@@ -74,7 +74,7 @@ When on-demand calls are stopped by the budget, or the API is failing, the panel
   - **Empty:** "No arrivals in the next 30 minutes for the vehicle types shown."
   - **Messages**, above the list: the disruption list's whose stops include this one.
   - **Source line:** "Timetable and positions 08:14:05", the positions' time of the snapshot its times were shifted by.
-- **Note**, under each tab's list: "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so."
+- **Note**, under each tab's list: "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so." Arrivals, while their times come from the timetable, read instead "Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so."; an answer from a board carries the first note on either tab.
 
 **Built from:** DetailPanel (stop variant) with LineBadges in its subheader, Section, Tabs, DepartureRow, Button, DataStatePanel, DisruptionCard, Text. A standing row is a DepartureRow, whose status part draws the trip's data state as VehicleDotLabel does, its dot and its word.
 
