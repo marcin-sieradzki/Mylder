@@ -4,8 +4,9 @@
 // filters hide, are where their motion (loop.ts) moves them each frame, and the aircraft, unless
 // the Planes filter hides them, where theirs (aircraft-loop.ts) does, with each kind's glyphs made
 // again when its snapshot lands, a data state turns by the clock, a filter or the theme changes;
-// every dot's size where the zoom puts it. A hover picks a dot of either kind (picking.ts), a tap
-// on one opens its panel, and a tap that finds no dot opens the stop under it, if any.
+// every dot's size where the zoom puts it, and each one where the camera draws it however the
+// map is turned or tilted. A hover picks a dot of either kind (picking.ts), a tap on one opens its
+// panel, and a tap that finds no dot opens the stop under it, if any.
 // Each frame drawn moves the camera onto the followed dot (follow.ts). It polls the snapshot while
 // the map is open, and the aircraft while the Planes filter shows them too. The numbers of
 // vehicles and aircraft drawn are on the map's container as `data-vehicles` and `data-aircraft`,
@@ -277,8 +278,23 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     frames.request()
   }
   map.on('zoom', onZoom)
+  // A turned or tilted camera changes where each strand's offset falls on the canvas and which
+  // way each plane points as it moves: each of its moves writes the offsets again and draws once
+  // more, even while the dots stand still, and so does the move that brings it back to flat and
+  // north-up. Flat and north-up, a pan or a zoom changes neither.
+  let level = true
+  const onCamera = () => {
+    const levelNow = map.getBearing() === 0 && map.getPitch() === 0
+    if (level && levelNow) return
+    level = levelNow
+    loop.reproject()
+    frames.request()
+  }
   // The picked dot's card follows it as the map pans, even while the dots stand still.
-  const onMove = () => picking.follow(kinds(), project)
+  const onMove = () => {
+    onCamera()
+    picking.follow(kinds(), project)
+  }
   map.on('move', onMove)
   // A resized window moves the canvas on the page, which the card's point counts from.
   const onResize = () => {
