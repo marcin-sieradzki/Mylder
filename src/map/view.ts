@@ -23,6 +23,13 @@ export interface MapView {
   /** Longitude and latitude, once the map has been moved or the address names them. */
   readonly centre?: readonly [number, number]
   readonly zoom?: number
+  /**
+   * The compass heading up the map, clockwise from north in degrees, -180 to 180, while it is
+   * turned; north-up when none.
+   */
+  readonly bearing?: number
+  /** The tilt from looking straight down, in degrees, up to `MAX_PITCH`, while tilted; flat when none. */
+  readonly pitch?: number
   /** The modes a filter keeps off the map; none by default. */
   readonly hidden: ReadonlySet<Mode>
   /** Whether the Planes filter keeps the aircraft off the map; it shows them by default. */
@@ -57,7 +64,8 @@ export interface ViewStore {
   subscribe(onChange: () => void): () => void
 }
 
-// `map=11.20/55.68000/12.56500`: zoom, latitude and longitude, in the order map links use.
+// `map=11.20/55.68000/12.56500`: zoom, latitude and longitude, in the order map links use, then
+// `/-35.0/50.0`, the heading and the tilt, while the map is turned or tilted (the 3D view).
 const MAP = 'map'
 const HIDE = 'hide'
 const TAB = 'tab'
@@ -75,19 +83,23 @@ const NOTHING: MapView = { hidden: new Set() }
 export function viewOf(search: string): MapView {
   const query = new URLSearchParams(search)
   const place = (query.get(MAP) ?? '').split('/').map((part) => (part ? Number(part) : NaN))
-  const [zoom, lat, lon] = place
-  // MapLibre refuses a latitude past a pole and won't start; a place off the map is no place.
+  const [zoom, lat, lon, bearing, pitch] = place
+  // MapLibre refuses a latitude past a pole and won't start; a place off the map is no place. A
+  // heading or a tilt out of range is dropped, and the place still opens, north-up or flat.
   const placed =
-    place.length === 3 &&
+    (place.length === 3 || place.length === 5) &&
     within(zoom, 0, MAX_ZOOM) &&
     within(lat, -90, 90) &&
     within(lon, -180, 180)
+  const angled = placed && place.length === 5
   const hide = (query.get(HIDE) ?? '').split(',')
   const hidden = new Set(hide.filter((mode): mode is Mode => isMode(mode)))
   const panel = panelOf(query)
   const tab = query.get(TAB) ?? ''
   return {
     ...(placed ? { centre: [lon, lat] as const, zoom } : {}),
+    ...(angled && within(bearing, -180, 180) ? { bearing } : {}),
+    ...(angled && within(pitch, 0, MAX_PITCH) ? { pitch } : {}),
     hidden,
     ...(hide.includes('aircraft') ? { aircraftHidden: true } : {}),
     ...(panel ? { panel } : {}),
@@ -107,6 +119,9 @@ function panelOf(query: URLSearchParams): Panel | undefined {
 /** The closest zoom MapLibre draws. */
 const MAX_ZOOM = 24
 
+/** The most the map tilts, in degrees, before the view is mostly sky and far-off streets. */
+export const MAX_PITCH = 60
+
 /** Whether `value` is a number from `low` to `high`; NaN is not. */
 const within = (value: number, low: number, high: number) => value >= low && value <= high
 
@@ -121,17 +136,24 @@ export function searchWith(search: string, view: MapView): string {
   const query = new URLSearchParams(search)
   const put = (name: string, value: string | undefined) =>
     value ? query.set(name, value) : query.delete(name)
-  put(
-    MAP,
-    view.centre && view.zoom !== undefined
-      ? `${view.zoom.toFixed(2)}/${view.centre[1].toFixed(5)}/${view.centre[0].toFixed(5)}`
-      : undefined,
-  )
+  put(MAP, placeOf(view))
   put(HIDE, MAP_FILTERS.filter((filter) => hides(view, filter)).join(','))
   for (const kind of KINDS) put(PANELS[kind], view.panel?.kind === kind ? view.panel.id : undefined)
   put(TAB, view.tab === SHEET_TABS[0] ? undefined : view.tab)
   const written = readableQuery(query)
   return written ? `?${written}` : ''
+}
+
+/**
+ * The view's `map=`: its place, then its heading and tilt while either is off flat and north-up at
+ * the tenth of a degree the address keeps, so a flat link stays as short as before 3D.
+ */
+function placeOf({ centre, zoom, bearing = 0, pitch = 0 }: MapView): string | undefined {
+  if (!centre || zoom === undefined) return undefined
+  const place = `${zoom.toFixed(2)}/${centre[1].toFixed(5)}/${centre[0].toFixed(5)}`
+  // Through a number and back, so a heading a hair west of north is 0.0, not -0.0.
+  const [heading, tilt] = [bearing, pitch].map((angle) => Number(angle.toFixed(1)))
+  return heading === 0 && tilt === 0 ? place : `${place}/${heading.toFixed(1)}/${tilt.toFixed(1)}`
 }
 
 /**
