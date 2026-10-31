@@ -1,0 +1,30 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { ready } from './lib.ts'
+// Pass rule 6: About says building heights come from OpenStreetMap and are approximate, in English and Danish.
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await ready(page, expect)
+  await step('map')
+  await page.getByRole('button', { name: 'About Mylder' }).click()
+  const en = page.getByRole('dialog', { name: 'About Mylder' })
+  await expect(en).toBeVisible()
+  const heightsEn = en.getByText(/building/i).filter({ hasText: /height/i })
+  await heightsEn.first().scrollIntoViewIfNeeded()
+  await step('About in English')
+  console.log('EN:', await heightsEn.allInnerTexts())
+  await expect(heightsEn.first()).toContainText(/OpenStreetMap/)
+  await expect(heightsEn.first()).toContainText(/approximate/i)
+  await page.keyboard.press('Escape')
+  await page.goto('/da')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'da')
+  await expect.poll(async () => Number(await page.locator('[data-vehicles]').getAttribute('data-vehicles')), { timeout: 30000 }).toBeGreaterThan(0)
+  await page.getByRole('button', { name: 'Om Mylder' }).click()
+  const da = page.getByRole('dialog', { name: 'Om Mylder' })
+  await expect(da).toBeVisible()
+  const heightsDa = da.getByText(/bygning/i).filter({ hasText: /højde/i })
+  await heightsDa.first().scrollIntoViewIfNeeded()
+  await step('About in Danish')
+  console.log('DA:', await heightsDa.allInnerTexts())
+  await expect(heightsDa.first()).toContainText(/OpenStreetMap/)
+  await expect(heightsDa.first()).toContainText(/omtrentlig|cirka|tilnærm|anslå|ca\./i)
+}

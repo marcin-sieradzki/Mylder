@@ -1,0 +1,10 @@
+{
+  "journey": "planes-over-buildings-2",
+  "pass": true,
+  "steps": [
+    "01-flat-on-sas506-at-55-732153-12-551451: flat on SAS506 at 55.732153,12.551451 (http://localhost:4313/en?map=14.00/55.732153/12.551451)",
+    "02-tilted-0: tilted, 0 (http://localhost:4313/en?map=14.00/55.73215/12.55145)",
+    "03-tilted-1: tilted, 1 (http://localhost:4313/en?map=14.00/55.73215/12.55145)",
+    "04-tilted-2: tilted, 2 (http://localhost:4313/en?map=14.00/55.73215/12.55145)"
+  ]
+}

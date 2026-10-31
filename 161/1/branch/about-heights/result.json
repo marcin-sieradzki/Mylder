@@ -1,0 +1,9 @@
+{
+  "journey": "about-heights",
+  "pass": true,
+  "steps": [
+    "01-map: map (http://localhost:4313/en)",
+    "02-about-in-english: About in English (http://localhost:4313/en)",
+    "03-about-in-danish: About in Danish (http://localhost:4313/da)"
+  ]
+}

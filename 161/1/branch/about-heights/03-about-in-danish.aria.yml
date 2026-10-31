@@ -1,0 +1,102 @@
+- region "Notifikationer"
+- dialog "Om Mylder":
+  - heading "Om Mylder" [level=2]
+  - button "Luk"
+  - paragraph: Et livekort over Københavns busser, S-tog, metro og tog, ærligt om hvor friske positionerne er.
+  - paragraph: Mylder viser data, som Rejseplanen sender dem, med Rejseplanens egne ord og sprog, og markerer hvert tal, Mylder selv regner ud.
+  - paragraph: "Mylder er ikke-kommercielt: ingen reklamer, ingen betalt version og intet salg af data eller af noget, der er bygget på dem."
+  - region "Data og kreditering":
+    - heading "Data og kreditering" [level=3]
+    - paragraph:
+      - text: "Realtidsdata og køreplan:"
+      - link "Rejseplanen":
+        - /url: https://www.rejseplanen.dk/
+      - text: ", under"
+      - link "CC BY 4.0":
+        - /url: https://creativecommons.org/licenses/by/4.0/
+      - text: . Køreplan fra 2. juni.
+    - paragraph:
+      - text: "Kort: ©"
+      - link "OpenStreetMap-bidragydere":
+        - /url: https://www.openstreetmap.org/copyright
+      - text: under
+      - link "ODbL":
+        - /url: https://opendatacommons.org/licenses/odbl/
+      - text: ", ©"
+      - link "OpenMapTiles":
+        - /url: https://openmaptiles.org/
+      - text: ","
+      - link "OpenFreeMap":
+        - /url: https://openfreemap.org/
+      - text: .
+    - paragraph: Bygningshøjderne kommer fra OpenStreetMap og er omtrentlige.
+    - paragraph:
+      - text: "Fly: ©"
+      - link "adsb.lol-bidragydere":
+        - /url: https://adsb.lol/
+      - text: under
+      - link "ODbL":
+        - /url: https://opendatacommons.org/licenses/odbl/
+      - text: .
+    - paragraph:
+      - text: Flyene er optagne data fra adsb.lol, åbne under samme licens i
+      - link "Mylders repository":
+        - /url: https://github.com/marcin-sieradzki/mylder/tree/main/recordings
+      - text: .
+    - paragraph:
+      - text: "Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se"
+      - link "licensen":
+        - /url: https://github.com/marcin-sieradzki/mylder/blob/main/src/map/style/LICENSE.md
+      - text: .
+  - region "Datatilstande":
+    - heading "Datatilstande" [level=3]
+    - list:
+      - listitem:
+        - text: Live
+        - paragraph: Køretøjet har selv meldt denne position inden for omtrent de seneste to forespørgsler.
+      - listitem:
+        - text: Ældre
+        - paragraph: Køretøjets seneste melding er ældre end det, men under 5 minutter; prikken kører videre fra den langs linjen.
+      - listitem:
+        - text: Beregnet
+        - paragraph: "Ingen ny melding, men Rejseplanen har stadig turen: en position, den har beregnet, eller forventede tider."
+      - listitem:
+        - text: Kun køreplan
+        - paragraph: Ingen realtid for turen i dag, så den er placeret efter køreplanen. Det gælder alle metrotog.
+      - listitem:
+        - text: Intet signal
+        - paragraph: Turen havde realtid, og den stoppede for 5 minutter siden eller mere; prikken kører efter køreplanen og sin seneste forsinkelse.
+  - region "Denne side":
+    - heading "Denne side" [level=3]
+    - paragraph: Køretøjerne på denne side er ikke rigtige.
+    - term: Kilde
+    - definition: En optagelse, weekday
+    - term: Positioner
+    - definition: Meldinger og beregnede positioner på skift
+    - term: Rejseplanens realtid
+    - definition: 07:23:00
+    - term: Forespørgsel
+    - definition: Hvert 60. sekund
+    - term: Databudget
+    - definition: Normalt
+    - term: Kald denne måned
+    - definition: "5"
+    - term: Serverlager
+    - definition: Tilgængeligt
+    - term: Driftsforstyrrelser
+    - definition: Tjekket 07:20
+  - region "Taster":
+    - heading "Taster" [level=3]
+    - list:
+      - listitem:
+        - paragraph: + og − zoomer kortet.
+      - listitem:
+        - paragraph: ← → ↑ ↓ flytter det.
+      - listitem:
+        - paragraph: Skift + ← og → drejer kortet.
+      - listitem:
+        - paragraph: Skift + ↑ og ↓ vipper det.
+      - listitem:
+        - paragraph: Esc lukker køretøjets kort eller panel.
+      - listitem:
+        - paragraph: Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen.

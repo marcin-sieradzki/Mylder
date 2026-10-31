@@ -1,0 +1,9 @@
+{
+  "journey": "smooth-tilted",
+  "pass": true,
+  "steps": [
+    "01-tilted-50-buildings-on-t-0: tilted 50, buildings on, t=0 (http://localhost:4312/en?map=15.00/55.66926/12.58106)",
+    "02-tilted-50-t-5s-24-1-fps: tilted 50, t=5s, 24.1 fps (http://localhost:4312/en?map=15.00/55.66926/12.58106)",
+    "03-tilted-50-t-8s: tilted 50, t=8s (http://localhost:4312/en?map=15.00/55.66926/12.58106)"
+  ]
+}

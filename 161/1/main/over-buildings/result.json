@@ -1,0 +1,10 @@
+{
+  "journey": "over-buildings",
+  "pass": true,
+  "steps": [
+    "01-flat-paused-centred-on-bus-5c: flat, paused, centred on bus 5C (http://localhost:4312/en?map=15.00/55.668370436960345/12.58399914870426)",
+    "02-tilted-50-over-buildings-lines-stops-and-dots-on-top: tilted 50 over buildings: lines, stops and dots on top (http://localhost:4312/en?map=15.00/55.66837/12.58400)",
+    "03-hover-card-over-buildings: hover card over buildings (http://localhost:4312/en?map=15.00/55.66837/12.58400)",
+    "04-panel-open-from-a-tap-over-buildings: panel open from a tap over buildings (http://localhost:4312/en?map=15.00/55.66837/12.58400&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

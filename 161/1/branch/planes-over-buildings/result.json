@@ -1,0 +1,8 @@
+{
+  "journey": "planes-over-buildings",
+  "pass": true,
+  "steps": [
+    "01-flat-on-plane-45ab23: flat on plane 45ab23 (http://localhost:4313/en?map=15.00/55.621324/12.650928)",
+    "02-tilted-50-on-the-plane-buildings-around: tilted 50 on the plane, buildings around (http://localhost:4313/en?map=15.00/55.62132/12.65093)"
+  ]
+}

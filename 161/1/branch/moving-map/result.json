@@ -1,0 +1,12 @@
+{
+  "journey": "moving-map",
+  "pass": true,
+  "steps": [
+    "01-map-drawn: map drawn (http://localhost:4313/en)",
+    "02-buses-off: buses off (http://localhost:4313/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4313/en)",
+    "04-zoomed-in-scale-scale-1-km-scale-500-m: zoomed in, scale Scale 1 km -> Scale 500 m (http://localhost:4313/en?map=12.20/55.68000/12.56500)",
+    "05-paused-near-a-live-dot: paused near a live dot (http://localhost:4313/en?map=15.00/55.705155471833635/12.493971271002007)",
+    "06-card-for-5c: card for 5C (http://localhost:4313/en?map=15.00/55.705155471833635/12.493971271002007)"
+  ]
+}

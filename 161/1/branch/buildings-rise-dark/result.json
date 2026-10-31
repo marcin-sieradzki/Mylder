@@ -1,0 +1,10 @@
+{
+  "journey": "buildings-rise-dark",
+  "pass": true,
+  "steps": [
+    "01-flat-at-zoom-16-inner-city: flat at zoom 16, inner city (http://localhost:4313/en?map=16.00/55.6800/12.5760)",
+    "02-tilted-60-at-zoom-16-buildings-should-rise: tilted 60 at zoom 16, buildings should rise (http://localhost:4313/en?map=16.00/55.68000/12.57600)",
+    "03-tilted-at-zoom-14-buildings-should-still-rise: tilted at zoom 14, buildings should still rise (http://localhost:4313/en?map=14.00/55.68000/12.57600)",
+    "04-tilted-at-zoom-13-buildings-should-be-flat-footprints: tilted at zoom 13, buildings should be flat footprints (http://localhost:4313/en?map=13.00/55.68000/12.57600)"
+  ]
+}
