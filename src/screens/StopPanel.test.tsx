@@ -509,9 +509,12 @@ describe('the trips standing at a stop’s platforms', () => {
     expect(bus).toHaveTextContent('Estimated')
     expect(bus).toHaveTextContent('2 min')
     expect(within(bus).getByText('07:23')).toHaveTextContent(/^~07:23$/)
-    // Above the departures.
-    const departures = within(stop).getByRole('list', { name: 'Departures' })
+    // Above the departures, which are a section of their own, named.
+    const departures = within(stop).getByRole('region', { name: 'Departures' })
     expect(section.compareDocumentPosition(departures)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(within(departures).getByRole('list', { name: 'Departures' })).toHaveTextContent(
+      'Teglholmen',
+    )
   })
 
   it('gives a standing trip’s track, as its board names it', async () => {

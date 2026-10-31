@@ -127,8 +127,8 @@ interface DeparturesProps {
 
 /**
  * The trips standing at the stop's platforms, then its messages, then its departures in the modes
- * the filters show, the interval lines' first and the rest aged by the server's clock, then the
- * note and the source line.
+ * the filters show, under their own title, the interval lines' first and the rest aged by the
+ * server's clock, then the note and the source line.
  */
 function Departures({ answer, timezone, lang, words }: DeparturesProps) {
   const hidden = useHiddenModes()
@@ -156,27 +156,33 @@ function Departures({ answer, timezone, lang, words }: DeparturesProps) {
         words={words}
         source={words.messagesSource}
       />
-      {shown.length + intervals.length === 0 ? (
-        <Text variant="body-sm" emphasis="secondary">
-          {words.empty}
-        </Text>
-      ) : (
-        <ul className={styles.departures} aria-label={words.departures}>
-          {intervals.map((row) => (
-            <Interval key={`${row.line} ${row.headsign} ${row.platform}`} row={row} words={words} />
-          ))}
-          {shown.map((row) => (
-            <Departure
-              key={`${row.trip} ${row.platform} ${row.scheduled}`}
-              row={row}
-              state={departureState(row, answer.source, states.get(row.trip))}
-              now={now}
-              timezone={timezone}
-              words={words}
-            />
-          ))}
-        </ul>
-      )}
+      <Section title={words.departures}>
+        {shown.length + intervals.length === 0 ? (
+          <Text variant="body-sm" emphasis="secondary">
+            {words.empty}
+          </Text>
+        ) : (
+          <ul className={styles.departures} aria-label={words.departures}>
+            {intervals.map((row) => (
+              <Interval
+                key={`${row.line} ${row.headsign} ${row.platform}`}
+                row={row}
+                words={words}
+              />
+            ))}
+            {shown.map((row) => (
+              <Departure
+                key={`${row.trip} ${row.platform} ${row.scheduled}`}
+                row={row}
+                state={departureState(row, answer.source, states.get(row.trip))}
+                now={now}
+                timezone={timezone}
+                words={words}
+              />
+            ))}
+          </ul>
+        )}
+      </Section>
       <Text variant="caption" emphasis="secondary">
         {words.note}
       </Text>

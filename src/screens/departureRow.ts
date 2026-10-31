@@ -1,4 +1,4 @@
-// What one departure row says (docs/screens.md, "Stop departures"; docs/data-states.md, "The
+// What one departure row says (docs/screens.md, "Stop panel"; docs/data-states.md, "The
 // states"): the countdown, the time beside it and the delay, each following the trip's data
 // state. Live and Ageing show the expected time, Estimated the expected time marked "~",
 // Timetable only and No signal the timetabled time and an unknown delay, and a cancelled
