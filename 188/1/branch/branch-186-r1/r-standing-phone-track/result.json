@@ -1,0 +1,8 @@
+{
+  "journey": "r-standing-phone-track",
+  "pass": true,
+  "steps": [
+    "01-map-at-k-benhavn-syd: map at København Syd (http://localhost:4303/en?map=17.00/55.65263/12.51685)",
+    "02-re-card-with-track-8: RE card with Track 8 (http://localhost:4303/en?map=17.00/55.65263/12.51685&stop=8600783)"
+  ]
+}

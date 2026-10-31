@@ -1,0 +1,89 @@
+== 22:05:18 main-186-r1 c1-maptap-filter-pixel7 --phone (rec "fetched":1781587200020
+"fetched":1781587200020)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"map tap, none standing","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+SOFT-FAIL map tap, none standing: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+FOOT {"label":"map tap, none standing","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"after Bus filter, standing","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":845.6875,"width":378,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":845.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":845.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL after Bus filter, standing: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+FOOT {"label":"after Bus filter, standing","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FULL top 12 peekTop 657
+BACK top 657
+TABS {"label":"dragged back to peek","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":845.6875,"width":378,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":845.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":845.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL dragged back to peek: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+FOOT {"label":"dragged back to peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FAIL c1-maptap-filter-pixel7: 7 steps in .verify/main-186-r1/c1-maptap-filter-pixel7/
+3 check(s) failed:
+- map tap, none standing: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+- after Bus filter, standing: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+- dragged back to peek: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875
+== 22:06:19 main-186-r1 c1-maptap-filter-390 --phone (rec "fetched":1781587265116
+"fetched":1781587200020)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"map tap, none standing","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":817.296875,"width":356,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":817.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":817.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+SOFT-FAIL map tap, none standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+FOOT {"label":"map tap, none standing","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"after Bus filter, standing","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":850.6875,"width":356,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":850.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":850.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL after Bus filter, standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+FOOT {"label":"after Bus filter, standing","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FULL top 12 peekTop 662
+BACK top 662
+TABS {"label":"dragged back to peek","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":850.6875,"width":356,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":850.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":850.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL dragged back to peek: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+FOOT {"label":"dragged back to peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":356,"y":696,"tag":"path","text":"","dialog":"Refshaleøen","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL c1-maptap-filter-390: 7 steps in .verify/main-186-r1/c1-maptap-filter-390/
+3 check(s) failed:
+- map tap, none standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+- after Bus filter, standing: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+- dragged back to peek: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+== 22:07:17 main-186-r1 c3-natural-held --phone (rec "fetched":1781587265116
+"fetched":1781587200020)
+fetched 2026-06-16T05:24:06.370Z t0 657
+TABS {"label":"Orientkaj before","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FAIL c3-natural-held: 2 steps in .verify/main-186-r1/c3-natural-held/
+Orientkaj before: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    849.296875
+== 22:09:36 main-186-r1 p2-none-link-pixel7 --phone (rec "fetched":1781587446370
+"fetched":1781587200020)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+SOFT-FAIL none standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+FOOT {"label":"none standing link","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"Nørreport St.","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+FAIL p2-none-link-pixel7: 4 steps in .verify/main-186-r1/p2-none-link-pixel7/
+1 check(s) failed:
+- none standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    849.296875
+== 22:10:13 main-186-r1 p2-none-link-390 --phone (rec "fetched":1781587446370
+"fetched":1781587200020)
+FOOT {"label":"baseline, Overview at peek","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+TABS {"label":"none standing link","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":817.296875,"width":356,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":817.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":817.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+SOFT-FAIL none standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+FOOT {"label":"none standing link","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Nørreport St.","top":662}],"sheetTop":662,"covered":[],"gap":12}
+hit {"x":356,"y":696,"tag":"path","text":"","dialog":"Nørreport St.","insideTarget":true}
+FOOT {"label":"stop closed","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL p2-none-link-390: 4 steps in .verify/main-186-r1/p2-none-link-390/
+1 check(s) failed:
+- none standing link: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    854.296875
+== 22:10:49 main-186-r1 c4-highlight-stop --phone (rec "fetched":1781587509101
+"fetched":1781587200020)
+URL after fit http://localhost:4302/en?tab=disruptions&map=15.00/55.66885/12.58226
+FOOT {"label":"after Show on map","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+stop top 657 URL http://localhost:4302/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807
+TABS {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":["DIV.pn-Sheet-content"],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+FAIL c4-highlight-stop: 3 steps in .verify/main-186-r1/c4-highlight-stop/
+Klaksvigsgade: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    849.296875
+== 22:11:21 main-186-r1 c6-desktop  (rec "fetched":1781587509101
+"fetched":1781587200020)
+DESKTOP Refshaleøen {"panel":{"x":904,"y":70,"width":364,"height":638},"anchor":"right","tablist":{"x":921,"y":225.296875,"width":330,"height":37},"credit":{"x":400,"y":668,"width":492,"height":40},"legend":{"x":417,"y":584.21875,"width":188.21875,"height":54.78125},"overview":{"x":12,"y":70,"width":376,"height":638}}
+DESKTOP Nørreport St. {"panel":{"x":904,"y":70,"width":364,"height":638},"anchor":"right","tablist":{"x":921,"y":225.296875,"width":330,"height":37},"credit":{"x":400,"y":668,"width":492,"height":40},"legend":{"x":417,"y":584.21875,"width":188.21875,"height":54.78125},"overview":{"x":12,"y":70,"width":376,"height":638}}
+PASS c6-desktop: 3 steps in .verify/main-186-r1/c6-desktop/

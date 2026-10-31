@@ -1,0 +1,12 @@
+{
+  "journey": "c5-line-taller-sheet",
+  "pass": false,
+  "error": "line + taller sheet: tablist bottom on screen (vp 839)\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 839.5\nReceived:    882.6875",
+  "steps": [
+    "01-show-whole-line-from-the-standing-card-vehicle: Show whole line from the standing card vehicle (http://localhost:4302/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901)",
+    "02-vehicle-closed-buses-hidden-line-still-highlighted: vehicle closed, buses hidden, line still highlighted (http://localhost:4302/en?map=11.19/55.68144/12.57901&hide=bus)",
+    "03-refshale-en-tapped-on-the-fitted-map-none-standing: Refshaleøen tapped on the fitted map, none standing (http://localhost:4302/en?map=11.19/55.68144/12.57901&hide=bus&stop=48645)",
+    "04-buses-shown-taller-peek-with-the-line-highlighted: buses shown: taller peek with the line highlighted (http://localhost:4302/en?map=11.19/55.68144/12.57901&stop=48645)",
+    "05-failure: failure (http://localhost:4302/en?map=11.19/55.68144/12.57901&stop=48645)"
+  ]
+}

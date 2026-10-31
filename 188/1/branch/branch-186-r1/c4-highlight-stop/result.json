@@ -1,0 +1,8 @@
+{
+  "journey": "c4-highlight-stop",
+  "pass": true,
+  "steps": [
+    "01-5c-stretch-shown-on-map: 5C stretch shown on map (http://localhost:4303/en?tab=disruptions&map=15.00/55.66885/12.58226)",
+    "02-ringed-stop-tapped-its-sheet-at-the-peek: ringed stop tapped, its sheet at the peek (http://localhost:4303/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807)"
+  ]
+}

@@ -1,0 +1,13 @@
+▲ Next.js 16.4.3
+- Local:         http://localhost:4303
+- Network:       http://192.0.2.2:4303
+✓ Ready in 161ms
+✓ Running next.config.ts took 45ms
+{"message":["Tracker run",{"source":{"kind":"recording","name":"weekday"},"positionMode":"alternating","answerMode":"CALC_REPORT","budget":{"level":"normal","calls":2},"store":"ok","calls":[{"service":"journeyPos","outcome":"ok","attempts":1,"ms":12},{"service":"himsearch","outcome":"ok","attempts":1,"ms":2}],"unmatched":0,"modes":{"bus":6,"metro":4,"s-tog":6,"train":1},"states":{"estimated":13,"timetable-only":4},"cpuMs":33,"timetable":{"prepared":"2026-06-02","last":"2026-08-26","daysLeft":72,"daysOld":14}}],"level":"INFO","timestamp":"2026-06-16T05:20:00.048Z","annotations":{},"spans":{},"fiberId":"#4"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:02.001Z","annotations":{},"spans":{},"fiberId":"#18"}
+{"message":"On-demand call: journeyDetail answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:08.162Z","annotations":{},"spans":{},"fiberId":"#31"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:27.090Z","annotations":{},"spans":{},"fiberId":"#42"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:20:58.086Z","annotations":{},"spans":{},"fiberId":"#54"}
+{"message":["Tracker run",{"source":{"kind":"recording","name":"weekday"},"positionMode":"alternating","answerMode":"REPORT_ONLY","budget":{"level":"normal","calls":7},"store":"ok","calls":[{"service":"journeyPos","outcome":"ok","attempts":1,"ms":3}],"unmatched":0,"modes":{"bus":6,"metro":4,"s-tog":6,"train":1},"states":{"estimated":6,"live":7,"timetable-only":4},"cpuMs":12,"timetable":{"prepared":"2026-06-02","last":"2026-08-26","daysLeft":72,"daysOld":14}}],"level":"INFO","timestamp":"2026-06-16T05:21:02.687Z","annotations":{},"spans":{},"fiberId":"#65"}
+{"message":"On-demand call: multiDepartureBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:21:03.147Z","annotations":{},"spans":{},"fiberId":"#73"}
+{"message":"On-demand call: multiArrivalBoard answered 400 SVC_PARAM","level":"WARN","timestamp":"2026-06-16T05:21:07.936Z","annotations":{},"spans":{},"fiberId":"#80"}

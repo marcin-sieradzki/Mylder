@@ -1,0 +1,71 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated —
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?stop=8600683&board=arrivals
+  - button "About Mylder"
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ) ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move Unknown
+      - paragraph
+- dialog "Hillerød St.":
+  - heading "Hillerød St." [level=2]
+  - list "Lines":
+    - listitem: A
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - paragraph: No vehicle of the types shown is standing at the platforms now.
+  - tablist "Departures and arrivals":
+    - tab "Departures"
+    - tab "Arrivals" [selected]
+  - tabpanel "Arrivals":
+    - paragraph: No arrivals in the next 30 minutes for the vehicle types shown.
+    - text: Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so. From the timetable
+    - paragraph:
+      - time: Timetable and positions 07:26:14
+- alert
+- region "Notifications"

@@ -1,0 +1,38 @@
+== 22:16:54 main-186-r1 r-standing-phone --phone (rec "fetched":1781587200021
+"fetched":1781587200021)
+card {"x":17,"y":761.296875,"width":340.1875,"height":72.390625} list {"x":17,"y":761.296875,"width":378,"height":72.390625} tablist {"x":17,"y":845.6875,"width":378,"height":37} vp {"width":412,"height":839}
+PASS r-standing-phone: 4 steps in .verify/main-186-r1/r-standing-phone/
+== 22:17:07 main-186-r1 c5-line-stop --phone (rec "fetched":1781587200021
+"fetched":1781587200021)
+FAIL c5-line-stop: 1 steps in .verify/main-186-r1/c5-line-stop/
+expect(locator).toBeAttached() failed
+Locator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+Expected: attached
+Error: strict mode violation: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) resolved to 2 elements:
+    1) <button type="button" class="ge1EQq_open" aria-label="Bus 991 to Teglholmen"></button> aka getByRole('list', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+    2) <button type="button" class="ge1EQq_open" aria-label="Bus 991 to Teglholmen"></button> aka getByRole('list', { name: 'Departures' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+Call log:
+  - Expect "toBeAttached" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+== 22:17:12 main-186-r1 c2-held-drag-390 --phone (rec "fetched":1781587200021
+"fetched":1781587200021)
+t0 662 held 649.5
+HELD samples [649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5,649.5]
+after release 662
+TABS {"label":"after held drag released","vp":{"width":390,"height":844},"sheetTop":662,"peek":182,"tablist":{"x":17,"y":850.6875,"width":356,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":850.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":850.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+SOFT-FAIL after held drag released: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+FOOT {"label":"after held drag released","vp":{"width":390,"height":844},"credit":{"top":592,"bottom":650,"left":12,"right":378},"legend":{"top":469.03125,"bottom":563},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":662}],"sheetTop":662,"covered":[],"gap":12}
+FAIL c2-held-drag-390: 5 steps in .verify/main-186-r1/c2-held-drag-390/
+1 check(s) failed:
+- after held drag released: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875
+== 22:17:40 main-186-r1 c4-highlight-stop --phone (rec "fetched":1781587200021
+"fetched":1781587200021)
+URL after fit http://localhost:4302/en?tab=disruptions&map=15.00/55.66885/12.58226
+FOOT {"label":"after Show on map","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+stop top 657 URL http://localhost:4302/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807
+TABS {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":812.296875,"width":378,"height":37},"tablistBottomGap":-10.296875,"scrolledBoxes":[],"otherScrolled":["DIV.pn-Sheet-content"],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":812.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":812.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+FAIL c4-highlight-stop: 3 steps in .verify/main-186-r1/c4-highlight-stop/
+Klaksvigsgade: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    849.296875

@@ -1,0 +1,51 @@
+== 22:16:54 branch-186-r1 r-standing-phone --phone (rec "fetched":1781587200027
+"fetched":1781587200027)
+card {"x":17,"y":717.296875,"width":340.1875,"height":72.390625} list {"x":17,"y":717.296875,"width":378,"height":72.390625} tablist {"x":17,"y":801.6875,"width":378,"height":37} vp {"width":412,"height":839}
+PASS r-standing-phone: 4 steps in .verify/branch-186-r1/r-standing-phone/
+== 22:17:08 branch-186-r1 c5-line-stop --phone (rec "fetched":1781587200027
+"fetched":1781587200027)
+FAIL c5-line-stop: 1 steps in .verify/branch-186-r1/c5-line-stop/
+expect(locator).toBeAttached() failed
+Locator: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+Expected: attached
+Error: strict mode violation: getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) resolved to 2 elements:
+    1) <button type="button" class="ge1EQq_open" aria-label="Bus 991 to Teglholmen"></button> aka getByRole('list', { name: 'At the platforms now' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+    2) <button type="button" class="ge1EQq_open" aria-label="Bus 991 to Teglholmen"></button> aka getByRole('list', { name: 'Departures' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+Call log:
+  - Expect "toBeAttached" getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Refshaleøen' }).getByRole('button', { name: 'Bus 991 to Teglholmen' })
+== 22:17:14 branch-186-r1 c2-held-drag-390 --phone (rec "fetched":1781587200027
+"fetched":1781587200027)
+t0 651 held 638.5
+HELD samples [638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5,638.5]
+after release 618
+TABS {"label":"after held drag released","vp":{"width":390,"height":844},"sheetTop":618,"peek":226,"tablist":{"x":17,"y":806.6875,"width":356,"height":37},"tablistBottomGap":0.3125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":806.6875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_0_"}},{"name":"Arrivals","box":{"x":111.90625,"y":806.6875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_0_"}}]}
+FOOT {"label":"after held drag released","vp":{"width":390,"height":844},"credit":{"top":548,"bottom":606,"left":12,"right":378},"legend":{"top":425.03125,"bottom":519},"sheets":[{"name":"Overview","top":662},{"name":"Refshaleøen","top":618}],"sheetTop":618,"covered":[],"gap":12}
+PASS c2-held-drag-390: 4 steps in .verify/branch-186-r1/c2-held-drag-390/
+== 22:17:40 branch-186-r1 r-first-paint  (rec "fetched":1781587200027
+"fetched":1781587200027)
+recorded rows 65 Now rows 0 dash rows 45
+recorded dialogs 20
+PASS r-first-paint: 2 steps in .verify/branch-186-r1/r-first-paint/
+== 22:17:49 branch-186-r1 r-arrivals-keys  (rec "fetched":1781587200027
+"fetched":1781587200027)
+PASS r-arrivals-keys: 2 steps in .verify/branch-186-r1/r-arrivals-keys/
+== 22:17:55 branch-186-r1 r-arrivals-metro  (rec "fetched":1781587261939
+"fetched":1781587200027)
+PASS r-arrivals-metro: 1 steps in .verify/branch-186-r1/r-arrivals-metro/
+== 22:18:00 branch-186-r1 r-vehicle-phone --phone (rec "fetched":1781587261939
+"fetched":1781587200027)
+trip bus.5C.32331e0e20.20260616.0707 5C Husum Torv [55.6679055261211,12.58672883948896]
+FOOT {"label":"vehicle sheet","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657},{"name":"5C to Husum Torv","top":657}],"sheetTop":657,"covered":[],"gap":12}
+hit {"x":50.546875,"y":747.5,"tag":"SPAN","text":"Follow","dialog":"5C to Husum Torv","insideTarget":true}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"5C to Husum Torv","insideTarget":true}
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"5C to Husum Torv","insideTarget":true}
+PASS r-vehicle-phone: 8 steps in .verify/branch-186-r1/r-vehicle-phone/
+== 22:18:20 branch-186-r1 c4-highlight-stop --phone (rec "fetched":1781587261939
+"fetched":1781587200027)
+URL after fit http://localhost:4303/en?tab=disruptions&map=15.00/55.66885/12.58226
+FOOT {"label":"after Show on map","vp":{"width":412,"height":839},"credit":{"top":587,"bottom":645,"left":12,"right":400},"legend":{"top":483.625,"bottom":558},"sheets":[{"name":"Overview","top":657}],"sheetTop":657,"covered":[],"gap":12}
+stop top 646 URL http://localhost:4303/en?tab=disruptions&map=15.00/55.66885/12.58226&stop=807
+TABS {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"sheetTop":646,"peek":193,"tablist":{"x":17,"y":801.296875,"width":378,"height":37},"tablistBottomGap":0.703125,"scrolledBoxes":[],"otherScrolled":["DIV.pn-Sheet-content"],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.296875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_o_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.296875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_o_"}}]}
+FOOT {"label":"Klaksvigsgade","vp":{"width":412,"height":839},"credit":{"top":576,"bottom":634,"left":12,"right":400},"legend":{"top":472.625,"bottom":547},"sheets":[{"name":"Overview","top":657},{"name":"Klaksvigsgade","top":646}],"sheetTop":646,"covered":[],"gap":12}
+PASS c4-highlight-stop: 2 steps in .verify/branch-186-r1/c4-highlight-stop/

@@ -1,0 +1,8 @@
+{
+  "journey": "r-arrivals-board",
+  "pass": true,
+  "steps": [
+    "01-board-arrivals: board arrivals (http://localhost:4303/en?stop=8600783&board=arrivals)",
+    "02-reopened-same-call-time: reopened, same call time (http://localhost:4303/en?stop=8600783&board=arrivals)"
+  ]
+}

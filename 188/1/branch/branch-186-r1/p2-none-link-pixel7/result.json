@@ -1,0 +1,9 @@
+{
+  "journey": "p2-none-link-pixel7",
+  "pass": true,
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4303/en)",
+    "02-stop-link-none-standing-at-its-peek: stop link, none standing, at its peek (http://localhost:4303/en?stop=27532)",
+    "03-stop-closed-foot-back: stop closed, foot back (http://localhost:4303/en)"
+  ]
+}

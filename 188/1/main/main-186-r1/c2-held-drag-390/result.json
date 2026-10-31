@@ -1,0 +1,12 @@
+{
+  "journey": "c2-held-drag-390",
+  "pass": false,
+  "error": "1 check(s) failed:\n- after held drag released: tablist bottom on screen (vp 844) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 844.5 | Received:    887.6875",
+  "steps": [
+    "01-bus-hidden-none-standing-at-its-peek: Bus hidden, none standing, at its peek (http://localhost:4302/en?hide=bus&stop=48645)",
+    "02-finger-holding-the-sheet-30-px-up: finger holding the sheet 30 px up (http://localhost:4302/en?hide=bus&stop=48645)",
+    "03-991-standing-while-the-finger-still-holds: 991 standing while the finger still holds (http://localhost:4302/en?stop=48645)",
+    "04-released-sheet-settles: released: sheet settles (http://localhost:4302/en?stop=48645)",
+    "05-failure: failure (http://localhost:4302/en?stop=48645)"
+  ]
+}

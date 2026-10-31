@@ -1,0 +1,11 @@
+{
+  "journey": "p1-standing-link-390",
+  "pass": true,
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4303/en)",
+    "02-stop-link-with-991-standing-at-its-peek-no-drag-no-scroll-: stop link with 991 standing, at its peek (no drag, no scroll) (http://localhost:4303/en?stop=48645)",
+    "03-vehicle-opened-from-the-standing-card: vehicle opened from the standing card (http://localhost:4303/en?trip=bus.991.7ce514fd98.20260616.0700)",
+    "04-show-whole-line-fit: Show whole line fit (http://localhost:4303/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.21/55.68142/12.57901)",
+    "05-vehicle-closed: vehicle closed (http://localhost:4303/en?map=11.21/55.68142/12.57901)"
+  ]
+}

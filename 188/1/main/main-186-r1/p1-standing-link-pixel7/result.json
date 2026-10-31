@@ -1,0 +1,13 @@
+{
+  "journey": "p1-standing-link-pixel7",
+  "pass": false,
+  "error": "1 check(s) failed:\n- standing link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875",
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4302/en)",
+    "02-stop-link-with-991-standing-at-its-peek-no-drag-no-scroll-: stop link with 991 standing, at its peek (no drag, no scroll) (http://localhost:4302/en?stop=48645)",
+    "03-vehicle-opened-from-the-standing-card: vehicle opened from the standing card (http://localhost:4302/en?trip=bus.991.7ce514fd98.20260616.0700)",
+    "04-show-whole-line-fit: Show whole line fit (http://localhost:4302/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901)",
+    "05-vehicle-closed: vehicle closed (http://localhost:4302/en?map=11.19/55.68144/12.57901)",
+    "06-failure: failure (http://localhost:4302/en?map=11.19/55.68144/12.57901)"
+  ]
+}

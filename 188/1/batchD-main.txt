@@ -1,0 +1,9 @@
+== 22:25:56 main-186-r1 c5-line-stop --phone (rec "fetched":1781587200018
+"fetched":1781587200018)
+URL http://localhost:4302/en?line=991&stop=48645 chip 0 top 657
+TABS {"label":"line + stop","vp":{"width":412,"height":839},"sheetTop":657,"peek":182,"tablist":{"x":17,"y":845.6875,"width":378,"height":37},"tablistBottomGap":-43.6875,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":845.6875,"width":94.90625,"height":36},"hit":{"inTab":false}},{"name":"Arrivals","box":{"x":111.90625,"y":845.6875,"width":73.1875,"height":36},"hit":{"inTab":false}}]}
+FAIL c5-line-stop: 2 steps in .verify/main-186-r1/c5-line-stop/
+line + stop: tablist bottom on screen (vp 839)
+expect(received).toBeLessThanOrEqual(expected)
+Expected: <= 839.5
+Received:    882.6875

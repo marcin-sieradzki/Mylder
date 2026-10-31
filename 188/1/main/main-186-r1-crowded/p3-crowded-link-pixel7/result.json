@@ -1,0 +1,10 @@
+{
+  "journey": "p3-crowded-link-pixel7",
+  "pass": false,
+  "error": "1 check(s) failed:\n- crowded link: tablist bottom on screen (vp 839) |  | expect(received).toBeLessThanOrEqual(expected) |  | Expected: <= 839.5 | Received:    882.6875",
+  "steps": [
+    "01-map-with-overview-at-peek-baseline-foot-: map with Overview at peek (baseline foot) (http://localhost:4401/en)",
+    "02-k-benhavn-h-six-standing-at-its-peek: København H, six standing, at its peek (http://localhost:4401/en?stop=8600626)",
+    "03-failure: failure (http://localhost:4401/en?stop=8600626)"
+  ]
+}

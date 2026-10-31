@@ -1,0 +1,12 @@
+== 22:29:05 branch-186-r1 c5-line-taller-sheet --phone (rec "fetched":1781587200017
+"fetched":1781587200017)
+hit {"x":187.09375,"y":753.4921875,"tag":"BUTTON","text":"","dialog":"Refshaleøen","insideTarget":true}
+hit {"x":155.921875,"y":747.5,"tag":"SPAN","text":"Show whole line","dialog":"991 to Teglholmen","insideTarget":true}
+fit URL http://localhost:4303/en?trip=bus.991.7ce514fd98.20260616.0700&map=11.19/55.68144/12.57901
+hit {"x":378,"y":691,"tag":"path","text":"","dialog":"991 to Teglholmen","insideTarget":true}
+Refshaleøen projected {"x":298.172118270965,"y":362.85654906835197}
+stop top none standing 646 http://localhost:4303/en?map=11.19/55.68144/12.57901&hide=bus&stop=48645
+stop top standing 613 chip 1 http://localhost:4303/en?map=11.19/55.68144/12.57901&stop=48645
+TABS {"label":"line + taller sheet","vp":{"width":412,"height":839},"sheetTop":613,"peek":226,"tablist":{"x":17,"y":801.6875,"width":378,"height":37},"tablistBottomGap":0.3125,"scrolledBoxes":[],"otherScrolled":[],"windowY":0,"tabs":[{"name":"Departures","box":{"x":17,"y":801.6875,"width":94.90625,"height":36},"hit":{"inTab":true,"tab":"Departures","dialogLabelledBy":"_r_1a_"}},{"name":"Arrivals","box":{"x":111.90625,"y":801.6875,"width":73.1875,"height":36},"hit":{"inTab":true,"tab":"Arrivals","dialogLabelledBy":"_r_1a_"}}]}
+FOOT {"label":"line + taller sheet","vp":{"width":412,"height":839},"credit":{"top":543,"bottom":601,"left":12,"right":400},"legend":{"top":439.625,"bottom":514},"sheets":[{"name":"Overview","top":657},{"name":"Refshaleøen","top":613}],"sheetTop":613,"covered":[],"gap":12}
+PASS c5-line-taller-sheet: 4 steps in .verify/branch-186-r1/c5-line-taller-sheet/

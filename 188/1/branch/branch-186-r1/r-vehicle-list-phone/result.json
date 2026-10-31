@@ -1,0 +1,12 @@
+{
+  "journey": "r-vehicle-list-phone",
+  "pass": true,
+  "steps": [
+    "01-vehicles-list: Vehicles list (http://localhost:4303/en?tab=vehicles)",
+    "02-vehicle-open-from-list: vehicle open from list (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707)",
+    "03-closed-with-close: closed with Close (http://localhost:4303/en?tab=vehicles)",
+    "04-second-vehicle-open: second vehicle open (http://localhost:4303/en?tab=vehicles&trip=metro.M1.c6fa766489.20260616.0705)",
+    "05-closed-with-escape: closed with Escape (http://localhost:4303/en?tab=vehicles)",
+    "06-trip-not-found: trip not found (http://localhost:4303/en?trip=nothing)"
+  ]
+}
