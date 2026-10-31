@@ -51,6 +51,13 @@ export const PORT = 4173
 export const SIMULATED_PORT = 4174
 export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 
+/**
+ * A third server on the same build and recording, which only the snapshot route's tests ask, so
+ * its runs, and the calls it counts, are theirs alone, whatever the other tests open and when.
+ */
+export const SNAPSHOT_PORT = 4175
+export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
+
 export const test = base.extend({
   page: async ({ page }, provide) => {
     await page.clock.install({ time: RECORDING_START })
@@ -86,8 +93,8 @@ export async function serveSavedStop(page: Page, stopId: string) {
 
 /**
  * Serves a stop's arrivals as the arrivals route gave them at the recording's second minute, saved
- * with the recording beside its departures, whenever the page asks for them, so a test that opens
- * Arrivals makes the server no run of its own.
+ * with the recording beside its departures, whenever the page asks for them, so its rows are the
+ * same whenever the test runs.
  */
 export async function serveSavedArrivals(page: Page, stopId: string) {
   const answer = readJson(join(RECORDING_DIR, 'answers', 'arrivals', `${stopId}.json`))

@@ -81,8 +81,7 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
 
 test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
   // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its
-  // departures and arrivals are the saved answers: either route asked of the server could make
-  // its snapshot's run, and take the first run the snapshot route's test counts on making.
+  // departures and arrivals are the saved answers, the same whenever the test runs.
   await serveFirstMinute(page)
   await serveSavedStop(page, '27532')
   await serveSavedArrivals(page, '27532')
