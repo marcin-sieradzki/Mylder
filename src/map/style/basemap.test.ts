@@ -311,6 +311,50 @@ describe('the basemap', () => {
     for (const id of STOP_LAYERS) expect(style.layers.some((each) => each.id === id)).toBe(true)
   })
 
+  it('raises the buildings from zoom 14 from their OpenStreetMap heights, flat footprints below', () => {
+    const style = styleNow()
+    const raised = layer(style, 'building-3d')
+    expect(raised).toMatchObject({
+      type: 'fill-extrusion',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      minzoom: 14,
+    })
+    expect(raised.paint['fill-extrusion-height']).toEqual(['get', 'render_height'])
+    expect(raised.paint['fill-extrusion-base']).toEqual(['get', 'render_min_height'])
+    const flat = layer(style, 'building')
+    expect(flat).toMatchObject({ type: 'fill', minzoom: 12, maxzoom: 14 })
+    expect(flat.paint['fill-color']).toBe('#E2E5E0')
+  })
+
+  it('leaves out the buildings OpenStreetMap flags hide_3d', () => {
+    expect(layer(styleNow(), 'building-3d').filter).toEqual(['!=', ['get', 'hide_3d'], true])
+  })
+
+  it("paints the buildings faint in Perron's map building colour, in light and dark", () => {
+    const light = layer(styleNow(), 'building-3d').paint
+    expect(light['fill-extrusion-color']).toBe('#E2E5E0')
+    expect(light['fill-extrusion-opacity']).toBe(0.6)
+    document.documentElement.dataset.theme = 'dark'
+    const dark = layer(styleNow(), 'building-3d').paint
+    expect(dark['fill-extrusion-color']).toBe('#1A2125')
+    expect(dark['fill-extrusion-opacity']).toBe(0.6)
+  })
+
+  it('draws the buildings over the streets and rail, and under the lines, stops and highlight', () => {
+    const style = styleNow(patternHighlight(network, 0))
+    const index = (id: string) => style.layers.findIndex((each) => each.id === id)
+    const raised = index('building-3d')
+    const basemap = style.layers.filter((each) => !each.id.startsWith('mylder-'))
+    const lastGround = basemap.findLastIndex((each) => each.type !== 'symbol')
+    expect(basemap[lastGround].id).toBe('building-3d')
+    for (const id of ['mylder-lines-train', 'mylder-stops-bus', 'mylder-stops-rail']) {
+      expect(index(id)).toBeGreaterThan(raised)
+    }
+    for (const id of STOP_LAYERS) expect(index(id)).toBeGreaterThan(raised)
+    expect(index('mylder-highlight-lines')).toBeGreaterThan(raised)
+  })
+
   it('draws the basemap alone until the network has loaded', () => {
     const style = basemapStyle(readPaint(document.documentElement, paintTokens()))
     expect(layer(style, 'background').paint['background-color']).toBe('#EDEFEB')
