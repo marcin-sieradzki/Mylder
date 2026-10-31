@@ -147,8 +147,8 @@ The host's own data cache is not relied on for the once-a-minute rule. Its defau
 - **The latest snapshot**, compressed, so an instance that did not build it can serve it.
 - **The lease**: one key per run, named by the moment the run falls due, set only if absent, expiring after a minute.
 - **The disruption list**: the last `himsearch` messages that belong to Copenhagen (`docs/screens.md`, "Disruptions"), with how many the answer held, when they were fetched and when the list was last checked, kept a month so a spent month still shows its last list.
-- **The call counter**: one counter per calendar month, plus one per service (`journeyPos`, `himsearch`, `journeyDetail`, `multiDepartureBoard`) for the about page and the logs. Keyed by month, so there is no reset to get wrong; kept two months.
-- **On-demand caches**: a stop's departures and a vehicle's detail, for 60 seconds each, keyed by stop id or trip key.
+- **The call counter**: one counter per calendar month, plus one per service (`journeyPos`, `himsearch`, `journeyDetail`, `multiDepartureBoard`, `multiArrivalBoard`) for the about page and the logs. Keyed by month, so there is no reset to get wrong; kept two months.
+- **On-demand caches**: a stop's departure board, its arrival board and a vehicle's detail, for 60 seconds each, keyed by stop id or trip key.
 - **The join's corrections**: by Rejseplanen's journey (`ZI@DA`), the trip an opened vehicle's `journeyDetail` showed it to be where the join's first guess was another. Each is its own entry, `<prefix>:corrections:<service day>:<n>`, numbered by that day's counter `<prefix>:corrections:<service day>`, so two corrections made at once both stay; a journey corrected again takes its latest entry. A correction the day already has is not added again, and a day keeps at most 100. Kept two days, and read by every run and every stop's board for the service days they join.
 
 ### What the store is
@@ -171,20 +171,21 @@ The free key allows 50,000 calls a calendar month. Every request the app sends w
 
 ### Calls per service
 
-| Service               | When                                                                                    | Month watched around the clock | Realistic month, 6 hours watched a day |
-| --------------------- | --------------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------- |
-| `journeyPos`          | Once a minute while anyone watches, at the budget level's interval                      | 44,640 (31 days at 60 s)       | 11,160                                 |
-| `himsearch`           | Once every 15 minutes while anyone watches, inside a tracker run                        | 2,976                          | 744                                    |
-| `multiDepartureBoard` | Only when a person opens a stop, one call for the stop (and its platforms), cached 60 s | At most the slack: about 2,000 | Up to 10,000, by the cushion rule      |
-| `journeyDetail`       | Only when a person opens a vehicle, cached 60 s per trip                                | Shares the slack above         | Shares the cushion above               |
-| Retries and failures  | Counted with the service that made them                                                 | Inside the figures above       | Inside the figures above               |
-| **Total**             |                                                                                         | **about 49,600**               | **about 22,000**                       |
+| Service               | When                                                                                                   | Month watched around the clock | Realistic month, 6 hours watched a day |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------ | -------------------------------------- |
+| `journeyPos`          | Once a minute while anyone watches, at the budget level's interval                                     | 44,640 (31 days at 60 s)       | 11,160                                 |
+| `himsearch`           | Once every 15 minutes while anyone watches, inside a tracker run                                       | 2,976                          | 744                                    |
+| `multiDepartureBoard` | Only when a person opens a stop, one call for the stop (and its platforms), cached 60 s                | At most the slack: about 2,000 | Up to 10,000, by the cushion rule      |
+| `multiArrivalBoard`   | Only when a person opens a stop's Arrivals tab, one call for the stop (and its platforms), cached 60 s | Shares the slack above         | Shares the cushion above               |
+| `journeyDetail`       | Only when a person opens a vehicle, cached 60 s per trip                                               | Shares the slack above         | Shares the cushion above               |
+| Retries and failures  | Counted with the service that made them                                                                | Inside the figures above       | Inside the figures above               |
+| **Total**             |                                                                                                        | **about 49,600**               | **about 22,000**                       |
 
-A stop or a vehicle that is opened when on-demand calls are stopped is served from the timetable plus the snapshot's delay for that trip, and its departures carry their trips' data states. Metro departures never spend a call: they show interval text from the planned times.
+A stop, its Arrivals or a vehicle that is opened when on-demand calls are stopped is served from the timetable plus the snapshot's delay for that trip, and its departures and arrivals carry their trips' data states. Metro departures and arrivals never spend a call: they show interval text from the planned times.
 
-An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-board.ts`); an opened vehicle's `journeyDetail` shares the same cache and limit:
+An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-board.ts`); its Arrivals tab asks for its arrival board the same way, and an opened vehicle's `journeyDetail` shares the same cache and limit:
 
-1. A board kept in the store for the stop, under `<prefix>:on-demand:stop:<stop id>`, answers while it is under a minute old, whatever the budget says now.
+1. A board kept in the store for the stop, under `<prefix>:on-demand:stop:<stop id>` (its arrival board under `<prefix>:on-demand:arrivals:<stop id>`, so either tab spends only its own call), answers while it is under a minute old, whatever the budget says now.
 2. Otherwise a call is made only when the pacing allows on-demand calls (normal, with the cushion) and the minute's shared counter, `<prefix>:on-demand:minute:<minute>`, is at 10 or under once this call has added itself to it. The 11th in a minute answers from the timetable.
 3. The call asks for every platform of the stop at once, for the next 30 minutes, and is counted with the month's calls before it is sent, as every call is. A stop whose departures are all Metro makes none.
 4. Each departure is joined back to its trip by its journey reference (`join.ts`), else by its line and planned time, so the row keeps its trip's key and takes its data state from the snapshot. The expected time, the track and a cancellation are the board's; a row whose trip has no realtime on the map but has it on the board is Estimated. A departure that joins no trip, such as an Extra trip, is left out, as the map leaves it out.
@@ -193,7 +194,7 @@ An opened stop asks for its board this way (`src/tracker/on-demand.ts`, `stop-bo
 
 Either way the answer carries the stop's messages: those on its board's departures, then the disruption list's that name the stop, each once.
 
-A stop's arrivals, asked for only while its panel's Arrivals tab is open (`/api/stops/<id>/arrivals`), spend no call for now: they come from the timetable plus the snapshot's delays, with the disruption list's messages that name the stop, and say `{ kind: 'timetable' }`.
+A stop's arrivals, asked for only while its panel's Arrivals tab is open (`/api/stops/<id>/arrivals`), come from its `multiArrivalBoard` call by the same steps: the stop's platforms over the next 30 minutes, the stop's own cache entry for a minute beside its departure board's, the same minute's shared limit, and each arrival joined back to its trip by its journey reference, else by its line, where it comes from, its platform and its planned arrival. The expected time, the track and a cancellation are the board's, and a cancelled arrival stays, marked. A stop where only the Metro arrives makes no call, and opening Departures alone never spends an arrival call. When no call can be made, or it fails, the arrivals come from the timetable plus the snapshot's delays and say `{ kind: 'timetable' }`. Either way they carry the board's messages that concern the stop, then the disruption list's that name it.
 
 An opened vehicle asks for its detail the same way (`trip-detail.ts`), under `<prefix>:on-demand:trip:<trip key>`, within the same minute's counter:
 
@@ -281,3 +282,4 @@ What this page needs settled, one call each where possible, at a weekday morning
 6. Whether the Metro appears in either mode at all.
 7. `himsearch` with the box and with lines set: its size and whether lines or trips come back.
 8. Whether two calls in the same second are accepted (the first-day tests send several).
+9. `multiArrivalBoard` for one stop's platforms: whether its answer is the `Arrival` list with `origin` that `src/tracker/rejseplanen/answers.ts` reads ([`researches/2026-10-31-multi-arrival-board.md`](researches/2026-10-31-multi-arrival-board.md)).

@@ -272,8 +272,8 @@ export const Arrival = Schema.Struct({ ...boardCall, origin: optional(Schema.Str
 
 /**
  * The `multiArrivalBoard` answer: arrivals at every stop in `idList`. Rejseplanen Labs lists the
- * service ("Arrival boards for multiple stations can be retrieved by a call to the
- * multiArrivalBoard service"); its shape is HAFAS's arrival board, unconfirmed by a saved answer.
+ * service; its shape is HAFAS's arrival board, unconfirmed by a saved answer
+ * (docs/researches/2026-10-31-multi-arrival-board.md).
  */
 export const ArrivalBoardAnswer = Schema.Struct({
   Arrival: optional(Schema.Array(Arrival)),
