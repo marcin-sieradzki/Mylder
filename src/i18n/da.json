@@ -101,6 +101,11 @@
   "stop": {
     "fallbackTitle": "Stoppested",
     "lines": "Linjer",
+    "standing": "Ved perronerne nu",
+    "standingNone": "Intet køretøj af de viste typer holder ved perronerne nu.",
+    "showAll": "Vis alle {count}",
+    "showFewer": "Vis færre",
+    "endsHere": "Slutter her",
     "departures": "Afgange",
     "loading": "Henter afgange…",
     "empty": "Ingen afgange de næste 30 minutter for de viste transportformer.",

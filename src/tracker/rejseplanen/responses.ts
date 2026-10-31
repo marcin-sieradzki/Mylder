@@ -20,11 +20,22 @@ export const svcParam = (request: Http.Request, errorText: string) =>
   errorAnswer(request, 400, 'SVC_PARAM', errorText)
 
 /**
- * Rejseplanen as a recording keeps it: a folder per service, and a call the recording has no
- * answer for refused as an unknown service would be.
+ * A departure board's key in a recording: the ids it is asked for, as `idList` lists them, joined
+ * by `+`, such as a stop's platforms `27532+50461+8600646+8603307`; none when they aren't ids.
+ */
+export function boardKey(url: URL): string | undefined {
+  const key = (url.searchParams.get('idList') ?? '').split('|').filter(Boolean).join('+')
+  return /^[\w.-]+(\+[\w.-]+)*$/.test(key) ? key : undefined
+}
+
+/**
+ * Rejseplanen as a recording keeps it: a folder per service, a departure board's calls in a
+ * subfolder for the stops it is asked for, and a call the recording has no answer for refused as
+ * an unknown service would be.
  */
 export const RECORDED_REJSEPLANEN: RecordedApi = {
   folders: SERVICES,
   folderOf: serviceOf,
+  keyed: { folders: ['multiDepartureBoard'], keyOf: boardKey },
   unknown: (request, url) => svcParam(request, `The recording has no ${url.pathname}`),
 }

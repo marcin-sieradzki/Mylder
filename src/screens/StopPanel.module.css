@@ -1,4 +1,4 @@
-/* Stop departures: the lines' badges in a row under the stop's name, then the stop's messages
+/* Stop panel: the lines' badges in a row under the stop's name, then the stop's messages
    (Messages.module.css), then the departures, each Perron's DepartureRow, an interval line's with
    its note under it, a divider between. */
 .lines {

@@ -1,4 +1,4 @@
-// The stop and trip answers (docs/screens.md, "Vehicle detail" and "Stop departures"): a stop's
+// The stop and trip answers (docs/screens.md, "Vehicle detail" and "Stop panel"): a stop's
 // departures and a trip's calls from the timetable plus the snapshot's delay for each trip. They
 // share nothing with the run but the snapshot, so they are pure functions of the two; the tracker
 // reads the snapshot and calls them. The on-demand calls (`on-demand.ts`, `stop-board.ts`) fall
@@ -18,9 +18,10 @@ import type { PlannedTrip } from '../timetable/trips.ts'
 import type { Disruption } from './disruptions.ts'
 import { tripOn } from './join.ts'
 import type { Snapshot, SnapshotTrip } from './snapshot.ts'
+import { standingAt, type StandingInput, type StandingTrip } from './standing.ts'
 import type { Timetable } from './timetable.ts'
 
-/** How long a stop's departures look ahead (docs/screens.md, "Stop departures"). */
+/** How long a stop's departures look ahead (docs/screens.md, "Stop panel"). */
 export const DEPARTURES_AHEAD = 30 * 60_000
 
 /**
@@ -69,7 +70,7 @@ export interface StopDeparture {
 }
 
 /**
- * An interval line's departures from a stop in one direction (docs/screens.md, "Stop departures";
+ * An interval line's departures from a stop in one direction (docs/screens.md, "Stop panel";
  * ADR 0006): how often it leaves, from the planned departures in the current hour, in place of
  * the departures' countdowns and clock times, which the Metro doesn't keep.
  */
@@ -95,6 +96,11 @@ export interface StopDepartures {
   readonly fetched: number
   readonly nextDue: number
   readonly source: AnswerSource
+  /**
+   * The trips standing at the stop's platforms now, the Metro aside, soonest shown departure first
+   * (`standing.ts`).
+   */
+  readonly standing: readonly StandingTrip[]
   readonly departures: readonly StopDeparture[]
   /** The interval lines' rows, one per line and direction leaving in the window, by line. */
   readonly intervals: readonly StopInterval[]
@@ -378,12 +384,14 @@ export function plannedTrip(
 /**
  * A found stop's departures in the 30 minutes after the snapshot, across its platforms, soonest
  * first, each at its timetabled time shifted by the snapshot's delay for its trip, a cancelled one
- * kept and marked, and its interval lines as intervals.
+ * kept and marked, and its interval lines as intervals; and the trips standing at its platforms
+ * at `standing.now`, the snapshot's moment unless the clock's is given.
  */
 export function departuresAt(
   timetable: Timetable,
   snapshot: SnapshotDelays,
   { index, stop }: FoundStop,
+  standing: StandingInput = { now: snapshot.fetched },
 ): StopDepartures {
   const { platforms } = timetable.stops
   const now = snapshot.fetched
@@ -420,6 +428,7 @@ export function departuresAt(
     fetched: now,
     nextDue: snapshot.nextDue,
     source: FROM_TIMETABLE,
+    standing: standingAt(timetable, snapshot, index, standing),
     ...listed(timetable, snapshot, stop, departures, calls, now),
     messages: [],
   }

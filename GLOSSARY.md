@@ -62,6 +62,10 @@ _Avoid_: Removed trip, dropped trip
 A trip standing at its first stop in the minutes before its first departure.
 _Avoid_: Layover, parked
 
+**Standing**:
+A trip at one of a stop's platforms now, between its shown arrival and its shown departure there. A Waiting trip stands at its first stop, and a trip that ends at a stop stands there for 2 minutes after it arrives. The Metro is never listed as standing.
+_Avoid_: Dwelling, at the platform, berthed
+
 **Service day**:
 The operating day a trip belongs to, which can run past midnight into the next calendar date.
 _Avoid_: Operating day, date

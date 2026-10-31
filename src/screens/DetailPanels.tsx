@@ -28,7 +28,7 @@ const SIDE: PanelFrame = {
 const PHONE_FRAME: PanelFrame = { anchor: 'bottom', onClose: close }
 
 /**
- * The detail panel the address has open (docs/screens.md, "Vehicle detail", "Stop departures" and
+ * The detail panel the address has open (docs/screens.md, "Vehicle detail", "Stop panel" and
  * "The plane's card"), beside the map on a wide screen and from the bottom on a phone. Esc and its
  * close button take it out of the address. A stop opens its departures, a trip its vehicle's
  * detail, an aircraft its card, which the aircraft snapshot holds rather than a route. Every kind

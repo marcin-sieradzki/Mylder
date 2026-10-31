@@ -1,4 +1,4 @@
-// The open panel's answer (docs/screens.md, "Vehicle detail" and "Stop departures"): the stop
+// The open panel's answer (docs/screens.md, "Vehicle detail" and "Stop panel"): the stop
 // route's answer for an open stop, the trip route's for an open trip, asked for when the panel
 // opens in the address (view.ts) and again just after each answer falls due, while anything on the
 // page watches it. An aircraft's panel has no route: its card is the aircraft snapshot's own. One

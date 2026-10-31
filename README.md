@@ -51,7 +51,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [x] A simulated Rejseplanen to build and test against until the key arrives
 - [x] The tracker: one call a minute while someone watches, one snapshot of the whole city
 - [x] Live map with every vehicle moving along its route (MapLibre GL + deck.gl)
-- [x] Vehicle detail and stop departures, each with its data state
+- [x] Vehicle detail and the stop panel, each with its data state
 - [x] City pulse: vehicles moving now, share reporting per mode, average delay when the data backs it, and the day's planned profile
 - [x] Vehicles list: every vehicle on the map in a searchable table, sortable by its columns
 - [x] Disruptions on one screen, and an About dialog with the sources and their terms

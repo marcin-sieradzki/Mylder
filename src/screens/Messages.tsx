@@ -73,7 +73,7 @@ interface MessagesProps {
 }
 
 /**
- * A panel's messages (docs/screens.md, "Stop departures" and "Vehicle detail", "Messages";
+ * A panel's messages (docs/screens.md, "Stop panel" and "Vehicle detail", "Messages";
  * "Disruptions", "A card"): those active now, then those starting within the week under Later,
  * each a card of its kind, with its heading and lead as Rejseplanen wrote them, in Danish, its
  * stops and its time. Kind and phase come from the domain's rule at `now`, so a card moves from

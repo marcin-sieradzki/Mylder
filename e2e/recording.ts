@@ -72,6 +72,18 @@ export async function serveFirstMinute(page: Page) {
   )
 }
 
+/**
+ * Serves a stop's answer as the stop route gave it at the recording's second minute, saved with
+ * the recording, whenever the page asks for it, so its standing trips are the same whenever the
+ * test runs, whatever time the server's clock has reached by then.
+ */
+export async function serveSavedStop(page: Page, stopId: string) {
+  const answer = readJson(join(RECORDING_DIR, 'answers', 'stops', `${stopId}.json`))
+  await page.route(`**/api/stops/${stopId}`, (route) =>
+    route.fulfill({ json: answer, headers: { 'cache-control': 'no-store' } }),
+  )
+}
+
 /** Where a point is drawn at the map's opening view on a desktop: zoom 11.2 on the centre. */
 export function onScreen([lat, lon]: readonly [number, number], width: number, height: number) {
   const world = 512 * 2 ** 11.2

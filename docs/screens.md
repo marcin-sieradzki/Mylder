@@ -2,7 +2,7 @@
 
 What each of Mylder's six screens shows, and where every figure on it comes from. The figures rest on three things only: the whole-city snapshot every browser polls (one `journeyPos` answer a minute, joined to the timetable and given data states by the server; [`live-data.md`](live-data.md)), the prepared timetable ([`timetable.md`](timetable.md)), and a call made because a person opened a stop or a vehicle. A figure the data can't back shows "—" and says why; nothing is averaged from a biased sample, and nothing is invented to fill a slot. The data-state rules are in [`data-states.md`](data-states.md) and the words in [`GLOSSARY.md`](../GLOSSARY.md); this page doesn't repeat them. Every screen is built from Perron, and this page names the components it uses; the changes Perron still needs, and each screen's stand-in until they ship, are listed in the spec rather than here, since that list shrinks as Perron ships.
 
-The six screens are the moving map, vehicle detail, stop departures, City pulse, the Vehicles list and Disruptions. On a desktop the map fills the window, City pulse, the Vehicles list and Disruptions are tabs in a side sheet, and vehicle detail and stop departures open as a panel. On a phone the sheet is a bottom sheet with a peek, and the panels open from the bottom. The About dialog is one tap from every screen. Everything is in English and Danish, light and dark.
+The six screens are the moving map, vehicle detail, the stop panel, City pulse, the Vehicles list and Disruptions. On a desktop the map fills the window, City pulse, the Vehicles list and Disruptions are tabs in a side sheet, and vehicle detail and the stop panel open as a panel. On a phone the sheet is a bottom sheet with a peek, and the panels open from the bottom. The About dialog is one tap from every screen. Everything is in English and Danish, light and dark.
 
 ## The moving map
 
@@ -55,19 +55,21 @@ When on-demand calls are stopped by the budget, or the API is failing, the panel
 
 **Built from:** DetailPanel (Sheet and DetailHeader), VehicleDotLabel, FactList, StopTimeline, Button, Delay, DisruptionCard, Text.
 
-## Stop departures
+## Stop panel
 
-**Shows.** A panel for one stop, opened from a stop on the map or a disruption card, with the stop's name, its lines as badges, and its departures for the next 30 minutes across its platforms.
+**Shows.** A panel for one stop, opened from a stop on the map or a disruption card, with the stop's name, its lines as badges, the trips standing at its platforms now, and its departures for the next 30 minutes across its platforms.
 
-- **The list** comes from one `multiDepartureBoard` call for the stop's platforms when it opens, cached a minute; when on-demand calls are stopped or the API is failing, from the timetable with the snapshot's delay where a trip has one. Each row shows the line, the destination, a countdown from the expected time (or the timetabled time when there is none; under 45 s it reads "Now"), the timetabled time struck through when the two differ by a minute or more, the platform or track when the board gives one, the delay, and the trip's data state, joined to the snapshot by the trip's key. A row whose trip is not in the snapshot but carries realtime shows as Estimated, since its expected time is realtime without a position. A departure's time follows its trip's state as [`data-states.md`](data-states.md) sets out: "~" before an Estimated time, and for Timetable only and No signal the timetabled time with the delay unknown, "—".
-- **The Metro:** an interval row, "every 3 min" or "every 3 to 4 min", worked out from the planned departures in the current hour in that direction, with no countdown and no clock time, and the note "Metro: planned times". If the first calls with the key show Metro realtime, Metro rows become ordinary rows.
-- **Cancelled** rows stay, marked Cancelled, with the countdown struck.
-- **Empty:** "No departures in the next 30 minutes for the vehicle types shown."
-- **Messages:** the messages on the stop's board, and the disruption list's whose stops include this one, as cards; both come with the stop's answer, so no call of their own.
+- **At the platforms now** ("Ved perronerne nu"), above the departures: the trips [standing](../GLOSSARY.md) at the stop's platforms at this moment, in the modes the filters show, soonest shown departure first, each a row as a departure's with its line, destination, track when the board gives one, countdown and time to its departure, delay and data state; a tap opens its vehicle. They spend no call: the server works them out from the stop's calls in the timetable and the snapshot, as the stop's answer is built. A trip stands between its shown arrival and its shown departure there, the times its data state shows; a Waiting trip at its first stop here stands from 5 minutes before it leaves; and a trip that ends here stands for 2 minutes after its shown arrival, its row reading "Ends here" with no countdown, since no source says when it leaves the platform. The tracker keeps such a trip's delay that long after it has left the map, and its row is Estimated, as a departure with realtime off the map is. Where the stop's departure board is in hand, its expected times and tracks win over the snapshot's. The Metro is never listed, so its 20-second stops don't flicker in and out. At most 4 rows show, then "Show all 6", which shows the rest and turns to "Show fewer"; with none standing, the section says "No vehicle of the types shown is standing at the platforms now."
+- **Departures**, under their own title:
+  - **The list** comes from one `multiDepartureBoard` call for the stop's platforms when it opens, cached a minute; when on-demand calls are stopped or the API is failing, from the timetable with the snapshot's delay where a trip has one. Each row shows the line, the destination, a countdown from the expected time (or the timetabled time when there is none; under 45 s it reads "Now"), the timetabled time struck through when the two differ by a minute or more, the platform or track when the board gives one, the delay, and the trip's data state, joined to the snapshot by the trip's key. A row whose trip is not in the snapshot but carries realtime shows as Estimated, since its expected time is realtime without a position. A departure's time follows its trip's state as [`data-states.md`](data-states.md) sets out: "~" before an Estimated time, and for Timetable only and No signal the timetabled time with the delay unknown, "—".
+  - **The Metro:** an interval row, "every 3 min" or "every 3 to 4 min", worked out from the planned departures in the current hour in that direction, with no countdown and no clock time, and the note "Metro: planned times". If the first calls with the key show Metro realtime, Metro rows become ordinary rows.
+  - **Cancelled** rows stay, marked Cancelled, with the countdown struck.
+  - **Empty:** "No departures in the next 30 minutes for the vehicle types shown."
+- **Messages**, between the two: the messages on the stop's board, and the disruption list's whose stops include this one, as cards; both come with the stop's answer, so no call of their own.
 - **Note:** "Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so."
 - **Source line:** "Rejseplanen · departures 08:14:20" when the board was called; "Timetable and positions 08:14:05" when served from the timetable plus the snapshot's delays.
 
-**Built from:** DetailPanel (stop variant) with LineBadges in its subheader, DepartureRow, DataStatePanel, DisruptionCard, Text.
+**Built from:** DetailPanel (stop variant) with LineBadges in its subheader, Section, DepartureRow, Button, DataStatePanel, DisruptionCard, Text. A standing row is a DepartureRow, whose status part draws the trip's data state as VehicleDotLabel does, its dot and its word.
 
 ## City pulse
 
@@ -139,15 +141,15 @@ Opened from the top bar's About button and from the corner credit. It holds the 
 
 Each source has its own clock, and the screens never blend them. A time is always the time the server received the answer a figure came from, in Copenhagen's clock, 24-hour; the data state says when that answer is old.
 
-| Screen          | Source line                                                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Moving map      | The corner credit, and "Updated 08:14:05" in the top bar: the positions' time, with seconds                                         |
-| Vehicle detail  | "Rejseplanen · position 08:14:05 · times 08:14:20", or "· times from the timetable"; the messages' "checked 08:15"                  |
-| Stop departures | "Rejseplanen · departures 08:14:20", or "Timetable and positions 08:14:05"; "Metro: planned times" beside an interval row           |
-| City pulse      | "Rejseplanen · positions 08:14:05 · timetable of 12 October"; the chart's "Planned, from today's timetable"                         |
-| Vehicles list   | "Rejseplanen · positions 08:14:05"                                                                                                  |
-| Disruptions     | "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open.", and the 100-message footer when it applies |
-| About           | Everything above, with the full terms                                                                                               |
+| Screen         | Source line                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Moving map     | The corner credit, and "Updated 08:14:05" in the top bar: the positions' time, with seconds                                         |
+| Vehicle detail | "Rejseplanen · position 08:14:05 · times 08:14:20", or "· times from the timetable"; the messages' "checked 08:15"                  |
+| Stop panel     | "Rejseplanen · departures 08:14:20", or "Timetable and positions 08:14:05"; "Metro: planned times" beside an interval row           |
+| City pulse     | "Rejseplanen · positions 08:14:05 · timetable of 12 October"; the chart's "Planned, from today's timetable"                         |
+| Vehicles list  | "Rejseplanen · positions 08:14:05"                                                                                                  |
+| Disruptions    | "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open.", and the 100-message footer when it applies |
+| About          | Everything above, with the full terms                                                                                               |
 
 The positions' time is shown with seconds in the top bar and to the minute elsewhere. When an answer is older than its refresh (a snapshot older than the poll interval and the few seconds the poll takes to bring the next, by the server's clock, a board older than a minute, messages older than 15 minutes), the source line adds "may be out of date", and the page notice takes over when Disconnected or Paused applies. On a phone a sheet or panel can cover the map and its corner credit, so each panel's own source line is what keeps the terms met there, and the About dialog is one tap away. Every panel says it the same way: the same words, the same order, source then time.
 

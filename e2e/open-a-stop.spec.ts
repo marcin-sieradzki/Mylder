@@ -1,6 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { expect, onScreen, RECORDING_DIR, serveFirstMinute, test } from './recording'
+import {
+  expect,
+  onScreen,
+  RECORDING_DIR,
+  serveFirstMinute,
+  serveSavedStop,
+  test,
+} from './recording'
 
 // Opening a stop: a tap on its marker opens its departures, the address keeps it through a reload
 // and the language switch, and Esc closes it. The page sees the recording's first minute; the
@@ -50,6 +57,25 @@ test('a tap on a stop opens its departures, which the address keeps', async ({ p
   await page.keyboard.press('Escape')
   await expect(panel).toBeHidden()
   await expect(page).not.toHaveURL(/stop=/)
+})
+
+test('a stop’s panel lists the trips standing at its platforms, and opens one’s vehicle', async ({
+  page,
+}) => {
+  // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
+  await serveFirstMinute(page)
+  await serveSavedStop(page, '48645')
+  await page.goto('/en?stop=48645')
+  const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+  const standing = panel.getByRole('region', { name: 'At the platforms now' })
+  const bus = standing.getByRole('listitem').filter({ hasText: 'Teglholmen' })
+  await expect(bus).toContainText('991')
+  await expect(bus).toContainText('Estimated')
+  await expect(bus).toContainText('07:23')
+  await expect(bus).toContainText(/\d+ min|Now/)
+  await bus.getByRole('button', { name: 'Bus 991 to Teglholmen' }).click()
+  await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
+  await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
 })
 
 test('the pointer turns over a stop’s marker, as over a dot', async ({ page }) => {

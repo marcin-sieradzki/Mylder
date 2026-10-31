@@ -1,4 +1,4 @@
-// A stop's departures from its board (docs/screens.md, "Stop departures"): one
+// A stop's departures from its board (docs/screens.md, "Stop panel"): one
 // `multiDepartureBoard` answer for every platform of the stop, each departure joined back to its
 // trip in the timetable, by its journey reference and the join's corrections, or else by its line,
 // way, platform and planned time, each trip's call once, so a row keeps its trip's key and takes its data state from the
@@ -31,10 +31,12 @@ import {
   type Disruption,
   type DisruptionList,
 } from './disruptions.ts'
+import type { History } from './build.ts'
 import { joinJourney, type Corrections } from './join.ts'
 import { dueBy, type Called, type OnDemand } from './on-demand.ts'
 import type { Departure, DepartureBoardAnswer, Message } from './rejseplanen/answers.ts'
 import type { RejseplanenShape, DepartureBoardQuery } from './rejseplanen/client.ts'
+import { callKey as standingKey, standingAt, type BoardCall } from './standing.ts'
 import type { Timetable } from './timetable.ts'
 
 /** The board call for a stop: every one of its platforms, over the departures' window. */
@@ -59,7 +61,7 @@ const lineOf = (departure: Departure) =>
   departure.Product?.[0]?.line
 
 /** A call's key among the stop's calls: its trip's and its index. */
-const callKey = (call: StopCall) => `${call.trip.key} ${call.index}`
+const callKey = (call: StopCall) => standingKey(call.trip, call.index)
 
 /** The stop's calls by their planned departure, which a board's departure is joined at. */
 function byPlannedTime(calls: readonly StopCall[]): ReadonlyMap<number, readonly StopCall[]> {
@@ -140,6 +142,7 @@ export function departuresFromBoard(
   board: Called<DepartureBoardAnswer>,
   now: number,
   corrections: Corrections = {},
+  history?: History,
 ): StopDepartures {
   const { timezone } = timetable.manifest
   const { platforms } = timetable.stops
@@ -148,6 +151,8 @@ export function departuresFromBoard(
   const onMap = tripsByKey(snapshot)
   const rows: StopDeparture[] = []
   const taken = new Set<string>()
+  // What the board says of each call it joined, in its window or not, for the standing trips.
+  const boardCalls = new Map<string, BoardCall>()
   const messages = new Map<string, Disruption>()
   const keep = (departure: Departure, call: StopCall | undefined) => {
     for (const message of departure.Messages?.Message ?? []) {
@@ -182,11 +187,17 @@ export function departuresFromBoard(
     // current realtime for the trip, or doesn't have it at all.
     const onTheMap = onMap.get(trip.key)?.state ?? 'timetable-only'
     const state = realtime ? updatedState(onTheMap) : onTheMap
+    const track = departure.rtTrack ?? departure.track
+    boardCalls.set(callKey(call), {
+      ...(expected === undefined ? {} : { expected }),
+      ...(track === undefined ? {} : { track }),
+      ...(cancelled ? { cancelled: true as const } : {}),
+      state,
+    })
     const leaves = shownAt({ scheduled: planned, expected }, state)
     const listedHere = leaves >= now && leaves <= now + DEPARTURES_AHEAD
     keep(departure, listedHere ? call : undefined)
     if (!listedHere) continue
-    const track = departure.rtTrack ?? departure.track
     rows.push({
       trip: trip.key,
       line: trip.line.name,
@@ -207,6 +218,7 @@ export function departuresFromBoard(
     // Due again when the snapshot is, or sooner when the board's minute runs out first.
     nextDue: Math.min(snapshot.nextDue, board.at + 60_000),
     source: { kind: 'rejseplanen', at: board.at },
+    standing: standingAt(timetable, snapshot, index, { now, board: boardCalls, history }),
     ...listed(timetable, snapshot, stop, rows, calls, now),
     messages: [...messages.values()],
   }
@@ -236,6 +248,8 @@ function stopMessages(
 export interface StopAnswerInput {
   readonly timetable: Timetable
   readonly snapshot: SnapshotDelays
+  /** What the tracker remembers of each trip, for the trips standing at the stop. */
+  readonly history: History | undefined
   readonly list: DisruptionList | undefined
   readonly ask: OnDemand
   readonly board: RejseplanenShape['multiDepartureBoard']
@@ -248,7 +262,7 @@ export interface StopAnswerInput {
  * the timetable plus the snapshot's delays; with its messages either way.
  */
 export const stopAnswer = (
-  { timetable, snapshot, list, ask, board, corrections }: StopAnswerInput,
+  { timetable, snapshot, history, list, ask, board, corrections }: StopAnswerInput,
   found: FoundStop,
 ): Effect.Effect<StopDepartures> =>
   Effect.gen(function* () {
@@ -258,7 +272,7 @@ export const stopAnswer = (
       : {}
     const now = yield* Clock.currentTimeMillis
     const answer = called
-      ? departuresFromBoard(timetable, snapshot, found, called, now, yield* corrections)
-      : dueBy(departuresAt(timetable, snapshot, found), askAgain)
+      ? departuresFromBoard(timetable, snapshot, found, called, now, yield* corrections, history)
+      : dueBy(departuresAt(timetable, snapshot, found, { now, history }), askAgain)
     return { ...answer, messages: stopMessages(timetable, stop.id, answer.messages, list) }
   })

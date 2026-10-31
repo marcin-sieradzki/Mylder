@@ -20,7 +20,8 @@ const saved = (recording: string, name: string): Snapshot =>
     readFileSync(join(process.cwd(), 'recordings', recording, 'snapshots', name), 'utf8'),
   ) as Snapshot
 
-// 07:25 on the weekday recording, its timetable prepared on 2 June; and a month spent.
+// 07:25 on the weekday recording, its timetable prepared on 2 June, after six position calls, the
+// disruption list and København Syd St.'s board; and a month spent.
 const weekday = saved('weekday', '0006.json')
 const spent = saved('spent', '0003.json')
 const aircraft = JSON.parse(
@@ -100,7 +101,7 @@ describe('the About dialog', () => {
       'https://github.com/marcin-sieradzki/mylder/blob/main/src/map/style/LICENSE.md',
     )
     expect(fact(dialog, 'Data budget')).toBe('Normal')
-    expect(fact(dialog, 'Calls this month')).toBe('7')
+    expect(fact(dialog, 'Calls this month')).toBe('8')
     expect(fact(dialog, 'Disruptions')).toBe('Checked 07:20')
     expect(keysIn(dialog)).toEqual([
       '+',
@@ -139,7 +140,7 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Kilde')).toBe('En optagelse, weekday')
     expect(fact(dialog, 'Positioner')).toBe('Meldinger og beregnede positioner på skift')
     expect(fact(dialog, 'Databudget')).toBe('Normalt')
-    expect(fact(dialog, 'Kald denne måned')).toBe('7')
+    expect(fact(dialog, 'Kald denne måned')).toBe('8')
     expect(dialog).toHaveTextContent('lukker køretøjets kort eller panel')
     expect(dialog).toHaveTextContent(
       'Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen.',

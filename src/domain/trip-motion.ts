@@ -56,6 +56,12 @@ export interface Vehicle {
 /** A trip stands Waiting at its first stop from this long before its first departure. */
 export const WAITING_FROM = 5 * 60_000
 
+/**
+ * A trip that ends at a stop counts as standing there for this long after it arrives, since no
+ * source says when it leaves the platform (GLOSSARY.md, "Standing").
+ */
+export const ENDED_STANDS_FOR = 2 * 60_000
+
 const EARTH_RADIUS = 6_371_000
 
 /** The distance between two nearby points, in metres. Exact enough across a city. */

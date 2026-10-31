@@ -402,6 +402,7 @@ export const layer: Layer.Layer<
         const found = findStop(timetable, stopId)
         if (!found) return undefined
         const snapshot = yield* getSnapshot
+        const history = yield* storedHistory
         const list = yield* storedDisruptions
         const board = rejseplanen.multiDepartureBoard
         // The board's departures join as the run's journeys do, corrections and all.
@@ -409,7 +410,7 @@ export const layer: Layer.Layer<
           Effect.flatMap((now) => corrections.read(serviceDaysAhead(timetable, now))),
         )
         return yield* stopAnswer(
-          { timetable, snapshot, list, ask, board, corrections: corrected },
+          { timetable, snapshot, history, list, ask, board, corrections: corrected },
           found,
         )
       })

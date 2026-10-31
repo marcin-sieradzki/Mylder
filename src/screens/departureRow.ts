@@ -1,4 +1,4 @@
-// What one departure row says (docs/screens.md, "Stop departures"; docs/data-states.md, "The
+// What one departure row says (docs/screens.md, "Stop panel"; docs/data-states.md, "The
 // states"): the countdown, the time beside it and the delay, each following the trip's data
 // state. Live and Ageing show the expected time, Estimated the expected time marked "~",
 // Timetable only and No signal the timetabled time and an unknown delay, and a cancelled
@@ -38,7 +38,7 @@ export interface DepartureTimes {
 
 /** A departure's times in `state` at `now`, read on the clock of `timezone`, the timetable's. */
 export function departureTimes(
-  row: StopDeparture,
+  row: Pick<StopDeparture, 'scheduled' | 'expected' | 'cancelled'>,
   state: DataState,
   now: number,
   timezone: string,
@@ -60,7 +60,7 @@ export function departureTimes(
  * where the map has no current realtime for the trip.
  */
 export function departureState(
-  row: StopDeparture,
+  row: Pick<StopDeparture, 'state' | 'expected' | 'cancelled'>,
   source: AnswerSource,
   onMap: DataState | undefined,
 ): DataState {
