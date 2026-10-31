@@ -334,7 +334,7 @@ describe('the basemap', () => {
     })
   })
 
-  it("paints the buildings faint in Perron's 3D building colour, in light and dark", () => {
+  it("paints the buildings in Perron's 3D building colour, in light and dark", () => {
     const light = layer(styleNow(), 'building-3d').paint
     expect(light['fill-extrusion-color']).toBe('#D3D9D4')
     expect(light['fill-extrusion-opacity']).toBe(0.6)

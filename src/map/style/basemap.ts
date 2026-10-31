@@ -33,8 +33,8 @@ type MapColour =
 const map = (colour: MapColour) => `perron-color-map-${colour}`
 
 /**
- * How opaque the raised buildings are drawn: faint enough that a vehicle on the street behind a
- * block reads as on the street (ADR 0016).
+ * How opaque the raised buildings are drawn, from Perron's token: see-through, with the vehicles,
+ * lines and stops drawn over them (ADR 0016).
  */
 const BUILDING_OPACITY = 'perron-opacity-map-building-3d'
 
