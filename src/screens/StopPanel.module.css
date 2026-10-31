@@ -35,9 +35,12 @@
   scroll-snap-type: x mandatory;
 }
 
+/* Wide enough that a row's state and track keep whole words, short of the row's width by the
+   peek of the next; padded by space.200 rather than the raised Surface's space.300, as a row is. */
 .card {
   flex: 0 0 auto;
-  inline-size: min(17.5rem, 85%);
+  inline-size: min(24rem, 90%);
+  padding: var(--perron-space-200);
   scroll-snap-align: start;
 }
 

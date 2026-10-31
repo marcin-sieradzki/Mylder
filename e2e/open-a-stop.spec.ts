@@ -79,6 +79,60 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
   await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
 })
 
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  const REFSHALEOEN = stops.find((stop) => stop.id === '48645')!
+
+  test('a stop’s standing trips are a row that scrolls sideways above the tabs, each opening its vehicle', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23. Its dot
+    // sits on the stop's marker, and a tap on a dot opens the vehicle, so the buses are hidden for
+    // the tap on the stop and shown again once its panel is open. A stop's sheet opens under the
+    // Overview's on a phone (#175), so the Overview is closed first.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto(`/en?hide=bus&map=17.00/${REFSHALEOEN.lat}/${REFSHALEOEN.lon}`)
+    await page
+      .getByRole('dialog', { name: 'Overview' })
+      .getByRole('button', { name: 'Close' })
+      .click()
+    const { width, height } = page.viewportSize()!
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(async () => {
+      await page.mouse.click(width / 2, height / 2)
+      await expect(panel).toBeVisible({ timeout: 1_000 })
+    }).toPass()
+    await expect(panel).toHaveAttribute('data-anchor', 'bottom')
+    const standing = panel.getByRole('region', { name: 'At the platforms now' })
+    await expect(standing).toContainText(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+
+    await page.getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ }).click()
+    const row = standing.getByRole('list', { name: 'At the platforms now' })
+    await expect(row).toHaveCSS('overflow-x', 'auto')
+    const bus = row.getByRole('listitem').filter({ hasText: 'Teglholmen' })
+    await expect(bus).toContainText('991')
+    await expect(bus).toContainText('Estimated')
+    await expect(bus).toContainText('07:23')
+    await expect(bus).toContainText(/\d+ min|Now/)
+    // One card, narrower than the row, so the next one would sit beside it; the row above the tabs.
+    const card = (await bus.boundingBox())!
+    const across = (await row.boundingBox())!
+    expect(card.width).toBeLessThan(across.width)
+    const tabs = (await panel
+      .getByRole('tablist', { name: 'Departures and arrivals' })
+      .boundingBox())!
+    expect(card.y + card.height).toBeLessThanOrEqual(tabs.y)
+
+    await bus.getByRole('button', { name: 'Bus 991 to Teglholmen' }).click()
+    await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
+    await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
+  })
+})
+
 test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
   // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its
   // departures and arrivals are the saved answers: either route asked of the server could make
