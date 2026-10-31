@@ -1,0 +1,20 @@
+[
+  {
+    "holdMs": 1000,
+    "keydowns": 31,
+    "heading": 31,
+    "msFromReleaseToRest": 498
+  },
+  {
+    "holdMs": 2000,
+    "keydowns": 59,
+    "heading": 34,
+    "msFromReleaseToRest": 629
+  },
+  {
+    "holdMs": 4000,
+    "keydowns": 120,
+    "heading": 35,
+    "msFromReleaseToRest": 482
+  }
+]

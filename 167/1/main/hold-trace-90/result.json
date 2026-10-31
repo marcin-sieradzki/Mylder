@@ -1,0 +1,8 @@
+{
+  "journey": "hold-trace-90",
+  "pass": true,
+  "steps": [
+    "01-north-up-map-focused: north-up, map focused (http://localhost:4362/en)",
+    "02-3-s-after-release: 3 s after release (http://localhost:4362/en?map=11.20/55.68000/12.56500/34.8/0.0)"
+  ]
+}

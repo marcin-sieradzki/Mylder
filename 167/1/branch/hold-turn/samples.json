@@ -1,0 +1,412 @@
+{
+  "keydowns": 90,
+  "releasedAtMs": 3011,
+  "allKeysHandledAtMs": 3066,
+  "restAtMs": 3557,
+  "msFromReleaseToRest": 546,
+  "finalHeading": "36",
+  "samples": [
+    {
+      "t": 0,
+      "phase": "held",
+      "needle": 0,
+      "heading": "0"
+    },
+    {
+      "t": 132,
+      "phase": "held",
+      "needle": 6,
+      "heading": "0"
+    },
+    {
+      "t": 3557,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 3926,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4217,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4486,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4607,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4734,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4864,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 4988,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5110,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5218,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5336,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5484,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5633,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5743,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 5901,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6012,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6124,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6262,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6392,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6549,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6670,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6795,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 6907,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7014,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7137,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7267,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7393,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7501,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7632,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7755,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7880,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 7987,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8100,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8211,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8322,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8430,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8549,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8671,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8797,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 8926,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9061,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9174,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9296,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9403,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9510,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9631,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9756,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9871,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 9992,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10100,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10253,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10381,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10496,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10618,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10736,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10842,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 10957,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11095,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11223,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11348,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11475,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11590,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11719,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11849,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    },
+    {
+      "t": 11964,
+      "phase": "released",
+      "needle": 36,
+      "heading": "36"
+    }
+  ]
+}

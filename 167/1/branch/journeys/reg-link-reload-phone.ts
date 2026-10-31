@@ -1,0 +1,47 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { ready, region } from './lib.ts'
+
+// Regression, moving-map map-3d "A tilted link and a reload" (the branch's feature map: three quick
+// Shift + Up and three Shift + Right). Entry: a shared link. This is the --phone run; neither the 3D toggle nor the compass shows.
+export default async ({ page, step, expect }: Journey) => {
+  const v = page.locator('[data-vehicles]')
+  const scale = page.getByText(/\d+\s(m|km)$/)
+  const drawn = async () => (await (await page.request.get('/api/snapshot')).json()).trips.filter((t: any) => t.state !== 'cancelled').length
+  await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/50.0')
+  await ready(page, expect)
+  await expect(v).toHaveAttribute('data-tilt', '50', { timeout: 15000 })
+  await expect(v).toHaveAttribute('data-heading', '-30')
+  await expect(scale).toBeHidden()
+  await expect(v).toHaveAttribute('data-vehicles', String(await drawn()))
+  await page.waitForTimeout(1500)
+  await expect(page.getByRole('button', { name: '3D view' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Reset to north' })).toHaveCount(0)
+  await step('tilted link opens tilted and turned')
+  await page.goto('/en?map=13.00/55.67600/12.56800')
+  await ready(page, expect)
+  await expect(v).toHaveAttribute('data-tilt', '0', { timeout: 15000 })
+  await page.waitForTimeout(1000)
+  await region(page).focus()
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(v).toHaveAttribute('data-tilt', '30', { timeout: 15000 })
+  await expect(v).toHaveAttribute('data-heading', '45', { timeout: 15000 })
+  await expect(page).toHaveURL(/map=13\.00\/55\.67600\/12\.56800\/45\.0\/30\.0$/)
+  await step('tilted and turned by keys, address has five parts')
+  await page.reload()
+  await ready(page, expect)
+  await expect(v).toHaveAttribute('data-tilt', '30', { timeout: 15000 })
+  await expect(v).toHaveAttribute('data-heading', '45')
+  await page.waitForTimeout(1000)
+  await step('reload keeps the angle')
+  await page.getByRole('button', { name: 'Centre the map' }).click()
+  await expect(v).toHaveAttribute('data-tilt', '0', { timeout: 15000 })
+  await expect(page).toHaveURL(/map=[\d.]+\/[\d.]+\/[\d.]+$/)
+  await step('centre the map: three-part address')
+  await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/75.0')
+  await ready(page, expect)
+  await expect(v).toHaveAttribute('data-heading', '-30', { timeout: 15000 })
+  await expect(v).toHaveAttribute('data-tilt', '0')
+  await expect(v).toHaveAttribute('data-vehicles', String(await drawn()))
+  await step('out-of-range tilt opens flat')
+}

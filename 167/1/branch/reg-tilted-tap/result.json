@@ -1,0 +1,9 @@
+{
+  "journey": "reg-tilted-tap",
+  "pass": true,
+  "steps": [
+    "01-tilted-40-turned-45-on-bus-5c: tilted 40, turned -45 on bus 5C (http://localhost:4363/en?map=15.00/55.66986/12.57985/-45.0/40.0)",
+    "02-card-bus-5c-to-husum-torvestimatedestimated-from-schedule: card: Bus 5C to Husum TorvEstimatedEstimated from schedule (http://localhost:4363/en?map=15.00/55.66986/12.57985/-45.0/40.0)",
+    "03-panel-open-with-trip-: panel open with ?trip= (http://localhost:4363/en?map=15.00/55.66986/12.57985/-45.0/40.0&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

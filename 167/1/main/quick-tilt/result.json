@@ -1,0 +1,10 @@
+{
+  "journey": "quick-tilt",
+  "pass": false,
+  "error": "expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('[data-vehicles]')\nExpected: \"30\"\nReceived: \"20\"\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('[data-vehicles]') with timeout 10000ms\n  - waiting for locator('[data-vehicles]')\n    15 × locator resolved to <div data-tilt=\"20\" data-heading=\"0\" data-aircraft=\"8\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n       - unexpected value \"20\"\n    8 × locator resolved to <div data-tilt=\"20\" data-heading=\"0\" data-aircraft=\"9\" data-vehicles=\"17\" class=\"EEL_KW_canvas maplibregl-map\">…</div>\n      - unexpected value \"20\"\n",
+  "steps": [
+    "01-flat-map-focused: flat, map focused (http://localhost:4362/en)",
+    "02-after-three-quick-shift-up: after three quick Shift+Up (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/20.2)",
+    "03-failure: failure (http://localhost:4362/en?map=11.20/55.68000/12.56500/0.0/20.2)"
+  ]
+}

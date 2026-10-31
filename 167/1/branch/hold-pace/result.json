@@ -1,0 +1,9 @@
+{
+  "journey": "hold-pace",
+  "pass": true,
+  "steps": [
+    "01-held-1000-ms-rests-at-31: held 1000 ms, rests at 31 (http://localhost:4363/en?map=11.20/55.68000/12.56500/30.8/0.0)",
+    "02-held-2000-ms-rests-at-32: held 2000 ms, rests at 32 (http://localhost:4363/en?map=11.20/55.68000/12.56500/31.9/0.0)",
+    "03-held-4000-ms-rests-at-35: held 4000 ms, rests at 35 (http://localhost:4363/en?map=11.20/55.68000/12.56500/35.1/0.0)"
+  ]
+}
