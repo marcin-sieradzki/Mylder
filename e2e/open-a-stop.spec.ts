@@ -190,8 +190,15 @@ test.describe('on a phone', () => {
       .getByRole('button', { name: /^Bus/ })
       .evaluate((button: HTMLButtonElement) => button.click())
     await expect(panel.getByRole('list', { name: 'At the platforms now' })).toBeVisible()
-    // Many frames, room for a new peek to move the sheet, were it measured during the drag.
-    await page.waitForTimeout(500)
+    // Thirty frames, room for a new peek to move the sheet, were it measured during the drag.
+    await page.evaluate(
+      () =>
+        new Promise<void>((done) => {
+          const frame = (left: number) =>
+            left === 0 ? done() : requestAnimationFrame(() => frame(left - 1))
+          frame(30)
+        }),
+    )
     expect(Math.abs((await panel.boundingBox())!.y - held)).toBeLessThan(1)
     // Let go: the sheet settles at its new peek, down to its tabs under the 991.
     await page.mouse.up()
