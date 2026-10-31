@@ -1,7 +1,7 @@
 'use client'
 
 import type { DetailPanelProps } from '@mylder/perron/patterns'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { numberOf, readPaint } from '../map/paint'
 import { sheetPeek } from '../map/peek'
 
@@ -79,7 +79,8 @@ export function usePeekTo(bottom: boolean): PeekTo {
   }, [bottom, popup, content, above, until])
   // Nothing to peek down to, as on a stop not found: the peek falls back to Perron's.
   const shown = bottom && until ? peek : undefined
-  useEffect(() => {
+  // Published in the same commit as the snap points change, so the map's foot moves with the sheet.
+  useLayoutEffect(() => {
     if (shown === undefined) return
     sheetPeek.set(shown)
     return () => sheetPeek.set(undefined)
