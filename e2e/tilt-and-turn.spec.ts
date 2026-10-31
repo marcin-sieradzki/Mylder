@@ -46,6 +46,37 @@ test('Shift + ↑ tilts the map, hiding the scale bar with every vehicle still d
   await expect(scale).toBeVisible()
 })
 
+test('holding Shift + → keeps turning the map, and it stops soon after the key is let go', async ({
+  page,
+}) => {
+  await page.goto('/en')
+  const map = page.locator('[data-vehicles]')
+  await expect(map).toHaveAttribute('data-heading', '0')
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  // A held key as the keyboard sends it: trusted keydowns, repeating every 33 ms, sent without
+  // waiting for the page, so they pile up while a slow renderer draws a frame.
+  const cdp = await page.context().newCDPSession(page)
+  const shift = { key: 'Shift', code: 'ShiftLeft', windowsVirtualKeyCode: 16 }
+  const right = { key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 }
+  const key = (type: 'rawKeyDown' | 'keyUp', which: object, autoRepeat = false) =>
+    cdp.send('Input.dispatchKeyEvent', { type, modifiers: 8, autoRepeat, ...which })
+  const sent = [key('rawKeyDown', shift), key('rawKeyDown', right)]
+  for (const start = Date.now(); Date.now() - start < 3_000;) {
+    await page.waitForTimeout(33)
+    sent.push(key('rawKeyDown', right, true))
+  }
+  sent.push(key('keyUp', right), key('keyUp', shift))
+  await Promise.all(sent)
+
+  // Well past the two steps a held key used to stop at, and still once it has come to rest.
+  const heading = async () => Number(await map.getAttribute('data-heading'))
+  await expect.poll(heading).toBeGreaterThanOrEqual(60)
+  await page.waitForTimeout(1_000)
+  const rested = await heading()
+  await page.waitForTimeout(1_000)
+  expect(await heading()).toBe(rested)
+})
+
 test('a sideways right-drag turns the map, an upward one tilts it, and Shift + ↓ brings it back flat', async ({
   page,
 }) => {
