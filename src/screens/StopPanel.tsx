@@ -5,6 +5,7 @@ import {
   EmptyState,
   LineBadge,
   Section,
+  Surface,
   Tab,
   Tabs,
   TabsList,
@@ -114,7 +115,13 @@ export function StopPanel({ state, frame }: StopPanelProps) {
       {status === 'not-found' ? (
         <EmptyState title={words.notFound}>{words.notFoundDetail}</EmptyState>
       ) : (
-        <StopLists state={state} timezone={timezoneOf(network)} lang={lang} words={words} />
+        <StopLists
+          state={state}
+          timezone={timezoneOf(network)}
+          lang={lang}
+          words={words}
+          phone={frame.anchor === 'bottom'}
+        />
       )}
     </DetailPanel>
   )
@@ -159,6 +166,8 @@ interface StopListsProps {
   timezone: string
   lang: Lang
   words: Words
+  /** Whether the panel is a phone's bottom sheet, where the standing trips are a row. */
+  phone: boolean
 }
 
 /**
@@ -166,7 +175,7 @@ interface StopListsProps {
  * as two tabs following the ARIA tabs pattern, the open one kept in the address. Departures opens
  * first, from the stop's answer; Arrivals asks for its own while it is open.
  */
-function StopLists({ state, timezone, lang, words }: StopListsProps) {
+function StopLists({ state, timezone, lang, words, phone }: StopListsProps) {
   const hidden = useHiddenModes()
   const states = useDataStates()
   const now = useServerSecond(useClockOffset())
@@ -185,6 +194,7 @@ function StopLists({ state, timezone, lang, words }: StopListsProps) {
           now={now}
           timezone={timezone}
           words={words}
+          phone={phone}
         />
       ) : null}
       <Tabs
@@ -451,17 +461,20 @@ interface StandingProps {
   now: number
   timezone: string
   words: Words
+  /** Whether the panel is a phone's bottom sheet: every trip shows, as a row that scrolls sideways. */
+  phone: boolean
 }
 
 /**
  * "At the platforms now" (docs/screens.md, "Stop panel"): the trips standing at the stop's
- * platforms, soonest to leave first, 4 of them until "Show all" shows the rest, or words saying
- * none stands. Each opens its vehicle.
+ * platforms, soonest to leave first, or words saying none stands. Each opens its vehicle. In a
+ * side panel they are a list, 4 of them until "Show all" shows the rest; in a phone's bottom
+ * sheet, every one of them as a row of cards the rider swipes through.
  */
-function Standing({ trips, source, states, now, timezone, words }: StandingProps) {
+function Standing({ trips, source, states, now, timezone, words, phone }: StandingProps) {
   const [all, setAll] = useState(false)
   const list = useId()
-  const folds = trips.length > SHOWN_STANDING
+  const folds = !phone && trips.length > SHOWN_STANDING
   const shown = folds && !all ? trips.slice(0, SHOWN_STANDING) : trips
   return (
     <Section
@@ -485,7 +498,11 @@ function Standing({ trips, source, states, now, timezone, words }: StandingProps
           {words.standingNone}
         </Text>
       ) : (
-        <ul id={list} className={styles.departures} aria-label={words.standing}>
+        <ul
+          id={list}
+          className={phone ? styles.standingRow : styles.departures}
+          aria-label={words.standing}
+        >
           {shown.map((trip) => (
             <StandingRow
               key={`${trip.trip} ${trip.platform}`}
@@ -494,6 +511,7 @@ function Standing({ trips, source, states, now, timezone, words }: StandingProps
               now={now}
               timezone={timezone}
               words={words}
+              card={phone}
             />
           ))}
         </ul>
@@ -508,19 +526,23 @@ interface StandingRowProps {
   now: number
   timezone: string
   words: Words
+  /** Whether it is a card in a phone's row rather than a row of a list. */
+  card: boolean
 }
 
 /**
  * One standing trip: Perron's row, with the time it leaves as its state shows it, or "Ends here"
- * for a trip that ends at the stop, which no source says when it leaves.
+ * for a trip that ends at the stop, which no source says when it leaves. In a phone's row it sits
+ * on a raised Surface, a card of its own, until Perron has a card for a standing trip
+ * (StandingCard, marcin-sieradzki/perron#190), which replaces this stand-in when it lands.
  */
-function StandingRow({ trip, state, now, timezone, words }: StandingRowProps) {
+function StandingRow({ trip, state, now, timezone, words, card }: StandingRowProps) {
   const times =
     trip.scheduled === undefined
       ? undefined
       : departureTimes({ scheduled: trip.scheduled, expected: trip.expected }, state, now, timezone)
-  return (
-    <li className={styles.departure}>
+  const content = (
+    <>
       <OpenTrip departure={trip} />
       <DepartureRow
         variant={state}
@@ -537,6 +559,13 @@ function StandingRow({ trip, state, now, timezone, words }: StandingRowProps) {
             })}
         {...platformOf(trip, words)}
       />
-    </li>
+    </>
+  )
+  return card ? (
+    <Surface variant="raised" className={styles.card} render={<li />}>
+      {content}
+    </Surface>
+  ) : (
+    <li className={styles.departure}>{content}</li>
   )
 }
