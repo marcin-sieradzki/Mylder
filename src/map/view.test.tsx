@@ -35,7 +35,11 @@ describe("the view an address's query names", () => {
   it.each([
     ['a heading past south', '?map=15.20/55.67610/12.56830/190.0/48.0', { pitch: 48 }],
     ['a heading that is no number', '?map=15.20/55.67610/12.56830/east/48.0', { pitch: 48 }],
-    ['a tilt past the most the map tilts', '?map=15.20/55.67610/12.56830/-35.5/75.0', { bearing: -35.5 }],
+    [
+      'a tilt past the most the map tilts',
+      '?map=15.20/55.67610/12.56830/-35.5/75.0',
+      { bearing: -35.5 },
+    ],
     ['a tilt below flat', '?map=15.20/55.67610/12.56830/-35.5/-10.0', { bearing: -35.5 }],
     ['both left empty', '?map=15.20/55.67610/12.56830//', {}],
   ])('still opens the place, dropping what is out of range, for %s', (_, search, kept) => {
