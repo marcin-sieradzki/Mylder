@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { devices, type Locator, type Page } from '@playwright/test'
 import {
   CROWDED_START,
   CROWDED_URL,
@@ -82,8 +83,172 @@ test('a stop’s panel lists the trips standing at its platforms, and opens one�
   await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
 })
 
+const { defaultBrowserType: _, ...PIXEL_7 } = devices['Pixel 7']
+
+/** Perron's size.sheet-peek, as the page's token stylesheet gives it, in CSS pixels. */
+const leastPeekOf = (page: Page) =>
+  page.evaluate(() =>
+    Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--perron-size-sheet-peek'),
+    ),
+  )
+
+/**
+ * A phone's stop sheet at its peek: its tablist whole on the screen, at the sheet's foot, the
+ * peek rising as far as the tabs need and no further, or to size.sheet-peek where that is more;
+ * and the map's corner credit whole above the sheet. Nothing here clicks or scrolls:
+ * toBeInViewport reads where the tablist is, as the rider sees it.
+ */
+async function expectTabsAtPeek(page: Page, panel: Locator) {
+  const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
+  await expect(tabs).toBeInViewport({ ratio: 1 })
+  const { height } = page.viewportSize()!
+  const least = await leastPeekOf(page)
+  const credit = page.locator('small', { hasText: 'Transit data' })
+  await expect(credit).toBeInViewport({ ratio: 1 })
+  await expect(async () => {
+    const box = (await tabs.boundingBox())!
+    const sheet = (await panel.boundingBox())!
+    // The peek is the larger of where the tabs end, from the sheet's top, and size.sheet-peek:
+    // it ends at the tabs' foot, or, where they end higher, at the usual peek with room below.
+    const peek = height - sheet.y
+    const tabsEnd = box.y + box.height - sheet.y
+    expect(Math.abs(peek - Math.max(tabsEnd, least))).toBeLessThan(1)
+    // The credit stands on the sheet's peek, none of it under the sheet.
+    const words = (await credit.boundingBox())!
+    expect(words.y + words.height).toBeLessThanOrEqual(sheet.y)
+  }).toPass()
+}
+
+/**
+ * A phone's stop sheet opens at its peek with its tabs on the screen, whether trips stand there or
+ * not, so the rider knows the departures are there before any drag or scroll.
+ */
+function peekTests() {
+  test('a stop with a trip standing shows its tabs under the standing row', async ({ page }) => {
+    // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645')
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(
+      panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
+    ).toContainText('Teglholmen')
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop with nothing standing shows its tabs too', async ({ page }) => {
+    // Nørreport St., where nothing stands at 07:21, its many lines' badges filling the header.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '27532')
+    await page.goto('/en?stop=27532')
+    const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+    await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop with six trains standing shows its tabs under their row', async ({ page }) => {
+    // København H on the crowded recording, where six trains stand from 07:20 to 07:24.
+    await page.goto(`${CROWDED_URL}/en?stop=8600626`)
+    const panel = page.getByRole('dialog', { name: 'København H' })
+    await expect(
+      panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
+    ).toHaveCount(6)
+    await expectTabsAtPeek(page, panel)
+  })
+}
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
+
+  peekTests()
+
+  test('a stop’s sheet holds still under the finger while a trip comes to stand, then peeks to its tabs', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21 with the buses hidden, so nothing stands until the filter shows the 991.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645&hide=bus')
+    const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
+      'No vehicle of the types shown is standing at the platforms now.',
+    )
+    await expectTabsAtPeek(page, panel)
+    // The rider drags the sheet's header up a little and holds it there.
+    const title = (await panel.getByRole('heading', { name: 'Refshaleøen' }).boundingBox())!
+    await page.mouse.move(title.x + 4, title.y + 4)
+    await page.mouse.down()
+    await page.mouse.move(title.x + 4, title.y - 16, { steps: 8 })
+    await expect(panel).toHaveAttribute('data-swiping')
+    const held = (await panel.boundingBox())!.y
+    // The 991 comes in while the finger is down, by the filter, as the next minute's answer could.
+    await page
+      .getByRole('group', { name: 'Filters' })
+      .getByRole('button', { name: /^Bus/ })
+      .evaluate((button: HTMLButtonElement) => button.click())
+    await expect(panel.getByRole('list', { name: 'At the platforms now' })).toBeVisible()
+    // Thirty frames, room for a new peek to move the sheet, were it measured during the drag.
+    await page.evaluate(
+      () =>
+        new Promise<void>((done) => {
+          const frame = (left: number) =>
+            left === 0 ? done() : requestAnimationFrame(() => frame(left - 1))
+          frame(30)
+        }),
+    )
+    expect(Math.abs((await panel.boundingBox())!.y - held)).toBeLessThan(1)
+    // Let go: the sheet settles at its new peek, down to its tabs under the 991.
+    await page.mouse.up()
+    await expectTabsAtPeek(page, panel)
+  })
+
+  test('a stop not found after one with a trip standing peeks as little as any', async ({
+    page,
+  }) => {
+    // Refshaleøen at 07:21, where the 991 stands, its row lifting the tabs and the peek with them.
+    await serveFirstMinute(page)
+    await serveSavedStop(page, '48645')
+    await page.goto('/en?stop=48645')
+    const found = page.getByRole('dialog', { name: 'Refshaleøen' })
+    await expect(found.getByRole('list', { name: 'At the platforms now' })).toBeVisible()
+    await expectTabsAtPeek(page, found)
+    const { height } = page.viewportSize()!
+    const least = await leastPeekOf(page)
+    const lifted = (await found.boundingBox())!
+    expect(height - lifted.y).toBeGreaterThan(least + 1)
+    const credit = page.locator('small', { hasText: 'Transit data' })
+    const words = (await credit.boundingBox())!
+    const clear = lifted.y - words.y - words.height
+    // While the rider holds the sheet up a little, so the next stop's loading measures no peek of
+    // its own first, a step forward in the page's own history opens, in the same sheet, a stop
+    // that isn't there: it has no tabs to peek down to.
+    await page.evaluate(() => history.pushState(null, '', '/en?stop=nowhere'))
+    await page.goBack()
+    const title = (await found.getByRole('heading', { name: 'Refshaleøen' }).boundingBox())!
+    await page.mouse.move(title.x + 4, title.y + 4)
+    await page.mouse.down()
+    await page.mouse.move(title.x + 4, title.y - 16, { steps: 8 })
+    await expect(found).toHaveAttribute('data-swiping')
+    await page.goForward()
+    const lost = page.getByRole('dialog', { name: 'Stop not found' })
+    await expect(lost).toBeVisible()
+    // Let go: the sheet peeks as little as any, and the credit follows it down.
+    await page.mouse.up()
+    await expect(async () => {
+      const sheet = (await lost.boundingBox())!
+      expect(Math.abs(height - sheet.y - least)).toBeLessThan(1)
+      const below = (await credit.boundingBox())!
+      expect(Math.abs(sheet.y - below.y - below.height - clear)).toBeLessThan(1)
+    }).toPass()
+  })
+
+  test.describe('on a Pixel 7', () => {
+    test.use(PIXEL_7)
+    peekTests()
+  })
 
   const REFSHALEOEN = stops.find((stop) => stop.id === '48645')!
 
