@@ -181,9 +181,10 @@ export interface Floating {
  * How far a fit keeps from the edges of a map `width` by `height`, clear of what floats over it,
  * from Perron's sizes: on a desktop the top bar and the highlight chip under it, the sheet at the
  * left and the detail panel at the right; on a phone the top bar's two rows, the chip and the
- * bottom sheet's peek, an open stop sheet's own where it measured one. Where the screen has measured them, it keeps clear of the page notices
- * that push the chip down and, on a desktop, of the legend. A window too small for that pads
- * less, at the bottom first, so the highlight keeps room.
+ * bottom sheet's peek, an open stop sheet's own where it measured one. Where the screen has
+ * measured them, it keeps clear of the page notices that push the chip down and, on a desktop, of
+ * the legend. A window too small for that pads less, at the bottom first, so the highlight keeps
+ * room.
  */
 export function fitPadding(width: number, height: number, floating: Floating = {}): Padding {
   const gap = 12 // size.panel-gap, and space.300 from the edge
