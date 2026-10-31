@@ -57,6 +57,27 @@ describe('the simulated multiDepartureBoard', () => {
     }).pipe(Effect.provide(simulation)),
   )
 
+  it.effect(
+    'gives every train its planned track, and its realtime track beside it with a prognosis, as Rejseplanen does',
+    () =>
+      Effect.gen(function* () {
+        // København H at 07:12, where the RE to Næstved waits on its track and S-tog pass.
+        const departures = (yield* board('8600626', Date.UTC(2026, 5, 16, 5, 12))).Departure ?? []
+        const rail = departures.filter((d) => ['4', '16'].includes(d.ProductAtStop?.cls ?? ''))
+        expect(rail.map((d) => d.ProductAtStop?.line)).toContain('RE')
+        for (const d of rail) {
+          expect(d.track).toMatch(/^[1-8]$/)
+          expect(d.rtTrack).toBe(d.prognosisType === undefined ? undefined : d.track)
+        }
+        // Buses and the Metro have no track.
+        const nørreport = (yield* board('27532|50461|8603307', Date.UTC(2026, 5, 16, 5, 5)))
+          .Departure ?? []
+        const others = nørreport.filter((d) => ['32', '1024'].includes(d.ProductAtStop?.cls ?? ''))
+        expect(others.length).toBeGreaterThan(0)
+        for (const d of others) expect([d.track, d.rtTrack]).toEqual([undefined, undefined])
+      }).pipe(Effect.provide(simulation)),
+  )
+
   it.effect('gives each departure its trip’s own messages, for its product', () =>
     Effect.gen(function* () {
       const departures = (yield* board('8600626')).Departure ?? []

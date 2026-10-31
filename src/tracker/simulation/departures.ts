@@ -74,7 +74,10 @@ function departure(
   const realtime = !isIntervalLine(trip) && !cancelled
   const [date, time] = dateAndTime(planned, timezone)
   const [rtDate, rtTime] = dateAndTime(expected, timezone)
+  // Tracks are made up, one per platform, where trains have them: the planned one always, and the
+  // realtime one beside it with a prognosis, as Rejseplanen gives them.
   const train = trip.line.mode === 'train' || trip.line.mode === 's-tog'
+  const track = train ? String(1 + (hash(platform.id) % 8)) : undefined
   const messages = tripMessages(settings, simulated, now)
   return {
     JourneyDetailRef: { ref: journeyRef(timetable, trip, simulated.journeyNumber) },
@@ -86,9 +89,9 @@ function departure(
     lat: platform.lat,
     time,
     date,
+    ...(track !== undefined && { track }),
     ...(realtime && expected !== planned && { rtTime, rtDate }),
-    // Tracks are made up, one per platform, where trains have them.
-    ...(realtime && train && { rtTrack: String(1 + (hash(platform.id) % 8)) }),
+    ...(realtime && track !== undefined && { rtTrack: track }),
     ...(realtime && { prognosisType: prognosisOf(simulated) }),
     direction: trip.headsign,
     reachable: !cancelled,
