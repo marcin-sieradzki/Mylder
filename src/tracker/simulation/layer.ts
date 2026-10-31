@@ -7,6 +7,7 @@ import 'server-only'
 import { Clock, Effect, type Layer, Schema } from 'effect'
 import * as Http from '../http.ts'
 import {
+  ArrivalBoardAnswer,
   DepartureBoardAnswer,
   HimSearchAnswer,
   JourneyDetailAnswer,
@@ -17,7 +18,7 @@ import {
 } from '../rejseplanen/answers.ts'
 import { errorAnswer, svcParam } from '../rejseplanen/responses.ts'
 import type { Timetable } from '../timetable.ts'
-import { departureBoard, readDepartureBoardRequest } from './departures.ts'
+import { arrivalBoard, departureBoard, readDepartureBoardRequest } from './departures.ts'
 import { journeyPos, readJourneyPosRequest } from './journey-pos.ts'
 import { envelope } from './journeys.ts'
 import { messagesAt } from './messages.ts'
@@ -68,6 +69,7 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
   const encode = {
     journeyPos: Schema.encodeSync(JourneyPosAnswer),
     multiDepartureBoard: Schema.encodeSync(DepartureBoardAnswer),
+    multiArrivalBoard: Schema.encodeSync(ArrivalBoardAnswer),
     journeyDetail: Schema.encodeSync(JourneyDetailAnswer),
     himsearch: Schema.encodeSync(HimSearchAnswer),
   }
@@ -92,6 +94,12 @@ export function simulatedClient(options: SimulationOptions): Http.HttpClient.Htt
             ? envelope(now, timezone)
             : departureBoard(settings, readDepartureBoardRequest(settings, query, now), now)
           return Http.json(request, 200, encode.multiDepartureBoard(answer))
+        }
+        case 'multiArrivalBoard': {
+          const answer = empty
+            ? envelope(now, timezone)
+            : arrivalBoard(settings, readDepartureBoardRequest(settings, query, now), now)
+          return Http.json(request, 200, encode.multiArrivalBoard(answer))
         }
         case 'journeyDetail': {
           const detail = journeyDetail(settings, query.get('id') ?? '', now)
