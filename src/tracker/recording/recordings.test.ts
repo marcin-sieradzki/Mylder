@@ -220,11 +220,10 @@ describe('the recorded layer', () => {
         const board = (idList: string) =>
           Effect.gen(function* () {
             const client = yield* Http.HttpClient.HttpClient
-            return yield* Http.getText(
-              client,
-              'https://www.rejseplan.dk/api/multiDepartureBoard',
-              { idList, duration: 30 },
-            ).pipe(Effect.map(statusAndText), Effect.orDie)
+            return yield* Http.getText(client, 'https://www.rejseplan.dk/api/multiDepartureBoard', {
+              idList,
+              duration: 30,
+            }).pipe(Effect.map(statusAndText), Effect.orDie)
           })
         const answers = await Effect.runPromise(
           Effect.gen(function* () {

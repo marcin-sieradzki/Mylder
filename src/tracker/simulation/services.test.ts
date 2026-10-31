@@ -70,8 +70,8 @@ describe('the simulated multiDepartureBoard', () => {
           expect(d.rtTrack).toBe(d.prognosisType === undefined ? undefined : d.track)
         }
         // Buses and the Metro have no track.
-        const nørreport = (yield* board('27532|50461|8603307', Date.UTC(2026, 5, 16, 5, 5)))
-          .Departure ?? []
+        const nørreport =
+          (yield* board('27532|50461|8603307', Date.UTC(2026, 5, 16, 5, 5))).Departure ?? []
         const others = nørreport.filter((d) => ['32', '1024'].includes(d.ProductAtStop?.cls ?? ''))
         expect(others.length).toBeGreaterThan(0)
         for (const d of others) expect([d.track, d.rtTrack]).toEqual([undefined, undefined])
