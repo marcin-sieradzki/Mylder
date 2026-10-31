@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { devices, type Locator, type Page } from '@playwright/test'
 import {
   expect,
   onScreen,
@@ -171,6 +172,61 @@ test.describe('on a phone', () => {
     await expect(page).toHaveURL(/[?&]trip=bus\.991\.7ce514fd98\.20260616\.0700(&|$)/)
   })
 })
+
+// A phone's stop sheet opens at its peek with its tabs on the screen, whether trips stand there or
+// not, so the rider knows the departures are there before any drag or scroll. Nothing here clicks
+// or scrolls: toBeInViewport reads where the tablist is, as the rider sees it.
+const { defaultBrowserType: _, ...PIXEL_7 } = devices['Pixel 7']
+
+/**
+ * The sheet's tablist whole on the screen, at the sheet's foot: the peek rises as far as the tabs
+ * need and no further, or to size.sheet-peek where that is more.
+ */
+async function expectTabsAtPeek(page: Page, panel: Locator) {
+  const tabs = panel.getByRole('tablist', { name: 'Departures and arrivals' })
+  await expect(tabs).toBeInViewport({ ratio: 1 })
+  const { height } = page.viewportSize()!
+  await expect(async () => {
+    const box = (await tabs.boundingBox())!
+    const sheet = (await panel.boundingBox())!
+    // The sheet stops under the tabs, unless size.sheet-peek, 182 px, reaches further.
+    expect(height - (box.y + box.height)).toBeLessThanOrEqual(Math.max(1, sheet.y - (height - 182)))
+    expect(height - sheet.y).toBeGreaterThanOrEqual(182)
+  }).toPass()
+}
+
+for (const [phone, use] of [
+  ['390×844', { viewport: { width: 390, height: 844 } }],
+  ['a Pixel 7', PIXEL_7],
+] as const) {
+  test.describe(`at its peek on ${phone}`, () => {
+    test.use(use)
+
+    test('a stop with a trip standing shows its tabs under the standing row', async ({ page }) => {
+      // Refshaleøen at 07:21, where the 991 to Teglholmen stands until it leaves at 07:23.
+      await serveFirstMinute(page)
+      await serveSavedStop(page, '48645')
+      await page.goto('/en?stop=48645')
+      const panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+      await expect(
+        panel.getByRole('list', { name: 'At the platforms now' }).getByRole('listitem'),
+      ).toContainText('Teglholmen')
+      await expectTabsAtPeek(page, panel)
+    })
+
+    test('a stop with nothing standing shows its tabs too', async ({ page }) => {
+      // Nørreport St., where nothing stands at 07:21, its many lines' badges filling the header.
+      await serveFirstMinute(page)
+      await serveSavedStop(page, '27532')
+      await page.goto('/en?stop=27532')
+      const panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+      await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText(
+        'No vehicle of the types shown is standing at the platforms now.',
+      )
+      await expectTabsAtPeek(page, panel)
+    })
+  })
+}
 
 test('a stop’s panel switches to its arrivals, which the address keeps', async ({ page }) => {
   // Nørreport St., where buses and S-tog arrive throughout the recording's first half hour. Its

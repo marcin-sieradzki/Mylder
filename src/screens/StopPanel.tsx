@@ -18,7 +18,7 @@ import {
   SourceLine,
   type SourceLineSource,
 } from '@mylder/perron/patterns'
-import { useId, useState } from 'react'
+import { useId, useState, type Ref } from 'react'
 import type { DataState } from '../domain/data-state'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
@@ -49,6 +49,7 @@ import { badgeLine, departureState, departureTimes } from './departureRow'
 import { OpenTrip } from './OpenTrip'
 import { Messages } from './Messages'
 import styles from './StopPanel.module.css'
+import { usePeekTo, type PeekTo } from './usePeekTo'
 import { useServerSecond } from './useServerSecond'
 import { fill } from './vehicleLabel'
 
@@ -101,9 +102,15 @@ export function StopPanel({ state, frame }: StopPanelProps) {
   const title =
     status === 'not-found' ? words.notFound : (answer?.stop.name ?? named ?? words.fallbackTitle)
   const lines = answer?.stop.lines ?? []
+  const phone = frame.anchor === 'bottom'
+  // On a phone the sheet's peek ends under the tabs, so the rider sees them below the standing row.
+  const { snapPoints, popup, content, above, until } = usePeekTo(phone)
   return (
     <DetailPanel
       {...frame}
+      ref={popup}
+      slotProps={{ ...frame.slotProps, content: { ref: content } }}
+      snapPoints={snapPoints}
       open
       variant="stop"
       title={title}
@@ -128,7 +135,9 @@ export function StopPanel({ state, frame }: StopPanelProps) {
           timezone={timezoneOf(network)}
           lang={lang}
           words={words}
-          phone={frame.anchor === 'bottom'}
+          phone={phone}
+          above={above}
+          until={until}
         />
       )}
     </DetailPanel>
@@ -179,6 +188,10 @@ interface StopListsProps {
   words: Words
   /** Whether the panel is a phone's bottom sheet, where the standing trips are a row. */
   phone: boolean
+  /** The standing trips' ref, whose height moves the tabs and so the sheet's peek. */
+  above: PeekTo['above']
+  /** The tabs' ref: a phone's sheet peeks down to their end. */
+  until: PeekTo['until']
 }
 
 /**
@@ -186,7 +199,7 @@ interface StopListsProps {
  * as two tabs following the ARIA tabs pattern, the open one kept in the address. Departures opens
  * first, from the stop's answer; Arrivals asks for its own while it is open.
  */
-function StopLists({ state, timezone, lang, words, phone }: StopListsProps) {
+function StopLists({ state, timezone, lang, words, phone, above, until }: StopListsProps) {
   const hidden = useHiddenModes()
   const states = useDataStates()
   // Until the first snapshot gives the server's clock, this device's could be any distance from it,
@@ -208,6 +221,7 @@ function StopLists({ state, timezone, lang, words, phone }: StopListsProps) {
           timezone={timezone}
           words={words}
           phone={phone}
+          ref={above}
         />
       ) : null}
       <Tabs
@@ -216,7 +230,7 @@ function StopLists({ state, timezone, lang, words, phone }: StopListsProps) {
           if (isStopBoard(value)) mapView.update({ board: value })
         }}
       >
-        <TabsList aria-label={words.boards}>
+        <TabsList ref={until} aria-label={words.boards}>
           {STOP_BOARDS.map((value) => (
             <Tab key={value} value={value}>
               {words[value]}
@@ -478,6 +492,7 @@ interface StandingProps {
   words: Words
   /** Whether the panel is a phone's bottom sheet: every trip shows, as a row that scrolls sideways. */
   phone: boolean
+  ref: Ref<HTMLElement>
 }
 
 /**
@@ -486,13 +501,14 @@ interface StandingProps {
  * side panel they are a list, 4 of them until "Show all" shows the rest; in a phone's bottom
  * sheet, every one of them as a row of cards the rider swipes through.
  */
-function Standing({ trips, source, states, now, timezone, words, phone }: StandingProps) {
+function Standing({ trips, source, states, now, timezone, words, phone, ref }: StandingProps) {
   const [all, setAll] = useState(false)
   const list = useId()
   const folds = !phone && trips.length > SHOWN_STANDING
   const shown = folds && !all ? trips.slice(0, SHOWN_STANDING) : trips
   return (
     <Section
+      ref={ref}
       title={words.standing}
       action={
         folds ? (
