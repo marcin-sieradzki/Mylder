@@ -94,6 +94,26 @@ export const VIEW_3D_PITCH = 50
 const STEP_EASE = 300
 const STEP = 'mylder-step'
 
+/**
+ * The furthest the keys turn the map ahead of where it is, in degrees: short of half a turn, so it
+ * eases the way it was turned rather than the shorter way back.
+ */
+const MOST_TURN = 180 - TURN_STEP
+
+/**
+ * How far ahead of the map a step `by` sets the aim, on one axis, when it is `ahead` already. A
+ * press steps on from the aim, so quick presses all count. A key `held` down repeats faster than
+ * a step eases, so its repeats keep the aim at most two steps ahead of the map, and it stops soon
+ * after it is let go; a repeat never pulls back an aim quick presses set further on.
+ */
+function further(ahead: number, by: number, held: boolean): number {
+  if (!held || by === 0) return ahead + by
+  const most = 2 * by
+  return by > 0
+    ? Math.max(ahead, Math.min(ahead + by, most))
+    : Math.min(ahead, Math.max(ahead + by, most))
+}
+
 /** Whether the system asks for reduced motion; not where the browser has no media queries. */
 const systemReducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -148,8 +168,7 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
   }
   /**
    * Where the steps under way are going, until the map comes to rest: a press while one eases
-   * steps on from there, so presses in quick succession add up however slowly the map draws. A
-   * held key repeats faster than a step eases, so the aim runs at most two steps ahead of the map.
+   * steps on from there, so every press counts however slowly the map draws.
    */
   let aim: { pitch: number; bearing: number } | undefined
   const rest = () => (aim = undefined)
@@ -157,14 +176,14 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
     if (!map) return
     const now = { pitch: map.getPitch(), bearing: map.getBearing() }
     const from = aim ?? now
-    // The turn ahead of the map the shorter way round, as MapLibre eases a heading.
-    const turn =
-      ((((from.bearing + (by.bearing ?? 0) - now.bearing + 180) % 360) + 360) % 360) - 180
-    const tilt = from.pitch + (by.pitch ?? 0) - now.pitch
-    const ahead = (value: number, most: number) => Math.min(most, Math.max(-most, value))
+    const held = input !== undefined && 'repeat' in input && input.repeat === true
+    // The turn the aim is ahead of the map, the shorter way round, as MapLibre eases a heading.
+    const turned = ((((from.bearing - now.bearing + 180) % 360) + 360) % 360) - 180
+    const turn = further(turned, by.bearing ?? 0, held)
+    const tilt = further(from.pitch - now.pitch, by.pitch ?? 0, held)
     aim = {
-      pitch: Math.min(map.getMaxPitch(), Math.max(0, now.pitch + ahead(tilt, 2 * TILT_STEP))),
-      bearing: now.bearing + ahead(turn, 2 * TURN_STEP),
+      pitch: Math.min(map.getMaxPitch(), Math.max(0, now.pitch + tilt)),
+      bearing: now.bearing + Math.min(MOST_TURN, Math.max(-MOST_TURN, turn)),
     }
     // One ease id, as MapLibre's own keys give theirs, chains each step onto the one under way.
     move(aim, input, { duration: STEP_EASE, easeId: STEP })
