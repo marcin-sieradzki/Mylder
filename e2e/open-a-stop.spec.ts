@@ -1,9 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
+  CROWDED_START,
+  CROWDED_URL,
   expect,
   onScreen,
   RECORDING_DIR,
+  RECORDING_START,
   serveFirstMinute,
   serveSavedArrivals,
   serveSavedStop,
@@ -246,4 +249,24 @@ test('a stop’s panel leaves the map’s controls and credit in view on a wide 
 test('an unknown stop in the address opens as not found', async ({ page }) => {
   await page.goto('/en?stop=nowhere')
   await expect(page.getByRole('dialog', { name: 'Stop not found' })).toBeVisible()
+})
+
+test('a stop where more than four trains stand lists four, and the rest on Show all', async ({
+  page,
+}) => {
+  // København H on the crowded recording, where six trains stand from 07:20 to 07:24 by its
+  // server's clock, which this test's first request starts.
+  expect(CROWDED_START).toBe(RECORDING_START)
+  await page.goto(`${CROWDED_URL}/en?stop=8600626`)
+  const panel = page.getByRole('dialog', { name: 'København H' })
+  const standing = panel.getByRole('region', { name: 'At the platforms now' })
+  const trains = standing.getByRole('listitem')
+  await expect(trains).toHaveCount(4)
+  await expect(trains.first()).toContainText('Næstved St.')
+  await expect(standing).not.toContainText('Holte St.')
+  await standing.getByRole('button', { name: 'Show all 6' }).click()
+  await expect(trains).toHaveCount(6)
+  await expect(trains.nth(4)).toContainText('Holte St.')
+  await expect(trains.nth(5)).toContainText('Hillerød St.')
+  await expect(standing.getByRole('button', { name: 'Show fewer' })).toBeVisible()
 })

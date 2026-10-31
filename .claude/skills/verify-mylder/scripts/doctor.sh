@@ -24,8 +24,10 @@ done
 
 body=$(curl -sf "http://localhost:$port/api/snapshot") || fail "/api/snapshot does not answer 200"
 echo "$body" | grep -q '"trips":\[{' || fail "the snapshot has no trips"
+recording=$(cat "$dir/recording" 2>/dev/null || echo weekday)
+minutes=$(ls "recordings/$recording/snapshots" | wc -l | tr -d ' ')
 age=$(($(date +%s) - $(cat "$dir/started")))
-if [ "$age" -gt 540 ]; then
-  fail "the server has run ${age} s; the weekday recording holds 10 minutes, after which every vehicle ages towards No signal. Clean up and relaunch with VERIFY_SKIP_BUILD=1"
+if [ "$age" -gt $(((minutes - 1) * 60)) ]; then
+  fail "the server has run ${age} s; the $recording recording holds $minutes minutes, after which every vehicle ages towards No signal. Clean up and relaunch with VERIFY_SKIP_BUILD=1"
 fi
-echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), recording minute $((age / 60)) of 10"
+echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), $recording recording minute $((age / 60)) of $minutes"

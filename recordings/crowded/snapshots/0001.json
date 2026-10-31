@@ -1,0 +1,284 @@
+{
+  "fetched": 1781587200000,
+  "nextDue": 1781587260000,
+  "pollInterval": 60,
+  "serviceDay": "2026-06-16",
+  "timetableVersion": "2026-06-02-fc8883cd",
+  "positionMode": "alternating",
+  "answerMode": "CALC_REPORT",
+  "apiTime": "2026-06-16T07:20:00+02:00",
+  "api": {
+    "status": "ok",
+    "since": 1781587200000
+  },
+  "budget": {
+    "level": "normal",
+    "calls": 2
+  },
+  "store": "ok",
+  "lastSeen": {
+    "s-tog": 1781587200000,
+    "train": 1781587200000
+  },
+  "disruptions": {
+    "fetched": 1781587200000,
+    "checked": 1781587200000,
+    "ok": true,
+    "count": 0,
+    "version": "4f53cda18c2b"
+  },
+  "source": {
+    "kind": "recording",
+    "name": "crowded"
+  },
+  "status": {
+    "calls": [
+      {
+        "service": "journeyPos",
+        "outcome": "ok",
+        "attempts": 1,
+        "ms": 0
+      },
+      {
+        "service": "himsearch",
+        "outcome": "ok",
+        "attempts": 1,
+        "ms": 0
+      }
+    ],
+    "unmatched": 0,
+    "modes": {
+      "s-tog": 5,
+      "train": 1
+    },
+    "states": {
+      "estimated": 6
+    },
+    "cpuMs": 0,
+    "timetable": {
+      "prepared": "2026-06-02",
+      "last": "2026-08-26",
+      "daysLeft": 72,
+      "daysOld": 14
+    }
+  },
+  "trips": [
+    {
+      "key": "s-tog.A.0bc307e3eb.20260616.0651",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 0,
+      "headsign": "Hillerød St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 18851,
+      "next": [
+        {
+          "index": 11,
+          "stop": "8600626",
+          "time": 1781587560000
+        },
+        {
+          "index": 12,
+          "stop": "8600645",
+          "time": 1781587620000
+        },
+        {
+          "index": 13,
+          "stop": "8600646",
+          "time": 1781587740000
+        }
+      ],
+      "vehicleNumber": "611122",
+      "journey": "672477@160626"
+    },
+    {
+      "key": "s-tog.A.0bc307e3eb.20260616.0654",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 0,
+      "headsign": "Hillerød St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 18851,
+      "next": [
+        {
+          "index": 11,
+          "stop": "8600626",
+          "time": 1781587740000
+        },
+        {
+          "index": 12,
+          "stop": "8600645",
+          "time": 1781587800000
+        },
+        {
+          "index": 13,
+          "stop": "8600646",
+          "time": 1781587920000
+        }
+      ],
+      "vehicleNumber": "612123",
+      "journey": "69840@160626"
+    },
+    {
+      "key": "s-tog.A.79fbe8e1f8.20260616.0637",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 1,
+      "headsign": "Hundige St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 36456,
+      "next": [
+        {
+          "index": 17,
+          "stop": "8600626",
+          "time": 1781587500000
+        },
+        {
+          "index": 18,
+          "stop": "8600634",
+          "time": 1781587620000
+        },
+        {
+          "index": 19,
+          "stop": "8600760",
+          "time": 1781587800000
+        }
+      ],
+      "vehicleNumber": "611223",
+      "journey": "71323@160626"
+    },
+    {
+      "key": "s-tog.E.7c0294e28d.20260616.0639",
+      "line": "E",
+      "mode": "s-tog",
+      "pattern": 2,
+      "headsign": "Holte St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 39368,
+      "next": [
+        {
+          "index": 18,
+          "stop": "8600626",
+          "time": 1781587680000
+        },
+        {
+          "index": 19,
+          "stop": "8600645",
+          "time": 1781587740000
+        },
+        {
+          "index": 20,
+          "stop": "8600646",
+          "time": 1781587860000
+        }
+      ],
+      "vehicleNumber": "641123",
+      "journey": "771609@160626"
+    },
+    {
+      "key": "s-tog.E.e8dc141a28.20260616.0648",
+      "line": "E",
+      "mode": "s-tog",
+      "pattern": 3,
+      "headsign": "Køge St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 18837,
+      "next": [
+        {
+          "index": 13,
+          "stop": "8600626",
+          "time": 1781587620000
+        },
+        {
+          "index": 14,
+          "stop": "8600634",
+          "time": 1781587740000
+        },
+        {
+          "index": 15,
+          "stop": "8600760",
+          "time": 1781587920000
+        }
+      ],
+      "vehicleNumber": "641222",
+      "journey": "672297@160626"
+    },
+    {
+      "key": "train.RE.7c3e865b99.20260616.0724",
+      "line": "RE",
+      "mode": "train",
+      "pattern": 4,
+      "headsign": "Næstved St.",
+      "state": "estimated",
+      "source": "computed",
+      "seen": 1781587200000,
+      "hadRealtime": true,
+      "delay": 0,
+      "position": [
+        55.67276,
+        12.56489
+      ],
+      "progress": 0,
+      "next": [
+        {
+          "index": 0,
+          "stop": "8600626",
+          "time": 1781587440000
+        },
+        {
+          "index": 1,
+          "stop": "8600783",
+          "time": 1781587740000
+        },
+        {
+          "index": 2,
+          "stop": "8600797",
+          "time": 1781588640000
+        }
+      ],
+      "waiting": true,
+      "vehicleNumber": "2427",
+      "journey": "892395@160626"
+    }
+  ]
+}

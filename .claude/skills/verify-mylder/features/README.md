@@ -4,7 +4,7 @@ The maintained source for verifying what a rider sees in Mylder. Read this index
 
 ## Baseline preconditions
 
-- A run launched with `launch.sh <run-id>` on the `weekday` recording, `doctor.sh <run-id>` healthy, and under nine minutes since launch.
+- A run launched with `launch.sh <run-id>` on the `weekday` recording, `doctor.sh <run-id>` healthy, and under nine minutes since launch. A recipe that names another recording runs on a launch of its own, as [`../SKILL.md`](../SKILL.md)'s Launch says; the rest of this baseline is the weekday's.
 - The recording's first minute has 17 vehicles (6 bus, 4 Metro, 6 S-tog, 1 train), 3 disruption messages, and planes from the aircraft recording; later minutes move them on.
 - English at `/en`, Danish at `/da`; the source banner reads "Recorded data from 16 June 2026." on every page.
 
