@@ -12,7 +12,9 @@ The six screens are the moving map, vehicle detail, stop departures, City pulse,
 
 **The legend** names the five data states with their glyphs, in the states' order, then, while the planes are on the map, the plane's glyph beside "Planes". If the first day with the key leaves Mylder on `CALC_REPORT` alone, no trip can be Live, and the legend says so once rather than every dot pretending. While the aircraft feed fails and the planes are shown, it says since when there has been no data: "Planes: no data since 15:42".
 
-**Map controls:** zoom in, zoom out, reset view, and a pause control that stops the dots moving (they then step to their new positions when each snapshot lands). The same stepping is used when the viewer's system asks for reduced motion. A scale bar sits beside the controls. Every dot has a tap target of at least 24 px.
+**Map controls:** zoom in, zoom out, reset view, the 3D toggle, a compass, and a pause control that stops the dots moving (they then step to their new positions when each snapshot lands). The same stepping is used when the viewer's system asks for reduced motion. A scale bar sits beside the controls. Every dot has a tap target of at least 24 px.
+
+**The 3D view** ([ADR 0016](adr/0016-3d-is-an-opt-in-view-with-the-dots-over-the-buildings.md)) is a view the rider chooses: the map opens flat and north-up, and the 3D toggle eases it to a tilt of about 50° and back to flat. Gestures tilt and turn it at any time too (a right-drag on a desktop, a two-finger drag on a phone), up to 60°, and the toggle shows pressed whenever the map is tilted, however it got there. Buildings rise from zoom 14, from OpenStreetMap's heights, in Perron's building colours, drawn faint; the dots, the aircraft, the line paths and the stops are drawn over them, so a bus behind a block shows through it. Dots keep one size near and far. The aircraft stay at their ground position, their altitude in their card. The compass points north as the map turns, and a press turns the map back to north. Reset view returns to flat and north-up, as well as to the opening place. Follow and a highlight's fit move the centre and zoom and keep the rider's tilt and heading. The scale bar hides while the map is tilted, and shows again once it is flat, turned or not. The address keeps the heading and tilt as `map=zoom/lat/lon/bearing/pitch` while the map isn't flat, so a link opens in 3D. Under reduced motion the toggle and the compass jump rather than ease. On a phone, the 3D view waits for a measured frame rate with the buildings on: until then, under Perron's `breakpoint.phone` the toggle and the compass don't show and gestures don't tilt or turn the map, though a link with a tilt still opens tilted, which is how the frame rate is measured.
 
 **The hover card** on a dot shows its line, its destination, its data state's word and its state label ("Reported 20 s ago", "Last seen 3 min ago", "Estimated from schedule", "Timetable only", "No signal since 10:42"), aged by the clock from the snapshot's times. A tap on a dot opens vehicle detail; a tap on a stop opens its departures.
 
@@ -32,7 +34,7 @@ The six screens are the moving map, vehicle detail, stop departures, City pulse,
 
 When both Disconnected and Paused hold, Disconnected is shown and the Paused notice from the last snapshot is kept beneath it.
 
-**Accessibility.** The canvas has an accessible name ("Live map of Copenhagen"). The dots themselves are not reachable by keyboard; the Vehicles list is the text alternative, and every vehicle on the map is a row there. Keys: + and − zoom, arrows pan, Esc closes panels; the About dialog lists them.
+**Accessibility.** The canvas has an accessible name ("Live map of Copenhagen"). The dots themselves are not reachable by keyboard; the Vehicles list is the text alternative, and every vehicle on the map is a row there. Keys: + and − zoom, arrows pan, Shift + ← and → turn the map, Shift + ↑ and ↓ tilt it, Esc closes panels; the About dialog lists them.
 
 **Built from:** the dots and paths on the canvas read Perron's tokens directly, and the planes Perron's `aircraft` icon and its tokens (no component); Brand, Surface (glass), FilterChip with Count, IconButton, VehicleDotLegend, MapControls, ScaleBar, Attribution, MapTooltip, HighlightChip, Alert, Toast, Text, Link, Dialog and Kbd, under PerronProvider; the plane's panel, DetailPanel with VehicleDotLabel, Text and EmptyState.
 
@@ -125,11 +127,11 @@ Cancellations make no card. They are shown where they are seen: a cancelled row 
 Opened from the top bar's About button and from the corner credit. It holds the full terms and the page's status:
 
 - Rejseplanen as the source of the realtime data and the timetable, under CC BY 4.0, with the link; the timetable's version date.
-- The map credits: OpenStreetMap contributors under ODbL, OpenMapTiles, OpenFreeMap, and the forked style's notice, each linked; and, once the page has aircraft, "Aircraft: © adsb.lol contributors under the ODbL.", or "Aircraft: © adsb.fi." when adsb.fi answered, linked; and, when the planes are a recording, as in the demo, that they are recorded adsb.lol data, open under the same licence in the repository's `recordings/`, linked.
+- The map credits: OpenStreetMap contributors under ODbL, OpenMapTiles, OpenFreeMap, and the forked style's notice, each linked, with "Building heights come from OpenStreetMap and are approximate."; and, once the page has aircraft, "Aircraft: © adsb.lol contributors under the ODbL.", or "Aircraft: © adsb.fi." when adsb.fi answered, linked; and, when the planes are a recording, as in the demo, that they are recorded adsb.lol data, open under the same licence in the repository's `recordings/`, linked.
 - "Mylder shows the data as Rejseplanen sends it, in its own words and language, and marks every figure it works out itself." and the non-commercial statement: no advertising, no paid tier, no sale of the data or of anything built on it.
 - The five data states with their sentences, and, when the position mode leaves no trip Live, one line saying so.
 - The page's status, from the snapshot: the position mode, Rejseplanen's own realtime time (`planRtTs`, shown here and used nowhere else), the budget level and the calls used this month, whether the server store is available (and when not, that no trip can be Ageing or No signal until it returns), the disruption list's last check, and the budget line when the poll has stretched.
-- The keys: + and − zoom, arrows pan, Esc closes panels, with the pause control named.
+- The keys: + and − zoom, arrows pan, Shift + ← and → turn the map, Shift + ↑ and ↓ tilt it, Esc closes panels, with the pause control named.
 
 **Built from:** Dialog, Section, FactList, VehicleDotLabel, Kbd, Link, Text.
 
