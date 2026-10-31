@@ -183,6 +183,9 @@
       "title": "Taster",
       "zoom": "{plus} og {minus} zoomer kortet.",
       "pan": "{left} {right} {up} {down} flytter det.",
+      "turn": "{shift} + {left} og {right} drejer kortet.",
+      "tilt": "{shift} + {up} og {down} vipper det.",
+      "shift": "Skift",
       "close": "{esc} lukker køretøjets kort eller panel.",
       "pause": "Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen."
     }

@@ -178,6 +178,13 @@ export interface Padding {
 /** Perron's breakpoint.phone: narrower is a phone, as Perron's own CSS has it. */
 const PHONE = 760
 
+/**
+ * The page as narrow as a phone, as a media query: under Perron's breakpoint.phone, as Perron's
+ * own CSS asks it. A custom property can't sit in a media query, so a module's CSS that lays out
+ * by it writes the same query.
+ */
+export const PHONE_QUERY = `(max-width: ${PHONE - 0.02}px)`
+
 /** The room a fit keeps for the highlight itself, across and down, before it pads less. */
 const ROOM = 200
 

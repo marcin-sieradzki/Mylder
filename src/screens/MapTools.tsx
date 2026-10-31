@@ -16,6 +16,8 @@ const setPaused = (_event: unknown, paused: boolean) => motionPause.set(paused)
 const attached = (view: CameraView | undefined) => view !== undefined
 const closest = (view: CameraView | undefined) => view?.closest ?? false
 const farthest = (view: CameraView | undefined) => view?.farthest ?? false
+/** Tilted, the map has no one scale: the ground at its foot is drawn bigger than at its top. */
+const tilted = (view: CameraView | undefined) => (view?.pitch ?? 0) > 0
 /**
  * The ground a pixel spans, to three figures, finer than the bar can show: a camera Follow moves
  * each frame changes it in the eighth figure, which needn't draw the bar again. None before the
@@ -31,7 +33,8 @@ function MapScale() {
 
 /**
  * The map's controls (docs/screens.md, "The moving map"): zoom in, zoom out, reset view and the
- * pause that stops the dots moving, with the scale bar beside them, and the map's keys. Until the
+ * pause that stops the dots moving, with the scale bar beside them while the map is flat, and the
+ * map's keys. Until the
  * map attaches the zoom and reset buttons are dimmed but the pause is not: a pause pressed then
  * holds once the dots draw. MapControls' `disabled` would dim the pause too, so the bar dims each
  * of the others on its own.
@@ -40,11 +43,12 @@ export function MapTools() {
   const hasMap = useCameraView(attached)
   const atClosest = useCameraView(closest)
   const atFarthest = useCameraView(farthest)
+  const isTilted = useCameraView(tilted)
   const paused = useMotionPaused()
   useEffect(() => listenForMapKeys(), [])
   return (
     <div className={styles.tools}>
-      <MapScale />
+      {isTilted ? null : <MapScale />}
       <MapControls
         zoomInDisabled={!hasMap || atClosest}
         zoomOutDisabled={!hasMap || atFarthest}

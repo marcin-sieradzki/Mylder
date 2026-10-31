@@ -2,14 +2,15 @@
 // halo under every dot, then the glyph, a scatterplot whose Timetable only ring is dashed by the
 // path-style extension and whose No signal dot is cut by a few lines of shader. A few more fade
 // a dot, halo and all, while it jumps to a far new place. Each dot faces the screen at one size in
-// px however the map is tilted (ADR 0016), moved off its position by its offset onto its strand
-// (offsets.ts). deck.gl draws them over the map in its own canvas (ADR 0003). WebGL is not tested
-// in jsdom.
+// px however the map is tilted (ADR 0016, screen-size.ts), moved off its position by its offset
+// onto its strand (offsets.ts). deck.gl draws them over the map in its own canvas (ADR 0003).
+// WebGL is not tested in jsdom.
 import 'client-only'
 import type { Accessor, DefaultProps, Layer } from '@deck.gl/core'
 import { PathStyleExtension } from '@deck.gl/extensions'
 import { ScatterplotLayer, type ScatterplotLayerProps } from '@deck.gl/layers'
 import { PICKED_LAYER, type DrawnKind, type Project } from './picking.ts'
+import { screenSizeModule } from './screen-size.ts'
 import type { Vehicles } from './vehicles.ts'
 
 type CutProps<D> = {
@@ -32,21 +33,6 @@ const cutModule = {
       'if (vCut > 0.0 && abs(unitPosition.x + unitPosition.y) * 0.70710678 * outerRadiusPixels < vCut * 0.5) discard;\n',
     'fs:DECKGL_FILTER_COLOR': 'color.a *= vOpacity;\n',
   },
-}
-
-/**
- * A billboard's radius and pixel offset at exactly their px on the canvas, however the map is
- * tilted. deck.gl adds them to the dot's clip-space position through
- * `project_pixel_size_to_clipspace`, which scales them by the focal distance so that the divide
- * by w gives their px at the canvas's centre only: on a tilted map a near dot would be drawn
- * bigger and a far one smaller, and its offset, which offsets.ts has already drawn through the
- * camera, foreshortened twice. Scaled by w over the focal distance first, they come out as given.
- */
-export const SCREEN_SIZE = 'size.xy *= gl_Position.w / project.focalDistance;\n'
-
-const screenSizeModule = {
-  name: 'vehicleScreenSize',
-  inject: { 'vs:DECKGL_FILTER_SIZE': SCREEN_SIZE },
 }
 
 /**

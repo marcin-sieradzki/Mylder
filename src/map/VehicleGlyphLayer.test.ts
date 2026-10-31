@@ -1,11 +1,12 @@
 import '@mylder/perron/tokens.css'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { getShaderAssembler, type Layer } from '@deck.gl/core'
 import { describe, expect, it } from 'vitest'
+import { between, inOrder, vertexShaderOf } from '../test/shaders.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { readPaint } from './paint.ts'
-import { SCREEN_SIZE, vehicleLayers } from './VehicleGlyphLayer.ts'
+import { SCREEN_SIZE } from './screen-size.ts'
+import { vehicleLayers } from './VehicleGlyphLayer.ts'
 import { vehiclePaint, vehiclesOf } from './vehicles.ts'
 
 // deck.gl draws with WebGL, which jsdom lacks: these tests read the layers' props, which say how
@@ -19,34 +20,6 @@ const vehicles = vehiclesOf(
   undefined,
   readPaint(document.documentElement, vehiclePaint()),
 )
-
-/** The vertex shader deck.gl would compile for `layer`, assembled as on a WebGL device. */
-function vertexShaderOf(layer: Layer) {
-  Object.assign(layer, {
-    context: { device: { type: 'webgl' }, defaultShaderModules: [] },
-    state: {},
-  })
-  const shaders = (layer as unknown as { getShaders(): object }).getShaders()
-  const platformInfo = {
-    type: 'webgl',
-    shaderLanguage: 'glsl',
-    shaderLanguageVersion: 300,
-    gpu: 'jsdom',
-    features: new Set(),
-  }
-  // deck.gl's GLSL assembler, which its types give as the base of every language's.
-  const assembler = getShaderAssembler('glsl') as unknown as {
-    assembleGLSLShaderPair(props: object): { vs: string }
-  }
-  return assembler.assembleGLSLShaderPair({ platformInfo, ...shaders }).vs
-}
-
-/** The text of `source` from `start` to the first `end` after it. */
-const between = (source: string, start: string, end: string) => {
-  const from = source.indexOf(start)
-  expect(from).toBeGreaterThanOrEqual(0)
-  return source.slice(from, source.indexOf(end, from) + end.length)
-}
 
 describe('the vehicles on the canvas', () => {
   it('draws every dot and its halo facing the screen, its size given in px', () => {
@@ -73,9 +46,7 @@ describe('the vehicles on the canvas', () => {
         'DECKGL_FILTER_SIZE(offset, geometry);',
         'gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);',
       ]
-      const at = steps.map((step) => billboard.indexOf(step))
-      expect(at.every((index) => index >= 0)).toBe(true)
-      expect(at).toEqual([...at].sort((a, b) => a - b))
+      expect(inOrder(billboard, steps)).toBe(true)
       expect(between(vs, 'vec2 project_pixel_size_to_clipspace(', '}')).toContain(
         'return offset * project.focalDistance;',
       )

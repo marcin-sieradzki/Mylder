@@ -183,6 +183,9 @@
       "title": "Keys",
       "zoom": "{plus} and {minus} zoom the map.",
       "pan": "{left} {right} {up} {down} move it.",
+      "turn": "{shift} + {left} and {right} turn the map.",
+      "tilt": "{shift} + {up} and {down} tilt it.",
+      "shift": "Shift",
       "close": "{esc} closes the vehicle card or panel.",
       "pause": "The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again."
     }

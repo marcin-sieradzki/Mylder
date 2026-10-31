@@ -4,7 +4,8 @@
 // the vehicle dots' halo, in three icon layers, bottom to top: the halos, the bodies and the rims.
 // The glyphs are masks in one atlas drawn from Perron's outline at the sizes its tokens give, so
 // deck.gl tints each with its colour; a few lines of shader cut a No signal plane from the top left
-// of its box to the bottom right on the screen, whatever its track. Laid out as one typed array per
+// of its box to the bottom right on the screen, whatever its track, and a few more keep every
+// glyph at its px near and far however the map is tilted (screen-size.ts). Laid out as one typed array per
 // attribute, as the vehicles are: the positions are their own array, which the aircraft's motion
 // writes into each frame (aircraft-loop.ts); the glyphs change only with a snapshot, a data state
 // or a theme. WebGL is not tested in jsdom.
@@ -16,6 +17,7 @@ import type { AircraftSnapshot, SnapshotAircraft } from '../tracker/aircraft/ind
 import { aircraftGlyphOf, type AircraftLook } from './aircraft-glyphs.ts'
 import type { AircraftStates } from './aircraft-states.ts'
 import type { DrawnKind, Project } from './picking.ts'
+import { screenSizeModule } from './screen-size.ts'
 
 /**
  * The layer whose glyphs a pick finds: the halos, which every state fills, so a hollow Estimated
@@ -233,7 +235,10 @@ const cutModule = {
   },
 }
 
-/** An icon layer with one more attribute per aircraft: the width of its No signal cut. */
+/**
+ * An icon layer whose icons keep their px whatever the tilt, as the vehicle dots do, with one more
+ * attribute per aircraft: the width of its No signal cut, 0 for none.
+ */
 class AircraftIconLayer<D = unknown> extends IconLayer<D, CutProps<D>> {
   static override layerName = 'AircraftIconLayer'
   static override defaultProps = {
@@ -245,7 +250,10 @@ class AircraftIconLayer<D = unknown> extends IconLayer<D, CutProps<D>> {
     const shaders = super.getShaders()
     return {
       ...shaders,
-      modules: [...shaders.modules, cutModule as unknown as (typeof shaders.modules)[number]],
+      modules: [
+        ...shaders.modules,
+        ...([cutModule, screenSizeModule] as unknown as typeof shaders.modules),
+      ],
     }
   }
 
@@ -332,7 +340,7 @@ export function aircraftLayers(
     sizeScale: radiusScale,
   } as const
   return [
-    new IconLayer({
+    new AircraftIconLayer({
       id: AIRCRAFT_LAYER,
       data: { length, attributes: { ...data.halos.attributes, ...moving } },
       ...icons,

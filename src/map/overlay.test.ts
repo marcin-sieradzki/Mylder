@@ -384,4 +384,32 @@ describe('the overlay on a turned map', () => {
     expect(right).toBeCloseTo(-north, 3)
     expect(up).toBeCloseTo(east, 3)
   })
+
+  it('opens the departures of the stop tapped where a tilted, turned map draws it', () => {
+    // Two stops 40 m apart, both under a tap's box; the one nearest the tap where the camera draws
+    // them opens.
+    const stops = [
+      { id: '27532', at: [12.57, 55.68] as [number, number] },
+      { id: '8600626', at: [12.5705, 55.6803] as [number, number] },
+    ]
+    const camera = stubProjection({ centre: [12.57, 55.678], zoom: 16, pitch: 45, bearing: -135 })
+    const tilted = {
+      ...map,
+      getBearing: () => -135,
+      getPitch: () => 45,
+      getLayer: () => ({}),
+      project: camera.project,
+      queryRenderedFeatures: () =>
+        stops.map(({ id, at }) => ({
+          properties: { id },
+          geometry: { type: 'Point', coordinates: at },
+        })),
+    } as unknown as MapLibreMap
+    overlay = vehicleOverlay(tilted, document.createElement('div'))
+    for (const { id, at } of stops) {
+      const { x, y } = camera.project(at)
+      hovering.onClick!({ picked: false, index: -1, x: x + 3, y: y - 3 })
+      expect(mapView.get().panel).toEqual({ kind: 'stop', id })
+    }
+  })
 })
