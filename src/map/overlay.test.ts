@@ -83,6 +83,8 @@ const map = {
   on() {},
   off() {},
   getZoom: () => 12,
+  getBearing: () => 0,
+  getPitch: () => 0,
   getCanvas: () => document.createElement('canvas'),
   project: ([x, y]: [number, number]) => ({ x, y }),
 } as unknown as MapLibreMap

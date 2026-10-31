@@ -12,7 +12,11 @@ import { vehiclePaint, vehiclesOf } from './vehicles.ts'
 const snapshot = JSON.parse(
   readFileSync(join(process.cwd(), 'recordings', 'weekday', 'snapshots', '0006.json'), 'utf8'),
 ) as Snapshot
-const vehicles = vehiclesOf(snapshot, undefined, readPaint(document.documentElement, vehiclePaint()))
+const vehicles = vehiclesOf(
+  snapshot,
+  undefined,
+  readPaint(document.documentElement, vehiclePaint()),
+)
 
 describe('the vehicles on the canvas', () => {
   it('draws every dot and its halo at one size in px, facing the screen however the map tilts', () => {

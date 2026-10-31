@@ -120,7 +120,8 @@ export function vehicleOverlay(map: MapLibreMap, container: HTMLElement): Vehicl
     // With nothing left to draw, such as the aircraft alone with the Planes filter turned off,
     // no layers clear what was drawn.
     const drawn = kinds()
-    overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale)) })
+    const heading = map.getBearing()
+    overlay.setProps({ layers: drawn.flatMap((kind) => kind.layers(radiusScale, heading)) })
     if (vehicles) {
       container.dataset.vehicles = String(vehicles.length)
       follow.frame(vehicles, along)
