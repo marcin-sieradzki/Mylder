@@ -1,16 +1,11 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
-
-/**
- * Under Perron's breakpoint.phone, 760px, as Perron's own CSS asks it; a custom property can't sit
- * in a media query, so a module's CSS that lays out by it writes the same query.
- */
-const PHONE = '(max-width: 759.98px)'
+import { PHONE_QUERY } from '../map/highlight'
 
 let list: MediaQueryList | null | undefined
 /** The page's one query, made when first asked; none where there is no `matchMedia`. */
-const query = () => (list ??= typeof matchMedia === 'function' ? matchMedia(PHONE) : null)
+const query = () => (list ??= typeof matchMedia === 'function' ? matchMedia(PHONE_QUERY) : null)
 
 const subscribe = (onChange: () => void) => {
   query()?.addEventListener('change', onChange)

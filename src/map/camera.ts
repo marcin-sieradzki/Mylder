@@ -8,6 +8,7 @@ import 'client-only'
 import type { CameraOptions, EaseToOptions, Map as MapLibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
 import type { MediaSetting } from './frames.ts'
+import { PHONE_QUERY } from './highlight.ts'
 
 /** What a view reads back for the controls. */
 export interface CameraView {
@@ -198,31 +199,31 @@ export function cameraStore(reducedMotion: () => boolean = systemReducedMotion):
   }
 }
 
-/** The part of MapLibre's map whose two-finger gestures tilt and turn it. */
-export type TouchMap = Pick<MapLibreMap, 'touchPitch' | 'touchZoomRotate'>
+/** The part of MapLibre's map whose gestures tilt and turn it. */
+export type GestureMap = Pick<MapLibreMap, 'dragRotate' | 'touchPitch' | 'touchZoomRotate'>
 
-/**
- * Under Perron's breakpoint.phone, 760px, as Perron's own CSS asks it; none where the browser has
- * no media queries.
- */
+/** As narrow as a phone; none where the browser has no media queries. */
 const systemPhone = (): MediaSetting | null =>
-  typeof matchMedia === 'function' ? matchMedia('(max-width: 759.98px)') : null
+  typeof matchMedia === 'function' ? matchMedia(PHONE_QUERY) : null
 
 /**
- * Lets a two-finger drag tilt `map` and a two-finger twist turn it, except while the page is as
- * narrow as a phone (`phone`), where 3D waits for a measured frame rate (ADR 0016): there the
- * gestures only pan and zoom. Follows the width across the breakpoint; returns the function that
- * stops following it.
+ * Lets a right-drag or a Ctrl-drag tilt and turn `map`, a two-finger drag tilt it and a
+ * two-finger twist turn it, except while the page is as narrow as a phone (`phone`), where 3D
+ * waits for a measured frame rate (ADR 0016): there the gestures only pan and zoom, and the keys
+ * alone tilt and turn it. Follows the width across the breakpoint; returns the function that stops
+ * following it.
  */
-export function touchTiltAndTurn(
-  map: TouchMap,
+export function gesturesTiltAndTurn(
+  map: GestureMap,
   phone: MediaSetting | null = systemPhone(),
 ): () => void {
   const apply = () => {
     if (phone?.matches) {
+      map.dragRotate.disable()
       map.touchPitch.disable()
       map.touchZoomRotate.disableRotation()
     } else {
+      map.dragRotate.enable()
       map.touchPitch.enable()
       map.touchZoomRotate.enableRotation()
     }

@@ -4,8 +4,12 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { pointAt } from '../domain/trip-motion.ts'
 import { readNetwork } from '../timetable/network.ts'
+import type { AircraftSnapshot } from '../tracker/aircraft/index.ts'
 import type { Snapshot } from '../tracker/index.ts'
+import { aircraftLookNow } from '../test/aircraftIcon.ts'
 import { stubProjection, worldOf, type StubCamera } from '../test/projection.ts'
+import { AIRCRAFT_LAYER, aircraftDrawn, aircraftOf } from './AircraftGlyphLayer.ts'
+import { aircraftStatesAt } from './aircraft-states.ts'
 import { writeOffset } from './offsets.ts'
 import { readPaint } from './paint.ts'
 import { dotPicking, pickedStore } from './picking.ts'
@@ -168,5 +172,35 @@ describe('picking a dot on its strand', () => {
       picks.props.onClick(pick)
       expect(tapped).toEqual([key])
     }
+  })
+
+  it("opens a plane's card on the plane, and its panel on a tap, on a map tilted and turned", () => {
+    const answer = read('answers/aircraft/0001.json') as AircraftSnapshot
+    const planes = aircraftOf(answer, aircraftLookNow(), aircraftStatesAt(answer, answer.fetched))
+    const i = planes.keys.indexOf('458d99')
+    const fix: [number, number] = [planes.positions[i * 2], planes.positions[i * 2 + 1]]
+    // The camera a little south of the plane, so the tilt draws it up the canvas.
+    const camera = { centre: [fix[0], fix[1] - 0.02] as const, zoom: 11 }
+    const tilted = stubProjection({ ...camera, pitch: 45, bearing: -135 })
+    const flat = stubProjection(camera)
+    const store = pickedStore()
+    const tapped: [string, string][] = []
+    const canvas = document.createElement('div')
+    canvas.getBoundingClientRect = () => DOMRect.fromRect({ x: 0, y: 0, width: 800, height: 600 })
+    const picks = dotPicking(canvas, store, { onTap: (kind, key) => tapped.push([kind, key]) })
+    picks.follow([tripsDrawn(vehicles), aircraftDrawn(planes)], tilted.project)
+    const pick = { x: 0, y: 0, picked: true, index: i, layer: { id: AIRCRAFT_LAYER } } as never
+    picks.props.onHover(pick)
+    expect(store.get()).toMatchObject({ kind: 'aircraft', key: '458d99' })
+    // Its card points at the plane where the tilted, turned camera draws its fix, well away from
+    // where a flat map would.
+    const drawnAt = tilted.projectWorld(worldOf(fix, camera.zoom))
+    const [x, y] = store.get()!.point
+    expect(x).toBeCloseTo(drawnAt.x, 6)
+    expect(y).toBeCloseTo(drawnAt.y, 6)
+    const flatAt = flat.project(fix)
+    expect(Math.hypot(x - flatAt.x, y - flatAt.y)).toBeGreaterThan(20)
+    picks.props.onClick(pick)
+    expect(tapped).toEqual([['aircraft', '458d99']])
   })
 })

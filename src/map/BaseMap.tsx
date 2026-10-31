@@ -11,7 +11,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl'
 import { useEffect, useEffectEvent, useRef, type RefObject } from 'react'
 import type { Network } from '../timetable/network.ts'
-import { mapCamera, touchTiltAndTurn } from './camera.ts'
+import { gesturesTiltAndTurn, mapCamera } from './camera.ts'
 import { followedVehicle } from './follow.ts'
 import { boundsOf, fitPadding, mapHighlight, type Floating } from './highlight.ts'
 import { vehicleOverlay } from './overlay.ts'
@@ -65,8 +65,7 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
         style: style(),
         center: view.centre ? [view.centre[0], view.centre[1]] : CENTRE,
         zoom: view.zoom ?? zoomFor(element.clientWidth),
-        // It opens flat and north-up, and a right-drag or a Ctrl-drag tilts and turns it, up to
-        // the 3D view's most (ADR 0016).
+        // It opens flat and north-up, and tilts up to the 3D view's most (ADR 0016).
         maxPitch: MAX_PITCH,
         // The screen's corner credit and its keys (keys.ts) stand in for MapLibre's own.
         attributionControl: false,
@@ -77,8 +76,9 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
       console.error('The map could not start', error)
       return
     }
-    // Two fingers tilt and turn it too, except on a phone until its frame rate is measured.
-    const stopTouch = touchTiltAndTurn(created)
+    // A right-drag, a Ctrl-drag and two fingers tilt and turn it, except on a phone until its
+    // frame rate is measured.
+    const stopGestures = gesturesTiltAndTurn(created)
     map.current = created
     created.getCanvas().setAttribute('aria-label', name.current)
     let disposed = false
@@ -124,7 +124,7 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
     return () => {
       disposed = true
       created.off('moveend', keepView)
-      stopTouch()
+      stopGestures()
       stopFollowing()
       stopHighlighting()
       stopWatching()
