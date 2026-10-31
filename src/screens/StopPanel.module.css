@@ -1,7 +1,7 @@
 /* Stop panel: the lines' badges in a row under the stop's name, then the trips standing at its
-   platforms (a row of cards that scrolls sideways on a phone), then Departures and Arrivals as tabs, each with its messages (Messages.module.css)
-   and its rows, each Perron's DepartureRow, an interval line's with its note under it, a divider
-   between. */
+   platforms (a row of cards that scrolls sideways on a phone), then Departures and Arrivals as
+   tabs, each with its messages (Messages.module.css) and its rows, each Perron's DepartureRow, an
+   interval line's with its note under it, a divider between. */
 .lines {
   display: flex;
   flex-wrap: wrap;
@@ -36,8 +36,11 @@
 }
 
 /* Wide enough that a row's state and track keep whole words, short of the row's width by the
-   peek of the next; padded by space.200 rather than the raised Surface's space.300, as a row is. */
-.card {
+   peek of the next; padded by space.200 rather than the raised Surface's space.300, as a row is.
+   Doubled, with the variant, to outrank the raised Surface's padding whichever stylesheet loads
+   last. A stand-in for Perron's card for a standing trip, marcin-sieradzki/perron#190
+   (StandingCard): goes when that lands. */
+.card.card[data-variant='raised'] {
   flex: 0 0 auto;
   inline-size: min(24rem, 90%);
   padding: var(--perron-space-200);

@@ -533,7 +533,8 @@ interface StandingRowProps {
 /**
  * One standing trip: Perron's row, with the time it leaves as its state shows it, or "Ends here"
  * for a trip that ends at the stop, which no source says when it leaves. In a phone's row it sits
- * on a raised Surface, a card of its own, until Perron has a card for a standing trip.
+ * on a raised Surface, a card of its own, until Perron has a card for a standing trip
+ * (StandingCard, marcin-sieradzki/perron#190), which replaces this stand-in when it lands.
  */
 function StandingRow({ trip, state, now, timezone, words, card }: StandingRowProps) {
   const times =

@@ -122,6 +122,9 @@ test.describe('on a phone', () => {
     const card = (await bus.boundingBox())!
     const across = (await row.boundingBox())!
     expect(card.width).toBeLessThan(across.width)
+    // Padded by space.200, as a row is, rather than by the raised Surface's space.300.
+    await expect(bus).toHaveCSS('padding-block-start', '8px')
+    await expect(bus).toHaveCSS('padding-inline-start', '8px')
     const tabs = (await panel
       .getByRole('tablist', { name: 'Departures and arrivals' })
       .boundingBox())!
