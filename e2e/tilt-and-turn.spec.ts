@@ -61,16 +61,27 @@ test('holding Shift + → keeps turning the map, and it stops soon after the key
   const key = (type: 'rawKeyDown' | 'keyUp', which: object, autoRepeat = false) =>
     cdp.send('Input.dispatchKeyEvent', { type, modifiers: 8, autoRepeat, ...which })
   const sent = [key('rawKeyDown', shift), key('rawKeyDown', right)]
-  for (const start = Date.now(); Date.now() - start < 3_000;) {
-    await page.waitForTimeout(33)
-    sent.push(key('rawKeyDown', right, true))
-  }
+  const letGo = new AbortController()
+  const repeating = (async () => {
+    while (!letGo.signal.aborted) {
+      await page.waitForTimeout(33)
+      sent.push(key('rawKeyDown', right, true))
+    }
+  })()
+
+  // While the key is still down, the map turns well past the two steps a held key used to stall
+  // at. Measured either way round, since the heading wraps at ±180° and how fast it turns depends
+  // on how fast the map draws.
+  const heading = async () => Number(await map.getAttribute('data-heading'))
+  await expect
+    .poll(async () => Math.abs(await heading()), { timeout: 4_000 })
+    .toBeGreaterThanOrEqual(45)
+  letGo.abort()
+  await repeating
   sent.push(key('keyUp', right), key('keyUp', shift))
   await Promise.all(sent)
 
-  // Well past the two steps a held key used to stop at, and still once it has come to rest.
-  const heading = async () => Number(await map.getAttribute('data-heading'))
-  await expect.poll(heading).toBeGreaterThanOrEqual(60)
+  // Let go, it comes to rest soon after and stays there.
   await page.waitForTimeout(1_000)
   const rested = await heading()
   await page.waitForTimeout(1_000)
