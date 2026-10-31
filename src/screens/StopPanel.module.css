@@ -1,5 +1,5 @@
 /* Stop panel: the lines' badges in a row under the stop's name, then the trips standing at its
-   platforms, then Departures and Arrivals as tabs, each with its messages (Messages.module.css)
+   platforms (a row of cards that scrolls sideways on a phone), then Departures and Arrivals as tabs, each with its messages (Messages.module.css)
    and its rows, each Perron's DepartureRow, an interval line's with its note under it, a divider
    between. */
 .lines {
@@ -19,6 +19,31 @@
 
 .departure + .departure {
   border-block-start: 1px solid var(--perron-color-border-subtle);
+}
+
+/* A phone's standing trips: one row of cards the rider swipes through, each settling at the
+   start, the next one peeking in at the end so the row reads as one that scrolls. A swipe that
+   reaches either end stops there rather than moving the sheet or the page. */
+.standingRow {
+  display: flex;
+  gap: var(--perron-space-200);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+.card {
+  flex: 0 0 auto;
+  inline-size: min(17.5rem, 85%);
+  scroll-snap-align: start;
+}
+
+/* The button over the card takes the card's corners, for its focus ring and hover. */
+.card > button {
+  border-radius: inherit;
 }
 
 /* Under an interval line's row, at the end, in the row's time type. */

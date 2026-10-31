@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import da from '../i18n/da.json'
 import en from '../i18n/en.json'
 import type { Lang } from '../i18n/lang'
+import { PHONE_QUERY } from '../map/highlight'
 import { liveSnapshot } from '../map/live'
 import { mapView, openPanel } from '../map/view'
 import type {
@@ -108,7 +109,32 @@ const row = (within_: HTMLElement, destination: string) =>
     .getAllByRole('listitem')
     .find((each) => each.textContent?.includes(destination))!
 
+/** Whether the page is as narrow as a phone, as each test sets it. */
+let phone = false
+const phoneChanges = new Set<() => void>()
+const mediaLists = new Map<string, object>()
+/**
+ * The browser's `matchMedia`, which jsdom lacks: only the phone's query matches, and only while
+ * `phone` is set. One list per query for the whole file, as the page keeps its list.
+ */
+function matchMedia(query: string) {
+  let list = mediaLists.get(query)
+  if (!list) {
+    list = {
+      get matches() {
+        return query === PHONE_QUERY && phone
+      },
+      addEventListener: (_: string, listener: () => void) => phoneChanges.add(listener),
+      removeEventListener: (_: string, listener: () => void) => phoneChanges.delete(listener),
+    }
+    mediaLists.set(query, list)
+  }
+  return list
+}
+
 beforeEach(() => {
+  phone = false
+  vi.stubGlobal('matchMedia', matchMedia)
   // The server's clock reads the answers' moment; this device's is the server's.
   vi.useFakeTimers({ toFake: ['Date'], now: NORREPORT.fetched })
   answers = new Map([
@@ -896,5 +922,23 @@ describe('the Departures and Arrivals tabs', () => {
         'Ingen ankomster de næste 30 minutter for de viste transportformer.',
       ),
     ).toBeInTheDocument()
+  })
+})
+
+describe('the trips standing at a stop’s platforms, on a phone', () => {
+  beforeEach(() => {
+    phone = true
+  })
+
+  it('shows every one in the row, with no Show all', async () => {
+    answers.set('48645', standingAt([1, 2, 3, 4, 5, 6].map((n) => standingTrain(n))))
+    openStop('en', '?stop=48645')
+    const section = standingSection(await panel('Refshaleøen'))
+    expect(
+      within(section)
+        .getAllByRole('listitem')
+        .map((each) => /Destination \d/.exec(each.textContent ?? '')?.[0]),
+    ).toEqual([1, 2, 3, 4, 5, 6].map((n) => `Destination ${n}`))
+    expect(within(section).queryByRole('button', { name: /Show all/ })).not.toBeInTheDocument()
   })
 })
