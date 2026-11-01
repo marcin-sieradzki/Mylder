@@ -26,7 +26,13 @@ body=$(curl -sf "http://localhost:$port/api/snapshot") || fail "/api/snapshot do
 echo "$body" | grep -q '"trips":\[{' || fail "the snapshot has no trips"
 recording=$(cat "$dir/recording" 2>/dev/null || echo weekday)
 # The timetable source runs at the real time and never runs out; on a saved folder it runs on
-# from the folder's moment, through its service day, as at the real time.
+# from the folder's moment, through its service day, as at the real time. The snapshot, not the
+# launch's argument, says which source answers: a checkout older than the timetable default runs
+# the simulation with MYLDER_SOURCE unset.
+if [ "${recording%%:*}" = timetable ]; then
+  echo "$body" | grep -q '"source":{"kind":"timetable"}' ||
+    fail "launched as $recording, but the snapshot's source is $(echo "$body" | grep -o '"source":{[^}]*}'); this checkout predates the timetable source or its default"
+fi
 if [ "$recording" = timetable ]; then
   echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source"
   exit 0

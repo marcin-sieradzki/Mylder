@@ -8,7 +8,7 @@ How Mylder's software factory turns a spec into merged code ([ADR 0015](../adr/0
 - **Ticket run**: one ticket's way through implement, review, verify and merge, inside a run.
 - **Brake**: a gate every PR passes before it merges: the **checks** (`npm run check` and CI), the **review** (the `factory-code-review` skill, by a reviewer that reads the diff cold) and the **verdict**.
 - **Verdict**: the verifier's judgement on one PR, PASS, PASS+NOTES or FAIL, posted as a PR comment, with each user story's pass rule and what `main` and the branch showed. It is never called a report: in Mylder a report is a vehicle's.
-- **Evidence**: the screenshots and ARIA snapshots `verify-mylder` keeps for a verdict, pushed to the orphan `evidence` branch and linked from the verdict.
+- **Evidence**: the screenshots and ARIA snapshots `verify-mylder` keeps for a verdict, pushed to the orphan `evidence` branch by the factory skill's `push-evidence.sh` and linked from the verdict.
 - **Cap**: the most rework rounds a ticket gets on one brake, two, before it stops.
 - **Run log**: the one comment on the spec that the run keeps up to date: each ticket's PR, verdict and state.
 
@@ -51,7 +51,7 @@ Each task answers the `software-factory` skill's five questions: what triggers i
 
 **Verify.** Triggered by a ticket PR with a clean review. FAIL sends it back to the implementer, a rework round; PASS+NOTES files each note as a follow-up issue and is otherwise a pass: under the spec, blocking nothing, when this spec's changes caused it, so the run builds it; standalone, for a later run, when `main` shows it too. Next: merge. Capped at two rework rounds.
 
-**Merge.** Triggered by a PR with green checks, a clean review and a passing verdict. Brings `main` in first; when the merge had conflicts or `main` changed files the PR touches, the verifier runs again on the new head before the merge. Merges the PR, which closes the ticket, updates the run log, and recomputes the frontier. When the spec's last ticket merges, the run closes the spec and removes `factory:running`. Next: retro.
+**Merge.** Triggered by a PR with green checks, a clean review and a passing verdict. Brings `main` in first; when the merge had conflicts or `main` changed runtime files the PR touches (`src/`, `app/`, `public/`, `recordings/`), the verifier runs again on the new head before the merge, driving the pass rules and the overlapping features' journeys on the branch alone. Merges the PR, which closes the ticket, updates the run log, and recomputes the frontier. When the spec's last ticket merges, the run closes the spec and removes `factory:running`. Next: retro.
 
 **Retro.** Triggered by the end of every run, whether its spec closed or tickets stopped ([ADR 0017](../adr/0017-a-retro-closes-every-factory-run.md)). Runs `/retro` on the run and ranks what it finds, from a check or a brief up to the factory's infrastructure or Mylder's architecture. Next: one PR of fixes to the factory's own files, and proposals for the rest. The maintainer re-enters by merging the PR and choosing among the proposals. The run ends with it, so each run has one retro.
 

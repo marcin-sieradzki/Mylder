@@ -1,0 +1,20 @@
+name: PR body
+
+# A PR's description says what it builds; who wrote it is the commits' Co-Authored-By trailer.
+# Some tools append a footer that links the session they ran in: this turns the PR red until the
+# description is edited, which runs this again.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  pr-body:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if printf '%s\n' "$BODY" | grep -nE 'claude\.ai/code/session_|Generated (with|by) \[Claude Code\]'; then
+            echo "The PR description above links a session or carries a tool footer: edit it out." >&2
+            exit 1
+          fi
