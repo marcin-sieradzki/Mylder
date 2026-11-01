@@ -2,7 +2,7 @@
 // means, its facts, where it is in words, its stops and where their times came from, worked out
 // from the trip route's answer, the snapshot's trip and the clock. Words only: the panel lays them
 // out. Times read on the clock of the timetable's zone.
-import type { DataState } from '../domain/data-state.ts'
+import { noSignalSince, type DataState, type DataStateContext } from '../domain/data-state.ts'
 import { tripPhase, type TimedCall } from '../domain/trip-motion.ts'
 import type { ClientDictionary } from '../i18n/dictionary.ts'
 import type { Where } from '../map/where.ts'
@@ -56,13 +56,23 @@ export interface StateInput {
    * only trip says live positions aren't there yet.
    */
   readonly noPositions?: boolean
+  /** SIRI-ET's feed, from the snapshot (`updatesContext`), whose last message dates No signal. */
+  readonly updates?: DataStateContext['updates']
 }
 
 /**
  * The one line that says what the trip's state means, such as "Reported by the vehicle; seen
  * 08:14:05"; none where the snapshot no longer carries the time it would give.
  */
-export function stateSentence({ detail, trip, state, timezone, words, noPositions }: StateInput) {
+export function stateSentence({
+  detail,
+  trip,
+  state,
+  timezone,
+  words,
+  noPositions,
+  updates,
+}: StateInput) {
   if (detail.cancelled) return words.cancelled
   if (runsToInterval(detail)) return words.interval
   const at = (moment: number | undefined, seconds = false) =>
@@ -84,7 +94,7 @@ export function stateSentence({ detail, trip, state, timezone, words, noPosition
     case 'timetable-only':
       return noPositions ? words.noLivePositions : words.timetableOnly
     case 'no-signal': {
-      const time = at(trip?.seen ?? trip?.reported ?? trip?.updated)
+      const time = at(trip && noSignalSince(trip, updates))
       return time === undefined ? undefined : fill(words.noSignal, { time })
     }
   }

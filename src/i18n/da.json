@@ -317,7 +317,9 @@
         "light-rail": "Ingen letbanepositioner siden {time}"
       },
       "messagesStale": "Driftsmeddelelser ikke opdateret siden {time}",
-      "messagesNever": "Driftsmeddelelser endnu ikke hentet"
+      "messagesNever": "Driftsmeddelelser endnu ikke hentet",
+      "updatesStale": "Forsinkelser fra Rejseplanen ikke opdateret siden {time}",
+      "updatesNever": "Forsinkelser fra Rejseplanen endnu ikke modtaget"
     }
   },
   "timetableOverview": {

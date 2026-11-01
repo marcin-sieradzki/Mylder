@@ -450,3 +450,59 @@ describe("Mylder's own data cards", () => {
     ])
   })
 })
+
+describe("Mylder's card for a quiet delay feed", () => {
+  // The SIRI-ET recording's saved minute of 09:22:00 on the timetable source, whose feed's last
+  // message came at 09:21:52: Rejseplanen's messages need the live connection, so the tab says so,
+  // and the delays' card, shown first, says when they were last updated.
+  const withDelays = savedSnapshot('0002.json', 'siri-et')
+  const list = savedList('0002.json', 'siri-et')
+  const lastMessage = withDelays.updates.lastMessage!
+  const quiet = { live: withDelays, polled: lastMessage + 5 * MINUTE }
+  const noMessages = {
+    en: "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.",
+  }
+  const mine = (name = 'From Mylder') => screen.queryByRole('list', { name })
+
+  it('is none while the feed is fresh', async () => {
+    await show('en', list, { live: withDelays, polled: lastMessage + 5 * MINUTE - 1000 })
+    expect(mine()).not.toBeInTheDocument()
+    expect(screen.getByText(noMessages.en)).toBeInTheDocument()
+  })
+
+  it('says the delays are not updated since the last message, 5 minutes on, first', async () => {
+    await show('en', list, quiet)
+    expect(titlesIn(mine()!)).toEqual(['Delays from Rejseplanen not updated since 09:21'])
+    const [card] = within(mine()!).getAllByRole('listitem')
+    expect(card).toHaveTextContent('Data feed problems')
+    expect(card).toHaveTextContent('From Mylder, about its own data')
+    // Above the sentence in place of Rejseplanen's messages.
+    const sentence = screen.getByText(noMessages.en)
+    expect(mine()!.compareDocumentPosition(sentence)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('says so in Danish', async () => {
+    await show('da', list, quiet)
+    expect(titlesIn(mine('Fra Mylder')!)).toEqual([
+      'Forsinkelser fra Rejseplanen ikke opdateret siden 09:21',
+    ])
+  })
+
+  it('says none has come yet when the feed has never sent one, in either language', async () => {
+    const { lastMessage: _, ...never } = withDelays.updates
+    const live = { ...withDelays, updates: never }
+    await show('en', list, { live })
+    expect(titlesIn(mine()!)).toEqual(['Delays from Rejseplanen not received yet'])
+    cleanup()
+    await show('da', list, { live })
+    expect(titlesIn(mine('Fra Mylder')!)).toEqual([
+      'Forsinkelser fra Rejseplanen endnu ikke modtaget',
+    ])
+  })
+
+  it('goes with the next message', async () => {
+    const next = { ...withDelays, updates: { ...withDelays.updates, lastMessage: quiet.polled } }
+    await show('en', list, { live: next, polled: quiet.polled + 20_000 })
+    expect(mine()).not.toBeInTheDocument()
+  })
+})
