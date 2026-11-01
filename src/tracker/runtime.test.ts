@@ -1,0 +1,65 @@
+import { Effect, ManagedRuntime } from 'effect'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { timetableManifestResponse } from './routes'
+import { environmentLayer, timetableDirOf } from './runtime'
+import { readSource } from './source'
+import { TIMETABLE_DIR } from './timetable'
+import { Tracker } from './tracker'
+
+// The runtime as the environment sets it up, as the verifier launches it: the timetable source
+// on a saved folder's timetable and clock, so a moment such as a timetable's last week can be
+// driven again (docs/testing-seams.md, "The switch").
+
+/** The snapshot of a runtime built from `env`, on the real clock beneath it. */
+async function snapshotOn(env: Record<string, string>) {
+  const runtime = ManagedRuntime.make(await environmentLayer(env))
+  try {
+    return await runtime.runPromise(
+      Effect.gen(function* () {
+        return yield* (yield* Tracker).getSnapshot
+      }),
+    )
+  } finally {
+    await runtime.dispose()
+  }
+}
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
+
+describe('the timetable source on a saved folder', () => {
+  it('runs on the folder’s timetable from its clock, in the timetable’s last week', async () => {
+    const snapshot = await snapshotOn({
+      MYLDER_SOURCE: 'timetable',
+      MYLDER_TIMETABLE_FROM: 'timetable-ending',
+    })
+    expect(snapshot.source).toEqual({ kind: 'timetable' })
+    expect(snapshot.status.calls).toEqual([])
+    expect(snapshot.serviceDay).toBe('2026-08-25')
+    expect(snapshot.timetableVersion).toBe('2026-06-02-4f2b8119')
+    expect(snapshot.timetableRunningOut).toBe(true)
+    expect(snapshot.status.timetable).toMatchObject({ last: '2026-08-26' })
+    expect(snapshot.trips.length).toBeGreaterThan(0)
+    expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(new Set(['timetable-only']))
+  })
+
+  it('serves the browser the folder’s timetable files', async () => {
+    vi.stubEnv('MYLDER_SOURCE', 'timetable')
+    vi.stubEnv('MYLDER_TIMETABLE_FROM', 'timetable-ending')
+    const manifest = (await (await timetableManifestResponse()).json()) as { version: string }
+    expect(manifest.version).toBe('2026-06-02-4f2b8119')
+  })
+
+  it('is ignored by every other source, and the timetable source alone runs on the deployed one', async () => {
+    const recorded = await snapshotOn({
+      MYLDER_SOURCE: 'recording:weekday',
+      MYLDER_TIMETABLE_FROM: 'timetable-ending',
+    })
+    expect(recorded.serviceDay).toBe('2026-06-16')
+    // Without it, as in production, the timetable source reads the deployed timetable.
+    expect(timetableDirOf(readSource('timetable'), undefined)).toBe(TIMETABLE_DIR)
+    expect(timetableDirOf(readSource('timetable'), ' ')).toBe(TIMETABLE_DIR)
+    expect(timetableDirOf(readSource('simulated'), 'timetable-ending')).toBe(TIMETABLE_DIR)
+  })
+})

@@ -4,8 +4,9 @@
 // in call order, the tracker's snapshot of every minute in `snapshots/`, and in `answers/` its
 // disruption list of every minute and the stop answers the plan saves. Its `aircraft/` folder is
 // kept as it is, and the aircraft snapshot of each of its calls saved in `answers/aircraft/`. The
-// timetable source's plan is saved the same way, with no answers or `clock.json`, since it makes no
-// call and is no recording to replay.
+// timetable source's plans are saved the same way, with no answers, since that source makes no
+// call and they are no recordings to replay; their `clock.json` is the moment
+// `MYLDER_TIMETABLE_FROM` starts the timetable source at.
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect } from 'effect'
@@ -26,8 +27,8 @@ import {
   type Served,
 } from '../../src/tracker/recording/freeze.ts'
 import {
-  ON_TIMETABLE,
   RECORDINGS,
+  TIMETABLE_PLANS,
   type RecordingPlan,
 } from '../../src/tracker/recording/plans.ts'
 import { loadTimetable, type Timetable } from '../../src/tracker/timetable.ts'
@@ -98,9 +99,11 @@ for (const plan of RECORDINGS.filter((each) => chosen(each.name))) {
   console.log(`recordings/${plan.name}: ${answered}, ${saved}${planes}`)
 }
 
-if (chosen(ON_TIMETABLE.name)) {
-  const timetable = await emptied(ON_TIMETABLE.name)
-  const served = await Effect.runPromise(onTimetable(ON_TIMETABLE, timetable))
-  const saved = await saveServed(ON_TIMETABLE, timetable, served)
-  console.log(`recordings/${ON_TIMETABLE.name}: no calls on the timetable source, ${saved}`)
+for (const plan of TIMETABLE_PLANS.filter((each) => chosen(each.name))) {
+  const timetable = await emptied(plan.name)
+  const served = await Effect.runPromise(onTimetable(plan, timetable))
+  const clock: RecordingClock = { start: new Date(plan.start).toISOString() }
+  await writeJson(join(recordingDir(plan.name), 'clock.json'), clock)
+  const saved = await saveServed(plan, timetable, served)
+  console.log(`recordings/${plan.name}: no calls on the timetable source, ${saved}`)
 }

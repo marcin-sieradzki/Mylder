@@ -9,7 +9,7 @@ import 'server-only'
 import { Effect } from 'effect'
 import { TRACKER_CACHING } from './caching.ts'
 import { cdnAnswer, notFound, unavailable } from './cdn-answer.ts'
-import { runTracker, timetableDirOf, type RunTracker } from './runtime.ts'
+import { runTracker, TIMETABLE_FROM_VARIABLE, timetableDirOf, type RunTracker } from './runtime.ts'
 import { readSource, type Source } from './source.ts'
 import {
   filesIn,
@@ -89,13 +89,15 @@ export const timetableFileResponse = (
 ): Promise<Response> => browserFileResponse(sourceFiles(source), version, file)
 
 /**
- * The files of a source's timetable folder: a recording's own, or the deployed one. The source is
- * read at each read, inside the route's try.
+ * The files of a source's timetable folder: a recording's own, the saved folder the timetable
+ * source runs on, or the deployed one. The source is read at each read, inside the route's try.
  */
 const sourceFiles =
   (source?: Source): ReadTimetableFile =>
   (file) =>
-    filesIn(timetableDirOf(source ?? environmentSource()))(file)
+    filesIn(timetableDirOf(source ?? environmentSource(), process.env[TIMETABLE_FROM_VARIABLE]))(
+      file,
+    )
 
 /** The manifest from a timetable folder's files. */
 export async function manifestResponse(read: ReadTimetableFile): Promise<Response> {
