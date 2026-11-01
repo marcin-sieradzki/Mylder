@@ -342,7 +342,7 @@ function Board({
   const shownIntervals = intervals.filter((row) => !hidden.has(row.mode))
   const shown = rows.filter((row) => !hidden.has(row.mode)).slice(0, SHOWN_DEPARTURES)
   // When SIRI-ET's delays the timetable's times were moved by were last updated, if they were.
-  const delays = answer.source.kind === 'timetable' ? answer.source.delays : undefined
+  const delaysUpdated = answer.source.kind === 'timetable' ? answer.source.delaysUpdated : undefined
   const placeOf = (row: BoardRow | BoardInterval) =>
     row.origin === undefined ? row.headsign : fill(words.from, { origin: row.origin })
   return (
@@ -385,7 +385,7 @@ function Board({
       <Text variant="caption" emphasis="secondary">
         {/* A board's answer carries Rejseplanen's expected times, whichever list it fills. */}
         {noPositions
-          ? delays === undefined
+          ? delaysUpdated === undefined
             ? words.timetableNote
             : words.delaysNote
           : answer.source.kind === 'rejseplanen'
@@ -410,7 +410,7 @@ function Board({
         />
       ) : (
         <SourceLine
-          sources={[timetableSource(answer.fetched, noPositions, delays, timezone, words)]}
+          sources={[timetableSource(answer.fetched, noPositions, delaysUpdated, timezone, words)]}
         />
       )}
     </>
@@ -422,20 +422,20 @@ function Board({
  * positions' time of the snapshot its times were shifted by. On the timetable source no position
  * moves them, so it is the timetable's alone, named with the time of its answer: "Timetable ·
  * 08:14:05"; or, where SIRI-ET's delays moved them, the timetable's and the delays', with the time
- * of their last update (`delays`): "Timetable and Rejseplanen's delays · updated 08:14:05".
+ * of their last update (`delaysUpdated`): "Timetable and Rejseplanen's delays · updated 08:14:05".
  */
 const timetableSource = (
   fetched: number,
   noPositions: boolean,
-  delays: number | undefined,
+  delaysUpdated: number | undefined,
   timezone: string,
   words: Words,
 ): SourceLineSource => {
   const time = clockTime(fetched, timezone, { seconds: true })
   if (!noPositions) return { label: words.timetableAndPositions, time }
-  return delays === undefined
+  return delaysUpdated === undefined
     ? { name: words.timetableSource, label: '{time}', time }
-    : { name: words.delaysSource, time: clockTime(delays, timezone, { seconds: true }) }
+    : { name: words.delaysSource, time: clockTime(delaysUpdated, timezone, { seconds: true }) }
 }
 
 interface IntervalProps {

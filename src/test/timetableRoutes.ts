@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * The timetable routes as the server answers them on a recording, `weekday` unless named: each
+ * The timetable routes as the server answers them on the named recording: each
  * version's files from its `timetable/` folder, for screen tests to stub `fetch` with. jsdom has no
  * server to reach.
  */

@@ -35,11 +35,11 @@ const INTERVAL_HOUR = 3600_000
 
 /**
  * Where an answer's times came from: the timetable plus the snapshot's delays, with when SIRI-ET's
- * delays among them were last updated (`delays`: the trip's own update for a trip, the feed's last
+ * delays among them were last updated (`delaysUpdated`: the trip's own update for a trip, the feed's last
  * message for a stop; spec #146), or an on-demand call to Rejseplanen made at `at`.
  */
 export type AnswerSource =
-  | { readonly kind: 'timetable'; readonly delays?: number }
+  | { readonly kind: 'timetable'; readonly delaysUpdated?: number }
   | { readonly kind: 'rejseplanen'; readonly at: number }
 
 const FROM_TIMETABLE: AnswerSource = { kind: 'timetable' }
@@ -224,8 +224,8 @@ export type SnapshotDelays = Pick<Snapshot, 'fetched' | 'nextDue' | 'trips'> & {
 
 /** A stop's answer from the timetable and the snapshot, with its delays' last update. */
 const fromTimetable = (snapshot: SnapshotDelays): AnswerSource => {
-  const delays = snapshot.updates?.lastMessage
-  return delays === undefined ? FROM_TIMETABLE : { kind: 'timetable', delays }
+  const delaysUpdated = snapshot.updates?.lastMessage
+  return delaysUpdated === undefined ? FROM_TIMETABLE : { kind: 'timetable', delaysUpdated }
 }
 
 /** The snapshot's trips by key. */
@@ -663,7 +663,9 @@ export function tripDetailOf(
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
     source:
-      live?.updated === undefined ? FROM_TIMETABLE : { kind: 'timetable', delays: live.updated },
+      live?.updated === undefined
+        ? FROM_TIMETABLE
+        : { kind: 'timetable', delaysUpdated: live.updated },
     calls: trip.calls.map((call, index) => ({
       index,
       stop: platforms[call.platform].id,

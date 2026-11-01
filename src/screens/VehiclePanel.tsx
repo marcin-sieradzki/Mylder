@@ -306,10 +306,11 @@ function sourcesOf(
 ): readonly [SourceLineSource] | readonly [SourceLineSource, SourceLineSource] {
   const at = (moment: number) => clockTime(moment, timezone, { seconds: true })
   if (noPositions) {
-    const delays = answer.source.kind === 'timetable' ? answer.source.delays : undefined
-    return delays === undefined
+    const delaysUpdated =
+      answer.source.kind === 'timetable' ? answer.source.delaysUpdated : undefined
+    return delaysUpdated === undefined
       ? [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
-      : [{ name: words.delaysSource, time: at(delays) }]
+      : [{ name: words.delaysSource, time: at(delaysUpdated) }]
   }
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   if (trip?.seen === undefined) {
