@@ -7,4 +7,4 @@ Runs in plain Node, outside Next.js. The SIRI-ET reader (spec #146, ADR 0019), a
 - `table.ts` is the update table's versioned schema, the listener's and the tracker's contract.
 - `recording.ts` reads a recorded folder's messages and the box's stops from its timetable.
 
-Its tests replay `fixtures/sample.jsonl.gz`, eight journeys of `recordings/siri-et/` (`docs/testing-seams.md`, "3. The SIRI-ET message stream").
+Its tests replay `fixtures/sample.jsonl.gz`, eight journeys of `recordings/siri-et/`, and `fixtures/round-trip.jsonl.gz`, bus 118's round trip, (`docs/testing-seams.md`, "3. The SIRI-ET message stream").

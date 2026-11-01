@@ -273,7 +273,8 @@ describe('the SIRI-ET reader', () => {
     const [first, second] = sample.filter((m) => m.dataset === '785')
     const reader = siriEtReader({ box, listener: LISTENER })
     reader.receive({ ...first, body: first.body.slice(0, first.body.length / 2) })
-    reader.receive({ ...first, body: 'not SIRI at all' })
+    // Its text with every tag taken out, so no XML at all.
+    reader.receive({ ...first, body: first.body.replace(/<[^>]*>/g, ' ') })
     reader.receive({
       ...first,
       body: first.body.replace('<Siri ', '<Other ').replace('</Siri>', '</Other>'),
