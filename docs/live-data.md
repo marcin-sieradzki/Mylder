@@ -16,6 +16,47 @@ Every trip on the map, Waiting or underway, is Timetable only, placed by its pla
 
 Going live stays one environment change: the key in `REJSEPLANEN_KEY` and `MYLDER_SOURCE=rejseplanen` in Production ("First day with the key", below). The simulated Rejseplanen stays for development, the recordings and the GitHub Pages demo, chosen by name with `MYLDER_SOURCE=simulated`.
 
+## SIRI-ET: delays and cancellations before the key
+
+Rejseplanen's SIRI-ET brings every trip's expected times and cancellations for Movia, DSB, the S-tog and Lokaltog, pushed over AMQP from Dataudveksleren to one always-on listener, which keeps the **update table** in the store for the tracker to read ([ADR 0019](adr/0019-siri-et-brings-delays-and-cancellations-through-one-always-on-listener.md), spec #146). The research is in [`researches/2026-10-31-siri-et-listener.md`](researches/2026-10-31-siri-et-listener.md). The figures below were measured by the probe of 31 October 2026, a Saturday morning, and by replaying its recording, `recordings/siri-et/` (09:00 to 09:56 Copenhagen time), into the reader with `scripts/siri-et/replay-siri-et.ts`. A Saturday is quiet, so they are a floor for a weekday.
+
+### The feed
+
+| Dataset      | Messages a second | XML a second | Median message      | Journeys a message | Calls a journey update (median) | Between a journey's updates (median, 90th percentile) |
+| ------------ | ----------------- | ------------ | ------------------- | ------------------ | ------------------------------- | ----------------------------------------------------- |
+| 785 DSB      | 0.4 to 0.6        | about 2 KB   | 3 KB                | 1.6                | 2                               | 50 s, 4 min                                           |
+| 788 Movia    | 0.2 to 0.3        | about 39 KB  | 125 KB (max 930 KB) | 35                 | 9                               | 49 s, 2 min                                           |
+| 799 Lokaltog | 0.1 to 0.2        | about 0.5 KB | 3.5 KB              | 1.1                | 4                               | 2 min, 6 min                                          |
+| 801 S-tog    | 0.2 to 0.3        | about 1 KB   | 2 KB                | 1.4                | 1                               | 71 s, 5 min                                           |
+
+- **Rates and sizes.** About 45 KB of XML a second in all, 95 % of it Movia's, which batches about 35 journeys a message: perhaps 100 to 150 KB/s at a weekday peak, 4 to 8 GB a day. Bodies are single-line SIRI 2.0 XML, uncompressed. From queued to received took under 25 ms at the median and 1.9 s at most.
+- **Backlog kept while away.** A subscription keeps its messages while nobody reads them: a 10-minute gap was delivered in full within 30 s of reconnecting, and the first connection received everything since the subscription was made, 40 to 55 minutes earlier. No snapshot is sent on subscribe. So a restarted listener catches up from the backlog, and each message's `receivedAt` in a recording is its queued time, not when the probe pulled it.
+- **Identifiers.** A journey is `DataFrameRef` (the service day; every one 2026-10-31) and `DatedVehicleJourneyRef` (`2727-8600351300000`). `LineRef` is the public line name for buses, S-tog and Lokaltog (`68`, `C`, `950R`) and the train number for DSB, whose `PublishedLineName` reads `IC 50118`. `TrainNumberRef` is on every journey, buses too. `OriginRef` and `DestinationRef` name the first and last stops even when their calls are not in the message. `StopPointRef` equals the timetable's platform or stop id without leading zeros, as it is: every DSB, S-tog and Lokaltog ref matches, and 6,969 of Movia's 7,120. Movia's misses are 98 nine-digit refs starting `980`, on lines 102A, 216, 315, 215, 318, 254, 848 and 847, and 53 stop numbers the timetable lacks, 46 on line 327. `SubscriptionRef` and `SubscriberRef` name the access point's feeds (`movia-et`, `DK-NAP-SIRI`), not the account's subscription.
+- **Merged calls.** A message carries only some of a journey's calls, often not its first: a median of 9 for Movia and 1 or 2 for the trains. `IsCompleteStopSequence` is true on 944 of the recording's 22,431 journey updates, which then carry the whole trip. So the reader merges each message's calls into what it holds for the journey, a call replacing the one at the same stop and aimed time, and never replaces the journey: merged, a Movia journey holds a median of 29 calls. A later call can undo an earlier one's cancellation, as bus 68's Gyldenlandsvej was cancelled at 09:01 and served again at 09:08.
+- **Cancellations.** 9 whole journeys (7 Lokaltog, 2 Movia) and 224 cancelled calls in the 56 minutes, each a `Cancellation` element on the journey or on the call.
+
+### The reader
+
+The reader (`src/tracker/siri-et/reader.ts`) takes each message, with its dataset and received time, and gives the update table at any moment. It reads a body in one pass over its tags, ignoring elements it doesn't use. It holds every journey it hears of, since a later message may bring a call inside the box, and lists those that call inside it: at any held call, or at their first or last stop. A call's delay is its expected minus its aimed departure, or arrival where it has no departure, in seconds; a call with no expected time gives none.
+
+- **Dropped:** a journey 10 minutes after its last held call's expected arrival (or, with no expected time, its aimed one), and every journey of a service day before yesterday's in the timetable's zone, which is how a journey with no calls ends.
+- **Limits:** 20,000 journeys held, past which the one updated longest ago is dropped and counted (`evicted`), and 4,000,000 characters a message, four times the largest seen; a longer message is counted and skipped. A body whose tags don't nest, or whose root isn't `Siri`, is counted as malformed and skipped whole; a journey without its service day, journey ref, line, origin or destination is counted and skipped, and the message's others are read.
+- **Speed and memory:** the whole recording, 2,090 messages and 114 MB of XML, replays in about 3 s, and the reader holds its 1,268 journeys in about 12 MB.
+
+### The update table
+
+The table (`src/tracker/siri-et/table.ts`) is versioned (`version: 1`) and checked with one schema by the listener that writes it and the tracker that reads it. Its envelope carries when it was written, the last message's received time, each dataset's last message time and counts (messages, journey updates, malformed, too large, skipped journeys), the listener's version and start time, the timetable version its box used, and the journeys held and evicted. Each journey carries its dataset, service day, journey ref, line, operator, origin, destination and train number; when its latest message was received; whether it is cancelled; its first held call, so a journey with no delay can still be joined; its cancelled calls; and its delays as steps, each a call (stop and aimed time) and a delay, listed only where the delay changes from the call before. A step's delay holds for every call after it until the next step.
+
+Replayed, the table grows as journeys come into their hour before departure:
+
+| At (Copenhagen) | Journeys listed | Steps  | Cancelled | Cancelled calls | JSON   | Gzipped |
+| --------------- | --------------- | ------ | --------- | --------------- | ------ | ------- |
+| 09:05           | 491             | 4,774  | 1         | 9               | 359 KB | 45 KB   |
+| 09:30           | 903             | 9,250  | 5         | 37              | 684 KB | 86 KB   |
+| 09:56           | 1,264           | 11,502 | 7         | 38              | 885 KB | 111 KB  |
+
+At 09:56 the listed journeys are 1,074 Movia, 90 S-tog, 61 DSB and 39 Lokaltog. Movia's delays wobble a minute either way from call to call, so its journeys average 10 steps; 49 of the S-tog's journeys and 16 of DSB's have no expected time yet, so no step. The table is about four times the 15 to 25 KB spec #146 budgeted for a weekday peak, and steps are most of it: written whole each minute, it would take about 4.8 GB a month of the store's free 10 GB on a quiet Saturday's figures, before the tracker reads it back. The listener (#217) writes less, as the spec allows: only the journeys that changed since its last write, or the table fetched from the listener over HTTPS instead.
+
 ## One call a minute
 
 The tracker runs at most once a minute, whoever asked. It is one function on the app's host, and it may run on several instances at once, so the once-a-minute rule cannot live in memory. It lives in the store: the first instance to take the lease for the current minute slot does the work; any other instance that lands in the same slot serves the stored snapshot instead and never calls the API.

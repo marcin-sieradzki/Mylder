@@ -93,8 +93,16 @@ One reply from Rejseplanen to one call Mylder makes: the whole city's positions,
 _Avoid_: Response, feed, message
 
 **Update**:
-An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation.
+An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation. An update also comes from SIRI-ET, Rejseplanen's push feed of every trip's expected times and cancellations, as one journey in one of its messages; a message carries only some of a trip's calls, so a trip's update is every message about it merged.
 _Avoid_: Report, prediction, event
+
+**Update table**:
+The trips with an update from SIRI-ET that call inside Mylder's box and haven't finished, each with its delays, its cancelled calls and whether it is cancelled, as the listener keeps it for the tracker to read.
+_Avoid_: Delay feed, delay cache
+
+**Listener**:
+The one always-on process, outside the app, that receives SIRI-ET's messages and writes the update table to the server store.
+_Avoid_: Consumer, worker, daemon
 
 **Report**:
 A trip's position at a moment, as its vehicle sent it, from an answer that holds reports only. A computed position is not one.
