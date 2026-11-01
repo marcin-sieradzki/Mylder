@@ -216,8 +216,8 @@ describe('dataState', () => {
 })
 
 describe('dataState with SIRI-ET’s update feed on', () => {
-  // The feed is fresh while its table is present and its last message is under 5 min old; a trip's
-  // own update may be older, since SIRI-ET sends one only when something changes.
+  // The feed is fresh while the last message the tracker has read is under 5 min old; a trip's own
+  // update may be older, since SIRI-ET sends one only when something changes.
   const feed = (lastMessage?: number): DataStateContext => ({
     ...fresh,
     positionMode: 'none',
