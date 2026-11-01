@@ -201,6 +201,24 @@ export function expectedTimes(
   return delay === undefined ? undefined : timedCalls(calls, delay)
 }
 
+/**
+ * Seconds a trip runs behind its timetable at one of its `calls`, by its delay steps, as its
+ * opened panel gives it: at the call's departure, or its arrival at the last stop, timed by
+ * `expectedTimes`; negative when early, and none where the steps give no time.
+ */
+export function delayAtCall(
+  calls: readonly Call[],
+  steps: readonly DelayStep[],
+  index: number,
+): number | undefined {
+  const call = calls[index]
+  const timed = call && expectedTimes(calls, { steps })?.[index]
+  if (!timed) return undefined
+  return index === calls.length - 1
+    ? (timed.arrival - call.arrival) / 1000
+    : (timed.departure - call.departure) / 1000
+}
+
 /** Where a trip is in its day at a moment, from all its timed calls. */
 export function tripPhase(calls: readonly TimedCall[], now: number): TripPhase {
   if (calls.length === 0) return 'finished'
