@@ -90,6 +90,23 @@ describe('updates from a SIRI-ET recording, MYLDER_UPDATES=recording:<folder>', 
     expect(snapshot.updates.lastMessage).toBeLessThan(start + 60_000)
   })
 
+  it('starts at a saved moment’s clock, recording:<folder>/<moment>, a few minutes before the messages end', async () => {
+    // recordings/siri-et/quiet/clock.json: 09:55:00, 67 s before the last message, at 09:56:07,
+    // so the feed is fresh at first and quiet 5 min after that message.
+    const snapshot = await snapshotOn({ MYLDER_UPDATES: 'recording:siri-et/quiet' })
+    expect(snapshot.serviceDay).toBe('2026-10-31')
+    expect(snapshot.fetched).toBeGreaterThanOrEqual(Date.parse('2026-10-31T08:55:00Z'))
+    expect(snapshot.fetched).toBeLessThan(Date.parse('2026-10-31T08:56:00Z'))
+    expect(snapshot.updates).toMatchObject({ kind: 'recording', fresh: true })
+    expect(snapshot.updates.withUpdate.bus).toBeGreaterThan(100)
+  }, 30_000)
+
+  it('refuses a saved moment that isn’t there', async () => {
+    await expect(environmentLayer({ MYLDER_UPDATES: 'recording:siri-et/never' })).rejects.toThrow(
+      /siri-et.never.clock\.json/,
+    )
+  })
+
   it('serves the browser the folder’s timetable files', async () => {
     vi.stubEnv('MYLDER_UPDATES', 'recording:siri-et')
     const manifest = (await (await timetableManifestResponse()).json()) as { version: string }

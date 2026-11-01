@@ -133,6 +133,10 @@ const DISRUPTIONS_SECONDS = 32 * 86_400
 /** How long a quota error is kept: past the end of any month it falls in. */
 const QUOTA_SECONDS = 32 * 86_400
 
+/** The later of two moments, either of which may be missing. */
+const latest = (a: number | undefined, b: number | undefined) =>
+  a === undefined ? b : b === undefined ? a : Math.max(a, b)
+
 /** Asks for nothing: the timetable source's opened stops and trips answer from the timetable. */
 const neverAsk: OnDemand = () => Effect.succeed({})
 
@@ -208,10 +212,13 @@ export const layer: Layer.Layer<
           outcome.health.status === 'spent' && before.level !== 'spent'
             ? pacing({ calls: before.calls, now, timezone, quotaGone: true })
             : before
-        // SIRI-ET's table, one read a run, joined to the trips it updates.
+        // SIRI-ET's table, one read a run, joined to the trips it updates. The feed's last message
+        // is the latest any run has read, so a run without the table, such as one whose fetch
+        // failed, leaves the feed fresh until no message has come for 5 min (docs/data-states.md,
+        // rule 3), and the quiet feed's card and No signal trips keep its time.
         const table = yield* feed.table(now)
         const joined = table ? joinTable(timetable, table) : NO_UPDATES
-        const lastMessage = table?.lastMessageAt
+        const lastMessage = latest(table?.lastMessageAt, previous?.updates.lastMessage)
         const { trips, unmatched, history } = buildTrips({
           timetable,
           now,

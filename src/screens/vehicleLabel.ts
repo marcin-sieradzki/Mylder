@@ -1,8 +1,9 @@
 // What a dot's card says of it (docs/screens.md, "The hover card"; docs/data-states.md, "The
 // states"): its line and destination, and its data state's label, aged by the server's clock.
 // A report's age counts from the answer that carried it, No signal from the last position answer
-// that carried the trip, and a Waiting trip gives its departure, never that the vehicle is there.
-import type { DataState } from '../domain/data-state.ts'
+// that carried the trip, or from SIRI-ET's last message for a trip it updated
+// (`noSignalSince`), and a Waiting trip gives its departure, never that the vehicle is there.
+import { noSignalSince, type DataState, type DataStateContext } from '../domain/data-state.ts'
 import type { ClientDictionary } from '../i18n/dictionary.ts'
 import { clockTime } from '../timetable/time.ts'
 import type { SnapshotTrip } from '../tracker/index.ts'
@@ -32,7 +33,7 @@ export const titleOf = (trip: SnapshotTrip, dictionary: ClientDictionary): strin
 /**
  * The state's label for `trip` in `state` at `now`, such as "Reported 20 s ago", or none where
  * it would only repeat the state's word, as Timetable only's does. Its times read on the clock of
- * `timezone`, the timetable's.
+ * `timezone`, the timetable's. `updates` is SIRI-ET's feed, from the snapshot (`updatesContext`).
  */
 export function stateLabelOf(
   trip: SnapshotTrip,
@@ -40,6 +41,7 @@ export function stateLabelOf(
   now: number,
   timezone: string,
   words: Words,
+  updates?: DataStateContext['updates'],
 ): string | undefined {
   const departs = trip.waiting ? trip.next[0]?.time : undefined
   if (departs !== undefined) return fill(words.departs, { time: clockTime(departs, timezone) })
@@ -55,7 +57,7 @@ export function stateLabelOf(
     case 'estimated':
       return words.estimated
     case 'no-signal': {
-      const since = trip.seen ?? trip.reported ?? trip.updated
+      const since = noSignalSince(trip, updates)
       return since === undefined
         ? undefined
         : fill(words.noSignalSince, { time: clockTime(since, timezone) })

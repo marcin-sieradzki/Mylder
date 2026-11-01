@@ -259,49 +259,54 @@ describe('SIRI-ET’s delays from the listener’s table, fetched over HTTPS', (
   const fromListener = (time: string, http: Layer.Layer<Http.HttpClient.HttpClient>) =>
     snapshotAt(time).pipe(Effect.provide(onListener(http)))
 
-  it.effect('gives the same trips as the reader inside the tracker, from one fetch a run', () =>
-    Effect.gen(function* () {
-      // The listener's own route, on a port of this machine, fed the recording's messages up to
-      // 09:21:30, when bus 102A of 09:04 has been cancelled whole for 15 s, beside every delay
-      // the table holds then.
-      const dir = recordingDir(RECORDING)
-      const [messages, box] = yield* Effect.promise(() =>
-        Promise.all([
-          readSiriEtMessages(join(dir, 'messages.jsonl.gz')),
-          readBox(join(dir, 'timetable')),
-        ]),
-      )
-      const listener = createListener({
-        token: TOKEN,
-        version: 'test',
-        startedAt: cph('09:00:00'),
-        now: () => cph('09:21:30'),
-      })
-      for (const message of messages) {
-        if (message.receivedAt <= cph('09:21:30')) listener.receive(message)
-      }
-      listener.useBox(box)
-      const server = yield* Effect.acquireRelease(
-        Effect.promise(() => serve(listener.handle, 0, '127.0.0.1')),
-        (started) => Effect.promise(() => new Promise((done) => started.close(done))),
-      )
-      const served = yield* snapshotAt('09:21:30').pipe(
-        Effect.provide(
-          trackerLayer({
-            timetable,
-            source: { kind: 'timetable' },
-            updates: { kind: 'siri' },
-            listener: { url: `http://127.0.0.1:${portOf(server)}/table`, token: TOKEN },
-            cpu: stoppedCpu,
-          }),
-        ),
-      )
-      const replayed = yield* snapshotAt('09:21:30').pipe(Effect.provide(onTimetable(recorded)))
-      expect(listener.minute().requests).toEqual({ served: 1, refused: 0, unavailable: 0 })
-      expect(served.trips).toEqual(replayed.trips)
-      expect(served.updates).toEqual({ ...replayed.updates, kind: 'siri' })
-      expect(tripOf(served, '102A', '09:04')?.cancelled).toBe(true)
-    }).pipe(Effect.scoped),
+  it.effect(
+    'gives the same trips as the reader inside the tracker, from one fetch a run',
+    () =>
+      Effect.gen(function* () {
+        // The listener's own route, on a port of this machine, fed the recording's messages up to
+        // 09:21:30, when bus 102A of 09:04 has been cancelled whole for 15 s, beside every delay
+        // the table holds then.
+        const dir = recordingDir(RECORDING)
+        const [messages, box] = yield* Effect.promise(() =>
+          Promise.all([
+            readSiriEtMessages(join(dir, 'messages.jsonl.gz')),
+            readBox(join(dir, 'timetable')),
+          ]),
+        )
+        const listener = createListener({
+          token: TOKEN,
+          version: 'test',
+          startedAt: cph('09:00:00'),
+          now: () => cph('09:21:30'),
+        })
+        for (const message of messages) {
+          if (message.receivedAt <= cph('09:21:30')) listener.receive(message)
+        }
+        listener.useBox(box)
+        const server = yield* Effect.acquireRelease(
+          Effect.promise(() => serve(listener.handle, 0, '127.0.0.1')),
+          (started) => Effect.promise(() => new Promise((done) => started.close(done))),
+        )
+        const served = yield* snapshotAt('09:21:30').pipe(
+          Effect.provide(
+            trackerLayer({
+              timetable,
+              source: { kind: 'timetable' },
+              updates: { kind: 'siri' },
+              listener: { url: `http://127.0.0.1:${portOf(server)}/table`, token: TOKEN },
+              cpu: stoppedCpu,
+            }),
+          ),
+        )
+        const replayed = yield* snapshotAt('09:21:30').pipe(Effect.provide(onTimetable(recorded)))
+        expect(listener.minute().requests).toEqual({ served: 1, refused: 0, unavailable: 0 })
+        expect(served.trips).toEqual(replayed.trips)
+        expect(served.updates).toEqual({ ...replayed.updates, kind: 'siri' })
+        expect(tripOf(served, '102A', '09:04')?.cancelled).toBe(true)
+      }).pipe(Effect.scoped),
+    // It reads the recording's messages twice, once for the listener and once for the tracker,
+    // which can pass 5 s while the whole suite runs.
+    30_000,
   )
 
   it.effect('joins no journey to a Metro or light rail trip, which stay Timetable only', () =>

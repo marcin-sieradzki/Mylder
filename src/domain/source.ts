@@ -34,7 +34,8 @@ export type SourceWords = BannerWords | LegendWords | SourceNameWords | SourceNo
 export interface SourceDescription {
   /**
    * Whether the tracker asks Rejseplanen, or the simulation or recording that answers in its
-   * place: with no call, nothing can stop answering, so nothing pauses and no data card shows.
+   * place: with no call, nothing can stop answering, so nothing pauses and no data card about
+   * Rejseplanen's answers shows; a quiet SIRI-ET feed's card still can (./data-cards.ts).
    */
   readonly callsRejseplanen: boolean
   /**

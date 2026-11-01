@@ -320,7 +320,9 @@
         "light-rail": "No light rail positions since {time}"
       },
       "messagesStale": "Disruption messages not updated since {time}",
-      "messagesNever": "Disruption messages not fetched yet"
+      "messagesNever": "Disruption messages not fetched yet",
+      "updatesStale": "Delays from Rejseplanen not updated since {time}",
+      "updatesNever": "Delays from Rejseplanen not received yet"
     }
   },
   "timetableOverview": {

@@ -8,7 +8,7 @@ import {
   type SourceLineSource,
 } from '@mylder/perron/patterns'
 import { useEffect, useRef } from 'react'
-import type { DataState } from '../domain/data-state'
+import { updatesContext, type DataState, type DataStateContext } from '../domain/data-state'
 import { disruptionPhase } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
@@ -105,6 +105,7 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
         <Detail
           answer={answer}
           trip={trip}
+          updates={snapshot && updatesContext(snapshot.updates).updates}
           network={network}
           noPositions={noPositions}
           lang={lang}
@@ -163,6 +164,8 @@ interface DetailProps {
   answer: TripDetail
   /** The trip as the snapshot carries it, while it is on the map. */
   trip: SnapshotTrip | undefined
+  /** SIRI-ET's feed, from the snapshot, whose last message dates a No signal trip it updated. */
+  updates: DataStateContext['updates']
   network: Network | undefined
   /**
    * Whether the page's source has no positions, as the timetable source has none: the trip is
@@ -177,7 +180,7 @@ interface DetailProps {
  * The trip's state, facts, place and stops, aged by the server's clock, then its messages and the
  * source line.
  */
-function Detail({ answer, trip, network, noPositions, lang, words }: DetailProps) {
+function Detail({ answer, trip, updates, network, noPositions, lang, words }: DetailProps) {
   const now = useServerSecond(useClockOffset())
   // The trip's state now, by the clock, while the snapshot carries it; else the answer's.
   const state: DataState = useDataState(answer.key) ?? answer.state
@@ -196,6 +199,7 @@ function Detail({ answer, trip, network, noPositions, lang, words }: DetailProps
     words,
     noPositions,
     next,
+    updates,
   })
   const live = state === 'live' || state === 'ageing'
   const delaySeconds = shownDelayOf(answer, trip, next)

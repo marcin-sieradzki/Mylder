@@ -17,6 +17,7 @@ import {
   pointAt,
   progressAt,
   snapToPath,
+  steppedCalls,
   timedCalls,
   timelineFrom,
   timelineOf,
@@ -24,6 +25,7 @@ import {
   type Position,
   type TripPhase,
   type Call,
+  type DelayStep,
   type TimedCall,
 } from '../domain/trip-motion.ts'
 import { clockMoment } from '../timetable/time.ts'
@@ -61,6 +63,17 @@ export interface TripHistory {
   readonly delay?: number
   /** When its latest update from SIRI-ET's feed was received. */
   readonly updated?: number
+  /**
+   * Its latest SIRI-ET update's delays, where each changes, so it keeps moving on them once the
+   * table no longer brings it, as a No signal trip does when the feed goes quiet.
+   */
+  readonly steps?: readonly DelayStep[]
+  /**
+   * Whether its latest SIRI-ET update cancelled it whole, and the calls it cancelled, kept the
+   * same way, so a run without the table never draws it again or unmarks its departures.
+   */
+  readonly cancelled?: true
+  readonly cancelledCalls?: readonly number[]
   /** Rejseplanen's journey, `ZI@DA`. */
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
@@ -226,8 +239,10 @@ export function buildTrips({
       const update = updates.get(trip.key)
       if (!realtime && !before && !update && !onMap(tripPhase(trip.calls, now))) continue
       const path = timetable.pathOf(trip.pattern)
-      // A position's stops lie over SIRI-ET's expected times, where both give one.
-      const base = update?.calls ?? trip.calls
+      // A position's stops lie over SIRI-ET's expected times, where both give one: this run's
+      // update's, or else the last one's, kept while the table no longer brings it.
+      const steps = update ? delaySteps(update.calls) : before?.steps
+      const base = update?.calls ?? (steps ? steppedCalls(trip.calls, steps) : trip.calls)
       const calls = realtime
         ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop, base)
         : base
@@ -256,16 +271,21 @@ export function buildTrips({
       const seen = position ?? before?.seen
       const reported = reportedNow ? position : before?.reported
       const updated = update?.received ?? before?.updated
+      // The cancellations of this run's update, or else of the last one's.
+      const cancelled = update ? update.cancelled : before?.cancelled === true
+      const cancelledCalls = update ? update.cancelledCalls : (before?.cancelledCalls ?? [])
       const remembered: TripHistory = {
         ...(seen ? { seen } : {}),
         ...(reported ? { reported } : {}),
         ...(updated === undefined ? {} : { updated }),
         ...(delay === undefined ? {} : { delay }),
+        ...(steps?.length ? { steps } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
         ...(journey ? { journey } : {}),
         ...(ref ? { ref } : {}),
       }
       const hadRealtime = realtime !== undefined || before !== undefined || update !== undefined
-      const steps = update ? delaySteps(update.calls) : []
       if (hadRealtime) kept[trip.key] = remembered
       // More than 5 min before it leaves on its expected times, a trip is remembered, not drawn.
       if (phase === 'upcoming') continue
@@ -299,9 +319,9 @@ export function buildTrips({
         progress: Math.round(progress),
         next: nextCalls(timetable, trip, timed, now),
         ...(atFirstStop ? { waiting: true as const } : {}),
-        ...(update?.cancelled ? { cancelled: true as const } : {}),
-        ...(update?.cancelledCalls.length ? { cancelledCalls: update.cancelledCalls } : {}),
-        ...(steps.length > 0 ? { steps } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
+        ...(steps?.length ? { steps } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
       })

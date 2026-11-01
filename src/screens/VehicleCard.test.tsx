@@ -134,3 +134,35 @@ describe("a dot's card", () => {
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 })
+
+describe("a dot's card when SIRI-ET's delays have gone quiet", () => {
+  // The SIRI-ET recording's saved minute of 09:22:00, whose feed's last message came at 09:21:52.
+  const withDelays = JSON.parse(
+    readFileSync(join(process.cwd(), 'recordings', 'siri-et', 'snapshots', '0002.json'), 'utf8'),
+  ) as Snapshot
+  const lastMessage = withDelays.updates.lastMessage!
+  /** Bus 500S of 07:40 to Ørestad St., 8 min late by its own update of 09:14:01. */
+  const BUS_500S = 'bus.500S.601b096611.20261031.0740'
+
+  const openQuiet = (lang: Lang) => {
+    vi.setSystemTime(lastMessage + 5 * 60_000)
+    liveSnapshot.update({ snapshot: withDelays, clockOffset: 0 })
+    pickedVehicle.pick({ kind: 'trip', key: BUS_500S, point: [200, 200] })
+    render(
+      <Providers lang={lang} dictionary={lang === 'da' ? da : en}>
+        <VehicleCard />
+      </Providers>,
+    )
+  }
+
+  it('says No signal since the feed’s last message, not since its own older update', () => {
+    openQuiet('en')
+    expect(card()).toHaveTextContent('No signal')
+    expect(card()).toHaveTextContent('No signal since 09:21')
+  })
+
+  it('says so in Danish', () => {
+    openQuiet('da')
+    expect(card()).toHaveTextContent('Intet signal siden 09:21')
+  })
+})

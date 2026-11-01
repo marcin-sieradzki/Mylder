@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # Builds this checkout and starts it on a recording, or on the timetable source, for one
 # verification run.
-# Usage: launch.sh <run-id> [port] [recording|timetable|timetable:<folder>|updates:<folder>]. The port defaults to
+# Usage: launch.sh <run-id> [port] [recording|timetable|timetable:<folder>|updates:<folder>[/<moment>]]. The port defaults to
 # 4300 and the recording to weekday; `timetable` starts it with MYLDER_SOURCE unset instead, the
 # default, which is the timetable source on the deployed timetable at the real time, and `timetable:<folder>` on the timetable source with a
 # saved folder's timetable and clock (MYLDER_TIMETABLE_FROM), such as `timetable-ending`, the
 # timetable's last week. `updates:<folder>` starts the timetable source with SIRI-ET's updates
 # from a SIRI-ET recording (MYLDER_UPDATES=recording:<folder>), such as `siri-et`, on its timetable
-# from its clock. The aircraft are always the weekday recording's. Prints the URL once the
+# from its clock, or from a saved moment's clock in it, such as `siri-et/quiet`. The aircraft are always the weekday recording's. Prints the URL once the
 # map's snapshot answers with vehicles. VERIFY_SKIP_BUILD=1 reuses a build of the same commit.
 set -euo pipefail
 set -m # the server gets a process group of its own, so cleanup.sh stops all of it
 
-run=${1:?usage: launch.sh <run-id> [port] [recording|timetable|timetable:<folder>|updates:<folder>]}
+run=${1:?usage: launch.sh <run-id> [port] [recording|timetable|timetable:<folder>|updates:<folder>[/<moment>]]}
 port=${2:-4300}
 recording=${3:-weekday}
 dir=".verify/$run"
@@ -34,8 +34,9 @@ elif [ "${recording#timetable:}" != "$recording" ]; then
 elif [ "${recording#updates:}" != "$recording" ]; then
   source=timetable
   updates=${recording#updates:}
-  if [ ! -f "recordings/$updates/messages.jsonl.gz" ] || [ ! -f "recordings/$updates/clock.json" ]; then
-    echo "No SIRI-ET recording recordings/$updates with a messages.jsonl.gz and a clock.json." >&2
+  # A saved moment, <folder>/<moment>, is a folder of the recording with a clock.json of its own.
+  if [ ! -f "recordings/${updates%%/*}/messages.jsonl.gz" ] || [ ! -f "recordings/$updates/clock.json" ]; then
+    echo "No SIRI-ET recording recordings/${updates%%/*} with a messages.jsonl.gz and a clock.json in recordings/$updates." >&2
     exit 1
   fi
   on="the timetable source with SIRI-ET's updates from recordings/$updates"
