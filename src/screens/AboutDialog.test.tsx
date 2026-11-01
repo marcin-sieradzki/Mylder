@@ -365,6 +365,32 @@ describe('the About dialog', () => {
     expect(fact(openDialog('Om Mylder'), 'Driftsforstyrrelser')).toBe('Ikke koblet på endnu')
   })
 
+  it('says on the timetable source that Rejseplanen’s realtime isn’t connected yet, not Unknown', () => {
+    // Its last saved minute: Rejseplanen was never asked, so there is no realtime time to give.
+    const onTimetable = saved('timetable-source', '0006.json')
+    show('en', onTimetable)
+    let dialog = openDialog('About Mylder')
+    expect(fact(dialog, "Rejseplanen's realtime")).toBe('Not connected yet')
+    expect(within(dialog).queryByText('Unknown')).not.toBeInTheDocument()
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', onTimetable)
+    dialog = openDialog('Om Mylder')
+    expect(fact(dialog, 'Rejseplanens realtid')).toBe('Ikke koblet på endnu')
+    expect(within(dialog).queryByText('Ukendt')).not.toBeInTheDocument()
+  })
+
+  it('still reads Unknown on any other source that has no realtime time yet', () => {
+    const { apiTime, ...noRealtime } = weekday
+    expect(apiTime).toBeDefined()
+    show('en', noRealtime)
+    const value = within(openDialog('About Mylder')).getByText("Rejseplanen's realtime", {
+      selector: 'dt',
+    }).nextElementSibling as HTMLElement
+    expect(value).toHaveTextContent('Unknown')
+    expect(value).toHaveAttribute('data-unknown')
+  })
+
   it('gives the budget line in Danish, in the page notice’s words', () => {
     show('da', { ...weekday, pollInterval: 90, budget: { level: 'stretched', calls: 30_000 } })
     const dialog = openDialog('Om Mylder')

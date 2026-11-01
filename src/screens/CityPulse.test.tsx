@@ -218,9 +218,7 @@ describe('Reporting live, by mode', () => {
 
   it('says it in Danish', () => {
     renderPulse('da', saved(MINUTE_6))
-    expect(meter('Metro')).toHaveTextContent(
-      'Ingen realtid fra Metroen; placeret ud fra køreplanen',
-    )
+    expect(meter('Metro')).toHaveTextContent('Ingen realtid fra Metroen; placeret efter køreplanen')
     expect(meter('Tog')).toHaveTextContent('1/1 · DSB')
   })
 
@@ -281,9 +279,14 @@ describe('How sure are we?', () => {
 
   it('says it in Danish', () => {
     renderPulse('da', saved(MINUTE_6))
-    expect(screen.getByRole('list', { name: 'Hvor sikre er vi?' })).toHaveTextContent(
-      'Meldt af køretøjet i de seneste svar.',
+    const key = screen.getByRole('list', { name: 'Hvor sikre er vi?' })
+    expect(key).toHaveTextContent('Meldt af køretøjet i de seneste svar.')
+    // A trip placed from the timetable is "placeret efter køreplanen", as everywhere in Danish.
+    expect(key).toHaveTextContent('Ingen realtid for denne tur i dag; placeret efter køreplanen.')
+    expect(key).toHaveTextContent(
+      'Placeret efter køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.',
     )
+    expect(key).not.toHaveTextContent('placeret ud fra')
   })
 })
 
