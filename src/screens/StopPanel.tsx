@@ -23,7 +23,7 @@ import type { DataState } from '../domain/data-state'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
-import { useKnownClockOffset, useSnapshot } from '../map/live'
+import { useKnownClockOffset, useSnapshot, useSource } from '../map/live'
 import { useStopArrivals, type PanelStateOf, type PanelStatus } from '../map/panels'
 import { useDataStates } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -178,10 +178,10 @@ interface ListContext {
   readonly now: number | undefined
   readonly timezone: string
   /**
-   * Whether the page runs on the timetable source, which asks Rejseplanen nothing: the lists are
+   * Whether the page's source has no positions, as the timetable source has none: the lists are
    * the timetable's by design, with no positions to move them by.
    */
-  readonly onTimetable: boolean
+  readonly noPositions: boolean
   readonly lang: Lang
   readonly words: Words
 }
@@ -211,8 +211,8 @@ function StopLists({ state, timezone, lang, words, phone, above, until }: StopLi
   // so nothing counts down or calls an answer old by it.
   const now = useServerSecond(useKnownClockOffset())
   const board = useStopBoard()
-  const onTimetable = useSnapshot()?.source.kind === 'timetable'
-  const context: ListContext = { hidden, states, now, timezone, onTimetable, lang, words }
+  const noPositions = useSource()?.positions === false
+  const context: ListContext = { hidden, states, now, timezone, noPositions, lang, words }
   const { answer, status } = state
   return (
     <>
@@ -334,7 +334,7 @@ function Board({
   states,
   now,
   timezone,
-  onTimetable,
+  noPositions,
   lang,
   words,
 }: BoardProps) {
@@ -382,13 +382,13 @@ function Board({
       )}
       <Text variant="caption" emphasis="secondary">
         {/* A board's answer carries Rejseplanen's expected times, whichever list it fills. */}
-        {onTimetable
+        {noPositions
           ? words.timetableNote
           : answer.source.kind === 'rejseplanen'
             ? words.note
             : words[named.note]}
       </Text>
-      {answer.source.kind === 'timetable' && !onTimetable ? (
+      {answer.source.kind === 'timetable' && !noPositions ? (
         <Text variant="caption" emphasis="secondary">
           {words.fromTimetable}
         </Text>
@@ -405,7 +405,7 @@ function Board({
           ]}
         />
       ) : (
-        <SourceLine sources={[timetableSource(answer.fetched, onTimetable, timezone, words)]} />
+        <SourceLine sources={[timetableSource(answer.fetched, noPositions, timezone, words)]} />
       )}
     </>
   )
@@ -419,12 +419,12 @@ function Board({
  */
 const timetableSource = (
   fetched: number,
-  onTimetable: boolean,
+  noPositions: boolean,
   timezone: string,
   words: Words,
 ): SourceLineSource => {
   const time = clockTime(fetched, timezone, { seconds: true })
-  return onTimetable
+  return noPositions
     ? { name: words.timetableSource, label: '{time}', time }
     : { label: words.timetableAndPositions, time }
 }

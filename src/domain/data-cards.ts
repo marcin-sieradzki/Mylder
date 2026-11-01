@@ -2,7 +2,7 @@
 // the Disruptions list like any other disruption, first and marked as Mylder's. Read from the
 // snapshot at a moment, so a card appears and clears by the clock between polls. Times are
 // milliseconds since the epoch.
-import { onTimetable, pauseAt, type PauseFacts } from './pause.ts'
+import { callsRejseplanen, pauseAt, type PauseFacts } from './pause.ts'
 
 /** One of Mylder's own cards, as codes and times; the screen writes the words. */
 export type DataCard =
@@ -47,7 +47,7 @@ const modeRank = (mode: string) => {
  * checked, or has never been fetched.
  */
 export function dataCards(facts: DataCardFacts, now: number): DataCard[] {
-  if (onTimetable(facts)) return []
+  if (!callsRejseplanen(facts)) return []
   const cards: DataCard[] = []
   const { api, lastSeen, disruptions } = facts
   const pause = pauseAt(facts, now, GAP)

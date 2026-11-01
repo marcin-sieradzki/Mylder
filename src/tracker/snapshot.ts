@@ -4,6 +4,7 @@
 // since the epoch, intervals and delays seconds.
 import 'server-only'
 import { Schema } from 'effect'
+import { SOURCE_KINDS } from '../domain/source.ts'
 
 const optional = Schema.optionalKey
 
@@ -85,7 +86,8 @@ export const DisruptionsSummary = Schema.Struct({
 })
 
 export const SnapshotSource = Schema.Struct({
-  kind: Schema.Literals(['timetable', 'simulated', 'recording', 'rejseplanen']),
+  /** The kinds `SOURCE_DESCRIPTIONS` describes (src/domain/source.ts), every one required. */
+  kind: Schema.Literals(SOURCE_KINDS),
   /** The scenario or the recording's folder. */
   name: optional(Schema.String),
 })

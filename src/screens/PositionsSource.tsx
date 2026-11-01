@@ -1,6 +1,7 @@
 'use client'
 
 import { SourceLine } from '@mylder/perron/patterns'
+import { describeSource } from '../domain/source'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset } from '../map/live'
 import type { Snapshot } from '../tracker/index'
@@ -21,8 +22,8 @@ interface PositionsSourceProps {
 
 /**
  * Where the snapshot's positions come from and when, "may be out of date" once the snapshot is
- * older than its refresh: "Rejseplanen · positions 08:14:05", or on the timetable source, which
- * asks Rejseplanen nothing and places every vehicle from the timetable, "Timetable · placed
+ * older than its refresh: "Rejseplanen · positions 08:14:05", or on a source with no positions,
+ * such as the timetable, which places every vehicle from the timetable, "Timetable · placed
  * 08:14:05". It reads the clock each second on its own, so what it sits beside doesn't render
  * again with it.
  */
@@ -34,7 +35,7 @@ export function PositionsSource({ snapshot, time, paused }: PositionsSourceProps
   return (
     <SourceLine
       sources={[
-        snapshot.source.kind === 'timetable'
+        !describeSource(snapshot.source.kind).positions
           ? { name: source, label: placedAt, time, outOfDate: late }
           : {
               name: 'Rejseplanen',

@@ -4,7 +4,7 @@ import { FactList, Meter, Section, Stat, Text } from '@mylder/perron'
 import { DataStateKey, ReportStrip } from '@mylder/perron/patterns'
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { useClockOffset, useLastAnswer, useSnapshot } from '../map/live'
+import { useClockOffset, useLastAnswer, useSnapshot, useSource } from '../map/live'
 import { usePaused as usePageNoticePaused } from '../map/notices'
 import { useDataStates } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
@@ -97,8 +97,8 @@ export function CityPulse() {
   const sureId = useId()
   const paused = usePaused(snapshot, clockOffset)
   const pulse = snapshot && pulseOf(snapshot, states, hidden, paused)
-  // On the timetable source, which asks Rejseplanen nothing, the figures are the timetable's plan.
-  const placed = snapshot?.source.kind === 'timetable'
+  // On a source with no positions, such as the timetable, the figures are the timetable's plan.
+  const placed = useSource()?.positions === false
 
   const { percent, minutes } = useMemo(
     () => ({

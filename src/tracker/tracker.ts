@@ -11,6 +11,7 @@
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
 import { checkedEvery } from '../domain/disruption.ts'
+import { describeSource } from '../domain/source.ts'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
 import {
@@ -47,7 +48,7 @@ import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './heal
 import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot } from './snapshot.ts'
-import { callsApi, type Source } from './source.ts'
+import { snapshotSourceOf, type Source } from './source.ts'
 import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
 
@@ -130,14 +131,6 @@ const DISRUPTIONS_SECONDS = 32 * 86_400
 /** How long a quota error is kept: past the end of any month it falls in. */
 const QUOTA_SECONDS = 32 * 86_400
 
-/** A source as the snapshot names it. */
-export const describeSource = (source: Source): Snapshot['source'] =>
-  source.kind === 'simulated'
-    ? { kind: 'simulated', name: source.scenario }
-    : source.kind === 'recording'
-      ? { kind: 'recording', name: source.folder }
-      : { kind: source.kind }
-
 /** Asks for nothing: the timetable source's opened stops and trips answer from the timetable. */
 const neverAsk: OnDemand = () => Effect.succeed({})
 
@@ -154,8 +147,8 @@ export const layer: Layer.Layer<
     const rejseplanen = yield* Rejseplanen
     const cpu = yield* CpuClock
     const key = (name: string) => `${config.keyPrefix}:${name}`
-    // A source with no API asks for no position, whatever the configured mode says.
-    const calling = callsApi(config.source)
+    // A source that asks Rejseplanen nothing asks for no position, whatever mode is configured.
+    const calling = describeSource(config.source.kind).callsRejseplanen
     const positionMode: PositionMode = calling ? config.positionMode : 'none'
     const { timezone } = timetable.manifest
     const area = { stops: timetable.stops, products: PRODUCTS, timezone }
@@ -249,7 +242,7 @@ export const layer: Layer.Layer<
             serviceDayStart(timetable.serviceDaysAt(now)[0], timezone),
           ),
           disruptions: summaryOf(yield* storedDisruptions),
-          source: describeSource(config.source),
+          source: snapshotSourceOf(config.source),
           status: {
             calls: outcome.calls,
             unmatched,
