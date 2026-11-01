@@ -4,11 +4,13 @@ import { Attribution } from '@mylder/perron'
 import type { MouseEvent } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useAircraftProvider } from '../map/aircraft'
+import { useDelaysOn } from '../map/live'
 import { aboutDialog } from './about'
 import { compose } from './compose'
 import {
   aircraftCredit,
   CC_BY,
+  DELAYS_PUBLISHER,
   ODBL,
   OPENFREEMAP,
   OPENMAPTILES,
@@ -28,14 +30,15 @@ const openAboutFromCredit = (event: MouseEvent<HTMLAnchorElement>) => {
 }
 
 /**
- * The corner credit (docs/screens.md, "The moving map"): the transit data, the aircraft once the
- * page has any, and the map, each source a link, in place of MapLibre's own.
+ * The corner credit (docs/screens.md, "The moving map"): the transit data, SIRI-ET's delays when
+ * they are on, the aircraft once the page has any, and the map, in place of MapLibre's own.
  */
 export function MapCredit() {
   const { dictionary } = useI18n()
   const words = dictionary.credit
   const provider = useAircraftProvider()
   const aircraft = provider && aircraftCredit(provider)
+  const delays = useDelaysOn()
   return (
     <Attribution>
       {words.transitData}:{' '}
@@ -43,6 +46,12 @@ export function MapCredit() {
         Rejseplanen
       </a>{' '}
       (<a href={CC_BY}>CC BY 4.0</a>){' · '}
+      {delays ? (
+        <>
+          {words.delays}: {DELAYS_PUBLISHER}
+          {' · '}
+        </>
+      ) : null}
       {aircraft ? (
         <>
           {aircraft.odbl

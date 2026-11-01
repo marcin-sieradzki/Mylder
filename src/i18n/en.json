@@ -97,6 +97,7 @@
   },
   "credit": {
     "transitData": "Transit data",
+    "delays": "Delays",
     "openStreetMap": "OpenStreetMap contributors",
     "aircraft": "Aircraft: {source} under the {licence}",
     "aircraftFrom": "Aircraft: {source}",
@@ -149,6 +150,7 @@
       "title": "Data and credits",
       "transit": "Realtime data and the timetable: {rejseplanen}, under {licence}. Timetable of {date}.",
       "map": "Map: © {openStreetMap} under the {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "delays": "Delays and cancellations: {company}, through Rejseplanen's SIRI-ET.",
       "buildings": "Building heights come from OpenStreetMap and are approximate.",
       "aircraft": "Aircraft: © {source} under the {licence}.",
       "aircraftFrom": "Aircraft: © {source}.",
@@ -195,6 +197,9 @@
       "store": "Server store",
       "storeOk": "Available",
       "storeUnavailable": "Unavailable: no vehicle can be Ageing or No signal until it returns.",
+      "delays": "Delays",
+      "delaysUpdated": "Rejseplanen's SIRI-ET, updated {time}",
+      "delaysNotYet": "Rejseplanen's SIRI-ET, no update yet",
       "disruptions": "Disruptions",
       "checked": "Checked {time}",
       "checkFailed": "Last checked {time}; the latest check failed.",
@@ -235,6 +240,7 @@
     "reportingLive": "Reporting live",
     "reportingLiveSub": "{count} of {total} vehicles that could report",
     "byMode": "Reporting live, by mode",
+    "withDelays": "With delays, by mode",
     "modeShare": "{count}/{total} · {operator}",
     "unknown": {
       "computed-only": "Rejseplanen sends computed positions only",

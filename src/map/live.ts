@@ -166,9 +166,25 @@ export function useSource(store: SnapshotStore = liveSnapshot): SourceDescriptio
   return snapshot && describeSnapshotSource(snapshot)
 }
 
+/**
+ * Whether the latest snapshot has SIRI-ET's delays on (`MYLDER_UPDATES` set), for what credits
+ * them: it renders again only when that changes. Off until a snapshot has landed.
+ */
+export function useDelaysOn(store: SnapshotStore = liveSnapshot): boolean {
+  return useSyncExternalStore(
+    store.subscribe,
+    () => delaysOn(store.get().snapshot),
+    () => false,
+  )
+}
+
+/** Whether a snapshot has SIRI-ET's delays on. */
+export const delaysOn = (snapshot: Snapshot | undefined): boolean =>
+  snapshot !== undefined && snapshot.updates.kind !== 'off'
+
 /** What a rider is told about a snapshot's source, with SIRI-ET's delays on or off. */
 export const describeSnapshotSource = (snapshot: Snapshot): SourceDescription =>
-  describeSource(snapshot.source.kind, { delays: snapshot.updates.kind !== 'off' })
+  describeSource(snapshot.source.kind, { delays: delaysOn(snapshot) })
 
 /**
  * When the server received the latest position answer this page has seen, for the Updated line:
