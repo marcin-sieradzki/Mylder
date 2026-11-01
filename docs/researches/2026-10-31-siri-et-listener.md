@@ -123,8 +123,8 @@ Movia batches about 35 journeys a message and is 95 % of the volume. In all, abo
 
 1. **How long a subscription keeps messages, and how many**, beyond the hour measured. Decides how long the listener may be down before it loses updates, and whether draining from Vercel could ever work.
 2. **The weekday peak rate**, which the listener's minute log line measures once it runs.
-3. **How often an active trip is updated** when nothing changes. Decides whether silence can ever be judged per trip.
-4. **Whether every Movia `StopPointRef` is a Labs GTFS `stop_id`**, which the reader's tests check against the timetable.
+3. **How often an active trip is updated** when nothing changes. Decides whether silence can ever be judged per trip. The 56-minute recording gives a median of 49 s between a Movia journey's updates and 2 min at the 90th percentile, and up to 6 min for Lokaltog (`docs/live-data.md`, "SIRI-ET"), but not whether those updates are changes.
+4. ~~**Whether every Movia `StopPointRef` is a Labs GTFS `stop_id`**~~ Answered by the recording (#212): 6,969 of Movia's 7,120 refs are, as they are, and every train's; the misses are listed in `docs/live-data.md`, "SIRI-ET".
 
 ## Sources
 
