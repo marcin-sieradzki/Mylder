@@ -85,7 +85,7 @@ export const DisruptionsSummary = Schema.Struct({
 })
 
 export const SnapshotSource = Schema.Struct({
-  kind: Schema.Literals(['simulated', 'recording', 'rejseplanen']),
+  kind: Schema.Literals(['timetable', 'simulated', 'recording', 'rejseplanen']),
   /** The scenario or the recording's folder. */
   name: optional(Schema.String),
 })
