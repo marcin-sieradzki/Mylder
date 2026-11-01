@@ -1,0 +1,8 @@
+{
+  "journey": "tt-vehicle-phone",
+  "pass": true,
+  "steps": [
+    "01-bus-opened-from-the-map: bus opened from the map (http://localhost:4411/en?map=14.00/55.72603/12.57666&trip=bus.164.ff955c5d3d.20261101.0935)",
+    "02-source-line-in-the-sheet: source line in the sheet (http://localhost:4411/en?map=14.00/55.72603/12.57666&trip=bus.164.ff955c5d3d.20261101.0935)"
+  ]
+}

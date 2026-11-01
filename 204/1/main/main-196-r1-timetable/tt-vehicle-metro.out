@@ -1,0 +1,56 @@
+attempt on metro.M4.532c1f6eac.20261101.0932: card Metro M4 to København Syd St. (Metro) Timetable only
+opened metro.M4.1af3ce8e4f.20261101.0946 (aimed at metro.M4.532c1f6eac.20261101.0932 M4 to Orientkaj St. (Metro))
+panel text:
+M4
+M4
+to København Syd St. (Metro)
+Metro
+Follow
+Show whole line
+Close
+Timetable only
+
+Runs to an interval
+
+Delay
+Runs to an interval
+Last seen
+—
+Unknown
+Next stop
+Østerport St. (Metro)
+
+Between Nordhavn St. (Metro) and Østerport St. (Metro)
+
+Every 4 min
+
+Orientkaj St. (Metro)
+Passed
+Nordhavn St. (Metro)
+Passed
+Østerport St. (Metro)
+Next stop
+Marmorkirken St. (Metro)
+Kongens Nytorv St. (Metro)
+Gammel Strand St. (Metro)
+Rådhuspladsen St. (Metro)
+København H (Metro)
+Havneholmen St. (Metro)
+Enghave Brygge St. (Metro)
+Sluseholmen St. (Metro)
+Mozarts Plads St. (Metro)
+København Syd St. (Metro)
+From the timetable
+
+Timetable · updated 09:48:59
+---
+snapshot fetched 09:48:59
+stops (13): Orientkaj St. (Metro)
+Passed | Nordhavn St. (Metro)
+Passed | Østerport St. (Metro)
+Next stop | Marmorkirken St. (Metro) | Kongens Nytorv St. (Metro)
+source line match: undefined
+FAIL tt-vehicle-metro: 2 steps in .verify/main-196-r1-timetable/tt-vehicle-metro/
+expect(received).toBeTruthy()
+
+Received: null

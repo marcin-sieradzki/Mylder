@@ -1,0 +1,308 @@
+attempt on bus.2A.9b5d39f98f.20261101.0924: card undefined
+attempt on bus.2A.9b5d39f98f.20261101.0915: card undefined
+attempt on bus.4A.04e5a53dac.20261101.0901: card undefined
+attempt on bus.4A.04e5a53dac.20261101.0916: card undefined
+attempt on bus.4A.04e5a53dac.20261101.0916: card Bus 4A mod Friheden St. Kun køreplan
+opened bus.4A.04e5a53dac.20261101.0916 (aimed at bus.4A.04e5a53dac.20261101.0916 4A to Friheden St.)
+panel text:
+4A
+4A
+mod Friheden St.
+Bus
+Følg
+Vis hele linjen
+Luk
+Kun køreplan
+
+Ingen realtid for denne tur i dag; placeret efter køreplanen.
+
+Forsinkelse
+—
+Ukendt
+Sidst set
+—
+Ukendt
+Næste stop
+Roskildevej, Zoologisk Have (Søndre Fasanvej)
+
+Mellem Mathildevej (Søndre Fasanvej) og Roskildevej, Zoologisk Have (Søndre Fasanvej)
+
+Buddinge St. (Buddingevej)
+Passeret
+09:16
+Buddinge Torv (Gladsaxe Ringvej)
+Passeret
+09:18
+Gladsaxe Ringvej (Gladsaxevej)
+Passeret
+09:20
+Vandtårnsvej (Gladsaxevej)
+Passeret
+09:21
+Gyngemosevej (Gladsaxevej)
+Passeret
+09:23
+Isbanevej (Gladsaxevej)
+Passeret
+09:24
+Høje Gladsaxe (Gladsaxevej)
+Passeret
+09:25
+Dalen (Gladsaxevej)
+Passeret
+09:25
+Mars Allé (Gladsaxevej)
+Passeret
+09:26
+Lauggårds Allé (Gladsaxevej)
+Passeret
+09:27
+Engkrogen (Gladsaxevej)
+Passeret
+09:28
+Gladsaxevej (Frederiksborgvej)
+Passeret
+09:29
+Emdrup Torv (Frederiksborgvej)
+Passeret
+09:31
+Bispebjerg Parkalle (Frederiksborgvej)
+Passeret
+09:32
+Bispebjerg Torv (Tagensvej)
+Passeret
+09:33
+Tagensvej (Tuborgvej)
+Passeret
+09:35
+Tuborgvej (Frederiksborgvej)
+Passeret
+09:35
+Landsdommervej (Frederiksborgvej)
+Passeret
+09:37
+Bispevej (Frederiksborgvej)
+Passeret
+09:38
+Frederikssundsvej (Frederiksborgvej)
+Passeret
+09:39
+Nørrebro St. (Folmer Bendtsens Plads)
+Passeret
+09:41
+Hillerødgade (Lundtoftegade)
+Passeret
+09:42
+Hillerødgade (Nordre Fasanvej)
+Passeret
+09:42
+Borups Allé (Nordre Fasanvej)
+Passeret
+09:43
+Mariendalsvej (Nordre Fasanvej)
+Passeret
+09:45
+Godthåbsvej (Nordre Fasanvej)
+Passeret
+09:46
+Nyelandsvej, Frederiksberg Hospital
+Passeret
+09:47
+Fasanvej St. (Nordre Fasanvej)
+Passeret
+09:49
+Peter Bangs Vej (Søndre Fasanvej)
+Passeret
+09:50
+Mathildevej (Søndre Fasanvej)
+Passeret
+09:51
+Roskildevej, Zoologisk Have (Søndre Fasanvej)
+Næste stop
+09:53
+Aurikelvej (Søndre Fasanvej)
+09:54
+Valby Langgade (Toftegårds Allé)
+09:55
+Valby St., broen (Toftegårds Allé)
+09:56
+Toftegårds Plads (Gammel Køge Landevej)
+09:58
+Kirsten Walthers Vej (Gammel Køge Landevej)
+09:58
+Carl Jacobsens Vej (Gammel Køge Landevej)
+09:59
+København Syd St., Grønttorvet
+10:00
+Folehaven (Gammel Køge Landevej)
+10:00
+Blommehaven (Gammel Køge Landevej)
+10:01
+Gl. Køge Landev. Kollegiet (Gammel Køge Landevej)
+10:02
+Vigerslevvej (Gammel Køge Landevej)
+10:02
+Åmarken St. (Gammel Køge Landevej)
+10:03
+Hvidovregårds Allé (Gammel Køge Landevej)
+10:04
+Michael Berings Vang (Gammel Køge Landevej)
+10:05
+Strandmarksvej (Gammel Køge Landevej)
+10:06
+Friheden St.
+10:07
+Fra køreplanen
+
+Køreplan · opdateret 09:52:10
+---
+snapshot fetched 09:52:10
+FAIL tt-vehicle-da: 2 steps in .verify/main-196-r1-timetable/tt-vehicle-da/
+expect(received).toContain(expected) // indexOf
+
+Expected substring: "Ingen livepositioner endnu; placeret efter køreplanen."
+Received string:    "4A
+4A
+mod Friheden St.
+Bus
+Følg
+Vis hele linjen
+Luk
+Kun køreplan·
+Ingen realtid for denne tur i dag; placeret efter køreplanen.·
+Forsinkelse
+—
+Ukendt
+Sidst set
+—
+Ukendt
+Næste stop
+Roskildevej, Zoologisk Have (Søndre Fasanvej)·
+Mellem Mathildevej (Søndre Fasanvej) og Roskildevej, Zoologisk Have (Søndre Fasanvej)·
+Buddinge St. (Buddingevej)
+Passeret
+09:16
+Buddinge Torv (Gladsaxe Ringvej)
+Passeret
+09:18
+Gladsaxe Ringvej (Gladsaxevej)
+Passeret
+09:20
+Vandtårnsvej (Gladsaxevej)
+Passeret
+09:21
+Gyngemosevej (Gladsaxevej)
+Passeret
+09:23
+Isbanevej (Gladsaxevej)
+Passeret
+09:24
+Høje Gladsaxe (Gladsaxevej)
+Passeret
+09:25
+Dalen (Gladsaxevej)
+Passeret
+09:25
+Mars Allé (Gladsaxevej)
+Passeret
+09:26
+Lauggårds Allé (Gladsaxevej)
+Passeret
+09:27
+Engkrogen (Gladsaxevej)
+Passeret
+09:28
+Gladsaxevej (Frederiksborgvej)
+Passeret
+09:29
+Emdrup Torv (Frederiksborgvej)
+Passeret
+09:31
+Bispebjerg Parkalle (Frederiksborgvej)
+Passeret
+09:32
+Bispebjerg Torv (Tagensvej)
+Passeret
+09:33
+Tagensvej (Tuborgvej)
+Passeret
+09:35
+Tuborgvej (Frederiksborgvej)
+Passeret
+09:35
+Landsdommervej (Frederiksborgvej)
+Passeret
+09:37
+Bispevej (Frederiksborgvej)
+Passeret
+09:38
+Frederikssundsvej (Frederiksborgvej)
+Passeret
+09:39
+Nørrebro St. (Folmer Bendtsens Plads)
+Passeret
+09:41
+Hillerødgade (Lundtoftegade)
+Passeret
+09:42
+Hillerødgade (Nordre Fasanvej)
+Passeret
+09:42
+Borups Allé (Nordre Fasanvej)
+Passeret
+09:43
+Mariendalsvej (Nordre Fasanvej)
+Passeret
+09:45
+Godthåbsvej (Nordre Fasanvej)
+Passeret
+09:46
+Nyelandsvej, Frederiksberg Hospital
+Passeret
+09:47
+Fasanvej St. (Nordre Fasanvej)
+Passeret
+09:49
+Peter Bangs Vej (Søndre Fasanvej)
+Passeret
+09:50
+Mathildevej (Søndre Fasanvej)
+Passeret
+09:51
+Roskildevej, Zoologisk Have (Søndre Fasanvej)
+Næste stop
+09:53
+Aurikelvej (Søndre Fasanvej)
+09:54
+Valby Langgade (Toftegårds Allé)
+09:55
+Valby St., broen (Toftegårds Allé)
+09:56
+Toftegårds Plads (Gammel Køge Landevej)
+09:58
+Kirsten Walthers Vej (Gammel Køge Landevej)
+09:58
+Carl Jacobsens Vej (Gammel Køge Landevej)
+09:59
+København Syd St., Grønttorvet
+10:00
+Folehaven (Gammel Køge Landevej)
+10:00
+Blommehaven (Gammel Køge Landevej)
+10:01
+Gl. Køge Landev. Kollegiet (Gammel Køge Landevej)
+10:02
+Vigerslevvej (Gammel Køge Landevej)
+10:02
+Åmarken St. (Gammel Køge Landevej)
+10:03
+Hvidovregårds Allé (Gammel Køge Landevej)
+10:04
+Michael Berings Vang (Gammel Køge Landevej)
+10:05
+Strandmarksvej (Gammel Køge Landevej)
+10:06
+Friheden St.
+10:07
+Fra køreplanen·
+Køreplan · opdateret 09:52:10"

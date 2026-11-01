@@ -1,0 +1,581 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 09:54:29
+  - group "Filters":
+    - button "Bus 309" [pressed]
+    - button "Metro 39" [pressed]
+    - button "S-tog 36" [pressed]
+    - button "Train 78" [pressed]
+    - button "Light rail 14" [pressed]
+    - button "Planes 10" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?map=14.00/55.70117/12.57744&trip=bus.1A.6ac794ea0d.20261101.0943
+  - button "About Mylder"
+- status: "Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 200 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 538"
+    - tab "Disruptions 0"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 476
+      - paragraph: of 538 in service
+    - group "Reported this minute":
+      - text: Reported this minute Unknown
+      - paragraph: Positions are paused
+    - group "Reporting live":
+      - text: Reporting live Unknown
+      - paragraph: Positions are paused
+    - list "On the map now":
+      - listitem: Live 0
+      - listitem: Ageing 0
+      - listitem: Estimated 0
+      - listitem: Timetable only 538
+      - listitem: No signal 0
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: Positions are paused
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: Positions are paused
+      - meter "Train": Train x
+      - paragraph: Positions are paused
+      - meter "Light rail": Light rail x
+      - paragraph: Positions are paused
+    - status
+    - figure "Vehicles in service today Planned, from today's timetable":
+      - text: Vehicles in service today Planned, from today's timetable
+      - group "Vehicles in service today Planned, from today's timetable":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "337"
+          - listitem:
+            - time: 00:15
+            - text: "294"
+          - listitem:
+            - time: 00:30
+            - text: "253"
+          - listitem:
+            - time: 00:45
+            - text: "209"
+          - listitem:
+            - time: 01:00
+            - text: "164"
+          - listitem:
+            - time: 01:15
+            - text: "157"
+          - listitem:
+            - time: 01:30
+            - text: "138"
+          - listitem:
+            - time: 01:45
+            - text: "131"
+          - listitem:
+            - time: 02:00
+            - text: "120"
+          - listitem:
+            - time: 02:15
+            - text: "118"
+          - listitem:
+            - time: 02:30
+            - text: "125"
+          - listitem:
+            - time: 02:45
+            - text: "118"
+          - listitem:
+            - time: 03:00
+            - text: "114"
+          - listitem:
+            - time: 03:15
+            - text: "121"
+          - listitem:
+            - time: 03:30
+            - text: "120"
+          - listitem:
+            - time: 03:45
+            - text: "113"
+          - listitem:
+            - time: 04:00
+            - text: "109"
+          - listitem:
+            - time: 04:15
+            - text: "109"
+          - listitem:
+            - time: 04:30
+            - text: "118"
+          - listitem:
+            - time: 04:45
+            - text: "114"
+          - listitem:
+            - time: 05:00
+            - text: "113"
+          - listitem:
+            - time: 05:15
+            - text: "129"
+          - listitem:
+            - time: 05:30
+            - text: "138"
+          - listitem:
+            - time: 05:45
+            - text: "151"
+          - listitem:
+            - time: 06:00
+            - text: "158"
+          - listitem:
+            - time: 06:15
+            - text: "186"
+          - listitem:
+            - time: 06:30
+            - text: "225"
+          - listitem:
+            - time: 06:45
+            - text: "236"
+          - listitem:
+            - time: 07:00
+            - text: "264"
+          - listitem:
+            - time: 07:15
+            - text: "304"
+          - listitem:
+            - time: 07:30
+            - text: "333"
+          - listitem:
+            - time: 07:45
+            - text: "336"
+          - listitem:
+            - time: 08:00
+            - text: "370"
+          - listitem:
+            - time: 08:15
+            - text: "384"
+          - listitem:
+            - time: 08:30
+            - text: "387"
+          - listitem:
+            - time: 08:45
+            - text: "402"
+          - listitem:
+            - time: 09:00
+            - text: "432"
+          - listitem:
+            - time: 09:15
+            - text: "454"
+          - listitem:
+            - time: 09:30
+            - text: "459"
+          - listitem:
+            - time: 09:45
+            - text: "467"
+          - listitem:
+            - time: 10:00
+            - text: "502"
+          - listitem:
+            - time: 10:15
+            - text: "524"
+          - listitem:
+            - time: 10:30
+            - text: "525"
+          - listitem:
+            - time: 10:45
+            - text: "542"
+          - listitem:
+            - time: 11:00
+            - text: "556"
+          - listitem:
+            - time: 11:15
+            - text: "566"
+          - listitem:
+            - time: 11:30
+            - text: "554"
+          - listitem:
+            - time: 11:45
+            - text: "560"
+          - listitem:
+            - time: 12:00
+            - text: "577"
+          - listitem:
+            - time: 12:15
+            - text: "584"
+          - listitem:
+            - time: 12:30
+            - text: "560"
+          - listitem:
+            - time: 12:45
+            - text: "573"
+          - listitem:
+            - time: 13:00
+            - text: "580"
+          - listitem:
+            - time: 13:15
+            - text: "586"
+          - listitem:
+            - time: 13:30
+            - text: "563"
+          - listitem:
+            - time: 13:45
+            - text: "572"
+          - listitem:
+            - time: 14:00
+            - text: "579"
+          - listitem:
+            - time: 14:15
+            - text: "584"
+          - listitem:
+            - time: 14:30
+            - text: "556"
+          - listitem:
+            - time: 14:45
+            - text: "571"
+          - listitem:
+            - time: 15:00
+            - text: "578"
+          - listitem:
+            - time: 15:15
+            - text: "583"
+          - listitem:
+            - time: 15:30
+            - text: "555"
+          - listitem:
+            - time: 15:45
+            - text: "569"
+          - listitem:
+            - time: 16:00
+            - text: "583"
+          - listitem:
+            - time: 16:15
+            - text: "583"
+          - listitem:
+            - time: 16:30
+            - text: "557"
+          - listitem:
+            - time: 16:45
+            - text: "571"
+          - listitem:
+            - time: 17:00
+            - text: "570"
+          - listitem:
+            - time: 17:15
+            - text: "569"
+          - listitem:
+            - time: 17:30
+            - text: "543"
+          - listitem:
+            - time: 17:45
+            - text: "549"
+          - listitem:
+            - time: 18:00
+            - text: "550"
+          - listitem:
+            - time: 18:15
+            - text: "535"
+          - listitem:
+            - time: 18:30
+            - text: "514"
+          - listitem:
+            - time: 18:45
+            - text: "495"
+          - listitem:
+            - time: 19:00
+            - text: "492"
+          - listitem:
+            - time: 19:15
+            - text: "475"
+          - listitem:
+            - time: 19:30
+            - text: "470"
+          - listitem:
+            - time: 19:45
+            - text: "456"
+          - listitem:
+            - time: 20:00
+            - text: "454"
+          - listitem:
+            - time: 20:15
+            - text: "441"
+          - listitem:
+            - time: 20:30
+            - text: "442"
+          - listitem:
+            - time: 20:45
+            - text: "430"
+          - listitem:
+            - time: 21:00
+            - text: "434"
+          - listitem:
+            - time: 21:15
+            - text: "427"
+          - listitem:
+            - time: 21:30
+            - text: "420"
+          - listitem:
+            - time: 21:45
+            - text: "411"
+          - listitem:
+            - time: 22:00
+            - text: "420"
+          - listitem:
+            - time: 22:15
+            - text: "410"
+          - listitem:
+            - time: 22:30
+            - text: "410"
+          - listitem:
+            - time: 22:45
+            - text: "398"
+          - listitem:
+            - time: 23:00
+            - text: "396"
+          - listitem:
+            - time: 23:15
+            - text: "385"
+          - listitem:
+            - time: 23:30
+            - text: "369"
+          - listitem:
+            - time: 23:45
+            - text: "357"
+    - paragraph: Peak 586 at 13:15
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 0 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 0 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 538 No realtime for this trip today; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- dialog "1A to Avedøre St.":
+  - heading "1A to Avedøre St." [level=2]
+  - text: Bus
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Timetable only
+  - paragraph: No realtime for this trip today; placed from the timetable.
+  - term: Delay
+  - definition: Unknown
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: Trianglen St. (Blegdamsvej)
+  - paragraph: Between Gustav Adolfs Gade (Østerbrogade) and Trianglen St. (Blegdamsvej)
+  - list "Stops":
+    - listitem:
+      - text: Hellerup St. Passed
+      - time: 09:43
+    - listitem:
+      - text: Callisensvej (Strandvejen) Passed
+      - time: 09:45
+    - listitem:
+      - text: Tuborg Boulevard (Strandvejen) Passed
+      - time: 09:45
+    - listitem:
+      - text: Gl. Vartov Vej (Strandvejen) Passed
+      - time: 09:47
+    - listitem:
+      - text: Strandøre (Strandvejen) Passed
+      - time: 09:47
+    - listitem:
+      - text: Strandvænget (Strandvejen) Passed
+      - time: 09:49
+    - listitem:
+      - text: Svanemøllen St. (Østerbrogade) Passed
+      - time: 09:50
+    - listitem:
+      - text: Nygårdsvej (Østerbrogade) Passed
+      - time: 09:50
+    - listitem:
+      - text: Poul Henningsens Plads St. (Østerbrogade) Passed
+      - time: 09:51
+    - listitem:
+      - text: Århusgade (Østerbrogade) Passed
+      - time: 09:53
+    - listitem:
+      - text: Gustav Adolfs Gade (Østerbrogade) Passed
+      - time: 09:54
+    - listitem:
+      - text: Trianglen St. (Blegdamsvej) Next stop
+      - time: 09:56
+    - listitem:
+      - text: Irmingersgade (Blegdamsvej)
+      - time: 09:57
+    - listitem:
+      - text: Rigshospitalet Hovedindgang (Blegdamsvej)
+      - time: 09:58
+    - listitem:
+      - text: Rigshospitalet Syd (Blegdamsvej)
+      - time: 09:59
+    - listitem:
+      - text: Skt. Hans Torv (Blegdamsvej)
+      - time: 10:00
+    - listitem:
+      - text: Elmegade (Nørrebrogade)
+      - time: 10:02
+    - listitem:
+      - text: Prins Jørgens Gade (Stengade)
+      - time: 10:03
+    - listitem:
+      - text: Rantzausgade (Griffenfeldsgade)
+      - time: 10:04
+    - listitem:
+      - text: Åboulevard (H.C. Ørsteds Vej)
+      - time: 10:05
+    - listitem:
+      - text: Rosenørns Allé (H.C. Ørsteds Vej)
+      - time: 10:05
+    - listitem:
+      - text: Thorvaldsensvej (H.C. Ørsteds Vej)
+      - time: 10:06
+    - listitem:
+      - text: Kastanievej (H.C. Ørsteds Vej)
+      - time: 10:07
+    - listitem:
+      - text: Gammel Kongevej (Alhambravej)
+      - time: 10:08
+    - listitem:
+      - text: Frederiksberg Allé (Kingosgade)
+      - time: 10:09
+    - listitem:
+      - text: Vesterbrogade (Enghavevej)
+      - time: 10:10
+    - listitem:
+      - text: Tove Ditlevsens Plads (Enghavevej)
+      - time: 10:10
+    - listitem:
+      - text: Enghave Plads St. (Enghavevej)
+      - time: 10:12
+    - listitem:
+      - text: Sønder Boulevard (Enghavevej)
+      - time: 10:12
+    - listitem:
+      - text: Carlsberg St. (Vigerslev Allé)
+      - time: 10:14
+    - listitem:
+      - text: Vigerslev Allé (Sjælør Boulevard)
+      - time: 10:16
+    - listitem:
+      - text: Sankt Annæ Gymnasium (Sjælør Boulevard)
+      - time: 10:18
+    - listitem:
+      - text: Sjælør St. (Carl Jacobsens Vej)
+      - time: 10:19
+    - listitem:
+      - text: København Syd St. (Carl Jacobsens Vej)
+      - time: 10:22
+    - listitem:
+      - text: Carl Jacobsens Vej (Gammel Køge Landevej)
+      - time: 10:24
+    - listitem:
+      - text: København Syd St., Grønttorvet
+      - time: 10:25
+    - listitem:
+      - text: Gl.Køge Landevej (Folehaven)
+      - time: 10:26
+    - listitem:
+      - text: Retortvej (Folehaven)
+      - time: 10:28
+    - listitem:
+      - text: Hestehaven (Folehaven)
+      - time: 10:28
+    - listitem:
+      - text: Danhaven (Folehaven)
+      - time: 10:30
+    - listitem:
+      - text: Folehaven (Vigerslevvej)
+      - time: 10:31
+    - listitem:
+      - text: Vigerslevvej (Vigerslev Allé)
+      - time: 10:32
+    - listitem:
+      - text: Hvidovregade (Vigerslev Allé)
+      - time: 10:34
+    - listitem:
+      - text: Rosenhøj (Hvidovrevej)
+      - time: 10:35
+    - listitem:
+      - text: Arnold Nielsens Boulevard (Kettegård Allé)
+      - time: 10:37
+    - listitem:
+      - text: Hvidovre Hospital, Indgang Øst (Kettegård Allé)
+      - time: 10:39
+    - listitem:
+      - text: Hvidovre Hospital, Hovedindgangen (Kettegård Allé)
+      - time: 10:39
+    - listitem:
+      - text: Hvidovre Hospital. Kollegiet (Avedøre Havnevej)
+      - time: 10:40
+    - listitem:
+      - text: Avedøre Havnevej (Brostykkevej)
+      - time: 10:43
+    - listitem:
+      - text: Bredholtvej (Brostykkevej)
+      - time: 10:44
+    - listitem:
+      - text: Avedøre Skole (Brostykkevej)
+      - time: 10:44
+    - listitem:
+      - text: Avedørelejren (Avedøre Tværvej)
+      - time: 10:45
+    - listitem:
+      - text: Naverporten (Rebslagerporten)
+      - time: 10:47
+    - listitem:
+      - text: Pottemagerporten (Naverporten)
+      - time: 10:47
+    - listitem:
+      - text: Enghøj Gymnasium (Naverporten)
+      - time: 10:49
+    - listitem:
+      - text: Avedøre St.
+      - time: 10:51
+  - text: From the timetable
+  - paragraph:
+    - text: Timetable ·
+    - time: updated 09:54:29
+- alert
+- region "Notifications"

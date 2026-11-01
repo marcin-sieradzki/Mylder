@@ -1,0 +1,9 @@
+{
+  "journey": "reg-vehicle-tilted",
+  "pass": true,
+  "steps": [
+    "01-trip-by-link-tilted: trip by link, tilted (http://localhost:4313/en?map=14.00/55.67196797566569/12.575585059563263/-30.0/50.0&trip=bus.5C.32331e0e20.20260616.0707)",
+    "02-following-tilted: following, tilted (http://localhost:4313/en?map=14.00/55.67196797566569/12.575585059563263/-30.0/50.0&trip=bus.5C.32331e0e20.20260616.0707)",
+    "03-whole-line-tilted: whole line, tilted (http://localhost:4313/en?map=11.13/55.67554/12.55372/-30.0/50.0&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

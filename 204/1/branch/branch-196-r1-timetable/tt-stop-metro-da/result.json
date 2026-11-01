@@ -1,0 +1,7 @@
+{
+  "journey": "tt-stop-metro-da",
+  "pass": true,
+  "steps": [
+    "01-gammel-strand-st-departures: Gammel Strand St. departures (http://localhost:4411/da?stop=8603332)"
+  ]
+}

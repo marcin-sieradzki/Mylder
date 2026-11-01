@@ -1,0 +1,9 @@
+{
+  "journey": "tt-vehicle-bus",
+  "pass": true,
+  "steps": [
+    "01-bus-opened-from-the-map: bus opened from the map (http://localhost:4411/en?map=15.00/55.68869/12.55856&trip=bus.5C.fc7dea5397.20261101.0916)",
+    "02-following: following (http://localhost:4411/en?map=15.00/55.68869/12.55856&trip=bus.5C.fc7dea5397.20261101.0916)",
+    "03-following-15-s-later: following, 15 s later (http://localhost:4411/en?map=15.00/55.68869/12.55856&trip=bus.5C.fc7dea5397.20261101.0916)"
+  ]
+}

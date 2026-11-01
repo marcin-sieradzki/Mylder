@@ -1,0 +1,127 @@
+attempt on bus.5C.21d4082f45.20261101.0917: card Bus 5C mod Husum Torv Kun køreplan
+opened bus.5C.21d4082f45.20261101.0917 (aimed at bus.5C.21d4082f45.20261101.0917 5C to Husum Torv)
+panel text:
+5C
+5C
+mod Husum Torv
+Bus
+Følg
+Vis hele linjen
+Luk
+Kun køreplan
+
+Ingen livepositioner endnu; placeret efter køreplanen.
+
+Forsinkelse
+—
+Ukendt
+Sidst set
+—
+Ukendt
+Næste stop
+Ravnsborggade (Nørrebrogade)
+
+Ved Ravnsborggade (Nørrebrogade)
+
+Sundbyvester Plads (Amagerbrogade)
+Passeret
+09:17
+Smyrnavej (Amagerbrogade)
+Passeret
+09:19
+Tycho Brahes Allé (Amagerbrogade)
+Passeret
+09:20
+Øresundsvej (Amagerbrogade)
+Passeret
+09:22
+Tingvej (Amagerbrogade)
+Passeret
+09:23
+Amagerbro St. (Amagerbrogade)
+Passeret
+09:25
+Sønderport (Amager Boulevard)
+Passeret
+09:26
+Amagerfælledvej (Amager Boulevard)
+Passeret
+09:27
+Ørestads Boulevard (Amager Boulevard)
+Passeret
+09:29
+Klaksvigsgade (Langebro)
+Passeret
+09:30
+Polititorvet
+Passeret
+09:34
+Hovedbanegården, Tivoli (Bernstorffsgade)
+Passeret
+09:36
+Rådhuspladsen St. (H.C. Andersens Boulevard)
+Passeret
+09:39
+Teglgårdstræde (Nørre Voldgade)
+Passeret
+09:41
+Nørreport St. (Nørre Voldgade)
+Passeret
+09:43
+Nørre Farimagsgade (Frederiksborggade)
+Passeret
+09:44
+Ravnsborggade (Nørrebrogade)
+Næste stop
+09:46
+Elmegade (Nørrebrogade)
+09:47
+Kapelvej (Nørrebrogade)
+09:48
+Sjællandsgade (Nørrebrogade)
+09:49
+Nørrebros Runddel St. (Nørrebrogade)
+09:49
+Stefansgade (Nørrebrogade)
+09:51
+Nørrebrohallen (Nørrebrogade)
+09:52
+Nørrebro St. (Frederikssundsvej)
+09:54
+Glasvej (Frederikssundsvej)
+09:56
+Hulgårds Plads (Frederikssundsvej)
+09:58
+Bellahøj (Frederikssundsvej)
+09:59
+Hyrdevangen (Frederikssundsvej)
+10:00
+Brønshøj Torv (Frederikssundsvej)
+10:02
+Astrupvej (Frederikssundsvej)
+10:04
+Veksøvej (Frederikssundsvej)
+10:05
+Kobbelvænget (Frederikssundsvej)
+10:06
+Husumvej (Frederikssundsvej)
+10:07
+Husum Torv, Sløjfen (Sløjfen)
+10:09
+
+Køreplan · placeret 09:45:34
+---
+snapshot fetched 09:45:34
+stops (34): Sundbyvester Plads (Amagerbrogade)
+Passeret
+09:17 | Smyrnavej (Amagerbrogade)
+Passeret
+09:19 | Tycho Brahes Allé (Amagerbrogade)
+Passeret
+09:20 | Øresundsvej (Amagerbrogade)
+Passeret
+09:22 | Tingvej (Amagerbrogade)
+Passeret
+09:23
+source line match: Køreplan · placeret 09:45:34
+PASS tt-vehicle-da: 1 steps in .verify/branch-196-r1-timetable/tt-vehicle-da/

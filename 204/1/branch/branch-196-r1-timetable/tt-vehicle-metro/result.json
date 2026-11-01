@@ -1,0 +1,7 @@
+{
+  "journey": "tt-vehicle-metro",
+  "pass": true,
+  "steps": [
+    "01-metro-opened-from-the-map: metro opened from the map (http://localhost:4411/en?map=14.00/55.67162/12.56433&trip=metro.M4.1af3ce8e4f.20261101.0934)"
+  ]
+}

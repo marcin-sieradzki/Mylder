@@ -1,0 +1,11 @@
+{
+  "journey": "wd-unchanged-stop",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-departures: Nørreport departures (http://localhost:4312/en?stop=27532)",
+    "02-n-rreport-arrivals: Nørreport arrivals (http://localhost:4312/en?stop=27532&board=arrivals)",
+    "03-k-benhavn-syd-departures-from-the-board: København Syd departures from the board (http://localhost:4312/en?stop=8600783)",
+    "04-bella-center-metro-interval: Bella Center Metro interval (http://localhost:4312/en?stop=8603313)",
+    "05-n-rreport-in-danish: Nørreport in Danish (http://localhost:4312/da?stop=27532)"
+  ]
+}

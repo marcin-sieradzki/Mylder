@@ -1,0 +1,240 @@
+Afgange rows (30):
+5C / Husum Torv / Kun køreplan / Nu / 09:56 / — / Forsinkelse ukendt
+17 / København Syd St. / Kun køreplan / Nu / 09:56 / — / Forsinkelse ukendt
+17 / Vesterport St. / Kun køreplan / Nu / 09:56 / — / Forsinkelse ukendt
+31 / Vanløse Ålekistevej / Kun køreplan / Nu / 09:56 / — / Forsinkelse ukendt
+2A / Refshaleøen / Kun køreplan / ~2 min / 09:57 / — / Forsinkelse ukendt
+2A / Tingbjerg Gavlhusvej / Kun køreplan / ~3 min / 09:58 / — / Forsinkelse ukendt
+250S / Bagsværd St. / Kun køreplan / ~3 min / 09:58 / — / Forsinkelse ukendt
+5C / Københavns Lufthavn / Kun køreplan / ~4 min / 09:59 / — / Forsinkelse ukendt
+--- panel foot: Forsinkelse ukendt / Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det. / Fra køreplanen /  / Køreplan og positioner 09:54:29
+FAIL tt-stop-bus-da: 3 steps in .verify/main-196-r1-timetable/tt-stop-bus-da/
+expect(received).toContain(expected) // indexOf
+
+Expected substring: "Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu."
+Received string:    "Hovedbanegården, Tivoli
+2A
+5C
+17
+31
+37
+68
+250S
+Luk
+VED PERRONERNE NU·
+Intet køretøj af de viste typer holder ved perronerne nu.·
+Afgange
+Ankomster
+5C
+Husum Torv
+Kun køreplan
+Nu
+09:56
+—
+Forsinkelse ukendt
+17
+København Syd St.
+Kun køreplan
+Nu
+09:56
+—
+Forsinkelse ukendt
+17
+Vesterport St.
+Kun køreplan
+Nu
+09:56
+—
+Forsinkelse ukendt
+31
+Vanløse Ålekistevej
+Kun køreplan
+Nu
+09:56
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~2 min
+09:57
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~3 min
+09:58
+—
+Forsinkelse ukendt
+250S
+Bagsværd St.
+Kun køreplan
+~3 min
+09:58
+—
+Forsinkelse ukendt
+5C
+Københavns Lufthavn
+Kun køreplan
+~4 min
+09:59
+—
+Forsinkelse ukendt
+31
+Kastrup St.
+Kun køreplan
+~9 min
+10:04
+—
+Forsinkelse ukendt
+68
+Kigkurren (Sturlasgade)
+Kun køreplan
+~9 min
+10:04
+—
+Forsinkelse ukendt
+68
+Lyngby St. (Jernbanepladsen)
+Kun køreplan
+~9 min
+10:04
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~11 min
+10:06
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~11 min
+10:06
+—
+Forsinkelse ukendt
+5C
+Herlev Hospital
+Kun køreplan
+~11 min
+10:06
+—
+Forsinkelse ukendt
+5C
+Sundbyvester Plads
+Kun køreplan
+~11 min
+10:06
+—
+Forsinkelse ukendt
+5C
+Husum Torv
+Kun køreplan
+~18 min
+10:13
+—
+Forsinkelse ukendt
+5C
+Sundbyvester Plads
+Kun køreplan
+~18 min
+10:13
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~19 min
+10:14
+—
+Forsinkelse ukendt
+250S
+Dragør Stationsplads
+Kun køreplan
+~19 min
+10:14
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~21 min
+10:16
+—
+Forsinkelse ukendt
+17
+København Syd St.
+Kun køreplan
+~21 min
+10:16
+—
+Forsinkelse ukendt
+31
+Vanløse Ålekistevej
+Kun køreplan
+~21 min
+10:16
+—
+Forsinkelse ukendt
+17
+Vesterport St.
+Kun køreplan
+~22 min
+10:17
+—
+Forsinkelse ukendt
+68
+Gladsaxe Trafikplads Via Mellemvangen
+Kun køreplan
+~24 min
+10:19
+—
+Forsinkelse ukendt
+250S
+Bagsværd St.
+Kun køreplan
+~24 min
+10:19
+—
+Forsinkelse ukendt
+5C
+Københavns Lufthavn
+Kun køreplan
+~25 min
+10:20
+—
+Forsinkelse ukendt
+5C
+Herlev Hospital
+Kun køreplan
+~25 min
+10:20
+—
+Forsinkelse ukendt
+68
+Bella Center St. (Martha Christensens Vej)
+Kun køreplan
+~25 min
+10:20
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~28 min
+10:23
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~29 min
+10:24
+—
+Forsinkelse ukendt
+Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.
+Fra køreplanen·
+Køreplan og positioner 09:54:29"

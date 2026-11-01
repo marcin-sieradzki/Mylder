@@ -1,0 +1,7 @@
+{
+  "journey": "tt-vehicle-da",
+  "pass": true,
+  "steps": [
+    "01-bus-opened-from-the-map: bus opened from the map (http://localhost:4411/da?map=14.00/55.68705/12.56288&trip=bus.5C.21d4082f45.20261101.0917)"
+  ]
+}

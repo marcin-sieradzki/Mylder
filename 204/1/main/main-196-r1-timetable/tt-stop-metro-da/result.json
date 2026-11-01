@@ -1,0 +1,9 @@
+{
+  "journey": "tt-stop-metro-da",
+  "pass": false,
+  "error": "expect(received).toContain(expected) // indexOf\n\nExpected substring: \"Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu.\"\nReceived string:    \"Gammel Strand St.\nM3\nM4\nLuk\nVED PERRONERNE NU·\nIntet køretøj af de viste typer holder ved perronerne nu.·\nAfgange\nAnkomster\nM3\nKøbenhavn H (Metro)\nKun køreplan\nHvert 4. min·\nMetro: planlagte tider·\nM3\nKøbenhavn H (Metro)\nKun køreplan\nHvert 4. min·\nMetro: planlagte tider·\nM4\nKøbenhavn Syd St. (Metro)\nKun køreplan\nHvert 4. min·\nMetro: planlagte tider·\nM4\nOrientkaj St. (Metro)\nKun køreplan\nHvert 4. min·\nMetro: planlagte tider·\nNedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det.\nFra køreplanen·\nKøreplan og positioner 09:55:31\"",
+  "steps": [
+    "01-gammel-strand-st-departures: Gammel Strand St. departures (http://localhost:4411/da?stop=8603332)",
+    "02-failure: failure (http://localhost:4411/da?stop=8603332)"
+  ]
+}

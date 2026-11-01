@@ -1,0 +1,23 @@
+Departures rows (28):
+2A / Refshaleøen / Timetable only / Now / 09:48 / — / Delay unknown
+5C / Sundbyvester Plads / Timetable only / Now / 09:48 / — / Delay unknown
+68 / Bella Center St. (Martha Christensens Vej) / Timetable only / ~1 min / 09:49 / — / Delay unknown
+68 / Gladsaxe Trafikplads Via Mellemvangen / Timetable only / ~1 min / 09:49 / — / Delay unknown
+2A / Tingbjerg Gavlhusvej / Timetable only / ~2 min / 09:50 / — / Delay unknown
+250S / Dragør Stationsplads / Timetable only / ~6 min / 09:54 / — / Delay unknown
+5C / Husum Torv / Timetable only / ~8 min / 09:56 / — / Delay unknown
+17 / København Syd St. / Timetable only / ~8 min / 09:56 / — / Delay unknown
+--- panel foot: — / Delay unknown / Countdowns use the timetable alone; live times aren't connected yet. /  / Timetable · 09:46:39
+source line: Timetable · 09:46:39
+Arrivals rows (28):
+2A / From Tingbjerg, Gavlhusvej / Timetable only / Now / 09:48 / — / Delay unknown
+5C / From Husum Torv, Sløjfen / Timetable only / Now / 09:48 / — / Delay unknown
+68 / From Lyngby St. / Timetable only / ~1 min / 09:49 / — / Delay unknown
+68 / From Kigkurren / Timetable only / ~1 min / 09:49 / — / Delay unknown
+2A / From Refshaleøen / Timetable only / ~2 min / 09:50 / — / Delay unknown
+250S / From Bagsværd St., terminalen / Timetable only / ~6 min / 09:54 / — / Delay unknown
+5C / From Sundbyvester Plads / Timetable only / ~8 min / 09:56 / — / Delay unknown
+17 / From Vesterport St. / Timetable only / ~8 min / 09:56 / — / Delay unknown
+--- panel foot: — / Delay unknown / Countdowns use the timetable alone; live times aren't connected yet. /  / Timetable · 09:46:39
+source line: Timetable · 09:46:39
+PASS tt-stop-bus: 4 steps in .verify/branch-196-r1-timetable/tt-stop-bus/

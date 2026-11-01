@@ -1,0 +1,312 @@
+tap opened http://localhost:4411/en?map=14.00/55.71030/12.57761&stop=1082
+attempt on bus.1A.48c080f3c1.20261101.0855: http://localhost:4411/en?map=14.00/55.71030/12.57761&stop=1082
+tap opened http://localhost:4411/en?map=14.00/55.66818/12.58408&stop=807
+attempt on bus.5C.fc7dea5397.20261101.0916: http://localhost:4411/en?map=14.00/55.66818/12.58408&stop=807
+tap opened http://localhost:4411/en?map=14.00/55.68390/12.57096&stop=6584
+attempt on bus.5C.94268b9b1c.20261101.0913: http://localhost:4411/en?map=14.00/55.68390/12.57096&stop=6584
+tap opened http://localhost:4411/en?map=14.00/55.68820/12.52607&stop=1239
+attempt on bus.2A.9b5d39f98f.20261101.0924: http://localhost:4411/en?map=14.00/55.68820/12.52607&stop=1239
+tap opened http://localhost:4411/en?map=14.00/55.68973/12.55581&stop=1957
+attempt on bus.5C.fc7dea5397.20261101.0933: http://localhost:4411/en?map=14.00/55.68973/12.55581&stop=1957
+attempt on bus.1A.6ac794ea0d.20261101.0943: http://localhost:4411/en?map=14.00/55.70117/12.57744&trip=bus.1A.6ac794ea0d.20261101.0943
+opened bus.1A.6ac794ea0d.20261101.0943 (aimed at bus.1A.6ac794ea0d.20261101.0943 1A to Avedøre St.)
+panel text:
+1A
+1A
+to Avedøre St.
+Bus
+Follow
+Show whole line
+Close
+Timetable only
+
+No realtime for this trip today; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Trianglen St. (Blegdamsvej)
+
+Between Gustav Adolfs Gade (Østerbrogade) and Trianglen St. (Blegdamsvej)
+
+Hellerup St.
+Passed
+09:43
+Callisensvej (Strandvejen)
+Passed
+09:45
+Tuborg Boulevard (Strandvejen)
+Passed
+09:45
+Gl. Vartov Vej (Strandvejen)
+Passed
+09:47
+Strandøre (Strandvejen)
+Passed
+09:47
+Strandvænget (Strandvejen)
+Passed
+09:49
+Svanemøllen St. (Østerbrogade)
+Passed
+09:50
+Nygårdsvej (Østerbrogade)
+Passed
+09:50
+Poul Henningsens Plads St. (Østerbrogade)
+Passed
+09:51
+Århusgade (Østerbrogade)
+Passed
+09:53
+Gustav Adolfs Gade (Østerbrogade)
+Passed
+09:54
+Trianglen St. (Blegdamsvej)
+Next stop
+09:56
+Irmingersgade (Blegdamsvej)
+09:57
+Rigshospitalet Hovedindgang (Blegdamsvej)
+09:58
+Rigshospitalet Syd (Blegdamsvej)
+09:59
+Skt. Hans Torv (Blegdamsvej)
+10:00
+Elmegade (Nørrebrogade)
+10:02
+Prins Jørgens Gade (Stengade)
+10:03
+Rantzausgade (Griffenfeldsgade)
+10:04
+Åboulevard (H.C. Ørsteds Vej)
+10:05
+Rosenørns Allé (H.C. Ørsteds Vej)
+10:05
+Thorvaldsensvej (H.C. Ørsteds Vej)
+10:06
+Kastanievej (H.C. Ørsteds Vej)
+10:07
+Gammel Kongevej (Alhambravej)
+10:08
+Frederiksberg Allé (Kingosgade)
+10:09
+Vesterbrogade (Enghavevej)
+10:10
+Tove Ditlevsens Plads (Enghavevej)
+10:10
+Enghave Plads St. (Enghavevej)
+10:12
+Sønder Boulevard (Enghavevej)
+10:12
+Carlsberg St. (Vigerslev Allé)
+10:14
+Vigerslev Allé (Sjælør Boulevard)
+10:16
+Sankt Annæ Gymnasium (Sjælør Boulevard)
+10:18
+Sjælør St. (Carl Jacobsens Vej)
+10:19
+København Syd St. (Carl Jacobsens Vej)
+10:22
+Carl Jacobsens Vej (Gammel Køge Landevej)
+10:24
+København Syd St., Grønttorvet
+10:25
+Gl.Køge Landevej (Folehaven)
+10:26
+Retortvej (Folehaven)
+10:28
+Hestehaven (Folehaven)
+10:28
+Danhaven (Folehaven)
+10:30
+Folehaven (Vigerslevvej)
+10:31
+Vigerslevvej (Vigerslev Allé)
+10:32
+Hvidovregade (Vigerslev Allé)
+10:34
+Rosenhøj (Hvidovrevej)
+10:35
+Arnold Nielsens Boulevard (Kettegård Allé)
+10:37
+Hvidovre Hospital, Indgang Øst (Kettegård Allé)
+10:39
+Hvidovre Hospital, Hovedindgangen (Kettegård Allé)
+10:39
+Hvidovre Hospital. Kollegiet (Avedøre Havnevej)
+10:40
+Avedøre Havnevej (Brostykkevej)
+10:43
+Bredholtvej (Brostykkevej)
+10:44
+Avedøre Skole (Brostykkevej)
+10:44
+Avedørelejren (Avedøre Tværvej)
+10:45
+Naverporten (Rebslagerporten)
+10:47
+Pottemagerporten (Naverporten)
+10:47
+Enghøj Gymnasium (Naverporten)
+10:49
+Avedøre St.
+10:51
+From the timetable
+
+Timetable · updated 09:54:29
+---
+snapshot fetched 09:54:29
+FAIL tt-vehicle-phone: 2 steps in .verify/main-196-r1-timetable/tt-vehicle-phone/
+expect(received).toContain(expected) // indexOf
+
+Expected substring: "No live positions yet; placed from the timetable."
+Received string:    "1A
+1A
+to Avedøre St.
+Bus
+Follow
+Show whole line
+Close
+Timetable only·
+No realtime for this trip today; placed from the timetable.·
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Trianglen St. (Blegdamsvej)·
+Between Gustav Adolfs Gade (Østerbrogade) and Trianglen St. (Blegdamsvej)·
+Hellerup St.
+Passed
+09:43
+Callisensvej (Strandvejen)
+Passed
+09:45
+Tuborg Boulevard (Strandvejen)
+Passed
+09:45
+Gl. Vartov Vej (Strandvejen)
+Passed
+09:47
+Strandøre (Strandvejen)
+Passed
+09:47
+Strandvænget (Strandvejen)
+Passed
+09:49
+Svanemøllen St. (Østerbrogade)
+Passed
+09:50
+Nygårdsvej (Østerbrogade)
+Passed
+09:50
+Poul Henningsens Plads St. (Østerbrogade)
+Passed
+09:51
+Århusgade (Østerbrogade)
+Passed
+09:53
+Gustav Adolfs Gade (Østerbrogade)
+Passed
+09:54
+Trianglen St. (Blegdamsvej)
+Next stop
+09:56
+Irmingersgade (Blegdamsvej)
+09:57
+Rigshospitalet Hovedindgang (Blegdamsvej)
+09:58
+Rigshospitalet Syd (Blegdamsvej)
+09:59
+Skt. Hans Torv (Blegdamsvej)
+10:00
+Elmegade (Nørrebrogade)
+10:02
+Prins Jørgens Gade (Stengade)
+10:03
+Rantzausgade (Griffenfeldsgade)
+10:04
+Åboulevard (H.C. Ørsteds Vej)
+10:05
+Rosenørns Allé (H.C. Ørsteds Vej)
+10:05
+Thorvaldsensvej (H.C. Ørsteds Vej)
+10:06
+Kastanievej (H.C. Ørsteds Vej)
+10:07
+Gammel Kongevej (Alhambravej)
+10:08
+Frederiksberg Allé (Kingosgade)
+10:09
+Vesterbrogade (Enghavevej)
+10:10
+Tove Ditlevsens Plads (Enghavevej)
+10:10
+Enghave Plads St. (Enghavevej)
+10:12
+Sønder Boulevard (Enghavevej)
+10:12
+Carlsberg St. (Vigerslev Allé)
+10:14
+Vigerslev Allé (Sjælør Boulevard)
+10:16
+Sankt Annæ Gymnasium (Sjælør Boulevard)
+10:18
+Sjælør St. (Carl Jacobsens Vej)
+10:19
+København Syd St. (Carl Jacobsens Vej)
+10:22
+Carl Jacobsens Vej (Gammel Køge Landevej)
+10:24
+København Syd St., Grønttorvet
+10:25
+Gl.Køge Landevej (Folehaven)
+10:26
+Retortvej (Folehaven)
+10:28
+Hestehaven (Folehaven)
+10:28
+Danhaven (Folehaven)
+10:30
+Folehaven (Vigerslevvej)
+10:31
+Vigerslevvej (Vigerslev Allé)
+10:32
+Hvidovregade (Vigerslev Allé)
+10:34
+Rosenhøj (Hvidovrevej)
+10:35
+Arnold Nielsens Boulevard (Kettegård Allé)
+10:37
+Hvidovre Hospital, Indgang Øst (Kettegård Allé)
+10:39
+Hvidovre Hospital, Hovedindgangen (Kettegård Allé)
+10:39
+Hvidovre Hospital. Kollegiet (Avedøre Havnevej)
+10:40
+Avedøre Havnevej (Brostykkevej)
+10:43
+Bredholtvej (Brostykkevej)
+10:44
+Avedøre Skole (Brostykkevej)
+10:44
+Avedørelejren (Avedøre Tværvej)
+10:45
+Naverporten (Rebslagerporten)
+10:47
+Pottemagerporten (Naverporten)
+10:47
+Enghøj Gymnasium (Naverporten)
+10:49
+Avedøre St.
+10:51
+From the timetable·
+Timetable · updated 09:54:29"

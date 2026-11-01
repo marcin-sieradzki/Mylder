@@ -1,0 +1,184 @@
+tap opened http://localhost:4411/en?map=14.00/55.69113/12.55367&stop=1957
+attempt on bus.5C.c798be064c.20261101.0915: http://localhost:4411/en?map=14.00/55.69113/12.55367&stop=1957
+tap opened http://localhost:4411/en?map=14.00/55.72703/12.57598&stop=1464
+attempt on bus.1A.6ac794ea0d.20261101.0943: http://localhost:4411/en?map=14.00/55.72703/12.57598&stop=1464
+tap opened http://localhost:4411/en?map=14.00/55.73082/12.49910&stop=331
+attempt on bus.4A.a47257f88b.20261101.0904: http://localhost:4411/en?map=14.00/55.73082/12.49910&stop=331
+attempt on bus.1A.f0912368dd.20261101.0855: http://localhost:4411/en?map=14.00/55.72603/12.57666&trip=bus.164.ff955c5d3d.20261101.0935
+opened bus.164.ff955c5d3d.20261101.0935 (aimed at bus.1A.f0912368dd.20261101.0855 1A to Hellerup St.)
+panel text:
+164
+164
+to Ballerup St.
+Bus
+Follow
+Show whole line
+Close
+Timetable only
+
+No live positions yet; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Tuborg Boulevard (Strandvejen)
+
+Between Experimentarium (Philip Heymans Allè) and Tuborg Boulevard (Strandvejen)
+
+Oceankaj
+Passed
+09:35
+Kattegatvej (Baltikavej)
+Passed
+09:36
+Færgehavnsvej (Baltikavej)
+Passed
+09:37
+Baltikavej (Sundkrogsgade)
+Passed
+09:37
+Containervej (Sundkrogsgade)
+Passed
+09:38
+Orientkaj St. (Sundkrogsgade)
+Passed
+09:39
+Kalkbrænderihavnsgade (Sundkrogsgade)
+Passed
+09:39
+Strandvænget (Strandvejen)
+Passed
+09:43
+Strandøre (Strandvejen)
+Passed
+09:44
+Hellerup Skole (Dessaus Boulevard)
+Passed
+09:45
+Experimentarium (Philip Heymans Allè)
+Passed
+09:46
+Tuborg Boulevard (Strandvejen)
+Next stop
+09:48
+Callisensvej (Strandvejen)
+09:49
+Strandvejen (Hellerupvej)
+09:51
+Hellerup St.
+09:54
+Rygårds Allé (Hellerupvej)
+09:55
+Bernstorffsvej (Kildegårdsvej)
+09:56
+Niels Andersens Vej (Kildegårdsvej)
+09:58
+Gentofte Hospital (Kildegårdsvej)
+09:59
+Kildegårds Plads (Ellegårdsvej)
+09:59
+Kærvangen (Ellegårdsvej)
+10:01
+Vangede St. (Ellegårdsvej)
+10:02
+Vangedevej (Kildebakkegårds Allé)
+10:02
+Kiplings Allé (Kildebakkegårds Allé)
+10:03
+Kildekrogen (Kildebakkegårds Allé)
+10:04
+Hagavej (Kildebakkegårds Allé)
+10:05
+Kildegården (Kildebakkegårds Allé)
+10:06
+Buddinge Skole (Søborg Hovedgade)
+10:07
+Søborg Hovedgade (Vandtårnsvej)
+10:08
+Marienborg Allé (Vandtårnsvej)
+10:09
+Gladsaxe Sportshal (Vandtårnsvej)
+10:10
+Isbanevej (Gladsaxevej)
+10:13
+Gyngemosevej (Gladsaxevej)
+10:14
+Gladsaxevej (Vandtårnsvej)
+10:15
+Gladsaxe Møllevej (Vandtårnsvej)
+10:16
+Gladsaxe Trafikplads (Gladsaxe Møllevej)
+10:18
+Gladsaxe Kirke (Gladsaxe Møllevej)
+10:19
+Gladsaxe Skole (Klausdalsbrovej)
+10:20
+Egegården (Klausdalsbrovej)
+10:21
+HF 4. Juli 1917 (Klausdalsbrovej)
+10:22
+HF Smørmose (Klausdalsbrovej)
+10:24
+HF Klausdalsbro (Klausdalsbrovej)
+10:25
+Ingefærhaven (Klausdalsbrovej)
+10:26
+Peberhaven (Sennepshaven)
+10:27
+Havnsøvej (Sennepshaven)
+10:28
+Kildegårdskolen (Gammel Klausdalsbrovej)
+10:29
+Gammelgårdsvej (Gammel Klausdalsbrovej)
+10:29
+Højergårdsvej (Gammel Klausdalsbrovej)
+10:30
+Skinderskovvej (Klausdalsbrovej)
+10:31
+Hjorteengen, Tryg Forsikring (Klausdalsbrovej)
+10:33
+Ring 4 (Nordbuen)
+10:35
+Agernhaven (Nordbuen)
+10:37
+Nordbuen (Egebjergvej)
+10:38
+Egebjerg Bygade (Egebjergvej)
+10:38
+Egebjerghuse (Skovvej)
+10:39
+Skovmarksvej (Skovvej)
+10:40
+Skovvejens skole - vest (Skovvej)
+10:42
+Digterparken (Skovvej)
+10:43
+Ballerup Rådhus (Hold-an Vej)
+10:44
+Parkvej (Hold-an Vej)
+10:45
+Ballerup St. (Banegårdspladsen)
+10:47
+
+Timetable · placed 09:46:39
+---
+snapshot fetched 09:46:39
+stops (61): Oceankaj
+Passed
+09:35 | Kattegatvej (Baltikavej)
+Passed
+09:36 | Færgehavnsvej (Baltikavej)
+Passed
+09:37 | Baltikavej (Sundkrogsgade)
+Passed
+09:37 | Containervej (Sundkrogsgade)
+Passed
+09:38
+source line match: Timetable · placed 09:46:39
+sideways: {"pageScroll":412,"inner":412,"wide":["TIME.:379-417","TIME.:383-416","TIME.:387-424","TIME.:391-427"],"scrollers":[":410/410",":410/410"]}
+source line box {"x":17,"y":806.484375,"width":155.015625,"height":15}
+PASS tt-vehicle-phone: 2 steps in .verify/branch-196-r1-timetable/tt-vehicle-phone/

@@ -1,0 +1,362 @@
+attempt on bus.2A.9b5d39f98f.20261101.0932: card Bus 68 to Bella Center St. (Martha Christensens Vej) Timetable only
+opened bus.68.36a3ce3156.20261101.0859 (aimed at bus.2A.9b5d39f98f.20261101.0932 2A to Tingbjerg Gavlhusvej)
+panel text:
+68
+68
+to Bella Center St. (Martha Christensens Vej)
+Bus
+Follow
+Show whole line
+Close
+Timetable only
+
+No realtime for this trip today; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Hovedbanegården, Tivoli (Bernstorffsgade)
+
+Between Hovedbanegården, Tivoli (Bernstorffsgade) and Polititorvet
+
+Lyngby St. (Jernbanepladsen)
+Passed
+08:59
+Engelsborgskolen (Engelsborgvej)
+Passed
+09:00
+Nybrovej (Bagsværdvej)
+Passed
+09:01
+Stengården St. (Gammelmosevej)
+Passed
+09:08
+Bagsværdfortet (Møllemarken)
+Passed
+09:09
+Buddinge Hovedgade (Gladsaxe Møllevej)
+Passed
+09:09
+Kronhjortvej (Gladsaxe Møllevej)
+Passed
+09:10
+Gladsaxe Skole (Gladsaxe Møllevej)
+Passed
+09:11
+Gladsaxe Kirke (Gladsaxe Møllevej)
+Passed
+09:11
+Gladsaxe Trafikplads, terminalen
+Passed
+09:16
+Gladsaxe Møllevej (Vandtårnsvej)
+Passed
+09:17
+Rosenkæret (Vandtårnsvej)
+Passed
+09:17
+Vandtårnsvej (Gladsaxevej)
+Passed
+09:18
+Gyngemosevej (Gladsaxevej)
+Passed
+09:19
+Isbanevej (Gladsaxevej)
+Passed
+09:20
+Høje Gladsaxe (Gladsaxevej)
+Passed
+09:21
+Dalen (Gladsaxevej)
+Passed
+09:21
+Gladsaxevej (Mars Allé)
+Passed
+09:22
+Nordtoftevej (Mars Allé)
+Passed
+09:23
+Mars Allé (Grønnemose Allé)
+Passed
+09:24
+Søborg Magle Kirke (Maglegårds Allé)
+Passed
+09:25
+Moseskrænten (Maglegårds Allé)
+Passed
+09:25
+Mosesvinget (Horsebakken)
+Passed
+09:26
+Lærkebakken (Horsebakken)
+Passed
+09:27
+Hyrdevangen (Horsebakken)
+Passed
+09:28
+Utterslev Torv (Utterslevvej)
+Passed
+09:29
+Nordvestkirken (Utterslevvej)
+Passed
+09:29
+Bellahøj (Borups Allé)
+Passed
+09:31
+Hulgårdsvej (Borups Allé)
+Passed
+09:32
+Mågevej (Borups Allé)
+Passed
+09:33
+Fuglebakken St. (Borups Allé)
+Passed
+09:35
+Nordre Fasanvej (Borups Allé)
+Passed
+09:36
+Borups Plads (Borups Allé)
+Passed
+09:37
+Nuuks Plads St. (Rantzausgade)
+Passed
+09:39
+Skyttegade (Rantzausgade)
+Passed
+09:40
+Griffenfeldsgade (Rantzausgade)
+Passed
+09:41
+Blågårdsgade (Åboulevard)
+Passed
+09:42
+Peblinge Dossering (Åboulevard)
+Passed
+09:43
+Vester Farimagsgade (Gyldenløvesgade)
+Passed
+09:44
+Vesterport St. (Vester Farimagsgade)
+Passed
+09:46
+Vesterport St. (Hammerichsgade)
+Passed
+09:47
+Hovedbanegården, Tivoli (Bernstorffsgade)
+Next stop
+09:49
+Polititorvet
+09:50
+Otto Mønsteds Plads (Rysensteensgade)
+09:50
+Weidekampsgade (Klaksvigsgade)
+09:53
+Isafjordsgade (Njalsgade)
+09:54
+Bergthorasgade (Isafjordsgade)
+09:54
+Halfdansgade
+09:55
+Kigkurren (Sturlasgade)
+09:56
+Axel Heides Gade (Artillerivej)
+09:57
+Drechselsgade (Artillerivej)
+09:57
+Rundholtsvej (Artillerivej)
+09:58
+HF Sønderbro (Artillerivej)
+09:59
+Artillerivej (Vejlands Allé)
+10:01
+Center Boulevard (Vejlands Allé)
+10:02
+Bella Center St. (Martha Christensens Vej)
+10:04
+From the timetable
+
+Timetable · updated 09:48:59
+---
+snapshot fetched 09:48:59
+FAIL tt-vehicle-bus: 2 steps in .verify/main-196-r1-timetable/tt-vehicle-bus/
+expect(received).toContain(expected) // indexOf
+
+Expected substring: "No live positions yet; placed from the timetable."
+Received string:    "68
+68
+to Bella Center St. (Martha Christensens Vej)
+Bus
+Follow
+Show whole line
+Close
+Timetable only·
+No realtime for this trip today; placed from the timetable.·
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Hovedbanegården, Tivoli (Bernstorffsgade)·
+Between Hovedbanegården, Tivoli (Bernstorffsgade) and Polititorvet·
+Lyngby St. (Jernbanepladsen)
+Passed
+08:59
+Engelsborgskolen (Engelsborgvej)
+Passed
+09:00
+Nybrovej (Bagsværdvej)
+Passed
+09:01
+Stengården St. (Gammelmosevej)
+Passed
+09:08
+Bagsværdfortet (Møllemarken)
+Passed
+09:09
+Buddinge Hovedgade (Gladsaxe Møllevej)
+Passed
+09:09
+Kronhjortvej (Gladsaxe Møllevej)
+Passed
+09:10
+Gladsaxe Skole (Gladsaxe Møllevej)
+Passed
+09:11
+Gladsaxe Kirke (Gladsaxe Møllevej)
+Passed
+09:11
+Gladsaxe Trafikplads, terminalen
+Passed
+09:16
+Gladsaxe Møllevej (Vandtårnsvej)
+Passed
+09:17
+Rosenkæret (Vandtårnsvej)
+Passed
+09:17
+Vandtårnsvej (Gladsaxevej)
+Passed
+09:18
+Gyngemosevej (Gladsaxevej)
+Passed
+09:19
+Isbanevej (Gladsaxevej)
+Passed
+09:20
+Høje Gladsaxe (Gladsaxevej)
+Passed
+09:21
+Dalen (Gladsaxevej)
+Passed
+09:21
+Gladsaxevej (Mars Allé)
+Passed
+09:22
+Nordtoftevej (Mars Allé)
+Passed
+09:23
+Mars Allé (Grønnemose Allé)
+Passed
+09:24
+Søborg Magle Kirke (Maglegårds Allé)
+Passed
+09:25
+Moseskrænten (Maglegårds Allé)
+Passed
+09:25
+Mosesvinget (Horsebakken)
+Passed
+09:26
+Lærkebakken (Horsebakken)
+Passed
+09:27
+Hyrdevangen (Horsebakken)
+Passed
+09:28
+Utterslev Torv (Utterslevvej)
+Passed
+09:29
+Nordvestkirken (Utterslevvej)
+Passed
+09:29
+Bellahøj (Borups Allé)
+Passed
+09:31
+Hulgårdsvej (Borups Allé)
+Passed
+09:32
+Mågevej (Borups Allé)
+Passed
+09:33
+Fuglebakken St. (Borups Allé)
+Passed
+09:35
+Nordre Fasanvej (Borups Allé)
+Passed
+09:36
+Borups Plads (Borups Allé)
+Passed
+09:37
+Nuuks Plads St. (Rantzausgade)
+Passed
+09:39
+Skyttegade (Rantzausgade)
+Passed
+09:40
+Griffenfeldsgade (Rantzausgade)
+Passed
+09:41
+Blågårdsgade (Åboulevard)
+Passed
+09:42
+Peblinge Dossering (Åboulevard)
+Passed
+09:43
+Vester Farimagsgade (Gyldenløvesgade)
+Passed
+09:44
+Vesterport St. (Vester Farimagsgade)
+Passed
+09:46
+Vesterport St. (Hammerichsgade)
+Passed
+09:47
+Hovedbanegården, Tivoli (Bernstorffsgade)
+Next stop
+09:49
+Polititorvet
+09:50
+Otto Mønsteds Plads (Rysensteensgade)
+09:50
+Weidekampsgade (Klaksvigsgade)
+09:53
+Isafjordsgade (Njalsgade)
+09:54
+Bergthorasgade (Isafjordsgade)
+09:54
+Halfdansgade
+09:55
+Kigkurren (Sturlasgade)
+09:56
+Axel Heides Gade (Artillerivej)
+09:57
+Drechselsgade (Artillerivej)
+09:57
+Rundholtsvej (Artillerivej)
+09:58
+HF Sønderbro (Artillerivej)
+09:59
+Artillerivej (Vejlands Allé)
+10:01
+Center Boulevard (Vejlands Allé)
+10:02
+Bella Center St. (Martha Christensens Vej)
+10:04
+From the timetable·
+Timetable · updated 09:48:59"

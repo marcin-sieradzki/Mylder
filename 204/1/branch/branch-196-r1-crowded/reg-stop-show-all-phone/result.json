@@ -1,0 +1,7 @@
+{
+  "journey": "reg-stop-show-all-phone",
+  "pass": true,
+  "steps": [
+    "01-six-cards-on-a-phone: six cards on a phone (http://localhost:4411/en?stop=8600626)"
+  ]
+}

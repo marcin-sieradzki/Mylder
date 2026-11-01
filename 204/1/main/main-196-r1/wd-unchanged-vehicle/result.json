@@ -1,0 +1,8 @@
+{
+  "journey": "wd-unchanged-vehicle",
+  "pass": true,
+  "steps": [
+    "01-bus-panel-on-the-recording: bus panel on the recording (http://localhost:4312/en?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707)",
+    "02-metro-panel-on-the-recording: metro panel on the recording (http://localhost:4312/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)"
+  ]
+}

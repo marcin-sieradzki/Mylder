@@ -1,0 +1,240 @@
+Departures rows (30):
+5C / Husum Torv / Timetable only / ~1 min / 09:56 / — / Delay unknown
+17 / København Syd St. / Timetable only / ~1 min / 09:56 / — / Delay unknown
+17 / Vesterport St. / Timetable only / ~1 min / 09:56 / — / Delay unknown
+31 / Vanløse Ålekistevej / Timetable only / ~1 min / 09:56 / — / Delay unknown
+2A / Refshaleøen / Timetable only / ~2 min / 09:57 / — / Delay unknown
+2A / Tingbjerg Gavlhusvej / Timetable only / ~3 min / 09:58 / — / Delay unknown
+250S / Bagsværd St. / Timetable only / ~3 min / 09:58 / — / Delay unknown
+5C / Københavns Lufthavn / Timetable only / ~4 min / 09:59 / — / Delay unknown
+--- panel foot: Delay unknown / Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. / From the timetable /  / Timetable and positions 09:54:29
+FAIL tt-stop-bus: 3 steps in .verify/main-196-r1-timetable/tt-stop-bus/
+expect(received).toContain(expected) // indexOf
+
+Expected substring: "Countdowns use the timetable alone; live times aren't connected yet."
+Received string:    "Hovedbanegården, Tivoli
+2A
+5C
+17
+31
+37
+68
+250S
+Close
+AT THE PLATFORMS NOW·
+No vehicle of the types shown is standing at the platforms now.·
+Departures
+Arrivals
+5C
+Husum Torv
+Timetable only
+~1 min
+09:56
+—
+Delay unknown
+17
+København Syd St.
+Timetable only
+~1 min
+09:56
+—
+Delay unknown
+17
+Vesterport St.
+Timetable only
+~1 min
+09:56
+—
+Delay unknown
+31
+Vanløse Ålekistevej
+Timetable only
+~1 min
+09:56
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~2 min
+09:57
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~3 min
+09:58
+—
+Delay unknown
+250S
+Bagsværd St.
+Timetable only
+~3 min
+09:58
+—
+Delay unknown
+5C
+Københavns Lufthavn
+Timetable only
+~4 min
+09:59
+—
+Delay unknown
+31
+Kastrup St.
+Timetable only
+~9 min
+10:04
+—
+Delay unknown
+68
+Kigkurren (Sturlasgade)
+Timetable only
+~9 min
+10:04
+—
+Delay unknown
+68
+Lyngby St. (Jernbanepladsen)
+Timetable only
+~9 min
+10:04
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~11 min
+10:06
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~11 min
+10:06
+—
+Delay unknown
+5C
+Herlev Hospital
+Timetable only
+~11 min
+10:06
+—
+Delay unknown
+5C
+Sundbyvester Plads
+Timetable only
+~11 min
+10:06
+—
+Delay unknown
+5C
+Husum Torv
+Timetable only
+~18 min
+10:13
+—
+Delay unknown
+5C
+Sundbyvester Plads
+Timetable only
+~18 min
+10:13
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~19 min
+10:14
+—
+Delay unknown
+250S
+Dragør Stationsplads
+Timetable only
+~19 min
+10:14
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~21 min
+10:16
+—
+Delay unknown
+17
+København Syd St.
+Timetable only
+~21 min
+10:16
+—
+Delay unknown
+31
+Vanløse Ålekistevej
+Timetable only
+~21 min
+10:16
+—
+Delay unknown
+17
+Vesterport St.
+Timetable only
+~22 min
+10:17
+—
+Delay unknown
+68
+Gladsaxe Trafikplads Via Mellemvangen
+Timetable only
+~24 min
+10:19
+—
+Delay unknown
+250S
+Bagsværd St.
+Timetable only
+~24 min
+10:19
+—
+Delay unknown
+5C
+Københavns Lufthavn
+Timetable only
+~25 min
+10:20
+—
+Delay unknown
+5C
+Herlev Hospital
+Timetable only
+~25 min
+10:20
+—
+Delay unknown
+68
+Bella Center St. (Martha Christensens Vej)
+Timetable only
+~25 min
+10:20
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~28 min
+10:23
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~29 min
+10:24
+—
+Delay unknown
+Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so.
+From the timetable·
+Timetable and positions 09:54:29"

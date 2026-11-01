@@ -1,0 +1,15 @@
+{
+  "journey": "reg-stop",
+  "pass": true,
+  "steps": [
+    "01-map-at-sterport-st-: map at Østerport St. (http://localhost:4313/en?map=15.00/55.6925/12.58779)",
+    "02--sterport-opened-from-its-marker: Østerport opened from its marker (http://localhost:4313/en?map=15.00/55.69250/12.58779&stop=8600650)",
+    "03-n-rreport-none-standing: Nørreport, none standing (http://localhost:4313/en?stop=27532)",
+    "04-n-rreport-arrivals: Nørreport arrivals (http://localhost:4313/en?stop=27532&board=arrivals)",
+    "05-k-benhavn-syd-arrivals-from-the-board: København Syd arrivals from the board (http://localhost:4313/en?stop=8600783&board=arrivals)",
+    "06-hiller-d-no-arrivals: Hillerød no arrivals (http://localhost:4313/en?stop=8600683&board=arrivals)",
+    "07-language-switched-panel-kept: language switched, panel kept (http://localhost:4313/da?stop=27532)",
+    "08-danish-arrivals: Danish arrivals (http://localhost:4313/da?stop=27532&board=arrivals)",
+    "09-stop-not-found: stop not found (http://localhost:4313/en?stop=nowhere)"
+  ]
+}

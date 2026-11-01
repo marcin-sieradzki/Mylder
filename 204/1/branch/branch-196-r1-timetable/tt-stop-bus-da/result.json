@@ -1,0 +1,10 @@
+{
+  "journey": "tt-stop-bus-da",
+  "pass": true,
+  "steps": [
+    "01-map-at-hovedbaneg-rden-tivoli: map at Hovedbanegården, Tivoli (http://localhost:4411/da?map=17.00/55.67259/12.56661)",
+    "02-stop-opened-from-its-marker: stop opened from its marker (http://localhost:4411/da?map=17.00/55.67259/12.56661&stop=10842)",
+    "03-departures-note-and-source-line: departures, note and source line (http://localhost:4411/da?map=17.00/55.67259/12.56661&stop=10842)",
+    "04-arrivals-note-and-source-line: arrivals, note and source line (http://localhost:4411/da?map=17.00/55.67259/12.56661&stop=10842&board=arrivals)"
+  ]
+}

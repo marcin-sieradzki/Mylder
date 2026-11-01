@@ -1,0 +1,5 @@
+bus bus.5C.32331e0e20.20260616.0707 state estimated: source line(s): ["Rejseplanen · position 07:20:00 · times from the timetable"]
+bus facts: 5C / 5C / to Husum Torv / Bus / Follow / Show whole line / Close / Estimated /  / Position computed by Rejseplanen /  / Delay / +2 min / 2 min late / Last seen / — / Unknown / Next stop / Klaksvigsgade (Langebro) /  / Between Ørestads Boulevard (Amager Boulevard) and Klaksvigsgade (Langebro) / 
+metro metro.M1.7f21f99145.20260616.0703 state timetable-only: source line(s): ["Timetable · updated 07:22:02"]
+metro facts: M1 / M1 / to Vestamager St. (Metro) / Metro / Follow / Show whole line / Close / Timetable only /  / Runs to an interval /  / Delay / Runs to an interval / Last seen / — / Unknown / Next stop / Bella Center St. (Metro) /  / At Bella Center St. (Metro) /  / Every 4 min
+PASS wd-unchanged-vehicle: 2 steps in .verify/branch-196-r1/wd-unchanged-vehicle/

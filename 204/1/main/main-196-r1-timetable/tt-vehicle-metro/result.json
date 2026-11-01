@@ -1,0 +1,9 @@
+{
+  "journey": "tt-vehicle-metro",
+  "pass": false,
+  "error": "expect(received).toBeTruthy()\n\nReceived: null",
+  "steps": [
+    "01-metro-opened-from-the-map: metro opened from the map (http://localhost:4411/en?map=14.00/55.69750/12.57651&trip=metro.M4.1af3ce8e4f.20261101.0946)",
+    "02-failure: failure (http://localhost:4411/en?map=14.00/55.69750/12.57651&trip=metro.M4.1af3ce8e4f.20261101.0946)"
+  ]
+}

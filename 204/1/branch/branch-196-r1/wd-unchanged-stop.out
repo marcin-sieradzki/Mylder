@@ -1,0 +1,8 @@
+Nørreport departures foot: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. / From the timetable / Timetable and positions 07:21:02
+first rows: E / Køge St. / Live / — / Unknown / Timetabled 07:27 / 07:27 / 07:29 / +2 min / 2 min late | 5C / Husum Torv / Estimated / — / Unknown / Timetabled 07:36 / 07:36 / ~07:38 / +2 min / 2 min late | 5C / Sundbyvester Plads / Estimated / — / Unknown / ~07:39 / On time | A / Hillerød St. / Live / — / Unknown / Timetabled 07:36 / 07:36 / 07:40 / +4 min / 4 min late
+Nørreport arrivals foot: Countdowns use the timetable, moved by the delay the positions show where a trip has one; the rest use the timetable alone, and say so. / From the timetable / Timetable and positions 07:21:02
+København Syd departures foot: 2 min late / Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. / Rejseplanen · departures 07:21:27
+Bella Center rows: M1 / Vestamager St. (Metro) / Timetable only / Every 4 min /  / Metro: planned times
+foot: Countdowns use Rejseplanen's expected times where it has them; the rest use the timetable, and say so. / From the timetable / Timetable and positions 07:21:02
+Nørreport da foot: Nedtællinger bruger Rejseplanens forventede tider, hvor de findes; resten bruger køreplanen og siger det. / Fra køreplanen / Køreplan og positioner 07:21:02
+PASS wd-unchanged-stop: 5 steps in .verify/branch-196-r1/wd-unchanged-stop/
