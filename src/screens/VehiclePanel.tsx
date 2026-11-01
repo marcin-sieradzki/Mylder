@@ -184,13 +184,21 @@ function Detail({ answer, trip, network, noPositions, lang, words }: DetailProps
   const timezone = timezoneOf(network)
   const cancelled = answer.cancelled === true
   const interval = runsToInterval(answer)
-  const sentence = stateSentence({ detail: answer, trip, state, timezone, words, noPositions })
   // The snapshot's trip, where its place is along the answer's calls: not while the trip's detail
   // shows them another planned trip's, until the run files the vehicle under it.
   const along = answer.planned === undefined ? trip : undefined
   const next = nextCallOf(answer, along, now)
+  const sentence = stateSentence({
+    detail: answer,
+    trip,
+    state,
+    timezone,
+    words,
+    noPositions,
+    next,
+  })
   const live = state === 'live' || state === 'ageing'
-  const delaySeconds = shownDelayOf(answer, trip)
+  const delaySeconds = shownDelayOf(answer, trip, next)
   // The messages listed now, from the trip's detail, and the moment it was called.
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   const messages =
@@ -285,7 +293,9 @@ function Detail({ answer, trip, network, noPositions, lang, words }: DetailProps
  * call or from the timetable shifted by the snapshot's delay. "Rejseplanen · position 08:14:05 ·
  * times 08:14:20", the times reading as Rejseplanen's after the position; the timetable's alone
  * keeps its own name and the snapshot's time. On a source with no positions, such as the
- * timetable, the place and the times are both the timetable's: "Timetable · placed 08:14:05".
+ * timetable, the place and the times are both the timetable's: "Timetable · placed 08:14:05"; or,
+ * for a trip SIRI-ET has sent an update for, the timetable's moved by it, with the time of its
+ * latest: "Timetable and Rejseplanen's delays · updated 08:14:05".
  */
 function sourcesOf(
   answer: TripDetail,
@@ -296,7 +306,10 @@ function sourcesOf(
 ): readonly [SourceLineSource] | readonly [SourceLineSource, SourceLineSource] {
   const at = (moment: number) => clockTime(moment, timezone, { seconds: true })
   if (noPositions) {
-    return [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
+    const delays = answer.source.kind === 'timetable' ? answer.source.delays : undefined
+    return delays === undefined
+      ? [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
+      : [{ name: words.delaysSource, time: at(delays) }]
   }
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   if (trip?.seen === undefined) {

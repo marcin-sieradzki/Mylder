@@ -662,7 +662,8 @@ export function tripDetailOf(
     ...(interval ? { interval } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
-    source: live?.updated === undefined ? FROM_TIMETABLE : { kind: 'timetable', delays: live.updated },
+    source:
+      live?.updated === undefined ? FROM_TIMETABLE : { kind: 'timetable', delays: live.updated },
     calls: trip.calls.map((call, index) => ({
       index,
       stop: platforms[call.platform].id,
