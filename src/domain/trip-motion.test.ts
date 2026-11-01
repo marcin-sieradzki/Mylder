@@ -245,6 +245,15 @@ describe('delaySteps and expectedTimes', () => {
     expect(delaySteps(calls)).toEqual([])
   })
 
+  it('leaves out a call whose delay is the step before’s, which times the same', () => {
+    const repeated: Call[] = [
+      ...updated.slice(0, 2),
+      { ...updated[2], expectedArrival: minutes(14), expectedDeparture: minutes(14) },
+    ]
+    expect(delaySteps(repeated)).toEqual(delaySteps(updated))
+    expect(expectedTimes(calls, { steps: delaySteps(repeated) })).toEqual(timedCalls(repeated))
+  })
+
   it('times each call by its steps, as the update’s calls are timed', () => {
     expect(expectedTimes(calls, { delay: -60, steps: delaySteps(updated) })).toEqual(
       timedCalls(updated),

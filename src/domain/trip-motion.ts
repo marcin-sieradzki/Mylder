@@ -161,12 +161,17 @@ export function timedCalls(calls: readonly Call[], delay?: number): TimedCall[] 
  */
 export type DelayStep = readonly [index: number, delay: number]
 
-/** The steps of an update's calls: each call with an expected time, and its delay there. */
+/**
+ * The steps of an update's calls: each call with an expected time whose delay differs from the
+ * step before's, and its delay there. The calls left out time the same by the step before them.
+ */
 export function delaySteps(calls: readonly Call[]): DelayStep[] {
-  return calls.flatMap((call, index) => {
+  const steps: DelayStep[] = []
+  calls.forEach((call, index) => {
     const delay = delayAt(call)
-    return delay === undefined ? [] : [[index, delay / 1000] as const]
+    if (delay !== undefined && delay / 1000 !== steps.at(-1)?.[1]) steps.push([index, delay / 1000])
   })
+  return steps
 }
 
 /**
