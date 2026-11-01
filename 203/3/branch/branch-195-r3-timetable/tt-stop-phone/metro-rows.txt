@@ -1,0 +1,6 @@
+[
+  "M3\nKøbenhavn H (Metro)\nTimetable only\nEvery 4 min\n\nMetro: planned times",
+  "M3\nKøbenhavn H (Metro)\nTimetable only\nEvery 4 min\n\nMetro: planned times",
+  "M4\nKøbenhavn Syd St. (Metro)\nTimetable only\nEvery 4 min\n\nMetro: planned times",
+  "M4\nOrientkaj St. (Metro)\nTimetable only\nEvery 4 min\n\nMetro: planned times"
+]

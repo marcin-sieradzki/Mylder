@@ -1,0 +1,8 @@
+{
+  "journey": "map-card",
+  "pass": true,
+  "steps": [
+    "01-centred-on-trip: centred on trip (http://localhost:4307/en?map=15.00/55.66929/12.58101)",
+    "02-hover-card: hover card (http://localhost:4307/en?map=15.00/55.66929/12.58101)"
+  ]
+}

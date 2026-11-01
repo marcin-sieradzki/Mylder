@@ -1,0 +1,9 @@
+{
+  "journey": "lang-switch",
+  "pass": true,
+  "steps": [
+    "01-english: english (http://localhost:4307/en?line=5C)",
+    "02-dansk: dansk (http://localhost:4307/da?line=5C)",
+    "03-english-again: english again (http://localhost:4307/en?line=5C)"
+  ]
+}

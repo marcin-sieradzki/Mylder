@@ -1,0 +1,8 @@
+{
+  "journey": "tt-ending-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-en-notice-and-banner: phone en notice and banner (http://localhost:4403/en)",
+    "02-phone-da-notice-and-banner: phone da notice and banner (http://localhost:4403/da)"
+  ]
+}

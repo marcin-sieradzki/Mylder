@@ -1,0 +1,32 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  const v = page.locator('[data-vehicles]')
+  await expect(v).not.toHaveAttribute('data-vehicles', '0', { timeout: 20000 })
+  await expect(v).toHaveAttribute('data-heading', '0')
+  const scale = page.getByText(/\d+\s(m|km)$/)
+  await step('flat')
+  const vp = page.viewportSize()!
+  const x = vp.width / 2 + 150, y = vp.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down({ button: 'right' })
+  await page.mouse.move(x + 150, y, { steps: 10 })
+  await page.mouse.up({ button: 'right' })
+  await expect(v).not.toHaveAttribute('data-heading', '0')
+  await expect(v).toHaveAttribute('data-tilt', '0')
+  await expect(scale).toBeVisible()
+  const heading = await v.getAttribute('data-heading')
+  await step('turned by right-drag')
+  await page.mouse.move(x, y)
+  await page.mouse.down({ button: 'right' })
+  await page.mouse.move(x, y - 60, { steps: 10 })
+  await page.mouse.up({ button: 'right' })
+  await expect(v).not.toHaveAttribute('data-tilt', '0')
+  await expect(v).toHaveAttribute('data-heading', heading!)
+  await expect(scale).toBeHidden()
+  await step('tilted by right-drag')
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  await expect(async () => { await page.keyboard.press('Shift+ArrowDown'); await expect(scale).toBeVisible({ timeout: 500 }) }).toPass({ timeout: 15000 })
+  await expect(v).toHaveAttribute('data-tilt', '0')
+  await step('flat again')
+}

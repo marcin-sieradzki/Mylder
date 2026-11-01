@@ -1,0 +1,10 @@
+{
+  "journey": "map-tilted-dot-tap",
+  "pass": false,
+  "error": "no tooltip within 40 px of the middle",
+  "steps": [
+    "01-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4307/en?map=15.00/55.66929/12.58101)",
+    "02-tilted-and-turned: tilted and turned (http://localhost:4307/en?map=15.00/55.66929/12.58101/-45.0/40.0)",
+    "03-failure: failure (http://localhost:4307/en?map=15.00/55.66929/12.58101/-45.0/40.0)"
+  ]
+}

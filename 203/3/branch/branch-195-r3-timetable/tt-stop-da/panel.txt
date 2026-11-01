@@ -1,0 +1,228 @@
+Hovedbanegården, Tivoli
+2A
+5C
+17
+31
+37
+68
+250S
+Luk
+VED PERRONERNE NU
+
+Intet køretøj af de viste typer holder ved perronerne nu.
+
+Afgange
+Ankomster
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~1 min
+10:39
+—
+Forsinkelse ukendt
+5C
+Københavns Lufthavn
+Kun køreplan
+~2 min
+10:40
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~3 min
+10:41
+—
+Forsinkelse ukendt
+5C
+Husum Torv
+Kun køreplan
+~3 min
+10:41
+—
+Forsinkelse ukendt
+250S
+Bagsværd St.
+Kun køreplan
+~3 min
+10:41
+—
+Forsinkelse ukendt
+31
+Kastrup St.
+Kun køreplan
+~6 min
+10:44
+—
+Forsinkelse ukendt
+5C
+Sundbyvester Plads
+Kun køreplan
+~8 min
+10:46
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~9 min
+10:47
+—
+Forsinkelse ukendt
+5C
+Herlev Hospital
+Kun køreplan
+~9 min
+10:47
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~11 min
+10:49
+—
+Forsinkelse ukendt
+68
+Gladsaxe Trafikplads Via Mellemvangen
+Kun køreplan
+~11 min
+10:49
+—
+Forsinkelse ukendt
+68
+Bella Center St. (Martha Christensens Vej)
+Kun køreplan
+~14 min
+10:52
+—
+Forsinkelse ukendt
+5C
+Sundbyvester Plads
+Kun køreplan
+~15 min
+10:53
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~16 min
+10:54
+—
+Forsinkelse ukendt
+5C
+Husum Torv
+Kun køreplan
+~16 min
+10:54
+—
+Forsinkelse ukendt
+250S
+Dragør Stationsplads
+Kun køreplan
+~17 min
+10:55
+—
+Forsinkelse ukendt
+17
+København Syd St.
+Kun køreplan
+~18 min
+10:56
+—
+Forsinkelse ukendt
+31
+Vanløse Ålekistevej
+Kun køreplan
+~18 min
+10:56
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~19 min
+10:57
+—
+Forsinkelse ukendt
+17
+Vesterport St.
+Kun køreplan
+~19 min
+10:57
+—
+Forsinkelse ukendt
+5C
+Københavns Lufthavn
+Kun køreplan
+~21 min
+10:59
+—
+Forsinkelse ukendt
+5C
+Herlev Hospital
+Kun køreplan
+~23 min
+11:01
+—
+Forsinkelse ukendt
+250S
+Bagsværd St.
+Kun køreplan
+~23 min
+11:01
+—
+Forsinkelse ukendt
+2A
+Tingbjerg Gavlhusvej
+Kun køreplan
+~24 min
+11:02
+—
+Forsinkelse ukendt
+31
+Kastrup St.
+Kun køreplan
+~26 min
+11:04
+—
+Forsinkelse ukendt
+68
+Lyngby St. (Jernbanepladsen)
+Kun køreplan
+~26 min
+11:04
+—
+Forsinkelse ukendt
+2A
+Refshaleøen
+Kun køreplan
+~28 min
+11:06
+—
+Forsinkelse ukendt
+5C
+Sundbyvester Plads
+Kun køreplan
+~28 min
+11:06
+—
+Forsinkelse ukendt
+5C
+Husum Torv
+Kun køreplan
+~29 min
+11:07
+—
+Forsinkelse ukendt
+68
+Kigkurren (Sturlasgade)
+Kun køreplan
+~29 min
+11:07
+—
+Forsinkelse ukendt
+Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu.
+
+Køreplan · 10:37:26

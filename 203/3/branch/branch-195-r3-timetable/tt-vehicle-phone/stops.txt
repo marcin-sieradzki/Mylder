@@ -1,0 +1,17 @@
+[
+  "Vigerslevvej (Vigerslev Allé)\nPassed\n10:32",
+  "Vigerslev Kirke (Vigerslev Allé)\nPassed\n10:33",
+  "Gladbovej (Vigerslev Allé)\nPassed\n10:33",
+  "Vigerslev Allé St. (Vigerslev Allé)\nPassed\n10:34",
+  "Fengersvej (Vigerslev Allé)\nPassed\n10:35",
+  "Vigerslev Allé Skole (Vigerslev Allé)\nPassed\n10:36",
+  "Peder Hjorts Vej (Vigerslev Allé)\nPassed\n10:37",
+  "Toftegårds Plads (Vigerslev Allé)\nNext stop\n10:38",
+  "Sjælør Boulevard (Vigerslev Allé)\n10:39",
+  "Carlsberg St. (Vigerslev Allé)\n10:41",
+  "Knud Lavards Gade (Ingerslevsgade)\n10:43",
+  "Dybbølsbro St. (Ingerslevsgade)\n10:44",
+  "Hovedbanegården (Tietgensgade)\n10:47",
+  "Stormgade (H.C. Andersens Boulevard)\n10:49",
+  "Rådhuspladsen St. (H.C. Andersens Boulevard)\n10:51"
+]

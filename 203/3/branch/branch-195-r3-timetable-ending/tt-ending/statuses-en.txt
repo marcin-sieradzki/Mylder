@@ -1,0 +1,4 @@
+[
+  "The timetable ends on 26 August. Without a new one, the map has no trips after that.",
+  "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."
+]

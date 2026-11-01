@@ -1,0 +1,7 @@
+{
+  "journey": "tt-banner-en",
+  "pass": true,
+  "steps": [
+    "01-map-on-the-timetable-source: map on the timetable source (http://localhost:4403/en)"
+  ]
+}

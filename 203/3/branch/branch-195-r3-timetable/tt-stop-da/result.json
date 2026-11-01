@@ -1,0 +1,11 @@
+{
+  "journey": "tt-stop-da",
+  "pass": true,
+  "steps": [
+    "01-centred-on-hovedbaneg-rden-tivoli: centred on Hovedbanegården, Tivoli (http://localhost:4403/da?map=17.00/55.67259/12.56661)",
+    "02-stop-panel-open: stop panel open (http://localhost:4403/da?map=17.00/55.67259/12.56661&stop=10842)",
+    "03-note-and-source-line: note and source line (http://localhost:4403/da?map=17.00/55.67259/12.56661&stop=10842)",
+    "04-arrivals: arrivals (http://localhost:4403/da?map=17.00/55.67259/12.56661&stop=10842&board=arrivals)",
+    "05-metro-stop: metro stop (http://localhost:4403/da?stop=8603332)"
+  ]
+}

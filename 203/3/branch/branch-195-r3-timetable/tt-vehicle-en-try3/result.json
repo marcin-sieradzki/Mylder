@@ -1,0 +1,10 @@
+{
+  "journey": "tt-vehicle-en",
+  "pass": true,
+  "steps": [
+    "01-centred-on-a-bus: centred on a bus (http://localhost:4403/en?map=14.00/55.66342/12.51470)",
+    "02-hover-card: hover card (http://localhost:4403/en?map=14.00/55.66342/12.51470)",
+    "03-vehicle-panel-open: vehicle panel open (http://localhost:4403/en?map=14.00/55.66342/12.51470&trip=s-tog.B.7e91e04136.20261101.0951)",
+    "04-source-line: source line (http://localhost:4403/en?map=14.00/55.66342/12.51470&trip=s-tog.B.7e91e04136.20261101.0951)"
+  ]
+}

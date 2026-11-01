@@ -1,0 +1,10 @@
+{
+  "key": "bus.135.493c07d18d.20261101.1007",
+  "line": "135",
+  "headsign": "Brøndbyvester St.",
+  "state": "timetable-only",
+  "position": [
+    55.66031068675,
+    12.383601575
+  ]
+}

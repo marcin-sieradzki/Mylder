@@ -1,0 +1,9 @@
+{
+  "journey": "tt-nocards-en",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: city pulse (http://localhost:4403/en)",
+    "02-disruptions-tab: disruptions tab (http://localhost:4403/en?tab=disruptions)",
+    "03-disruptions-a-poll-later: disruptions a poll later (http://localhost:4403/en?tab=disruptions)"
+  ]
+}

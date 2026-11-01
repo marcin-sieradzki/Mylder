@@ -1,0 +1,103 @@
+B
+B
+to Høje Taastrup St.
+S-tog
+Follow
+Show whole line
+Close
+Timetable only
+
+No live positions yet; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Valby St.
+
+Between Valby St. and Danshøj St.
+
+Farum St.
+Passed
+09:51
+Værløse St.
+Passed
+09:55
+Hareskov St.
+Passed
+09:58
+Skovbrynet St.
+Passed
+10:01
+Bagsværd St.
+Passed
+10:03
+Stengården St.
+Passed
+10:04
+Buddinge St.
+Passed
+10:07
+Kildebakke St.
+Passed
+10:08
+Vangede St.
+Passed
+10:10
+Dyssegård St.
+Passed
+10:12
+Emdrup St.
+Passed
+10:14
+Ryparken St.
+Passed
+10:16
+Svanemøllen St.
+Passed
+10:19
+Nordhavn St.
+Passed
+10:21
+Østerport St.
+Passed
+10:23
+Nørreport St.
+Passed
+10:25
+Vesterport St.
+Passed
+10:27
+København H
+Passed
+10:30
+Dybbølsbro St.
+Passed
+10:32
+Carlsberg St.
+Passed
+10:34
+Valby St.
+Next stop
+10:37
+Danshøj St.
+10:39
+Hvidovre St.
+10:40
+Rødovre St.
+10:42
+Brøndbyøster St.
+10:44
+Glostrup St.
+10:47
+Albertslund St.
+10:50
+Taastrup St.
+10:53
+Høje Taastrup St.
+10:56
+
+Timetable · placed 10:36:22

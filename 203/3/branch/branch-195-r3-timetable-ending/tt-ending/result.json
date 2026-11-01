@@ -1,0 +1,10 @@
+{
+  "journey": "tt-ending",
+  "pass": true,
+  "steps": [
+    "01-en-map-with-the-timetable-notice: en map with the timetable notice (http://localhost:4403/en)",
+    "02-en-about-credit-with-the-fixture-timetable-s-date: en about credit with the fixture timetable's date (http://localhost:4403/en)",
+    "03-da-map-with-the-timetable-notice: da map with the timetable notice (http://localhost:4403/da)",
+    "04-da-about-credit-with-the-fixture-timetable-s-date: da about credit with the fixture timetable's date (http://localhost:4403/da)"
+  ]
+}

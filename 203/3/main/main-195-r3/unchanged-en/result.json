@@ -1,0 +1,9 @@
+{
+  "journey": "unchanged-en",
+  "pass": true,
+  "steps": [
+    "01-map-with-banner: map with banner (http://localhost:4306/en)",
+    "02-about-open: about open (http://localhost:4306/en)",
+    "03-about-closed: about closed (http://localhost:4306/en)"
+  ]
+}

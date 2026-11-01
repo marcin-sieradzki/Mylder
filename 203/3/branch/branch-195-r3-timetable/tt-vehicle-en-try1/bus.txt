@@ -1,0 +1,10 @@
+{
+  "key": "bus.135.d3098e416e.20261101.1033",
+  "line": "135",
+  "headsign": "Brøndby Strand St.",
+  "state": "timetable-only",
+  "position": [
+    55.64368222442417,
+    12.393607918081653
+  ]
+}

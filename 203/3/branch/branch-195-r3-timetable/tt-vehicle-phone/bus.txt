@@ -1,0 +1,10 @@
+{
+  "key": "bus.133.b999b32ae0.20261101.1036",
+  "line": "133",
+  "headsign": "Avedøre St.",
+  "state": "timetable-only",
+  "position": [
+    55.661482874,
+    12.513943562
+  ]
+}

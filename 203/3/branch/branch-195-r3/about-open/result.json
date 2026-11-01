@@ -1,0 +1,12 @@
+{
+  "journey": "about-open",
+  "pass": true,
+  "steps": [
+    "01-en-map: en map (http://localhost:4307/en)",
+    "02-en-about: en about (http://localhost:4307/en)",
+    "03-en-closed: en closed (http://localhost:4307/en)",
+    "04-da-map: da map (http://localhost:4307/da)",
+    "05-da-about: da about (http://localhost:4307/da)",
+    "06-da-closed: da closed (http://localhost:4307/da)"
+  ]
+}

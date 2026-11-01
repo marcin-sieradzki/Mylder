@@ -1,0 +1,62 @@
+11
+11
+to Københavns Rådhusplads
+Bus
+Follow
+Show whole line
+Close
+Timetable only
+
+No live positions yet; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Toftegårds Plads (Vigerslev Allé)
+
+At Toftegårds Plads (Vigerslev Allé)
+
+Vigerslevvej (Vigerslev Allé)
+Passed
+10:32
+Vigerslev Kirke (Vigerslev Allé)
+Passed
+10:33
+Gladbovej (Vigerslev Allé)
+Passed
+10:33
+Vigerslev Allé St. (Vigerslev Allé)
+Passed
+10:34
+Fengersvej (Vigerslev Allé)
+Passed
+10:35
+Vigerslev Allé Skole (Vigerslev Allé)
+Passed
+10:36
+Peder Hjorts Vej (Vigerslev Allé)
+Passed
+10:37
+Toftegårds Plads (Vigerslev Allé)
+Next stop
+10:38
+Sjælør Boulevard (Vigerslev Allé)
+10:39
+Carlsberg St. (Vigerslev Allé)
+10:41
+Knud Lavards Gade (Ingerslevsgade)
+10:43
+Dybbølsbro St. (Ingerslevsgade)
+10:44
+Hovedbanegården (Tietgensgade)
+10:47
+Stormgade (H.C. Andersens Boulevard)
+10:49
+Rådhuspladsen St. (H.C. Andersens Boulevard)
+10:51
+
+Timetable · placed 10:37:26

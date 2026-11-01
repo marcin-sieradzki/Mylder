@@ -1,0 +1,228 @@
+Hovedbanegården, Tivoli
+2A
+5C
+17
+31
+37
+68
+250S
+Close
+AT THE PLATFORMS NOW
+
+No vehicle of the types shown is standing at the platforms now.
+
+Departures
+Arrivals
+17
+København Syd St.
+Timetable only
+Now
+10:36
+—
+Delay unknown
+31
+Vanløse Ålekistevej
+Timetable only
+Now
+10:36
+—
+Delay unknown
+17
+Vesterport St.
+Timetable only
+~2 min
+10:37
+—
+Delay unknown
+37
+Amagerværket, Vindmøllevej (Vindmøllevej)
+Timetable only
+~2 min
+10:37
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~4 min
+10:39
+—
+Delay unknown
+5C
+Københavns Lufthavn
+Timetable only
+~5 min
+10:40
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~6 min
+10:41
+—
+Delay unknown
+5C
+Husum Torv
+Timetable only
+~6 min
+10:41
+—
+Delay unknown
+250S
+Bagsværd St.
+Timetable only
+~6 min
+10:41
+—
+Delay unknown
+31
+Kastrup St.
+Timetable only
+~9 min
+10:44
+—
+Delay unknown
+5C
+Sundbyvester Plads
+Timetable only
+~11 min
+10:46
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~12 min
+10:47
+—
+Delay unknown
+5C
+Herlev Hospital
+Timetable only
+~12 min
+10:47
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~14 min
+10:49
+—
+Delay unknown
+68
+Gladsaxe Trafikplads Via Mellemvangen
+Timetable only
+~14 min
+10:49
+—
+Delay unknown
+68
+Bella Center St. (Martha Christensens Vej)
+Timetable only
+~17 min
+10:52
+—
+Delay unknown
+5C
+Sundbyvester Plads
+Timetable only
+~18 min
+10:53
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~19 min
+10:54
+—
+Delay unknown
+5C
+Husum Torv
+Timetable only
+~19 min
+10:54
+—
+Delay unknown
+250S
+Dragør Stationsplads
+Timetable only
+~20 min
+10:55
+—
+Delay unknown
+17
+København Syd St.
+Timetable only
+~21 min
+10:56
+—
+Delay unknown
+31
+Vanløse Ålekistevej
+Timetable only
+~21 min
+10:56
+—
+Delay unknown
+2A
+Refshaleøen
+Timetable only
+~22 min
+10:57
+—
+Delay unknown
+17
+Vesterport St.
+Timetable only
+~22 min
+10:57
+—
+Delay unknown
+5C
+Københavns Lufthavn
+Timetable only
+~24 min
+10:59
+—
+Delay unknown
+5C
+Herlev Hospital
+Timetable only
+~26 min
+11:01
+—
+Delay unknown
+250S
+Bagsværd St.
+Timetable only
+~26 min
+11:01
+—
+Delay unknown
+2A
+Tingbjerg Gavlhusvej
+Timetable only
+~27 min
+11:02
+—
+Delay unknown
+31
+Kastrup St.
+Timetable only
+~29 min
+11:04
+—
+Delay unknown
+68
+Lyngby St. (Jernbanepladsen)
+Timetable only
+~29 min
+11:04
+—
+Delay unknown
+Countdowns use the timetable alone; live times aren't connected yet.
+
+Timetable · 10:35:21

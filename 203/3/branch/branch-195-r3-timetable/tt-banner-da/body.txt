@@ -1,0 +1,29 @@
+mylder
+Opdateret 10:29:06
+Bus
+338
+Metro
+38
+S-tog
+47
+Tog
+82
+Letbane
+13
+Fly
+8
+English
+Om Mylder
+Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være. Fly: optagne data fra adsb.lol.
+Live
+Ældre
+Beregnet
+Kun køreplan
+Intet signal
+Fly
+
+Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.
+
+Målestok
+1 km
+Trafikdata: Rejseplanen (CC BY 4.0) · Fly: © adsb.lol-bidragydere under ODbL · © OpenStreetMap-bidragydere · © OpenMapTiles · OpenFreeMap

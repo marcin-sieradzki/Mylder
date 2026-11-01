@@ -1,0 +1,32 @@
+PASS tt-banner-en: 1 steps in .verify/branch-195-r3-timetable/tt-banner-en/ 
+
+PASS tt-banner-da: 1 steps in .verify/branch-195-r3-timetable/tt-banner-da/ 
+
+PASS tt-legend-en: 1 steps in .verify/branch-195-r3-timetable/tt-legend-en/ 
+
+PASS tt-legend-da: 1 steps in .verify/branch-195-r3-timetable/tt-legend-da/ 
+
+PASS tt-about-en: 4 steps in .verify/branch-195-r3-timetable/tt-about-en/ 
+
+PASS tt-about-da: 4 steps in .verify/branch-195-r3-timetable/tt-about-da/ 
+
+PASS tt-updated: 2 steps in .verify/branch-195-r3-timetable/tt-updated/ 
+
+PASS tt-phone: 2 steps in .verify/branch-195-r3-timetable/tt-phone/ 
+
+PASS tt-nocards-en: 3 steps in .verify/branch-195-r3-timetable/tt-nocards-en/ 
+
+PASS tt-nocards-da: 3 steps in .verify/branch-195-r3-timetable/tt-nocards-da/ 
+
+FAIL tt-vehicle-en: 2 steps in .verify/branch-195-r3-timetable/tt-vehicle-en/ no trip panel from a tap  Call Log: - Timeout 30000ms exceeded while waiting on the predicate 
+
+FAIL tt-vehicle-da: 2 steps in .verify/branch-195-r3-timetable/tt-vehicle-da/ no trip panel from a tap  Call Log: - Timeout 30000ms exceeded while waiting on the predicate 
+
+FAIL tt-vehicle-phone: 2 steps in .verify/branch-195-r3-timetable/tt-vehicle-phone/ no trip panel from a tap  Call Log: - Timeout 30000ms exceeded while waiting on the predicate 
+
+FAIL tt-stop-en: 3 steps in .verify/branch-195-r3-timetable/tt-stop-en/ expect(received).toMatch(expected)  Expected pattern: /Timetable · \d\d:\d\d:\d\d/ Received string:  "Hovedbanegården, Tivoli 2A 5C 17 31 37 68 250S Close AT THE PLATFORMS NOW· No vehicle of the types shown is standing at the platforms now.· Departures Arrivals 17 København Syd St. Timetable only Now 10:36 — Delay unknown 31 Vanløse Ålekistevej Timetable only Now 10:36 — Delay unknown 17 Vesterport St. Timetable o
+
+FAIL tt-stop-da: 3 steps in .verify/branch-195-r3-timetable/tt-stop-da/ expect(received).toMatch(expected)  Expected pattern: /Køreplan · \d\d:\d\d:\d\d/ Received string:  "Hovedbanegården, Tivoli 2A 5C 17 31 37 68 250S Luk VED PERRONERNE NU· Intet køretøj af de viste typer holder ved perronerne nu.· Afgange Ankomster 17 København Syd St. Kun køreplan Nu 10:36 — Forsinkelse ukendt 31 Vanløse Ålekistevej Kun køreplan Nu 10:36 — Forsinkelse ukendt 17 Vesterport St. Kun køreplan ~1
+
+FAIL tt-stop-phone: 3 steps in .verify/branch-195-r3-timetable/tt-stop-phone/ expect(received).toMatch(expected)  Expected pattern: /Timetable · \d\d:\d\d:\d\d/ Received string:  "Hovedbanegården, Tivoli 2A 5C 17 31 37 68 250S Close AT THE PLATFORMS NOW· No vehicle of the types shown is standing at the platforms now.· Departures Arrivals 17 København Syd St. Timetable only Now 10:36 — Delay unknown 31 Vanløse Ålekistevej Timetable only Now 10:36 — Delay unknown 17 Vesterport St. Timet
+

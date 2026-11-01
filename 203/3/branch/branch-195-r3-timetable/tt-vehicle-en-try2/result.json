@@ -1,0 +1,9 @@
+{
+  "journey": "tt-vehicle-en",
+  "pass": false,
+  "error": "no dot within 260 px of the bus's snapshot position",
+  "steps": [
+    "01-centred-on-a-bus: centred on a bus (http://localhost:4403/en?map=15.00/55.64868/12.37850)",
+    "02-failure: failure (http://localhost:4403/en?map=15.00/55.64868/12.37850)"
+  ]
+}

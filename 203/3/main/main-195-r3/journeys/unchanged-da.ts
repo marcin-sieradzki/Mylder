@@ -1,0 +1,26 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { dump } from './_dump.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/da')
+  await expect(page.getByRole('banner').getByText(/^Opdateret \d\d:\d\d:\d\d$/)).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Optagne data fra 16. juni 2026/ })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Optagne data fra 16\. juni 2026\. Fly: optagne data fra adsb\.lol\.$/ })).toBeVisible({ timeout: 20000 })
+  await step('map with banner')
+  const statuses = await page.getByRole('status').allInnerTexts()
+  dump('statuses', statuses)
+  const legend = await page.getByRole('list', { name: 'Datatilstande' }).locator('xpath=..').innerText()
+  dump('legend', legend)
+  expect(legend).not.toMatch(/Kun køreplan indtil videre/)
+  expect(statuses.join(' ')).not.toMatch(/Kun køreplan: der er endnu/)
+  expect(statuses.join(' ')).not.toMatch(/paused|hasn't answered/i)
+  await page.getByRole('button', { name: 'Om Mylder' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Om Mylder' })
+  await expect(dialog).toBeVisible()
+  await step('about open')
+  const about = await dialog.innerText()
+  dump('about', about)
+  expect(about).not.toMatch(/endnu ingen livepositioner/)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await step('about closed')
+}

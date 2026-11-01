@@ -1,0 +1,15 @@
+{
+  "vw": 412,
+  "sw": 412,
+  "boxes": [
+    {
+      "text": "Optagne data fra 16. juni 2026. Fly: optagne data fra adsb.lol.",
+      "box": {
+        "x": 12,
+        "y": 110.296875,
+        "width": 388,
+        "height": 65
+      }
+    }
+  ]
+}

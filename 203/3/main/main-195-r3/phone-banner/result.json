@@ -1,0 +1,8 @@
+{
+  "journey": "phone-banner",
+  "pass": true,
+  "steps": [
+    "01-phone-en: phone en (http://localhost:4306/en)",
+    "02-phone-da: phone da (http://localhost:4306/da)"
+  ]
+}

@@ -1,0 +1,41 @@
+Gammel Strand St.
+M3
+M4
+Luk
+VED PERRONERNE NU
+
+Intet køretøj af de viste typer holder ved perronerne nu.
+
+Afgange
+Ankomster
+M3
+København H (Metro)
+Kun køreplan
+Hvert 4. min
+
+Metro: planlagte tider
+
+M3
+København H (Metro)
+Kun køreplan
+Hvert 4. min
+
+Metro: planlagte tider
+
+M4
+København Syd St. (Metro)
+Kun køreplan
+Hvert 4. min
+
+Metro: planlagte tider
+
+M4
+Orientkaj St. (Metro)
+Kun køreplan
+Hvert 4. min
+
+Metro: planlagte tider
+
+Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu.
+
+Køreplan · 10:37:26

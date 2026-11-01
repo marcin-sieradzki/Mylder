@@ -1,0 +1,8 @@
+{
+  "journey": "about-credit-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-map: phone map (http://localhost:4307/en)",
+    "02-about-from-credit: about from credit (http://localhost:4307/en)"
+  ]
+}

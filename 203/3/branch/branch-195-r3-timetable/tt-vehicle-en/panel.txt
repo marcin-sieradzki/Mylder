@@ -1,0 +1,70 @@
+133
+133
+to Avedøre St.
+Bus
+Follow
+Show whole line
+Close
+Timetable only
+
+No live positions yet; placed from the timetable.
+
+Delay
+—
+Unknown
+Last seen
+—
+Unknown
+Next stop
+Peder Hjorts Vej (Vigerslev Allé)
+
+Between Toftegårds Plads (Vigerslev Allé) and Peder Hjorts Vej (Vigerslev Allé)
+
+Valby St., Lyshøjgårdsvej (Lyshøjgårdsvej)
+Passed
+10:36
+Valby St., Lyshøjgårdsvej (Lyshøjgårdsvej)
+Passed
+10:36
+Toftegårds Plads (Vigerslev Allé)
+Passed
+10:37
+Peder Hjorts Vej (Vigerslev Allé)
+Next stop
+10:38
+Vigerslev Allé Skole (Vigerslev Allé)
+10:39
+Fengersvej (Vigerslev Allé)
+10:40
+Vigerslev Allé St. (Vigerslev Allé)
+10:41
+Hornemanns Vænge (Kulbanevej)
+10:44
+Centerparken (Kulbanevej)
+10:45
+Krogstens Allé (Sønderkær)
+10:47
+Arnold Nielsens Boulevard (Hvidovrevej)
+10:49
+Høvedstensvej (Hvidovrevej)
+10:49
+Arnold Nielsens Boulevard 60
+10:51
+Bibliotekvej (Arnold Nielsens Boulevard)
+10:51
+Gurrevej (Arnold Nielsens Boulevard)
+10:53
+Brostykkevej (Avedøre Havnevej)
+10:53
+Dybenskærvej (Avedøre Havnevej)
+10:55
+Avedøre Havnevej (Gammel Køge Landevej)
+10:56
+Tårnfalkevej (Gammel Køge Landevej)
+10:58
+Parallelvej (Byvej)
+10:59
+Avedøre St.
+11:01
+
+Timetable · placed 10:37:26

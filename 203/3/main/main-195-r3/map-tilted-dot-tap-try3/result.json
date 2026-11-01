@@ -1,0 +1,10 @@
+{
+  "journey": "map-tilted-dot-tap",
+  "pass": true,
+  "steps": [
+    "01-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4306/en?map=15.00/55.66767/12.58978)",
+    "02-tilted-and-turned: tilted and turned (http://localhost:4306/en?map=15.00/55.66767/12.58978/-45.0/40.0)",
+    "03-hover-card: hover card (http://localhost:4306/en?map=15.00/55.66767/12.58978/-45.0/40.0)",
+    "04-panel-open: panel open (http://localhost:4306/en?map=15.00/55.66767/12.58978/-45.0/40.0&trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

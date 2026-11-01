@@ -1,0 +1,8 @@
+{
+  "journey": "map-controls",
+  "pass": true,
+  "steps": [
+    "01-scale-1000: scale 1000 (http://localhost:4307/en)",
+    "02-zoomed-in: zoomed in (http://localhost:4307/en?map=12.20/55.68000/12.56500)"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "journey": "map-draw-chrome",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-17: map drawn 17 (http://localhost:4307/en)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "tt-updated",
+  "pass": true,
+  "steps": [
+    "01-updated-line: updated line (http://localhost:4403/en)",
+    "02-matches-snapshot-fetched: matches snapshot fetched (http://localhost:4403/en)"
+  ]
+}

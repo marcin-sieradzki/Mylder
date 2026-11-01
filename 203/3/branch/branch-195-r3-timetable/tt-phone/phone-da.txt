@@ -1,0 +1,15 @@
+{
+  "vw": 412,
+  "sw": 412,
+  "boxes": [
+    {
+      "text": "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være. Fly: optagne data fra adsb.lol.",
+      "box": {
+        "x": 12,
+        "y": 110.296875,
+        "width": 388,
+        "height": 84.5
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "source": {
+    "kind": "timetable"
+  },
+  "serviceDay": "2026-08-25",
+  "timetableRunningOut": true,
+  "timetable": {
+    "prepared": "2026-06-02",
+    "last": "2026-08-26",
+    "daysLeft": 2,
+    "daysOld": 84
+  },
+  "trips": 13,
+  "states": [
+    "timetable-only"
+  ]
+}

@@ -1,0 +1,80 @@
+Om Mylder
+Luk
+
+Et livekort over Københavns busser, S-tog, metro og tog, ærligt om hvor friske positionerne er.
+
+Mylder viser data, som Rejseplanen sender dem, med Rejseplanens egne ord og sprog, og markerer hvert tal, Mylder selv regner ud.
+
+Mylder er ikke-kommercielt: ingen reklamer, ingen betalt version og intet salg af data eller af noget, der er bygget på dem.
+
+DATA OG KREDITERING
+
+Køreplansdata: Rejseplanen, under CC BY 4.0. Køreplan fra 2. juni.
+
+Kort: © OpenStreetMap-bidragydere under ODbL, © OpenMapTiles, OpenFreeMap.
+
+Bygningshøjderne kommer fra OpenStreetMap og er omtrentlige.
+
+Fly: © adsb.lol-bidragydere under ODbL.
+
+Flyene er optagne data fra adsb.lol, åbne under samme licens i Mylders repository.
+
+Kortets stil bygger på OpenFreeMaps Positron, der selv bygger på OpenMapTiles' Positron GL Style: se licensen.
+
+DATATILSTANDE
+Live
+
+Køretøjet har selv meldt denne position inden for omtrent de seneste to forespørgsler.
+
+Ældre
+
+Køretøjets seneste melding er ældre end det, men under 5 minutter; prikken kører videre fra den langs linjen.
+
+Beregnet
+
+Ingen ny melding, men Rejseplanen har stadig turen: en position, den har beregnet, eller forventede tider.
+
+Kun køreplan
+
+Ingen realtid for turen i dag, så den er placeret efter køreplanen. Det gælder alle metrotog.
+
+Intet signal
+
+Turen havde realtid, og den stoppede for 5 minutter siden eller mere; prikken kører efter køreplanen og sin seneste forsinkelse.
+
+Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.
+
+DENNE SIDE
+
+Positionerne på denne side er køreplanens plan, ikke meldinger fra køretøjerne.
+
+Kilde
+Rejseplanens køreplan, endnu ingen livepositioner
+Positioner
+Ingen positionskald
+Rejseplanens realtid
+—
+Ukendt
+Forespørgsel
+Hvert 60. sekund
+Databudget
+Normalt
+Kald denne måned
+0
+Serverlager
+Tilgængeligt
+Driftsforstyrrelser
+Ikke tjekket endnu
+TASTER
+
++ og − zoomer kortet.
+
+← → ↑ ↓ flytter det.
+
+Skift + ← og → drejer kortet.
+
+Skift + ↑ og ↓ vipper det.
+
+Esc lukker køretøjets kort eller panel.
+
+Pauseknappen ved siden af zoomknapperne stopper køretøjerne, og afspilningsknappen sætter dem i gang igen.

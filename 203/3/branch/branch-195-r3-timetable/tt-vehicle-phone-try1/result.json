@@ -1,0 +1,9 @@
+{
+  "journey": "tt-vehicle-phone",
+  "pass": false,
+  "error": "no trip panel from a tap\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-centred-on-a-bus: centred on a bus (http://localhost:4403/en?map=15.00/55.66031/12.38360)",
+    "02-failure: failure (http://localhost:4403/en?map=15.00/55.66031/12.38360)"
+  ]
+}

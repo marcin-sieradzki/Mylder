@@ -1,0 +1,10 @@
+{
+  "journey": "map-tilt-keys",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4307/en)",
+    "02-tilted-and-turned: tilted and turned (http://localhost:4307/en?map=11.20/55.68000/12.56500/30.0/30.0)",
+    "03-centred: centred (http://localhost:4307/en?map=11.20/55.68000/12.56500)",
+    "04-held-3-s-heading-120: held 3 s heading 120 (http://localhost:4307/en?map=11.20/55.68000/12.56500/120.0/0.0)"
+  ]
+}

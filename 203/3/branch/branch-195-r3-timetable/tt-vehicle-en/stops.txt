@@ -1,0 +1,23 @@
+[
+  "Valby St., Lyshøjgårdsvej (Lyshøjgårdsvej)\nPassed\n10:36",
+  "Valby St., Lyshøjgårdsvej (Lyshøjgårdsvej)\nPassed\n10:36",
+  "Toftegårds Plads (Vigerslev Allé)\nPassed\n10:37",
+  "Peder Hjorts Vej (Vigerslev Allé)\nNext stop\n10:38",
+  "Vigerslev Allé Skole (Vigerslev Allé)\n10:39",
+  "Fengersvej (Vigerslev Allé)\n10:40",
+  "Vigerslev Allé St. (Vigerslev Allé)\n10:41",
+  "Hornemanns Vænge (Kulbanevej)\n10:44",
+  "Centerparken (Kulbanevej)\n10:45",
+  "Krogstens Allé (Sønderkær)\n10:47",
+  "Arnold Nielsens Boulevard (Hvidovrevej)\n10:49",
+  "Høvedstensvej (Hvidovrevej)\n10:49",
+  "Arnold Nielsens Boulevard 60\n10:51",
+  "Bibliotekvej (Arnold Nielsens Boulevard)\n10:51",
+  "Gurrevej (Arnold Nielsens Boulevard)\n10:53",
+  "Brostykkevej (Avedøre Havnevej)\n10:53",
+  "Dybenskærvej (Avedøre Havnevej)\n10:55",
+  "Avedøre Havnevej (Gammel Køge Landevej)\n10:56",
+  "Tårnfalkevej (Gammel Køge Landevej)\n10:58",
+  "Parallelvej (Byvej)\n10:59",
+  "Avedøre St.\n11:01"
+]
