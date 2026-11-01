@@ -1,7 +1,7 @@
 // Where the tracker's answers come from, picked by `MYLDER_SOURCE` at request time
-// (docs/testing-seams.md, "The switch"): the timetable alone, the simulated Rejseplanen, a
-// recording, or the real API. The key never picks the source, so a missing key fails loudly
-// instead of showing a simulation.
+// (docs/testing-seams.md, "The switch"): the timetable alone (the default, and production's until
+// the key arrives, ADR 0018), the simulated Rejseplanen, a recording, or the real API. The key
+// never picks the source, so a missing key fails loudly instead of showing a simulation.
 import 'server-only'
 import { Effect, type Layer } from 'effect'
 import * as Http from './http.ts'
@@ -24,15 +24,14 @@ export type Source =
 export const KEY_VARIABLE = 'REJSEPLANEN_KEY'
 
 /**
- * Reads `MYLDER_SOURCE`: `timetable`, `simulated` or `simulated:<scenario>` (the default),
+ * Reads `MYLDER_SOURCE`: `timetable` (the default, when it is unset or empty, so a deployment that
+ * forgets it shows the honest map, never invented realtime), `simulated` or `simulated:<scenario>`,
  * `recording:<folder>` or `rejseplanen`. Anything else is a mistake worth stopping for.
  */
 export function readSource(value: string | undefined): Source {
   const setting = value?.trim() ?? ''
-  if (setting === '' || setting === 'simulated') {
-    return { kind: 'simulated', scenario: DEFAULT_SCENARIO }
-  }
-  if (setting === 'timetable') return { kind: 'timetable' }
+  if (setting === '' || setting === 'timetable') return { kind: 'timetable' }
+  if (setting === 'simulated') return { kind: 'simulated', scenario: DEFAULT_SCENARIO }
   if (setting === 'rejseplanen') return { kind: 'rejseplanen' }
   const [kind, ...rest] = setting.split(':')
   const argument = rest.join(':')

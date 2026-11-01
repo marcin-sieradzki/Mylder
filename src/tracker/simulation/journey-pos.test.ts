@@ -91,8 +91,8 @@ function distanceFromPattern(journey: PositionJourney): number {
 }
 
 describe('the source switch', () => {
-  it('runs the weekday simulation when MYLDER_SOURCE is unset', () => {
-    expect(readSource(undefined)).toEqual({ kind: 'simulated', scenario: 'weekday' })
+  it('runs the weekday simulation when MYLDER_SOURCE names it, never by default', () => {
+    expect(readSource(undefined)).toEqual({ kind: 'timetable' })
     expect(readSource('simulated')).toEqual({ kind: 'simulated', scenario: 'weekday' })
     expect(readSource('simulated:weekday')).toEqual({ kind: 'simulated', scenario: 'weekday' })
     expect(readSource('recording:recordings/weekday')).toEqual({
@@ -107,13 +107,13 @@ describe('the source switch', () => {
     expect(() => readSource('recording:')).toThrow(/MYLDER_SOURCE/)
   })
 
-  it.effect('answers journeyPos from the simulation by default', () =>
+  it.effect('answers journeyPos from the simulation when it is chosen', () =>
     Effect.gen(function* () {
       const { status } = yield* journeyPos()
       const journeys = yield* answer()
       expect(status).toBe(200)
       expect(journeys.length).toBeGreaterThan(0)
-    }).pipe(Effect.provide(apiLayer({ source: readSource(undefined), timetable }))),
+    }).pipe(Effect.provide(apiLayer({ source: readSource('simulated'), timetable }))),
   )
 
   it.effect('answers as a refused key on rejseplanen with no key, never simulating', () =>
