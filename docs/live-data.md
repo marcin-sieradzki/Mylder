@@ -69,25 +69,26 @@ A joined journey with a delay, a cancellation or a cancelled call is the trip's 
 
 ### The listener
 
-The listener is `src/listener/`, the package's second entry point (ADR 0012), run as `node src/listener/main.ts` on Node's own type stripping. `listener.Dockerfile` builds it into a container image with only the folders it imports (`src/listener/`, `src/siri-et/`, `src/timetable/`) and the packages they need (Effect, rhea). CI builds the image on every change and starts it without its settings, and it must stop with an error naming them. Its deployment on Fly.io is #218.
+The listener is `src/listener/`, a second entry point in the one package and a second deployable beside the app (ADR 0012, as ADR 0019 amends it), run as `node src/listener/main.ts` on Node's own type stripping. `listener.Dockerfile` builds it into a container image with only the folders its lint fence lets it and the SIRI-ET reader import (`src/listener/`, `src/siri-et/`, `src/timetable/`, `src/domain/`) and the packages they need (Effect, rhea). CI builds the image on every change and starts it without its settings, and it must stop with an error naming them. Its deployment on Fly.io is #218.
 
 Its settings come only from the environment, which only the host's secrets set. A missing or malformed variable stops it at start with an error that names the variable, never its value:
 
-| Variable               | What it holds                                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `DU_CLIENT_ID`         | The Dataudveksleren service account's Entra ID client id                                                            |
-| `DU_TENANT_ID`         | Its tenant id                                                                                                       |
-| `DU_SECRET`            | Its client secret                                                                                                   |
-| `DU_ADDRESSES`         | One AMQP address a dataset, `amqps://<host>/t-distribution-<dataset>/<subscription>`, separated by spaces or commas |
-| `MYLDER_UPDATES_TOKEN` | The token the table route asks for, at least 32 characters, the same as the tracker's                               |
-| `MYLDER_APP_URL`       | The app's public URL, whose timetable routes give the box's stops                                                   |
-| `PORT`                 | The port it serves on, 8080 when unset                                                                              |
+| Variable                  | What it holds                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `DU_CLIENT_ID`            | The Dataudveksleren service account's Entra ID client id                                                            |
+| `DU_TENANT_ID`            | Its tenant id                                                                                                       |
+| `DU_SECRET`               | Its client secret                                                                                                   |
+| `DU_ADDRESSES`            | One AMQP address a dataset, `amqps://<host>/t-distribution-<dataset>/<subscription>`, separated by spaces or commas |
+| `MYLDER_UPDATES_TOKEN`    | The token the table route asks for, at least 32 characters, the same as the tracker's                               |
+| `MYLDER_APP_URL`          | The app's public URL, whose timetable routes give the box's stops                                                   |
+| `PORT`                    | The port it serves on, 8080 when unset                                                                              |
+| `MYLDER_LISTENER_VERSION` | The commit the image was built from, which the table names; the image sets it from its build, `dev` when unset      |
 
 - **AMQP.** For each dataset, the listener opens one connection over AMQP 1.0 with TLS on port 5671 (`src/listener/amqp.ts`, with `rhea`, as the probe did). It gets an Entra ID client-credentials token for `https://servicebus.azure.net/.default`, puts it on the connection with a CBS `put-token`, and opens a receiver on the dataset's subscription once the broker accepts it. Every 15 minutes it gets a new token and puts it on every open connection. It settles each message on receipt, at most once, and lets the broker send at most 20 ahead, so a backlog of Movia's 1 MB messages holds at most about 20 MB in flight. A gzipped body is unzipped. A message's received time is when the broker queued it (`x-opt-enqueued-time`), or else when it arrived, so a backlog read after a restart keeps its own times. The shell holds no logic: each message goes to the reader.
 - **Reconnecting.** A connection that closes or fails is opened again after 1 s, then 2, 4 and so on up to 2 minutes, and from 1 s again once it is listening. When no dataset has sent a message for 5 minutes between 05:00 and midnight, Copenhagen time, every connection is closed and opened again. At night a quiet feed is left alone.
 - **The box's stops.** The listener asks the app for its timetable manifest, `GET <MYLDER_APP_URL>/api/timetable`, and, when the manifest names a version other than the one it has, for that version's stops, `GET /api/timetable/<version>/stops`. It keeps the ids of the stops and platforms inside the manifest's box, without leading zeros. It asks at start, every minute while it has no stops, and every 15 minutes after. When the app can't be reached, it keeps the set it has and logs why. Messages that arrive before it has a set are read and held, and listed once it has one.
 - **Memory.** The reader's caps bound it: 20,000 journeys and 4,000,000 characters a message ("The reader", above). The table is built at most once a minute and one copy is held, gzipped.
-- **Credentials.** No log line and no answer carries one. The listener cuts the service account's id, tenant and secret, each subscription id, `MYLDER_UPDATES_TOKEN` and every Entra ID token it gets out of every line it logs. An error from Entra ID names only its status and code. Its tests run the loop and the route with fake credentials and read every line and body.
+- **Credentials.** No log line and no answer carries one. The listener cuts the service account's id, tenant and secret, each subscription id, `MYLDER_UPDATES_TOKEN` and the latest 8 Entra ID tokens it got, two hours' worth, past the hour or so each one lasts, out of every line it logs. An error from Entra ID names only its status and code. Its tests run the loop and the route with fake credentials and read every line and body.
 
 #### The route
 

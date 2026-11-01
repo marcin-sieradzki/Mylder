@@ -5,5 +5,6 @@
 !src/listener/
 !src/siri-et/
 !src/timetable/
+!src/domain/
 **/*.test.ts
 src/siri-et/fixtures/

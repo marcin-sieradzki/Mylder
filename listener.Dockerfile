@@ -1,5 +1,6 @@
 # The listener (#217, ADR 0019): the SIRI-ET listener's entry point, src/listener/main.ts, run by
-# Node's own type stripping, with only the folders it imports and the packages they need. Built
+# Node's own type stripping, with only the folders its lint fence lets it and the SIRI-ET reader
+# import (.oxlintrc.json) and the packages they need. Built
 # from the repository root: docker build --file listener.Dockerfile --build-arg VERSION=<commit> .
 
 FROM node:22-alpine AS packages
@@ -21,6 +22,7 @@ COPY package.json ./
 COPY src/listener ./src/listener
 COPY src/siri-et ./src/siri-et
 COPY src/timetable ./src/timetable
+COPY src/domain ./src/domain
 USER node
 EXPOSE 8080
 CMD ["node", "src/listener/main.ts"]

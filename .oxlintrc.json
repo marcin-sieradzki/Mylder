@@ -102,7 +102,7 @@
             "patterns": [
               {
                 "regex": "^(\\.\\./)+(app|i18n|map|screens|tracker)(/|$)|^@/",
-                "message": "The SIRI-ET reader runs in the listener's plain Node: it imports from the timetable readers and the domain only."
+                "message": "The SIRI-ET reader runs in the listener's plain Node: it imports from the timetable readers and the domain only, the folders listener.Dockerfile ships beside it."
               },
               {
                 "group": [
@@ -133,7 +133,7 @@
             "patterns": [
               {
                 "regex": "^(\\.\\./)+(app|i18n|map|screens|tracker|demo)(/|$)|^@/",
-                "message": "The listener runs in plain Node on its own host: it imports the SIRI-ET reader, the timetable readers and the domain only."
+                "message": "The listener runs in plain Node on its own host: it imports the SIRI-ET reader, the timetable readers and the domain only, the folders listener.Dockerfile ships."
               },
               {
                 "group": [
