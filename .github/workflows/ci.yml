@@ -55,6 +55,23 @@ jobs:
           path: playwright-report
           retention-days: 7
 
+  # The listener's container image (#217, ADR 0019), built on every change and started without its
+  # settings, when it must stop with an error naming them; starting loads every import it has.
+  listener-image:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --file listener.Dockerfile --build-arg VERSION=${{ github.sha }} --tag mylder-listener .
+      - name: Stops with a clear error when its settings are missing
+        run: |
+          if docker run --rm mylder-listener > started.txt 2>&1; then
+            echo "The listener started without its settings" >&2
+            exit 1
+          fi
+          cat started.txt
+          grep -F "MYLDER_UPDATES_TOKEN and MYLDER_APP_URL are not set" started.txt
+
   # The GitHub Pages demo (ADR 0013): the static export with the simulated tracker in a Web
   # Worker, tested on its build, and deployed from main.
   demo:

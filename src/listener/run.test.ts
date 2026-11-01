@@ -89,9 +89,9 @@ function stubs() {
 /** The listener started on the fake links, with every line it logs. */
 function started() {
   const links: FakeLink[] = []
-  const connect: Connect = (address, clientId, token, events) => {
+  const connect: Connect = (to, clientId, token, events) => {
     const link: FakeLink = {
-      dataset: address.dataset,
+      dataset: to.dataset,
       clientId,
       token,
       events,

@@ -5,7 +5,7 @@
 // recording's messages.
 import 'server-only'
 import { join } from 'node:path'
-import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
+import { Cause, Clock, Context, Effect, Layer, Option, Result, Schema } from 'effect'
 import type { Call } from '../domain/trip-motion.ts'
 import { siriEtReader } from '../siri-et/reader.ts'
 import { readBox, siriEtReplay } from '../siri-et/recording.ts'
@@ -130,15 +130,12 @@ export const readUpdateTable = (
         undefined,
       )
     }
-    const answer = yield* Http.getText(
-      client,
-      listener.url,
-      {},
-      {
-        authorization: `Bearer ${listener.token}`,
-      },
-    ).pipe(Effect.timeout(LISTENER_TIMEOUT), Effect.result)
-    if (answer._tag === 'Failure') {
+    const authorization = `Bearer ${listener.token}`
+    const answer = yield* Http.getText(client, listener.url, {}, { authorization }).pipe(
+      Effect.timeout(LISTENER_TIMEOUT),
+      Effect.result,
+    )
+    if (Result.isFailure(answer)) {
       const failure = answer.failure
       return yield* Cause.isTimeoutError(failure)
         ? without(`took over ${LISTENER_TIMEOUT}`)
