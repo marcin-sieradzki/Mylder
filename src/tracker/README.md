@@ -2,7 +2,7 @@
 
 Runs on the server only. Every module here starts with `import 'server-only'`, so importing one from a client component fails `next build`. Callers go through `index.ts`.
 
-- `http.ts`: the tracker's one door to Effect's `unstable` HTTP module (ADR 0011), knowing no feed: the `HttpClient` service, a client that answers every request itself, the fetch layer, JSON and text answers, the gateway timeout, and a plain GET.
+- `http.ts`: the tracker's one door to Effect's `unstable` HTTP module (ADR 0011), knowing no feed: the `HttpClient` service, a client that answers every request itself, the fetch layer, JSON and text answers, the gateway timeout, a plain GET, and a GET with headers whose answer is read no further than a byte limit (`getTextUpTo`).
 - `rejseplanen/answers.ts`: the Rejseplanen API 2.0 answer schemas every source decodes or encodes with, and their contract fixtures in `rejseplanen/fixtures/`.
 - `rejseplanen/responses.ts`: Rejseplanen's answers built on the HTTP door, for every adapter that answers in its place: its error answer (`errorAnswer`), its `SVC_PARAM` refusal (`svcParam`), and how a recording keeps its calls (`RECORDED_REJSEPLANEN`).
 - `source.ts`: `MYLDER_SOURCE`, and the `HttpClient` layer each source answers through (`docs/testing-seams.md`). The timetable source is the default, what an unset `MYLDER_SOURCE` reads as, and what production runs until the key arrives (ADR 0018): its layer refuses every request, since that source makes no call and the tracker builds every run from the timetable alone. The simulation is only ever chosen by name, `simulated`.
