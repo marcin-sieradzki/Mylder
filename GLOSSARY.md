@@ -151,7 +151,7 @@ The trip has had no realtime this service day, so it is placed where its timetab
 _Avoid_: Scheduled, scheduled only, static
 
 **No signal**:
-The trip had realtime, and it stopped: the trip has been missing from the answers for five minutes, or no answers have come for five minutes.
+The trip had realtime, and it stopped: the trip has been missing from the answers for five minutes, or no answers have come for five minutes, or, for a trip with an update from SIRI-ET, its feed has sent no message for five minutes.
 _Avoid_: Stale, lost, offline
 
 ## Page conditions
@@ -171,5 +171,5 @@ One of Rejseplanen's messages about the network that belongs to Copenhagen, show
 _Avoid_: Alert, incident, notice
 
 **Data card**:
-Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen or no positions for a mode, shown first and marked as Mylder's.
+Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen, no positions for a mode or no delays from SIRI-ET's feed for five minutes, shown first and marked as Mylder's.
 _Avoid_: System alert, status card
