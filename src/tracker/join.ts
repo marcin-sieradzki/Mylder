@@ -148,7 +148,8 @@ export function joinJourney(
  * so the join can't key on the first departure as a reference does. A train is found by its train
  * number, which SIRI-ET's `TrainNumberRef` gives without the timetable's leading zeros; any other
  * journey by its line and its first and last stops, then by a call it holds, at a stop of the
- * trip's pattern at that call's planned time.
+ * trip's pattern at that call's planned time. No Metro or light rail trip is joined: SIRI-ET has no
+ * dataset for either, so they stay Timetable only (ADR 0006) whatever a journey claims.
  */
 export interface TableJoinable {
   readonly day: string
@@ -171,6 +172,9 @@ const tableIndexes = new WeakMap<Timetable, Map<IsoDate, TableIndex>>()
 
 const endsKey = (line: string, first: string, last: string) => `${line}|${first}|${last}`
 
+/** The modes SIRI-ET carries no journeys of, whose trips the join leaves alone. */
+const NOT_IN_SIRI_ET: ReadonlySet<string> = new Set(['metro', 'light-rail'])
+
 /** A service day's trips by train number and by their ends, built once per day. */
 function tableIndexOf(timetable: Timetable, day: IsoDate): TableIndex {
   let days = tableIndexes.get(timetable)
@@ -185,6 +189,7 @@ function tableIndexOf(timetable: Timetable, day: IsoDate): TableIndex {
       map.set(key, [...(map.get(key) ?? []), trip])
     for (const trip of timetable.tripsOn(day)) {
       const { mode, name } = trip.line
+      if (NOT_IN_SIRI_ET.has(mode)) continue
       if (trip.number && (mode === 'train' || mode === 's-tog')) {
         add(byNumber, platformId(trip.number), trip)
       }

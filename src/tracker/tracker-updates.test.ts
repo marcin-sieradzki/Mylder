@@ -5,7 +5,8 @@ import { join } from 'node:path'
 import { siriEtReader } from '../siri-et/reader'
 import { readBox, readSiriEtMessages } from '../siri-et/recording'
 import { UPDATE_TABLE_KEY, writeUpdateTable } from '../siri-et/store'
-import type { UpdateTable } from '../siri-et/table'
+import type { TableJourney, UpdateTable } from '../siri-et/table'
+import type { PlannedTrip } from '../timetable/trips'
 import { recordingDir } from './recording/layer'
 import { stoppedCpu } from './report'
 import { trackerLayer } from './runtime'
@@ -245,6 +246,55 @@ describe('SIRI-ET’s delays from the listener’s table in the store', () => {
       expect(written.trips).toEqual(replayed.trips)
       expect(written.updates).toEqual({ ...replayed.updates, kind: 'siri' })
       expect(tripOf(written, '102A', '09:04')?.cancelled).toBe(true)
+    }),
+  )
+
+  it.effect('joins no journey to a Metro or light rail trip, which stay Timetable only', () =>
+    Effect.gen(function* () {
+      // No dataset carries the Metro or the light rail, so these journeys are made up: each names
+      // a trip underway at 09:21:30, its line, its first and last stops and its first call, 5 min
+      // late from its second call, as a SIRI-ET journey of it would.
+      const moment = cph('09:21:30')
+      const { platforms } = timetable.stops
+      const underway = (mode: string) =>
+        timetable
+          .tripsOn('2026-10-31')
+          .find(
+            (trip) =>
+              trip.line.mode === mode &&
+              trip.calls[0].departure < moment &&
+              trip.calls.at(-1)!.arrival > moment + 600_000,
+          )!
+      const journeyOf = (trip: PlannedTrip, n: number): TableJourney => {
+        const at = (call: PlannedTrip['calls'][number]) => platforms[call.platform].id
+        return {
+          dataset: '788',
+          day: '2026-10-31',
+          journey: `made-up-${n}`,
+          line: trip.line.name,
+          origin: at(trip.calls[0]),
+          destination: at(trip.calls.at(-1)!),
+          received: cph('09:21:00'),
+          first: { stop: at(trip.calls[0]), aimed: trip.calls[0].departure },
+          steps: [{ stop: at(trip.calls[1]), aimed: trip.calls[1].departure, delay: 300 }],
+        }
+      }
+      const metro = underway('metro')
+      const lightRail = underway('light-rail')
+      const table = yield* Effect.promise(() => listenersTable('09:21:30'))
+      const made = {
+        ...table,
+        journeys: [...table.journeys, journeyOf(metro, 1), journeyOf(lightRail, 2)],
+      }
+      const before = yield* fromStore('09:21:30', table)
+      const after = yield* fromStore('09:21:30', made)
+      for (const trip of [metro, lightRail]) {
+        const drawn = after.trips.find((each) => each.key === trip.key)
+        expect(drawn).toMatchObject({ state: 'timetable-only', hadRealtime: false })
+        expect(drawn?.updated).toBeUndefined()
+        expect(drawn?.delay).toBeUndefined()
+      }
+      expect(after.updates.unmatched.bus).toBe((before.updates.unmatched.bus ?? 0) + 2)
     }),
   )
 
