@@ -16,7 +16,6 @@ describe('what a rider is told about each source', () => {
         callsRejseplanen: false,
         positions: false,
         messages: false,
-        banner: { words: 'onTimetable.banner', dated: false },
         legend: 'onTimetable.legend',
         named: 'onTimetable.source',
         note: 'onTimetable.note',
@@ -64,13 +63,12 @@ describe('what a rider is told about each source', () => {
   it('says on the timetable source, with SIRI-ET’s delays on, that vehicles are placed from them', () => {
     expect(describeSource('timetable', { delays: true })).toEqual({
       ...describeSource('timetable'),
-      banner: { words: 'onTimetable.bannerWithDelays', dated: false },
       legend: 'onTimetable.legendWithDelays',
     })
   })
 
   it.each(['simulated', 'recording', 'rejseplanen'] as const)(
-    'tells of the %s source as before with delays on: its banner and legend are its own',
+    'tells of the %s source as before with delays on: its legend is its own',
     (kind) => {
       expect(describeSource(kind, { delays: true })).toEqual(describeSource(kind))
     },

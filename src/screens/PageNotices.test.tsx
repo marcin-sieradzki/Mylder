@@ -178,30 +178,25 @@ describe('the source banner', () => {
 describe('the timetable source', () => {
   /** Its last saved minute, built at 07:25:00 in Copenhagen with no call made. */
   const onTimetable = () => saved('0006.json', 'timetable-source')
-  const BANNER_EN =
-    "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be."
-  const BANNER_DA =
-    'Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være.'
 
-  it('says once, in the banner, that every vehicle is placed from its timetable', () => {
+  it('shows no banner: the legend, About and the panels say vehicles are placed from it', () => {
     land(onTimetable(), '2026-06-16T05:25:20Z')
     const { unmount } = renderScreen('en')
-    expect(notices()).toEqual([BANNER_EN])
+    expect(notices()).toEqual([])
     expect(updatedLine()).toHaveTextContent('Updated 07:25:00')
     unmount()
     renderScreen('da')
-    expect(notices()).toEqual([BANNER_DA])
+    expect(notices()).toEqual([])
     expect(updatedLine()).toHaveTextContent('Opdateret 07:25:00')
   })
 
-  it('names the planes after it, in both languages', () => {
+  it('says nothing of live planes, and that recorded ones are recorded', () => {
     land(onTimetable(), '2026-06-16T05:25:20Z')
     act(() => liveAircraft.update({ snapshot: aircraft('adsb.lol') }))
-    const { unmount } = renderScreen('en')
-    expect(notices()).toEqual([`${BANNER_EN} Planes: live from adsb.lol.`])
-    unmount()
-    renderScreen('da')
-    expect(notices()).toEqual([`${BANNER_DA} Fly: live fra adsb.lol.`])
+    renderScreen('en')
+    expect(notices()).toEqual([])
+    act(() => liveAircraft.update({ snapshot: aircraft('recording') }))
+    expect(notices()).toEqual(['Planes: recorded adsb.lol data.'])
   })
 
   it('never shows Paused, however long after the snapshot was built', () => {
@@ -214,12 +209,12 @@ describe('the timetable source', () => {
     }
     land(odd, '2026-06-16T09:25:00Z')
     const { unmount } = renderScreen('en')
-    expect(notices()).toEqual([BANNER_EN])
+    expect(notices()).toEqual([])
     expect(updatedLine()).toHaveTextContent('Updated 07:25:00')
     expect(updatedLine()).not.toHaveTextContent('paused')
     unmount()
     renderScreen('da')
-    expect(notices()).toEqual([BANNER_DA])
+    expect(notices()).toEqual([])
     expect(updatedLine()).not.toHaveTextContent('sat på pause')
   })
 
@@ -240,7 +235,6 @@ describe('the timetable source', () => {
     renderScreen('en')
     expect(notices()).toEqual([
       'The timetable ends on 26 August. Without a new one, the map has no trips after that.',
-      BANNER_EN,
     ])
   })
 })
@@ -248,39 +242,23 @@ describe('the timetable source', () => {
 describe('the timetable source with SIRI-ET’s delays', () => {
   /** The SIRI-ET recording's second saved minute, built at 09:22:00 in Copenhagen. */
   const withDelays = () => saved('0002.json', 'siri-et')
-  const BANNER_EN =
-    "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay."
-  const BANNER_DA =
-    'Køreplan og forsinkelser: der er endnu ingen livepositioner, så hvert køretøj er placeret ud fra sin køreplan og, hvor Rejseplanen har sendt en, sin forsinkelse.'
 
-  it('says once, in the banner, that vehicles are placed from the timetable and their delay', () => {
+  it('shows no banner', () => {
     land(withDelays(), '2026-10-31T08:22:20Z')
     const { unmount } = renderScreen('en')
-    expect(notices()).toEqual([BANNER_EN])
+    expect(notices()).toEqual([])
     expect(updatedLine()).toHaveTextContent('Updated 09:22:00')
     unmount()
     renderScreen('da')
-    expect(notices()).toEqual([BANNER_DA])
+    expect(notices()).toEqual([])
   })
 
-  it('shows no Paused notice when the delays go quiet, only the banner', () => {
+  it('shows no Paused notice when the delays go quiet', () => {
     // 09:28:00, over 5 min after the feed's last message, at 09:21:52: Mylder's card in
     // Disruptions says so, and nothing pauses, since the transit asks Rejseplanen nothing.
-    const quiet = withDelays()
-    land(quiet, '2026-10-31T08:28:00Z')
-    const { unmount } = renderScreen('en')
-    expect(notices()).toEqual([BANNER_EN])
-    unmount()
-    renderScreen('da')
-    expect(notices()).toEqual([BANNER_DA])
-  })
-
-  it('says the timetable alone places every vehicle once the updates are off', () => {
-    land({ ...withDelays(), updates: { kind: 'off', fresh: false, withUpdate: {}, unmatched: {} } })
+    land(withDelays(), '2026-10-31T08:28:00Z')
     renderScreen('en')
-    expect(notices()).toEqual([
-      "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
-    ])
+    expect(notices()).toEqual([])
   })
 })
 

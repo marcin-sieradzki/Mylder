@@ -26,11 +26,11 @@ test('with MYLDER_SOURCE unset, the map runs on the timetable and says so', asyn
   expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(new Set(['timetable-only']))
 
   await page.goto(`${DEFAULT_URL}/en`)
-  // The City sheet has statuses of its own; the banner is the one that names the data.
-  const banner = page.getByRole('status').filter({ hasText: /^Timetable only:/ })
-  await expect(banner).toHaveText(
-    "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
-  )
+  // No banner names the source: the legend's note says every vehicle is placed from the timetable.
+  await expect(
+    page.getByText("Every vehicle is Timetable only for now: live positions aren't connected yet."),
+  ).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Timetable only:/ })).toHaveCount(0)
   const map = page.locator('[data-vehicles]')
   await expect
     .poll(async () => Number(await map.getAttribute('data-vehicles')), {

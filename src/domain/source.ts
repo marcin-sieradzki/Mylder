@@ -13,8 +13,7 @@ export const SOURCE_KINDS = ['timetable', 'simulated', 'recording', 'rejseplanen
 export type SourceKind = (typeof SOURCE_KINDS)[number]
 
 /** The source banner's words, which `{date}` fills with the day a recording was made. */
-export type BannerWords =
-  'notices.simulated' | 'notices.recorded' | 'onTimetable.banner' | 'onTimetable.bannerWithDelays'
+export type BannerWords = 'notices.simulated' | 'notices.recorded'
 
 /** The legend's note on which states the dots can take, on a source with no positions. */
 export type LegendWords = 'onTimetable.legend' | 'onTimetable.legendWithDelays'
@@ -47,8 +46,9 @@ export interface SourceDescription {
   /** Whether it brings Rejseplanen's disruption messages; without them Disruptions says so. */
   readonly messages: boolean
   /**
-   * The banner that says where the page's data comes from, and whether it names the day the
-   * snapshot was built; none for Rejseplanen's own live data.
+   * The banner that says the page's data isn't real, and whether it names the day the snapshot
+   * was built; none for real data, Rejseplanen's own or the timetable's, whose legend, About and
+   * panels name it.
    */
   readonly banner?: { readonly words: BannerWords; readonly dated: boolean }
   /**
@@ -68,7 +68,7 @@ export interface SourceDescription {
 }
 
 /** What SIRI-ET's delays change in a source's description, when they are on. */
-export type WithDelays = Partial<Pick<SourceDescription, 'banner' | 'legend'>>
+export type WithDelays = Partial<Pick<SourceDescription, 'legend'>>
 
 /** A description for each of the kinds `K`, every one required, and what delays change in it. */
 export type SourceDescriptions<K extends string> = {
@@ -92,16 +92,12 @@ export const SOURCE_DESCRIPTIONS: SourceDescriptions<SourceKind> = {
     callsRejseplanen: false,
     positions: false,
     messages: false,
-    banner: { words: 'onTimetable.banner', dated: false },
     legend: 'onTimetable.legend',
     named: 'onTimetable.source',
     note: 'onTimetable.note',
     credit: 'timetable',
     // Vehicles are placed from the timetable and, where Rejseplanen has sent one, their delay.
-    withDelays: {
-      banner: { words: 'onTimetable.bannerWithDelays', dated: false },
-      legend: 'onTimetable.legendWithDelays',
-    },
+    withDelays: { legend: 'onTimetable.legendWithDelays' },
   },
   simulated: {
     ...ANSWERING,
@@ -120,8 +116,8 @@ export const SOURCE_DESCRIPTIONS: SourceDescriptions<SourceKind> = {
 
 /**
  * The description of a source, with SIRI-ET's delays on (`delays`, the snapshot's updates not off)
- * or off. A source whose banner and legend are its own whatever the delays, such as a simulation,
- * reads the same either way.
+ * or off. A source whose legend is its own whatever the delays, such as a simulation, reads the
+ * same either way.
  */
 export function describeSource(
   kind: SourceKind,

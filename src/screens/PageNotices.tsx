@@ -86,8 +86,9 @@ const COLOURS: Record<PageNotice['kind'], AlertProps['color']> = {
 /**
  * The page notices (docs/screens.md, "Page notices"), as alerts at the top of the map, above
  * every panel: Disconnected, then Paused beneath it, the budget line, the timetable notice and
- * the source banner. The banner names the transit's source, then says whether the planes are
- * live or recorded; recorded planes beside real transit get a banner of their own.
+ * the source banner. The banner, on simulated or recorded transit, says so, then whether the
+ * planes are live or recorded; recorded planes beside real transit, Rejseplanen's or the
+ * timetable's, get a banner of their own.
  */
 export function PageNotices() {
   const i18n = useI18n()
