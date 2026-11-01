@@ -7,7 +7,7 @@ argument-hint: '<spec or ticket issue number>'
 
 `/factory <spec>` builds every ticket of one spec issue to a merged PR. You are the **orchestrator**: you start every subagent, read what each returns, post the verdicts, merge, and keep the run log. The design, the words (run, brake, verdict, evidence, cap, run log), the labels and the roles are in [`docs/agents/factory.md`](../../../docs/agents/factory.md); read it, and [`docs/agents/issue-tracker.md`](../../../docs/agents/issue-tracker.md) for every issue operation, before step 1. With no `gh`, as in a cloud thread, use the GitHub MCP tools for the same operations.
 
-Subagents are `general-purpose` agents whose prompt starts with the role file to read, [`implementer.md`](implementer.md) or [`verifier.md`](verifier.md), and ends with "Your final message is your return." The review is the repo's `code-review` skill, which you run. Reach a repo skill by reading its `SKILL.md` under `.claude/skills/`: a cloud thread's Skill tool lists none of them, and its `code-review` is a built-in of the same name. At most three subagents at once, counting the review's two axes; give each pointers (issue numbers, branch, paths), never pasted context. You own their work: read each diff and verdict before acting on it.
+Subagents are `general-purpose` agents whose prompt starts with the role file to read, [`implementer.md`](implementer.md) or [`verifier.md`](verifier.md), and ends with "Your final message is your return." The review is the repo's `factory-code-review` skill, which you run. Reach a repo skill by reading its `SKILL.md` under `.claude/skills/`: a cloud thread's Skill tool lists none of them. At most three subagents at once, counting the review's two axes; give each pointers (issue numbers, branch, paths), never pasted context. You own their work: read each diff and verdict before acting on it.
 
 ## 1. Claim the spec
 
@@ -33,7 +33,7 @@ Start an implementer in the background: `Read .claude/skills/factory/implementer
 
 ## 5. Review
 
-Follow `.claude/skills/code-review/SKILL.md` on the ticket's branch, fixed point `origin/main`, the ticket as its spec. Every hard Standards violation, and every missing or wrong Spec requirement, goes back to step 4 as a rework round with those findings; judgement calls and smells go in the PR body under **Review notes**. Two rework rounds on the review without a clean one: stop the ticket (step 8). Done when a review finds no hard violation and no Spec gap.
+Follow `.claude/skills/factory-code-review/SKILL.md` on the ticket's branch, fixed point `origin/main`, the ticket as its spec. Every hard Standards violation, and every missing or wrong Spec requirement, goes back to step 4 as a rework round with those findings; judgement calls and smells go in the PR body under **Review notes**. Two rework rounds on the review without a clean one: stop the ticket (step 8). Done when a review finds no hard violation and no Spec gap.
 
 ## 6. Verify
 
@@ -41,7 +41,7 @@ Start a verifier in the foreground: `Read .claude/skills/factory/verifier.md and
 
 1. Push the evidence to the orphan `evidence` branch under `<pr>/<round>/` (a worktree of `origin/evidence`, or `git worktree add --orphan -b evidence ../mylder-evidence` the first time), and post the verdict on the PR as a comment, each screenshot linked as `https://github.com/marcin-sieradzki/mylder/blob/evidence/<pr>/<round>/<file>?raw=true`.
 2. **FAIL**: back to step 4 as a rework round, with the verdict's failing stories and what the branch showed; the implementer adds a regression test for each. Two rework rounds on verify without a pass: stop the ticket (step 8).
-3. **PASS+NOTES**: file each note as an issue under the spec, blocking nothing, linked from the verdict.
+3. **PASS+NOTES**: file each note as an issue, linked from the verdict. A note this spec's changes caused goes under the spec, blocking nothing, and this run builds it. A note `main` shows too (the verdict's `main` column, or a check of `main` for anything the verdict doesn't cover) is a standalone issue for a later run.
 
 Done when the PR's latest verdict is PASS or PASS+NOTES.
 

@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder`, `to-spec`, `to-tickets`, `factory` and `code-review` skills read and write issues as this page says.
+Mylder's work is tracked in this repository's GitHub Issues, through the `gh` CLI, which finds the repository from the clone. The `wayfinder`, `to-spec`, `to-tickets`, `factory` and `factory-code-review` skills read and write issues as this page says.
 
 ## Operations
 
