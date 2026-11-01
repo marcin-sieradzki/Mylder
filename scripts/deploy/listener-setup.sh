@@ -10,9 +10,9 @@
 #
 #   scripts/deploy/listener-setup.sh <env-file>
 #
-# The env file holds DU_CLIENT_ID, DU_TENANT_ID, DU_SECRET, and the four amqps:// addresses: as
-# DU_ADDRESSES, separated by spaces or commas, or as variables of any name whose values start
-# with amqps://.
+# The env file holds DU_CLIENT_ID, DU_TENANT_ID and the four amqps:// addresses: as DU_ADDRESSES,
+# separated by spaces or commas, or as variables of any name whose values start with amqps://.
+# DU_SECRET, the service account's password, may be in it too; when it isn't, the script asks.
 set -euo pipefail
 
 APP=mylder-listener
@@ -29,6 +29,11 @@ set -a
 . "$env_file"
 set +a
 
+if [ -z "${DU_SECRET:-}" ] && [ -t 0 ]; then
+  # The service account's password stays out of the file: asked for here, never echoed.
+  read -rsp "The Mylder service account's password (not shown): " DU_SECRET
+  echo
+fi
 if [ -z "${DU_ADDRESSES:-}" ]; then
   DU_ADDRESSES=$(env | sed -n 's/^[A-Za-z_][A-Za-z0-9_]*=\(amqps:\/\/[^ ]*\)$/\1/p' | sort -u | paste -sd, -)
 fi
