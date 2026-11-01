@@ -49,7 +49,10 @@ describe("City pulse's paused rule on the timetable source", () => {
     // The weekday's 07:25 answer, its modes alternating, so its Live limit is 240 s: failing
     // since a minute before it, positions pause 180 s after it.
     const weekday = saved('weekday', '0006.json')
-    const failing: Snapshot = { ...weekday, api: { status: 'error', since: weekday.fetched - MINUTE } }
+    const failing: Snapshot = {
+      ...weekday,
+      api: { status: 'error', since: weekday.fetched - MINUTE },
+    }
     expect(pausedFrom(failing)).toBe(weekday.fetched + 3 * MINUTE)
   })
 })

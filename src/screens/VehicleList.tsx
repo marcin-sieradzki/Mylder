@@ -1,20 +1,19 @@
 'use client'
 
 import { Link, SearchField } from '@mylder/perron'
-import { DataStatePanel, SourceLine, VehicleTable } from '@mylder/perron/patterns'
+import { DataStatePanel, VehicleTable } from '@mylder/perron/patterns'
 import { useDeferredValue, useMemo, useState, type MouseEvent, type SyntheticEvent } from 'react'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { useI18n } from '../i18n/useI18n'
-import { useClockOffset, useLastAnswer, useSnapshot } from '../map/live'
+import { useLastAnswer, useSnapshot } from '../map/live'
 import { usePaused } from '../map/notices'
 import { useDataStates } from '../map/states'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { mapView, openPanel, searchWith, useHiddenModes } from '../map/view'
 import { clockTime } from '../timetable/time'
-import type { Snapshot } from '../tracker/index'
 import { carriesDelays } from './delays'
 import { badgeLine } from './departureRow'
-import { useServerSecond } from './useServerSecond'
+import { PositionsSource } from './PositionsSource'
 import { titleOf } from './vehicleLabel'
 import styles from './VehicleList.module.css'
 import {
@@ -38,12 +37,6 @@ const tripHref = (search: string, key: string) =>
 function freshHref(event: SyntheticEvent<HTMLAnchorElement>, key: string) {
   event.currentTarget.setAttribute('href', tripHref(window.location.search, key))
 }
-
-/**
- * A snapshot this far past its poll interval is late: the poll lands up to 4 s after it is due,
- * and asks again up to three times 5 s apart for an answer that isn't new yet.
- */
-const LATE_AFTER = 20_000
 
 /** Opens the trip in place, as the map's own address does, rather than loading the page again. */
 function openTrip(event: MouseEvent<HTMLAnchorElement>, key: string) {
@@ -95,11 +88,10 @@ export function VehicleList() {
         onChange={(_event, value) => setQuery(value)}
       />
       {updatedAt === undefined || !snapshot ? null : (
-        <ListSource
+        <PositionsSource
           snapshot={snapshot}
           time={clockTime(updatedAt, timezone, { seconds: true })}
           paused={paused}
-          words={words}
         />
       )}
       <DataStatePanel
@@ -119,30 +111,6 @@ export function VehicleList() {
         </div>
       </DataStatePanel>
     </div>
-  )
-}
-
-interface ListSourceProps {
-  snapshot: Snapshot
-  /** The positions' time, `HH:MM:SS`. */
-  time: string
-  paused: boolean
-  words: ClientDictionary['vehicleList']
-}
-
-/**
- * The source line above the rows: Rejseplanen and the positions' time, "may be out of date" once
- * the snapshot is older than its refresh. It reads the clock each second on its own, so the rows
- * don't render again with it.
- */
-function ListSource({ snapshot, time, paused, words }: ListSourceProps) {
-  const now = useServerSecond(useClockOffset())
-  const late = now - snapshot.fetched > snapshot.pollInterval * 1000 + LATE_AFTER
-  return (
-    <SourceLine
-      sources={[{ name: 'Rejseplanen', label: words.positionsAt, time, outOfDate: late }]}
-      paused={paused}
-    />
   )
 }
 
