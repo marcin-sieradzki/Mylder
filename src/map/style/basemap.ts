@@ -7,14 +7,16 @@
 // under the lines and stops (ADR 0016), where the flat footprints stop.
 import 'client-only'
 import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson'
-import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import type { ExpressionSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { distance } from '../../domain/trip-motion.ts'
 import type { LineRecord, Mode } from '../../timetable/format.ts'
 import type { Network } from '../../timetable/network.ts'
 import type { LatLon } from '../../timetable/polyline.ts'
 import type { Highlight } from '../highlight.ts'
+import { parseColour } from '../glyphs.ts'
 import { modeColour, numberOf, type Paint } from '../paint.ts'
 import positron from './positron.json'
+import { BAR_BANDS, stationBars, type StationBar } from './stations.ts'
 import { patternPlaces, strandsOf, type StrandOf } from './strands.ts'
 
 type MapColour =
@@ -173,6 +175,8 @@ export function vehicleOffsets(paint: Paint, network: Network): Offsets {
 
 const STOP_FILL = map('land')
 const STOP_RING = map('label')
+/** A station bar's ring: the text's colour, so the bar reads over the colours of its lines. */
+const BAR_RING = 'perron-color-text-primary'
 
 /** How much wider a line in focus is drawn than at rest; a bus route has a width of its own. */
 const FOCUS_EXTRA = 'perron-map-line-width-focus-extra'
@@ -195,6 +199,7 @@ export function paintTokens(network?: Network, highlight?: Highlight): string[] 
     ...LINE.map(([, colour]) => map(colour)),
     map('label'),
     map('water-label'),
+    BAR_RING,
     map('building-3d'),
     BUILDING_OPACITY,
     ...RAIL.flatMap(({ width, opacity }) => [width, opacity]),
@@ -246,7 +251,12 @@ export function basemapStyle(
 
   const dimmed = highlight !== undefined
   style.sources['mylder-lines'] = { type: 'geojson', data: lineFeatures(paint, network, dimmed) }
-  style.sources['mylder-stops'] = { type: 'geojson', data: stopFeatures(network) }
+  const bars = stationBars(network, {
+    widthOf: (mode) => numberOf(paint, RAIL.find((rail) => rail.mode === mode)!.width),
+    offsets: vehicleOffsets(paint, network),
+  })
+  style.sources['mylder-stops'] = { type: 'geojson', data: stopFeatures(network, bars) }
+  style.sources[STATIONS] = { type: 'geojson', data: barFeatures(network, bars) }
   const focus = highlightFeatures(paint, highlight)
   style.sources[HIGHLIGHT_LINES] = { type: 'geojson', data: focus.lines }
   style.sources[HIGHLIGHT_STOPS] = { type: 'geojson', data: focus.stops }
@@ -260,12 +270,24 @@ const HIGHLIGHT_STOPS = 'mylder-highlight-stops'
 
 const BUS_STOPS = 'mylder-stops-bus'
 const RAIL_STOPS = 'mylder-stops-rail'
+/** The stations drawn as a bar across their lines, one layer for each band of zoom. */
+const STATIONS = 'mylder-stations'
+const STATION_BARS = BAR_BANDS.map((_, band) => `${STATIONS}-${band}`)
+/** The same stations as a dot, further out, where their lines lie too close to cross. */
+const STATIONS_FAR = 'mylder-stations-far'
+const BARS_FROM = BAR_BANDS[0].from
 
 /**
  * The layers the stops are drawn in, whose features carry each stop's `id`, for a tap to open:
  * a highlight's ringed stops too, drawn at any zoom.
  */
-export const STOP_LAYERS: readonly string[] = [HIGHLIGHT_STOPS, RAIL_STOPS, BUS_STOPS]
+export const STOP_LAYERS: readonly string[] = [
+  HIGHLIGHT_STOPS,
+  ...STATION_BARS,
+  STATIONS_FAR,
+  RAIL_STOPS,
+  BUS_STOPS,
+]
 
 function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
   const stationOpacity = dimmed ? numberOf(paint, DIM_STATION) : 1
@@ -284,27 +306,85 @@ function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
   }))
   const stops = (
     id: string,
-    rail: boolean,
+    filter: ExpressionSpecification,
     minzoom: number,
-    radius: number,
+    maxzoom = 24,
   ): LayerSpecification => ({
     id,
     type: 'circle',
     source: 'mylder-stops',
     minzoom,
-    filter: ['==', ['get', 'rail'], rail],
+    maxzoom,
+    filter,
     paint: {
-      'circle-radius': radius,
+      'circle-radius': id === BUS_STOPS ? BUS_STOP_RADIUS : STATION_RADIUS,
       'circle-color': paint.get(STOP_FILL) ?? '',
       'circle-stroke-color': paint.get(STOP_RING) ?? '',
-      'circle-stroke-width': 1,
+      'circle-stroke-width': STOP_RING_WIDTH,
       'circle-opacity': stationOpacity,
       'circle-stroke-opacity': stationOpacity,
     },
   })
+  const [fill, ring] = [hex(paint.get(STOP_FILL)), hex(paint.get(BAR_RING))]
+  const bars = BAR_BANDS.map(({ from, to }, band): LayerSpecification => ({
+    id: STATION_BARS[band],
+    type: 'symbol',
+    source: STATIONS,
+    minzoom: from,
+    maxzoom: to,
+    filter: ['==', ['get', 'band'], band],
+    layout: {
+      'icon-image': [
+        'concat',
+        'mylder-station-',
+        ['to-string', ['get', 'length']],
+        `-${fill}-${ring}`,
+      ],
+      'icon-rotate': ['get', 'bearing'],
+      'icon-offset': ['array', 'number', 2, ['get', 'offset']],
+      'icon-rotation-alignment': 'map',
+      'icon-pitch-alignment': 'map',
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+    },
+    paint: { 'icon-opacity': stationOpacity },
+  }))
   // A bus stop shows only close in, where the streets it stands on can be told apart.
-  return [...lines, stops(BUS_STOPS, false, 14, 2), stops(RAIL_STOPS, true, 9, 3)]
+  return [
+    ...lines,
+    stops(BUS_STOPS, ['!', ['get', 'rail']], 14),
+    stops(RAIL_STOPS, ['all', ['get', 'rail'], ['!', ['get', 'barred']]], 9),
+    stops(STATIONS_FAR, ['get', 'barred'], 9, BARS_FROM),
+    ...bars,
+  ]
 }
+
+/** A colour as the bars' image names carry it, six hex digits without the `#`. */
+function hex(colour: string | undefined): string {
+  const [r, g, b] = parseColour(colour ?? '') ?? [0, 0, 0]
+  return [r, g, b].map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * A stop's radius in pixels by zoom: small enough at city zoom to leave the lines readable, and
+ * growing close in, where a station is something to find and tap. An interchange, a stop of more
+ * than one rail mode such as Nørreport, is drawn a size up from a station of one.
+ */
+const STATION_RADIUS: ExpressionSpecification = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  9,
+  ['case', ['to-boolean', ['get', 'interchange']], 3.5, 3],
+  12,
+  ['case', ['to-boolean', ['get', 'interchange']], 5, 4],
+  15,
+  ['case', ['to-boolean', ['get', 'interchange']], 9, 7],
+  17,
+  ['case', ['to-boolean', ['get', 'interchange']], 12, 9],
+]
+const BUS_STOP_RADIUS: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 5]
+const STOP_RING_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2]
 
 /** The lines drawn at rest: every Metro, S-tog, train and light rail line with a pattern. */
 function drawnLines(network: Network): LineRecord[] {
@@ -387,17 +467,39 @@ function lineFeatures(
   return { type: 'FeatureCollection', features }
 }
 
-function stopFeatures(network: Network): FeatureCollection<Point> {
+function stopFeatures(network: Network, bars: readonly StationBar[]): FeatureCollection<Point> {
+  const barred = new Set(bars.map((bar) => bar.stop))
   return {
     type: 'FeatureCollection',
-    features: network.stops.stops.map((stop) => ({
+    features: network.stops.stops.map((stop, index) => ({
       type: 'Feature',
       properties: {
         id: stop.id,
         name: stop.name,
         rail: stop.modes.some((mode) => mode !== 'bus'),
+        interchange: stop.modes.filter((mode) => mode !== 'bus').length > 1,
+        barred: barred.has(index),
       },
       geometry: { type: 'Point', coordinates: [stop.lon, stop.lat] },
+    })),
+  }
+}
+
+/** Each station's bars across its lines, carrying the stop's id for a tap to open. */
+function barFeatures(network: Network, bars: readonly StationBar[]): FeatureCollection<Point> {
+  return {
+    type: 'FeatureCollection',
+    features: bars.map((bar) => ({
+      type: 'Feature',
+      properties: {
+        id: network.stops.stops[bar.stop].id,
+        name: network.stops.stops[bar.stop].name,
+        band: bar.band,
+        length: bar.length,
+        bearing: bar.bearing,
+        offset: [bar.offset, 0],
+      },
+      geometry: { type: 'Point', coordinates: [bar.at[1], bar.at[0]] },
     })),
   }
 }
@@ -446,7 +548,7 @@ function highlightLayers(paint: Paint): LayerSpecification[] {
       type: 'circle',
       source: HIGHLIGHT_STOPS,
       paint: {
-        'circle-radius': 3,
+        'circle-radius': STATION_RADIUS,
         'circle-color': paint.get(STOP_FILL) ?? '',
         'circle-stroke-color': ['get', 'colour'],
         'circle-stroke-width': 2,
