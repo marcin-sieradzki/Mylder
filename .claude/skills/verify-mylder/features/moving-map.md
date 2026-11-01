@@ -49,7 +49,7 @@ Preconditions:
 
 ## Gotchas
 
-- On `updates:siri-et` cancelled trips are few: bus 102A of 09:04, cancelled whole at 09:21:15 and marked `"cancelled":true` from 09:22 to 09:25 (the saved snapshot of 09:22, `recordings/siri-et/snapshots/0002.json`, has it too); bus 102A of 09:22, from 09:22 to 09:41; and the 950R of 10:01, Waiting from 09:56.
+- On `updates:siri-et` cancelled trips are few: the two 102A trips under "A cancelled trip absent" above (bus 102A of 09:04 was cancelled whole at 09:21:15, and the saved snapshot of 09:22, `recordings/siri-et/snapshots/0002.json`, has it too), and the 950R of 10:01, Waiting from 09:56.
 - Dots move between frames; pause first or retry the hover inside `expect(...).toPass()`.
 - On the timetable source the counts and lines are the deployed timetable's plan at the real time, so assert against `/api/snapshot`, not the weekday's 17; the panels' words there are in `vehicle-detail.md` and `stop-panel.md`.
 - After a minute the next snapshot lands and counts can change; assert counts in the first minute or against `/api/snapshot` fetched at the same moment.
