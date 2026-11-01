@@ -1,0 +1,10 @@
+{
+  "journey": "about-en-phone",
+  "pass": true,
+  "steps": [
+    "01-corner-credit-names-rejsekort-rejseplan-a-s: corner credit names Rejsekort & Rejseplan A/S (http://localhost:4401/en)",
+    "02-about-opened: about opened (http://localhost:4401/en)",
+    "03-about-delays-as-a-source-with-their-latest-update: about: delays as a source with their latest update (http://localhost:4401/en)",
+    "04-about-delays-credited-to-rejsekort-rejseplan-a-s: about: delays credited to Rejsekort & Rejseplan A/S (http://localhost:4401/en)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "r-weekday-pulse-da",
+  "pass": true,
+  "steps": [
+    "01-pulse-on-weekday: pulse on weekday (http://localhost:4303/en)",
+    "02-pulse-on-weekday-danish: pulse on weekday, danish (http://localhost:4303/da)"
+  ]
+}

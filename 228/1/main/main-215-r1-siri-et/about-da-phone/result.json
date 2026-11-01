@@ -1,0 +1,8 @@
+{
+  "journey": "about-da-phone",
+  "pass": false,
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: getByRole('link', { name: 'Rejseplanen', exact: true }).locator('..')\nExpected substring: \"Forsinkelser: Rejsekort & Rejseplan A/S\"\nReceived string:    \"Trafikdata: Rejseplanen (CC BY 4.0) · Fly: © adsb.lol-bidragydere under ODbL · © OpenStreetMap-bidragydere · © OpenMapTiles · OpenFreeMap\"\nTimeout: 30000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('link', { name: 'Rejseplanen', exact: true }).locator('..') with timeout 30000ms\n  - waiting for getByRole('link', { name: 'Rejseplanen', exact: true }).locator('..')\n    4 × locator resolved to <small class=\"pn-Attribution\">…</small>\n      - unexpected value \"Trafikdata: Rejseplanen (CC BY 4.0) · © OpenStreetMap-bidragydere · © OpenMapTiles · OpenFreeMap\"\n    51 × locator resolved to <small class=\"pn-Attribution\">…</small>\n       - unexpected value \"Trafikdata: Rejseplanen (CC BY 4.0) · Fly: © adsb.lol-bidragydere under ODbL · © OpenStreetMap-bidragydere · © OpenMapTiles · OpenFreeMap\"\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4401/da)"
+  ]
+}

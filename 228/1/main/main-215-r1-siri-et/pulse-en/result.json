@@ -1,0 +1,8 @@
+{
+  "journey": "pulse-en",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Overview' }).getByRole('group', { name: 'Average delay' })\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Overview' }).getByRole('group', { name: 'Average delay' }) with timeout 30000ms\n  - waiting for getByRole('dialog', { name: 'Overview' }).getByRole('group', { name: 'Average delay' })\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4401/en)"
+  ]
+}

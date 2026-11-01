@@ -1,0 +1,10 @@
+{
+  "journey": "r-weekday-lang",
+  "pass": true,
+  "steps": [
+    "01-english-with-line-5c: english with line=5C (http://localhost:4303/en?line=5C)",
+    "02-danish: danish (http://localhost:4303/da?line=5C)",
+    "03-om-mylder: om mylder (http://localhost:4303/da?line=5C)",
+    "04-back-to-english: back to english (http://localhost:4303/en?line=5C)"
+  ]
+}

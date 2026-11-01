@@ -1,0 +1,9 @@
+{
+  "journey": "r-vehicles-delay",
+  "pass": true,
+  "steps": [
+    "01-vehicles-list-with-a-delay-column: vehicles list with a Delay column (http://localhost:4401/en?tab=vehicles)",
+    "02-sorted-by-delay: sorted by delay (http://localhost:4401/en?tab=vehicles)",
+    "03-opened-row-panel-delay-matches-the-row: opened row: panel delay matches the row (http://localhost:4401/en?tab=vehicles&trip=bus.133.b999b32ae0.20261031.0907)"
+  ]
+}

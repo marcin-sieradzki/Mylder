@@ -1,0 +1,10 @@
+{
+  "journey": "pulse-en",
+  "pass": true,
+  "steps": [
+    "01-city-pulse-opened: city pulse opened (http://localhost:4401/en)",
+    "02-average-delay: average delay (http://localhost:4401/en)",
+    "03-with-delays-by-mode: with delays, by mode (http://localhost:4401/en)",
+    "04-position-meters-still-without-live-positions: position meters still without live positions (http://localhost:4401/en)"
+  ]
+}

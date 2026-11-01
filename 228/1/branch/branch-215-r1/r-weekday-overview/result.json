@@ -1,0 +1,10 @@
+{
+  "journey": "r-weekday-overview",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: city pulse (http://localhost:4303/en)",
+    "02-vehicles-list: vehicles list (http://localhost:4303/en?tab=vehicles)",
+    "03-search-5c: search 5C (http://localhost:4303/en?tab=vehicles)",
+    "04-no-match: no match (http://localhost:4303/en?tab=vehicles)"
+  ]
+}

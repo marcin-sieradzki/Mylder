@@ -1,0 +1,11 @@
+{
+  "journey": "pulse-da-phone",
+  "pass": true,
+  "steps": [
+    "01-city-pulse-opened: city pulse opened (http://localhost:4401/da)",
+    "02-average-delay: average delay (http://localhost:4401/da)",
+    "03-with-delays-by-mode: with delays, by mode (http://localhost:4401/da)",
+    "04-position-meters-still-without-live-positions: position meters still without live positions (http://localhost:4401/da)",
+    "05-phone-lines-inside-the-sheet: phone: lines inside the sheet (http://localhost:4401/da)"
+  ]
+}

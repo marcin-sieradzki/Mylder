@@ -1,0 +1,8 @@
+{
+  "journey": "r-quiet-shares",
+  "pass": true,
+  "steps": [
+    "01-pulse-while-fresh: pulse while fresh (http://localhost:4401/en)",
+    "02-pulse-with-the-feed-quiet-shares-hold: pulse with the feed quiet: shares hold (http://localhost:4401/en)"
+  ]
+}

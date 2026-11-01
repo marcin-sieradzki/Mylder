@@ -1,0 +1,10 @@
+{
+  "journey": "r-weekday-chrome",
+  "pass": true,
+  "steps": [
+    "01-map-chrome-credit-without-delays: map chrome, credit without delays (http://localhost:4303/en)",
+    "02-about-without-delays: about without delays (http://localhost:4303/en)",
+    "03-about-closed: about closed (http://localhost:4303/en)",
+    "04-about-from-the-credit: about from the credit (http://localhost:4303/en)"
+  ]
+}

@@ -1,0 +1,20 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en?line=5C')
+  await expect(page.getByRole('banner')).toBeVisible()
+  await step('english with line=5C')
+  await page.getByRole('navigation', { name: 'Language' }).getByRole('link', { name: 'Dansk' }).click()
+  await expect(page).toHaveURL(/\/da\?line=5C/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'da')
+  await step('danish')
+  await page.getByRole('button', { name: 'Om Mylder' }).click()
+  const about = page.getByRole('dialog', { name: 'Om Mylder' })
+  await expect(about).toBeVisible()
+  expect(await about.innerText()).not.toMatch(/Rejsekort|SIRI-ET|Forsinkelser:/)
+  await step('om mylder')
+  await page.keyboard.press('Escape')
+  await page.getByRole('navigation', { name: 'Sprog' }).getByRole('link', { name: 'English' }).click()
+  await expect(page).toHaveURL(/\/en\?line=5C/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await step('back to english')
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "r-quiet-shares",
+  "pass": false,
+  "error": "expect(received).toBe(expected) // Object.is equality\n\nExpected: \"ok\"\nReceived: \"Bus \\\"undefined\\\" vs \\\"404/461 · Movia\\\"; S-tog \\\"undefined\\\" vs \\\"34/47 · DSB\\\"; Train \\\"undefined\\\" vs \\\"44/83 · DSB\\\"\"\n\nCall Log:\n- Timeout 75000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-pulse-while-fresh: pulse while fresh (http://localhost:4401/en)",
+    "02-failure: failure (http://localhost:4401/en)"
+  ]
+}
