@@ -1,0 +1,32 @@
+# The SIRI-ET listener on Fly.io (#218, ADR 0019): one always-on machine in Stockholm, beside the
+# app's functions, serving its table route over TLS at Fly's edge. Deployed from main by
+# .github/workflows/listener.yml; its settings are Fly secrets (docs/live-data.md, "The listener").
+
+app = "mylder-listener"
+primary_region = "arn"
+
+[build]
+  dockerfile = "listener.Dockerfile"
+  ignorefile = "listener.Dockerfile.dockerignore"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Always up, whether or not requests come: the listener holds the feed's connections.
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+
+[[restart]]
+  policy = "always"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
