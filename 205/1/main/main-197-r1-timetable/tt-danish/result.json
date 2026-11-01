@@ -1,0 +1,9 @@
+{
+  "journey": "tt-danish",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Overblik' }).getByRole('tabpanel').getByRole('region', { name: 'I bevægelse, efter transportform' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Overblik' }).getByRole('tabpanel').getByRole('region', { name: 'I bevægelse, efter transportform' }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Overblik' }).getByRole('tabpanel').getByRole('region', { name: 'I bevægelse, efter transportform' })\n",
+  "steps": [
+    "01-byens-puls: Byens puls (http://localhost:4421/da)",
+    "02-failure: failure (http://localhost:4421/da)"
+  ]
+}

@@ -1,0 +1,68 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 10:21:45
+  - group "Filtre":
+    - button "Bus 354" [pressed]
+    - button "Metro 38" [pressed]
+    - button "S-tog 48" [pressed]
+    - button "Tog 80" [pressed]
+    - button "Letbane 14" [pressed]
+    - button "Fly 10" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en?tab=disruptions
+  - button "Om Mylder"
+- status: "Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls"
+    - tab "Køretøjer 584"
+    - tab "Driftsforstyrrelser" [selected]
+  - tabpanel "Driftsforstyrrelser":
+    - paragraph: Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu.
+- alert
+- region "Notifikationer"

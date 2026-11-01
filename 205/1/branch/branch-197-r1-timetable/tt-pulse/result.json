@@ -1,0 +1,10 @@
+{
+  "journey": "tt-pulse",
+  "pass": true,
+  "steps": [
+    "01-city-pulse-open-on-the-timetable-source: City pulse open on the timetable source (http://localhost:4421/en)",
+    "02-meters-read-dash-neutral-with-their-lines: meters read dash, neutral, with their lines (http://localhost:4421/en)",
+    "03-planned-trips-chart-with-its-peak: planned-trips chart with its peak (http://localhost:4421/en)",
+    "04-how-sure-are-we: how sure are we (http://localhost:4421/en)"
+  ]
+}

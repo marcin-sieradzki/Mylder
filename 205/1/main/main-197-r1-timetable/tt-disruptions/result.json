@@ -1,0 +1,9 @@
+{
+  "journey": "tt-disruptions",
+  "pass": false,
+  "error": "expect(locator).toHaveAccessibleName(expected) failed\n\nLocator:  getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ })\nExpected: \"Disruptions\"\nReceived: \"Disruptions 0\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveAccessibleName\" getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ }) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ })\n    13 × locator resolved to <button role=\"tab\" type=\"button\" tabindex=\"-1\" class=\"pn-Tab\" id=\"base-ui-_r_3_\" aria-disabled=\"false\" aria-selected=\"false\" data-orientation=\"horizontal\" data-activation-direction=\"none\">…</button>\n       - unexpected value \"Disruptions 0\"\n",
+  "steps": [
+    "01-city-pulse: City pulse (http://localhost:4421/en)",
+    "02-failure: failure (http://localhost:4421/en)"
+  ]
+}

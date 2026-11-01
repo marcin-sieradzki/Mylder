@@ -1,0 +1,9 @@
+{
+  "journey": "explore",
+  "pass": true,
+  "steps": [
+    "01-pulse: pulse (http://localhost:4421/en)",
+    "02-vehicles: vehicles (http://localhost:4421/en?tab=vehicles)",
+    "03-disruptions: disruptions (http://localhost:4421/en?tab=disruptions)"
+  ]
+}

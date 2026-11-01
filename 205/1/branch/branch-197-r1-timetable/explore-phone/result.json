@@ -1,0 +1,7 @@
+{
+  "journey": "explore-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-start: phone start (http://localhost:4421/en)"
+  ]
+}

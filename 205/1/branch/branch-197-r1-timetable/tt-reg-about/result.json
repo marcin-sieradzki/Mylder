@@ -1,0 +1,10 @@
+{
+  "journey": "tt-reg-about",
+  "pass": true,
+  "steps": [
+    "01-en-disruptions-tab: en disruptions tab (http://localhost:4421/en?tab=disruptions)",
+    "02-en-about: en About (http://localhost:4421/en?tab=disruptions)",
+    "03-da-disruptions-tab: da disruptions tab (http://localhost:4421/da?tab=disruptions)",
+    "04-da-about: da About (http://localhost:4421/da?tab=disruptions)"
+  ]
+}

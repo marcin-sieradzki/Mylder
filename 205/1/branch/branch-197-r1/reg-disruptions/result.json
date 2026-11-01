@@ -1,0 +1,11 @@
+{
+  "journey": "reg-disruptions",
+  "pass": true,
+  "steps": [
+    "01-list-and-footer: list and footer (http://localhost:4323/en?tab=disruptions)",
+    "02-show-on-map: show on map (http://localhost:4323/en?tab=disruptions&map=11.28/55.70501/12.57566)",
+    "03-cleared: cleared (http://localhost:4323/en?tab=disruptions&map=11.28/55.70501/12.57566)",
+    "04-5c-shown-tilted: 5C shown, tilted (http://localhost:4323/en?tab=disruptions&map=15.00/55.66899/12.58183/-30.0/50.0)",
+    "05-danish: Danish (http://localhost:4323/da?tab=disruptions)"
+  ]
+}

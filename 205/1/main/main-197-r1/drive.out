@@ -1,0 +1,3 @@
+PASS wd-unchanged: 6 steps in .verify/main-197-r1/wd-unchanged/
+PASS reg-overview: 5 steps in .verify/main-197-r1/reg-overview/
+PASS reg-disruptions: 5 steps in .verify/main-197-r1/reg-disruptions/

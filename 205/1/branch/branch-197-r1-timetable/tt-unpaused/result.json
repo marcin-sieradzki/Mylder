@@ -1,0 +1,8 @@
+{
+  "journey": "tt-unpaused",
+  "pass": true,
+  "steps": [
+    "01-city-pulse-at-first-snapshot: City pulse at first snapshot (http://localhost:4421/en)",
+    "02-city-pulse-after-two-and-a-half-minutes-still-not-paused: City pulse after two and a half minutes, still not paused (http://localhost:4421/en)"
+  ]
+}

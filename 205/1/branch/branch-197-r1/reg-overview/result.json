@@ -1,0 +1,11 @@
+{
+  "journey": "reg-overview",
+  "pass": true,
+  "steps": [
+    "01-pulse: pulse (http://localhost:4323/en)",
+    "02-list: list (http://localhost:4323/en?tab=vehicles)",
+    "03-search-5c: search 5C (http://localhost:4323/en?tab=vehicles)",
+    "04-search-zzz: search zzz (http://localhost:4323/en?tab=vehicles)",
+    "05-row-opened-vehicle-detail: row opened vehicle detail (http://localhost:4323/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)"
+  ]
+}

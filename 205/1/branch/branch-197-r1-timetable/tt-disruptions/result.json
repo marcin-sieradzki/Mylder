@@ -1,0 +1,9 @@
+{
+  "journey": "tt-disruptions",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: City pulse (http://localhost:4421/en)",
+    "02-disruptions-tab: Disruptions tab (http://localhost:4421/en?tab=disruptions)",
+    "03-after-the-next-snapshot: after the next snapshot (http://localhost:4421/en?tab=disruptions)"
+  ]
+}
