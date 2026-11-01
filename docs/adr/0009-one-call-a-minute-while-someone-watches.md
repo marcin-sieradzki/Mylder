@@ -1,7 +1,5 @@
 # One Rejseplanen call a minute, only while someone watches
 
-> Superseded by [ADR 0018](0018-mylder-runs-on-the-timetable-and-siri-et-without-the-rejseplanen-api.md): with no API calls, there is no budget.
-
 The free key allows 50,000 calls a calendar month, which is one call a minute around the clock with 5,360 to spare. Mylder spends the minute on one `journeyPos` call for one Greater Copenhagen box and the spare on `himsearch` every 15 minutes, on stops and vehicles a person opens, and on retries. Polling is pull-driven: the tracker runs only when a browser's poll misses the CDN, a browser polls only while its page is visible, so an evening with no viewers costs nothing and needs no scheduler or watcher count. A pacing rule compares the month's spend with a straight line to 50,000 and degrades in order: on-demand calls stop first, then the poll stretches to 90 and 120 s, then disruptions refresh less often; at 49,500 calls no more are made, and the page says live data is paused until the 1st.
 
 ## Considered Options

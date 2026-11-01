@@ -11,7 +11,7 @@ _Mylder_ is Danish for a teeming crowd, and it echoes _myldretid_, rush hour.
   <img alt="Mylder's map of Copenhagen: every bus, Metro, S-tog, train and light rail vehicle as a dot on its line, with City pulse open in the side sheet" src="docs/images/map-light.png">
 </picture>
 
-> **Status:** every screen of the first public version is built, and runs on a simulated Rejseplanen for now. Next come the timetable source, delays and cancellations from Rejseplanen's SIRI-ET feed, and deploying to Vercel. Mylder no longer waits for a Rejseplanen API key ([ADR 0018](docs/adr/0018-mylder-runs-on-the-timetable-and-siri-et-without-the-rejseplanen-api.md)). See the [roadmap](#roadmap).
+> **Status:** every screen of the first public version is built, and runs on a simulated Rejseplanen for now. Next come the timetable source, delays and cancellations from Rejseplanen's SIRI-ET feed, and deploying to Vercel. The Rejseplanen API joins once its key arrives ([ADR 0018](docs/adr/0018-mylder-goes-public-on-the-timetable-and-siri-et-and-adds-the-api-with-the-key.md)). See the [roadmap](#roadmap).
 
 ## Why
 
@@ -61,6 +61,8 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [ ] Every vehicle on its timetable by default, with no invented realtime
 - [ ] Delays and cancellations from Rejseplanen's SIRI-ET feed, through one small always-on listener
 - [ ] Deploy production and previews on Vercel, with the tracker's state in a hosted Redis
+
+**Once the API key arrives:** reported positions and disruption messages from the Rejseplanen API, on top of the timetable and SIRI-ET.
 
 **Later:** harbour ships from AIS, car traffic flow, replay of a past rush hour, a full-screen kiosk mode, more cities.
 
