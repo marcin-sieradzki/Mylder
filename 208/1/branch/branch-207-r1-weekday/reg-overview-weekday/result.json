@@ -1,0 +1,10 @@
+{
+  "journey": "reg-overview-weekday",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: City pulse (http://localhost:4401/en)",
+    "02-vehicles-list: Vehicles list (http://localhost:4401/en?tab=vehicles)",
+    "03-search-5c: search 5C (http://localhost:4401/en?tab=vehicles)",
+    "04-search-zzz: search zzz (http://localhost:4401/en?tab=vehicles)"
+  ]
+}

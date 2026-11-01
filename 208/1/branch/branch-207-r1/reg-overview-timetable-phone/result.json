@@ -1,0 +1,9 @@
+{
+  "journey": "reg-overview-timetable-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-peek: phone peek (http://localhost:4303/da)",
+    "02-metro-line-on-the-phone: Metro line on the phone (http://localhost:4303/da)",
+    "03-about-realtime-fact-on-the-phone: About realtime fact on the phone (http://localhost:4303/en)"
+  ]
+}

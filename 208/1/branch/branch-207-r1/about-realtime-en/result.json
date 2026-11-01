@@ -1,0 +1,9 @@
+{
+  "journey": "about-realtime-en",
+  "pass": true,
+  "steps": [
+    "01-map-loaded-on-the-timetable-source: map loaded on the timetable source (http://localhost:4303/en)",
+    "02-about-open-this-page-facts: About open, This page facts (http://localhost:4303/en)",
+    "03-about-closed: About closed (http://localhost:4303/en)"
+  ]
+}

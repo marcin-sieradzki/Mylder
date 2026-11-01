@@ -1,0 +1,9 @@
+{
+  "journey": "about-realtime-da",
+  "pass": true,
+  "steps": [
+    "01-map-loaded-in-danish-on-the-timetable-source: map loaded in Danish on the timetable source (http://localhost:4303/da)",
+    "02-om-mylder-open-denne-side-facts: Om Mylder open, Denne side facts (http://localhost:4303/da)",
+    "03-om-mylder-closed: Om Mylder closed (http://localhost:4303/da)"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "journey": "reg-lang-about",
+  "pass": true,
+  "steps": [
+    "01-english-with-line-5c: English with line 5C (http://localhost:4401/en?line=5C)",
+    "02-danish-query-kept: Danish, query kept (http://localhost:4401/da?line=5C)",
+    "03-back-to-english: back to English (http://localhost:4401/en?line=5C)",
+    "04-about-open: About open (http://localhost:4401/en?line=5C)",
+    "05-about-closed: About closed (http://localhost:4401/en?line=5C)"
+  ]
+}

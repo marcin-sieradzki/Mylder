@@ -1,0 +1,12 @@
+{
+  "journey": "reg-about-timetable",
+  "pass": true,
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4303/en)",
+    "02-about-open: About open (http://localhost:4303/en)",
+    "03-about-facts-in-view: About facts in view (http://localhost:4303/en)",
+    "04-about-closed-with-esc: About closed with Esc (http://localhost:4303/en)",
+    "05-switched-to-danish: switched to Danish (http://localhost:4303/da)",
+    "06-om-mylder-open: Om Mylder open (http://localhost:4303/da)"
+  ]
+}

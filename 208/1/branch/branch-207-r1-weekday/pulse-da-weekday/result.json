@@ -1,0 +1,8 @@
+{
+  "journey": "pulse-da-weekday",
+  "pass": true,
+  "steps": [
+    "01-danish-city-pulse-on-the-recording: Danish City pulse on the recording (http://localhost:4401/da)",
+    "02-metro-meter-line-in-view: Metro meter line in view (http://localhost:4401/da)"
+  ]
+}

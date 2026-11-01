@@ -1,0 +1,10 @@
+{
+  "journey": "about-realtime-weekday",
+  "pass": true,
+  "steps": [
+    "01--en-map-loaded-on-the-recording: /en map loaded on the recording (http://localhost:4401/en)",
+    "02--en-about-open: /en about open (http://localhost:4401/en)",
+    "03--da-map-loaded-on-the-recording: /da map loaded on the recording (http://localhost:4401/da)",
+    "04--da-about-open: /da about open (http://localhost:4401/da)"
+  ]
+}

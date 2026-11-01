@@ -1,0 +1,10 @@
+{
+  "journey": "about-realtime-en",
+  "pass": false,
+  "error": "expect(received).not.toMatch(expected)\n\nExpected pattern: not /Unknown|^—/\nReceived string:      \"—\nUnknown\"",
+  "steps": [
+    "01-map-loaded-on-the-timetable-source: map loaded on the timetable source (http://localhost:4302/en)",
+    "02-about-open-this-page-facts: About open, This page facts (http://localhost:4302/en)",
+    "03-failure: failure (http://localhost:4302/en)"
+  ]
+}

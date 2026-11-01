@@ -1,0 +1,10 @@
+{
+  "journey": "about-realtime-da",
+  "pass": false,
+  "error": "expect(received).not.toMatch(expected)\n\nExpected pattern: not /Ukendt|Unknown|^—/\nReceived string:      \"—\nUkendt\"",
+  "steps": [
+    "01-map-loaded-in-danish-on-the-timetable-source: map loaded in Danish on the timetable source (http://localhost:4302/da)",
+    "02-om-mylder-open-denne-side-facts: Om Mylder open, Denne side facts (http://localhost:4302/da)",
+    "03-failure: failure (http://localhost:4302/da)"
+  ]
+}

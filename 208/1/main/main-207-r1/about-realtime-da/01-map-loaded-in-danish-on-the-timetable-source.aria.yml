@@ -1,0 +1,111 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 07:22:21
+  - group "Filtre":
+    - button "Fly 8" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en
+  - button "Om Mylder"
+- status: "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være. Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- paragraph: "Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner."
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls" [selected]
+    - tab "Køretøjer 17"
+    - tab "Driftsforstyrrelser"
+  - tabpanel "Byens puls":
+    - group "I bevægelse":
+      - text: I bevægelse 17
+      - paragraph: af 17 i drift
+    - group "Meldt i dette minut":
+      - text: Meldt i dette minut Ukendt
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - group "Melder live":
+      - text: Melder live Ukendt
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - paragraph:
+      - text: Køreplan ·
+      - time: placeret 07:22:21
+    - list "På kortet nu":
+      - listitem: Live 0
+      - listitem: Ældre 0
+      - listitem: Beregnet 0
+      - listitem: Kun køreplan 17
+      - listitem: Intet signal 0
+    - region "I bevægelse, efter transportform":
+      - heading "I bevægelse, efter transportform" [level=3]
+      - term: Bus
+      - definition: "6"
+      - term: Metro
+      - definition: "4"
+      - term: S-tog
+      - definition: "6"
+      - term: Tog
+      - definition: "1"
+    - region "Melder live, efter transportform":
+      - heading "Melder live, efter transportform" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+      - meter "Metro": Metro x
+      - paragraph: Ingen realtid fra Metroen; placeret ud fra køreplanen
+      - meter "S-tog": S-tog x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+      - meter "Tog": Tog x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - status:
+      - paragraph: Indlæser
+    - region "Hvor sikre er vi?":
+      - heading "Hvor sikre er vi?" [level=3]
+      - list "Hvor sikre er vi?":
+        - listitem: Live 0 Meldt af køretøjet i de seneste svar.
+        - listitem: Ældre 0 Sidst meldt for få minutter siden; kører siden videre ad sin rute.
+        - listitem: Beregnet 0 Placeret ud fra køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.
+        - listitem: Kun køreplan 17 Ingen livepositioner endnu; placeret efter køreplanen.
+        - listitem: Intet signal 0 Havde realtid, mangler i 5 min; kører videre efter køreplanen og sin seneste forsinkelse.
+- alert
+- region "Notifikationer"

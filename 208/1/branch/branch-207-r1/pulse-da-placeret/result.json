@@ -1,0 +1,8 @@
+{
+  "journey": "pulse-da-placeret",
+  "pass": true,
+  "steps": [
+    "01-danish-city-pulse-open: Danish City pulse open (http://localhost:4303/da)",
+    "02-metro-meter-line-in-view: Metro meter line in view (http://localhost:4303/da)"
+  ]
+}

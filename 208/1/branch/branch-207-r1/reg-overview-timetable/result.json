@@ -1,0 +1,11 @@
+{
+  "journey": "reg-overview-timetable",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: City pulse (http://localhost:4303/en)",
+    "02-city-pulse-figures-checked: City pulse figures checked (http://localhost:4303/en)",
+    "03-vehicles-list: Vehicles list (http://localhost:4303/en?tab=vehicles)",
+    "04-search-with-no-match: search with no match (http://localhost:4303/en?tab=vehicles)",
+    "05-danish-city-pulse: Danish City pulse (http://localhost:4303/da)"
+  ]
+}
