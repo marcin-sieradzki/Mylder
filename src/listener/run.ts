@@ -59,6 +59,9 @@ export interface ListenerConfig {
 /** A token is renewed this often, well inside the hour an Entra ID token lasts. */
 export const TOKEN_EVERY = 15 * 60_000
 
+/** How many of the latest tokens are cut out of log lines: two hours' worth. */
+const KEPT_TOKENS = 8
+
 /** A failed renewal is tried again this soon. */
 const TOKEN_RETRY = 60_000
 
@@ -106,14 +109,16 @@ export function startListener({
   version,
 }: RunOptions): Running {
   const now = () => Date.now()
-  const secrets = new Set([
+  const credentials = [
     config.secret,
     config.clientId,
     config.tenantId,
     config.token,
     ...config.datasets.map((d) => d.subscription),
-  ])
-  const log = redacting(write, secrets)
+  ]
+  /** The Entra ID tokens of the last two hours, past the hour or so each one lasts. */
+  const tokens: string[] = []
+  const log = redacting(write, () => [...credentials, ...tokens])
   const listener = createListener({ token: config.token, version, startedAt: now(), now })
   const timers = new Set<ReturnType<typeof setTimeout>>()
   const later = (ms: number, run: () => void) => {
@@ -130,7 +135,8 @@ export function startListener({
   let jwt: { readonly token: string; readonly at: number } | undefined
   const newToken = async (): Promise<string> => {
     const token = await entraToken(config, fetch)
-    secrets.add(token)
+    tokens.push(token)
+    if (tokens.length > KEPT_TOKENS) tokens.shift()
     jwt = { token, at: now() }
     return token
   }
@@ -303,7 +309,7 @@ export async function entraToken(
  * A log that cuts each of `secrets`, as they stand when a line is written, out of every string in
  * the line, in one pass, so no secret is found inside another's mark.
  */
-function redacting(log: Log, secrets: ReadonlySet<string>): Log {
+function redacting(log: Log, secrets: () => readonly string[]): Log {
   const redact = (value: unknown, pattern: RegExp): unknown => {
     if (typeof value === 'string') return value.replace(pattern, '<redacted>')
     if (Array.isArray(value)) return value.map((each) => redact(each, pattern))
@@ -315,9 +321,9 @@ function redacting(log: Log, secrets: ReadonlySet<string>): Log {
     return value
   }
   return (line) => {
-    const cut = [...secrets]
+    const cut = secrets()
       .filter(Boolean)
-      .sort((a, b) => b.length - a.length)
+      .toSorted((a, b) => b.length - a.length)
       .map((secret) => secret.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     log(cut.length > 0 ? (redact(line, new RegExp(cut.join('|'), 'g')) as LogLine) : line)
   }
