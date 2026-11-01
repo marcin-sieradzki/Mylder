@@ -93,6 +93,9 @@ interface RunOutcome {
   readonly calls: Snapshot['status']['calls']
 }
 
+/** A run that made no call and had no answer, with the API's health ok. */
+const NO_CALL: RunOutcome = { health: { status: 'ok' }, calls: [] }
+
 export interface TrackerShape {
   readonly getSnapshot: Effect.Effect<Snapshot>
   readonly getStopDepartures: (stopId: string) => Effect.Effect<StopDepartures | undefined>
@@ -265,7 +268,7 @@ export const layer: Layer.Layer<
       Effect.gen(function* (): Effect.fn.Return<RunOutcome> {
         const mode =
           positionMode === 'alternating' ? alternatingMode(previous?.answerMode, now) : positionMode
-        if (mode === 'none') return { health: { status: 'ok' }, calls: [] }
+        if (mode === 'none') return NO_CALL
         const result = yield* Effect.result(
           rejseplanen.journeyPos({
             box: COPENHAGEN_BOX,
@@ -332,6 +335,9 @@ export const layer: Layer.Layer<
       Effect.gen(function* () {
         const cpuFrom = yield* cpu
         const pace = yield* paceAt(now)
+        // The timetable source builds every run from the timetable alone, as a run with no answer,
+        // whatever the budget reads.
+        if (!calling) return yield* snapshotAt(now, previous, pace, NO_CALL, cpuFrom)
         // A spent month makes no call: the trips move on and age from their history alone, and
         // the modes take turns again from where they stopped.
         if (pace.level === 'spent') {
@@ -344,16 +350,6 @@ export const layer: Layer.Layer<
               health: { status: 'spent' },
               calls: [],
             },
-            cpuFrom,
-          )
-        }
-        // The timetable source builds every run from the timetable alone, as a run with no answer.
-        if (!calling) {
-          return yield* snapshotAt(
-            now,
-            previous,
-            pace,
-            { health: { status: 'ok' }, calls: [] },
             cpuFrom,
           )
         }
@@ -386,7 +382,7 @@ export const layer: Layer.Layer<
           now,
           previous,
           yield* paceAt(now),
-          { health: { status: 'ok' }, calls: [] },
+          NO_CALL,
           yield* cpu,
         )
         return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }

@@ -1,9 +1,12 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Effect, Layer, Logger } from 'effect'
 import { TestClock } from 'effect/testing'
+import { SPENT_AT } from './budget'
+import { callsKey } from './rejseplanen/client'
 import { keyPrefixOf, trackerLayer } from './runtime'
 import type { Snapshot } from './snapshot'
 import { readSource } from './source'
+import { Store } from './store'
 import { fixtureTimetable, startingAtMidnight } from './testing'
 import type { Timetable } from './timetable'
 import { Tracker, type PositionMode } from './tracker'
@@ -227,6 +230,20 @@ describe('the tracker on the timetable source', () => {
         })
       }).pipe(Effect.provide(onTimetable({ logged })))
     },
+  )
+
+  it.effect(
+    'runs as a healthy run with no calls even when its store reads the month as spent',
+    () =>
+      Effect.gen(function* () {
+        yield* TestClock.setTime(MOMENT)
+        // A counter no run on this source writes, set as a spent month's would be.
+        yield* (yield* Store).set(callsKey(keyPrefixOf(timetableSource), '2026-06'), SPENT_AT)
+        const s = yield* snapshot
+        expect(s.api).toEqual({ status: 'ok', since: MOMENT })
+        expect(s.status.calls).toEqual([])
+        for (const trip of s.trips) expect(trip.state).toBe('timetable-only')
+      }).pipe(Effect.provide(onTimetable())),
   )
 
   it('keeps its store keys apart from every other source’s', () => {
