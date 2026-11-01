@@ -1,8 +1,9 @@
 import { describe, expect, it } from '@effect/vitest'
 import { Cause, Effect, Exit, Logger } from 'effect'
 import * as Http from './http'
-import { apiLayer, readSource } from './source'
+import { apiLayer, readSource, updatesFor } from './source'
 import { fixtureTimetable } from './testing'
+import { readUpdates } from './updates'
 
 const timetable = await fixtureTimetable()
 
@@ -55,5 +56,27 @@ describe('the timetable source’s API layer', () => {
         ]),
       ),
     )
+  })
+})
+
+describe('the update switch beside the source switch', () => {
+  it('runs as set under the timetable, a recording and Rejseplanen', () => {
+    for (const source of ['timetable', 'recording:weekday', 'rejseplanen']) {
+      expect(updatesFor(readSource(source), readUpdates('siri'))).toEqual({
+        updates: { kind: 'siri' },
+      })
+    }
+  })
+
+  it('is ignored under the simulation, which brings its own updates, and says so', () => {
+    const { updates, warning } = updatesFor(readSource('simulated'), readUpdates('siri'))
+    expect(updates).toEqual({ kind: 'off' })
+    expect(warning).toMatch(/MYLDER_UPDATES=siri is ignored under MYLDER_SOURCE=simulated/)
+  })
+
+  it('says nothing when it is off under the simulation', () => {
+    expect(updatesFor(readSource('simulated:patchy'), readUpdates(undefined))).toEqual({
+      updates: { kind: 'off' },
+    })
   })
 })

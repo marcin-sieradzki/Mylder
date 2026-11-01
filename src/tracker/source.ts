@@ -13,6 +13,7 @@ import * as SimulatedRejseplanen from './simulation/layer.ts'
 import { DEFAULT_SCENARIO, scenarioNamed } from './simulation/scenarios.ts'
 import type { Snapshot } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
+import { UPDATES_VARIABLE, updatesSetting, type Updates } from './updates.ts'
 
 /**
  * A source as the tracker runs it, with the scenario or recording it needs. What a rider is told
@@ -123,5 +124,21 @@ export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.
       return RecordedHttpClient.layer(RECORDED_REJSEPLANEN, recordingDir(source.folder))
     case 'rejseplanen':
       return settings.key ? Http.fetchLayer : Http.layer(missingKey)
+  }
+}
+
+/**
+ * The updates a source runs with (`MYLDER_UPDATES`, ./updates.ts). The simulated Rejseplanen
+ * brings its own invented updates, so under it the switch is ignored, with a warning to log when it
+ * was set.
+ */
+export function updatesFor(
+  source: Source,
+  updates: Updates,
+): { readonly updates: Updates; readonly warning?: string } {
+  if (source.kind !== 'simulated' || updates.kind === 'off') return { updates }
+  return {
+    updates: { kind: 'off' },
+    warning: `${UPDATES_VARIABLE}=${updatesSetting(updates)} is ignored under MYLDER_SOURCE=simulated, which brings its own updates`,
   }
 }
