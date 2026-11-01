@@ -1,0 +1,20 @@
+{
+ "key": "bus.2A.643c65fb6f.20261031.0857",
+ "line": "2A",
+ "state": "estimated",
+ "delay": 240,
+ "fetched": "2026-10-31T08:20:43.194Z",
+ "pausedAt": "Updated 09:20:43",
+ "scanSeconds": 4.231,
+ "dot": {
+  "metresAlongPath": 6472,
+  "tooltip": "Bus 2A to Refshaleøen Estimated Estimated from schedule"
+ },
+ "timetablePast": {
+  "stop": "Forum St. (Rosenørns Allé)",
+  "index": 21,
+  "metresAlongPath": 7608,
+  "plannedDeparture": "2026-10-31T08:20:00.000Z",
+  "expectedDeparture": "2026-10-31T08:24:00.000Z"
+ }
+}

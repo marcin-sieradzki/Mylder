@@ -1,0 +1,8 @@
+{
+  "journey": "p3-before-drawn",
+  "pass": true,
+  "steps": [
+    "01-centred-on-102a-of-09-22-paused: centred on 102A of 09:22 paused (http://localhost:4302/en?map=15.00/55.40841/12.14224)",
+    "02-102a-of-09-22-hovered: 102A of 09:22 hovered (http://localhost:4302/en?map=15.00/55.40841/12.14224)"
+  ]
+}

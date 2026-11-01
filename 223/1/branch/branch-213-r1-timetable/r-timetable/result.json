@@ -1,0 +1,8 @@
+{
+  "journey": "r-timetable",
+  "pass": true,
+  "steps": [
+    "01-timetable-banner-and-legend-en: timetable banner and legend en (http://localhost:4401/en)",
+    "02-timetable-banner-and-legend-da: timetable banner and legend da (http://localhost:4401/da)"
+  ]
+}

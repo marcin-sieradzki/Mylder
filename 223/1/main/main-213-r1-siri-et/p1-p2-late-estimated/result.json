@@ -1,0 +1,11 @@
+{
+  "journey": "p1-p2-late-estimated",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /Estimated from schedule/\nReceived string:  \"Bus 2A to Refshaleøen Timetable only\"",
+  "steps": [
+    "01-map-open: map open (http://localhost:4302/en)",
+    "02-centred-on-2a-paused: centred on 2A paused (http://localhost:4302/en?map=15.00/55.67918/12.56397)",
+    "03-hover-2a-on-its-path: hover 2A on its path (http://localhost:4302/en?map=15.00/55.67918/12.56397)",
+    "04-failure: failure (http://localhost:4302/en?map=15.00/55.67918/12.56397)"
+  ]
+}

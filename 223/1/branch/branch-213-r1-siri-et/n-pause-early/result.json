@@ -1,0 +1,9 @@
+{
+  "journey": "n-pause-early",
+  "pass": true,
+  "steps": [
+    "01-paused-before-the-first-snapshot: paused before the first snapshot (http://localhost:4401/en?map=15.00/55.67600/12.56800)",
+    "02-snapshot-landed-while-paused: snapshot landed while paused (http://localhost:4401/en?map=15.00/55.67600/12.56800)",
+    "03-resumed: resumed (http://localhost:4401/en?map=15.00/55.67600/12.56800)"
+  ]
+}

@@ -1,0 +1,20 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+const outside = (page: any) => page.locator('[role=status]:not([role=dialog] [role=status])')
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible()
+  await expect(page.locator('[data-vehicles]')).not.toHaveAttribute('data-vehicles', '0')
+  const snap = await (await page.request.get('/api/snapshot')).json()
+  expect(snap.source).toEqual({ kind: 'timetable' })
+  expect(snap.trips.every((t: any) => t.state === 'timetable-only')).toBe(true)
+  console.log(JSON.stringify({ updates: snap.updates }))
+  await expect(outside(page).first()).toHaveText(/^Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be\./)
+  await expect(page.getByText(/paused|hasn't answered/i)).toHaveCount(0)
+  await expect(page.getByRole('list', { name: 'Data states' }).locator('xpath=..')).toContainText(/Every vehicle is Timetable only for now: live positions aren't connected yet\.$/)
+  await step('timetable banner and legend en')
+  await page.getByRole('link', { name: 'Dansk' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'da')
+  await expect(outside(page).first()).toHaveText(/^Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være\./)
+  await expect(page.getByText('Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.')).toBeVisible()
+  await step('timetable banner and legend da')
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "r-tilt-keys",
+  "pass": true,
+  "steps": [
+    "01-map-flat: map flat (http://localhost:4303/en)",
+    "02-tilted-30-turned-30: tilted 30 turned 30 (http://localhost:4303/en?map=11.20/55.68000/12.56500/30.0/30.0)",
+    "03-centred-flat: centred flat (http://localhost:4303/en?map=11.20/55.68000/12.56500)"
+  ]
+}

@@ -1,0 +1,35 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+// Pass rule: with SIRI-ET's delays on, a rider opening the map reads that vehicles are placed from
+// the timetable and their delay, and the legend shows Estimated (from its delay) and Timetable only,
+// in English and Danish; no Paused notice.
+const outside = (page: any) => page.locator('[role=status]:not([role=dialog] [role=status])')
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible()
+  await step('map open en')
+  const snap = await (await page.request.get('/api/snapshot')).json()
+  expect(snap.updates, 'snapshot has an updates block').toBeTruthy()
+  expect(snap.updates.kind).toBe('recording')
+  expect(snap.updates.fresh).toBe(true)
+  const states = new Set(snap.trips.map((t: any) => t.state))
+  expect([...states].sort()).toEqual(['estimated', 'timetable-only'])
+  for (const t of snap.trips.filter((t: any) => t.state === 'estimated')) expect(t.updated).toBeTruthy()
+  await expect(page.locator('[data-vehicles]')).toHaveAttribute('data-vehicles', String(snap.trips.filter((t: any) => !t.cancelled).length), { timeout: 15000 })
+  const statuses = outside(page)
+  await expect(statuses.first()).toHaveText(/^Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay\./)
+  await expect(page.getByText(/paused|hasn't answered/i)).toHaveCount(0)
+  const legend = page.getByRole('list', { name: 'Data states' })
+  await expect(legend).toBeVisible()
+  const surface = legend.locator('xpath=..')
+  await expect(surface).toContainText('Estimated')
+  await expect(surface).toContainText('Timetable only')
+  await expect(surface).toContainText(/For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet\.$/)
+  await step('banner and legend en')
+  await page.getByRole('link', { name: 'Dansk' }).click()
+  await expect(page).toHaveURL(/\/da/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'da')
+  await expect(outside(page).first()).toHaveText(/^Køreplan og forsinkelser: der er endnu ingen livepositioner, så hvert køretøj er placeret ud fra sin køreplan og, hvor Rejseplanen har sendt en, sin forsinkelse\./)
+  const daSurface = page.getByRole('list', { name: /Datatilstande|Data/ }).locator('xpath=..')
+  await expect(daSurface).toContainText(/Indtil videre er et køretøj Beregnet, placeret ud fra sin forsinkelse, eller Kun køreplan: der er endnu ingen livepositioner\.$/)
+  await step('banner and legend da')
+}

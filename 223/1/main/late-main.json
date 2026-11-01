@@ -1,0 +1,18 @@
+{
+ "key": "bus.2A.643c65fb6f.20261031.0857",
+ "line": "2A",
+ "state": "timetable-only",
+ "fetched": "2026-10-31T08:22:23.100Z",
+ "pausedAt": "Updated 09:22:23",
+ "scanSeconds": 1.801,
+ "dot": {
+  "metresAlongPath": 8518,
+  "tooltip": "Bus 2A to Refshaleøen Timetable only"
+ },
+ "timetablePast": {
+  "stop": "Vester Farimagsgade (Gyldenløvesgade)",
+  "index": 22,
+  "metresAlongPath": 8357,
+  "plannedDeparture": "2026-10-31T08:22:00.000Z"
+ }
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "r-buildings",
+  "pass": true,
+  "steps": [
+    "01-buildings-light: buildings light (http://localhost:4303/en?map=16.00/55.68100/12.57000/-20.0/60.0)",
+    "02-buildings-dark: buildings dark (http://localhost:4303/en?map=16.00/55.68100/12.57000/-20.0/60.0)"
+  ]
+}

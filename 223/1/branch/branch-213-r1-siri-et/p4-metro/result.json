@@ -1,0 +1,9 @@
+{
+  "journey": "p4-metro",
+  "pass": true,
+  "steps": [
+    "01-map-paused: map paused (http://localhost:4401/en)",
+    "02-centred-on-metro-m1: centred on metro M1 (http://localhost:4401/en?map=16.00/55.62906/12.57939)",
+    "03-hover-metro-m1: hover metro M1 (http://localhost:4401/en?map=16.00/55.62906/12.57939)"
+  ]
+}

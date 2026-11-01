@@ -1,0 +1,23 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  const dots = page.locator('[data-vehicles]')
+  await expect(page.getByRole('banner').getByText(/^Updated /)).toBeVisible()
+  await step('map flat')
+  const scale = page.getByText(/\d+\s(m|km)$/)
+  await expect(scale).toBeVisible()
+  await page.getByRole('region', { name: 'Live map of Copenhagen' }).focus()
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(dots).toHaveAttribute('data-tilt', '30')
+  await expect(dots).toHaveAttribute('data-heading', '30')
+  await expect(scale).toBeHidden()
+  const snap = await (await page.request.get('/api/snapshot')).json()
+  await expect(dots).toHaveAttribute('data-vehicles', String(snap.trips.filter((t: any) => !t.cancelled).length))
+  await step('tilted 30 turned 30')
+  await page.getByRole('button', { name: 'Centre the map' }).click()
+  await expect(dots).toHaveAttribute('data-tilt', '0')
+  await expect(dots).toHaveAttribute('data-heading', '0')
+  await expect(scale).toBeVisible()
+  await step('centred flat')
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "p1-p2-late-estimated",
+  "pass": true,
+  "steps": [
+    "01-map-open: map open (http://localhost:4401/en)",
+    "02-centred-on-2a-paused: centred on 2A paused (http://localhost:4401/en?map=15.00/55.68677/12.53221)",
+    "03-hover-2a-on-its-path: hover 2A on its path (http://localhost:4401/en?map=15.00/55.68677/12.53221)"
+  ]
+}

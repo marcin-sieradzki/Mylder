@@ -1,0 +1,11 @@
+{
+  "journey": "p4-metro",
+  "pass": false,
+  "error": "delays flowing: updates fresh\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: undefined",
+  "steps": [
+    "01-map-paused: map paused (http://localhost:4302/en)",
+    "02-centred-on-metro-m1: centred on metro M1 (http://localhost:4302/en?map=16.00/55.63805/12.58291)",
+    "03-hover-metro-m1: hover metro M1 (http://localhost:4302/en?map=16.00/55.63805/12.58291)",
+    "04-failure: failure (http://localhost:4302/en?map=16.00/55.63805/12.58291)"
+  ]
+}

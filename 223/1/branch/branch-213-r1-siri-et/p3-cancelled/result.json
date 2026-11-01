@@ -1,0 +1,9 @@
+{
+  "journey": "p3-cancelled",
+  "pass": true,
+  "steps": [
+    "01-map-open: map open (http://localhost:4401/en)",
+    "02-centred-on-102a-of-09-22-paused: centred on 102A of 09:22 paused (http://localhost:4401/en?map=16.00/55.40382/12.13564)",
+    "03-hovered-around-the-middle: hovered around the middle (http://localhost:4401/en?map=16.00/55.40382/12.13564)"
+  ]
+}

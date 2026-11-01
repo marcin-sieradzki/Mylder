@@ -1,0 +1,8 @@
+{
+  "journey": "r-timetable-ending",
+  "pass": true,
+  "steps": [
+    "01-timetable-ending-en: timetable ending en (http://localhost:4303/en)",
+    "02-timetable-ending-da: timetable ending da (http://localhost:4303/da)"
+  ]
+}

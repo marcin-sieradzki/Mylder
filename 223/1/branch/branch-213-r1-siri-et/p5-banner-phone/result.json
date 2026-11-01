@@ -1,0 +1,7 @@
+{
+  "journey": "p5-banner-phone",
+  "pass": true,
+  "steps": [
+    "01-banner-on-phone: banner on phone (http://localhost:4401/en)"
+  ]
+}

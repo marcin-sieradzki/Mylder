@@ -1,0 +1,9 @@
+{
+  "journey": "p5-banner-legend",
+  "pass": false,
+  "error": "snapshot has an updates block\n\nexpect(received).toBeTruthy()\n\nReceived: undefined",
+  "steps": [
+    "01-map-open-en: map open en (http://localhost:4302/en)",
+    "02-failure: failure (http://localhost:4302/en)"
+  ]
+}
