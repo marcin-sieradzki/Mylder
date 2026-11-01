@@ -65,11 +65,13 @@ const REPORTING: ReadonlySet<DataState> = new Set(['live', 'ageing'])
 const NO_FILTER: ReadonlySet<Mode> = new Set()
 
 /**
- * When positions are paused (docs/data-states.md, "Paused"): at once when the month's calls are
- * spent, else the moment the latest good answer is older than the Live limit; none while the API
- * answers well.
+ * When positions are paused (docs/data-states.md, "Paused"): never on the timetable source, which
+ * asks Rejseplanen nothing; at once when the month's calls are spent or no position is asked for,
+ * else the moment the latest good answer is older than the Live limit; none while the API answers
+ * well.
  */
 export function pausedFrom(snapshot: Snapshot): number | undefined {
+  if (snapshot.source.kind === 'timetable') return undefined
   if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return -Infinity
   if (snapshot.api.status === 'ok') return undefined
   const answered = Math.min(snapshot.api.since, snapshot.fetched)
