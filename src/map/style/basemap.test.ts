@@ -2,6 +2,7 @@ import '@mylder/perron/tokens.css'
 import type { MultiLineString } from 'geojson'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { createExpression } from '@maplibre/maplibre-gl-style-spec'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork, type Network } from '../../timetable/network.ts'
@@ -310,6 +311,40 @@ describe('the basemap', () => {
     )
     expect(norreport?.properties).toMatchObject({ id: '27532', rail: true })
     for (const id of STOP_LAYERS) expect(style.layers.some((each) => each.id === id)).toBe(true)
+  })
+
+  it('draws a station bigger as the map zooms in, and an interchange bigger than a station', () => {
+    const style = styleNow()
+    const stop = (name: string) => {
+      const found = features(style, 'mylder-stops').find((f) => f.properties!.name === name)
+      if (!found) throw new Error(`no stop ${name}`)
+      return found
+    }
+    // MapLibre's own evaluation of a layer's paint, at a zoom, for a stop.
+    const size = (id: string, property: string, zoom: number, name: string) => {
+      const parsed = createExpression(
+        layer(style, id).paint[property],
+        `layers.${id}.paint.${property}`,
+      )
+      if (parsed.result !== 'success') throw new Error(`${id} ${property} does not parse`)
+      return parsed.value.evaluate({ zoom }, stop(name) as never) as number
+    }
+    const rail = (zoom: number, name: string) =>
+      size('mylder-stops-rail', 'circle-radius', zoom, name)
+
+    // Nørreport has the Metro and the S-tog; Sorgenfri only the S-tog.
+    expect(stop('Nørreport St.').properties).toMatchObject({ interchange: true })
+    expect(stop('Sorgenfri St.').properties).toMatchObject({ interchange: false })
+    expect(rail(10, 'Sorgenfri St.')).toBeGreaterThanOrEqual(3)
+    expect(rail(13, 'Sorgenfri St.')).toBeGreaterThan(rail(10, 'Sorgenfri St.'))
+    expect(rail(16, 'Sorgenfri St.')).toBeGreaterThanOrEqual(8)
+    for (const zoom of [10, 13, 16]) {
+      expect(rail(zoom, 'Nørreport St.')).toBeGreaterThan(rail(zoom, 'Sorgenfri St.'))
+    }
+    // A bus stop grows too, and stays smaller than a station.
+    const bus = (zoom: number) => size('mylder-stops-bus', 'circle-radius', zoom, 'Husum Torv')
+    expect(bus(17)).toBeGreaterThan(bus(14))
+    expect(bus(16)).toBeLessThan(rail(16, 'Sorgenfri St.'))
   })
 
   it('raises the buildings from zoom 14 from their OpenStreetMap heights, flat footprints below', () => {

@@ -7,7 +7,7 @@
 // under the lines and stops (ADR 0016), where the flat footprints stop.
 import 'client-only'
 import type { Feature, FeatureCollection, MultiLineString, Point } from 'geojson'
-import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import type { ExpressionSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { distance } from '../../domain/trip-motion.ts'
 import type { LineRecord, Mode } from '../../timetable/format.ts'
 import type { Network } from '../../timetable/network.ts'
@@ -282,29 +282,45 @@ function networkLayers(paint: Paint, dimmed: boolean): LayerSpecification[] {
       'line-offset': ['get', 'offset'],
     },
   }))
-  const stops = (
-    id: string,
-    rail: boolean,
-    minzoom: number,
-    radius: number,
-  ): LayerSpecification => ({
+  const stops = (id: string, rail: boolean, minzoom: number): LayerSpecification => ({
     id,
     type: 'circle',
     source: 'mylder-stops',
     minzoom,
     filter: ['==', ['get', 'rail'], rail],
     paint: {
-      'circle-radius': radius,
+      'circle-radius': rail ? STATION_RADIUS : BUS_STOP_RADIUS,
       'circle-color': paint.get(STOP_FILL) ?? '',
       'circle-stroke-color': paint.get(STOP_RING) ?? '',
-      'circle-stroke-width': 1,
+      'circle-stroke-width': STOP_RING_WIDTH,
       'circle-opacity': stationOpacity,
       'circle-stroke-opacity': stationOpacity,
     },
   })
   // A bus stop shows only close in, where the streets it stands on can be told apart.
-  return [...lines, stops(BUS_STOPS, false, 14, 2), stops(RAIL_STOPS, true, 9, 3)]
+  return [...lines, stops(BUS_STOPS, false, 14), stops(RAIL_STOPS, true, 9)]
 }
+
+/**
+ * A stop's radius in pixels by zoom: small enough at city zoom to leave the lines readable, and
+ * growing close in, where a station is something to find and tap. An interchange, a stop of more
+ * than one rail mode such as Nørreport, is drawn a size up from a station of one.
+ */
+const STATION_RADIUS: ExpressionSpecification = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  9,
+  ['case', ['to-boolean', ['get', 'interchange']], 3.5, 3],
+  12,
+  ['case', ['to-boolean', ['get', 'interchange']], 5, 4],
+  15,
+  ['case', ['to-boolean', ['get', 'interchange']], 9, 7],
+  17,
+  ['case', ['to-boolean', ['get', 'interchange']], 12, 9],
+]
+const BUS_STOP_RADIUS: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 5]
+const STOP_RING_WIDTH: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2]
 
 /** The lines drawn at rest: every Metro, S-tog, train and light rail line with a pattern. */
 function drawnLines(network: Network): LineRecord[] {
@@ -396,6 +412,7 @@ function stopFeatures(network: Network): FeatureCollection<Point> {
         id: stop.id,
         name: stop.name,
         rail: stop.modes.some((mode) => mode !== 'bus'),
+        interchange: stop.modes.filter((mode) => mode !== 'bus').length > 1,
       },
       geometry: { type: 'Point', coordinates: [stop.lon, stop.lat] },
     })),
@@ -446,7 +463,7 @@ function highlightLayers(paint: Paint): LayerSpecification[] {
       type: 'circle',
       source: HIGHLIGHT_STOPS,
       paint: {
-        'circle-radius': 3,
+        'circle-radius': STATION_RADIUS,
         'circle-color': paint.get(STOP_FILL) ?? '',
         'circle-stroke-color': ['get', 'colour'],
         'circle-stroke-width': 2,
