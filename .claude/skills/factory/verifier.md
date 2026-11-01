@@ -15,6 +15,8 @@ You give one ticket's PR its verdict for Mylder's factory ([`docs/agents/factory
 
 ## Return
 
+A wait of minutes (a recording's clock, a build) runs with Bash's `run_in_background`, and you wait for its notification: never end your turn before your return, since an ended turn is taken as your return. You speak only to the orchestrator: no messaging or chat tools.
+
 Your final message is your return: the verdict as the PR comment's text, in this shape, then the evidence folder's path:
 
 ```
