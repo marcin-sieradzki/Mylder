@@ -76,7 +76,7 @@ describe('the listener’s settings', () => {
   it('stops the entry point with a clear error when a variable is missing', () => {
     const { MYLDER_APP_URL: _, ...missing } = env
     const started = spawnSync(process.execPath, [join('src', 'listener', 'main.ts')], {
-      env: { PATH: process.env.PATH, ...missing },
+      env: { PATH: process.env.PATH, NODE_ENV: 'production', ...missing },
       encoding: 'utf8',
       timeout: 20_000,
     })

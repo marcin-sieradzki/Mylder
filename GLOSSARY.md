@@ -109,7 +109,7 @@ The journeys with an update from SIRI-ET that call inside Mylder's box and haven
 _Avoid_: Delay feed, delay cache
 
 **Listener**:
-The one always-on process, outside the app, that receives SIRI-ET messages and keeps the update table in the server store.
+The one always-on process, outside the app, that receives SIRI-ET messages, keeps the update table and serves it over HTTPS, behind a token, for the tracker to fetch on each run.
 _Avoid_: Consumer, worker, daemon
 
 **Report**:

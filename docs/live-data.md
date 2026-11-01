@@ -18,7 +18,7 @@ Going live stays one environment change: the key in `REJSEPLANEN_KEY` and `MYLDE
 
 ## SIRI-ET: delays and cancellations before the key
 
-Rejseplanen's SIRI-ET brings every trip's expected times and cancellations for Movia, DSB, the S-tog and Lokaltog, pushed over AMQP from Dataudveksleren to one always-on listener, which keeps the **update table** in the store for the tracker to read ([ADR 0019](adr/0019-siri-et-brings-delays-and-cancellations-through-one-always-on-listener.md), spec #146). The research is in [`researches/2026-10-31-siri-et-listener.md`](researches/2026-10-31-siri-et-listener.md). The figures below were measured by the probe of 31 October 2026, a Saturday morning, and by replaying its recording, `recordings/siri-et/` (09:00 to 09:56 Copenhagen time), into the reader with `scripts/siri-et/replay-siri-et.ts`. A Saturday is quiet, so they are a floor for a weekday.
+Rejseplanen's SIRI-ET brings every trip's expected times and cancellations for Movia, DSB, the S-tog and Lokaltog, pushed over AMQP from Dataudveksleren to one always-on listener, which keeps the **update table** and serves it over HTTPS for the tracker to fetch ([ADR 0019](adr/0019-siri-et-brings-delays-and-cancellations-through-one-always-on-listener.md), spec #146). The research is in [`researches/2026-10-31-siri-et-listener.md`](researches/2026-10-31-siri-et-listener.md). The figures below were measured by the probe of 31 October 2026, a Saturday morning, and by replaying its recording, `recordings/siri-et/` (09:00 to 09:56 Copenhagen time), into the reader with `scripts/siri-et/replay-siri-et.ts`. A Saturday is quiet, so they are a floor for a weekday.
 
 ### The feed
 
@@ -55,17 +55,68 @@ Replayed, the table grows as journeys come into their hour before departure:
 | 09:30           | 917             | 9,311  | 5         | 37              | 690 KB | 87 KB   |
 | 09:56           | 1,282           | 11,595 | 7         | 38              | 895 KB | 112 KB  |
 
-At 09:56 the listed journeys are 1,082 Movia, 97 S-tog, 64 DSB and 39 Lokaltog. Movia's delays wobble a minute either way from call to call, so its journeys average 10 steps; 49 of the S-tog's journeys and 16 of DSB's have no expected time yet, so no step. The table is about four times the 15 to 25 KB spec #146 budgeted for a weekday peak, and steps are most of it: written whole each minute, it would take about 4.8 GB a month of the store's free 10 GB on a quiet Saturday's figures, before the tracker reads it back. The listener (#217) writes less, as the spec allows: only the journeys that changed since its last write, or the table fetched from the listener over HTTPS instead.
+At 09:56 the listed journeys are 1,082 Movia, 97 S-tog, 64 DSB and 39 Lokaltog. Movia's delays wobble a minute either way from call to call, so its journeys average 10 steps; 49 of the S-tog's journeys and 16 of DSB's have no expected time yet, so no step. The table is about four times the 15 to 25 KB spec #146 budgeted for a weekday peak, and steps are most of it: written whole each minute, it would take about 4.8 GB a month of the store's free 10 GB on a quiet Saturday's figures, before the tracker reads it back. So the store doesn't carry it: the listener serves it on its own route and the tracker fetches it (ADR 0019, amended for #217), below.
 
 ### The tracker's use of the table
 
-With `MYLDER_UPDATES` on (`docs/testing-seams.md`, "The update switch"), each run reads the table once, from the store or from the reader over a recording, and joins each journey to a trip of its service day (`DataFrameRef`) in `src/tracker/join.ts`:
+With `MYLDER_UPDATES` on (`docs/testing-seams.md`, "The update switch"), each run reads the table once, fetched from the listener or from the reader over a recording, and joins each journey to a trip of its service day (`DataFrameRef`) in `src/tracker/join.ts`:
 
 - **Trains first by number.** A journey whose `TrainNumberRef`, without leading zeros, is the train number of a train or S-tog trip, and whose line is that trip's line or the number itself (DSB's), is that trip. Movia's `TrainNumberRef` is a vehicle journey number, never a train's, and its buses have none in the timetable.
 - **Then by line and ends.** Otherwise the trips of its line from its `OriginRef`'s Stop to its `DestinationRef`'s are the candidates, and the first not yet joined that has a call at one of the journey's held calls (its first, its steps' and its cancelled ones) at that call's aimed time is the trip.
 - **Unmatched.** A journey no trip fits, such as an Extra trip's or one whose first or last stop lies outside the timetable's box, is counted by its dataset's mode (788 bus, 785 and 799 train, 801 S-tog) in the snapshot's `updates.unmatched` and the run's log line, and not drawn. On the recording at 09:30, 22 of Movia's 772 journeys in the table don't join: 20 of line 19, whose stop 56543 the timetable, cut to its box, doesn't have, and 2 of 930R. Every train and S-tog journey joins by number.
 
 A joined journey with a delay, a cancellation or a cancelled call is the trip's update: its received time is the trip's `updated`, each step's call leaves that many seconds late and the calls between take the step before's delay, so the trip's next calls and its place on the path follow its timetable plus its delay, and its cancelled calls are listed by index. A cancelled trip stays in the snapshot, marked `cancelled`, for the departure lists, and the map leaves it out. A joined journey with no expected time yet, as about half the S-tog's are, tells its trip nothing and leaves it Timetable only, as a departure row without a prognosis does. The trip's latest `updated` is kept in its history for the rest of its service day. While the feed is fresh, every trip with an update is Estimated (`docs/data-states.md`, rule 3); the Metro, which SIRI-ET doesn't carry, and every trip without an update stay Timetable only, and nothing is Live or Ageing. The run's log line adds the feed's kind, last message and freshness, the unmatched journeys, and each mode's share of its trips on the map with an update, to two decimals.
+
+### The listener
+
+The listener is `src/listener/`, the package's second entry point (ADR 0012), run as `node src/listener/main.ts` on Node's own type stripping. `listener.Dockerfile` builds it into a container image with only the folders it imports (`src/listener/`, `src/siri-et/`, `src/timetable/`) and the packages they need (Effect, rhea). CI builds the image on every change and starts it without its settings, and it must stop with an error naming them. Its deployment on Fly.io is #218.
+
+Its settings come only from the environment, which only the host's secrets set. A missing or malformed variable stops it at start with an error that names the variable, never its value:
+
+| Variable               | What it holds                                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `DU_CLIENT_ID`         | The Dataudveksleren service account's Entra ID client id                                                            |
+| `DU_TENANT_ID`         | Its tenant id                                                                                                       |
+| `DU_SECRET`            | Its client secret                                                                                                   |
+| `DU_ADDRESSES`         | One AMQP address a dataset, `amqps://<host>/t-distribution-<dataset>/<subscription>`, separated by spaces or commas |
+| `MYLDER_UPDATES_TOKEN` | The token the table route asks for, at least 32 characters, the same as the tracker's                               |
+| `MYLDER_APP_URL`       | The app's public URL, whose timetable routes give the box's stops                                                   |
+| `PORT`                 | The port it serves on, 8080 when unset                                                                              |
+
+- **AMQP.** For each dataset, the listener opens one connection over AMQP 1.0 with TLS on port 5671 (`src/listener/amqp.ts`, with `rhea`, as the probe did). It gets an Entra ID client-credentials token for `https://servicebus.azure.net/.default`, puts it on the connection with a CBS `put-token`, and opens a receiver on the dataset's subscription once the broker accepts it. Every 15 minutes it gets a new token and puts it on every open connection. It settles each message on receipt, at most once, and lets the broker send at most 20 ahead, so a backlog of Movia's 1 MB messages holds at most about 20 MB in flight. A gzipped body is unzipped. A message's received time is when the broker queued it (`x-opt-enqueued-time`), or else when it arrived, so a backlog read after a restart keeps its own times. The shell holds no logic: each message goes to the reader.
+- **Reconnecting.** A connection that closes or fails is opened again after 1 s, then 2, 4 and so on up to 2 minutes, and from 1 s again once it is listening. When no dataset has sent a message for 5 minutes between 05:00 and midnight, Copenhagen time, every connection is closed and opened again. At night a quiet feed is left alone.
+- **The box's stops.** The listener asks the app for its timetable manifest, `GET <MYLDER_APP_URL>/api/timetable`, and, when the manifest names a version other than the one it has, for that version's stops, `GET /api/timetable/<version>/stops`. It keeps the ids of the stops and platforms inside the manifest's box, without leading zeros. It asks at start, every minute while it has no stops, and every 15 minutes after. When the app can't be reached, it keeps the set it has and logs why. Messages that arrive before it has a set are read and held, and listed once it has one.
+- **Memory.** The reader's caps bound it: 20,000 journeys and 4,000,000 characters a message ("The reader", above). The table is built at most once a minute and one copy is held, gzipped.
+- **Credentials.** No log line and no answer carries one. The listener cuts the service account's id, tenant and secret, each subscription id, `MYLDER_UPDATES_TOKEN` and every Entra ID token it gets out of every line it logs. An error from Entra ID names only its status and code. Its tests run the loop and the route with fake credentials and read every line and body.
+
+#### The route
+
+The listener has one inbound port. TLS ends at the platform's edge, and the port serves two routes:
+
+- **`GET /table`** answers only a request whose `Authorization` header is `Bearer <MYLDER_UPDATES_TOKEN>`. Without it, the answer is 401, with no body. Until the listener has the box's stops and a first table, the answer is 503 with no body and `Retry-After: 60`. Otherwise it is 200 with the update table as JSON, gzipped (`Content-Encoding: gzip`), in the shape and version `src/siri-et/table.ts` gives it. The table is built at most once a minute and served from memory in between. It carries the listener's heartbeat: `writtenAt`, when it was built, and `lastMessageAt`, the last message's received time, beside the listener's version and start time.
+- **`GET /health`** needs no token and says only `ok`, once there is a table to serve, or `starting`.
+
+Anything else, another path, a query or another method, is 404 with no body.
+
+#### Its minute line
+
+Every minute the listener logs one JSON line whose `message` is `Listener minute`:
+
+| Field                      | What it says                                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `datasets`                 | Each dataset's messages and their bytes this minute, by its number. A dataset missing at a weekday noon has gone quiet.                                            |
+| `held`, `journeys`         | Journeys the reader holds, in the box or not, and those the table lists.                                                                                           |
+| `tableBytes`               | The table's size as served, gzipped: about 112 KB at 09:56 on the recorded Saturday.                                                                               |
+| `builtAt`, `lastMessageAt` | When the table served was built, and the last message's received time.                                                                                             |
+| `timetableVersion`         | The version whose stops the box uses. Missing until it has one.                                                                                                    |
+| `parseFailures`            | Messages skipped as malformed or too large, and journeys skipped for want of an identifying part, since the line before, as counted by the table the line reports. |
+| `requests`                 | Table requests this minute: `served`, `refused` for a missing or wrong token, and `unavailable` before the first table. The tracker makes one a run.               |
+
+Beside it, the listener logs when a dataset starts listening, when a connection closes and how long until it opens again, when every connection is reopened for a quiet feed, a failed token renewal and a failed read of the app's timetable.
+
+#### How the tracker reads it
+
+With `MYLDER_UPDATES=siri`, each tracker run fetches the table once (`readUpdateTable` in `src/tracker/updates.ts`). `MYLDER_UPDATES_URL` is the route's whole URL, `https://<listener>/table`, and `MYLDER_UPDATES_TOKEN` is the token. The fetch has a 3 s timeout, and the gzip is undone by the HTTP client. The table is checked against its schema. A timeout, a failed fetch, any answer but 200, a body that fails the schema (a table of another version among them) or a table built over 10 minutes ago is no table that run. Each is logged as a warning that names why, never with the token, and none fails the run: the trips stay or turn as rule 3 of [`data-states.md`](data-states.md) says. With `siri` and either variable missing, each run logs an error and reads no table.
 
 ## One call a minute
 
