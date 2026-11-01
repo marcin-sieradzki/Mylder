@@ -9,11 +9,13 @@ The map of Copenhagen fills the window, every vehicle in the snapshot drawn as a
 - `map-filter` takes a mode's dots off with its chip, which keeps its count.
 - `map-controls` zooms, resets the view and pauses the dots.
 - `map-chrome` shows the Updated line, the legend, the source banner and the credit.
+- `map-timetable` on the timetable source: the banner says every vehicle is placed from its timetable, the legend says every vehicle is Timetable only for now, and no Paused notice shows.
 - `map-3d` tilts (up to 60°) and turns the map by Shift + the arrows and, wider than a phone, by a right-drag or Ctrl-drag and the 3D toggle, hides the scale bar while tilted, keeps every dot drawn, raises the buildings from zoom 14, see-through, in Perron's building colour under the lines, stops and dots, the compass turns it back to north, and reset brings it back flat and north-up. The address keeps the angle as `map=zoom/lat/lon/bearing/pitch` while the map isn't flat and north-up, so a link or a reload opens at it, on a phone too.
 
 ## How to get to it (user POV)
 
 - Open `/en` (or `/da`).
+- Open it on a launch on the timetable source (`launch.sh <run-id> <port> timetable`).
 - Hover or tap a dot.
 - Choose a mode chip in the top bar (Bus, Metro, S-tog, Train, Planes).
 - Use the map controls, or + and − with the map focused.
@@ -28,6 +30,7 @@ Preconditions:
 
 - **Draw.** `page.goto('/en')`. `expect(page.locator('[data-vehicles]')).toHaveAttribute('data-vehicles', '17')` within the first minute, and `page.getByRole('region', { name: 'Live map of Copenhagen' })` is visible.
 - **Chrome.** `page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)`, `page.getByRole('list', { name: 'Data states' })`, `page.getByRole('toolbar', { name: 'Map controls' })`, `page.getByRole('link', { name: 'Rejseplanen' })` and `page.getByRole('status').filter({ hasText: /^Recorded data from 16 June 2026/ })` are visible.
+- **On the timetable source.** On its own launch (`timetable` as the third argument), `page.goto('/en')`: `[data-vehicles]` above 0, and the only `page.getByRole('status')` outside a dialog reads "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.", followed by "Planes: live from adsb.lol." (or adsb.fi) once the planes have answered; no "paused" or "hasn't answered" anywhere, and the Updated line reads `Updated HH:MM:SS` with `/api/snapshot`'s `fetched` time. The legend (`page.getByRole('list', { name: 'Data states' })`'s surface) ends with "Every vehicle is Timetable only for now: live positions aren't connected yet." At `/da` the banner reads "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være." and the legend line "Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.". With `--phone` the banner wraps inside the viewport, no wider than the simulated source's, with no horizontal scroll.
 - **Filter.** `page.getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ }).click()`. `[data-vehicles]` drops by the bus count and the chip still shows its count; click again to bring them back.
 - **Card.** Pause with `page.getByRole('button', { name: 'Pause' })`, read a trip's `position` from `await (await page.request.get('/api/snapshot')).json()`, open `/en?map=15.00/<lat>/<lon>`, and hover the viewport's middle until `page.getByRole('tooltip')` shows the line, the destination and a state label such as "Estimated from schedule".
 - **Controls.** `page.getByRole('button', { name: 'Zoom in' }).click()`; the scale bar (`page.getByText(/\d+\s(m|km)$/)`) shows a shorter distance.
@@ -41,6 +44,7 @@ Preconditions:
 ## Gotchas
 
 - Dots move between frames; pause first or retry the hover inside `expect(...).toPass()`.
+- On the timetable source the counts and lines are the deployed timetable's plan at the real time, so assert against `/api/snapshot`, not the weekday's 17; the Disruptions screen and the panels' words there are other tickets' (#196, #197).
 - After a minute the next snapshot lands and counts can change; assert counts in the first minute or against `/api/snapshot` fetched at the same moment.
 - The recording has no Live trips in some minutes (its position mode alternates); a journey that needs a Live dot reports which minute it looked in.
 - The address takes the heading and tilt, to the tenth of a degree, only once the map comes to rest, and drops either when out of range (heading -180 to 180, tilt 0 to 60). `data-tilt` and `data-heading` are written when the map comes to rest, so wait for them after a move.
