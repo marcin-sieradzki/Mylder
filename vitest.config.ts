@@ -13,6 +13,10 @@ export default defineConfig({
         test: {
           name: 'node',
           environment: 'node',
+          // The node tests keep no state between files, so they share workers instead of starting
+          // one per file. A file that must start clean (a module-level cache it fills, a global it
+          // leaves stubbed) cleans up after itself, as `vi.unstubAllEnvs()` does.
+          isolate: false,
           // Server modules start with `import 'server-only'`, which throws outside a React Server
           // Components build; its empty twin stands in, as Next.js's server build resolves it.
           alias: {
@@ -36,9 +40,14 @@ export default defineConfig({
         test: {
           name: 'jsdom',
           environment: 'jsdom',
+          // Each file still gets its own jsdom, but in a VM context of a shared thread rather than
+          // a fresh process, which saves most of the time spent setting them up. CPU-heavy node
+          // tests run slower in a VM context, so this is the jsdom project's alone.
+          pool: 'vmThreads',
           setupFiles: ['./src/test/setup.ts'],
           include: [
-            'app/**/*.test.{ts,tsx}',
+            // `.ts` tests under app/ are the node project's; matching them here ran them twice.
+            'app/**/*.test.tsx',
             'src/screens/**/*.test.{ts,tsx}',
             'src/map/**/*.test.{ts,tsx}',
           ],
