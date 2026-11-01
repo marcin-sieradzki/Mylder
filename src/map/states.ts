@@ -21,12 +21,15 @@ const NONE: DataStates = new Map()
 
 /** Every trip's state in `snapshot` at `now`. */
 export function statesAt(snapshot: Snapshot, now: number): DataStates {
+  const { kind, lastMessage } = snapshot.updates
   const context: DataStateContext = {
     now,
     fetched: snapshot.fetched,
     pollInterval: snapshot.pollInterval,
     positionMode: snapshot.positionMode,
     health: snapshot.api,
+    // With SIRI-ET's feed on, its freshness ages by the clock here too.
+    ...(kind === 'off' ? {} : { updates: lastMessage === undefined ? {} : { lastMessage } }),
   }
   return new Map(snapshot.trips.map((trip) => [trip.key, dataState(trip, context)]))
 }

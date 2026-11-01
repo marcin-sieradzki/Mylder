@@ -92,6 +92,22 @@ export const SnapshotSource = Schema.Struct({
   name: optional(Schema.String),
 })
 
+/**
+ * Where the snapshot's updates come from (`MYLDER_UPDATES`, spec #146): SIRI-ET's update table
+ * from the listener, the reader over a recording, or none; and how the feed stands.
+ */
+export const SnapshotUpdates = Schema.Struct({
+  kind: Schema.Literals(['off', 'siri', 'recording']),
+  /** When the table's last message was received, from any dataset; absent with no table. */
+  lastMessage: optional(Schema.Number),
+  /** Whether the feed was fresh at fetch time: the table present, its last message under 5 min old. */
+  fresh: Schema.Boolean,
+  /** The snapshot's trips with an update this service day, by mode. */
+  withUpdate: Schema.Record(Schema.String, Schema.Number),
+  /** The table's journeys that joined no trip, by the mode of their dataset; counted, not drawn. */
+  unmatched: Schema.Record(Schema.String, Schema.Number),
+})
+
 /** The run's own figures, which the about panel shows and a monitor can poll. */
 export const Status = Schema.Struct({
   calls: Schema.Array(
@@ -148,6 +164,7 @@ export const Snapshot = Schema.Struct({
   /** Null until the first `himsearch` (#57). */
   disruptions: Schema.NullOr(DisruptionsSummary),
   source: SnapshotSource,
+  updates: SnapshotUpdates,
   status: Status,
   trips: Schema.Array(SnapshotTrip),
 })
@@ -155,3 +172,4 @@ export const Snapshot = Schema.Struct({
 export type Snapshot = typeof Snapshot.Type
 export type SnapshotTrip = typeof SnapshotTrip.Type
 export type NextCall = typeof NextCall.Type
+export type SnapshotUpdates = typeof SnapshotUpdates.Type

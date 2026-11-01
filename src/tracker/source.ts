@@ -85,14 +85,19 @@ export function snapshotSourceOf(source: Source): Snapshot['source'] {
 /**
  * The saved folder in `recordings/` a source runs on, its timetable and its clock: a recording's
  * own, or the timetable source's from `from` (`MYLDER_TIMETABLE_FROM`), which no other source
- * reads.
+ * reads, or else from the recording its updates replay (`MYLDER_UPDATES=recording:<folder>`), so
+ * that recording's messages come at its own clock, on its own timetable.
  */
-export function savedFolderOf(source: Source, from: string | undefined): string | undefined {
+export function savedFolderOf(
+  source: Source,
+  from: string | undefined,
+  updates?: Updates,
+): string | undefined {
   switch (source.kind) {
     case 'recording':
       return source.folder
     case 'timetable':
-      return from?.trim() || undefined
+      return from?.trim() || (updates?.kind === 'recording' ? updates.folder : undefined)
     case 'simulated':
     case 'rejseplanen':
       return undefined

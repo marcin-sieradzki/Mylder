@@ -10,6 +10,7 @@
 // (`corrections.ts`), which the next run and every stop's board read.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
+import { UPDATES_FRESH } from '../domain/data-state.ts'
 import { checkedEvery } from '../domain/disruption.ts'
 import { describeSource } from '../domain/source.ts'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
@@ -51,6 +52,7 @@ import type { Snapshot } from './snapshot.ts'
 import { snapshotSourceOf, type Source } from './source.ts'
 import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
+import { joinTable, NO_UPDATES, UpdateFeed } from './updates.ts'
 
 /** Every product that runs on a line (docs/live-data.md): trains, S-tog, buses, ferries, Metro, light rail. */
 export const PRODUCTS = 3839
@@ -137,7 +139,7 @@ const neverAsk: OnDemand = () => Effect.succeed({})
 export const layer: Layer.Layer<
   Tracker,
   never,
-  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock
+  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock | UpdateFeed
 > = Layer.effect(
   Tracker,
   Effect.gen(function* () {
@@ -146,6 +148,8 @@ export const layer: Layer.Layer<
     const store = yield* Store
     const rejseplanen = yield* Rejseplanen
     const cpu = yield* CpuClock
+    const feed = yield* UpdateFeed
+    const updatesOn = feed.updates.kind !== 'off'
     const key = (name: string) => `${config.keyPrefix}:${name}`
     // A source that asks Rejseplanen nothing asks for no position, whatever mode is configured.
     const calling = describeSource(config.source.kind).callsRejseplanen
@@ -205,16 +209,22 @@ export const layer: Layer.Layer<
           outcome.health.status === 'spent' && before.level !== 'spent'
             ? pacing({ calls: before.calls, now, timezone, quotaGone: true })
             : before
+        // SIRI-ET's table, one read a run, joined to the trips it updates.
+        const table = yield* feed.table(now)
+        const joined = table ? joinTable(timetable, table) : NO_UPDATES
+        const lastMessage = table?.lastMessageAt
         const { trips, unmatched, history } = buildTrips({
           timetable,
           now,
           answer: outcome.answer,
           history: yield* storedHistory,
           corrections: yield* corrections.read(timetable.serviceDaysAt(now)),
+          updates: joined.trips,
           context: {
             pollInterval: pace.pollInterval,
             positionMode,
             health: api,
+            ...(updatesOn ? { updates: lastMessage === undefined ? {} : { lastMessage } } : {}),
           },
         })
         const serviceDay = timetable.serviceDaysAt(now).at(-1)!
@@ -243,6 +253,16 @@ export const layer: Layer.Layer<
           ),
           disruptions: summaryOf(yield* storedDisruptions),
           source: snapshotSourceOf(config.source),
+          updates: {
+            kind: feed.updates.kind,
+            ...(lastMessage === undefined ? {} : { lastMessage }),
+            fresh: lastMessage !== undefined && now - lastMessage < UPDATES_FRESH,
+            withUpdate: countBy(
+              trips.filter((trip) => trip.updated !== undefined),
+              'mode',
+            ),
+            unmatched: joined.unmatched,
+          },
           status: {
             calls: outcome.calls,
             unmatched,

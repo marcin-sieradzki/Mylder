@@ -32,6 +32,12 @@
     "kind": "recording",
     "name": "cap"
   },
+  "updates": {
+    "kind": "off",
+    "fresh": false,
+    "withUpdate": {},
+    "unmatched": {}
+  },
   "status": {
     "calls": [
       {

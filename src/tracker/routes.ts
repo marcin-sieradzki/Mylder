@@ -10,7 +10,8 @@ import { Effect } from 'effect'
 import { TRACKER_CACHING } from './caching.ts'
 import { cdnAnswer, notFound, unavailable } from './cdn-answer.ts'
 import { runTracker, TIMETABLE_FROM_VARIABLE, timetableDirOf, type RunTracker } from './runtime.ts'
-import { readSource, type Source } from './source.ts'
+import { readSource, updatesFor, type Source } from './source.ts'
+import { readUpdates, UPDATES_VARIABLE } from './updates.ts'
 import {
   filesIn,
   isBrowserFile,
@@ -90,14 +91,16 @@ export const timetableFileResponse = (
 
 /**
  * The files of a source's timetable folder: a recording's own, the saved folder the timetable
- * source runs on, or the deployed one. The source is read at each read, inside the route's try.
+ * source runs on (`MYLDER_TIMETABLE_FROM`, or else the recording its updates replay), or the
+ * deployed one. The source is read at each read, inside the route's try.
  */
 const sourceFiles =
   (source?: Source): ReadTimetableFile =>
-  (file) =>
-    filesIn(timetableDirOf(source ?? environmentSource(), process.env[TIMETABLE_FROM_VARIABLE]))(
-      file,
-    )
+  (file) => {
+    const running = source ?? environmentSource()
+    const { updates } = updatesFor(running, readUpdates(process.env[UPDATES_VARIABLE]))
+    return filesIn(timetableDirOf(running, process.env[TIMETABLE_FROM_VARIABLE], updates))(file)
+  }
 
 /** The manifest from a timetable folder's files. */
 export async function manifestResponse(read: ReadTimetableFile): Promise<Response> {
