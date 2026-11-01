@@ -39,7 +39,7 @@
    peek of the next; padded by space.200 rather than the raised Surface's space.300, as a row is.
    Doubled, with the variant, to outrank the raised Surface's padding whichever stylesheet loads
    last. A stand-in for Perron's card for a standing trip, marcin-sieradzki/perron#190
-   (StandingCard): goes when that lands. */
+   (StandingCard): goes when that lands. perron-stand-in: perron#190 */
 .card.card[data-variant='raised'] {
   flex: 0 0 auto;
   inline-size: min(24rem, 90%);

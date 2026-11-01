@@ -1,0 +1,31 @@
+name: Stand-ins
+
+# Opens a Mylder ticket when Perron closes an issue a `perron-stand-in: perron#<n>` marker names,
+# so a stand-in for a Perron piece goes once Perron ships it (ADR 0004). Weekly, by hand, and as a
+# dry run that opens nothing on a pull request that changes the job.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/stand-ins.yml
+      - scripts/stand-ins/**
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  tickets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: npm run stand-ins -- ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
