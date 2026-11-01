@@ -7,6 +7,8 @@ import {
   RECORDING,
   SIMULATED_PORT,
   SNAPSHOT_PORT,
+  UPDATES,
+  UPDATES_PORT,
 } from './e2e/recording'
 
 // The production build serves the weekday recording, at the recording's moment, its aircraft
@@ -15,8 +17,8 @@ import {
 // recording to the snapshot route's tests alone, whose run they count, so no other test's stop or
 // vehicle can spend a call they don't expect, however the tests are ordered. A fourth serves the
 // crowded recording, where more trains stand at one stop than its panel lists before "Show all",
-// and a fifth the simulation, chosen by name. All but the first have the aircraft off, so no test
-// calls adsb.lol.
+// a fifth the simulation, chosen by name, and a sixth the timetable source with SIRI-ET's delays
+// from their recording. All but the first have the aircraft off, so no test calls adsb.lol.
 
 export default defineConfig({
   testDir: './e2e',
@@ -68,6 +70,14 @@ export default defineConfig({
       command: `npm start -- --port ${SIMULATED_PORT}`,
       port: SIMULATED_PORT,
       env: { MYLDER_SOURCE: 'simulated', MYLDER_AIRCRAFT_SOURCE: 'off' },
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      // The timetable source, unset as production meets it, with updates from the recording, which
+      // brings its own timetable and clock.
+      command: `env -u MYLDER_SOURCE -u MYLDER_TIMETABLE_FROM npm start -- --port ${UPDATES_PORT}`,
+      port: UPDATES_PORT,
+      env: { MYLDER_UPDATES: `recording:${UPDATES}`, MYLDER_AIRCRAFT_SOURCE: 'off' },
       reuseExistingServer: !process.env.CI,
     },
   ],

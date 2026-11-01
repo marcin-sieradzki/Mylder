@@ -15,10 +15,40 @@ export async function readSiriEtMessages(file: string): Promise<SiriEtMessage[]>
   return text
     .split('\n')
     .filter((line) => line.length > 0)
-    .map((line) => {
-      const { dataset, receivedAt, body } = JSON.parse(line) as Record<string, string>
-      return { dataset, receivedAt: Date.parse(receivedAt), body }
-    })
+    .map(message)
+}
+
+/**
+ * A recording's messages read as a clock reaches them: each call gives the messages received up to
+ * `now` that no earlier call gave, in order. Each line is read only when its turn comes, so the
+ * whole recording, 114 MB of XML, is held once, as the bytes of its file.
+ */
+export async function siriEtReplay(file: string): Promise<(now: number) => SiriEtMessage[]> {
+  const bytes = gunzipSync(await readFile(/* turbopackIgnore: true */ file))
+  let from = 0
+  let pending: SiriEtMessage | undefined
+  const next = (): SiriEtMessage | undefined => {
+    while (from < bytes.length) {
+      const end = bytes.indexOf(10, from)
+      const line = bytes.toString('utf8', from, end < 0 ? bytes.length : end)
+      from = end < 0 ? bytes.length : end + 1
+      if (line.length > 0) return message(line)
+    }
+    return undefined
+  }
+  return (now) => {
+    const due: SiriEtMessage[] = []
+    for (pending ??= next(); pending && pending.receivedAt <= now; pending = next()) {
+      due.push(pending)
+    }
+    return due
+  }
+}
+
+/** One line of a recording as its message. */
+function message(line: string): SiriEtMessage {
+  const { dataset, receivedAt, body } = JSON.parse(line) as Record<string, string>
+  return { dataset, receivedAt: Date.parse(receivedAt), body }
 }
 
 /**

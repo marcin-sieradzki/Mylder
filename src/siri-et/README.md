@@ -5,6 +5,7 @@ The SIRI-ET reader (spec #146, ADR 0019), apart from the tracker so that the lis
 - `siri.ts` reads one message body's journeys in one pass over its tags.
 - `reader.ts` merges each journey's calls across messages and gives the update table at a moment, dropping finished journeys and those of a service day that has ended, and holding to its caps.
 - `table.ts` is the update table's versioned schema, the listener's and the tracker's contract.
-- `recording.ts` reads a recorded folder's messages and the box's stops from its timetable.
+- `recording.ts` reads a recorded folder's messages, all at once or as a clock reaches each, and the box's stops from its timetable.
+- `store.ts` is where the table lives in the server store, one key apart from every source's prefix: the listener writes it there and the tracker reads it back with the schema. How much the listener writes is #217's to settle, behind these two functions.
 
 Its tests replay `fixtures/sample.jsonl.gz`, eight journeys of `recordings/siri-et/`, and `fixtures/round-trip.jsonl.gz`, bus 118's round trip (`docs/testing-seams.md`, "3. The SIRI-ET message stream").

@@ -161,6 +161,27 @@ describe("the map's legend", () => {
     })
   })
 
+  describe('on the timetable source with SIRI-ET’s delays', () => {
+    const withDelays = saved('siri-et', '0002.json')
+    const WITH_DELAYS_EN =
+      "For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet."
+    const WITH_DELAYS_DA =
+      'Indtil videre er et køretøj Beregnet, placeret ud fra sin forsinkelse, eller Kun køreplan: der er endnu ingen livepositioner.'
+    const ON_TIMETABLE_EN =
+      "Every vehicle is Timetable only for now: live positions aren't connected yet."
+
+    it('says once that a vehicle is Estimated from its delay or Timetable only, in English', () => {
+      show('en', withDelays)
+      expect(screen.getAllByText(WITH_DELAYS_EN)).toHaveLength(1)
+      expect(screen.queryByText(ON_TIMETABLE_EN)).not.toBeInTheDocument()
+    })
+
+    it('says it in Danish', () => {
+      show('da', withDelays)
+      expect(screen.getAllByText(WITH_DELAYS_DA)).toHaveLength(1)
+    })
+  })
+
   it("says since when the planes' feed has had no data while it fails, in English", () => {
     liveAircraft.update({ snapshot: failing })
     show('en', alternating)

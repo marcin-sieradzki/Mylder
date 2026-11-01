@@ -31,6 +31,7 @@ import { joinJourney, type Corrections } from './join.ts'
 import type { PositionJourney, Stop } from './rejseplanen/answers.ts'
 import type { NextCall, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
+import type { TripUpdate } from './updates.ts'
 
 const onMap = (phase: TripPhase) => phase === 'waiting' || phase === 'underway'
 
@@ -57,6 +58,8 @@ export interface TripHistory {
   readonly reported?: Position
   /** Its last known delay, in seconds, which it keeps for the rest of its day. */
   readonly delay?: number
+  /** When its latest update from SIRI-ET's feed was received. */
+  readonly updated?: number
   /** Rejseplanen's journey, `ZI@DA`. */
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
@@ -73,6 +76,8 @@ export interface BuildInput {
   readonly history?: History
   /** The join's corrections, from the `journeyDetail` calls opened trips made. */
   readonly corrections?: Corrections
+  /** By trip key, the updates SIRI-ET's table gives the trips it joins (./updates.ts). */
+  readonly updates?: ReadonlyMap<string, TripUpdate>
   readonly context: Omit<DataStateContext, 'now' | 'fetched'> & { readonly health: ApiHealth }
 }
 
@@ -91,8 +96,9 @@ function callsWithStops(
   timetable: Timetable,
   trip: PlannedTrip,
   stops: readonly Stop[] | undefined,
+  base: readonly Call[] = trip.calls,
 ): Call[] {
-  const calls: Call[] = trip.calls.map(({ arrival, departure }) => ({ arrival, departure }))
+  const calls: Call[] = [...base]
   const { platforms } = timetable.stops
   const { timezone } = timetable.manifest
   let from = 0
@@ -196,6 +202,7 @@ export function buildTrips({
   answer,
   history: stored = {},
   corrections = {},
+  updates = new Map(),
   context,
 }: BuildInput): Built {
   const history = correctedHistory(stored, corrections)
@@ -215,12 +222,15 @@ export function buildTrips({
     for (const trip of timetable.tripsOn(day)) {
       const realtime = joined.get(trip.key)
       const before = history[trip.key] as TripHistory | undefined
-      if (!realtime && !before && !onMap(tripPhase(trip.calls, now))) continue
+      const update = updates.get(trip.key)
+      if (!realtime && !before && !update && !onMap(tripPhase(trip.calls, now))) continue
       const path = timetable.pathOf(trip.pattern)
+      // A position's stops lie over SIRI-ET's expected times, where both give one.
+      const base = update?.calls ?? trip.calls
       const calls = realtime
-        ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop)
-        : trip.calls
-      const delay = (realtime ? delayOf(calls) : undefined) ?? before?.delay
+        ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop, base)
+        : base
+      const delay = (realtime || update ? delayOf(calls) : undefined) ?? before?.delay
       const timed = timedCalls(calls, before?.delay)
       // A trip that has arrived on its expected times is done with, whatever an answer says; its
       // delay is kept while it stands at its last stop.
@@ -244,20 +254,23 @@ export function buildTrips({
       const ref = realtime?.ref ?? before?.ref
       const seen = position ?? before?.seen
       const reported = reportedNow ? position : before?.reported
+      const updated = update?.received ?? before?.updated
       const remembered: TripHistory = {
         ...(seen ? { seen } : {}),
         ...(reported ? { reported } : {}),
+        ...(updated === undefined ? {} : { updated }),
         ...(delay === undefined ? {} : { delay }),
         ...(journey ? { journey } : {}),
         ...(ref ? { ref } : {}),
       }
-      const hadRealtime = realtime !== undefined || before !== undefined
+      const hadRealtime = realtime !== undefined || before !== undefined || update !== undefined
       if (hadRealtime) kept[trip.key] = remembered
       // More than 5 min before it leaves on its expected times, a trip is remembered, not drawn.
       if (phase === 'upcoming') continue
       const fields = {
         ...(seen ? { seen: seen.time } : {}),
         ...(reported ? { reported: reported.time } : {}),
+        ...(updated === undefined ? {} : { updated }),
         hadRealtime,
       }
       const state = dataState(fields, ctx)
@@ -284,6 +297,8 @@ export function buildTrips({
         progress: Math.round(progress),
         next: nextCalls(timetable, trip, timed, now),
         ...(atFirstStop ? { waiting: true as const } : {}),
+        ...(update?.cancelled ? { cancelled: true as const } : {}),
+        ...(update?.cancelledCalls.length ? { cancelledCalls: update.cancelledCalls } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
       })

@@ -17,6 +17,7 @@ import {
   replay,
   replayAircraft,
   savedAnswers,
+  withUpdates,
 } from './freeze'
 import {
   bundledFiles,
@@ -33,7 +34,7 @@ import {
   type Recorded,
   type RecordedApi,
 } from './layer'
-import { ENDING_TIMETABLE, ON_TIMETABLE, RECORDINGS, TIMETABLE_PLANS } from './plans'
+import { ENDING_TIMETABLE, ON_SIRI_ET, ON_TIMETABLE, RECORDINGS, TIMETABLE_PLANS } from './plans'
 
 const timetable = await fixtureTimetable()
 
@@ -161,6 +162,39 @@ describe('a frozen recording', () => {
           Promise.all(snapshots.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
         )
         expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
+      }),
+  )
+
+  it.effect(
+    'runs the timetable source with the SIRI-ET recording’s updates into the snapshots saved for it',
+    () =>
+      Effect.gen(function* () {
+        const plan = ON_SIRI_ET
+        const dir = recordingDir(plan.name)
+        const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
+        const { snapshots } = yield* withUpdates(plan, recorded)
+        const saved = yield* Effect.promise(() =>
+          Promise.all(snapshots.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
+        )
+        expect(snapshots).toHaveLength(plan.minutes)
+        expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
+        // What the screens get: Estimated trips beside Timetable only ones, from a fresh feed, and
+        // bus 102A of 09:04 cancelled whole by the second minute.
+        for (const snapshot of snapshots) {
+          expect(snapshot).toMatchObject({
+            source: { kind: 'timetable' },
+            updates: { kind: 'recording', fresh: true },
+          })
+          expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(
+            new Set(['estimated', 'timetable-only']),
+          )
+        }
+        const bus102A = (snapshot: (typeof snapshots)[number]) =>
+          snapshot.trips.find(
+            (trip) => trip.key.startsWith('bus.102A.') && trip.key.endsWith('.0904'),
+          )
+        expect(bus102A(snapshots[0])?.cancelled).toBeUndefined()
+        expect(bus102A(snapshots[1])?.cancelled).toBe(true)
       }),
   )
 

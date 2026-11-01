@@ -13,6 +13,7 @@ import * as SimulatedRejseplanen from './simulation/layer.ts'
 import { DEFAULT_SCENARIO, scenarioNamed } from './simulation/scenarios.ts'
 import type { Snapshot } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
+import { UPDATES_VARIABLE, updatesSetting, type Updates } from './updates.ts'
 
 /**
  * A source as the tracker runs it, with the scenario or recording it needs. What a rider is told
@@ -84,14 +85,19 @@ export function snapshotSourceOf(source: Source): Snapshot['source'] {
 /**
  * The saved folder in `recordings/` a source runs on, its timetable and its clock: a recording's
  * own, or the timetable source's from `from` (`MYLDER_TIMETABLE_FROM`), which no other source
- * reads.
+ * reads, or else from the recording its updates replay (`MYLDER_UPDATES=recording:<folder>`), so
+ * that recording's messages come at its own clock, on its own timetable.
  */
-export function savedFolderOf(source: Source, from: string | undefined): string | undefined {
+export function savedFolderOf(
+  source: Source,
+  from: string | undefined,
+  updates?: Updates,
+): string | undefined {
   switch (source.kind) {
     case 'recording':
       return source.folder
     case 'timetable':
-      return from?.trim() || undefined
+      return from?.trim() || (updates?.kind === 'recording' ? updates.folder : undefined)
     case 'simulated':
     case 'rejseplanen':
       return undefined
@@ -124,4 +130,42 @@ export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.
     case 'rejseplanen':
       return settings.key ? Http.fetchLayer : Http.layer(missingKey)
   }
+}
+
+/** The source as `MYLDER_SOURCE` names it, for a log line. */
+const sourceSetting = (source: Source): string => {
+  const { kind, name } = snapshotSourceOf(source)
+  return name ? `${kind}:${name}` : kind
+}
+
+/**
+ * The updates a source runs with (`MYLDER_UPDATES`, ./updates.ts), and a warning to log when the
+ * switch is set but ignored:
+ * - under the simulated Rejseplanen, which brings its own invented updates;
+ * - for a recording's messages, wherever the runtime's clock isn't that recording's: they are due
+ *   by its clock, and at another all of them would be due at once, or none. Only the timetable
+ *   source with no saved folder of its own (`from`, `MYLDER_TIMETABLE_FROM`) runs at it.
+ */
+export function updatesFor(
+  source: Source,
+  updates: Updates,
+  from?: string,
+): { readonly updates: Updates; readonly warning?: string } {
+  if (updates.kind === 'off') return { updates }
+  const ignored = (why: string) => ({
+    updates: { kind: 'off' } as const,
+    warning: `${UPDATES_VARIABLE}=${updatesSetting(updates)} is ignored ${why}`,
+  })
+  if (source.kind === 'simulated') {
+    return ignored('under MYLDER_SOURCE=simulated, which brings its own updates')
+  }
+  if (updates.kind === 'recording' && savedFolderOf(source, from, updates) !== updates.folder) {
+    const under = from?.trim()
+      ? `MYLDER_TIMETABLE_FROM=${from.trim()}`
+      : `MYLDER_SOURCE=${sourceSetting(source)}`
+    return ignored(
+      `under ${under}, which runs at its own clock, not recordings/${updates.folder}'s`,
+    )
+  }
+  return { updates }
 }

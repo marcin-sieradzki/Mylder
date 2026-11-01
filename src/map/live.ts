@@ -158,13 +158,17 @@ export function useSnapshot(store: LiveStore<unknown> = liveSnapshot): unknown {
 
 /**
  * What a rider is told about the latest snapshot's source (src/domain/source.ts): whether it asks
- * Rejseplanen, has positions and brings messages, and how it is named and credited. None until a
- * snapshot has landed.
+ * Rejseplanen, has positions and brings messages, how it is named and credited, and its banner and
+ * legend with SIRI-ET's delays on or off. None until a snapshot has landed.
  */
 export function useSource(store: SnapshotStore = liveSnapshot): SourceDescription | undefined {
   const snapshot = useSnapshot(store)
-  return snapshot && describeSource(snapshot.source.kind)
+  return snapshot && describeSnapshotSource(snapshot)
 }
+
+/** What a rider is told about a snapshot's source, with SIRI-ET's delays on or off. */
+export const describeSnapshotSource = (snapshot: Snapshot): SourceDescription =>
+  describeSource(snapshot.source.kind, { delays: snapshot.updates.kind !== 'off' })
 
 /**
  * When the server received the latest position answer this page has seen, for the Updated line:

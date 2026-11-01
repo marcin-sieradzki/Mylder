@@ -31,6 +31,12 @@
     "kind": "recording",
     "name": "crowded"
   },
+  "updates": {
+    "kind": "off",
+    "fresh": false,
+    "withUpdate": {},
+    "unmatched": {}
+  },
   "status": {
     "calls": [
       {

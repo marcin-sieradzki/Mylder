@@ -18,6 +18,11 @@ export const E2E_PORTS = {
   crowded: 4177,
   /** The simulation, chosen with `MYLDER_SOURCE=simulated`, with the aircraft off. */
   simulated: 4178,
+  /**
+   * The timetable source with SIRI-ET's updates from the SIRI-ET recording
+   * (`MYLDER_UPDATES=recording:siri-et`), at its clock, with the aircraft off.
+   */
+  updates: 4179,
 } as const
 
 /** The GitHub Pages demo, served from out/ (`npm run demo:serve`, playwright.demo.config.ts). */

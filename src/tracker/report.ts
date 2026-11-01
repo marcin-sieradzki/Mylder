@@ -54,12 +54,35 @@ export function countBy(
   return counts
 }
 
-/** The run's log line: the snapshot's status with the source, the mode, the budget and the store. */
-export const runLine = ({ source, positionMode, answerMode, budget, store, status }: Snapshot) => ({
-  source,
-  positionMode,
-  ...(answerMode ? { answerMode } : {}),
-  budget: { level: budget.level, calls: budget.calls },
-  store,
-  ...status,
-})
+/**
+ * The updates' part of the run's log line, while they are on: how the feed stands, the table's
+ * journeys that joined no trip by mode, and the share of each mode's trips on the map that have an
+ * update, to two decimals, so a bad join shows after a new timetable (spec #146).
+ */
+function updatesLine({ updates, status }: Snapshot) {
+  const { kind, lastMessage, fresh, withUpdate, unmatched } = updates
+  const share = Object.fromEntries(
+    Object.entries(status.modes).map(([mode, trips]) => [
+      mode,
+      Math.round(((withUpdate[mode] ?? 0) / trips) * 100) / 100,
+    ]),
+  )
+  return { kind, ...(lastMessage === undefined ? {} : { lastMessage }), fresh, unmatched, share }
+}
+
+/**
+ * The run's log line: the snapshot's status with the source, the mode, the budget and the store,
+ * and the updates while they are on.
+ */
+export const runLine = (snapshot: Snapshot) => {
+  const { source, positionMode, answerMode, budget, store, status, updates } = snapshot
+  return {
+    source,
+    positionMode,
+    ...(answerMode ? { answerMode } : {}),
+    budget: { level: budget.level, calls: budget.calls },
+    store,
+    ...(updates.kind === 'off' ? {} : { updates: updatesLine(snapshot) }),
+    ...status,
+  }
+}

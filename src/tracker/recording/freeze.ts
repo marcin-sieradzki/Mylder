@@ -29,6 +29,7 @@ import { trackerLayer } from '../runtime.ts'
 import { simulatedClient } from '../simulation/layer.ts'
 import type { Snapshot } from '../snapshot.ts'
 import type { Source } from '../source.ts'
+import type { Updates } from '../updates.ts'
 import { loadTimetable, type Timetable } from '../timetable.ts'
 import { Tracker } from '../tracker.ts'
 import * as RecordedHttpClient from './layer.ts'
@@ -235,11 +236,24 @@ export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Served> 
   }).pipe(Effect.provide(TestClock.layer()))
 
 /**
- * Runs the tracker over the timetable source's plan: no call to keep or replay, so freezing it and
- * checking it again are the same run.
+ * Runs the tracker over the timetable source's plan, with updates when given: no call to keep or
+ * replay, so freezing it and checking it again are the same run.
  */
-export const onTimetable = (plan: TimetablePlan, timetable: Timetable): Effect.Effect<Served> =>
+export const onTimetable = (
+  plan: TimetablePlan,
+  timetable: Timetable,
+  updates?: Updates,
+): Effect.Effect<Served> =>
   play(plan).pipe(
-    Effect.provide(trackerLayer({ timetable, source: { kind: 'timetable' }, cpu: stoppedCpu })),
+    Effect.provide(
+      trackerLayer({ timetable, source: { kind: 'timetable' }, updates, cpu: stoppedCpu }),
+    ),
     Effect.provide(TestClock.layer()),
   )
+
+/**
+ * Runs the tracker over a plan of `UPDATES_PLANS` on the timetable source, with updates from the
+ * SIRI-ET recording in its own folder, at that recording's clock.
+ */
+export const withUpdates = (plan: TimetablePlan, timetable: Timetable): Effect.Effect<Served> =>
+  onTimetable(plan, timetable, { kind: 'recording', folder: plan.name })

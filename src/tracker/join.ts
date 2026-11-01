@@ -141,3 +141,120 @@ export function joinJourney(
   })
   return fit ? { trip: fit, ref } : undefined
 }
+
+/**
+ * SIRI-ET's join (spec #146, docs/timetable.md "The join"): each journey of the update table to a
+ * trip of its service day. A message carries only some of a journey's calls, often not its first,
+ * so the join can't key on the first departure as a reference does. A train is found by its train
+ * number, which SIRI-ET's `TrainNumberRef` gives without the timetable's leading zeros; any other
+ * journey by its line and its first and last stops, then by a call it holds, at a stop of the
+ * trip's pattern at that call's planned time. No Metro or Light rail trip is joined: SIRI-ET has no
+ * dataset for either, so they stay Timetable only (ADR 0006) whatever a journey claims.
+ */
+export interface TableJoinable {
+  readonly day: string
+  readonly line: string
+  readonly origin: string
+  readonly destination: string
+  readonly trainNumber?: string
+  /** The calls the journey holds: its first, its delays' and its cancelled ones. */
+  readonly calls: readonly { readonly stop: string; readonly aimed: number }[]
+}
+
+interface TableIndex {
+  /** Train and S-tog trips by their train number, without leading zeros. */
+  readonly byNumber: ReadonlyMap<string, readonly PlannedTrip[]>
+  /** Trips by line and first and last Stop. */
+  readonly byEnds: ReadonlyMap<string, readonly PlannedTrip[]>
+}
+
+const tableIndexes = new WeakMap<Timetable, Map<IsoDate, TableIndex>>()
+
+const endsKey = (line: string, first: string, last: string) => `${line}|${first}|${last}`
+
+/** The modes SIRI-ET carries no journeys of, whose trips the join leaves alone. */
+const NOT_IN_SIRI_ET: ReadonlySet<string> = new Set(['metro', 'light-rail'])
+
+/** A service day's trips by train number and by their ends, built once per day. */
+function tableIndexOf(timetable: Timetable, day: IsoDate): TableIndex {
+  let days = tableIndexes.get(timetable)
+  if (!days) tableIndexes.set(timetable, (days = new Map()))
+  let index = days.get(day)
+  if (!index) {
+    const { platforms, stops } = timetable.stops
+    const stopAt = (call: PlannedTrip['calls'][number]) => stops[platforms[call.platform].stop].id
+    const byNumber = new Map<string, PlannedTrip[]>()
+    const byEnds = new Map<string, PlannedTrip[]>()
+    const add = (map: Map<string, PlannedTrip[]>, key: string, trip: PlannedTrip) =>
+      map.set(key, [...(map.get(key) ?? []), trip])
+    for (const trip of timetable.tripsOn(day)) {
+      const { mode, name } = trip.line
+      if (NOT_IN_SIRI_ET.has(mode)) continue
+      if (trip.number && (mode === 'train' || mode === 's-tog')) {
+        add(byNumber, platformId(trip.number), trip)
+      }
+      add(byEnds, endsKey(name, stopAt(trip.calls[0]), stopAt(trip.calls.at(-1)!)), trip)
+    }
+    days.set(day, (index = { byNumber, byEnds }))
+  }
+  return index
+}
+
+/** Whether a trip's call is at a SIRI-ET stop ref, its platform's or its Stop's. */
+function atStop(timetable: Timetable, call: PlannedTrip['calls'][number], ref: string): boolean {
+  const { platforms, stops } = timetable.stops
+  const platform = platforms[call.platform]
+  return (
+    platformId(platform.id) === platformId(ref) ||
+    stops[platform.stop].id === stopOf(timetable, platformId(ref))
+  )
+}
+
+/**
+ * The index of a trip's call at a SIRI-ET call, from `from` on: at its stop, planned to leave (or
+ * arrive, at a call it doesn't leave) at its aimed time. -1 when the trip has no such call.
+ */
+export function callIndexOf(
+  timetable: Timetable,
+  trip: PlannedTrip,
+  call: { readonly stop: string; readonly aimed: number },
+  from = 0,
+): number {
+  return trip.calls.findIndex(
+    (each, i) =>
+      i >= from &&
+      (each.departure === call.aimed || each.arrival === call.aimed) &&
+      atStop(timetable, each, call.stop),
+  )
+}
+
+/**
+ * The trip a SIRI-ET journey is, or undefined when no trip of its day fits: an unmatched journey.
+ * `taken` holds the keys the table's other journeys have already joined.
+ */
+export function joinTableJourney(
+  timetable: Timetable,
+  journey: TableJoinable,
+  taken: { has(key: string): boolean } = new Set<string>(),
+): PlannedTrip | undefined {
+  const index = tableIndexOf(timetable, journey.day)
+  const free = (trip: PlannedTrip) => !taken.has(trip.key)
+  if (journey.trainNumber) {
+    const number = platformId(journey.trainNumber)
+    // DSB's line is the train number itself; the S-tog's and Lokaltog's is the line's name.
+    const train = index.byNumber
+      .get(number)
+      ?.find((trip) => free(trip) && (trip.line.name === journey.line || journey.line === number))
+    if (train) return train
+  }
+  const ends = endsKey(
+    journey.line,
+    stopOf(timetable, platformId(journey.origin)),
+    stopOf(timetable, platformId(journey.destination)),
+  )
+  return index.byEnds
+    .get(ends)
+    ?.find(
+      (trip) => free(trip) && journey.calls.some((call) => callIndexOf(timetable, trip, call) >= 0),
+    )
+}

@@ -169,3 +169,19 @@ export const ENDING_TIMETABLE: TimetablePlan = {
 
 /** The timetable source's plans, each saved by `npm run recordings`. */
 export const TIMETABLE_PLANS: readonly TimetablePlan[] = [ON_TIMETABLE, ENDING_TIMETABLE]
+
+/** 09:21 in Copenhagen on Saturday 2026-10-31, in the SIRI-ET recording's hour. */
+const SIRI_ET_MOMENT = Date.UTC(2026, 9, 31, 8, 21)
+
+/**
+ * The timetable source with SIRI-ET's updates from `recordings/siri-et` (spec #146,
+ * `MYLDER_UPDATES=recording:siri-et`), on that recording's own timetable, at its own clock: its
+ * snapshots of 09:21 and 09:22 are saved beside its messages for screen tests. Bus 102A of 09:04
+ * has two cancelled calls in the first and is cancelled whole in the second. The folder's messages,
+ * timetable and clock are recorded, never frozen, so `npm run recordings` rewrites only its
+ * `snapshots/` and `answers/`.
+ */
+export const ON_SIRI_ET: TimetablePlan = { name: 'siri-et', start: SIRI_ET_MOMENT, minutes: 2 }
+
+/** The plans run with updates from their own folder's SIRI-ET recording. */
+export const UPDATES_PLANS: readonly TimetablePlan[] = [ON_SIRI_ET]
