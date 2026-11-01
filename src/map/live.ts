@@ -6,6 +6,7 @@
 import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { lastAnswer } from '../domain/pause.ts'
+import { describeSource, type SourceDescription } from '../domain/source.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { pagePoll, snapshotPoller, snapshotRoute } from './poll.ts'
 
@@ -153,6 +154,16 @@ export function useSnapshot(store: LiveStore<unknown> = liveSnapshot): unknown {
     () => store.get().snapshot,
     () => undefined,
   )
+}
+
+/**
+ * What a rider is told about the latest snapshot's source (src/domain/source.ts): whether it asks
+ * Rejseplanen, has positions and brings messages, and how it is named and credited. None until a
+ * snapshot has landed.
+ */
+export function useSource(store: SnapshotStore = liveSnapshot): SourceDescription | undefined {
+  const snapshot = useSnapshot(store)
+  return snapshot && describeSource(snapshot.source.kind)
 }
 
 /**

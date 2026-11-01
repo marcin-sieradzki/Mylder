@@ -1,11 +1,12 @@
 'use client'
 
 import { Dialog, FactList, Kbd, Link, Section, Text, VehicleDotLabel } from '@mylder/perron'
+import { describeSource } from '../domain/source'
 import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useAircraftProvider } from '../map/aircraft'
-import { useSnapshot } from '../map/live'
+import { useSnapshot, useSource } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
@@ -37,13 +38,19 @@ const STATES = [
   ['no-signal', 'noSignal'],
 ] as const
 
-/** Where the page's vehicles come from. */
+/** Where the page's vehicles come from, by the source's name and its scenario or recording. */
 function sourceOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary): string {
-  const name = source.name ?? ''
-  if (source.kind === 'simulated') return about.status.simulated.replace('{name}', name)
-  if (source.kind === 'recording') return about.status.recording.replace('{name}', name)
-  if (source.kind === 'timetable') return onTimetable.source
-  return about.status.rejseplanen
+  const scenario = source.name ?? ''
+  switch (describeSource(source.kind).name) {
+    case 'simulated':
+      return about.status.simulated.replace('{name}', scenario)
+    case 'recording':
+      return about.status.recording.replace('{name}', scenario)
+    case 'timetable':
+      return onTimetable.source
+    case 'rejseplanen':
+      return about.status.rejseplanen
+  }
 }
 
 /**
@@ -51,17 +58,24 @@ function sourceOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary
  * source that they are the timetable's plan, on a simulation or a recording that they aren't real.
  */
 function sourceNoteOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary) {
-  if (source.kind === 'rejseplanen') return undefined
-  return source.kind === 'timetable' ? onTimetable.note : about.status.notReal
+  switch (describeSource(source.kind).name) {
+    case 'rejseplanen':
+      return undefined
+    case 'timetable':
+      return onTimetable.note
+    case 'simulated':
+    case 'recording':
+      return about.status.notReal
+  }
 }
 
 /**
- * The disruption list's last check, as the status says it; on the timetable source, which asks
- * Rejseplanen nothing, that the messages aren't connected yet.
+ * The disruption list's last check, as the status says it; on a source that brings no messages,
+ * such as the timetable, that the messages aren't connected yet.
  */
 function disruptionsOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary): string {
   const words = dictionary.about.status
-  if (snapshot.source.kind === 'timetable') return dictionary.onTimetable.notConnected
+  if (!describeSource(snapshot.source.kind).messages) return dictionary.onTimetable.notConnected
   const list = snapshot.disruptions
   if (!list) return words.notChecked
   if (list.ok) return words.checked.replace('{time}', clockTime(list.checked, timezone))
@@ -71,11 +85,14 @@ function disruptionsOf(snapshot: Snapshot, timezone: string, dictionary: ClientD
 }
 
 /**
- * Rejseplanen's own realtime time, as the status gives it; on the timetable source, which asks
- * Rejseplanen nothing, that its realtime isn't connected yet rather than that the time is unknown.
+ * Rejseplanen's own realtime time, as the status gives it; on a source that asks Rejseplanen
+ * nothing, such as the timetable, that its realtime isn't connected yet rather than that the time
+ * is unknown.
  */
 function apiTimeOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary) {
-  if (snapshot.source.kind === 'timetable') return dictionary.onTimetable.notConnected
+  if (!describeSource(snapshot.source.kind).callsRejseplanen) {
+    return dictionary.onTimetable.notConnected
+  }
   const apiTime = snapshot.apiTime ? Date.parse(snapshot.apiTime) : Number.NaN
   return Number.isNaN(apiTime) ? undefined : clockTime(apiTime, timezone, { seconds: true })
 }
@@ -182,8 +199,10 @@ export function AboutDialog() {
   const snapshot = useSnapshot()
   const words = dictionary.about
   const prepared = snapshot?.status.timetable.prepared
-  // On the timetable source no realtime is asked for, so the credit names the timetable alone.
-  const onTimetable = snapshot?.source.kind === 'timetable'
+  const source = useSource()
+  // Credited to the timetable alone on the timetable source, which asks for no realtime.
+  const transit =
+    source?.credit === 'timetable' ? dictionary.onTimetable.transit : words.credits.transit
   return (
     <Dialog
       title={words.title}
@@ -197,7 +216,7 @@ export function AboutDialog() {
         <Text render={<p />}>{words.nonCommercial}</Text>
         <Section title={words.credits.title}>
           <Text render={<p />}>
-            {compose(onTimetable ? dictionary.onTimetable.transit : words.credits.transit, {
+            {compose(transit, {
               rejseplanen: <Link href={REJSEPLANEN}>Rejseplanen</Link>,
               licence: <Link href={CC_BY}>CC BY 4.0</Link>,
               date: prepared ? dayOf(prepared, lang) : '—',
@@ -231,7 +250,9 @@ export function AboutDialog() {
           {snapshot?.positionMode === 'CALC_REPORT' ? (
             <Text render={<p />}>{dictionary.legend.noLive}</Text>
           ) : null}
-          {onTimetable ? <Text render={<p />}>{dictionary.onTimetable.legend}</Text> : null}
+          {source && !source.positions ? (
+            <Text render={<p />}>{dictionary.onTimetable.legend}</Text>
+          ) : null}
         </Section>
         <Section title={words.status.title}>
           <PageStatus snapshot={snapshot} />

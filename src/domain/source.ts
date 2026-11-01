@@ -26,7 +26,10 @@ export interface SourceDescription {
   readonly messages: boolean
   /** How it is named. */
   readonly name: SourceName
-  /** Whose data the transit is credited to: Rejseplanen's realtime and timetable, or the timetable alone. */
+  /**
+   * Whose data the transit is credited to: Rejseplanen's realtime and timetable, or the timetable
+   * alone.
+   */
   readonly credit: 'rejseplanen' | 'timetable'
 }
 

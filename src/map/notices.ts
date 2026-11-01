@@ -6,6 +6,7 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { liveLimit } from '../domain/data-state.ts'
 import { pauseAt } from '../domain/pause.ts'
+import { describeSource } from '../domain/source.ts'
 import type { IsoDate } from '../timetable/format.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveSnapshot, type LiveSnapshot, type SnapshotStore } from './live.ts'
@@ -37,14 +38,18 @@ export type PageNotices = readonly PageNotice[]
 
 const NONE: PageNotices = []
 
-/** The source banner, whenever the data isn't Rejseplanen's own. */
+/** The source banner, which names the source, whenever the data isn't Rejseplanen's own. */
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
-  const { kind } = snapshot.source
-  if (kind === 'simulated') return { kind: 'source', source: 'simulated' }
-  if (kind === 'timetable') return { kind: 'source', source: 'timetable' }
-  if (kind === 'recording')
-    return { kind: 'source', source: 'recording', fetched: snapshot.fetched }
-  return undefined
+  const { name } = describeSource(snapshot.source.kind)
+  switch (name) {
+    case 'simulated':
+    case 'timetable':
+      return { kind: 'source', source: name }
+    case 'recording':
+      return { kind: 'source', source: name, fetched: snapshot.fetched }
+    case 'rejseplanen':
+      return undefined
+  }
 }
 
 /** Disconnected, at once, while the browser's own polls fail. */

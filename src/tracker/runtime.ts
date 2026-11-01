@@ -10,12 +10,18 @@ import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
 import type * as Http from './http.ts'
-import { apiLayer, KEY_VARIABLE, readSource, type Source } from './source.ts'
+import {
+  apiLayer,
+  KEY_VARIABLE,
+  readSource,
+  savedFolderOf,
+  snapshotSourceOf,
+  type Source,
+} from './source.ts'
 import { memoryLayer, type Store } from './store.ts'
 import { loadTimetable, TIMETABLE_DIR, type Timetable } from './timetable.ts'
 import {
   clientSettings,
-  describeSource,
   layer as trackerServiceLayer,
   TimetableService,
   Tracker,
@@ -42,7 +48,7 @@ export function readPositionMode(value: string | undefined): PositionMode {
 
 /** Each source keeps its own state, so a simulated call never touches a live counter. */
 export function keyPrefixOf(source: Source): string {
-  const { kind, name } = describeSource(source)
+  const { kind, name } = snapshotSourceOf(source)
   return name ? `mylder:${kind}:${name}` : `mylder:${kind}`
 }
 
@@ -85,12 +91,6 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
  * the timetable source reads it; production never sets it.
  */
 export const TIMETABLE_FROM_VARIABLE = 'MYLDER_TIMETABLE_FROM'
-
-/** The saved folder a source runs on: a recording's own, or the timetable source's from `from`. */
-function savedFolderOf(source: Source, from: string | undefined): string | undefined {
-  if (source.kind === 'recording') return source.folder
-  return source.kind === 'timetable' ? from?.trim() || undefined : undefined
-}
 
 /**
  * Where a source's timetable lives: a recording brings its own, as does the timetable source

@@ -3,6 +3,7 @@
 // nothing, once its last good answer is old enough; never on the timetable source, which asks
 // Rejseplanen nothing. The page notice waits the Live limit, the data card 5 min; both read this
 // one rule. Times are milliseconds since the epoch.
+import { describeSource, type SourceKind } from './source.ts'
 
 /** What the rule reads of a snapshot. */
 export interface PauseFacts {
@@ -13,8 +14,8 @@ export interface PauseFacts {
   }
   /** By mode, when a position answer last carried one of its trips this service day. */
   readonly lastSeen: Readonly<Record<string, number>>
-  /** Where the snapshot's transit comes from: `timetable` makes no call, so nothing can pause. */
-  readonly source: { readonly kind: string }
+  /** Where the snapshot's transit comes from: one that makes no call has nothing to pause. */
+  readonly source: { readonly kind: SourceKind }
 }
 
 /** Why live data is paused: the month is spent, until a date, or no answer has come since a moment. */
@@ -31,9 +32,9 @@ export function lastCarried(lastSeen: PauseFacts['lastSeen']): number | undefine
   return moments.length === 0 ? undefined : Math.max(...moments)
 }
 
-/** Whether the snapshot is on the timetable source, which asks Rejseplanen nothing. */
-export const onTimetable = (facts: Pick<PauseFacts, 'source'>): boolean =>
-  facts.source.kind === 'timetable'
+/** Whether the snapshot's source asks Rejseplanen anything; the timetable source asks nothing. */
+export const callsRejseplanen = (facts: Pick<PauseFacts, 'source'>): boolean =>
+  describeSource(facts.source.kind).callsRejseplanen
 
 /**
  * The last good position answer a snapshot knows of: its own time while the API answers well, or
@@ -41,7 +42,7 @@ export const onTimetable = (facts: Pick<PauseFacts, 'source'>): boolean =>
  * carried a trip. None when no answer has carried one this service day.
  */
 export function lastAnswer(facts: PauseFacts & { readonly fetched: number }): number | undefined {
-  return facts.api.status === 'ok' || onTimetable(facts)
+  return facts.api.status === 'ok' || !callsRejseplanen(facts)
     ? facts.fetched
     : lastCarried(facts.lastSeen)
 }
@@ -55,7 +56,7 @@ export function lastAnswer(facts: PauseFacts & { readonly fetched: number }): nu
  * at night, leaves no mark there, so after one the pause can come sooner.
  */
 export function pauseAt(facts: PauseFacts, now: number, after: number): Pause | undefined {
-  if (onTimetable(facts)) return undefined
+  if (!callsRejseplanen(facts)) return undefined
   const { api, budget } = facts
   if (budget.level === 'spent' || api.status === 'spent') {
     return { reason: 'spent', ...(budget.resumes ? { resumes: budget.resumes } : {}) }

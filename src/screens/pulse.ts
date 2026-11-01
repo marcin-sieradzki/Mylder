@@ -2,6 +2,7 @@
 // clock alone, so the figures and the dots never disagree. Each figure follows the mode filters;
 // a figure the data can't back is none, with the reason it can't be known.
 import { AGEING_ENDS, liveLimit, reportInterval, type DataState } from '../domain/data-state'
+import { describeSource } from '../domain/source'
 import type { DataStates } from '../map/states'
 import { onMap } from '../map/vehicles'
 import { MODES, type Mode } from '../timetable/format'
@@ -80,13 +81,13 @@ const REPORTING: ReadonlySet<DataState> = new Set(['live', 'ageing'])
 const NO_FILTER: ReadonlySet<Mode> = new Set()
 
 /**
- * When positions are paused (docs/data-states.md, "Paused"): never on the timetable source, which
- * asks Rejseplanen nothing; at once when the month's calls are spent or no position is asked for,
- * else the moment the latest good answer is older than the Live limit; none while the API answers
- * well.
+ * When positions are paused (docs/data-states.md, "Paused"): never on a source that asks
+ * Rejseplanen nothing, such as the timetable; at once when the month's calls are spent or no
+ * position is asked for, else the moment the latest good answer is older than the Live limit; none
+ * while the API answers well.
  */
 export function pausedFrom(snapshot: Snapshot): number | undefined {
-  if (snapshot.source.kind === 'timetable') return undefined
+  if (!describeSource(snapshot.source.kind).callsRejseplanen) return undefined
   if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return -Infinity
   if (snapshot.api.status === 'ok') return undefined
   const answered = Math.min(snapshot.api.since, snapshot.fetched)
@@ -108,8 +109,8 @@ export function pulseOf(
   const reporting = (trip: SnapshotTrip) => REPORTING.has(stateOf(trip))
 
   const computedOnly = snapshot.positionMode === 'CALC_REPORT'
-  const onTimetable = snapshot.source.kind === 'timetable'
-  const why: Unknown | undefined = onTimetable
+  const noPositions = !describeSource(snapshot.source.kind).positions
+  const why: Unknown | undefined = noPositions
     ? 'timetable'
     : paused
       ? 'paused'
@@ -135,7 +136,7 @@ export function pulseOf(
   // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
   // figure for another: under the minimum it says so.
   const delay: Pulse['delay'] =
-    onTimetable || !carriesDelays(snapshot)
+    noPositions || !carriesDelays(snapshot)
       ? undefined
       : paused
         ? 'paused'
