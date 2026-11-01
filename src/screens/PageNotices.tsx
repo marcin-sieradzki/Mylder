@@ -12,6 +12,7 @@ import { clockTime } from '../timetable/time'
 import type { AircraftProvider } from '../tracker/aircraft/index'
 import { intervalOf } from './budget'
 import styles from './PageNotices.module.css'
+import { sourceWords } from './sourceWords'
 import { dayOf, longDateOf } from './wording'
 
 /** One notice's sentences. */
@@ -47,10 +48,12 @@ function wordsOf(
         '{date}',
         dayOf(notice.last, lang),
       )
-    case 'source':
-      if (notice.source === 'simulated') return words.simulated
-      if (notice.source === 'timetable') return dictionary.onTimetable.banner
-      return words.recorded.replace('{date}', longDateOf(notice.fetched, lang, timezone))
+    case 'source': {
+      const banner = sourceWords(dictionary, notice.words)
+      return notice.fetched === undefined
+        ? banner
+        : banner.replace('{date}', longDateOf(notice.fetched, lang, timezone))
+    }
   }
 }
 

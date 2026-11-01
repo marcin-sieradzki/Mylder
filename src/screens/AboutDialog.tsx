@@ -14,6 +14,7 @@ import { aboutDialog, useAboutOpen } from './about'
 import { budgetLine, intervalOf } from './budget'
 import styles from './AboutDialog.module.css'
 import { compose } from './compose'
+import { sourceWords } from './sourceWords'
 import {
   aircraftCredit,
   CC_BY,
@@ -39,34 +40,18 @@ const STATES = [
 ] as const
 
 /** Where the page's vehicles come from, by the source's name and its scenario or recording. */
-function sourceOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary): string {
-  const scenario = source.name ?? ''
-  switch (describeSource(source.kind).name) {
-    case 'simulated':
-      return about.status.simulated.replace('{name}', scenario)
-    case 'recording':
-      return about.status.recording.replace('{name}', scenario)
-    case 'timetable':
-      return onTimetable.source
-    case 'rejseplanen':
-      return about.status.rejseplanen
-  }
+function sourceOf({ source }: Snapshot, dictionary: ClientDictionary): string {
+  const { named } = describeSource(source.kind)
+  return sourceWords(dictionary, named).replace('{name}', source.name ?? '')
 }
 
 /**
  * What the page says of its vehicles when they aren't Rejseplanen's live data: on the timetable
  * source that they are the timetable's plan, on a simulation or a recording that they aren't real.
  */
-function sourceNoteOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary) {
-  switch (describeSource(source.kind).name) {
-    case 'rejseplanen':
-      return undefined
-    case 'timetable':
-      return onTimetable.note
-    case 'simulated':
-    case 'recording':
-      return about.status.notReal
-  }
+function sourceNoteOf({ source }: Snapshot, dictionary: ClientDictionary) {
+  const { note } = describeSource(source.kind)
+  return note && sourceWords(dictionary, note)
 }
 
 /**

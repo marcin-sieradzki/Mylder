@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { describeSource, SOURCE_KINDS, type SourceDescription, type SourceKind } from './source'
+import {
+  describeSource,
+  SOURCE_DESCRIPTIONS,
+  SOURCE_KINDS,
+  type SourceDescription,
+  type SourceDescriptions,
+  type SourceKind,
+} from './source'
 
 describe('what a rider is told about each source', () => {
   it.each([
@@ -9,7 +16,9 @@ describe('what a rider is told about each source', () => {
         callsRejseplanen: false,
         positions: false,
         messages: false,
-        name: 'timetable',
+        banner: { words: 'onTimetable.banner', dated: false },
+        named: 'onTimetable.source',
+        note: 'onTimetable.note',
         credit: 'timetable',
       },
     ],
@@ -19,7 +28,9 @@ describe('what a rider is told about each source', () => {
         callsRejseplanen: true,
         positions: true,
         messages: true,
-        name: 'simulated',
+        banner: { words: 'notices.simulated', dated: false },
+        named: 'about.status.simulated',
+        note: 'about.status.notReal',
         credit: 'rejseplanen',
       },
     ],
@@ -29,7 +40,9 @@ describe('what a rider is told about each source', () => {
         callsRejseplanen: true,
         positions: true,
         messages: true,
-        name: 'recording',
+        banner: { words: 'notices.recorded', dated: true },
+        named: 'about.status.recording',
+        note: 'about.status.notReal',
         credit: 'rejseplanen',
       },
     ],
@@ -39,7 +52,7 @@ describe('what a rider is told about each source', () => {
         callsRejseplanen: true,
         positions: true,
         messages: true,
-        name: 'rejseplanen',
+        named: 'about.status.rejseplanen',
         credit: 'rejseplanen',
       },
     ],
@@ -49,14 +62,20 @@ describe('what a rider is told about each source', () => {
 
   it('describes every kind the snapshot can name', () => {
     expect(SOURCE_KINDS).toEqual(['timetable', 'simulated', 'recording', 'rejseplanen'])
-    for (const kind of SOURCE_KINDS) expect(describeSource(kind).name).toBe(kind)
+    expect(Object.keys(SOURCE_DESCRIPTIONS).sort()).toEqual([...SOURCE_KINDS].sort())
   })
 
-  // The type test: the snapshot's kinds are `SOURCE_KINDS`, and the description is an exhaustive
-  // switch over them, so a kind added there fails `npm run typecheck` at the switch until it has a
-  // case. A kind outside them is refused, by the type and, should one get past it, at run time.
-  it('takes no kind it has not described', () => {
-    // @ts-expect-error -- a SIRI-ET source, say, has no description until the switch gives it one
-    expect(() => describeSource('siri-et')).toThrow('siri-et')
+  // The type test, checked by `npm run typecheck`: the snapshot's kinds are `SOURCE_KINDS`, and
+  // the descriptions are typed over them, so a kind added there with no description fails.
+  it('fails typecheck for a kind added with no description', () => {
+    const described: SourceDescriptions<SourceKind> = SOURCE_DESCRIPTIONS
+    // @ts-expect-error -- were `SOURCE_KINDS` to gain 'siri-et', its description would be missing
+    const withSiriEt: SourceDescriptions<SourceKind | 'siri-et'> = SOURCE_DESCRIPTIONS
+    expect(withSiriEt).toBe(described)
+  })
+
+  it('takes no kind outside them', () => {
+    // @ts-expect-error -- 'siri-et' is no kind the snapshot can name
+    expect(describeSource('siri-et')).toBeUndefined()
   })
 })

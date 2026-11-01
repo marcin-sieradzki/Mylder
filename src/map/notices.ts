@@ -6,7 +6,7 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { liveLimit } from '../domain/data-state.ts'
 import { pauseAt } from '../domain/pause.ts'
-import { describeSource } from '../domain/source.ts'
+import { describeSource, type BannerWords } from '../domain/source.ts'
 import type { IsoDate } from '../timetable/format.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveSnapshot, type LiveSnapshot, type SnapshotStore } from './live.ts'
@@ -27,29 +27,24 @@ export type PageNotice =
   | { readonly kind: 'budget'; readonly pollInterval: number }
   /** The prepared timetable has under 7 days of service left, or none: its last covered day. */
   | { readonly kind: 'timetable'; readonly last: IsoDate; readonly ended: boolean }
-  | { readonly kind: 'source'; readonly source: 'simulated' }
-  /** No live positions are connected: every vehicle is placed from its timetable. */
-  | { readonly kind: 'source'; readonly source: 'timetable' }
-  /** `fetched` is when the recorded snapshot was built, which names the recording's day. */
-  | { readonly kind: 'source'; readonly source: 'recording'; readonly fetched: number }
+  /**
+   * Where the page's data comes from, when it isn't Rejseplanen's own live data, by the words of
+   * the source's description; `fetched`, when the banner is dated, is when the snapshot was built,
+   * which names a recording's day.
+   */
+  | { readonly kind: 'source'; readonly words: BannerWords; readonly fetched?: number }
 
 /** The notices, top to bottom. */
 export type PageNotices = readonly PageNotice[]
 
 const NONE: PageNotices = []
 
-/** The source banner, which names the source, whenever the data isn't Rejseplanen's own. */
+/** The source banner its description gives, whenever the data isn't Rejseplanen's own. */
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
-  const { name } = describeSource(snapshot.source.kind)
-  switch (name) {
-    case 'simulated':
-    case 'timetable':
-      return { kind: 'source', source: name }
-    case 'recording':
-      return { kind: 'source', source: name, fetched: snapshot.fetched }
-    case 'rejseplanen':
-      return undefined
-  }
+  const { banner } = describeSource(snapshot.source.kind)
+  if (!banner) return undefined
+  const { words, dated } = banner
+  return dated ? { kind: 'source', words, fetched: snapshot.fetched } : { kind: 'source', words }
 }
 
 /** Disconnected, at once, while the browser's own polls fail. */
