@@ -46,11 +46,11 @@ const modeRank = (mode: string) => {
 /**
  * The cards at a moment, in order. First, on any source, the delays' card while SIRI-ET's feed is
  * on and quiet: no message for 5 min, or none yet (docs/data-states.md, rule 3). Then none on the
- * timetable source, which asks Rejseplanen nothing and so has no other gap to report: paused while the month is spent; no answer once Rejseplanen
- * has failed or answered nothing for 5 min since its last good answer (./pause.ts); while it
- * answers, one per mode with trips underway whose positions stopped 5 min ago; and the messages'
- * card once the list is more than 15 min old after a failed check, or an hour old however it was
- * checked, or has never been fetched.
+ * timetable source, which asks Rejseplanen nothing and so has no other gap to report: paused
+ * while the month is spent; no answer once Rejseplanen has failed or answered nothing for 5 min
+ * since its last good answer (./pause.ts); while it answers, one per mode with trips underway
+ * whose positions stopped 5 min ago; and the messages' card once the list is more than 15 min old
+ * after a failed check, or an hour old however it was checked, or has never been fetched.
  */
 export function dataCards(facts: DataCardFacts, now: number): DataCard[] {
   const cards: DataCard[] = []
