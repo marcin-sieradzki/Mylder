@@ -7,12 +7,17 @@
 export const E2E_PORTS = {
   /** The weekday recording, with its aircraft; the tests' base URL. */
   recording: 4173,
-  /** The simulation, with the aircraft off, to prove the default source starts. */
-  simulated: 4174,
+  /**
+   * `MYLDER_SOURCE` unset, so the default source, the timetable, with the aircraft off: proves the
+   * default source starts.
+   */
+  default: 4174,
   /** The weekday recording again, for the snapshot route's tests alone, which count its calls. */
   snapshot: 4176,
   /** The crowded recording, for the tests that open a stop with more trains than it lists. */
   crowded: 4177,
+  /** The simulation, chosen with `MYLDER_SOURCE=simulated`, with the aircraft off. */
+  simulated: 4178,
 } as const
 
 /** The GitHub Pages demo, served from out/ (`npm run demo:serve`, playwright.demo.config.ts). */

@@ -47,10 +47,10 @@ export async function serveAircraft(page: Page, call: number) {
   )
 }
 
-/** The server on the recording, and a second one on the same build on the simulation. */
+/** The server on the recording, and a second one on the same build with `MYLDER_SOURCE` unset. */
 export const PORT = E2E_PORTS.recording
-export const SIMULATED_PORT = E2E_PORTS.simulated
-export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
+export const DEFAULT_PORT = E2E_PORTS.default
+export const DEFAULT_URL = `http://localhost:${DEFAULT_PORT}`
 
 /**
  * A third server on the same build and recording, which only the snapshot route's tests ask, so
@@ -71,6 +71,10 @@ export const CROWDED_URL = `http://localhost:${CROWDED_PORT}`
 export const CROWDED_START = Date.parse(
   (readJson(join('recordings', CROWDED, 'clock.json')) as { start: string }).start,
 )
+
+/** A fifth server on the same build, on the simulation, which a test must choose by name. */
+export const SIMULATED_PORT = E2E_PORTS.simulated
+export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 
 export const test = base.extend({
   page: async ({ page }, provide) => {

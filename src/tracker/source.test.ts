@@ -12,9 +12,15 @@ describe('the timetable source in the switch', () => {
     expect(readSource(' timetable ')).toEqual({ kind: 'timetable' })
   })
 
-  it('still reads unset and empty as the simulation, for now', () => {
-    expect(readSource(undefined)).toEqual({ kind: 'simulated', scenario: 'weekday' })
-    expect(readSource('')).toEqual({ kind: 'simulated', scenario: 'weekday' })
+  it('reads unset, empty and blank as the timetable source, the default', () => {
+    expect(readSource(undefined)).toEqual({ kind: 'timetable' })
+    expect(readSource('')).toEqual({ kind: 'timetable' })
+    expect(readSource('  ')).toEqual({ kind: 'timetable' })
+  })
+
+  it('still reads simulated as the simulation, which is never the default', () => {
+    expect(readSource('simulated')).toEqual({ kind: 'simulated', scenario: 'weekday' })
+    expect(readSource('simulated:patchy')).toEqual({ kind: 'simulated', scenario: 'patchy' })
   })
 
   it('lists timetable among the choices when a setting is unknown', () => {

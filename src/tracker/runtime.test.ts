@@ -28,6 +28,18 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
+describe('the default source', () => {
+  it('is the timetable when MYLDER_SOURCE is unset or empty: no call, nothing simulated', async () => {
+    for (const env of [{}, { MYLDER_SOURCE: '' }] as Record<string, string>[]) {
+      const snapshot = await snapshotOn(env)
+      expect(snapshot.source).toEqual({ kind: 'timetable' })
+      expect(snapshot.positionMode).toBe('none')
+      expect(snapshot.status.calls).toEqual([])
+      expect(snapshot.budget).toMatchObject({ calls: 0 })
+    }
+  })
+})
+
 describe('the timetable source on a saved folder', () => {
   it('runs on the folder’s timetable from its clock, in the timetable’s last week', async () => {
     const snapshot = await snapshotOn({
