@@ -98,9 +98,12 @@ export const SnapshotSource = Schema.Struct({
  */
 export const SnapshotUpdates = Schema.Struct({
   kind: Schema.Literals(['off', 'siri', 'recording']),
-  /** When the table's last message was received, from any dataset; absent with no table. */
+  /**
+   * When the feed's last message was received, from any dataset: the latest a run has read, kept
+   * through runs without the table; absent before any has come.
+   */
   lastMessage: optional(Schema.Number),
-  /** Whether the feed was fresh at fetch time: the table present, its last message under 5 min old. */
+  /** Whether the feed was fresh at fetch time: its last message under 5 min old. */
   fresh: Schema.Boolean,
   /** The snapshot's trips with an update this service day, by mode. */
   withUpdate: Schema.Record(Schema.String, Schema.Number),
