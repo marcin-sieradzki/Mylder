@@ -61,13 +61,23 @@ function sourceNoteOf({ source }: Snapshot, { about, onTimetable }: ClientDictio
  */
 function disruptionsOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary): string {
   const words = dictionary.about.status
-  if (snapshot.source.kind === 'timetable') return dictionary.timetableOverview.disruptionsFact
+  if (snapshot.source.kind === 'timetable') return dictionary.onTimetable.notConnected
   const list = snapshot.disruptions
   if (!list) return words.notChecked
   if (list.ok) return words.checked.replace('{time}', clockTime(list.checked, timezone))
   // A failed check gives the time of the last good one, as the Disruptions footer does.
   if (list.fetched === null) return words.firstCheckFailed
   return words.checkFailed.replace('{time}', clockTime(list.fetched, timezone))
+}
+
+/**
+ * Rejseplanen's own realtime time, as the status gives it; on the timetable source, which asks
+ * Rejseplanen nothing, that its realtime isn't connected yet rather than that the time is unknown.
+ */
+function apiTimeOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary) {
+  if (snapshot.source.kind === 'timetable') return dictionary.onTimetable.notConnected
+  const apiTime = snapshot.apiTime ? Date.parse(snapshot.apiTime) : Number.NaN
+  return Number.isNaN(apiTime) ? undefined : clockTime(apiTime, timezone, { seconds: true })
 }
 
 /** The page's status from the snapshot (docs/screens.md, "The About dialog"). */
@@ -78,7 +88,6 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   const status = words.status
   if (!snapshot) return <FactList items={[{ label: status.source }]} />
   const { budget } = snapshot
-  const apiTime = snapshot.apiTime ? Date.parse(snapshot.apiTime) : Number.NaN
   const notes: string[] = []
   const sourceNote = sourceNoteOf(snapshot, dictionary)
   if (sourceNote) notes.push(sourceNote)
@@ -99,12 +108,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
         items={[
           { label: status.source, value: sourceOf(snapshot, dictionary) },
           { label: status.positions, value: status.positionModes[snapshot.positionMode] },
-          {
-            label: status.apiTime,
-            value: Number.isNaN(apiTime)
-              ? undefined
-              : clockTime(apiTime, timezone, { seconds: true }),
-          },
+          { label: status.apiTime, value: apiTimeOf(snapshot, timezone, dictionary) },
           {
             label: status.updates,
             value: status.every.replace(

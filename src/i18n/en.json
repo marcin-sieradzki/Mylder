@@ -274,7 +274,8 @@
     "legend": "Every vehicle is Timetable only for now: live positions aren't connected yet.",
     "source": "Rejseplanen's timetable, no live positions yet",
     "note": "The positions on this page are the timetable's plan, not reports from the vehicles.",
-    "transit": "Timetable data: {rejseplanen}, under {licence}. Timetable of {date}."
+    "transit": "Timetable data: {rejseplanen}, under {licence}. Timetable of {date}.",
+    "notConnected": "Not connected yet"
   },
   "interval": {
     "seconds": "{n} s",
@@ -323,7 +324,6 @@
     "byMode": "On the move, by mode",
     "noLivePositions": "No live positions yet; placed from the timetable",
     "timetableOnly": "No live positions yet; placed from the timetable.",
-    "disruptions": "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.",
-    "disruptionsFact": "Not connected yet"
+    "disruptions": "Disruption messages come with Rejseplanen's live connection, which isn't connected yet."
   }
 }
