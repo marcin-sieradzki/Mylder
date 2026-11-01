@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { readPaths } from '../../src/timetable/paths.ts'
 import { readPatterns } from '../../src/timetable/patterns.ts'
 import { readStops } from '../../src/timetable/stops.ts'
+import type { Mode } from '../../src/timetable/format.ts'
 import { forEachRow } from './csv.ts'
+import type { Call, Feed, StopRow, Trip } from './feed.ts'
+import { buildPatterns } from './patterns.ts'
+import { buildStops } from './stops.ts'
 import { FIXTURE, prepareFixture } from './testing.ts'
 
 async function prepare() {
@@ -177,5 +181,89 @@ describe('line colours', () => {
     expect(logs).toContainEqual(expect.stringMatching(/perron-color-transit-mode-regional.*\bRE\b/))
     expect(logs).toContainEqual(expect.stringMatching(/perron-color-transit-mode-bus.*\b5C\b/))
     expect(logs.join('\n')).not.toMatch(/\bM1\b/)
+  })
+})
+
+describe('where paths meet a station', () => {
+  // København H is one platform row for every train, at the station building, while its tracks
+  // run tens of metres away and the rail-replacement buses have no shape.
+  const station: StopRow = {
+    gtfsId: '000008600626',
+    name: 'København H',
+    lat: 55.673,
+    lon: 12.5655,
+  }
+  const north: StopRow = {
+    gtfsId: '000008600645',
+    name: 'Vesterport St.',
+    lat: 55.676,
+    lon: 12.5625,
+  }
+  const south: StopRow = {
+    gtfsId: '000008600650',
+    name: 'Dybbølsbro St.',
+    lat: 55.665,
+    lon: 12.5595,
+  }
+  const call = (stop: StopRow, at: number): Call => ({ stop, arrival: at, departure: at })
+  // A track from Vesterport through København H to Dybbølsbro, `west` degrees west of the row.
+  const track = (west: number): [number, number][] => [
+    [north.lat, north.lon - west],
+    [station.lat + 0.001, station.lon - west],
+    [station.lat, station.lon - west],
+    [station.lat - 0.001, station.lon - west],
+    [south.lat, south.lon - west],
+  ]
+  const trip = (id: string, line: string, mode: Mode, shapeId: string): Trip => ({
+    id,
+    route: { id: line, line, mode },
+    serviceId: '1',
+    shapeId,
+    headsign: south.name,
+    shortName: '',
+    direction: '0',
+    calls: [call(north, 0), call(station, 120), call(south, 240)],
+  })
+  const feed = (trips: Trip[], shapes: Record<string, [number, number][]>): Feed => ({
+    timezone: 'Europe/Copenhagen',
+    trips,
+    stops: [north, station, south],
+    services: new Map(),
+    transfers: [],
+    shapes: new Map(Object.entries(shapes)),
+    rows: {},
+    calendarEnd: '2026-12-31',
+  })
+  // Where each of a pattern's segments meets the station row, start or end.
+  function atStation(trips: Trip[], shapes: Record<string, [number, number][]>, line: string) {
+    const stops = buildStops(feed(trips, shapes))
+    const { file, paths } = buildPatterns(feed(trips, shapes), stops, () => {})
+    const read = readPaths(paths)
+    const pattern = file.patterns.find((p) => file.lines[p.line].name === line)!
+    const [into, out] = [read.points(pattern.segments[0]), read.points(pattern.segments[1])]
+    expect(into.at(-1)).toEqual(out[0])
+    return out[0]
+  }
+
+  it("keeps a train on its tracks when a bus without a shape calls at the station's row", () => {
+    const shapes = { a: track(0.0007) }
+    const trips = [trip('bus', '6802', 'bus', 'none'), trip('train', 'A', 's-tog', 'a')]
+
+    expect(metresToLine(atStation(trips, shapes, 'A'), shapes.a)).toBeLessThan(1)
+  })
+
+  it('keeps two lines on their own tracks through one platform row', () => {
+    const shapes = { a: track(0.0007), re: track(0.0014) }
+    const trips = [trip('s-tog', 'A', 's-tog', 'a'), trip('train', 'RE', 'train', 're')]
+
+    expect(metresToLine(atStation(trips, shapes, 'A'), shapes.a)).toBeLessThan(1)
+    expect(metresToLine(atStation(trips, shapes, 'RE'), shapes.re)).toBeLessThan(1)
+  })
+
+  it('joins a bus without a shape to the paths where they pass its platform', () => {
+    const shapes = { a: track(0.0007) }
+    const trips = [trip('bus', '6802', 'bus', 'none'), trip('train', 'A', 's-tog', 'a')]
+
+    expect(atStation(trips, shapes, '6802')).toEqual(atStation(trips, shapes, 'A'))
   })
 })
