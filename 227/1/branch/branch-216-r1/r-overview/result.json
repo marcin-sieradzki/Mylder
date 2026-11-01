@@ -1,0 +1,10 @@
+{
+  "journey": "r-overview",
+  "pass": false,
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: 'Overview' }).getByRole('table', { name: 'Vehicles' }).getByRole('row').nth(6)\nExpected substring: \"5C\"\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" getByRole('dialog', { name: 'Overview' }).getByRole('table', { name: 'Vehicles' }).getByRole('row').nth(6) with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Overview' }).getByRole('table', { name: 'Vehicles' }).getByRole('row').nth(6)\n",
+  "steps": [
+    "01-pulse: pulse (http://localhost:4303/en)",
+    "02-vehicles-list: vehicles list (http://localhost:4303/en?tab=vehicles)",
+    "03-failure: failure (http://localhost:4303/en?tab=vehicles)"
+  ]
+}

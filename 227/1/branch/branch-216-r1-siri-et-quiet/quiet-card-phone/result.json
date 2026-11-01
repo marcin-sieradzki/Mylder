@@ -1,0 +1,8 @@
+{
+  "journey": "quiet-card-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-disruptions: phone, disruptions (http://localhost:4401/en?tab=disruptions)",
+    "02-phone-card-fits: phone card fits (http://localhost:4401/en?tab=disruptions)"
+  ]
+}

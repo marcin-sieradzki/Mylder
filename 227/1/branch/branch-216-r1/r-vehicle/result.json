@@ -1,0 +1,13 @@
+{
+  "journey": "r-vehicle",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: /to Hillerød St./ })\nExpected: visible\nTimeout: 1500ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: /to Hillerød St./ }) with timeout 1500ms\n  - waiting for getByRole('dialog', { name: /to Hillerød St./ })\n\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-list: list (http://localhost:4303/en?tab=vehicles)",
+    "02-vehicle-open-from-list: vehicle open from list (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-follow: follow (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-whole-line: whole line (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=10.98/55.65540/12.54031)",
+    "05-closed: closed (http://localhost:4303/en?tab=vehicles&map=10.98/55.65540/12.54031)",
+    "06-failure: failure (http://localhost:4303/en?map=15.00/55.62703/12.47004)"
+  ]
+}

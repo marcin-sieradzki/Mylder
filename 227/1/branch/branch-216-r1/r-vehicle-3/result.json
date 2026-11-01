@@ -1,0 +1,13 @@
+{
+  "journey": "r-vehicle-3",
+  "pass": false,
+  "error": "expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n\nCall Log:\n- Timeout 60000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-list: list (http://localhost:4303/en?tab=vehicles)",
+    "02-vehicle-open-from-list: vehicle open from list (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707)",
+    "03-follow: follow (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707)",
+    "04-whole-line: whole line (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707&map=10.98/55.65540/12.54031)",
+    "05-closed: closed (http://localhost:4303/en?tab=vehicles&map=10.98/55.65540/12.54031)",
+    "06-failure: failure (http://localhost:4303/en?map=15.00/55.65152/12.52028)"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "journey": "r-delays",
+  "pass": true,
+  "steps": [
+    "01-map-with-fresh-delays: map with fresh delays (http://localhost:4401/en)",
+    "02-disruptions-no-quiet-card-while-fresh: disruptions: no quiet card while fresh (http://localhost:4401/en?tab=disruptions)",
+    "03-estimated-bus-panel: estimated bus panel (http://localhost:4401/en?trip=bus.2A.643c65fb6f.20261031.0819)",
+    "04-danish-banner: danish banner (http://localhost:4401/da)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "r-dis-timetable",
+  "pass": true,
+  "steps": [
+    "01-timetable-source-disruptions: timetable source disruptions (http://localhost:4401/en?tab=disruptions)",
+    "02-danish: danish (http://localhost:4401/da?tab=disruptions)"
+  ]
+}

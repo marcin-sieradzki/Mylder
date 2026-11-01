@@ -1,0 +1,7 @@
+{
+  "journey": "quiet-card-da",
+  "pass": true,
+  "steps": [
+    "01-danish-card: danish card (http://localhost:4401/da?tab=disruptions)"
+  ]
+}

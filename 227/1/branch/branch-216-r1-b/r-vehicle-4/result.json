@@ -1,0 +1,13 @@
+{
+  "journey": "r-vehicle-4",
+  "pass": true,
+  "steps": [
+    "01-list: list (http://localhost:4303/en?tab=vehicles)",
+    "02-vehicle-open-from-list: vehicle open from list (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "03-follow: follow (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "04-whole-line: whole line (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703&map=10.98/55.65540/12.54031)",
+    "05-closed: closed (http://localhost:4303/en?tab=vehicles&map=10.98/55.65540/12.54031)",
+    "06-vehicle-open-from-dot: vehicle open from dot (http://localhost:4303/en?map=15.00/55.66792/12.58663&trip=bus.5C.32331e0e20.20260616.0707)",
+    "07-missing: missing (http://localhost:4303/en?trip=nothing)"
+  ]
+}

@@ -1,0 +1,66 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 10:07:04
+  - group "Filters":
+    - button "Planes 10" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=disruptions
+  - button "About Mylder"
+- status: "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet."
+- text: Scale 3 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 668"
+    - tab "Disruptions 1" [selected]
+  - tabpanel "Disruptions 1":
+    - list "From Mylder":
+      - listitem:
+        - text: Data feed problems
+        - paragraph: Delays from Rejseplanen not updated since 09:56
+        - paragraph: From Mylder, about its own data
+    - paragraph: Disruption messages come with Rejseplanen's live connection, which isn't connected yet.
+- alert
+- region "Notifications"

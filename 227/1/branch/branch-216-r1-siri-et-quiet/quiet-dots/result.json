@@ -1,0 +1,11 @@
+{
+  "journey": "quiet-dots",
+  "pass": true,
+  "steps": [
+    "01-map-with-the-feed-quiet: map with the feed quiet (http://localhost:4401/en)",
+    "02-centred-on-a-no-signal-bus-paused: centred on a No signal bus, paused (http://localhost:4401/en?map=15.00/55.73151/12.57489)",
+    "03-hover-card-says-no-signal: hover card says No signal (http://localhost:4401/en?map=15.00/55.73151/12.57489)",
+    "04-panel-says-no-signal-since-09-56: panel says No signal since 09:56 (http://localhost:4401/en?map=15.00/55.73151/12.57489&trip=bus.23.8daefceff9.20261031.0900)",
+    "05-a-minute-on-still-moving: a minute on, still moving (http://localhost:4401/en?map=15.00/55.73151/12.57489&trip=bus.23.8daefceff9.20261031.0900)"
+  ]
+}

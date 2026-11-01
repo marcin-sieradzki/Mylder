@@ -1,0 +1,9 @@
+{
+  "journey": "quiet-card",
+  "pass": true,
+  "steps": [
+    "01-disruptions-while-the-feed-is-fresh: disruptions while the feed is fresh (http://localhost:4401/en?tab=disruptions)",
+    "02-feed-quiet-the-card-from-mylder: feed quiet: the card from Mylder (http://localhost:4401/en?tab=disruptions)",
+    "03-card-first-tab-counts-it-no-paused-notice: card first, tab counts it, no paused notice (http://localhost:4401/en?tab=disruptions)"
+  ]
+}

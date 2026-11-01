@@ -1,0 +1,74 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 10:07:04
+  - group "Filtre":
+    - button "Bus 408" [pressed]
+    - button "Metro 36" [pressed]
+    - button "S-tog 43" [pressed]
+    - button "Tog 78" [pressed]
+    - button "Letbane 21" [pressed]
+    - button "Fly 10" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en?tab=disruptions
+  - button "Om Mylder"
+- status: "Køreplan og forsinkelser: der er endnu ingen livepositioner, så hvert køretøj er placeret ud fra sin køreplan og, hvor Rejseplanen har sendt en, sin forsinkelse. Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- paragraph: "Indtil videre er et køretøj Beregnet, placeret ud fra sin forsinkelse, eller Kun køreplan: der er endnu ingen livepositioner."
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls"
+    - tab "Køretøjer 668"
+    - tab "Driftsforstyrrelser 1" [selected]
+  - tabpanel "Driftsforstyrrelser 1":
+    - list "Fra Mylder":
+      - listitem:
+        - text: Problemer med realtidsdata
+        - paragraph: Forsinkelser fra Rejseplanen ikke opdateret siden 09:56
+        - paragraph: Fra Mylder, om Mylders egne data
+    - paragraph: Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu.
+- alert
+- region "Notifikationer"

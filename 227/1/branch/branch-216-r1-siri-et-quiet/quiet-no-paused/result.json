@@ -1,0 +1,7 @@
+{
+  "journey": "quiet-no-paused",
+  "pass": true,
+  "steps": [
+    "01-map-quiet-banner-unchanged-no-paused-notice: map quiet: banner unchanged, no paused notice (http://localhost:4401/en)"
+  ]
+}
