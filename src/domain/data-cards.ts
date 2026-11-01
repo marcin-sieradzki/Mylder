@@ -2,6 +2,7 @@
 // the Disruptions list like any other disruption, first and marked as Mylder's. Read from the
 // snapshot at a moment, so a card appears and clears by the clock between polls. Times are
 // milliseconds since the epoch.
+import { feedFresh } from './data-state.ts'
 import { callsRejseplanen, pauseAt, type PauseFacts } from './pause.ts'
 
 /** One of Mylder's own cards, as codes and times; the screen writes the words. */
@@ -11,6 +12,8 @@ export type DataCard =
   | { readonly kind: 'mode-quiet'; readonly mode: string; readonly since: number }
   /** Since the last good answer, or with no time when none has come. */
   | { readonly kind: 'messages-stale'; readonly since?: number }
+  /** SIRI-ET's delays, since the feed's last message, or with no time when none has come. */
+  | { readonly kind: 'updates-stale'; readonly since?: number }
 
 /** What the cards read of a snapshot. */
 export interface DataCardFacts extends PauseFacts {
@@ -19,6 +22,8 @@ export interface DataCardFacts extends PauseFacts {
     readonly ok: boolean
   } | null
   readonly trips: readonly { readonly mode: string; readonly waiting?: true }[]
+  /** SIRI-ET's update feed (spec #146): where updates come from, and the last message read. */
+  readonly updates?: { readonly kind: string; readonly lastMessage?: number }
 }
 
 /** How long a gap lasts before it gets a card. */
@@ -39,16 +44,22 @@ const modeRank = (mode: string) => {
 }
 
 /**
- * The cards at a moment, in order, none on the timetable source, which asks Rejseplanen nothing
- * and so has no gap to report: paused while the month is spent; no answer once Rejseplanen
+ * The cards at a moment, in order. First, on any source, the delays' card while SIRI-ET's feed is
+ * on and quiet: no message for 5 min, or none yet (docs/data-states.md, rule 3). Then none on the
+ * timetable source, which asks Rejseplanen nothing and so has no other gap to report: paused while the month is spent; no answer once Rejseplanen
  * has failed or answered nothing for 5 min since its last good answer (./pause.ts); while it
  * answers, one per mode with trips underway whose positions stopped 5 min ago; and the messages'
  * card once the list is more than 15 min old after a failed check, or an hour old however it was
  * checked, or has never been fetched.
  */
 export function dataCards(facts: DataCardFacts, now: number): DataCard[] {
-  if (!callsRejseplanen(facts)) return []
   const cards: DataCard[] = []
+  const { updates } = facts
+  if (updates && updates.kind !== 'off' && !feedFresh(updates.lastMessage, now)) {
+    const since = updates.lastMessage
+    cards.push({ kind: 'updates-stale', ...(since === undefined ? {} : { since }) })
+  }
+  if (!callsRejseplanen(facts)) return cards
   const { api, lastSeen, disruptions } = facts
   const pause = pauseAt(facts, now, GAP)
   if (pause?.reason === 'spent') {

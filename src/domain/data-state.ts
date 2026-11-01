@@ -123,6 +123,21 @@ function updatesCurrent(context: DataStateContext): boolean {
 }
 
 /**
+ * Since when a No signal trip has had no signal, as its label says: the last position answer that
+ * carried it, or its last report; else, for a trip whose realtime was an update, the last message
+ * of SIRI-ET's feed while the feed is on (`updates`, the context's), since its update held until
+ * the feed went quiet, and otherwise the update itself. None for a trip with no realtime.
+ */
+export function noSignalSince(
+  trip: TripRealtime,
+  updates: DataStateContext['updates'],
+): number | undefined {
+  const position = trip.seen ?? trip.reported
+  if (position !== undefined || trip.updated === undefined) return position
+  return Math.max(trip.updated, updates?.lastMessage ?? -Infinity)
+}
+
+/**
  * A trip's data state at a moment: the first of the rules in docs/data-states.md that holds.
  * Every Metro trip falls to Timetable only because no answer carries it, and gets the ordinary
  * states the day one does (ADR 0006). A cancelled trip is not drawn, so it needs no state.

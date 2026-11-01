@@ -163,3 +163,66 @@ describe('Mylder’s own data cards on the timetable source', () => {
     }
   })
 })
+
+describe('Mylder’s card for a quiet delay feed', () => {
+  // SIRI-ET's update feed (spec #146): quiet once its last message is 5 min old, or before one has
+  // come. Shown on any source, the timetable's too, which brings no other card.
+  const onTimetable: DataCardFacts = {
+    api: { status: 'ok', since: NOW - 60 * MINUTE },
+    budget: { level: 'normal' },
+    lastSeen: {},
+    disruptions: null,
+    trips: [{ mode: 'bus' }, { mode: 'metro' }],
+    source: { kind: 'timetable' },
+  }
+  const feed = (lastMessage?: number): DataCardFacts => ({
+    ...onTimetable,
+    updates: { kind: 'siri', ...(lastMessage === undefined ? {} : { lastMessage }) },
+  })
+
+  it.each<[string, DataCardFacts, unknown[]]>([
+    ['with its last message 4 min 59 s ago', feed(NOW - 299_000), []],
+    [
+      'with its last message 5 min ago',
+      feed(NOW - 5 * MINUTE),
+      [{ kind: 'updates-stale', since: NOW - 5 * MINUTE }],
+    ],
+    [
+      'with its last message an hour ago',
+      feed(NOW - 60 * MINUTE),
+      [{ kind: 'updates-stale', since: NOW - 60 * MINUTE }],
+    ],
+    ['before any message has come', feed(), [{ kind: 'updates-stale' }]],
+    [
+      'replayed from a recording that has stopped',
+      { ...onTimetable, updates: { kind: 'recording', lastMessage: NOW - 6 * MINUTE } },
+      [{ kind: 'updates-stale', since: NOW - 6 * MINUTE }],
+    ],
+    ['with updates off', { ...onTimetable, updates: { kind: 'off' } }, []],
+    ['with no updates block, as an older snapshot has none', onTimetable, []],
+  ])('on the timetable source %s', (_, facts, cards) => {
+    expect(dataCards(facts, NOW)).toEqual(cards)
+  })
+
+  it('shows only while the feed is quiet, and goes at the next message', () => {
+    const quietFrom = NOW - 5 * MINUTE
+    expect(dataCards(feed(quietFrom), NOW - 1)).toEqual([])
+    expect(dataCards(feed(quietFrom), NOW)).toEqual([{ kind: 'updates-stale', since: quietFrom }])
+    expect(dataCards(feed(NOW - 10_000), NOW)).toEqual([])
+  })
+
+  it('comes first, before Rejseplanen’s own cards', () => {
+    const everything: DataCardFacts = {
+      ...healthy,
+      lastSeen: { bus: NOW - 20 * MINUTE, 's-tog': NOW - 10 * MINUTE },
+      disruptions: { fetched: NOW - 40 * MINUTE, ok: false },
+      updates: { kind: 'siri', lastMessage: NOW - 7 * MINUTE },
+    }
+    expect(dataCards(everything, NOW).map((card) => card.kind)).toEqual([
+      'updates-stale',
+      'mode-quiet',
+      'mode-quiet',
+      'messages-stale',
+    ])
+  })
+})

@@ -3,6 +3,7 @@ import {
   dataState,
   feedFresh,
   liveLimit,
+  noSignalSince,
   updatesContext,
   type DataStateContext,
   type TripRealtime,
@@ -260,6 +261,40 @@ describe('dataState with SIRI-ET’s update feed on', () => {
     expect(
       dataState({ updated: min(10), hadRealtime: true }, { ...context, now: now + 60_000 }),
     ).toBe('no-signal')
+  })
+})
+
+describe('a quiet SIRI-ET feed', () => {
+  // The feed goes quiet when no message has come for 5 min: every trip that had an update turns
+  // No signal from the last message's time, and a trip without one stays Timetable only.
+  const lastMessage = min(5)
+  const quiet: DataStateContext = { ...fresh, positionMode: 'none', updates: { lastMessage } }
+  const updated: TripRealtime = { updated: min(20), hadRealtime: true }
+
+  it.each<[string, number, string, string]>([
+    ['a trip with an update, 1 ms before', 4 * 60_000 + 59_999, 'updated', 'estimated'],
+    ['a trip with an update, at 5 min', 5 * 60_000, 'updated', 'no-signal'],
+    ['a trip with an update, at 30 min', 30 * 60_000, 'updated', 'no-signal'],
+    ['a trip without one, at 5 min', 5 * 60_000, 'never', 'timetable-only'],
+  ])('makes %s after the last message', (_, after, which, state) => {
+    const trip = which === 'updated' ? updated : never
+    expect(dataState(trip, { ...quiet, now: lastMessage + after })).toBe(state)
+  })
+
+  it('dates a No signal trip from the feed’s last message, not its own older update', () => {
+    expect(noSignalSince(updated, quiet.updates)).toBe(lastMessage)
+    // With no message ever read, from its own update.
+    expect(noSignalSince(updated, {})).toBe(min(20))
+    // While updates are off, an opened stop's update dates it, as before.
+    expect(noSignalSince(updated, undefined)).toBe(min(20))
+  })
+
+  it('dates a trip a position answer carried from that answer, whatever the feed says', () => {
+    expect(noSignalSince({ seen: min(9), reported: min(12), hadRealtime: true }, {})).toBe(min(9))
+    expect(noSignalSince({ reported: min(12), updated: min(2), hadRealtime: true }, {})).toBe(
+      min(12),
+    )
+    expect(noSignalSince(never, quiet.updates)).toBeUndefined()
   })
 })
 
