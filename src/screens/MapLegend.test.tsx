@@ -132,6 +132,35 @@ describe("the map's legend", () => {
     expect(screen.getByText(NO_LIVE_EN)).toBeInTheDocument()
   })
 
+  describe('on the timetable source', () => {
+    const onTimetable = saved('timetable-source', '0006.json')
+    const ON_TIMETABLE_EN =
+      "Every vehicle is Timetable only for now: live positions aren't connected yet."
+    const ON_TIMETABLE_DA =
+      'Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.'
+
+    it('says once that every vehicle is placed from the timetable for now, in English', () => {
+      show('en', onTimetable)
+      expect(screen.getAllByText(ON_TIMETABLE_EN)).toHaveLength(1)
+      // Its position mode is none, not CALC_REPORT: no call is made at all.
+      expect(screen.queryByText(NO_LIVE_EN)).not.toBeInTheDocument()
+    })
+
+    it('says it in Danish', () => {
+      show('da', onTimetable)
+      expect(screen.getAllByText(ON_TIMETABLE_DA)).toHaveLength(1)
+    })
+
+    it('says nothing of it on any other source', () => {
+      show('en', alternating)
+      expect(screen.queryByText(ON_TIMETABLE_EN)).not.toBeInTheDocument()
+      for (const kind of ['simulated', 'recording', 'rejseplanen'] as const) {
+        act(() => liveSnapshot.update({ snapshot: { ...onTimetable, source: { kind } } }))
+        expect(screen.queryByText(ON_TIMETABLE_EN)).not.toBeInTheDocument()
+      }
+    })
+  })
+
   it("says since when the planes' feed has had no data while it fails, in English", () => {
     liveAircraft.update({ snapshot: failing })
     show('en', alternating)
