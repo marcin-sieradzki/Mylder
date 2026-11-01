@@ -1,0 +1,9 @@
+{
+  "journey": "map-delays-late",
+  "pass": true,
+  "steps": [
+    "01-paused-centred-on-stop-glasvej-frederikssundsvej-: paused centred on stop Glasvej (Frederikssundsvej) (http://localhost:4302/en?map=16.00/55.70374/12.52848)",
+    "02-hover-5c-dot: hover 5C dot (http://localhost:4302/en?map=16.00/55.70374/12.52848)",
+    "03-tapped-5c-panel-open: tapped 5C panel open (http://localhost:4302/en?map=16.00/55.70374/12.52848&trip=bus.5C.94268b9b1c.20261031.0810)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "map-draw",
+  "pass": true,
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4302/en)",
+    "02-dots-drawn-match-snapshot: dots drawn match snapshot (http://localhost:4302/en)"
+  ]
+}

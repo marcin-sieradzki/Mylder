@@ -1,0 +1,11 @@
+{
+  "journey": "map-delays-cancelled",
+  "pass": true,
+  "steps": [
+    "01-map-loaded: map loaded (http://localhost:4302/en)",
+    "02-no-dot-at-0922: no dot at 0922 (http://localhost:4302/en?map=16.00/55.40359/12.13556)",
+    "03-tap-there-does-not-open-0922: tap there does not open 0922 (http://localhost:4302/en?map=16.00/55.40359/12.13556&stop=8983)",
+    "04-no-dot-at-0904: no dot at 0904 (http://localhost:4302/en?map=16.00/55.41017/12.14659)",
+    "05-tap-there-does-not-open-0904: tap there does not open 0904 (http://localhost:4302/en?map=16.00/55.41017/12.14659)"
+  ]
+}

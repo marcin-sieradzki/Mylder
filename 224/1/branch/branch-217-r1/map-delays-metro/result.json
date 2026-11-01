@@ -1,0 +1,8 @@
+{
+  "journey": "map-delays-metro",
+  "pass": true,
+  "steps": [
+    "01-paused-on-metro: paused on metro (http://localhost:4302/en?map=15.00/55.62906/12.57939)",
+    "02-metro-tooltip: metro tooltip (http://localhost:4302/en?map=15.00/55.62906/12.57939)"
+  ]
+}

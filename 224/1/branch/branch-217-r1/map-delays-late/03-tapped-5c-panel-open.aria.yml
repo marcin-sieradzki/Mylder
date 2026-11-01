@@ -1,0 +1,628 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 09:04:49
+  - group "Filters":
+    - button "Bus 348" [pressed]
+    - button "Metro 38" [pressed]
+    - button "S-tog 26" [pressed]
+    - button "Train 67" [pressed]
+    - button "Light rail 21" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?map=16.00/55.70374/12.52848&trip=bus.5C.94268b9b1c.20261031.0810
+  - button "About Mylder"
+- status: "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet."
+- text: Scale 50 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Resume"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 565"
+    - tab "Disruptions"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 500
+      - paragraph: of 565 in service
+    - group "Reported this minute":
+      - text: Reported this minute Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - group "Reporting live":
+      - text: Reporting live Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 09:04:49
+    - list "On the map now":
+      - listitem: Live 0
+      - listitem: Ageing 0
+      - listitem: Estimated 371
+      - listitem: Timetable only 194
+      - listitem: No signal 0
+    - region "On the move, by mode":
+      - heading "On the move, by mode" [level=3]
+      - term: Bus
+      - definition: "348"
+      - term: Metro
+      - definition: "38"
+      - term: S-tog
+      - definition: "26"
+      - term: Train
+      - definition: "67"
+      - term: Light rail
+      - definition: "21"
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Train": Train x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Light rail": Light rail x
+      - paragraph: No live positions yet; placed from the timetable
+    - status
+    - figure "Vehicles in service today Planned, from today's timetable":
+      - text: Vehicles in service today Planned, from today's timetable
+      - group "Vehicles in service today Planned, from today's timetable":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "351"
+          - listitem:
+            - time: 00:15
+            - text: "311"
+          - listitem:
+            - time: 00:30
+            - text: "262"
+          - listitem:
+            - time: 00:45
+            - text: "215"
+          - listitem:
+            - time: 01:00
+            - text: "167"
+          - listitem:
+            - time: 01:15
+            - text: "156"
+          - listitem:
+            - time: 01:30
+            - text: "137"
+          - listitem:
+            - time: 01:45
+            - text: "125"
+          - listitem:
+            - time: 02:00
+            - text: "116"
+          - listitem:
+            - time: 02:15
+            - text: "117"
+          - listitem:
+            - time: 02:30
+            - text: "123"
+          - listitem:
+            - time: 02:45
+            - text: "119"
+          - listitem:
+            - time: 03:00
+            - text: "114"
+          - listitem:
+            - time: 03:15
+            - text: "121"
+          - listitem:
+            - time: 03:30
+            - text: "120"
+          - listitem:
+            - time: 03:45
+            - text: "115"
+          - listitem:
+            - time: 04:00
+            - text: "110"
+          - listitem:
+            - time: 04:15
+            - text: "109"
+          - listitem:
+            - time: 04:30
+            - text: "119"
+          - listitem:
+            - time: 04:45
+            - text: "118"
+          - listitem:
+            - time: 05:00
+            - text: "116"
+          - listitem:
+            - time: 05:15
+            - text: "137"
+          - listitem:
+            - time: 05:30
+            - text: "152"
+          - listitem:
+            - time: 05:45
+            - text: "165"
+          - listitem:
+            - time: 06:00
+            - text: "179"
+          - listitem:
+            - time: 06:15
+            - text: "217"
+          - listitem:
+            - time: 06:30
+            - text: "260"
+          - listitem:
+            - time: 06:45
+            - text: "277"
+          - listitem:
+            - time: 07:00
+            - text: "314"
+          - listitem:
+            - time: 07:15
+            - text: "360"
+          - listitem:
+            - time: 07:30
+            - text: "381"
+          - listitem:
+            - time: 07:45
+            - text: "394"
+          - listitem:
+            - time: 08:00
+            - text: "419"
+          - listitem:
+            - time: 08:15
+            - text: "440"
+          - listitem:
+            - time: 08:30
+            - text: "446"
+          - listitem:
+            - time: 08:45
+            - text: "467"
+          - listitem:
+            - time: 09:00
+            - text: "491"
+          - listitem:
+            - time: 09:15
+            - text: "528"
+          - listitem:
+            - time: 09:30
+            - text: "541"
+          - listitem:
+            - time: 09:45
+            - text: "567"
+          - listitem:
+            - time: 10:00
+            - text: "597"
+          - listitem:
+            - time: 10:15
+            - text: "622"
+          - listitem:
+            - time: 10:30
+            - text: "621"
+          - listitem:
+            - time: 10:45
+            - text: "636"
+          - listitem:
+            - time: 11:00
+            - text: "642"
+          - listitem:
+            - time: 11:15
+            - text: "650"
+          - listitem:
+            - time: 11:30
+            - text: "637"
+          - listitem:
+            - time: 11:45
+            - text: "641"
+          - listitem:
+            - time: 12:00
+            - text: "649"
+          - listitem:
+            - time: 12:15
+            - text: "658"
+          - listitem:
+            - time: 12:30
+            - text: "641"
+          - listitem:
+            - time: 12:45
+            - text: "651"
+          - listitem:
+            - time: 13:00
+            - text: "652"
+          - listitem:
+            - time: 13:15
+            - text: "658"
+          - listitem:
+            - time: 13:30
+            - text: "644"
+          - listitem:
+            - time: 13:45
+            - text: "646"
+          - listitem:
+            - time: 14:00
+            - text: "649"
+          - listitem:
+            - time: 14:15
+            - text: "653"
+          - listitem:
+            - time: 14:30
+            - text: "636"
+          - listitem:
+            - time: 14:45
+            - text: "647"
+          - listitem:
+            - time: 15:00
+            - text: "647"
+          - listitem:
+            - time: 15:15
+            - text: "655"
+          - listitem:
+            - time: 15:30
+            - text: "634"
+          - listitem:
+            - time: 15:45
+            - text: "643"
+          - listitem:
+            - time: 16:00
+            - text: "639"
+          - listitem:
+            - time: 16:15
+            - text: "638"
+          - listitem:
+            - time: 16:30
+            - text: "613"
+          - listitem:
+            - time: 16:45
+            - text: "617"
+          - listitem:
+            - time: 17:00
+            - text: "606"
+          - listitem:
+            - time: 17:15
+            - text: "604"
+          - listitem:
+            - time: 17:30
+            - text: "583"
+          - listitem:
+            - time: 17:45
+            - text: "576"
+          - listitem:
+            - time: 18:00
+            - text: "566"
+          - listitem:
+            - time: 18:15
+            - text: "553"
+          - listitem:
+            - time: 18:30
+            - text: "533"
+          - listitem:
+            - time: 18:45
+            - text: "520"
+          - listitem:
+            - time: 19:00
+            - text: "512"
+          - listitem:
+            - time: 19:15
+            - text: "500"
+          - listitem:
+            - time: 19:30
+            - text: "493"
+          - listitem:
+            - time: 19:45
+            - text: "474"
+          - listitem:
+            - time: 20:00
+            - text: "464"
+          - listitem:
+            - time: 20:15
+            - text: "451"
+          - listitem:
+            - time: 20:30
+            - text: "447"
+          - listitem:
+            - time: 20:45
+            - text: "435"
+          - listitem:
+            - time: 21:00
+            - text: "439"
+          - listitem:
+            - time: 21:15
+            - text: "438"
+          - listitem:
+            - time: 21:30
+            - text: "430"
+          - listitem:
+            - time: 21:45
+            - text: "418"
+          - listitem:
+            - time: 22:00
+            - text: "424"
+          - listitem:
+            - time: 22:15
+            - text: "417"
+          - listitem:
+            - time: 22:30
+            - text: "423"
+          - listitem:
+            - time: 22:45
+            - text: "406"
+          - listitem:
+            - time: 23:00
+            - text: "407"
+          - listitem:
+            - time: 23:15
+            - text: "398"
+          - listitem:
+            - time: 23:30
+            - text: "382"
+          - listitem:
+            - time: 23:45
+            - text: "366"
+    - paragraph: Peak 658 at 12:15
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 0 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 371 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 194 No live positions yet; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- dialog "5C to Herlev Hospital":
+  - heading "5C to Herlev Hospital" [level=2]
+  - text: Bus
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Estimated
+  - paragraph: Estimated from the timetable and a delay of +5 min
+  - term: Delay
+  - definition: 5 min late
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: Glasvej (Frederikssundsvej)
+  - paragraph: Between Glasvej (Frederikssundsvej) and Hulgårds Plads (Frederikssundsvej)
+  - list "Stops":
+    - listitem:
+      - text: Københavns Lufthavn (Ellehammersvej) Passed
+      - time: 08:10
+      - text: Expected 08:15 5 min late
+    - listitem:
+      - text: Skøjtevej (Amager Strandvej) Passed
+      - time: 08:12
+      - text: Expected 08:17 5 min late
+    - listitem:
+      - text: Den Blå Planet (Amager Strandvej) Passed
+      - time: 08:13
+      - text: Expected 08:18 5 min late
+    - listitem:
+      - text: Søvang Allé (Saltværksvej) Passed
+      - time: 08:14
+      - text: Expected 08:19 5 min late
+    - listitem:
+      - text: Kastruplundgade (Saltværksvej) Passed
+      - time: 08:14
+      - text: Expected 08:19 5 min late
+    - listitem:
+      - text: Skottegårdsskolen (Saltværksvej) Passed
+      - time: 08:16
+      - text: Expected 08:21 5 min late
+    - listitem:
+      - text: Mosrosevej (Saltværksvej) Passed
+      - time: 08:17
+      - text: Expected 08:22 5 min late
+    - listitem:
+      - text: Korsvejens Skole (Amager Landevej) Passed
+      - time: 08:19
+      - text: Expected 08:24 5 min late
+    - listitem:
+      - text: Randkløve Allé (Amager Landevej) Passed
+      - time: 08:19
+      - text: Expected 08:24 5 min late
+    - listitem:
+      - text: Willumsvej (Amagerbrogade) Passed
+      - time: 08:20
+      - text: Expected 08:25 5 min late
+    - listitem:
+      - text: Vejlands Allé (Amagerbrogade) Passed
+      - time: 08:22
+      - text: Expected 08:27 5 min late
+    - listitem:
+      - text: Sundbyvester Plads (Amagerbrogade) Passed
+      - time: 08:23
+      - text: Expected 08:28 5 min late
+    - listitem:
+      - text: Smyrnavej (Amagerbrogade) Passed
+      - time: 08:24
+      - text: Expected 08:29 5 min late
+    - listitem:
+      - text: Tycho Brahes Allé (Amagerbrogade) Passed
+      - time: 08:26
+      - text: Expected 08:31 5 min late
+    - listitem:
+      - text: Øresundsvej (Amagerbrogade) Passed
+      - time: 08:27
+      - text: Expected 08:32 5 min late
+    - listitem:
+      - text: Tingvej (Amagerbrogade) Passed
+      - time: 08:28
+      - text: Expected 08:33 5 min late
+    - listitem:
+      - text: Amagerbro St. (Amagerbrogade) Passed
+      - time: 08:30
+      - text: Expected 08:35 5 min late
+    - listitem:
+      - text: Sønderport (Amager Boulevard) Passed
+      - time: 08:31
+      - text: Expected 08:36 5 min late
+    - listitem:
+      - text: Amagerfælledvej (Amager Boulevard) Passed
+      - time: 08:31
+      - text: Expected 08:36 5 min late
+    - listitem:
+      - text: Ørestads Boulevard (Amager Boulevard) Passed
+      - time: 08:33
+      - text: Expected 08:38 5 min late
+    - listitem:
+      - text: Klaksvigsgade (Langebro) Passed
+      - time: 08:35
+      - text: Expected 08:40 5 min late
+    - listitem:
+      - text: Polititorvet Passed
+      - time: 08:38
+      - text: Expected 08:43 5 min late
+    - listitem:
+      - text: Hovedbanegården, Tivoli (Bernstorffsgade) Passed
+      - time: 08:40
+      - text: Expected 08:45 5 min late
+    - listitem:
+      - text: Rådhuspladsen St. (H.C. Andersens Boulevard) Passed
+      - time: 08:43
+      - text: Expected 08:48 5 min late
+    - listitem:
+      - text: Teglgårdstræde (Nørre Voldgade) Passed
+      - time: 08:45
+      - text: Expected 08:50 5 min late
+    - listitem:
+      - text: Nørreport St. (Nørre Voldgade) Passed
+      - time: 08:47
+      - text: Expected 08:52 5 min late
+    - listitem:
+      - text: Nørre Farimagsgade (Frederiksborggade) Passed
+      - time: 08:48
+      - text: Expected 08:53 5 min late
+    - listitem:
+      - text: Ravnsborggade (Nørrebrogade) Passed
+      - time: 08:50
+      - text: Expected 08:55 5 min late
+    - listitem:
+      - text: Elmegade (Nørrebrogade) Passed
+      - time: 08:51
+      - text: Expected 08:56 5 min late
+    - listitem:
+      - text: Kapelvej (Nørrebrogade) Passed
+      - time: 08:52
+      - text: Expected 08:57 5 min late
+    - listitem:
+      - text: Sjællandsgade (Nørrebrogade) Passed
+      - time: 08:53
+      - text: Expected 08:58 5 min late
+    - listitem:
+      - text: Nørrebros Runddel St. (Nørrebrogade) Passed
+      - time: 08:53
+      - text: Expected 08:58 5 min late
+    - listitem:
+      - text: Stefansgade (Nørrebrogade) Passed
+      - time: 08:55
+      - text: Expected 09:00 5 min late
+    - listitem:
+      - text: Nørrebrohallen (Nørrebrogade) Passed
+      - time: 08:56
+      - text: Expected 09:01 5 min late
+    - listitem:
+      - text: Nørrebro St. (Frederikssundsvej) Passed
+      - time: 08:58
+      - text: Expected 09:03 5 min late
+    - listitem:
+      - text: Glasvej (Frederikssundsvej) Next stop
+      - time: 09:00
+      - text: Expected 09:05 5 min late
+    - listitem:
+      - text: Hulgårds Plads (Frederikssundsvej)
+      - time: 09:02
+      - text: Expected 09:07 5 min late
+    - listitem:
+      - text: Bellahøj (Frederikssundsvej)
+      - time: 09:03
+      - text: Expected 09:08 5 min late
+    - listitem:
+      - text: Hyrdevangen (Frederikssundsvej)
+      - time: 09:04
+      - text: Expected 09:09 5 min late
+    - listitem:
+      - text: Brønshøj Torv (Frederikssundsvej)
+      - time: 09:06
+      - text: Expected 09:11 5 min late
+    - listitem:
+      - text: Astrupvej (Frederikssundsvej)
+      - time: 09:07
+      - text: Expected 09:12 5 min late
+    - listitem:
+      - text: Veksøvej (Frederikssundsvej)
+      - time: 09:08
+      - text: Expected 09:13 5 min late
+    - listitem:
+      - text: Kobbelvænget (Frederikssundsvej)
+      - time: 09:10
+      - text: Expected 09:15 5 min late
+    - listitem:
+      - text: Husumvej (Frederikssundsvej)
+      - time: 09:11
+      - text: Expected 09:16 5 min late
+    - listitem:
+      - text: Husum Torv (Frederikssundsvej)
+      - time: 09:12
+      - text: Expected 09:17 5 min late
+    - listitem:
+      - text: Åfløjen (Frederikssundsvej)
+      - time: 09:14
+      - text: Expected 09:19 5 min late
+    - listitem:
+      - text: Elverhøjen (Herlev Hovedgade)
+      - time: 09:16
+      - text: Expected 09:21 5 min late
+    - listitem:
+      - text: Hyrdindestien (Herlev Hovedgade)
+      - time: 09:17
+      - text: Expected 09:22 5 min late
+    - listitem:
+      - text: Herlev Hospital, Sløjfen (Hyldemorsvej)
+      - time: 09:20
+      - text: Expected 09:25 5 min late
+  - paragraph:
+    - text: Timetable ·
+    - time: placed 09:04:49
+- alert
+- region "Notifications"
+- tooltip "Bus 5C to Herlev Hospital Estimated Estimated from schedule"

@@ -1,0 +1,7 @@
+{
+  "journey": "map-timetable-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-banner-wraps: phone banner wraps (http://localhost:4303/en)"
+  ]
+}

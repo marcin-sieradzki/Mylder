@@ -1,0 +1,9 @@
+{
+  "journey": "map-delays-chrome",
+  "pass": true,
+  "steps": [
+    "01-map-loaded-en: map loaded en (http://localhost:4302/en)",
+    "02-banner-and-legend-en: banner and legend en (http://localhost:4302/en)",
+    "03-banner-and-legend-da: banner and legend da (http://localhost:4302/da)"
+  ]
+}
