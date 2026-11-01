@@ -310,6 +310,17 @@ describe('the About dialog', () => {
     expect(fact(dialog, 'Disruptions')).toBe('The latest check failed')
   })
 
+  it('says on the timetable source that disruption messages aren’t connected yet', () => {
+    // Its last saved minute: no call made, so no disruption list either.
+    const onTimetable = saved('timetable-source', '0006.json')
+    show('en', onTimetable)
+    expect(fact(openDialog('About Mylder'), 'Disruptions')).toBe('Not connected yet')
+    act(() => aboutDialog.close())
+    cleanup()
+    show('da', onTimetable)
+    expect(fact(openDialog('Om Mylder'), 'Driftsforstyrrelser')).toBe('Ikke koblet på endnu')
+  })
+
   it('gives the budget line in Danish, in the page notice’s words', () => {
     show('da', { ...weekday, pollInterval: 90, budget: { level: 'stretched', calls: 30_000 } })
     const dialog = openDialog('Om Mylder')
