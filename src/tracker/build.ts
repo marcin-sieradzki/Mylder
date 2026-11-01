@@ -17,6 +17,7 @@ import {
   pointAt,
   progressAt,
   snapToPath,
+  steppedCalls,
   timedCalls,
   timelineFrom,
   timelineOf,
@@ -77,25 +78,6 @@ export interface TripHistory {
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
   readonly ref?: string
-}
-
-/**
- * The trip's calls with the expected times its remembered steps give: each step's call leaves
- * that late, and arrives so at the last stop; the calls between are timed by `timedCalls`.
- */
-function callsFromSteps(calls: readonly Call[], steps: readonly DelayStep[]): Call[] {
-  const last = calls.length - 1
-  const stepped: Call[] = calls.map(({ arrival, departure }) => ({ arrival, departure }))
-  for (const [index, delay] of steps) {
-    const call = stepped[index]
-    if (!call) continue
-    stepped[index] = {
-      ...call,
-      expectedDeparture: call.departure + delay * 1000,
-      ...(index === last ? { expectedArrival: call.arrival + delay * 1000 } : {}),
-    }
-  }
-  return stepped
 }
 
 /** Each trip's history, by trip key. */
@@ -260,7 +242,7 @@ export function buildTrips({
       // A position's stops lie over SIRI-ET's expected times, where both give one: this run's
       // update's, or else the last one's, kept while the table no longer brings it.
       const steps = update ? delaySteps(update.calls) : before?.steps
-      const base = update?.calls ?? (steps ? callsFromSteps(trip.calls, steps) : trip.calls)
+      const base = update?.calls ?? (steps ? steppedCalls(trip.calls, steps) : trip.calls)
       const calls = realtime
         ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop, base)
         : base

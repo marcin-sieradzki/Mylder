@@ -175,29 +175,35 @@ export function delaySteps(calls: readonly Call[]): DelayStep[] {
 }
 
 /**
+ * A trip's scheduled `calls` with the expected times its delay steps give: each step's call leaves
+ * that late, and arrives so at the last stop. The calls between keep their plan, for `timedCalls`
+ * to time by the step before them.
+ */
+export function steppedCalls(calls: readonly Call[], steps: readonly DelayStep[]): Call[] {
+  const last = calls.length - 1
+  const stepped: Call[] = calls.map(({ arrival, departure }) => ({ arrival, departure }))
+  for (const [index, late] of steps) {
+    const call = stepped[index]
+    if (!call) continue
+    stepped[index] = {
+      ...call,
+      expectedDeparture: call.departure + late * 1000,
+      ...(index === last ? { expectedArrival: call.arrival + late * 1000 } : {}),
+    }
+  }
+  return stepped
+}
+
+/**
  * The times a trip will keep at each of its scheduled `calls`, from what the snapshot carries of
- * it: by its delay steps where it has them, each step's call leaving that late (arriving so at the
- * last stop) and the calls between timed as `timedCalls` times an update's; else every call
- * shifted by its delay; none with neither.
+ * it: by its delay steps where it has them (`steppedCalls`), the calls between timed as
+ * `timedCalls` times an update's; else every call shifted by its delay; none with neither.
  */
 export function expectedTimes(
   calls: readonly Call[],
   { delay, steps }: { readonly delay?: number; readonly steps?: readonly DelayStep[] },
 ): TimedCall[] | undefined {
-  if (steps && steps.length > 0) {
-    const last = calls.length - 1
-    const stepped: Call[] = calls.map(({ arrival, departure }) => ({ arrival, departure }))
-    for (const [index, late] of steps) {
-      const call = stepped[index]
-      if (!call) continue
-      stepped[index] = {
-        ...call,
-        expectedDeparture: call.departure + late * 1000,
-        ...(index === last ? { expectedArrival: call.arrival + late * 1000 } : {}),
-      }
-    }
-    return timedCalls(stepped)
-  }
+  if (steps && steps.length > 0) return timedCalls(steppedCalls(calls, steps))
   return delay === undefined ? undefined : timedCalls(calls, delay)
 }
 

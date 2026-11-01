@@ -46,6 +46,8 @@ export function CitySheet({ open, onClose, asked, opener, behindPanel }: CityShe
   const messages = useSource()?.messages !== false
   // Loaded with the page, so the tab counts its cards before it opens.
   const disruptions = useListedDisruptions()?.reading
+  // Rejseplanen's messages, listed only on a source that brings them.
+  const listed = messages ? disruptions : undefined
   const dataCards = useDataCards()
   const popup = useRef<HTMLDivElement>(null)
   const counts: Partial<Record<SheetTab, number>> = {
@@ -54,9 +56,8 @@ export function CitySheet({ open, onClose, asked, opener, behindPanel }: CityShe
     // The cards listed: Mylder's own, shown at once, and Rejseplanen's once its list has come;
     // on a source that brings no messages, such as the timetable, Mylder's alone.
     disruptions:
-      (messages && disruptions) || dataCards.length > 0
-        ? dataCards.length +
-          (messages && disruptions ? disruptions.active.length + disruptions.later.length : 0)
+      listed || dataCards.length > 0
+        ? dataCards.length + (listed ? listed.active.length + listed.later.length : 0)
         : undefined,
   }
 

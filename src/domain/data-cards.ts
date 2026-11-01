@@ -23,7 +23,10 @@ export interface DataCardFacts extends PauseFacts {
   } | null
   readonly trips: readonly { readonly mode: string; readonly waiting?: true }[]
   /** SIRI-ET's update feed (spec #146): where updates come from, and the last message read. */
-  readonly updates?: { readonly kind: string; readonly lastMessage?: number }
+  readonly updates?: {
+    readonly kind: 'off' | 'siri' | 'recording'
+    readonly lastMessage?: number
+  }
 }
 
 /** How long a gap lasts before it gets a card. */
