@@ -41,7 +41,7 @@ The reader (`src/siri-et/reader.ts`) takes each message, with its dataset and re
 
 - **Dropped:** a journey 10 minutes after its expected arrival at its last stop (or, with no expected time, its aimed one), once the reader holds that call: the call at `DestinationRef`, which a round trip only reaches, never leaves. A journey heard only through calls short of its last stop stays, with what it has, until its service day has ended, and so does one with no calls. A service day starts as the timetable counts it (`serviceDayStart` in `src/timetable/time.ts`, midnight but on the two days the clocks change) and has ended 36 hours later: the longest in the prepared timetable of 1 November 2026 runs 34 h 9 min, a train 083 into 10:09 the next morning. So Saturday's journeys are all gone at noon on Sunday.
 - **Limits:** 20,000 journeys held, past which the one updated longest ago is dropped and counted (`evicted`), and 4,000,000 characters a message, four times the largest seen; a longer message is counted and skipped. A body whose tags don't nest, or whose root isn't `Siri`, is counted as malformed and skipped whole; a journey without its service day, journey ref, line, origin or destination is counted and skipped, and the message's others are read.
-- **Speed and memory:** the whole recording, 2,090 messages and 114 MB of XML, replays in about 3 s, and the reader holds its 1,268 journeys in about 12 MB.
+- **Speed and memory:** the whole recording, 2,090 messages and 114 MB of XML, replays in about 3 s, and the reader holds its 1,286 journeys in about 13 MB.
 
 ### The update table
 
@@ -52,10 +52,10 @@ Replayed, the table grows as journeys come into their hour before departure:
 | At (Copenhagen) | Journeys listed | Steps  | Cancelled | Cancelled calls | JSON   | Gzipped |
 | --------------- | --------------- | ------ | --------- | --------------- | ------ | ------- |
 | 09:05           | 491             | 4,774  | 1         | 9               | 359 KB | 45 KB   |
-| 09:30           | 903             | 9,250  | 5         | 37              | 684 KB | 86 KB   |
-| 09:56           | 1,264           | 11,502 | 7         | 38              | 885 KB | 111 KB  |
+| 09:30           | 917             | 9,311  | 5         | 37              | 690 KB | 87 KB   |
+| 09:56           | 1,282           | 11,595 | 7         | 38              | 895 KB | 112 KB  |
 
-At 09:56 the listed journeys are 1,074 Movia, 90 S-tog, 61 DSB and 39 Lokaltog. Movia's delays wobble a minute either way from call to call, so its journeys average 10 steps; 49 of the S-tog's journeys and 16 of DSB's have no expected time yet, so no step. The table is about four times the 15 to 25 KB spec #146 budgeted for a weekday peak, and steps are most of it: written whole each minute, it would take about 4.8 GB a month of the store's free 10 GB on a quiet Saturday's figures, before the tracker reads it back. The listener (#217) writes less, as the spec allows: only the journeys that changed since its last write, or the table fetched from the listener over HTTPS instead.
+At 09:56 the listed journeys are 1,082 Movia, 97 S-tog, 64 DSB and 39 Lokaltog. Movia's delays wobble a minute either way from call to call, so its journeys average 10 steps; 49 of the S-tog's journeys and 16 of DSB's have no expected time yet, so no step. The table is about four times the 15 to 25 KB spec #146 budgeted for a weekday peak, and steps are most of it: written whole each minute, it would take about 4.8 GB a month of the store's free 10 GB on a quiet Saturday's figures, before the tracker reads it back. The listener (#217) writes less, as the spec allows: only the journeys that changed since its last write, or the table fetched from the listener over HTTPS instead.
 
 ## One call a minute
 
