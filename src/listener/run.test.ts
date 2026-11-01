@@ -313,4 +313,26 @@ describe('the listener’s credentials', () => {
       for (const secret of SECRETS) expect(text).not.toContain(secret)
     }
   })
+
+  it('cuts a credential out once, even one inside the mark it leaves', async () => {
+    const lines: LogLine[] = []
+    const links: LinkEvents[] = []
+    const { fetch } = stubs()
+    const running = startListener({
+      config: { ...config, secret: 'red', clientId: 'act', datasets: [address('788')] },
+      connect: (_, __, ___, events) => {
+        links.push(events)
+        return { renew: () => {}, close: () => {} }
+      },
+      fetch,
+      log: (line) => lines.push(line),
+      version: 'test',
+    })
+    stop = running.stop
+    await settle()
+    links[0].onClose('refused red')
+    expect(lines.at(-1)?.message).toBe(
+      'Dataset 788’s link closed (refused <redacted>); reopening in 1 s',
+    )
+  })
 })

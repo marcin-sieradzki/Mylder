@@ -7,7 +7,7 @@ import { createRequire } from 'node:module'
 import { gunzipSync } from 'node:zlib'
 import type { EventContext, Message } from 'rhea'
 import type { SiriEtMessage } from '../siri-et/reader.ts'
-import type { Connect, DatasetAddress } from './run.ts'
+import type { Connect } from './run.ts'
 
 // rhea exports one container as its CommonJS module, which ESM sees only as a default its types
 // don't declare.
@@ -113,12 +113,4 @@ function bufferOf(body: unknown): Buffer {
   if (Buffer.isBuffer(content)) return content
   if (Array.isArray(body)) return Buffer.concat(body.map(bufferOf))
   return Buffer.from(String(body ?? ''))
-}
-
-/** An address in `DU_ADDRESSES`: `amqps://<host>/t-distribution-<dataset>/<subscription>`. */
-export function readAddress(address: string): DatasetAddress | undefined {
-  const match = /^amqps:\/\/([^/]+)\/(t-distribution-(\d+))\/([^/]+)$/.exec(address.trim())
-  if (!match) return undefined
-  const [, host, topic, dataset, subscription] = match
-  return { host, topic, subscription, dataset }
 }

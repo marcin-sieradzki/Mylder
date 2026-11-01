@@ -299,14 +299,27 @@ export async function entraToken(
   return body.access_token
 }
 
-/** A log that cuts each of `secrets`, as they stand when a line is written, out of every line. */
+/**
+ * A log that cuts each of `secrets`, as they stand when a line is written, out of every string in
+ * the line, in one pass, so no secret is found inside another's mark.
+ */
 function redacting(log: Log, secrets: ReadonlySet<string>): Log {
-  return (line) => {
-    let text = JSON.stringify(line)
-    for (const secret of secrets) {
-      if (secret) text = text.split(JSON.stringify(secret).slice(1, -1)).join('<redacted>')
+  const redact = (value: unknown, pattern: RegExp): unknown => {
+    if (typeof value === 'string') return value.replace(pattern, '<redacted>')
+    if (Array.isArray(value)) return value.map((each) => redact(each, pattern))
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, each]) => [key, redact(each, pattern)]),
+      )
     }
-    log(JSON.parse(text) as LogLine)
+    return value
+  }
+  return (line) => {
+    const cut = [...secrets]
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length)
+      .map((secret) => secret.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    log(cut.length > 0 ? (redact(line, new RegExp(cut.join('|'), 'g')) as LogLine) : line)
   }
 }
 
