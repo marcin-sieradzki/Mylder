@@ -60,7 +60,7 @@ test('the stop and trip routes answer 404 for an id they don’t know', async ({
   expect((await request.get('/api/trips/bus.5C.none.20260616.0700')).status()).toBe(404)
 })
 
-test('the default source, the simulation, starts', async ({ request }) => {
+test('the simulation starts when MYLDER_SOURCE names it', async ({ request }) => {
   const response = await request.get(`${SIMULATED_URL}/api/snapshot`)
   expect(response.status()).toBe(200)
   const snapshot = (await response.json()) as SnapshotLike
