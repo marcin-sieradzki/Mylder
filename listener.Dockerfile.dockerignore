@@ -1,0 +1,10 @@
+# Only what listener.Dockerfile copies.
+*
+!package.json
+!package-lock.json
+!src/listener/
+!src/siri-et/
+!src/timetable/
+!src/domain/
+**/*.test.ts
+src/siri-et/fixtures/

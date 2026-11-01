@@ -85,8 +85,8 @@
           {
             "patterns": [
               {
-                "regex": "(^|/)siri-et(/|$)",
-                "message": "The SIRI-ET reader uses Effect without `server-only` so the listener can run it in plain Node; the page reaches its table only through the tracker's snapshot (ADR 0011)."
+                "regex": "(^|/)(siri-et|listener)(/|$)",
+                "message": "The SIRI-ET reader and the listener use Effect and Node without `server-only` so the listener can run them in plain Node; the page reaches the update table only through the tracker's snapshot (ADR 0011)."
               }
             ]
           }
@@ -102,7 +102,7 @@
             "patterns": [
               {
                 "regex": "^(\\.\\./)+(app|i18n|map|screens|tracker)(/|$)|^@/",
-                "message": "The SIRI-ET reader runs in the listener's plain Node: it imports from the timetable readers and the domain only."
+                "message": "The SIRI-ET reader runs in the listener's plain Node: it imports from the timetable readers and the domain only, the folders listener.Dockerfile ships beside it."
               },
               {
                 "group": [
@@ -118,6 +118,37 @@
                   "next/**"
                 ],
                 "message": "The SIRI-ET reader runs in plain Node, outside Next.js, where `server-only` throws."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/listener/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(app|i18n|map|screens|tracker|demo)(/|$)|^@/",
+                "message": "The listener runs in plain Node on its own host: it imports the SIRI-ET reader, the timetable readers and the domain only, the folders listener.Dockerfile ships."
+              },
+              {
+                "group": [
+                  "server-only",
+                  "server-only/**",
+                  "client-only",
+                  "client-only/**",
+                  "react",
+                  "react/**",
+                  "react-dom",
+                  "react-dom/**",
+                  "next",
+                  "next/**"
+                ],
+                "message": "The listener runs in plain Node, outside Next.js, where `server-only` throws."
               }
             ]
           }

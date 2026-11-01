@@ -5,8 +5,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import type { Box } from '../timetable/format.ts'
-import { readManifest } from '../timetable/manifest.ts'
-import { platformId, readStops } from '../timetable/stops.ts'
+import { boxOf, stopsFileOf } from './box.ts'
 import type { ReaderBox, SiriEtMessage } from './reader.ts'
 
 /** A recording's messages, in the order they were received. */
@@ -58,15 +57,6 @@ function message(line: string): SiriEtMessage {
 export async function readBox(timetableDir: string, area?: Box): Promise<ReaderBox> {
   const read = async (name: string): Promise<unknown> =>
     JSON.parse(await readFile(/* turbopackIgnore: true */ join(timetableDir, name), 'utf8'))
-  const manifest = readManifest(await read('manifest.json'))
-  const { stops, platforms } = readStops(await read(manifest.files.stops))
-  const { south, west, north, east } = area ?? manifest.box
-  const inside = [...stops, ...platforms].filter(
-    ({ lat, lon }) => lat >= south && lat <= north && lon >= west && lon <= east,
-  )
-  return {
-    stops: new Set(inside.map(({ id }) => platformId(id))),
-    timetableVersion: manifest.version,
-    timezone: manifest.timezone,
-  }
+  const manifest = await read('manifest.json')
+  return boxOf(manifest, await read(stopsFileOf(manifest)), area)
 }

@@ -29,6 +29,7 @@ export default defineConfig({
             'src/domain/**/*.test.ts',
             'src/tracker/**/*.test.ts',
             'src/siri-et/**/*.test.ts',
+            'src/listener/**/*.test.ts',
             'src/demo/**/*.test.ts',
             'src/timetable/**/*.test.ts',
             'src/i18n/**/*.test.ts',

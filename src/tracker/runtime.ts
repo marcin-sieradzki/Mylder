@@ -9,7 +9,7 @@ import { rememberRuntime } from './remember.ts'
 import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
-import type * as Http from './http.ts'
+import * as Http from './http.ts'
 import {
   apiLayer,
   KEY_VARIABLE,
@@ -21,7 +21,14 @@ import {
 } from './source.ts'
 import { memoryLayer, type Store } from './store.ts'
 import { loadTimetable, TIMETABLE_DIR, type Timetable } from './timetable.ts'
-import { feedLayer, readUpdates, UPDATES_VARIABLE, type Updates } from './updates.ts'
+import {
+  feedLayer,
+  type ListenerAddress,
+  readListener,
+  readUpdates,
+  UPDATES_VARIABLE,
+  type Updates,
+} from './updates.ts'
 import {
   clientSettings,
   layer as trackerServiceLayer,
@@ -65,6 +72,10 @@ export interface TrackerLayerOptions {
   readonly cpu?: Layer.Layer<CpuClock>
   /** Where updates come from (`MYLDER_UPDATES`); off when left out. */
   readonly updates?: Updates
+  /** Where `siri` fetches the listener's table (`MYLDER_UPDATES_URL`, `MYLDER_UPDATES_TOKEN`). */
+  readonly listener?: ListenerAddress
+  /** The `HttpClient` the listener's table is fetched through; the real network when left out. */
+  readonly updatesHttp?: Layer.Layer<Http.HttpClient.HttpClient>
 }
 
 /** The tracker with all it needs: the store in memory, the timetable, the source's client. */
@@ -86,7 +97,9 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
     Layer.succeed(TrackerConfig, settings),
     options.cpu ?? processCpu,
   )
-  const feed = feedLayer(options.updates ?? { kind: 'off' })
+  const feed = feedLayer(options.updates ?? { kind: 'off' }, options.listener).pipe(
+    Layer.provide(options.updatesHttp ?? Http.fetchLayer),
+  )
   return trackerServiceLayer.pipe(
     Layer.provide(client),
     Layer.provide(feed),
@@ -125,6 +138,7 @@ export async function environmentLayer(
   const from = env[TIMETABLE_FROM_VARIABLE]
   const { updates, warning } = updatesFor(source, readUpdates(env[UPDATES_VARIABLE]), from)
   const warned = warning ? Layer.effectDiscard(Effect.logWarning(warning)) : Layer.empty
+  const listener = readListener(env)
   const folder = savedFolderOf(source, from, updates)
   if (folder) {
     const [timetable, start] = await Promise.all([
@@ -132,15 +146,20 @@ export async function environmentLayer(
       readStart(recordingDir(folder)),
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
-    return trackerLayer({ timetable, source, positionMode, updates }).pipe(
+    return trackerLayer({ timetable, source, positionMode, updates, listener }).pipe(
       Layer.merge(warned),
       Layer.provideMerge(sharedStartingAt(start)),
     )
   }
   const timetable = await loadTimetable(TIMETABLE_DIR)
-  return trackerLayer({ timetable, source, positionMode, key: env[KEY_VARIABLE], updates }).pipe(
-    Layer.merge(warned),
-  )
+  return trackerLayer({
+    timetable,
+    source,
+    positionMode,
+    key: env[KEY_VARIABLE],
+    updates,
+    listener,
+  }).pipe(Layer.merge(warned))
 }
 
 /**

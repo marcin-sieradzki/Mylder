@@ -328,6 +328,18 @@ describe('the SIRI-ET reader', () => {
     expect(table.datasets['788']).toMatchObject({ messages: 61, tooLarge: 1 })
   })
 
+  it('counts a message the listener skipped unread, its body over the limit once unzipped', () => {
+    const reader = replayed('09:06:53')
+    const before = reader.table(cph('09:07:00')).datasets['788']
+    reader.receive({ dataset: '788', receivedAt: cph('09:06:59'), tooLarge: true })
+    expect(reader.table(cph('09:07:00')).datasets['788']).toEqual({
+      ...before,
+      lastMessageAt: cph('09:06:59'),
+      messages: before.messages + 1,
+      tooLarge: before.tooLarge + 1,
+    })
+  })
+
   it('holds no more journeys than its cap, dropping the one updated longest ago', () => {
     // In the recording's wider box, so every journey held is listed.
     const fed = (limits?: Partial<ReaderLimits>) => {
@@ -353,6 +365,26 @@ describe('the SIRI-ET reader', () => {
     expect(() => Schema.decodeUnknownSync(UpdateTable)({ ...table, version: 2 })).toThrow(
       /\["version"\]/,
     )
+  })
+
+  it('holds messages received before it has a box, and lists them once it has one', () => {
+    // The listener receives from its first second, before it has the box's stops from the app.
+    const reader = siriEtReader({ listener: LISTENER })
+    for (const message of sample) if (message.receivedAt <= cph('09:06:53')) reader.receive(message)
+    reader.useBox(box)
+    expect(reader.table(cph('09:07:00'))).toEqual(replayed('09:06:53').table(cph('09:07:00')))
+  })
+
+  it('lists by the stops of the box it was last given, keeping every journey held', () => {
+    // A timetable version whose box holds only IC 50118's stop at Ringsted (8600601), which none
+    // of the other sample journeys call at.
+    const reader = replayed('09:06:53')
+    reader.useBox({ ...box, stops: new Set(['8600601']), timetableVersion: 'next' })
+    const narrow = reader.table(cph('09:07:00'))
+    expect(narrow.timetableVersion).toBe('next')
+    expect(narrow.journeys.map((j) => j.journey)).toEqual(['50118-8600096500000'])
+    reader.useBox(box)
+    expect(reader.table(cph('09:07:00'))).toEqual(replayed('09:06:53').table(cph('09:07:00')))
   })
 })
 
