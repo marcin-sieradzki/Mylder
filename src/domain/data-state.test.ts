@@ -207,6 +207,55 @@ describe('dataState', () => {
   })
 })
 
+describe('dataState with SIRI-ET’s update feed on', () => {
+  // The feed is fresh while its table is present and its last message is under 5 min old; a trip's
+  // own update may be older, since SIRI-ET sends one only when something changes.
+  const feed = (lastMessage?: number): DataStateContext => ({
+    ...fresh,
+    positionMode: 'none',
+    updates: lastMessage === undefined ? {} : { lastMessage },
+  })
+
+  it.each<[string, TripRealtime, DataStateContext, string]>([
+    [
+      'updated 20 min ago, with the feed’s last message 30 s ago',
+      { updated: min(20), hadRealtime: true },
+      feed(s(30)),
+      'estimated',
+    ],
+    [
+      'updated 2 min ago, with the feed’s last message 4 min 59 s ago',
+      { updated: min(2), hadRealtime: true },
+      feed(s(299)),
+      'estimated',
+    ],
+    [
+      'updated 2 min ago, with the feed’s last message 5 min ago',
+      { updated: min(2), hadRealtime: true },
+      feed(min(5)),
+      'no-signal',
+    ],
+    [
+      'updated earlier today, with the table gone from the store',
+      { updated: min(20), hadRealtime: true },
+      feed(),
+      'no-signal',
+    ],
+    ['with no update today, with the feed fresh', never, feed(s(30)), 'timetable-only'],
+    ['with no update today, with the table gone', never, feed(), 'timetable-only'],
+  ])('a trip %s', (_, trip, context, state) => {
+    expect(dataState(trip, context)).toBe(state)
+  })
+
+  it('ages the feed by the clock in a browser whose snapshot is 2 min old', () => {
+    const context = { ...feed(min(4)), fetched: min(2) }
+    expect(dataState({ updated: min(10), hadRealtime: true }, context)).toBe('estimated')
+    expect(
+      dataState({ updated: min(10), hadRealtime: true }, { ...context, now: now + 60_000 }),
+    ).toBe('no-signal')
+  })
+})
+
 describe('liveLimit', () => {
   it.each<[number, DataStateContext['positionMode'], number]>([
     [60, 'REPORT_ONLY', 150],
