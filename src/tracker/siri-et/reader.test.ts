@@ -3,10 +3,11 @@
 // order, and the update table asked for at chosen moments. Every expected delay is read off the
 // messages by hand: each call's expected time minus its aimed time.
 import { join } from 'node:path'
+import { Schema } from 'effect'
 import { describe, expect, it } from 'vitest'
 import { readBox, readSiriEtMessages, type SiriEtMessage } from './recording'
 import { siriEtReader, type ReaderLimits } from './reader'
-import type { TableJourney, UpdateTable } from './table'
+import { UpdateTable, type TableJourney } from './table'
 
 const RECORDING = join(process.cwd(), 'recordings', 'siri-et')
 const sample = await readSiriEtMessages(join(import.meta.dirname, 'fixtures', 'sample.jsonl.gz'))
@@ -189,4 +190,101 @@ describe('the SIRI-ET reader', () => {
     reader.receive({ ...noCalls, receivedAt: Date.parse('2026-11-01T23:00:01Z') })
     expect(reader.table(Date.parse('2026-11-01T23:00:02Z')).held).toBe(0)
   })
+
+  it("counts each dataset's messages and the journeys they carry", () => {
+    const table = replayed('09:56:08').table(cph('09:56:08'))
+    expect(table.datasets).toEqual({
+      '785': counts(69, 69, '2026-10-31T08:54:45.492Z'),
+      '788': counts(61, 68, '2026-10-31T08:43:47.591Z'),
+      '799': counts(23, 23, '2026-10-31T08:30:33.467Z'),
+      '801': counts(47, 49, '2026-10-31T08:54:57.743Z'),
+    })
+    expect(table.lastMessageAt).toBe(Date.parse('2026-10-31T08:54:57.743Z'))
+    expect(table).toMatchObject({
+      version: 1,
+      writtenAt: cph('09:56:08'),
+      listener: LISTENER,
+      timetableVersion: '2026-11-01-6495dcc6',
+      evicted: 0,
+    })
+  })
+
+  it('counts and skips a malformed message, and reads the next', () => {
+    const [first, second] = sample.filter((m) => m.dataset === '785')
+    const reader = siriEtReader({ box, listener: LISTENER })
+    reader.receive({ ...first, body: first.body.slice(0, first.body.length / 2) })
+    reader.receive({ ...first, body: 'not SIRI at all' })
+    reader.receive({
+      ...first,
+      body: first.body.replace('<Siri ', '<Other ').replace('</Siri>', '</Other>'),
+    })
+    expect(reader.table(cph('09:01:00'))).toMatchObject({
+      datasets: { '785': { messages: 3, malformed: 3, journeyUpdates: 0 } },
+      held: 0,
+    })
+    reader.receive(second)
+    expect(reader.table(cph('09:01:00'))).toMatchObject({
+      datasets: { '785': { messages: 4, malformed: 3, journeyUpdates: 1 } },
+      held: 1,
+    })
+  })
+
+  it("counts and skips a journey that lacks an identifying part, and reads the message's others", () => {
+    // Bus 68's message of 09:32:23 carries bus 327's journey too.
+    const both = sample.find((m) => m.receivedAt === Date.parse('2026-10-31T08:32:23.782Z'))!
+    expect(both.body.match(/<EstimatedVehicleJourney>/g)).toHaveLength(2)
+    const reader = siriEtReader({ box, listener: LISTENER })
+    reader.receive({
+      ...both,
+      body: both.body.replace(/<LineRef>68<\/LineRef>/, ''),
+    })
+    const table = reader.table(cph('09:32:30'))
+    expect(table.datasets['788']).toMatchObject({ skippedJourneys: 1, journeyUpdates: 1 })
+    expect(table.held).toBe(1)
+    expect(journey(table, '6800119-8601705300000')).toBeUndefined()
+  })
+
+  it('skips a message over the size limit', () => {
+    const table = replayed('09:56:08', { messageChars: 18_000 }).table(cph('09:56:08'))
+    // Two S-tog messages, of 18,081 and 22,040 characters, and one of Movia's, 19,438.
+    expect(table.datasets['801']).toMatchObject({ messages: 47, tooLarge: 2 })
+    expect(table.datasets['788']).toMatchObject({ messages: 61, tooLarge: 1 })
+  })
+
+  it('holds no more journeys than its cap, dropping the one updated longest ago', () => {
+    // In the recording's wider box, so every journey held is listed.
+    const fed = (limits?: Partial<ReaderLimits>) => {
+      const reader = siriEtReader({ box: widerBox, listener: LISTENER, limits })
+      for (const message of sample)
+        if (message.receivedAt <= cph('09:30:00')) reader.receive(message)
+      return reader.table(cph('09:30:00'))
+    }
+    const capped = fed({ journeys: 3 })
+    expect(capped.held).toBe(3)
+    // At least the five over the cap, and again each time one comes back.
+    expect(capped.evicted).toBeGreaterThanOrEqual(5)
+    const latest = [...fed().journeys].sort((a, b) => b.received - a.received).slice(0, 3)
+    expect(capped.journeys.map((j) => j.journey).sort()).toEqual(
+      latest.map((j) => j.journey).sort(),
+    )
+  })
+
+  it('gives a table the schema decodes, and refuses one of another version', () => {
+    const table = replayed('09:30:00').table(cph('09:30:00'))
+    const written = JSON.stringify(Schema.encodeSync(UpdateTable)(table))
+    expect(Schema.decodeUnknownSync(UpdateTable)(JSON.parse(written))).toEqual(table)
+    expect(() => Schema.decodeUnknownSync(UpdateTable)({ ...table, version: 2 })).toThrow()
+  })
 })
+
+/** A dataset's counts with every message read. */
+function counts(messages: number, journeyUpdates: number, last: string) {
+  return {
+    lastMessageAt: Date.parse(last),
+    messages,
+    journeyUpdates,
+    malformed: 0,
+    tooLarge: 0,
+    skippedJourneys: 0,
+  }
+}
