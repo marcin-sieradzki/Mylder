@@ -381,12 +381,12 @@ describe('the About dialog', () => {
   })
 
   it('still reads Unknown on any other source that has no realtime time yet', () => {
-    const noRealtime: Snapshot = { ...weekday }
-    delete noRealtime.apiTime
+    const { apiTime, ...noRealtime } = weekday
+    expect(apiTime).toBeDefined()
     show('en', noRealtime)
-    const value = within(openDialog('About Mylder'))
-      .getByText("Rejseplanen's realtime", { selector: 'dt' })
-      .nextElementSibling as HTMLElement
+    const value = within(openDialog('About Mylder')).getByText("Rejseplanen's realtime", {
+      selector: 'dt',
+    }).nextElementSibling as HTMLElement
     expect(value).toHaveTextContent('Unknown')
     expect(value).toHaveAttribute('data-unknown')
   })

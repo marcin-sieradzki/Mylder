@@ -218,9 +218,7 @@ describe('Reporting live, by mode', () => {
 
   it('says it in Danish', () => {
     renderPulse('da', saved(MINUTE_6))
-    expect(meter('Metro')).toHaveTextContent(
-      'Ingen realtid fra Metroen; placeret efter køreplanen',
-    )
+    expect(meter('Metro')).toHaveTextContent('Ingen realtid fra Metroen; placeret efter køreplanen')
     expect(meter('Tog')).toHaveTextContent('1/1 · DSB')
   })
 
