@@ -12,7 +12,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "oxlint",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --check --cache .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
