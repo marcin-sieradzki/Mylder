@@ -265,6 +265,13 @@
     "aircraftLive": "Planes: live from {provider}.",
     "aircraftRecorded": "Planes: recorded adsb.lol data."
   },
+  "onTimetable": {
+    "banner": "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
+    "legend": "Every vehicle is Timetable only for now: live positions aren't connected yet.",
+    "source": "Rejseplanen's timetable, no live positions yet",
+    "note": "The positions on this page are the timetable's plan, not reports from the vehicles.",
+    "transit": "Timetable data: {rejseplanen}, under {licence}. Timetable of {date}."
+  },
   "interval": {
     "seconds": "{n} s",
     "minutes": "{n} min"

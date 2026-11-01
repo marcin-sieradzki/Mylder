@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { pauseAt, type PauseFacts } from './pause'
+import { lastAnswer, pauseAt, type PauseFacts } from './pause'
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
@@ -37,5 +37,15 @@ describe('the pause rule on the timetable source', () => {
       reason: 'no-answer',
       since: NOW - HOUR,
     })
+  })
+})
+
+describe('the last answer on the timetable source', () => {
+  // The Updated line's time: the positions were placed when the snapshot was built.
+  it('is when the snapshot was built, whatever its health says', () => {
+    expect(lastAnswer(onTimetable)).toBe(NOW)
+    const failing = { ...onTimetable, api: { status: 'error' as const, since: NOW - HOUR } }
+    expect(lastAnswer(failing)).toBe(NOW)
+    expect(lastAnswer({ ...failing, source: { kind: 'simulated' } })).toBeUndefined()
   })
 })

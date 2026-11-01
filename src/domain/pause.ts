@@ -31,17 +31,20 @@ export function lastCarried(lastSeen: PauseFacts['lastSeen']): number | undefine
   return moments.length === 0 ? undefined : Math.max(...moments)
 }
 
-/**
- * The last good position answer a snapshot knows of: its own time while the API answers well,
- * else the last answer that carried a trip. None when no answer has carried one this service day.
- */
-export function lastAnswer(facts: PauseFacts & { readonly fetched: number }): number | undefined {
-  return facts.api.status === 'ok' ? facts.fetched : lastCarried(facts.lastSeen)
-}
-
 /** Whether the snapshot is on the timetable source, which asks Rejseplanen nothing. */
 export const onTimetable = (facts: Pick<PauseFacts, 'source'>): boolean =>
   facts.source.kind === 'timetable'
+
+/**
+ * The last good position answer a snapshot knows of: its own time while the API answers well, or
+ * on the timetable source, which places every vehicle when it builds; else the last answer that
+ * carried a trip. None when no answer has carried one this service day.
+ */
+export function lastAnswer(facts: PauseFacts & { readonly fetched: number }): number | undefined {
+  return facts.api.status === 'ok' || onTimetable(facts)
+    ? facts.fetched
+    : lastCarried(facts.lastSeen)
+}
 
 /**
  * Whether live data is paused at `now`: never on the timetable source, whatever else the
