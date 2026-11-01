@@ -17,12 +17,15 @@ import { Providers } from './Providers'
 // minute, built at 07:25:00 in Copenhagen. Its 18 trips are all Timetable only: 7 buses, one of
 // them Waiting at its first stop, 6 S-trains, 4 Metro trains and 1 regional train, on the weekday
 // recording's timetable. Nothing in the Overview names Rejseplanen's positions or its messages.
-const minute6 = JSON.parse(
-  readFileSync(
-    join(process.cwd(), 'recordings', 'timetable-source', 'snapshots', '0006.json'),
-    'utf8',
-  ),
-) as Snapshot
+const folder = join(process.cwd(), 'recordings', 'timetable-source')
+const read = (path: string): unknown => JSON.parse(readFileSync(join(folder, path), 'utf8'))
+const minute6 = read('snapshots/0006.json') as Snapshot
+
+/** The disruption route's answer saved then, which holds no message, and the timetable's routes. */
+const routes = async (input: RequestInfo | URL): Promise<Response> =>
+  String(input).startsWith('/api/disruptions')
+    ? Response.json(read('answers/disruptions/0006.json'))
+    : timetableRoutes(input)
 
 /** Opens the page in `lang` on the tab `tab` names, `after` ms after the snapshot was built. */
 function open(lang: Lang, tab: string, snapshot: Snapshot = minute6, after = 20_000) {
@@ -46,8 +49,8 @@ const countOf = (list: HTMLElement, mode: string) =>
   within(list).getByText(mode, { selector: 'dt' }).nextElementSibling?.textContent
 
 beforeEach(() => {
-  // jsdom has no server: the timetable comes from the recording's files, and nothing else answers.
-  vi.stubGlobal('fetch', timetableRoutes)
+  // jsdom has no server: the routes answer from the recording's files.
+  vi.stubGlobal('fetch', routes)
 })
 
 afterEach(() => {

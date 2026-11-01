@@ -257,7 +257,9 @@ function footerOf(
 /**
  * The Disruptions tab (docs/screens.md, "Disruptions"): Mylder's own data cards, Rejseplanen's
  * messages active now, then those starting within the week under "Later", "Running normally"
- * once when nothing is active, and a footer that says when the list was checked.
+ * once when nothing is active, and a footer that says when the list was checked. On the timetable
+ * source, which asks Rejseplanen nothing, one sentence in their place: the messages come with the
+ * live connection.
  */
 export function DisruptionList({ store = disruptionList }: { store?: DisruptionListStore }) {
   const { lang, dictionary } = useI18n()
@@ -267,6 +269,16 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
   const network = useNetwork(snapshot?.timetableVersion)
   const timezone = timezoneOf(network)
   const laterHeading = useId()
+
+  if (snapshot?.source.kind === 'timetable') {
+    return (
+      <div className={styles.list}>
+        <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.loading}>
+          {dictionary.timetableOverview.disruptions}
+        </Text>
+      </div>
+    )
+  }
 
   if (!listed) {
     return (
