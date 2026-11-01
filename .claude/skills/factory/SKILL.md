@@ -19,7 +19,7 @@ Done when the spec is claimed and the run log exists.
 
 ## 2. Decompose when there are no tickets
 
-When the issue is itself a ticket (it has `## Acceptance criteria` and no sub-issues), it is the run's only ticket: go to step 3, where the spec named under its `## Parent` is the spec its reviewer and verifier read. Otherwise, with no sub-issues, follow `.claude/skills/to-tickets/SKILL.md` on the spec and publish its tickets without the quiz, taking its recommended slicing. Each acceptance criterion a rider can see names the recording that shows its precondition; when no recording in `recordings/` can (more trips standing than any recording has, say), the ticket also builds one, a fixture and a plan as `crowded` was, so the verifier can drive it. Done when the run has its tickets, with their blocking edges, and every rider-visible criterion has a recording that shows it.
+When the issue is itself a ticket (it has `## Acceptance criteria` and no sub-issues), it is the run's only ticket: go to step 3, where the spec named under its `## Parent` is the spec its reviewer and verifier read. Otherwise, with no sub-issues, follow `.claude/skills/to-tickets/SKILL.md` on the spec and publish its tickets without the quiz, taking its recommended slicing. Each acceptance criterion a rider can see names the recording that shows its precondition; when no recording in `recordings/` can (more trips standing than any recording has, say), the ticket also builds one, a fixture and a plan as `crowded` was, so the verifier can drive it. A precondition tied to a date or an hour (a timetable's last week, a quiet night) needs a saved moment too, a folder with its own clock as `timetable-ending` is, because a source at the real time shows only today. Done when the run has its tickets, with their blocking edges, and every rider-visible criterion has a recording that shows it.
 
 ## 3. Work the frontier
 
@@ -33,21 +33,21 @@ Start an implementer in the background: `Read .claude/skills/factory/implementer
 
 ## 5. Review
 
-Follow `.claude/skills/factory-code-review/SKILL.md` on the ticket's branch, fixed point `origin/main`, the ticket as its spec. Every hard Standards violation, and every missing or wrong Spec requirement, goes back to step 4 as a rework round with those findings; judgement calls and smells go in the PR body under **Review notes**. Two rework rounds on the review without a clean one: stop the ticket (step 8). Done when a review finds no hard violation and no Spec gap.
+Follow `.claude/skills/factory-code-review/SKILL.md` on the ticket's branch, fixed point `origin/main`, the ticket as its spec; tell the Spec axis that a "Verified on …" criterion is the verifier's, still to come. Every hard Standards violation, and every missing or wrong Spec requirement, goes back to step 4 as a rework round with those findings; judgement calls and smells go in the PR body under **Review notes**. Two rework rounds on the review without a clean one: stop the ticket (step 8). Done when a review finds no hard violation and no Spec gap.
 
 ## 6. Verify
 
-Start a verifier in the foreground: `Read .claude/skills/factory/verifier.md and follow it. Ticket #<n>, spec #<spec>, branch factory/<n>-<slug>, round <r>, ports <4300 + 2r> and <4301 + 2r>, and <4400 + r> for a recipe on another recording.` It never gets the diff, the review or the implementer's notes. It returns a verdict and the paths of its evidence. Then:
+Start a verifier in the foreground: `Read .claude/skills/factory/verifier.md and follow it. Ticket #<n>, spec #<spec>, branch factory/<n>-<slug>, round <r>, ports <4300 + 2r> and <4301 + 2r>, and <4400 + r> for a recipe on another recording. Open sibling tickets: #<a>, #<b>.` With two verifiers at once, give the second ports of its own (4310 and up). It never gets the diff, the review or the implementer's notes. It returns a verdict and the paths of its evidence. Then:
 
-1. Push the evidence to the orphan `evidence` branch under `<pr>/<round>/` (a worktree of `origin/evidence`, or `git worktree add --orphan -b evidence ../mylder-evidence` the first time), and post the verdict on the PR as a comment, each screenshot linked as `https://github.com/marcin-sieradzki/mylder/blob/evidence/<pr>/<round>/<file>?raw=true`.
+1. Push the evidence to the orphan `evidence` branch under `<pr>/<round>/` with `.claude/skills/factory/scripts/push-evidence.sh <evidence-folder> <pr> <round>`, which commits it without fetching the branch's blobs, and post the verdict on the PR as a comment, each screenshot linked as `https://github.com/marcin-sieradzki/mylder/blob/evidence/<pr>/<round>/<file>?raw=true`.
 2. **FAIL**: back to step 4 as a rework round, with the verdict's failing stories and what the branch showed; the implementer adds a regression test for each. Two rework rounds on verify without a pass: stop the ticket (step 8).
-3. **PASS+NOTES**: file each note as an issue, linked from the verdict. A note this spec's changes caused goes under the spec, blocking nothing, and this run builds it. A note `main` shows too (the verdict's `main` column, or a check of `main` for anything the verdict doesn't cover) is a standalone issue for a later run.
+3. **PASS+NOTES**: file each note as an issue, linked from the verdict. A note this spec's changes caused goes under the spec, blocking nothing, and this run builds it. A note `main` shows too (the verdict's `main` column, or a check of `main` for anything the verdict doesn't cover) is a standalone issue for a later run, unless an earlier ticket of this run put it on `main`: that note is this spec's.
 
 Done when the PR's latest verdict is PASS or PASS+NOTES.
 
 ## 7. Merge
 
-1. Bring `main` in: in the ticket's worktree, `git fetch origin && git merge --no-commit origin/main`, resolve conflicts keeping both sides' intent, run `npm run check`, commit and push. When the merge had a conflict, or `main` brought changes to files the PR touches (`git diff --name-only` of each side against the merge base), run step 6 again on the new head; otherwise the verdict stands.
+1. Bring `main` in: in the ticket's worktree, `git fetch origin && git merge --no-commit origin/main`, resolve conflicts keeping both sides' intent, run `npm run check`, commit and push. When the merge had a conflict, or `main` brought changes to runtime files the PR touches (`git diff --name-only` of each side against the merge base, counting `src/`, `app/`, `public/` and `recordings/`), run step 6 again on the new head, adding to the brief: `Re-verify after main moved: drive the pass rules on the branch only, and the regression journeys of the features <overlapping files> feed.` Otherwise the verdict stands, and the run log says which files overlapped. Of two verified PRs that share runtime files, merge one and only then bring `main` into the other, so it re-verifies once.
 2. Wait for `check` as in step 4, then merge the PR with a merge commit (`gh pr merge <pr> --merge --delete-branch`, or the MCP's merge with method `merge`). Confirm it reads merged and the ticket closed.
 3. Update the run log, remove the ticket's worktree, and go back to step 3.
 
