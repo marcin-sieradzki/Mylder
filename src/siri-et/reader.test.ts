@@ -1,5 +1,5 @@
 // The SIRI-ET reader at the message stream (docs/testing-seams.md): a sample of the recording in
-// recordings/siri-et, cut to seven journeys by scripts/siri-et/sample-siri-et.mjs, replayed in
+// recordings/siri-et, cut to eight journeys by scripts/siri-et/sample-siri-et.mjs, replayed in
 // order, and the update table asked for at chosen moments. Every expected delay is read off the
 // messages by hand: each call's expected time minus its aimed time.
 import { join } from 'node:path'
@@ -12,6 +12,10 @@ import { UpdateTable, type TableJourney } from './table'
 const RECORDING = join(process.cwd(), 'recordings', 'siri-et')
 const sample = await readSiriEtMessages(join(import.meta.dirname, 'fixtures', 'sample.jsonl.gz'))
 const box = await readBox(join(RECORDING, 'timetable'))
+/** Bus 118's journey of 09:00, a round trip from Vanløse St. (2627) and back, cut the same way. */
+const roundTrip = await readSiriEtMessages(
+  join(import.meta.dirname, 'fixtures', 'round-trip.jsonl.gz'),
+)
 /** The box the recording was cut to, 0.05° wider on each side than the timetable's. */
 const widerBox = await readBox(join(RECORDING, 'timetable'), {
   south: 55.4,
@@ -162,8 +166,9 @@ describe('the SIRI-ET reader', () => {
     })
   })
 
-  it('drops a journey 10 minutes after its last call', () => {
-    // Bus 68 reached Kigkurren (3155) at 09:43, a minute early, as its message of 09:43:47 says.
+  it('drops a journey 10 minutes after its last call, when that call is at its last stop', () => {
+    // Bus 68 reached Kigkurren (3155), its DestinationRef, at 09:43, a minute early, as its
+    // message of 09:43:47 says.
     expect(
       journey(replayed('09:56:08').table(cph('09:52:59')), '6800119-8601705300000'),
     ).toBeDefined()
@@ -173,22 +178,77 @@ describe('the SIRI-ET reader', () => {
     expect(table.held).toBe(replayed('09:56:08').table(cph('09:52:59')).held - 1)
   })
 
-  it("drops a journey with no calls once its service day is over, and doesn't take it back", () => {
+  it('keeps a journey heard only through calls short of its last stop, and their delays', () => {
+    // IC 50118's first message, at 09:00:04, carries only its call at 8600079, due away at 08:56
+    // and gone on time; its last stop, 8600650, is in none of its messages.
+    const reader = replayed('09:00:05')
+    const table = reader.table(cph('09:30:00'))
+    expect(journey(table, '50118-8600096500000')).toMatchObject({
+      first: { stop: '8600079', aimed: cph('08:56') },
+      steps: [step('8600079', '08:56', 0)],
+    })
+  })
+
+  it('ends a round trip at its arrival back where it started, not at its departure from there', () => {
+    // Bus 118's last message, of 09:39:24: it left Vanløse St. (2627) at 09:00 and was back at
+    // 09:39.
+    const ref = '11800009-8600981704000'
+    const whole = siriEtReader({ box, listener: LISTENER })
+    for (const message of roundTrip) whole.receive(message)
+    expect(journey(whole.table(cph('09:48:59')), ref)).toBeDefined()
+    expect(journey(whole.table(cph('09:49:00')), ref)).toBeUndefined()
+    // The same message with its first call alone, the departure from Vanløse St.
+    const last = roundTrip[roundTrip.length - 1]
+    const departureOnly = siriEtReader({ box, listener: LISTENER })
+    departureOnly.receive({
+      ...last,
+      body: last.body
+        .replace(
+          /<\/RecordedCall><RecordedCall>.*<\/RecordedCalls>/,
+          '</RecordedCall></RecordedCalls>',
+        )
+        .replace(/<EstimatedCalls>.*<\/EstimatedCalls>/, ''),
+    })
+    expect(journey(departureOnly.table(cph('09:30:00')), ref)).toMatchObject({
+      first: { stop: '2627', aimed: cph('09:00') },
+    })
+    // Its first message, of 09:00:03, with its last call alone: due back at 09:37, at 09:35.
+    const arrivalOnly = siriEtReader({ box, listener: LISTENER })
+    arrivalOnly.receive({
+      ...roundTrip[0],
+      body: roundTrip[0].body.replace(
+        /<EstimatedCalls>.*(<EstimatedCall><StopPointRef>2627<)/,
+        '<EstimatedCalls>$1',
+      ),
+    })
+    expect(journey(arrivalOnly.table(cph('09:44:59')), ref)).toBeDefined()
+    expect(journey(arrivalOnly.table(cph('09:45:00')), ref)).toBeUndefined()
+  })
+
+  it('drops a journey of a service day that has ended, and refuses it after', () => {
+    // IC 50118 after its first message, still short of its last stop. Saturday's service day
+    // starts at its midnight and runs at most 36 hours, so it has ended at noon on Sunday.
+    const first = sample.find((m) => m.body.includes('50118-8600096500000'))!
+    const reader = replayed('09:00:05')
+    const sunday = (time: string) => Date.parse(`2026-11-01T${time}+01:00`)
+    expect(journey(reader.table(sunday('11:59:59')), '50118-8600096500000')).toBeDefined()
+    expect(reader.table(sunday('12:00:00')).held).toBe(0)
+    reader.receive({ ...first, receivedAt: sunday('12:00:01') })
+    expect(reader.table(sunday('12:00:02')).held).toBe(0)
+  })
+
+  it('drops a journey with no calls once its service day has ended', () => {
     // The 950R's cancellation with its calls taken out: nothing says when it ends.
     const [cancellation] = sample.filter((m) => m.body.includes('106044-8605418300001'))
-    const noCalls = {
+    const reader = siriEtReader({ box, listener: LISTENER })
+    reader.receive({
       ...cancellation,
       body: cancellation.body.replace(/<EstimatedCalls>.*<\/EstimatedCalls>/, ''),
-    }
-    const reader = siriEtReader({ box, listener: LISTENER })
-    reader.receive(noCalls)
-    // Saturday's trips may still run until Monday starts, past Sunday's last night bus.
+    })
     expect(
-      journey(reader.table(Date.parse('2026-11-01T22:59:59Z')), '106044-8605418300001'),
+      journey(reader.table(Date.parse('2026-11-01T11:59:59+01:00')), '106044-8605418300001'),
     ).toMatchObject({ cancelled: true })
-    expect(reader.table(Date.parse('2026-11-01T23:00:00Z')).held).toBe(0)
-    reader.receive({ ...noCalls, receivedAt: Date.parse('2026-11-01T23:00:01Z') })
-    expect(reader.table(Date.parse('2026-11-01T23:00:02Z')).held).toBe(0)
+    expect(reader.table(Date.parse('2026-11-01T12:00:00+01:00')).held).toBe(0)
   })
 
   it("counts each dataset's messages and the journeys they carry", () => {

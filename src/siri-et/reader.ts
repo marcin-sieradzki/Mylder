@@ -6,9 +6,8 @@
 // reader holds for the journey, a call replacing the one it held at the same stop and aimed time;
 // a message never replaces the journey. The reader holds every journey it hears of, since a later
 // message may bring a call inside the box, and the table lists those that call inside it.
-import { addDays } from '../timetable/dates.ts'
 import { platformId } from '../timetable/stops.ts'
-import { calendarDay } from '../timetable/time.ts'
+import { serviceDayStart } from '../timetable/time.ts'
 import { readSiriEt, type SiriCall } from './siri.ts'
 import {
   TABLE_VERSION,
@@ -44,8 +43,15 @@ export interface ReaderLimits {
 /** Room for a weekday's journeys on all four datasets, and four times the largest message seen. */
 export const READER_LIMITS: ReaderLimits = { journeys: 20_000, messageChars: 4_000_000 }
 
-/** A journey leaves the reader this long after its last call. */
+/** A journey leaves the reader this long after its call at its last stop. */
 export const FINISHED_AFTER = 10 * 60_000
+
+/**
+ * How long a service day runs from its start (`serviceDayStart`, src/timetable/time.ts: midnight,
+ * but on the two days the clocks change). The longest in the prepared timetable of 1 November 2026
+ * runs 34 h 9 min, a train 083 to 10:09 the next morning; past this, its journeys have ended.
+ */
+export const SERVICE_DAY_LENGTH = 36 * 3_600_000
 
 export interface ReaderOptions {
   readonly box: ReaderBox
@@ -68,6 +74,8 @@ interface HeldCall {
   /** Seconds late, when the call has an expected time. */
   readonly delay: number | undefined
   readonly cancelled: boolean
+  /** Whether the journey leaves the call: false at its last stop, which it only reaches. */
+  readonly departs: boolean
   /** When the call is expected, or else aimed: its arrival, or its departure at the first. */
   readonly at: number
 }
@@ -112,7 +120,7 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
     }
     for (const update of journeys) {
       const { day, journey, line, origin, destination } = update
-      if (!day || !journey || !line || !origin || !destination) {
+      if (!day || !ISO_DATE.test(day) || !journey || !line || !origin || !destination) {
         counts.skippedJourneys++
         continue
       }
@@ -173,13 +181,10 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
   }
 
   function table(now: number): UpdateTable {
-    const firstDay = addDays(calendarDay(now, box.timezone), -1)
     const journeys: TableJourney[] = []
     for (const [key, journey] of held) {
       const calls = inOrder(journey.calls)
-      const last = calls[calls.length - 1]
-      const finished = last ? now >= last.at + FINISHED_AFTER : journey.day < firstDay
-      if (finished || journey.day < firstDay) {
+      if (finished(journey, calls, now)) {
         held.delete(key)
         continue
       }
@@ -198,6 +203,21 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
     }
   }
 
+  /**
+   * Whether a journey has finished at `now`: 10 minutes after its call at its last stop, or, when
+   * the reader holds no such call, once its service day has ended.
+   */
+  function finished(journey: HeldJourney, calls: readonly HeldCall[], now: number): boolean {
+    if (now >= serviceDayStart(journey.day, box.timezone) + SERVICE_DAY_LENGTH) return true
+    const last = calls[calls.length - 1]
+    const atLastStop =
+      last !== undefined &&
+      platformId(last.stop) === platformId(journey.destination) &&
+      // A round trip starts where it ends: its departure from there is not its last call.
+      (journey.origin !== journey.destination || !last.departs)
+    return atLastStop && now >= last.at + FINISHED_AFTER
+  }
+
   function callsInBox(journey: HeldJourney, calls: readonly HeldCall[]): boolean {
     return (
       box.stops.has(platformId(journey.origin)) ||
@@ -208,6 +228,8 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
 
   return { receive, table }
 }
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 /** A call the reader can place: one with a stop and an aimed time. */
 function heldCall(call: SiriCall): HeldCall | undefined {
@@ -224,6 +246,7 @@ function heldCall(call: SiriCall): HeldCall | undefined {
     aimed,
     delay: delay === undefined ? undefined : Math.round(delay / 1000),
     cancelled: call.cancelled,
+    departs: call.aimedDeparture !== undefined,
     at: call.expectedArrival ?? call.expectedDeparture ?? call.aimedArrival ?? aimed,
   }
 }
