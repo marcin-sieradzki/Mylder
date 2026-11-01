@@ -21,6 +21,7 @@ import { vehicleOverlay } from './overlay.ts'
 import { sheetPeek } from './peek.ts'
 import { readPaint, watchTheme } from './paint.ts'
 import { basemapStyle, paintTokens } from './style/basemap.ts'
+import { barImage } from './style/stations.ts'
 import { timetables } from './timetable.ts'
 import { MAX_PITCH, mapView } from './view.ts'
 
@@ -114,6 +115,12 @@ export default function BaseMap({ label, className, top, foot }: BaseMapProps) {
       zoom: zoomFor(element.clientWidth),
     }))
     const vehicles = vehicleOverlay(created, element)
+    // The stations' bars are drawn when the style first asks for one of a length and colour.
+    created.setMissingStyleImageResolver((id) => {
+      const pixelRatio = window.devicePixelRatio || 1
+      const image = barImage(id, pixelRatio)
+      if (image && !created.hasImage(id)) created.addImage(id, image, { pixelRatio })
+    })
     const repaint = () => created.setStyle(style(), { diff: true })
     const stopWatching = watchTheme(root, () => {
       repaint()
