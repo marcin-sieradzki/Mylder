@@ -51,7 +51,9 @@ Each task answers the `software-factory` skill's five questions: what triggers i
 
 **Verify.** Triggered by a ticket PR with a clean review. FAIL sends it back to the implementer, a rework round; PASS+NOTES files each note as a follow-up issue under the spec that blocks nothing, and is otherwise a pass. Next: merge. Capped at two rework rounds.
 
-**Merge.** Triggered by a PR with green checks, a clean review and a passing verdict. Brings `main` in first; when the merge had conflicts or `main` changed files the PR touches, the verifier runs again on the new head before the merge. Merges the PR, which closes the ticket, updates the run log, and recomputes the frontier. When the spec's last ticket merges, the run closes the spec, removes `factory:running` and ends.
+**Merge.** Triggered by a PR with green checks, a clean review and a passing verdict. Brings `main` in first; when the merge had conflicts or `main` changed files the PR touches, the verifier runs again on the new head before the merge. Merges the PR, which closes the ticket, updates the run log, and recomputes the frontier. When the spec's last ticket merges, the run closes the spec and removes `factory:running`. Next: retro.
+
+**Retro.** Triggered by the end of every run, whether its spec closed or tickets stopped ([ADR 0017](../adr/0017-a-retro-closes-every-factory-run.md)). Runs `/retro` on the run and ranks what it finds, from a check or a brief up to the factory's infrastructure or Mylder's architecture. Next: one PR of fixes to the factory's own files, and proposals for the rest. The maintainer re-enters by merging the PR and choosing among the proposals. The run ends with it, so each run has one retro.
 
 ## Throttle
 
