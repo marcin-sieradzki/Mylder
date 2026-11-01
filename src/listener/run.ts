@@ -55,6 +55,8 @@ export interface ListenerConfig {
   /** The app, whose timetable routes give the box's stops. */
   readonly appUrl: string
   readonly port: number
+  /** The listener's version, which its table names: the commit its image was built from. */
+  readonly version: string
 }
 
 /** A token is renewed this often, well inside the hour an Entra ID token lasts. */
@@ -91,8 +93,6 @@ export interface RunOptions {
   readonly connect: Connect
   readonly fetch: typeof globalThis.fetch
   readonly log: Log
-  /** The listener's version, which its table names. */
-  readonly version: string
 }
 
 export interface Running {
@@ -102,13 +102,8 @@ export interface Running {
 }
 
 /** Starts the listener: its links, its token's renewal, its minute line and its stops. */
-export function startListener({
-  config,
-  connect,
-  fetch,
-  log: write,
-  version,
-}: RunOptions): Running {
+export function startListener({ config, connect, fetch, log: write }: RunOptions): Running {
+  const { version } = config
   const now = () => Date.now()
   const credentials = [
     config.secret,

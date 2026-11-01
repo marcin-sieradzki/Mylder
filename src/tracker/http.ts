@@ -125,10 +125,10 @@ export const getTextUpTo = (
     Effect.flatMap((response) => {
       const chunks: Uint8Array[] = []
       let size = 0
-      const answer = (text: string) => ({
+      const answer = (body: string) => ({
         status: response.status,
         headers: response.headers,
-        text,
+        text: body,
       })
       return Stream.runForEach(response.stream, (chunk) => {
         size += chunk.byteLength

@@ -13,6 +13,8 @@ export const VARIABLES = {
   token: 'MYLDER_UPDATES_TOKEN',
   appUrl: 'MYLDER_APP_URL',
   port: 'PORT',
+  /** The commit the image was built from, which the table names; `dev` when unset. */
+  version: 'MYLDER_LISTENER_VERSION',
 } as const
 
 /** The port it listens on when `PORT` isn't set. */
@@ -69,6 +71,7 @@ export function readConfig(env: Environment): ListenerConfig {
     token: value(VARIABLES.token),
     appUrl: value(VARIABLES.appUrl),
     port,
+    version: value(VARIABLES.version) || 'dev',
   }
 }
 

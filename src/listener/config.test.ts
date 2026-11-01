@@ -20,7 +20,7 @@ const env = {
 
 describe('the listener’s settings', () => {
   it('reads every one from the environment', () => {
-    expect(readConfig({ ...env, PORT: '9000' })).toEqual({
+    expect(readConfig({ ...env, PORT: '9000', MYLDER_LISTENER_VERSION: 'abc123' })).toEqual({
       clientId: 'fake-client',
       tenantId: 'fake-tenant',
       secret: SECRET,
@@ -41,8 +41,9 @@ describe('the listener’s settings', () => {
       token: TOKEN,
       appUrl: 'https://mylder.example',
       port: 9000,
+      version: 'abc123',
     })
-    expect(readConfig(env).port).toBe(8080)
+    expect(readConfig(env)).toMatchObject({ port: 8080, version: 'dev' })
   })
 
   it('names every variable that is missing, and none’s value', () => {

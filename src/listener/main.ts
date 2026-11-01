@@ -7,9 +7,6 @@ import { jsonLog } from './log.ts'
 import { startListener } from './run.ts'
 import { serve } from './server.ts'
 
-/** The image's version, which its table names: the commit it was built from. */
-const VERSION = process.env.MYLDER_LISTENER_VERSION?.trim() || 'dev'
-
 function settings() {
   try {
     return readConfig(process.env)
@@ -26,7 +23,6 @@ const running = startListener({
   connect: connectAmqp,
   fetch: globalThis.fetch,
   log: jsonLog,
-  version: VERSION,
 })
 const server = await serve(running.listener.handle, config.port)
 jsonLog({ level: 'info', message: `The listener serves its table on port ${config.port}` })

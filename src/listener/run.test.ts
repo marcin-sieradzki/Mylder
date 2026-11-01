@@ -46,6 +46,7 @@ const config: ListenerConfig = {
   token: TOKEN,
   appUrl: 'https://mylder.example',
   port: 0,
+  version: 'test',
 }
 /** Every credential, and every access token Entra ID gives out (`jwt-<n>`). */
 const SECRETS = [SECRET, CLIENT_ID, TENANT_ID, TOKEN, SUBSCRIPTION, 'jwt-']
@@ -121,7 +122,6 @@ function started() {
     connect,
     fetch,
     log: (line) => lines.push(line),
-    version: 'test',
   })
   const open = (dataset: string) => links.filter((l) => l.dataset === dataset && !l.closed)
   const opened = (dataset: string) => links.filter((l) => l.dataset === dataset)
@@ -371,7 +371,6 @@ describe('the listener’s credentials', () => {
       },
       fetch,
       log: (line) => lines.push(line),
-      version: 'test',
     })
     stop = running.stop
     await settle()
