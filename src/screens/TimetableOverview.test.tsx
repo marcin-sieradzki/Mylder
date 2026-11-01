@@ -139,6 +139,9 @@ describe('City pulse on the timetable source', () => {
     expect(figure('Meldt i dette minut')).toHaveTextContent(NO_LIVE_DA)
     expect(figure('Melder live')).toHaveTextContent(NO_LIVE_DA)
     expect(meterLine('Bus')).toContain(NO_LIVE_DA)
+    // The Metro's line, shared with the other sources, places its trains in the same words.
+    expect(meterLine('Metro')).toContain('Ingen realtid fra Metroen; placeret efter køreplanen')
+    expect(panel()).not.toHaveTextContent('placeret ud fra')
     expect(within(panel()).getByRole('list', { name: 'Hvor sikre er vi?' })).toHaveTextContent(
       `Kun køreplan 18 ${NO_LIVE_DA}.`,
     )

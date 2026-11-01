@@ -238,7 +238,7 @@
       "paused": "Positionerne er sat på pause",
       "none-underway": "Ingen køretøjer undervejs",
       "too-few": "For få køretøjer med kendt forsinkelse",
-      "metro": "Ingen realtid fra Metroen; placeret ud fra køreplanen",
+      "metro": "Ingen realtid fra Metroen; placeret efter køreplanen",
       "computed-meters": "Alle positioner er beregnet af Rejseplanen"
     },
     "now": "På kortet nu",
@@ -246,8 +246,8 @@
     "states": {
       "live": "Meldt af køretøjet i de seneste svar.",
       "ageing": "Sidst meldt for få minutter siden; kører siden videre ad sin rute.",
-      "estimated": "Placeret ud fra køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.",
-      "timetableOnly": "Ingen realtid for denne tur i dag; placeret ud fra køreplanen.",
+      "estimated": "Placeret efter køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.",
+      "timetableOnly": "Ingen realtid for denne tur i dag; placeret efter køreplanen.",
       "noSignal": "Havde realtid, mangler i 5 min; kører videre efter køreplanen og sin seneste forsinkelse."
     },
     "dayProfile": "Køretøjer i drift i dag",
