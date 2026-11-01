@@ -8,8 +8,11 @@ import { MODES, type Mode } from '../timetable/format'
 import type { Snapshot, SnapshotTrip } from '../tracker/index'
 import { carriesDelays, DELAY_KNOWN } from './delays'
 
-/** Why a figure is "—". */
-export type Unknown = 'computed-only' | 'paused' | 'none-underway'
+/**
+ * Why a figure is "—": on the timetable source no live position is connected yet, so none can
+ * report.
+ */
+export type Unknown = 'computed-only' | 'paused' | 'none-underway' | 'timetable'
 
 /** Why the average delay is "—": too few trips carry one for a mean, or positions are paused. */
 export type DelayUnknown = Extract<Unknown, 'paused'> | 'too-few'
@@ -25,6 +28,12 @@ export interface ModeShare {
   /** None for the Metro, an interval line with no realtime (ADR 0006), or when it can't be known. */
   readonly share?: Share
   readonly unknown?: Unknown | 'metro'
+}
+
+/** How many vehicles of a mode are on the move, as On the move counts them. */
+export interface ModeCount {
+  readonly mode: Mode
+  readonly count: number
 }
 
 /** How many trips are in each state, as Perron's ReportStrip and DataStateKey count them. */
@@ -44,12 +53,18 @@ export interface Pulse {
   readonly reported: number | Unknown
   /**
    * The mean delay in seconds, when at least `MIN_DELAYS` trips carry one, or why it can't be
-   * known; none when the snapshot carries no delays at all, and Reporting live takes its slot.
+   * known; none when the snapshot carries no delays at all, or on the timetable source, which
+   * can't know one, and Reporting live takes its slot.
    */
   readonly delay?: { readonly mean: number; readonly count: number } | DelayUnknown
   /** Live and Ageing over underway, the Metro left out: the sum of the meters. */
   readonly live: Share | Unknown
   readonly modes: readonly ModeShare[]
+  /**
+   * The vehicles on the move in each mode the filters show, in the modes' order: together the
+   * On the move figure, each the count its mode's chip gives while none is No signal.
+   */
+  readonly movingByMode: readonly ModeCount[]
   /** The trips on the map in each state, after the filters, in the keys Perron's parts take. */
   readonly states: StateCounts
   /** The Live limit and the end of Ageing, in ms, for the key's sentences. */
@@ -65,11 +80,13 @@ const REPORTING: ReadonlySet<DataState> = new Set(['live', 'ageing'])
 const NO_FILTER: ReadonlySet<Mode> = new Set()
 
 /**
- * When positions are paused (docs/data-states.md, "Paused"): at once when the month's calls are
- * spent, else the moment the latest good answer is older than the Live limit; none while the API
- * answers well.
+ * When positions are paused (docs/data-states.md, "Paused"): never on the timetable source, which
+ * asks Rejseplanen nothing; at once when the month's calls are spent or no position is asked for,
+ * else the moment the latest good answer is older than the Live limit; none while the API answers
+ * well.
  */
 export function pausedFrom(snapshot: Snapshot): number | undefined {
+  if (snapshot.source.kind === 'timetable') return undefined
   if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return -Infinity
   if (snapshot.api.status === 'ok') return undefined
   const answered = Math.min(snapshot.api.since, snapshot.fetched)
@@ -87,10 +104,18 @@ export function pulseOf(
   const all = snapshot.trips.filter((trip) => onMap(trip, NO_FILTER))
   const shown = all.filter((trip) => onMap(trip, hidden))
   const underway = shown.filter((trip) => !trip.waiting)
+  const moving = underway.filter((trip) => stateOf(trip) !== 'no-signal')
   const reporting = (trip: SnapshotTrip) => REPORTING.has(stateOf(trip))
 
   const computedOnly = snapshot.positionMode === 'CALC_REPORT'
-  const why: Unknown | undefined = paused ? 'paused' : computedOnly ? 'computed-only' : undefined
+  const onTimetable = snapshot.source.kind === 'timetable'
+  const why: Unknown | undefined = onTimetable
+    ? 'timetable'
+    : paused
+      ? 'paused'
+      : computedOnly
+        ? 'computed-only'
+        : undefined
 
   // A trip reported in the latest report answer, while it is still Live by the clock.
   const interval = reportInterval(snapshot.pollInterval, snapshot.positionMode) * 1000
@@ -109,25 +134,27 @@ export function pulseOf(
     .map((trip) => trip.delay!)
   // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
   // figure for another: under the minimum it says so.
-  const delay: Pulse['delay'] = !carriesDelays(snapshot)
-    ? undefined
-    : paused
-      ? 'paused'
-      : delays.length < MIN_DELAYS
-        ? 'too-few'
-        : {
-            mean: delays.reduce((sum, each) => sum + each, 0) / delays.length,
-            count: delays.length,
-          }
+  const delay: Pulse['delay'] =
+    onTimetable || !carriesDelays(snapshot)
+      ? undefined
+      : paused
+        ? 'paused'
+        : delays.length < MIN_DELAYS
+          ? 'too-few'
+          : {
+              mean: delays.reduce((sum, each) => sum + each, 0) / delays.length,
+              count: delays.length,
+            }
 
   const shareOf = (trips: readonly SnapshotTrip[]): Share | Unknown =>
     why ??
     (trips.length === 0
       ? 'none-underway'
       : { count: trips.filter(reporting).length, total: trips.length })
-  const modes = MODES.filter(
+  const shownModes = MODES.filter(
     (mode) => !hidden.has(mode) && all.some((trip) => trip.mode === mode),
-  ).map((mode): ModeShare => {
+  )
+  const modes = shownModes.map((mode): ModeShare => {
     if (mode === 'metro') return { mode, unknown: 'metro' }
     const share = shareOf(underway.filter((trip) => trip.mode === mode))
     return typeof share === 'string' ? { mode, unknown: share } : { mode, share }
@@ -150,12 +177,16 @@ export function pulseOf(
   }
 
   return {
-    moving: underway.filter((trip) => stateOf(trip) !== 'no-signal').length,
+    moving: moving.length,
     inService: all.length,
     reported,
     ...(delay === undefined ? {} : { delay }),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
+    movingByMode: shownModes.map((mode) => ({
+      mode,
+      count: moving.filter((trip) => trip.mode === mode).length,
+    })),
     states: byState,
     thresholds: {
       live: liveLimit(snapshot.pollInterval, snapshot.positionMode),

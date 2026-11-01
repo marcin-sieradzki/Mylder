@@ -316,5 +316,14 @@
       "messagesStale": "Driftsmeddelelser ikke opdateret siden {time}",
       "messagesNever": "Driftsmeddelelser endnu ikke hentet"
     }
+  },
+  "timetableOverview": {
+    "source": "Køreplan",
+    "placedAt": "placeret {time}",
+    "byMode": "I bevægelse, efter transportform",
+    "noLivePositions": "Ingen livepositioner endnu; placeret efter køreplanen",
+    "timetableOnly": "Ingen livepositioner endnu; placeret efter køreplanen.",
+    "disruptions": "Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu.",
+    "disruptionsFact": "Ikke koblet på endnu"
   }
 }

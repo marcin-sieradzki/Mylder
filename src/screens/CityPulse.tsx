@@ -1,18 +1,22 @@
 'use client'
 
-import { Meter, Section, Stat, Text } from '@mylder/perron'
+import { FactList, Meter, Section, Stat, Text } from '@mylder/perron'
 import { DataStateKey, ReportStrip } from '@mylder/perron/patterns'
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { useI18n } from '../i18n/useI18n'
-import { useClockOffset, useSnapshot } from '../map/live'
+import { useClockOffset, useLastAnswer, useSnapshot } from '../map/live'
+import { usePaused as usePageNoticePaused } from '../map/notices'
 import { useDataStates } from '../map/states'
+import { timezoneOf, useNetwork } from '../map/timetable'
 import { useHiddenModes } from '../map/view'
 import type { Mode } from '../timetable/format'
+import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
 import { budgetLine } from './budget'
 import styles from './CityPulse.module.css'
 import { DayProfile } from './DayProfile'
 import { grouped } from './numbers'
+import { PositionsSource } from './PositionsSource'
 import {
   pausedFrom,
   pulseOf,
@@ -93,6 +97,8 @@ export function CityPulse() {
   const sureId = useId()
   const paused = usePaused(snapshot, clockOffset)
   const pulse = snapshot && pulseOf(snapshot, states, hidden, paused)
+  // On the timetable source, which asks Rejseplanen nothing, the figures are the timetable's plan.
+  const placed = snapshot?.source.kind === 'timetable'
 
   const { percent, minutes } = useMemo(
     () => ({
@@ -105,8 +111,9 @@ export function CityPulse() {
     }),
     [lang],
   )
+  const onTimetable = dictionary.timetableOverview
   const why = (unknown: Unknown | DelayUnknown | 'metro' | 'computed-meters') =>
-    words.unknown[unknown]
+    unknown === 'timetable' ? onTimetable.noLivePositions : words.unknown[unknown]
   const fill = (template: string, values: Record<string, string | number>) =>
     Object.entries(values).reduce(
       (text, [name, value]) => text.replace(`{${name}}`, String(value)),
@@ -167,7 +174,19 @@ export function CityPulse() {
           </Figure>
         )}
       </div>
+      {placed ? <PlacedSource snapshot={snapshot} /> : null}
       <ReportStrip aria-label={words.now} counts={pulse.states} />
+      {placed ? (
+        <Section title={onTimetable.byMode}>
+          <FactList
+            items={pulse.movingByMode.map(({ mode, count }) => ({
+              key: mode,
+              label: dictionary.modes[mode],
+              value: grouped(count),
+            }))}
+          />
+        </Section>
+      ) : null}
       <Section title={words.byMode}>
         <div className={styles.meters}>
           {pulse.modes.map((each) => (
@@ -194,10 +213,30 @@ export function CityPulse() {
           liveDescriptionLabel={words.states.live}
           ageingDescriptionLabel={words.states.ageing}
           estimatedDescriptionLabel={words.states.estimated}
-          timetableOnlyDescriptionLabel={words.states.timetableOnly}
+          timetableOnlyDescriptionLabel={
+            placed ? onTimetable.timetableOnly : words.states.timetableOnly
+          }
           noSignalDescriptionLabel={words.states.noSignal}
         />
       </Section>
     </div>
+  )
+}
+
+/**
+ * The source line under the figures on the timetable source: "Timetable · placed 08:14:05", the
+ * moment the snapshot placed the vehicles, as the Vehicles list says it.
+ */
+function PlacedSource({ snapshot }: { snapshot: Snapshot }) {
+  const updatedAt = useLastAnswer()
+  const paused = usePageNoticePaused()
+  const timezone = timezoneOf(useNetwork(snapshot.timetableVersion))
+  if (updatedAt === undefined) return null
+  return (
+    <PositionsSource
+      snapshot={snapshot}
+      time={clockTime(updatedAt, timezone, { seconds: true })}
+      paused={paused}
+    />
   )
 }

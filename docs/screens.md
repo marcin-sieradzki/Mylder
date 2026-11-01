@@ -100,7 +100,9 @@ The tab counts: Vehicles, the trips on the map after the mode filters; Disruptio
 
 **Source line:** "Rejseplanen · positions 08:14:05 · timetable of 12 October", under the figures; the chart carries its own caption.
 
-**Built from:** Stat, Meter, DayProfileChart, ReportStrip, VehicleDotLegend, Section, Sheet, Tabs with Tab counts, DataStatePanel, Text.
+**On the timetable source** (`MYLDER_SOURCE=timetable`), which asks Rejseplanen nothing, City pulse reads as the plan, not the vehicles. On the move counts as anywhere, and "On the move, by mode" splits it by mode after the mode filters, each the count its mode's chip in the top bar gives. Reported this minute and Reporting live read "—" with "No live positions yet; placed from the timetable", and so does every mode's meter, neutral, not 0 % in red; the Metro's keeps its own line, since it runs to an interval on every source. The average delay is left out, since no delay can be known, and Reporting live takes its slot. How sure are we? gives Timetable only the sentence "No live positions yet; placed from the timetable." Positions are never paused there, whatever the snapshot's health or budget says. The source line under the figures reads "Timetable · placed 08:14:05", the time of the snapshot that placed the vehicles, and the planned-trips chart is unchanged.
+
+**Built from:** Stat, Meter, DayProfileChart, ReportStrip, VehicleDotLegend, Section, FactList (On the move, by mode, on the timetable source), SourceLine, Sheet, Tabs with Tab counts, DataStatePanel, Text.
 
 ## The Vehicles list
 
@@ -111,7 +113,7 @@ The tab counts: Vehicles, the trips on the map after the mode filters; Disruptio
 - **Search** over line name and destination. "No vehicles match." when nothing does.
 - **A row** opens the vehicle's detail. The list re-renders when a snapshot lands and when a row's state ages, not every frame.
 - **Count:** the Vehicles tab's count.
-- **Source line:** "Rejseplanen · positions 08:14:05", above the rows, so it is seen before scrolling.
+- **Source line:** "Rejseplanen · positions 08:14:05", above the rows, so it is seen before scrolling; on the timetable source, where every row is Timetable only and the Delay column is hidden, "Timetable · placed 08:14:05".
 
 **Built from:** SearchField, Select (the sort), VehicleTable, DataStatePanel, Text.
 
@@ -132,6 +134,8 @@ No line badges, unless the first day shows the answers name lines in a field: a 
 Cancellations make no card. They are shown where they are seen: a cancelled row in a stop's departures, a cancelled trip's panel, cancelled calls on a trip's next stops. A card per cancellation would describe where people looked, not the network.
 
 **Footer:** "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open." After a failed check, "Last checked 07:45; the latest check failed." After an hour without a successful check the list stays, marked "May be out of date", and the data card above says so. The time is the server's receipt time of the last good answer.
+
+**On the timetable source** (`MYLDER_SOURCE=timetable`) no message is asked for, since `himsearch` needs the key, and nothing it doesn't ask for can be missing: in place of the list, its footer and Mylder's own data cards, the screen says "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.", the tab counts nothing, and the About dialog's Disruptions fact reads "Not connected yet".
 
 **Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, Button, Accordion, Section, Separator, DataStatePanel, Text.
 

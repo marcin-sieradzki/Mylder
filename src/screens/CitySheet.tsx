@@ -50,9 +50,10 @@ export function CitySheet({ open, onClose, asked, opener, behindPanel }: CityShe
   const counts: Partial<Record<SheetTab, number>> = {
     // The trips on the map after the filters.
     vehicles: snapshot?.trips.filter((trip) => onMap(trip, hidden)).length,
-    // The cards listed: Mylder's own, shown at once, and Rejseplanen's once its list has come.
+    // The cards listed: Mylder's own, shown at once, and Rejseplanen's once its list has come;
+    // none on the timetable source, which lists no card.
     disruptions:
-      disruptions || dataCards.length > 0
+      snapshot?.source.kind !== 'timetable' && (disruptions || dataCards.length > 0)
         ? dataCards.length +
           (disruptions ? disruptions.active.length + disruptions.later.length : 0)
         : undefined,

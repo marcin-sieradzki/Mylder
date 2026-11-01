@@ -55,8 +55,13 @@ function sourceNoteOf({ source }: Snapshot, { about, onTimetable }: ClientDictio
   return source.kind === 'timetable' ? onTimetable.note : about.status.notReal
 }
 
-/** The disruption list's last check, as the status says it. */
-function disruptionsOf(snapshot: Snapshot, timezone: string, words: Words['status']): string {
+/**
+ * The disruption list's last check, as the status says it; on the timetable source, which asks
+ * Rejseplanen nothing, that the messages aren't connected yet.
+ */
+function disruptionsOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary): string {
+  const words = dictionary.about.status
+  if (snapshot.source.kind === 'timetable') return dictionary.timetableOverview.disruptionsFact
   const list = snapshot.disruptions
   if (!list) return words.notChecked
   if (list.ok) return words.checked.replace('{time}', clockTime(list.checked, timezone))
@@ -116,7 +121,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
             label: status.store,
             value: snapshot.store === 'ok' ? status.storeOk : status.storeUnavailable,
           },
-          { label: status.disruptions, value: disruptionsOf(snapshot, timezone, status) },
+          { label: status.disruptions, value: disruptionsOf(snapshot, timezone, dictionary) },
         ]}
       />
     </>

@@ -316,5 +316,14 @@
       "messagesStale": "Disruption messages not updated since {time}",
       "messagesNever": "Disruption messages not fetched yet"
     }
+  },
+  "timetableOverview": {
+    "source": "Timetable",
+    "placedAt": "placed {time}",
+    "byMode": "On the move, by mode",
+    "noLivePositions": "No live positions yet; placed from the timetable",
+    "timetableOnly": "No live positions yet; placed from the timetable.",
+    "disruptions": "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.",
+    "disruptionsFact": "Not connected yet"
   }
 }
