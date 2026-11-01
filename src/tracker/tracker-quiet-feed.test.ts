@@ -27,6 +27,9 @@ const timetable = await loadTimetable(join(recordingDir(RECORDING), 'timetable')
 /** A moment on Saturday 31 October 2026, Copenhagen time (UTC+1). */
 const cph = (time: string) => Date.parse(`2026-10-31T${time}+01:00`)
 
+/** Room for a test that replays the recording's messages, slow while the whole suite runs. */
+const REPLAY_TIMEOUT = 30_000
+
 /** The recording's last message. */
 const LAST_MESSAGE = cph('09:56:07.521')
 
@@ -121,93 +124,98 @@ describe('a quiet SIRI-ET feed, replayed from the recording', () => {
         expect(late).toBeDefined()
       }).pipe(Effect.provide(onTimetable)),
     // The reader inside the tracker reads the recording's whole hour of messages.
-    30_000,
+    REPLAY_TIMEOUT,
   )
 })
 
+const TOKEN = 'a-test-token-of-the-listener-0123456789abcdef'
+const LISTENER = { url: 'https://listener.example/table', token: TOKEN }
+
+/**
+ * A listener fed the recording's messages as they come, except that none reach it from
+ * `stops` until `resumes`, when those held back arrive at once, as a subscription keeps them
+ * (spec #146, "Restarts"). It builds its table at each request's moment; from `gone` on, it
+ * doesn't answer at all.
+ */
+const pausedListener = async ({
+  stops,
+  resumes,
+  gone,
+}: {
+  readonly stops: number
+  readonly resumes: number
+  readonly gone?: number
+}): Promise<Layer.Layer<Http.HttpClient.HttpClient>> => {
+  const dir = recordingDir(RECORDING)
+  const [messages, box] = await Promise.all([
+    readSiriEtMessages(join(dir, 'messages.jsonl.gz')),
+    readBox(join(dir, 'timetable')),
+  ])
+  const reader = siriEtReader({ box, listener: { version: 'test', startedAt: cph('09:00:00') } })
+  let next = 0
+  return Http.layer(
+    Http.client((request, url) =>
+      Effect.gen(function* () {
+        if (url.href !== LISTENER.url) return Http.text(request, 404, '')
+        const now = yield* Clock.currentTimeMillis
+        if (gone !== undefined && now >= gone) return yield* Http.unreachable(request)
+        const through = now < stops || now >= resumes ? now : stops
+        while (next < messages.length && messages[next].receivedAt <= through) {
+          reader.receive(messages[next++])
+        }
+        return Http.json(request, 200, reader.table(now))
+      }),
+    ),
+  )
+}
+
+const onListener = (http: Layer.Layer<Http.HttpClient.HttpClient>) =>
+  trackerLayer({
+    timetable,
+    source: { kind: 'timetable' },
+    updates: { kind: 'siri' },
+    listener: LISTENER,
+    updatesHttp: http,
+    cpu: stoppedCpu,
+  })
+
 describe('a quiet SIRI-ET feed, from the listener’s table', () => {
-  const TOKEN = 'a-test-token-of-the-listener-0123456789abcdef'
-  const LISTENER = { url: 'https://listener.example/table', token: TOKEN }
+  it.effect(
+    'brings the states back and clears the card at the next message',
+    () =>
+      Effect.gen(function* () {
+        const http = yield* Effect.promise(() =>
+          pausedListener({ stops: cph('09:10:00'), resumes: cph('09:20:00') }),
+        )
+        yield* Effect.gen(function* () {
+          const flowing = yield* snapshotAt('09:09:30')
+          expect(flowing.updates.fresh).toBe(true)
+          expect(cardsOf(flowing)).toEqual([])
 
-  /**
-   * A listener fed the recording's messages as they come, except that none reach it from
-   * `stops` until `resumes`, when those held back arrive at once, as a subscription keeps them
-   * (spec #146, "Restarts"). It builds its table at each request's moment; from `gone` on, it
-   * doesn't answer at all.
-   */
-  const pausedListener = async ({
-    stops,
-    resumes,
-    gone,
-  }: {
-    readonly stops: number
-    readonly resumes: number
-    readonly gone?: number
-  }): Promise<Layer.Layer<Http.HttpClient.HttpClient>> => {
-    const dir = recordingDir(RECORDING)
-    const [messages, box] = await Promise.all([
-      readSiriEtMessages(join(dir, 'messages.jsonl.gz')),
-      readBox(join(dir, 'timetable')),
-    ])
-    const reader = siriEtReader({ box, listener: { version: 'test', startedAt: cph('09:00:00') } })
-    let next = 0
-    return Http.layer(
-      Http.client((request, url) =>
-        Effect.gen(function* () {
-          if (url.href !== LISTENER.url) return Http.text(request, 404, '')
-          const now = yield* Clock.currentTimeMillis
-          if (gone !== undefined && now >= gone) return yield* Http.unreachable(request)
-          const through = now < stops || now >= resumes ? now : stops
-          while (next < messages.length && messages[next].receivedAt <= through) {
-            reader.receive(messages[next++])
-          }
-          return Http.json(request, 200, reader.table(now))
-        }),
-      ),
-    )
-  }
+          // The listener still answers, with a table built now, but its last message, from before
+          // 09:10, ages.
+          const quiet = yield* snapshotAt('09:15:30')
+          const last = quiet.updates.lastMessage!
+          expect(last).toBeLessThanOrEqual(cph('09:10:00'))
+          expect(quiet.updates.fresh).toBe(false)
+          expect(cardsOf(quiet)).toEqual([{ kind: 'updates-stale', since: last }])
+          expect(withUpdate(quiet).length).toBeGreaterThan(50)
+          for (const trip of withUpdate(quiet)) expect(trip.state).toBe('no-signal')
+          for (const trip of withoutUpdate(quiet)) expect(trip.state).toBe('timetable-only')
 
-  const onListener = (http: Layer.Layer<Http.HttpClient.HttpClient>) =>
-    trackerLayer({
-      timetable,
-      source: { kind: 'timetable' },
-      updates: { kind: 'siri' },
-      listener: LISTENER,
-      updatesHttp: http,
-      cpu: stoppedCpu,
-    })
-
-  it.effect('brings the states back and clears the card at the next message', () =>
-    Effect.gen(function* () {
-      const http = yield* Effect.promise(() =>
-        pausedListener({ stops: cph('09:10:00'), resumes: cph('09:20:00') }),
-      )
-      yield* Effect.gen(function* () {
-        const flowing = yield* snapshotAt('09:09:30')
-        expect(flowing.updates.fresh).toBe(true)
-        expect(cardsOf(flowing)).toEqual([])
-
-        // The listener still answers, with a table built now, but its last message, from before
-        // 09:10, ages.
-        const quiet = yield* snapshotAt('09:15:30')
-        const last = quiet.updates.lastMessage!
-        expect(last).toBeLessThanOrEqual(cph('09:10:00'))
-        expect(quiet.updates.fresh).toBe(false)
-        expect(cardsOf(quiet)).toEqual([{ kind: 'updates-stale', since: last }])
-        expect(withUpdate(quiet).length).toBeGreaterThan(50)
-        for (const trip of withUpdate(quiet)) expect(trip.state).toBe('no-signal')
-        for (const trip of withoutUpdate(quiet)) expect(trip.state).toBe('timetable-only')
-
-        // The messages held back arrive: the card goes and every trip with an update is
-        // Estimated again, at once.
-        const back = yield* snapshotAt('09:20:00')
-        expect(back.updates.fresh).toBe(true)
-        expect(back.updates.lastMessage).toBeGreaterThan(cph('09:19:00'))
-        expect(cardsOf(back)).toEqual([])
-        expect(withUpdate(back).length).toBeGreaterThan(50)
-        for (const trip of withUpdate(back)) expect(trip.state).toBe('estimated')
-      }).pipe(Effect.provide(onListener(http)))
-    }),
+          // The messages held back arrive: the card goes and every trip with an update is
+          // Estimated again, at once.
+          const back = yield* snapshotAt('09:20:00')
+          expect(back.updates.fresh).toBe(true)
+          expect(back.updates.lastMessage).toBeGreaterThan(cph('09:19:00'))
+          expect(cardsOf(back)).toEqual([])
+          expect(withUpdate(back).length).toBeGreaterThan(50)
+          for (const trip of withUpdate(back)) expect(trip.state).toBe('estimated')
+        }).pipe(Effect.provide(onListener(http)))
+      }),
+    // Each replays the recording's messages into a listener of its own, and can pass 5 s while
+    // the whole suite runs.
+    REPLAY_TIMEOUT,
   )
 
   it.effect(
@@ -249,5 +257,78 @@ describe('a quiet SIRI-ET feed, from the listener’s table', () => {
           expect(compared).toBeGreaterThan(50)
         }).pipe(Effect.provide(onListener(http)))
       }),
+    // Each replays the recording's messages into a listener of its own, and can pass 5 s while
+    // the whole suite runs.
+    REPLAY_TIMEOUT,
+  )
+})
+
+describe('a cancelled trip on a quiet SIRI-ET feed', () => {
+  it.effect(
+    'stays cancelled, with its skipped calls, through runs with no table and once the feed is quiet',
+    () =>
+      Effect.gen(function* () {
+        // The listener answers until 09:23:00, then never again: one run without the table while
+        // the feed is still fresh, then the feed quiet from 5 min after its last message.
+        const http = yield* Effect.promise(() =>
+          pausedListener({ stops: Infinity, resumes: Infinity, gone: cph('09:23:00') }),
+        )
+        yield* Effect.gen(function* () {
+          const tracker = yield* Tracker
+          const flowing = yield* snapshotAt('09:22:30')
+          // Bus 102A of 09:22 is cancelled whole; bus 68 skips Otto Mønsteds Plads, stop 30090.
+          const cancelled = flowing.trips.filter((trip) => trip.cancelled)
+          const skipping = flowing.trips.filter((trip) => trip.cancelledCalls?.length)
+          expect(cancelled.map((trip) => trip.line)).toContain('102A')
+          expect(skipping.length).toBeGreaterThan(0)
+          const marked = (snapshot: Snapshot) => ({
+            cancelled: snapshot.trips.filter((trip) => trip.cancelled).map((trip) => trip.key),
+            skipped: Object.fromEntries(
+              snapshot.trips
+                .filter((trip) => trip.cancelledCalls?.length)
+                .map((trip) => [trip.key, trip.cancelledCalls]),
+            ),
+          })
+          /** The departures at a stop the snapshot's cancellations mark, by trip. */
+          const cancelledAt = (stop: string) =>
+            tracker.getStopDepartures(stop).pipe(
+              Effect.map((answer) =>
+                (answer?.departures ?? [])
+                  .filter((row) => row.cancelled)
+                  .map((row) => row.trip)
+                  .sort(),
+              ),
+            )
+          const fændediget = yield* cancelledAt('5344')
+          const ottoMønsteds = yield* cancelledAt('30090')
+          expect(fændediget.length).toBeGreaterThan(0)
+          expect(ottoMønsteds.length).toBeGreaterThan(0)
+
+          for (const time of ['09:23:31', '09:28:32']) {
+            const without = yield* snapshotAt(time)
+            expect(without.updates.fresh).toBe(time === '09:23:31')
+            // Every trip still on the map keeps its marks, and none is drawn again.
+            const now = marked(without)
+            for (const key of marked(flowing).cancelled) {
+              if (without.trips.some((trip) => trip.key === key)) {
+                expect(now.cancelled).toContain(key)
+              }
+            }
+            for (const [key, calls] of Object.entries(marked(flowing).skipped)) {
+              if (without.trips.some((trip) => trip.key === key)) {
+                expect(now.skipped[key]).toEqual(calls)
+              }
+            }
+            expect(now.cancelled.length).toBeGreaterThan(0)
+            expect(yield* cancelledAt('5344')).toEqual(
+              expect.arrayContaining(fændediget.filter((key) => now.cancelled.includes(key))),
+            )
+            expect((yield* cancelledAt('30090')).length).toBeGreaterThan(0)
+          }
+        }).pipe(Effect.provide(onListener(http)))
+      }),
+    // Each replays the recording's messages into a listener of its own, and can pass 5 s while
+    // the whole suite runs.
+    REPLAY_TIMEOUT,
   )
 })

@@ -67,6 +67,12 @@ export interface TripHistory {
    * table no longer brings it, as a No signal trip does when the feed goes quiet.
    */
   readonly steps?: readonly DelayStep[]
+  /**
+   * Whether its latest SIRI-ET update cancelled it whole, and the calls it cancelled, kept the
+   * same way, so a run without the table never draws it again or unmarks its departures.
+   */
+  readonly cancelled?: true
+  readonly cancelledCalls?: readonly number[]
   /** Rejseplanen's journey, `ZI@DA`. */
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
@@ -283,12 +289,17 @@ export function buildTrips({
       const seen = position ?? before?.seen
       const reported = reportedNow ? position : before?.reported
       const updated = update?.received ?? before?.updated
+      // The cancellations of this run's update, or else of the last one's.
+      const cancelled = update ? update.cancelled : before?.cancelled === true
+      const cancelledCalls = update ? update.cancelledCalls : (before?.cancelledCalls ?? [])
       const remembered: TripHistory = {
         ...(seen ? { seen } : {}),
         ...(reported ? { reported } : {}),
         ...(updated === undefined ? {} : { updated }),
         ...(delay === undefined ? {} : { delay }),
         ...(steps?.length ? { steps } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
         ...(journey ? { journey } : {}),
         ...(ref ? { ref } : {}),
       }
@@ -326,8 +337,8 @@ export function buildTrips({
         progress: Math.round(progress),
         next: nextCalls(timetable, trip, timed, now),
         ...(atFirstStop ? { waiting: true as const } : {}),
-        ...(update?.cancelled ? { cancelled: true as const } : {}),
-        ...(update?.cancelledCalls.length ? { cancelledCalls: update.cancelledCalls } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
         ...(steps?.length ? { steps } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
