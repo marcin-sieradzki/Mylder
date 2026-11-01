@@ -31,7 +31,7 @@ export interface ModeShare {
 }
 
 /** How many trips are in each state, as Perron's ReportStrip and DataStateKey count them. */
-/** How many vehicles of a mode are on the map, Waiting ones included. */
+/** How many vehicles of a mode are on the move, as On the move counts them. */
 export interface ModeCount {
   readonly mode: Mode
   readonly count: number
@@ -60,8 +60,11 @@ export interface Pulse {
   /** Live and Ageing over underway, the Metro left out: the sum of the meters. */
   readonly live: Share | Unknown
   readonly modes: readonly ModeShare[]
-  /** The vehicles on the map in each mode the filters show, in the modes' order. */
-  readonly onMap: readonly ModeCount[]
+  /**
+   * The vehicles on the move in each mode the filters show, in the modes' order: together the
+   * On the move figure, each the count its mode's chip gives while none is No signal.
+   */
+  readonly movingByMode: readonly ModeCount[]
   /** The trips on the map in each state, after the filters, in the keys Perron's parts take. */
   readonly states: StateCounts
   /** The Live limit and the end of Ageing, in ms, for the key's sentences. */
@@ -101,6 +104,7 @@ export function pulseOf(
   const all = snapshot.trips.filter((trip) => onMap(trip, NO_FILTER))
   const shown = all.filter((trip) => onMap(trip, hidden))
   const underway = shown.filter((trip) => !trip.waiting)
+  const moving = underway.filter((trip) => stateOf(trip) !== 'no-signal')
   const reporting = (trip: SnapshotTrip) => REPORTING.has(stateOf(trip))
 
   const computedOnly = snapshot.positionMode === 'CALC_REPORT'
@@ -173,15 +177,15 @@ export function pulseOf(
   }
 
   return {
-    moving: underway.filter((trip) => stateOf(trip) !== 'no-signal').length,
+    moving: moving.length,
     inService: all.length,
     reported,
     ...(delay === undefined ? {} : { delay }),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
-    onMap: shownModes.map((mode) => ({
+    movingByMode: shownModes.map((mode) => ({
       mode,
-      count: shown.filter((trip) => trip.mode === mode).length,
+      count: moving.filter((trip) => trip.mode === mode).length,
     })),
     states: byState,
     thresholds: {

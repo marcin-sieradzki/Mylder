@@ -179,7 +179,7 @@ export function CityPulse() {
       {placed ? (
         <Section title={onTimetable.byMode}>
           <FactList
-            items={pulse.onMap.map(({ mode, count }) => ({
+            items={pulse.movingByMode.map(({ mode, count }) => ({
               key: mode,
               label: dictionary.modes[mode],
               value: grouped(count),

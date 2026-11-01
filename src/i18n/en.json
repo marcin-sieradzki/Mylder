@@ -309,7 +309,7 @@
   "timetableOverview": {
     "source": "Timetable",
     "placedAt": "placed {time}",
-    "byMode": "On the map, by mode",
+    "byMode": "On the move, by mode",
     "noLivePositions": "No live positions yet; placed from the timetable",
     "timetableOnly": "No live positions yet; placed from the timetable.",
     "disruptions": "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.",

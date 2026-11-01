@@ -61,11 +61,12 @@ afterEach(() => {
 describe('City pulse on the timetable source', () => {
   const NO_LIVE = 'No live positions yet; placed from the timetable'
 
-  it('counts the vehicles on the map, and by mode', () => {
+  it('counts the vehicles on the move, and by mode', () => {
     open('en', '')
     expect(figure('On the move')).toHaveTextContent(/^On the move17of 18 in service$/)
-    const byMode = within(panel()).getByRole('region', { name: 'On the map, by mode' })
-    expect(countOf(byMode, 'Bus')).toBe('7')
+    // The bus Waiting at its first stop is in service, not on the move, as its mode's chip says.
+    const byMode = within(panel()).getByRole('region', { name: 'On the move, by mode' })
+    expect(countOf(byMode, 'Bus')).toBe('6')
     expect(countOf(byMode, 'Metro')).toBe('4')
     expect(countOf(byMode, 'S-tog')).toBe('6')
     expect(countOf(byMode, 'Train')).toBe('1')
@@ -130,8 +131,10 @@ describe('City pulse on the timetable source', () => {
     const NO_LIVE_DA = 'Ingen livepositioner endnu; placeret efter køreplanen'
     open('da', '')
     expect(figure('I bevægelse')).toHaveTextContent(/^I bevægelse17af 18 i drift$/)
-    const byMode = within(panel()).getByRole('region', { name: 'På kortet, efter transportform' })
-    expect(countOf(byMode, 'Bus')).toBe('7')
+    const byMode = within(panel()).getByRole('region', {
+      name: 'I bevægelse, efter transportform',
+    })
+    expect(countOf(byMode, 'Bus')).toBe('6')
     expect(countOf(byMode, 'Tog')).toBe('1')
     expect(figure('Meldt i dette minut')).toHaveTextContent(NO_LIVE_DA)
     expect(figure('Melder live')).toHaveTextContent(NO_LIVE_DA)
@@ -152,7 +155,7 @@ describe('City pulse on the timetable source', () => {
   it('reads as before on any other source', () => {
     open('en', '', { ...minute6, source: { kind: 'simulated', name: 'weekday' } })
     expect(
-      within(panel()).queryByRole('region', { name: 'On the map, by mode' }),
+      within(panel()).queryByRole('region', { name: 'On the move, by mode' }),
     ).not.toBeInTheDocument()
     expect(panel()).not.toHaveTextContent('No live positions yet')
     expect(panel()).not.toHaveTextContent('placed 07:25:00')
