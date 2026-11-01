@@ -51,6 +51,16 @@ const TIMEOUT_AFTER = '30 seconds'
 export const gatewayTimeout = (request: Request): Effect.Effect<Response> =>
   Effect.sleep(TIMEOUT_AFTER).pipe(Effect.as(text(request, 504, 'Gateway Timeout')))
 
+/** Fails a request as a network that can't reach its host does. */
+export const unreachable = (
+  request: Request,
+): Effect.Effect<never, HttpClientError.HttpClientError> =>
+  Effect.fail(
+    new HttpClientError.HttpClientError({
+      reason: new HttpClientError.TransportError({ request, description: 'unreachable' }),
+    }),
+  )
+
 /** An `HttpClient` that answers every request itself, from the request and its URL. */
 export const client = (
   answer: (request: Request, url: URL) => Effect.Effect<Response, HttpClientError.HttpClientError>,
@@ -76,13 +86,17 @@ export interface Answer {
   readonly text: string
 }
 
-/** GETs a URL with a query through a client, answering with the status, headers and body. */
+/**
+ * GETs a URL with a query, and any headers, through a client, answering with the status, headers
+ * and body.
+ */
 export const getText = (
   httpClient: HttpClient.HttpClient,
   url: string,
   urlParams: Readonly<Record<string, string | number>>,
+  headers: ExtraHeaders = {},
 ): Effect.Effect<Answer, Unanswered> =>
-  httpClient.get(url, { urlParams }).pipe(
+  httpClient.get(url, { urlParams, headers }).pipe(
     Effect.flatMap((response) =>
       Effect.map(response.text, (body) => ({
         status: response.status,

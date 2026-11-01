@@ -1,23 +1,22 @@
 // Where the tracker's updates come from, picked by `MYLDER_UPDATES` at request time
 // (docs/testing-seams.md, "The update switch"), apart from `MYLDER_SOURCE`, so delays work on the
 // timetable source now and on Rejseplanen's later (spec #146): off (the default), SIRI-ET's update
-// table as the listener keeps it in the store, or the SIRI-ET reader run inside the tracker over a
+// table fetched from the listener over HTTPS, or the SIRI-ET reader run inside the tracker over a
 // recording's messages.
 import 'server-only'
 import { join } from 'node:path'
-import { Clock, Context, Effect, Layer } from 'effect'
+import { Cause, Clock, Context, Effect, Layer, Option, Schema } from 'effect'
 import type { Call } from '../domain/trip-motion.ts'
 import { siriEtReader } from '../siri-et/reader.ts'
 import { readBox, siriEtReplay } from '../siri-et/recording.ts'
-import { readUpdateTable } from '../siri-et/store.ts'
-import type { DelayStep, UpdateTable } from '../siri-et/table.ts'
+import { UpdateTable, type DelayStep } from '../siri-et/table.ts'
 import type { PlannedTrip } from '../timetable/trips.ts'
+import * as Http from './http.ts'
 import { callIndexOf, joinTableJourney } from './join.ts'
 import { recordingDir } from './recording/layer.ts'
-import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
 
-/** Where updates come from: none, the listener's table in the store, or a recording's messages. */
+/** Where updates come from: none, the listener's table over HTTPS, or a recording's messages. */
 export type Updates =
   | { readonly kind: 'off' }
   | { readonly kind: 'siri' }
@@ -42,6 +41,25 @@ export function readUpdates(value: string | undefined): Updates {
   throw new Error(`${UPDATES_VARIABLE}="${setting}" is none of off, siri or recording:<folder>`)
 }
 
+/** The variables that name the listener's table route and the token it asks for. */
+export const LISTENER_URL_VARIABLE = 'MYLDER_UPDATES_URL'
+export const LISTENER_TOKEN_VARIABLE = 'MYLDER_UPDATES_TOKEN'
+
+/** Where the tracker fetches the listener's table: its route's whole URL, and the token it asks for. */
+export interface ListenerAddress {
+  readonly url: string
+  readonly token: string
+}
+
+/** The listener's address from the environment, or undefined when either variable is missing. */
+export function readListener(
+  env: Readonly<Record<string, string | undefined>>,
+): ListenerAddress | undefined {
+  const url = env[LISTENER_URL_VARIABLE]?.trim()
+  const token = env[LISTENER_TOKEN_VARIABLE]?.trim()
+  return url && token ? { url, token } : undefined
+}
+
 /** The variable's value as it was set, for a log line. */
 export const updatesSetting = (updates: Updates): string =>
   updates.kind === 'recording' ? `recording:${updates.folder}` : updates.kind
@@ -50,7 +68,7 @@ export const updatesSetting = (updates: Updates): string =>
 export interface UpdateFeedShape {
   readonly updates: Updates
   /**
-   * The update table at `now`: the listener's from the store, one get a run, or the reader's over
+   * The update table at `now`: the listener's, one fetch a run, or the reader's over
    * a recording's messages received by then; undefined when updates are off or the table is gone.
    */
   readonly table: (now: number) => Effect.Effect<UpdateTable | undefined>
@@ -79,8 +97,94 @@ const fromRecording = (folder: string) =>
       })
   })
 
-/** The feed `updates` sets up; the listener's table is read from the tracker's store. */
-export const feedLayer = (updates: Updates): Layer.Layer<UpdateFeed, never, Store> =>
+/** How long the tracker waits for the listener's table before it runs without. */
+export const LISTENER_TIMEOUT = '3 seconds'
+
+/** A table built longer ago than this is a stuck listener's, and counts as none. */
+export const TABLE_MAX_AGE = 10 * 60_000
+
+const decodeTable = Schema.decodeUnknownOption(UpdateTable)
+
+/**
+ * The listener's table, fetched once a run with its token (ADR 0019), or undefined when the fetch
+ * times out, fails or is refused, or the table is older than 10 minutes or fails its schema, such
+ * as a table of another version. Each of those is logged, never with the token, and none fails the
+ * run: its trips stay or turn as rule 3 of docs/data-states.md says.
+ */
+export const readUpdateTable = (
+  client: Http.HttpClient.HttpClient,
+  listener: ListenerAddress | undefined,
+  now: number,
+): Effect.Effect<UpdateTable | undefined> =>
+  Effect.gen(function* () {
+    const without = (why: string) =>
+      Effect.as(
+        Effect.logWarning(`The listener’s table ${why}; delays are left out this run`),
+        undefined,
+      )
+    if (!listener) {
+      return yield* Effect.as(
+        Effect.logError(
+          `MYLDER_UPDATES=siri needs ${LISTENER_URL_VARIABLE} and ${LISTENER_TOKEN_VARIABLE}; delays are left out`,
+        ),
+        undefined,
+      )
+    }
+    const answer = yield* Http.getText(
+      client,
+      listener.url,
+      {},
+      {
+        authorization: `Bearer ${listener.token}`,
+      },
+    ).pipe(Effect.timeout(LISTENER_TIMEOUT), Effect.result)
+    if (answer._tag === 'Failure') {
+      const failure = answer.failure
+      return yield* Cause.isTimeoutError(failure)
+        ? without(`took over ${LISTENER_TIMEOUT}`)
+        : without(`couldn’t be fetched: ${withoutToken(failure.message, listener.token)}`)
+    }
+    const { status, text } = answer.success
+    if (status !== 200) {
+      return yield* Effect.as(
+        Effect.logWarning(`The listener answered ${status}; delays are left out this run`),
+        undefined,
+      )
+    }
+    const body = parseJson(text)
+    const table = decodeTable(body)
+    if (Option.isNone(table)) {
+      const version = (body as { version?: unknown } | undefined)?.version
+      return yield* without(`fails its schema (version ${String(version)})`)
+    }
+    if (now - table.value.writtenAt > TABLE_MAX_AGE) {
+      return yield* without(
+        `was built at ${new Date(table.value.writtenAt).toISOString()}, over 10 minutes ago`,
+      )
+    }
+    return table.value
+  })
+
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return undefined
+  }
+}
+
+/** A message with the token cut out, should a client ever echo a header. */
+const withoutToken = (message: string, token: string): string =>
+  message.split(token).join('<token>')
+
+/**
+ * The feed `updates` sets up; the listener's table is fetched from `listener` through the client
+ * provided.
+ */
+export const feedLayer = (
+  updates: Updates,
+  listener?: ListenerAddress,
+): Layer.Layer<UpdateFeed, never, Http.HttpClient.HttpClient> =>
   Layer.effect(
     UpdateFeed,
     Effect.gen(function* () {
@@ -88,8 +192,8 @@ export const feedLayer = (updates: Updates): Layer.Layer<UpdateFeed, never, Stor
         case 'off':
           return { updates, table: () => Effect.succeed(undefined) }
         case 'siri': {
-          const store = yield* Store
-          return { updates, table: () => readUpdateTable(store) }
+          const client = yield* Http.HttpClient.HttpClient
+          return { updates, table: (now: number) => readUpdateTable(client, listener, now) }
         }
         case 'recording':
           return { updates, table: yield* fromRecording(updates.folder) }

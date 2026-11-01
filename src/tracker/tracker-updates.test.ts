@@ -1,17 +1,16 @@
 import { describe, expect, it } from '@effect/vitest'
-import { Effect, Layer, Logger, References } from 'effect'
+import { Effect, Fiber, Layer, Logger, References } from 'effect'
 import { TestClock } from 'effect/testing'
 import { join } from 'node:path'
 import { siriEtReader } from '../siri-et/reader'
 import { readBox, readSiriEtMessages } from '../siri-et/recording'
-import { UPDATE_TABLE_KEY, writeUpdateTable } from '../siri-et/store'
-import type { TableJourney, UpdateTable } from '../siri-et/table'
+import type { TableJourney } from '../siri-et/table'
 import type { PlannedTrip } from '../timetable/trips'
+import * as Http from './http'
 import { recordingDir } from './recording/layer'
 import { stoppedCpu } from './report'
 import { trackerLayer } from './runtime'
 import type { Snapshot, SnapshotTrip } from './snapshot'
-import { Store } from './store'
 import { loadTimetable } from './timetable'
 import { Tracker } from './tracker'
 import type { Updates } from './updates'
@@ -24,6 +23,10 @@ import type { Updates } from './updates'
 const RECORDING = 'siri-et'
 const timetable = await loadTimetable(join(recordingDir(RECORDING), 'timetable'))
 const recorded: Updates = { kind: 'recording', folder: RECORDING }
+
+/** The listener's address and token, as `MYLDER_UPDATES_URL` and `MYLDER_UPDATES_TOKEN` give them. */
+const TOKEN = 'a-test-token-of-the-listener-0123456789abcdef'
+const LISTENER = { url: 'https://listener.example/table', token: TOKEN }
 
 /** A moment on Saturday 31 October 2026, Copenhagen time (UTC+1). */
 const cph = (time: string) => Date.parse(`2026-10-31T${time}+01:00`)
@@ -210,8 +213,8 @@ describe('SIRI-ET’s delays from a recording, on the timetable source', () => {
   )
 })
 
-describe('SIRI-ET’s delays from the listener’s table in the store', () => {
-  /** The reader's table at a moment, Copenhagen time, as the listener would write it then. */
+describe('SIRI-ET’s delays from the listener’s table, fetched over HTTPS', () => {
+  /** The reader's table at a moment, Copenhagen time, as the listener would serve it then. */
   const listenersTable = async (time: string) => {
     const dir = recordingDir(RECORDING)
     const [messages, box] = await Promise.all([
@@ -220,32 +223,55 @@ describe('SIRI-ET’s delays from the listener’s table in the store', () => {
     ])
     const reader = siriEtReader({ box, listener: { version: 'test', startedAt: cph('09:00:00') } })
     for (const message of messages) if (message.receivedAt <= cph(time)) reader.receive(message)
-    // Through JSON, as the store keeps it.
-    return JSON.parse(JSON.stringify(reader.table(cph(time)))) as UpdateTable
+    return reader.table(cph(time))
   }
 
-  /** The snapshot at a moment with the store holding `table` under the table's key, if any. */
-  const fromStore = (time: string, table?: unknown) =>
-    Effect.gen(function* () {
-      yield* TestClock.setTime(cph(time))
-      const store = yield* Store
-      if (table !== undefined) yield* store.set(UPDATE_TABLE_KEY, table, 600)
-      return yield* snapshotAt(time)
-    }).pipe(Effect.provide(onTimetable({ kind: 'siri' })))
+  /** The tracker on the timetable source, reading the listener's table through `http`. */
+  const onListener = (http: Layer.Layer<Http.HttpClient.HttpClient>) =>
+    trackerLayer({
+      timetable,
+      source: { kind: 'timetable' },
+      updates: { kind: 'siri' },
+      listener: LISTENER,
+      updatesHttp: http,
+      cpu: stoppedCpu,
+    })
 
-  it.effect('gives the same trips as the reader inside the tracker, from one read a run', () =>
+  /** A listener whose route answers each request with the token as `answer` says. */
+  const listenerAnswering = (
+    answer: (request: Http.Request) => Effect.Effect<Http.Response>,
+  ): Layer.Layer<Http.HttpClient.HttpClient> =>
+    Http.layer(
+      Http.client((request, url) =>
+        url.href === LISTENER.url && request.headers.authorization === `Bearer ${TOKEN}`
+          ? answer(request)
+          : Effect.succeed(Http.text(request, 401, '')),
+      ),
+    )
+
+  /** A listener serving `table`, as JSON once the gzip is undone. */
+  const serving = (table: unknown) =>
+    listenerAnswering((request) => Effect.succeed(Http.json(request, 200, table)))
+
+  /** The snapshot at a moment, Copenhagen time, with the tracker reading through `http`. */
+  const fromListener = (time: string, http: Layer.Layer<Http.HttpClient.HttpClient>) =>
+    snapshotAt(time).pipe(Effect.provide(onListener(http)))
+
+  it.effect('gives the same trips as the reader inside the tracker, from one fetch a run', () =>
     Effect.gen(function* () {
       // Bus 102A of 09:04 cancelled whole at 09:21:15, beside every delay the table holds then.
       const table = yield* Effect.promise(() => listenersTable('09:21:30'))
-      const written = yield* Effect.gen(function* () {
-        yield* TestClock.setTime(cph('09:21:30'))
-        yield* writeUpdateTable(yield* Store, table)
-        return yield* snapshotAt('09:21:30')
-      }).pipe(Effect.provide(onTimetable({ kind: 'siri' })))
+      let fetched = 0
+      const counted = listenerAnswering((request) => {
+        fetched++
+        return Effect.succeed(Http.json(request, 200, table))
+      })
+      const served = yield* fromListener('09:21:30', counted)
       const replayed = yield* snapshotAt('09:21:30').pipe(Effect.provide(onTimetable(recorded)))
-      expect(written.trips).toEqual(replayed.trips)
-      expect(written.updates).toEqual({ ...replayed.updates, kind: 'siri' })
-      expect(tripOf(written, '102A', '09:04')?.cancelled).toBe(true)
+      expect(fetched).toBe(1)
+      expect(served.trips).toEqual(replayed.trips)
+      expect(served.updates).toEqual({ ...replayed.updates, kind: 'siri' })
+      expect(tripOf(served, '102A', '09:04')?.cancelled).toBe(true)
     }),
   )
 
@@ -286,8 +312,8 @@ describe('SIRI-ET’s delays from the listener’s table in the store', () => {
         ...table,
         journeys: [...table.journeys, journeyOf(metro, 1), journeyOf(lightRail, 2)],
       }
-      const before = yield* fromStore('09:21:30', table)
-      const after = yield* fromStore('09:21:30', made)
+      const before = yield* fromListener('09:21:30', serving(table))
+      const after = yield* fromListener('09:21:30', serving(made))
       for (const trip of [metro, lightRail]) {
         const drawn = after.trips.find((each) => each.key === trip.key)
         expect(drawn).toMatchObject({ state: 'timetable-only', hadRealtime: false })
@@ -298,25 +324,108 @@ describe('SIRI-ET’s delays from the listener’s table in the store', () => {
     }),
   )
 
-  it.effect('leaves every trip Timetable only while the store holds no table', () =>
+  /** The lines a run logs, as text, with the snapshot it gives at 09:21:30 through `http`. */
+  const loggedRun = (http: Layer.Layer<Http.HttpClient.HttpClient>) => {
+    const lines: string[] = []
+    const kept = Logger.layer([
+      Logger.make(({ message, logLevel }) => lines.push(`${logLevel} ${JSON.stringify(message)}`)),
+    ])
+    return Effect.gen(function* () {
+      yield* TestClock.setTime(cph('09:21:30'))
+      const run = yield* Effect.forkChild((yield* Tracker).getSnapshot)
+      // Past the listener's timeout, so a fetch that never answers gives up.
+      yield* TestClock.adjust('10 seconds')
+      const snapshot = yield* Fiber.join(run)
+      return { snapshot, lines }
+    }).pipe(Effect.provide(Layer.merge(onListener(http), kept)))
+  }
+
+  /** No table: every trip Timetable only, and the feed named but not fresh. */
+  const expectNoTable = (snapshot: Snapshot) => {
+    expect(snapshot.updates).toEqual({ kind: 'siri', fresh: false, withUpdate: {}, unmatched: {} })
+    expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(new Set(['timetable-only']))
+  }
+
+  it.effect.each([
+    {
+      case: 'a fetch that never answers',
+      http: listenerAnswering(() => Effect.never),
+      logged: /listener’s table took over 3 seconds/,
+    },
+    {
+      case: 'a fetch the network fails',
+      http: Http.layer(Http.client(Http.unreachable)),
+      logged: /listener’s table couldn’t be fetched/,
+    },
+    {
+      case: 'a request the listener refuses',
+      http: Http.layer(Http.client((request) => Effect.succeed(Http.text(request, 401, '')))),
+      logged: /listener answered 401/,
+    },
+    {
+      case: 'a listener with no table yet',
+      http: listenerAnswering((request) => Effect.succeed(Http.text(request, 503, ''))),
+      logged: /listener answered 503/,
+    },
+    {
+      case: 'an answer that isn’t JSON',
+      http: listenerAnswering((request) => Effect.succeed(Http.text(request, 200, '<html>'))),
+      logged: /listener’s table fails its schema/,
+    },
+  ])('treats $case as no table, and logs it without the token', ({ http, logged }) =>
     Effect.gen(function* () {
-      const snapshot = yield* fromStore('09:21:30')
-      expect(snapshot.updates).toEqual({
-        kind: 'siri',
-        fresh: false,
-        withUpdate: {},
-        unmatched: {},
-      })
-      expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(new Set(['timetable-only']))
+      const { snapshot, lines } = yield* loggedRun(http)
+      expectNoTable(snapshot)
+      expect(lines.filter((line) => line.startsWith('Warn')).join('\n')).toMatch(logged)
+      for (const line of lines) expect(line).not.toContain(TOKEN)
     }),
   )
 
-  it.effect('refuses a table of another version, as the schema says', () =>
+  it.effect('treats a table built over 10 minutes ago as no table, and logs it', () =>
+    Effect.gen(function* () {
+      // A listener that stopped building at 09:11:00 and still answers with its last table.
+      const table = yield* Effect.promise(() => listenersTable('09:11:00'))
+      const { snapshot, lines } = yield* loggedRun(serving(table))
+      expectNoTable(snapshot)
+      expect(lines.join('\n')).toMatch(/listener’s table was built at 2026-10-31T08:11:00\.000Z/)
+      // One built 9 minutes ago is still read.
+      const recent = yield* Effect.promise(() => listenersTable('09:12:30'))
+      const read = yield* loggedRun(serving(recent))
+      expect(read.snapshot.updates.lastMessage).toBeGreaterThan(cph('09:12:00'))
+    }),
+  )
+
+  it.effect('treats a table of another version as no table, and logs it', () =>
     Effect.gen(function* () {
       const table = yield* Effect.promise(() => listenersTable('09:21:30'))
-      const snapshot = yield* fromStore('09:21:30', { ...table, version: 2 })
-      expect(snapshot.updates).toMatchObject({ kind: 'siri', fresh: false, withUpdate: {} })
-      expect(snapshot.updates.lastMessage).toBeUndefined()
+      const { snapshot, lines } = yield* loggedRun(serving({ ...table, version: 2 }))
+      expectNoTable(snapshot)
+      expect(lines.join('\n')).toMatch(/listener’s table fails its schema \(version 2\)/)
+    }),
+  )
+
+  it.effect('logs a missing address each run, and reads no table', () =>
+    Effect.gen(function* () {
+      const lines: string[] = []
+      const kept = Logger.layer([
+        Logger.make(({ message, logLevel }) => lines.push(`${logLevel} ${String(message)}`)),
+      ])
+      const snapshot = yield* snapshotAt('09:21:30').pipe(
+        Effect.provide(
+          Layer.merge(
+            trackerLayer({
+              timetable,
+              source: { kind: 'timetable' },
+              updates: { kind: 'siri' },
+              updatesHttp: serving({}),
+              cpu: stoppedCpu,
+            }),
+            kept,
+          ),
+        ),
+      )
+      expectNoTable(snapshot)
+      expect(lines.join('\n')).toMatch(/Error .*MYLDER_UPDATES_URL and MYLDER_UPDATES_TOKEN/)
     }),
   )
 })
