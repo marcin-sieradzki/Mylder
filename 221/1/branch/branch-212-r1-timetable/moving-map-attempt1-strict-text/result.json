@@ -1,0 +1,8 @@
+{
+  "journey": "moving-map",
+  "pass": false,
+  "error": "expect(locator).toHaveText(expected) failed\n\nLocator:  locator('[role=\"status\"]:not([role=\"dialog\"] *)').first()\nExpected: \"Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.\"\nReceived: \"Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.\"\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toHaveText\" locator('[role=\"status\"]:not([role=\"dialog\"] *)').first() with timeout 5000ms\n  - waiting for locator('[role=\"status\"]:not([role=\"dialog\"] *)').first()\n    12 × locator resolved to <div role=\"status\" data-color=\"info\" class=\"pn-Alert _4nvEWa_notice\">…</div>\n       - unexpected value \"Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.\"\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4303/en)"
+  ]
+}

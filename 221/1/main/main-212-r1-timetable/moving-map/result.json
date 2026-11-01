@@ -1,0 +1,14 @@
+{
+  "journey": "moving-map",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('tooltip')\nExpected: visible\nTimeout: 500ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('tooltip') with timeout 500ms\n  - waiting for getByRole('tooltip')\n\n\nCall Log:\n- Timeout 60000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-map-drawn-641-timetable-only: map drawn 641 timetable only (http://localhost:4401/en)",
+    "02-buses-off-430-: buses off (430) (http://localhost:4401/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4401/en)",
+    "04-zoomed-in: zoomed in (http://localhost:4401/en?map=12.20/55.68000/12.56500)",
+    "05-tilted-30-turned-30: tilted 30 turned 30 (http://localhost:4401/en?map=12.20/55.68000/12.56500/30.0/30.0)",
+    "06-centred: centred (http://localhost:4401/en?map=11.20/55.68000/12.56500)",
+    "07-failure: failure (http://localhost:4401/en?map=14.00/55.67600/12.56800)"
+  ]
+}

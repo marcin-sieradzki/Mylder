@@ -1,0 +1,18 @@
+{
+  "journey": "moving-map",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-17: map drawn 17 (http://localhost:4302/en)",
+    "02-buses-off-6-: buses off (6) (http://localhost:4302/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4302/en)",
+    "04-zoomed-in: zoomed in (http://localhost:4302/en?map=12.20/55.68000/12.56500)",
+    "05-tilted-30-turned-30: tilted 30 turned 30 (http://localhost:4302/en?map=12.20/55.68000/12.56500/30.0/30.0)",
+    "06-centred-flat-north-up: centred flat north-up (http://localhost:4302/en?map=11.20/55.68000/12.56500)",
+    "07-3d-on: 3D on (http://localhost:4302/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "08-turned-15: turned 15 (http://localhost:4302/en?map=11.20/55.68000/12.56500/15.0/50.0)",
+    "09-back-to-north: back to north (http://localhost:4302/en?map=11.20/55.68000/12.56500/0.0/50.0)",
+    "10-3d-off: 3D off (http://localhost:4302/en?map=11.20/55.68000/12.56500)",
+    "11-hover-card: hover card (http://localhost:4302/en?map=15.00/55.66767/12.58978)",
+    "12-tilted-link: tilted link (http://localhost:4302/en?map=14.00/55.67600/12.56800/-30.0/50.0)"
+  ]
+}

@@ -1,0 +1,91 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  // map-draw, map-chrome
+  await page.goto('/en')
+  const dots = page.locator('[data-vehicles]')
+  await expect(dots).toHaveAttribute('data-vehicles', '17')
+  await expect(page.getByRole('region', { name: 'Live map of Copenhagen' })).toBeVisible()
+  await expect(page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible()
+  await expect(page.getByRole('list', { name: 'Data states' })).toBeVisible()
+  await expect(page.getByRole('toolbar', { name: 'Map controls' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Rejseplanen' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Recorded data from 16 June 2026/ })).toBeVisible()
+  await step('map drawn 17')
+  // map-filter
+  const snap = await (await page.request.get('/api/snapshot')).json()
+  const n = snap.trips.filter((t: any) => !t.cancelled).length
+  const buses = snap.trips.filter((t: any) => t.mode === 'bus' && !t.cancelled).length
+  const chip = page.getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ })
+  await chip.click()
+  await expect(dots).toHaveAttribute('data-vehicles', String(n - buses))
+  await expect(chip).toContainText(String(buses))
+  await step(`buses off (${buses})`)
+  await chip.click()
+  await expect(dots).toHaveAttribute('data-vehicles', String(n))
+  await step('buses back')
+  // map-controls
+  const scale = page.getByText(/\d+\s(m|km)$/)
+  const before = await scale.innerText()
+  await page.getByRole('button', { name: 'Zoom in' }).click()
+  await expect(scale).not.toHaveText(before)
+  await step('zoomed in')
+  // map-3d by keys
+  const map = page.getByRole('region', { name: 'Live map of Copenhagen' })
+  await map.focus()
+  for (let i = 0; i < 3; i++) await page.keyboard.press('Shift+ArrowUp')
+  for (let i = 0; i < 2; i++) await page.keyboard.press('Shift+ArrowRight')
+  await expect(dots).toHaveAttribute('data-tilt', '30')
+  await expect(dots).toHaveAttribute('data-heading', '30')
+  await expect(scale).toBeHidden()
+  const s2 = await (await page.request.get('/api/snapshot')).json()
+  await expect(dots).toHaveAttribute('data-vehicles', String(s2.trips.filter((t: any) => !t.cancelled).length))
+  await step('tilted 30 turned 30')
+  await page.getByRole('button', { name: 'Centre the map' }).click()
+  await expect(dots).toHaveAttribute('data-tilt', '0')
+  await expect(dots).toHaveAttribute('data-heading', '0')
+  await expect(scale).toBeVisible()
+  await step('centred flat north-up')
+  // 3D toggle and compass
+  const toggle = page.getByRole('button', { name: '3D view' })
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await expect(dots).toHaveAttribute('data-tilt', '50')
+  await expect(scale).toBeHidden()
+  await step('3D on')
+  await map.focus()
+  await page.keyboard.press('Shift+ArrowRight')
+  await expect(dots).toHaveAttribute('data-heading', '15')
+  const north = page.getByRole('button', { name: 'Reset to north' })
+  await expect(north).toHaveAccessibleDescription('Map turned away from north')
+  await step('turned 15')
+  await north.click()
+  await expect(dots).toHaveAttribute('data-heading', '0')
+  await expect(dots).toHaveAttribute('data-tilt', '50')
+  await step('back to north')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await expect(dots).toHaveAttribute('data-tilt', '0')
+  await expect(scale).toBeVisible()
+  await step('3D off')
+  // map-card
+  const s3 = await (await page.request.get('/api/snapshot')).json()
+  const bus = s3.trips.find((t: any) => t.mode === 'bus' && !t.cancelled && !t.waiting)
+  await page.goto(`/en?map=15.00/${bus.position[0].toFixed(5)}/${bus.position[1].toFixed(5)}`)
+  await page.getByRole('button', { name: 'Pause' }).click()
+  const vp = page.viewportSize()!
+  await expect(async () => {
+    for (let r = 0; r <= 160; r += 7) for (let a = 0; a < 360; a += r ? 20 : 360) {
+      await page.mouse.move(vp.width / 2 + r * Math.cos(a * Math.PI / 180), vp.height / 2 + r * Math.sin(a * Math.PI / 180))
+      if (await page.getByRole('tooltip').isVisible()) break
+    }
+    await expect(page.getByRole('tooltip')).toBeVisible({ timeout: 500 })
+  }).toPass({ timeout: 60000 })
+  await expect(page.getByRole('tooltip')).toContainText(/Estimated|Live|Timetable|Ageing|No signal/)
+  await step('hover card')
+  // a tilted link
+  await page.goto('/en?map=14.00/55.67600/12.56800/-30.0/50.0')
+  await expect(dots).toHaveAttribute('data-tilt', '50')
+  await expect(dots).toHaveAttribute('data-heading', '-30')
+  await expect(scale).toBeHidden()
+  await step('tilted link')
+}

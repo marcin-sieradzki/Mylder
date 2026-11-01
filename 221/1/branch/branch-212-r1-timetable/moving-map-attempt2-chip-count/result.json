@@ -1,0 +1,9 @@
+{
+  "journey": "moving-map",
+  "pass": false,
+  "error": "expect(locator).toContainText(expected) failed\n\nLocator: getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ })\nExpected substring: \"428\"\nReceived string:    \"Bus 389\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ }) with timeout 5000ms\n  - waiting for getByRole('group', { name: 'Filters' }).getByRole('button', { name: /^Bus/ })\n    13 × locator resolved to <button tabindex=\"0\" type=\"button\" aria-pressed=\"false\" class=\"pn-FilterChip\">…</button>\n       - unexpected value \"Bus 389\"\n",
+  "steps": [
+    "01-map-drawn-638-timetable-only: map drawn 638 timetable only (http://localhost:4303/en)",
+    "02-failure: failure (http://localhost:4303/en?hide=bus)"
+  ]
+}

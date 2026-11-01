@@ -1,0 +1,14 @@
+{
+  "journey": "moving-map",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-629-timetable-only: map drawn 629 timetable only (http://localhost:4303/en)",
+    "02-buses-off-422-: buses off (422) (http://localhost:4303/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4303/en)",
+    "04-zoomed-in: zoomed in (http://localhost:4303/en?map=12.20/55.68000/12.56500)",
+    "05-tilted-30-turned-30: tilted 30 turned 30 (http://localhost:4303/en?map=12.20/55.68000/12.56500/30.0/30.0)",
+    "06-centred: centred (http://localhost:4303/en?map=11.20/55.68000/12.56500)",
+    "07-hover-card: hover card (http://localhost:4303/en?map=14.00/55.67600/12.56800)",
+    "08-da-banner-and-legend: da banner and legend (http://localhost:4303/da)"
+  ]
+}
