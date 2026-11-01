@@ -354,6 +354,26 @@ describe('the SIRI-ET reader', () => {
       /\["version"\]/,
     )
   })
+
+  it('holds messages received before it has a box, and lists them once it has one', () => {
+    // The listener receives from its first second, before it has the box's stops from the app.
+    const reader = siriEtReader({ listener: LISTENER })
+    for (const message of sample) if (message.receivedAt <= cph('09:06:53')) reader.receive(message)
+    reader.useBox(box)
+    expect(reader.table(cph('09:07:00'))).toEqual(replayed('09:06:53').table(cph('09:07:00')))
+  })
+
+  it('lists by the stops of the box it was last given, keeping every journey held', () => {
+    // A timetable version whose box holds only IC 50118's stop at Ringsted (8600601), which none
+    // of the other sample journeys call at.
+    const reader = replayed('09:06:53')
+    reader.useBox({ ...box, stops: new Set(['8600601']), timetableVersion: 'next' })
+    const narrow = reader.table(cph('09:07:00'))
+    expect(narrow.timetableVersion).toBe('next')
+    expect(narrow.journeys.map((j) => j.journey)).toEqual(['50118-8600096500000'])
+    reader.useBox(box)
+    expect(reader.table(cph('09:07:00'))).toEqual(replayed('09:06:53').table(cph('09:07:00')))
+  })
 })
 
 /** A dataset's counts with every message read. */

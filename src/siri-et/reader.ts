@@ -54,14 +54,26 @@ export const FINISHED_AFTER = 10 * 60_000
 export const SERVICE_DAY_LENGTH = 36 * 3_600_000
 
 export interface ReaderOptions {
-  readonly box: ReaderBox
+  /**
+   * The box's stops; the listener starts without them, receiving from its first second, and gives
+   * them with `useBox` once it has them from the app.
+   */
+  readonly box?: ReaderBox
   readonly listener: { readonly version: string; readonly startedAt: number }
   readonly limits?: Partial<ReaderLimits>
 }
 
 export interface SiriEtReader {
   receive(message: SiriEtMessage): void
-  /** The update table at `now`, after dropping the journeys that have finished by then. */
+  /**
+   * Lists the journeys by another box's stops from the next table on, such as a new timetable
+   * version's, keeping every journey held.
+   */
+  useBox(box: ReaderBox): void
+  /**
+   * The update table at `now`, after dropping the journeys that have finished by then. Only once
+   * the reader has a box: without one, it throws.
+   */
   table(now: number): UpdateTable
 }
 
@@ -95,7 +107,7 @@ interface HeldJourney {
   readonly calls: Map<string, HeldCall>
 }
 
-export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtReader {
+export function siriEtReader({ box: given, listener, limits }: ReaderOptions): SiriEtReader {
   const { journeys: maxJourneys, messageChars } = { ...READER_LIMITS, ...limits }
   // A Map keeps its order of insertion: each update moves its journey to the end, so the first
   // is always the one updated longest ago.
@@ -103,6 +115,7 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
   const datasets = new Map<string, Counts>()
   let lastMessageAt: number | undefined
   let evicted = 0
+  let box = given
 
   function receive({ dataset, receivedAt, body }: SiriEtMessage) {
     const counts = countsOf(dataset, receivedAt)
@@ -181,14 +194,15 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
   }
 
   function table(now: number): UpdateTable {
+    if (!box) throw new Error('The SIRI-ET reader has no box yet, so no table')
     const journeys: TableJourney[] = []
     for (const [key, journey] of held) {
       const calls = inOrder(journey.calls)
-      if (finished(journey, calls, now)) {
+      if (finished(journey, calls, now, box)) {
         held.delete(key)
         continue
       }
-      if (callsInBox(journey, calls)) journeys.push(tableJourney(journey, calls))
+      if (callsInBox(journey, calls, box)) journeys.push(tableJourney(journey, calls))
     }
     return {
       version: TABLE_VERSION,
@@ -207,8 +221,13 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
    * Whether a journey has finished at `now`: 10 minutes after its call at its last stop, or, when
    * the reader holds no such call, once its service day has ended.
    */
-  function finished(journey: HeldJourney, calls: readonly HeldCall[], now: number): boolean {
-    if (now >= serviceDayStart(journey.day, box.timezone) + SERVICE_DAY_LENGTH) return true
+  function finished(
+    journey: HeldJourney,
+    calls: readonly HeldCall[],
+    now: number,
+    { timezone }: ReaderBox,
+  ): boolean {
+    if (now >= serviceDayStart(journey.day, timezone) + SERVICE_DAY_LENGTH) return true
     const last = calls[calls.length - 1]
     const atLastStop =
       last !== undefined &&
@@ -218,15 +237,23 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
     return atLastStop && now >= last.at + FINISHED_AFTER
   }
 
-  function callsInBox(journey: HeldJourney, calls: readonly HeldCall[]): boolean {
+  function callsInBox(
+    journey: HeldJourney,
+    calls: readonly HeldCall[],
+    { stops }: ReaderBox,
+  ): boolean {
     return (
-      box.stops.has(platformId(journey.origin)) ||
-      box.stops.has(platformId(journey.destination)) ||
-      calls.some((call) => box.stops.has(platformId(call.stop)))
+      stops.has(platformId(journey.origin)) ||
+      stops.has(platformId(journey.destination)) ||
+      calls.some((call) => stops.has(platformId(call.stop)))
     )
   }
 
-  return { receive, table }
+  const useBox = (next: ReaderBox) => {
+    box = next
+  }
+
+  return { receive, useBox, table }
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
