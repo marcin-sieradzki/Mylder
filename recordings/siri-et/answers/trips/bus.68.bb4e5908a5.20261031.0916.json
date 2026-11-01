@@ -1,0 +1,532 @@
+{
+  "key": "bus.68.bb4e5908a5.20261031.0916",
+  "line": "68",
+  "mode": "bus",
+  "colour": "perron-color-transit-mode-bus",
+  "headsign": "Lyngby St. (Jernbanepladsen)",
+  "pattern": 255,
+  "state": "estimated",
+  "delay": -60,
+  "fetched": 1793434920000,
+  "nextDue": 1793434980000,
+  "source": {
+    "kind": "timetable",
+    "delays": 1793434901634
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "28002",
+      "name": "Bella Center St. (Martha Christensens Vej)",
+      "arrival": 1793434560000,
+      "departure": 1793434560000,
+      "expectedArrival": 1793434620000,
+      "expectedDeparture": 1793434620000
+    },
+    {
+      "index": 1,
+      "stop": "28000",
+      "name": "Bella Center, Indgang Vest",
+      "arrival": 1793434590000,
+      "departure": 1793434590000,
+      "expectedArrival": 1793434650000,
+      "expectedDeparture": 1793434650000
+    },
+    {
+      "index": 2,
+      "stop": "2747",
+      "name": "Center Boulevard (Vejlands Allé)",
+      "arrival": 1793434620000,
+      "departure": 1793434620000,
+      "expectedArrival": 1793434680000,
+      "expectedDeparture": 1793434680000
+    },
+    {
+      "index": 3,
+      "stop": "48768",
+      "name": "Vejlands Allé (Artillerivej)",
+      "arrival": 1793434740000,
+      "departure": 1793434740000,
+      "expectedArrival": 1793434740000,
+      "expectedDeparture": 1793434740000
+    },
+    {
+      "index": 4,
+      "stop": "48769",
+      "name": "HF Sønderbro (Artillerivej)",
+      "arrival": 1793434860000,
+      "departure": 1793434860000,
+      "expectedArrival": 1793434800000,
+      "expectedDeparture": 1793434800000
+    },
+    {
+      "index": 5,
+      "stop": "49271",
+      "name": "Rundholtsvej (Artillerivej)",
+      "arrival": 1793434920000,
+      "departure": 1793434920000,
+      "expectedArrival": 1793434800000,
+      "expectedDeparture": 1793434860000
+    },
+    {
+      "index": 6,
+      "stop": "3134",
+      "name": "Drechselsgade (Artillerivej)",
+      "arrival": 1793434980000,
+      "departure": 1793434980000,
+      "expectedArrival": 1793434920000,
+      "expectedDeparture": 1793434920000
+    },
+    {
+      "index": 7,
+      "stop": "2903",
+      "name": "Axel Heides Gade (Artillerivej)",
+      "arrival": 1793435040000,
+      "departure": 1793435040000,
+      "expectedArrival": 1793434980000,
+      "expectedDeparture": 1793434980000
+    },
+    {
+      "index": 8,
+      "stop": "2904",
+      "name": "Kigkurren (Leifsgade)",
+      "arrival": 1793435160000,
+      "departure": 1793435160000,
+      "expectedArrival": 1793435040000,
+      "expectedDeparture": 1793435100000
+    },
+    {
+      "index": 9,
+      "stop": "3139",
+      "name": "Halfdansgade (Leifsgade)",
+      "arrival": 1793435190000,
+      "departure": 1793435190000,
+      "expectedArrival": 1793435130000,
+      "expectedDeparture": 1793435130000
+    },
+    {
+      "index": 10,
+      "stop": "3140",
+      "name": "Bergthorasgade (Isafjordsgade)",
+      "arrival": 1793435220000,
+      "departure": 1793435220000,
+      "expectedArrival": 1793435160000,
+      "expectedDeparture": 1793435220000
+    },
+    {
+      "index": 11,
+      "stop": "943",
+      "name": "Isafjordsgade (Njalsgade)",
+      "arrival": 1793435280000,
+      "departure": 1793435280000,
+      "expectedArrival": 1793435280000,
+      "expectedDeparture": 1793435280000
+    },
+    {
+      "index": 12,
+      "stop": "28050",
+      "name": "Weidekampsgade (Klaksvigsgade)",
+      "arrival": 1793435340000,
+      "departure": 1793435340000,
+      "expectedArrival": 1793435340000,
+      "expectedDeparture": 1793435340000
+    },
+    {
+      "index": 13,
+      "stop": "30091",
+      "name": "Otto Mønsteds Plads (Rysensteensgade)",
+      "arrival": 1793435520000,
+      "departure": 1793435520000,
+      "expectedArrival": 1793435520000,
+      "expectedDeparture": 1793435520000,
+      "cancelled": true
+    },
+    {
+      "index": 14,
+      "stop": "3005",
+      "name": "Polititorvet",
+      "arrival": 1793435580000,
+      "departure": 1793435580000,
+      "expectedArrival": 1793435580000,
+      "expectedDeparture": 1793435580000
+    },
+    {
+      "index": 15,
+      "stop": "10845",
+      "name": "Hovedbanegården, Tivoli (Bernstorffsgade)",
+      "arrival": 1793435700000,
+      "departure": 1793435700000,
+      "expectedArrival": 1793435580000,
+      "expectedDeparture": 1793435640000
+    },
+    {
+      "index": 16,
+      "stop": "3022",
+      "name": "Vesterport St. (Vester Farimagsgade)",
+      "arrival": 1793435880000,
+      "departure": 1793435880000,
+      "expectedArrival": 1793435820000,
+      "expectedDeparture": 1793435820000
+    },
+    {
+      "index": 17,
+      "stop": "676",
+      "name": "Vester Farimagsgade (Gyldenløvesgade)",
+      "arrival": 1793435910000,
+      "departure": 1793435910000,
+      "expectedArrival": 1793435850000,
+      "expectedDeparture": 1793435850000
+    },
+    {
+      "index": 18,
+      "stop": "351",
+      "name": "Peblinge Dossering (Åboulevard)",
+      "arrival": 1793436000000,
+      "departure": 1793436000000,
+      "expectedArrival": 1793435940000,
+      "expectedDeparture": 1793435940000
+    },
+    {
+      "index": 19,
+      "stop": "3023",
+      "name": "Blågårdsgade (Åboulevard)",
+      "arrival": 1793436060000,
+      "departure": 1793436060000,
+      "expectedArrival": 1793436000000,
+      "expectedDeparture": 1793436060000
+    },
+    {
+      "index": 20,
+      "stop": "54901",
+      "name": "H. C. Ørsteds Vej (Åboulevard)",
+      "arrival": 1793436120000,
+      "departure": 1793436120000,
+      "expectedArrival": 1793436120000,
+      "expectedDeparture": 1793436120000
+    },
+    {
+      "index": 21,
+      "stop": "54654",
+      "name": "Hans Egedes Gade (Ågade)",
+      "arrival": 1793436180000,
+      "departure": 1793436180000,
+      "expectedArrival": 1793436120000,
+      "expectedDeparture": 1793436120000
+    },
+    {
+      "index": 22,
+      "stop": "3027",
+      "name": "Nuuks Plads St. (Borups Allé)",
+      "arrival": 1793436300000,
+      "departure": 1793436300000,
+      "expectedArrival": 1793436180000,
+      "expectedDeparture": 1793436300000
+    },
+    {
+      "index": 23,
+      "stop": "3028",
+      "name": "Borups Plads (Borups Allé)",
+      "arrival": 1793436360000,
+      "departure": 1793436360000,
+      "expectedArrival": 1793436360000,
+      "expectedDeparture": 1793436360000
+    },
+    {
+      "index": 24,
+      "stop": "3029",
+      "name": "Nordre Fasanvej (Borups Allé)",
+      "arrival": 1793436420000,
+      "departure": 1793436420000,
+      "expectedArrival": 1793436420000,
+      "expectedDeparture": 1793436420000
+    },
+    {
+      "index": 25,
+      "stop": "3030",
+      "name": "Fuglebakken St. (Borups Allé)",
+      "arrival": 1793436540000,
+      "departure": 1793436540000,
+      "expectedArrival": 1793436540000,
+      "expectedDeparture": 1793436540000
+    },
+    {
+      "index": 26,
+      "stop": "236",
+      "name": "Hillerødgade (Borups Allé)",
+      "arrival": 1793436600000,
+      "departure": 1793436600000,
+      "expectedArrival": 1793436540000,
+      "expectedDeparture": 1793436600000
+    },
+    {
+      "index": 27,
+      "stop": "237",
+      "name": "Mågevej (Borups Allé)",
+      "arrival": 1793436630000,
+      "departure": 1793436630000,
+      "expectedArrival": 1793436630000,
+      "expectedDeparture": 1793436630000
+    },
+    {
+      "index": 28,
+      "stop": "238",
+      "name": "Hulgårdsvej (Borups Allé)",
+      "arrival": 1793436720000,
+      "departure": 1793436720000,
+      "expectedArrival": 1793436720000,
+      "expectedDeparture": 1793436720000
+    },
+    {
+      "index": 29,
+      "stop": "239",
+      "name": "Bellahøj (Borups Allé)",
+      "arrival": 1793436840000,
+      "departure": 1793436840000,
+      "expectedArrival": 1793436840000,
+      "expectedDeparture": 1793436840000
+    },
+    {
+      "index": 30,
+      "stop": "51759",
+      "name": "Nordvestkirken (Utterslevvej)",
+      "arrival": 1793436900000,
+      "departure": 1793436900000,
+      "expectedArrival": 1793436840000,
+      "expectedDeparture": 1793436900000
+    },
+    {
+      "index": 31,
+      "stop": "307",
+      "name": "Utterslev Torv (Horsebakken)",
+      "arrival": 1793436960000,
+      "departure": 1793436960000,
+      "expectedArrival": 1793436960000,
+      "expectedDeparture": 1793436960000
+    },
+    {
+      "index": 32,
+      "stop": "308",
+      "name": "Hyrdevangen (Horsebakken)",
+      "arrival": 1793436990000,
+      "departure": 1793436990000,
+      "expectedArrival": 1793436990000,
+      "expectedDeparture": 1793436990000
+    },
+    {
+      "index": 33,
+      "stop": "309",
+      "name": "Lærkebakken (Horsebakken)",
+      "arrival": 1793437020000,
+      "departure": 1793437020000,
+      "expectedArrival": 1793437020000,
+      "expectedDeparture": 1793437020000
+    },
+    {
+      "index": 34,
+      "stop": "310",
+      "name": "Mosesvinget (Horsebakken)",
+      "arrival": 1793437050000,
+      "departure": 1793437050000,
+      "expectedArrival": 1793437050000,
+      "expectedDeparture": 1793437050000
+    },
+    {
+      "index": 35,
+      "stop": "311",
+      "name": "Moseskrænten (Maglegårds Allé)",
+      "arrival": 1793437140000,
+      "departure": 1793437140000,
+      "expectedArrival": 1793437140000,
+      "expectedDeparture": 1793437140000
+    },
+    {
+      "index": 36,
+      "stop": "312",
+      "name": "Søborg Magle Kirke (Maglegårds Allé)",
+      "arrival": 1793437170000,
+      "departure": 1793437170000,
+      "expectedArrival": 1793437140000,
+      "expectedDeparture": 1793437140000
+    },
+    {
+      "index": 37,
+      "stop": "313",
+      "name": "Mars Allé (Grønnemose Allé)",
+      "arrival": 1793437200000,
+      "departure": 1793437200000,
+      "expectedArrival": 1793437140000,
+      "expectedDeparture": 1793437200000
+    },
+    {
+      "index": 38,
+      "stop": "314",
+      "name": "Nordtoftevej (Mars Allé)",
+      "arrival": 1793437260000,
+      "departure": 1793437260000,
+      "expectedArrival": 1793437260000,
+      "expectedDeparture": 1793437260000
+    },
+    {
+      "index": 39,
+      "stop": "367",
+      "name": "Mars Allé (Gladsaxevej)",
+      "arrival": 1793437320000,
+      "departure": 1793437320000,
+      "expectedArrival": 1793437260000,
+      "expectedDeparture": 1793437320000
+    },
+    {
+      "index": 40,
+      "stop": "368",
+      "name": "Dalen (Gladsaxevej)",
+      "arrival": 1793437350000,
+      "departure": 1793437350000,
+      "expectedArrival": 1793437350000,
+      "expectedDeparture": 1793437350000
+    },
+    {
+      "index": 41,
+      "stop": "369",
+      "name": "Høje Gladsaxe (Gladsaxevej)",
+      "arrival": 1793437440000,
+      "departure": 1793437440000,
+      "expectedArrival": 1793437440000,
+      "expectedDeparture": 1793437440000
+    },
+    {
+      "index": 42,
+      "stop": "370",
+      "name": "Isbanevej (Gladsaxevej)",
+      "arrival": 1793437470000,
+      "departure": 1793437470000,
+      "expectedArrival": 1793437440000,
+      "expectedDeparture": 1793437440000
+    },
+    {
+      "index": 43,
+      "stop": "371",
+      "name": "Gyngemosevej (Gladsaxevej)",
+      "arrival": 1793437500000,
+      "departure": 1793437500000,
+      "expectedArrival": 1793437440000,
+      "expectedDeparture": 1793437440000
+    },
+    {
+      "index": 44,
+      "stop": "10010",
+      "name": "Gladsaxevej (Vandtårnsvej)",
+      "arrival": 1793437560000,
+      "departure": 1793437560000,
+      "expectedArrival": 1793437500000,
+      "expectedDeparture": 1793437560000
+    },
+    {
+      "index": 45,
+      "stop": "51826",
+      "name": "Gladsaxe Møllevej (Vandtårnsvej)",
+      "arrival": 1793437620000,
+      "departure": 1793437620000,
+      "expectedArrival": 1793437620000,
+      "expectedDeparture": 1793437620000
+    },
+    {
+      "index": 46,
+      "stop": "7926",
+      "name": "Gladsaxe Trafikplads (Gladsaxe Møllevej)",
+      "arrival": 1793437740000,
+      "departure": 1793437740000,
+      "expectedArrival": 1793437740000,
+      "expectedDeparture": 1793437740000
+    },
+    {
+      "index": 47,
+      "stop": "247",
+      "name": "Gladsaxe Kirke (Gladsaxe Møllevej)",
+      "arrival": 1793437770000,
+      "departure": 1793437770000,
+      "expectedArrival": 1793437740000,
+      "expectedDeparture": 1793437740000
+    },
+    {
+      "index": 48,
+      "stop": "1890",
+      "name": "Gladsaxe Skole (Gladsaxe Møllevej)",
+      "arrival": 1793437800000,
+      "departure": 1793437800000,
+      "expectedArrival": 1793437740000,
+      "expectedDeparture": 1793437740000
+    },
+    {
+      "index": 49,
+      "stop": "1891",
+      "name": "Kronhjortvej (Gladsaxe Møllevej)",
+      "arrival": 1793437860000,
+      "departure": 1793437860000,
+      "expectedArrival": 1793437800000,
+      "expectedDeparture": 1793437800000
+    },
+    {
+      "index": 50,
+      "stop": "1892",
+      "name": "Buddinge Hovedgade (Møllemarken)",
+      "arrival": 1793437920000,
+      "departure": 1793437920000,
+      "expectedArrival": 1793437860000,
+      "expectedDeparture": 1793437860000
+    },
+    {
+      "index": 51,
+      "stop": "1893",
+      "name": "Bagsværdfortet (Møllemarken)",
+      "arrival": 1793437950000,
+      "departure": 1793437950000,
+      "expectedArrival": 1793437860000,
+      "expectedDeparture": 1793437860000
+    },
+    {
+      "index": 52,
+      "stop": "56465",
+      "name": "Stengården St. (Gammelmosevej)",
+      "arrival": 1793437980000,
+      "departure": 1793437980000,
+      "expectedArrival": 1793437860000,
+      "expectedDeparture": 1793437860000
+    },
+    {
+      "index": 53,
+      "stop": "464",
+      "name": "Nybrovej (Engelsborgvej)",
+      "arrival": 1793438460000,
+      "departure": 1793438460000,
+      "expectedArrival": 1793438340000,
+      "expectedDeparture": 1793438400000
+    },
+    {
+      "index": 54,
+      "stop": "465",
+      "name": "Christian X's Allé",
+      "arrival": 1793438520000,
+      "departure": 1793438520000,
+      "expectedArrival": 1793438460000,
+      "expectedDeparture": 1793438460000
+    },
+    {
+      "index": 55,
+      "stop": "56336",
+      "name": "Lyngby St. (Jernbanepladsen)",
+      "arrival": 1793438640000,
+      "departure": 1793438640000,
+      "expectedArrival": 1793438580000,
+      "expectedDeparture": 1793438640000
+    },
+    {
+      "index": 56,
+      "stop": "56334",
+      "name": "Lyngby St. (Jernbanepladsen)",
+      "arrival": 1793438700000,
+      "departure": 1793438700000,
+      "expectedArrival": 1793438640000,
+      "expectedDeparture": 1793438640000
+    }
+  ]
+}

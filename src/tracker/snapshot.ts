@@ -53,6 +53,13 @@ export const SnapshotTrip = Schema.Struct({
   cancelled: optional(Schema.Literal(true)),
   extra: optional(Schema.Literal(true)),
   cancelledCalls: optional(Schema.Array(Schema.Number)),
+  /**
+   * SIRI-ET's delays for the trip, from its update this run (spec #146), as steps: a call index and
+   * the delay in seconds there, listed where the delay changes, the calls between taking the step
+   * before them (`expectedTimes`, src/domain/trip-motion.ts). Opened trips and stops time each
+   * call by them, as the map moves the trip.
+   */
+  steps: optional(Schema.Array(Schema.Tuple([Schema.Number, Schema.Number]))),
   vehicleNumber: optional(Schema.String),
   /** Rejseplanen's journey number and day, `ZI@DA`, once the trip has been in an answer. */
   journey: optional(Schema.String),

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   delayOf,
+  delaySteps,
+  expectedTimes,
   measurePath,
   pointAt,
   snapToPath,
@@ -224,6 +226,39 @@ describe('delayOf', () => {
     ],
   ])('a trip %s is %s s late', (_, trip, delay) => {
     expect(delayOf(trip)).toBe(delay)
+  })
+})
+
+describe('delaySteps and expectedTimes', () => {
+  // An update's calls: 2 min late away from A, 1 min early from B, so 1 min early at C.
+  const updated: Call[] = [
+    { arrival: minutes(0), departure: minutes(0), expectedDeparture: minutes(2) },
+    { arrival: minutes(10), departure: minutes(11), expectedDeparture: minutes(10) },
+    { arrival: minutes(15), departure: minutes(15) },
+  ]
+
+  it('lists each call an update gave an expected time, with its delay in seconds', () => {
+    expect(delaySteps(updated)).toEqual([
+      [0, 120],
+      [1, -60],
+    ])
+    expect(delaySteps(calls)).toEqual([])
+  })
+
+  it('times each call by its steps, as the update’s calls are timed', () => {
+    expect(expectedTimes(calls, { delay: -60, steps: delaySteps(updated) })).toEqual(
+      timedCalls(updated),
+    )
+    // A step at the last stop gives its arrival.
+    expect(expectedTimes(calls, { steps: [[2, 300]] })?.[2]).toEqual({
+      arrival: minutes(20),
+      departure: minutes(20),
+    })
+  })
+
+  it('shifts every call by the delay without steps, and gives none with neither', () => {
+    expect(expectedTimes(calls, { delay: 60 })).toEqual(timedCalls(calls, 60))
+    expect(expectedTimes(calls, {})).toBeUndefined()
   })
 })
 

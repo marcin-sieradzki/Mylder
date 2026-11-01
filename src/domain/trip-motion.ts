@@ -154,6 +154,48 @@ export function timedCalls(calls: readonly Call[], delay?: number): TimedCall[] 
   })
 }
 
+/**
+ * One of a trip's delay steps (spec #146): a call its update gave an expected time, by its index,
+ * and its delay there in seconds, late at its departure, or at its arrival at the last stop.
+ * SIRI-ET's update table lists a journey's delays this way, only where the delay changes.
+ */
+export type DelayStep = readonly [index: number, delay: number]
+
+/** The steps of an update's calls: each call with an expected time, and its delay there. */
+export function delaySteps(calls: readonly Call[]): DelayStep[] {
+  return calls.flatMap((call, index) => {
+    const delay = delayAt(call)
+    return delay === undefined ? [] : [[index, delay / 1000] as const]
+  })
+}
+
+/**
+ * The times a trip will keep at each of its scheduled `calls`, from what the snapshot carries of
+ * it: by its delay steps where it has them, each step's call leaving that late (arriving so at the
+ * last stop) and the calls between timed as `timedCalls` times an update's; else every call
+ * shifted by its delay; none with neither.
+ */
+export function expectedTimes(
+  calls: readonly Call[],
+  { delay, steps }: { readonly delay?: number; readonly steps?: readonly DelayStep[] },
+): TimedCall[] | undefined {
+  if (steps && steps.length > 0) {
+    const last = calls.length - 1
+    const stepped: Call[] = calls.map(({ arrival, departure }) => ({ arrival, departure }))
+    for (const [index, late] of steps) {
+      const call = stepped[index]
+      if (!call) continue
+      stepped[index] = {
+        ...call,
+        expectedDeparture: call.departure + late * 1000,
+        ...(index === last ? { expectedArrival: call.arrival + late * 1000 } : {}),
+      }
+    }
+    return timedCalls(stepped)
+  }
+  return delay === undefined ? undefined : timedCalls(calls, delay)
+}
+
 /** Where a trip is in its day at a moment, from all its timed calls. */
 export function tripPhase(calls: readonly TimedCall[], now: number): TripPhase {
   if (calls.length === 0) return 'finished'

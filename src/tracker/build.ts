@@ -12,6 +12,7 @@ import {
 } from '../domain/data-state.ts'
 import {
   delayOf,
+  delaySteps,
   ENDED_STANDS_FOR,
   pointAt,
   progressAt,
@@ -264,6 +265,7 @@ export function buildTrips({
         ...(ref ? { ref } : {}),
       }
       const hadRealtime = realtime !== undefined || before !== undefined || update !== undefined
+      const steps = update ? delaySteps(update.calls) : []
       if (hadRealtime) kept[trip.key] = remembered
       // More than 5 min before it leaves on its expected times, a trip is remembered, not drawn.
       if (phase === 'upcoming') continue
@@ -299,6 +301,7 @@ export function buildTrips({
         ...(atFirstStop ? { waiting: true as const } : {}),
         ...(update?.cancelled ? { cancelled: true as const } : {}),
         ...(update?.cancelledCalls.length ? { cancelledCalls: update.cancelledCalls } : {}),
+        ...(steps.length > 0 ? { steps } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
       })

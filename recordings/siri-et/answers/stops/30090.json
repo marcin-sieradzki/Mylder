@@ -1,0 +1,74 @@
+{
+  "stop": {
+    "id": "30090",
+    "name": "Otto Mønsteds Plads",
+    "lines": [
+      {
+        "name": "5C",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "68",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      }
+    ]
+  },
+  "fetched": 1793434920000,
+  "nextDue": 1793434980000,
+  "source": {
+    "kind": "timetable",
+    "delays": 1793434912430
+  },
+  "standing": [],
+  "departures": [
+    {
+      "trip": "bus.68.36a3ce3156.20261031.0831",
+      "line": "68",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Bella Center St. (Martha Christensens Vej)",
+      "platform": "30090",
+      "scheduled": 1793434860000,
+      "expected": 1793434920000,
+      "state": "estimated"
+    },
+    {
+      "trip": "bus.68.bb4e5908a5.20261031.0916",
+      "line": "68",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Lyngby St. (Jernbanepladsen)",
+      "platform": "30091",
+      "scheduled": 1793435520000,
+      "expected": 1793435520000,
+      "state": "estimated",
+      "cancelled": true
+    },
+    {
+      "trip": "bus.68.4b093e7030.20261031.0903",
+      "line": "68",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Kigkurren (Sturlasgade)",
+      "platform": "30090",
+      "scheduled": 1793435880000,
+      "expected": 1793435880000,
+      "state": "estimated",
+      "cancelled": true
+    },
+    {
+      "trip": "bus.68.5109a9ba4b.20261031.0940",
+      "line": "68",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Gladsaxe Trafikplads Via Mellemvangen",
+      "platform": "30091",
+      "scheduled": 1793436360000,
+      "state": "timetable-only"
+    }
+  ],
+  "intervals": [],
+  "messages": []
+}
