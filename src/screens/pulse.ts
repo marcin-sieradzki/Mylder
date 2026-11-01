@@ -25,6 +25,12 @@ export interface Share {
   readonly total: number
 }
 
+/**
+ * Why a mode's meter is "—": as a figure, or the Metro, an interval line with no realtime, or a
+ * mode SIRI-ET carries nothing of, among the shares with an update.
+ */
+export type MeterUnknown = Unknown | 'metro' | 'no-delays'
+
 export interface ModeShare {
   readonly mode: Mode
   /**
@@ -32,7 +38,7 @@ export interface ModeShare {
    * nothing of among the shares with delays, or when it can't be known.
    */
   readonly share?: Share
-  readonly unknown?: Unknown | 'metro' | 'no-delays'
+  readonly unknown?: MeterUnknown
 }
 
 /** How many vehicles of a mode are on the move, as On the move counts them. */
@@ -70,7 +76,7 @@ export interface Pulse {
    * all its trips on the map, Waiting ones included: the share the run's log line gives, which a
    * quiet feed's No signal trips keep. None with the delays off.
    */
-  readonly withDelays?: readonly ModeShare[]
+  readonly updateShares?: readonly ModeShare[]
   /**
    * The vehicles on the move in each mode the filters show, in the modes' order: together the
    * On the move figure, each the count its mode's chip gives while none is No signal.
@@ -145,8 +151,8 @@ export function pulseOf(
   // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
   // figure for another: under the minimum it says so. With no positions, only SIRI-ET's delays,
   // when they are on, can bring one.
-  const withUpdates = delaysOn(snapshot)
-  const hasDelayFigure = noPositions ? withUpdates : carriesDelays(snapshot)
+  const delaysAreOn = delaysOn(snapshot)
+  const hasDelayFigure = noPositions ? delaysAreOn : carriesDelays(snapshot)
   const delay: Pulse['delay'] = !hasDelayFigure
     ? undefined
     : paused
@@ -171,7 +177,7 @@ export function pulseOf(
     const share = shareOf(underway.filter((trip) => trip.mode === mode))
     return typeof share === 'string' ? { mode, unknown: share } : { mode, share }
   })
-  const withDelays = withUpdates
+  const updateShares = delaysAreOn
     ? shownModes.map((mode): ModeShare => {
         if (mode === 'metro') return { mode, unknown: 'metro' }
         if (NOT_IN_SIRI_ET.has(mode)) return { mode, unknown: 'no-delays' }
@@ -205,7 +211,7 @@ export function pulseOf(
     ...(delay === undefined ? {} : { delay }),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
-    ...(withDelays ? { withDelays } : {}),
+    ...(updateShares ? { updateShares } : {}),
     movingByMode: shownModes.map((mode) => ({
       mode,
       count: moving.filter((trip) => trip.mode === mode).length,

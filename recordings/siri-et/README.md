@@ -19,6 +19,7 @@ node scripts/siri-et/cut-siri-et.mjs <probe>/out public/timetable recordings/sir
 - `messages.jsonl.gz`: one message a line, in order of `receivedAt`, as `{ "dataset": "788", "receivedAt": "<ISO>", "body": "<SIRI XML>" }`. A body is the message as sent, single-line SIRI 2.0 XML, minus the `EstimatedVehicleJourney` elements of journeys outside the box. A message left with none is dropped.
 - `timetable/`: `public/timetable/` as it was on 1 November 2026, version `2026-11-01-6495dcc6`, whose window (2026-10-19 to 2027-01-13) covers 31 October.
 - `clock.json`: the first message's `receivedAt`.
+- `quiet/clock.json`: a saved moment, 09:55:00, 67 s before the last message, which `MYLDER_UPDATES=recording:siri-et/quiet` starts the clock at instead, so the feed goes quiet 5 min after that message, at 10:01:07, early in a drive (#216).
 
 | Dataset           | Messages kept / received | Journey updates kept / received | Journeys | Cancelled journeys | Cancelled call tags |
 | ----------------- | ------------------------ | ------------------------------- | -------- | ------------------ | ------------------- |

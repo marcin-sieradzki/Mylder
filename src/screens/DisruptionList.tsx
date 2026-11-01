@@ -201,6 +201,10 @@ function sentenceOf(card: DataCard, words: Words['dataCards'], lang: Lang, timez
       return card.since === undefined
         ? words.messagesNever
         : words.messagesStale.replace('{time}', at(card.since))
+    case 'updates-stale':
+      return card.since === undefined
+        ? words.updatesNever
+        : words.updatesStale.replace('{time}', at(card.since))
   }
 }
 
@@ -259,7 +263,7 @@ function footerOf(
  * messages active now, then those starting within the week under "Later", "Running normally"
  * once when nothing is active, and a footer that says when the list was checked. On a source that
  * brings no messages, such as the timetable, one sentence in their place: the messages come with
- * the live connection.
+ * the live connection, under the one data card such a source can have, a quiet SIRI-ET feed's.
  */
 export function DisruptionList({ store = disruptionList }: { store?: DisruptionListStore }) {
   const { lang, dictionary } = useI18n()
@@ -274,6 +278,7 @@ export function DisruptionList({ store = disruptionList }: { store?: DisruptionL
   if (!messages) {
     return (
       <div className={styles.list}>
+        <DataCards timezone={timezone} />
         <Text variant="body-sm" emphasis="secondary" render={<p />} className={styles.loading}>
           {dictionary.timetableOverview.disruptions}
         </Text>

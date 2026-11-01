@@ -207,6 +207,8 @@ describe('a frozen recording', () => {
           })
         }
       }),
+    // It replays the SIRI-ET recording's messages, which can pass 5 s while the whole suite runs.
+    30_000,
   )
 
   it.effect('saves the timetable source in its timetable’s last week, the notice’s moment', () =>

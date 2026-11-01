@@ -45,7 +45,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  liveSnapshot.update({ snapshot: undefined, clockOffset: 0 })
+  liveSnapshot.update({ snapshot: undefined, lastGoodPoll: undefined, clockOffset: 0 })
   liveAircraft.update({ snapshot: undefined })
   vi.unstubAllGlobals()
 })
@@ -225,5 +225,34 @@ describe("City pulse's first figure", () => {
     const { grouped } = await import('./numbers')
     expect(grouped(1046)).toBe('1 046')
     expect(grouped(312)).toBe('312')
+  })
+})
+
+describe('the Disruptions tab’s count with SIRI-ET’s delays', () => {
+  // The SIRI-ET recording's minute of 09:22:00 on the timetable source, which lists no message.
+  const withDelays = JSON.parse(
+    readFileSync(join(process.cwd(), 'recordings', 'siri-et', 'snapshots', '0002.json'), 'utf8'),
+  ) as Snapshot
+  /** Lands it with the latest poll at `moment` on the server's clock. */
+  const landAt = (moment: number) =>
+    act(() =>
+      liveSnapshot.update({
+        snapshot: withDelays,
+        lastGoodPoll: Date.now(),
+        clockOffset: moment - Date.now(),
+      }),
+    )
+  const disruptionsTab = () => within(tabs('Overview')).getAllByRole('tab')[2]
+
+  it('counts nothing while the feed is fresh', () => {
+    landAt(withDelays.fetched + 20_000)
+    renderScreen('en')
+    expect(disruptionsTab()).toHaveTextContent(/^Disruptions$/)
+  })
+
+  it('counts the quiet feed’s card', () => {
+    landAt(withDelays.updates.lastMessage! + 6 * 60_000)
+    renderScreen('en')
+    expect(disruptionsTab()).toHaveTextContent(/^Disruptions ?1$/)
   })
 })

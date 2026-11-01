@@ -4,7 +4,8 @@
 // (`MYLDER_UPDATES`, spec #146) or off. The domain's rules, the
 // screens and the tracker's run read this description, never the kind itself: only
 // src/tracker/source.ts tells its sources apart, to build each one. A new source changes this one
-// place.
+// place. Beside it, `NOT_IN_SIRI_ET`: the modes SIRI-ET's delays never reach, whatever the source,
+// which the tracker's join leaves alone and City pulse's shares with an update read as "—".
 
 /** Every source the snapshot can name. */
 export const SOURCE_KINDS = ['timetable', 'simulated', 'recording', 'rejseplanen'] as const
@@ -34,7 +35,8 @@ export type SourceWords = BannerWords | LegendWords | SourceNameWords | SourceNo
 export interface SourceDescription {
   /**
    * Whether the tracker asks Rejseplanen, or the simulation or recording that answers in its
-   * place: with no call, nothing can stop answering, so nothing pauses and no data card shows.
+   * place: with no call, nothing can stop answering, so nothing pauses and no data card about
+   * Rejseplanen's answers shows; a quiet SIRI-ET feed's card still can (./data-cards.ts).
    */
   readonly callsRejseplanen: boolean
   /**

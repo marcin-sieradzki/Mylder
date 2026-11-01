@@ -263,6 +263,18 @@ describe('the timetable source with SIRI-ET’s delays', () => {
     expect(notices()).toEqual([BANNER_DA])
   })
 
+  it('shows no Paused notice when the delays go quiet, only the banner', () => {
+    // 09:28:00, over 5 min after the feed's last message, at 09:21:52: Mylder's card in
+    // Disruptions says so, and nothing pauses, since the transit asks Rejseplanen nothing.
+    const quiet = withDelays()
+    land(quiet, '2026-10-31T08:28:00Z')
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([BANNER_EN])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([BANNER_DA])
+  })
+
   it('says the timetable alone places every vehicle once the updates are off', () => {
     land({ ...withDelays(), updates: { kind: 'off', fresh: false, withUpdate: {}, unmatched: {} } })
     renderScreen('en')
