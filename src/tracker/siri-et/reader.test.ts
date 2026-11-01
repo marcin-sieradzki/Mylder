@@ -5,7 +5,7 @@
 import { join } from 'node:path'
 import { Schema } from 'effect'
 import { describe, expect, it } from 'vitest'
-import { readBox, readSiriEtMessages, type SiriEtMessage } from './recording'
+import { readBox, readSiriEtMessages } from './recording'
 import { siriEtReader, type ReaderLimits } from './reader'
 import { UpdateTable, type TableJourney } from './table'
 
@@ -273,7 +273,9 @@ describe('the SIRI-ET reader', () => {
     const table = replayed('09:30:00').table(cph('09:30:00'))
     const written = JSON.stringify(Schema.encodeSync(UpdateTable)(table))
     expect(Schema.decodeUnknownSync(UpdateTable)(JSON.parse(written))).toEqual(table)
-    expect(() => Schema.decodeUnknownSync(UpdateTable)({ ...table, version: 2 })).toThrow()
+    expect(() => Schema.decodeUnknownSync(UpdateTable)({ ...table, version: 2 })).toThrow(
+      /\["version"\]/,
+    )
   })
 })
 

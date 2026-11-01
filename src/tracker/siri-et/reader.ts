@@ -60,6 +60,9 @@ export interface SiriEtReader {
   table(now: number): UpdateTable
 }
 
+/** A dataset's counts as the reader keeps adding to them. */
+type Counts = { -readonly [K in keyof DatasetCounts]: DatasetCounts[K] }
+
 interface HeldCall {
   readonly stop: string
   readonly aimed: number
@@ -90,7 +93,7 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
   // A Map keeps its order of insertion: each update moves its journey to the end, so the first
   // is always the one updated longest ago.
   const held = new Map<string, HeldJourney>()
-  const datasets = new Map<string, DatasetCounts>()
+  const datasets = new Map<string, Counts>()
   let lastMessageAt: number | undefined
   let evicted = 0
 
@@ -154,7 +157,7 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
     }
   }
 
-  function countsOf(dataset: string, at: number): DatasetCounts {
+  function countsOf(dataset: string, at: number): Counts {
     let counts = datasets.get(dataset)
     if (!counts) {
       counts = {
@@ -167,7 +170,7 @@ export function siriEtReader({ box, listener, limits }: ReaderOptions): SiriEtRe
       }
       datasets.set(dataset, counts)
     }
-    return counts as { -readonly [K in keyof DatasetCounts]: DatasetCounts[K] }
+    return counts
   }
 
   function table(now: number): UpdateTable {
