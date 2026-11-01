@@ -1,0 +1,7 @@
+{
+  "en.statuses": "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.",
+  "en.legend": "Live\nAgeing\nEstimated\nTimetable only\nNo signal\nPlanes\n\nEvery vehicle is Timetable only for now: live positions aren't connected yet.",
+  "en.updated": "Updated 07:20:00 (snapshot 07:20:00)",
+  "da.statuses": "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være. Fly: optagne data fra adsb.lol.",
+  "da.legend": "Live\nÆldre\nBeregnet\nKun køreplan\nIntet signal\nFly\n\nAlle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner."
+}

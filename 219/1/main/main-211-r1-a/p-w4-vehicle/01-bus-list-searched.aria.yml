@@ -1,0 +1,126 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:23:30
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 7" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 17" [selected]
+    - tab "Disruptions 3"
+  - tabpanel "Vehicles 17":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": 5C
+      - button "Clear"
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: positions 07:23:30
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position Delay":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+          - columnheader "Delay":
+            - button "Delay"
+      - rowgroup:
+        - row "5C Bus 5C to Husum Torv Estimated 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "2 min late"
+        - row "5C Bus 5C to Husum Torv Estimated On time":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0716"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "On time"
+        - row "5C Bus 5C to Sundbyvester Plads Live 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.a74214d87d.20260616.0714"
+              - text: Sundbyvester Plads
+          - cell "Live"
+          - cell "2 min late"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated 1 min early":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0700"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "1 min early"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated 1 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0716"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "1 min late"
+- alert
+- region "Notifications"

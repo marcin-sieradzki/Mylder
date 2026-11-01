@@ -1,0 +1,159 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:24:08
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles&trip=train.RE.7c3e865b99.20260616.0717
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 17" [selected]
+    - tab "Disruptions 3"
+  - tabpanel "Vehicles 17":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": RE
+      - button "Clear"
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: positions 07:24:08
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position Delay":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+          - columnheader "Delay":
+            - button "Delay"
+      - rowgroup:
+        - row "RE Train RE to Næstved St. Live 1 min late":
+          - rowheader "RE"
+          - rowheader "Train RE to Næstved St.":
+            - link "Train RE to Næstved St.":
+              - /url: "?tab=vehicles&trip=train.RE.7c3e865b99.20260616.0717"
+              - text: Næstved St.
+          - cell "Live"
+          - cell "1 min late"
+- dialog "RE to Næstved St.":
+  - heading "RE to Næstved St." [level=2]
+  - text: Train
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Live
+  - paragraph: Reported by the vehicle; seen 07:24:08
+  - term: Delay
+  - definition: 1 min late
+  - term: Last seen
+  - definition: 07:24:08
+  - term: Next stop
+  - definition: Køge Nord St.
+  - paragraph: Between København Syd St. and Køge Nord St.
+  - list "Stops":
+    - listitem:
+      - text: København H Passed
+      - time: 07:17
+      - text: Expected 07:18 1 min late
+    - listitem:
+      - text: København Syd St. Passed
+      - time: 07:22
+      - text: Expected 07:23 1 min late
+    - listitem:
+      - text: Køge Nord St. Next stop
+      - time: 07:37
+      - text: Expected 07:38 1 min late
+    - listitem:
+      - text: Ølby St.
+      - time: 07:41
+      - text: Expected 07:42 1 min late
+    - listitem:
+      - text: Køge St.
+      - time: 07:49
+      - text: Expected 07:50 1 min late
+    - listitem:
+      - text: Herfølge St.
+      - time: 07:54
+      - text: Expected 07:55 1 min late
+    - listitem:
+      - text: Tureby St.
+      - time: 08:00
+      - text: Expected 08:01 1 min late
+    - listitem:
+      - text: Haslev St.
+      - time: 08:06
+      - text: Expected 08:07 1 min late
+    - listitem:
+      - text: Holme-Olstrup St.
+      - time: 08:14
+      - text: Expected 08:15 1 min late
+    - listitem:
+      - text: Næstved Nord St.
+      - time: 08:18
+      - text: Expected 08:19 1 min late
+    - listitem:
+      - text: Næstved St.
+      - time: 08:22
+      - text: Expected 08:23 1 min late
+  - text: From the timetable
+  - paragraph:
+    - text: Rejseplanen ·
+    - time: position 07:24:08
+    - text: · times from the timetable
+- alert
+- region "Notifications"

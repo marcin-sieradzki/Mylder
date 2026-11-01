@@ -1,0 +1,208 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:21:01
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0707
+  - button "About Mylder"
+- status: "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "Every vehicle is Timetable only for now: live positions aren't connected yet."
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 17" [selected]
+    - tab "Disruptions"
+  - tabpanel "Vehicles 17":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": Hillerød St.
+      - button "Clear"
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 07:21:01
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+      - rowgroup:
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0707"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717"
+              - text: Hillerød St.
+          - cell "Timetable only"
+- dialog "A to Hillerød St.":
+  - heading "A to Hillerød St." [level=2]
+  - text: S-tog
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Timetable only
+  - paragraph: No live positions yet; placed from the timetable.
+  - term: Delay
+  - definition: Unknown
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: København Syd St.
+  - paragraph: Between Åmarken St. and København Syd St.
+  - list "Stops":
+    - listitem:
+      - text: Hundige St. Passed
+      - time: 07:07
+    - listitem:
+      - text: Ishøj St. Passed
+      - time: 07:09
+    - listitem:
+      - text: Vallensbæk St. Passed
+      - time: 07:12
+    - listitem:
+      - text: Brøndby Strand St. Passed
+      - time: 07:14
+    - listitem:
+      - text: Avedøre St. Passed
+      - time: 07:17
+    - listitem:
+      - text: Friheden St. Passed
+      - time: 07:19
+    - listitem:
+      - text: Åmarken St. Passed
+      - time: 07:21
+    - listitem:
+      - text: København Syd St. Next stop
+      - time: 07:23
+    - listitem:
+      - text: Sjælør St.
+      - time: 07:25
+    - listitem:
+      - text: Sydhavn St.
+      - time: 07:27
+    - listitem:
+      - text: Dybbølsbro St.
+      - time: 07:29
+    - listitem:
+      - text: København H
+      - time: 07:33
+    - listitem:
+      - text: Vesterport St.
+      - time: 07:34
+    - listitem:
+      - text: Nørreport St.
+      - time: 07:36
+    - listitem:
+      - text: Østerport St.
+      - time: 07:38
+    - listitem:
+      - text: Nordhavn St.
+      - time: 07:41
+    - listitem:
+      - text: Svanemøllen St.
+      - time: 07:43
+    - listitem:
+      - text: Hellerup St.
+      - time: 07:45
+    - listitem:
+      - text: Bernstorffsvej St.
+      - time: 07:47
+    - listitem:
+      - text: Gentofte St.
+      - time: 07:48
+    - listitem:
+      - text: Jægersborg St.
+      - time: 07:49
+    - listitem:
+      - text: Lyngby St.
+      - time: 07:51
+    - listitem:
+      - text: Sorgenfri St.
+      - time: 07:52
+    - listitem:
+      - text: Virum St.
+      - time: 07:54
+    - listitem:
+      - text: Holte St.
+      - time: 07:55
+    - listitem:
+      - text: Birkerød St.
+      - time: 08:00
+    - listitem:
+      - text: Høvelte St.
+      - time: 08:02
+    - listitem:
+      - text: Allerød St.
+      - time: 08:04
+    - listitem:
+      - text: Favrholm St.
+      - time: 08:08
+    - listitem:
+      - text: Hillerød St.
+      - time: 08:11
+  - paragraph:
+    - text: Timetable ·
+    - time: placed 07:21:01
+- alert
+- region "Notifications"

@@ -1,0 +1,30 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { dump } from './dump.ts'
+const J = 't1-banner-legend'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.locator('[data-vehicles]')).not.toHaveAttribute('data-vehicles', '0')
+  const outside = page.locator('[role="status"]:not([role="dialog"] *)')
+  await expect(outside.first()).toContainText("Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.")
+  await expect(page.getByText(/Planes: (live|recorded)/)).toBeVisible()
+  await expect(page.getByText(/paused|hasn't answered/i)).toHaveCount(0)
+  const snap = await (await page.request.get('/api/snapshot')).json()
+  expect(snap.source).toEqual({ kind: 'timetable' })
+  expect(snap.trips.every((t: any) => t.state === 'timetable-only')).toBe(true)
+  const hhmmss = new Date(snap.fetched).toLocaleTimeString('en-GB', { timeZone: 'Europe/Copenhagen' })
+  await expect(page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible()
+  const legend = page.getByRole('list', { name: 'Data states' })
+  await expect(legend.locator('xpath=..')).toContainText("Every vehicle is Timetable only for now: live positions aren't connected yet.")
+  await step('en map loaded')
+  dump(J, 'en.statuses', (await outside.allInnerTexts()).join('\n|\n'))
+  dump(J, 'en.legend', await legend.locator('xpath=..').innerText())
+  dump(J, 'en.updated', `${await page.getByRole('banner').getByText(/^Updated /).innerText()} (snapshot ${hhmmss})`)
+  await page.goto('/da')
+  await expect(page.locator('[data-vehicles]')).not.toHaveAttribute('data-vehicles', '0')
+  await expect(outside.first()).toContainText('Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være.')
+  const dl = page.getByRole('list', { name: 'Datatilstande' })
+  await expect(dl.locator('xpath=..')).toContainText('Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.')
+  await step('da map loaded')
+  dump(J, 'da.statuses', (await outside.allInnerTexts()).join('\n|\n'))
+  dump(J, 'da.legend', await dl.locator('xpath=..').innerText())
+}

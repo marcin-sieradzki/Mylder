@@ -1,0 +1,15 @@
+{
+  "journey": "w4-vehicle",
+  "pass": true,
+  "steps": [
+    "01-bus-list-searched: bus list searched (http://localhost:4303/en?tab=vehicles)",
+    "02-bus-vehicle-open: bus vehicle open (http://localhost:4303/en?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707)",
+    "03-metro-list-searched: metro list searched (http://localhost:4303/en?tab=vehicles)",
+    "04-metro-vehicle-open: metro vehicle open (http://localhost:4303/en?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703)",
+    "05-s-tog-list-searched: s-tog list searched (http://localhost:4303/en?tab=vehicles)",
+    "06-s-tog-vehicle-open: s-tog vehicle open (http://localhost:4303/en?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0707)",
+    "07-train-list-searched: train list searched (http://localhost:4303/en?tab=vehicles)",
+    "08-train-vehicle-open: train vehicle open (http://localhost:4303/en?tab=vehicles&trip=train.RE.7c3e865b99.20260616.0717)",
+    "09-da-bus-vehicle: da bus vehicle (http://localhost:4303/da?trip=bus.5C.32331e0e20.20260616.0707)"
+  ]
+}

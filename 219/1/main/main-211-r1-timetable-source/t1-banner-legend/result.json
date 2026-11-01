@@ -1,0 +1,8 @@
+{
+  "journey": "t1-banner-legend",
+  "pass": true,
+  "steps": [
+    "01-en-map-loaded: en map loaded (http://localhost:4401/en)",
+    "02-da-map-loaded: da map loaded (http://localhost:4401/da)"
+  ]
+}

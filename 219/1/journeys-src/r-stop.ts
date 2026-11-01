@@ -1,0 +1,51 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+export default async ({ page, step, expect }: Journey) => {
+  // Standing, within the first three minutes
+  await page.goto('/en?stop=48645')
+  let panel = page.getByRole('dialog', { name: 'Refshaleøen' })
+  const standing = panel.getByRole('region', { name: 'At the platforms now' })
+  await expect(standing).toContainText('991')
+  await expect(standing).toContainText('Teglholmen')
+  await step('refshaleoen standing')
+  await standing.getByRole('button', { name: 'Bus 991 to Teglholmen' }).click()
+  await expect(page.getByRole('dialog', { name: /991 to Teglholmen/ })).toBeVisible()
+  await expect(page).toHaveURL(/trip=/)
+  await expect(page).not.toHaveURL(/stop=/)
+  await step('standing trip opened')
+  // From the map: Østerport St.
+  await page.goto('/en?map=15.00/55.69250/12.58779')
+  const vp = page.viewportSize()!
+  await expect(async () => {
+    await page.mouse.click(vp.width / 2, vp.height / 2)
+    await expect(page.getByRole('dialog', { name: 'Østerport St.' })).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 30000 })
+  panel = page.getByRole('dialog', { name: 'Østerport St.' })
+  await expect(page).toHaveURL(/stop=/)
+  await expect(panel.getByRole('tab', { name: 'Departures' })).toHaveAttribute('aria-selected', 'true')
+  await expect(panel.getByRole('list', { name: 'Departures' }).getByRole('listitem').first()).toBeVisible()
+  await step('osterport from map')
+  // Track at København Syd from 07:22
+  await expect.poll(async () => (await (await page.request.get('/api/snapshot')).json()).fetched, { timeout: 120000, intervals: [2000] }).toBeGreaterThanOrEqual(Date.parse('2026-06-16T05:22:00Z'))
+  await page.goto('/en?stop=8600783')
+  panel = page.getByRole('dialog', { name: 'København Syd St.' })
+  await expect(panel).toContainText(/departures \d\d:\d\d/)
+  await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText('Track 8')
+  await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText('Næstved St.')
+  await step('kbh syd track')
+  // Arrivals at Nørreport
+  await page.goto('/en?stop=27532')
+  panel = page.getByRole('dialog', { name: 'Nørreport St.' })
+  await expect(panel.getByRole('region', { name: 'At the platforms now' })).toContainText('No vehicle of the types shown is standing at the platforms now.')
+  await panel.getByRole('tab', { name: 'Arrivals' }).click()
+  await expect(page).toHaveURL(/stop=27532&board=arrivals/)
+  await expect(panel.getByRole('tabpanel', { name: 'Arrivals' }).getByRole('list', { name: 'Arrivals' })).toBeVisible()
+  await expect(panel).toContainText('From Holte St.')
+  await expect(panel).toContainText(/Timetable and positions \d\d:\d\d/)
+  await step('norreport arrivals')
+  await panel.getByRole('tab', { name: 'Departures' }).click()
+  await expect(page).not.toHaveURL(/board=/)
+  await step('back to departures')
+  await page.goto('/en?stop=nowhere')
+  await expect(page.getByRole('dialog', { name: 'Stop not found' })).toBeVisible()
+  await step('missing')
+}

@@ -1,0 +1,114 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 07:21:02
+  - group "Filtre":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Tog 1" [pressed]
+    - button "Fly 8" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en?tab=disruptions
+  - button "Om Mylder"
+- status: "Optagne data fra 16. juni 2026. Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls"
+    - tab "Køretøjer 17"
+    - tab "Driftsforstyrrelser 3" [selected]
+  - tabpanel "Driftsforstyrrelser 3":
+    - list "Aktuelle nu":
+      - listitem:
+        - text: Driftsmeddelelse
+        - paragraph: Færre S-tog mellem København H og Hellerup
+        - paragraph: Signalfejl ved Østerport. Forvent ventetid og ændrede spor.
+        - heading "Mere" [level=3]:
+          - button "Mere"
+        - list "Transportformer":
+          - listitem: S-tog
+        - paragraph: Mellem København H og Hellerup St.
+        - paragraph:
+          - time: 05:00
+          - text: til
+          - time: 23:30
+        - button "Vis på kortet"
+      - listitem:
+        - text: Planlagt arbejde
+        - paragraph: Linje 5C kører en anden rute ved Langebro
+        - paragraph: På grund af vejarbejde kører linje 5C via Knippelsbro.
+        - heading "Mere" [level=3]:
+          - button "Mere"
+        - list "Transportformer":
+          - listitem: Bus
+        - paragraph: Mellem Klaksvigsgade (Langebro) og Klaksvigsgade (Amager Boulevard)
+        - paragraph:
+          - time: "15."
+          - text: til
+          - time: 18. juni
+        - button "Vis på kortet"
+    - region "Senere":
+      - heading "Senere" [level=3]
+      - list "Senere":
+        - listitem:
+          - text: Planlagt arbejde
+          - paragraph: Ingen S-tog mellem Hellerup og Holte i weekenden
+          - paragraph: Sporarbejde. Togbusser kører i stedet.
+          - heading "Mere" [level=3]:
+            - button "Mere"
+          - list "Transportformer":
+            - listitem: S-tog
+          - paragraph: Mellem Hellerup St. og Holte St.
+          - paragraph:
+            - time: "20."
+            - text: til
+            - time: 21. juni
+          - button "Vis på kortet"
+    - paragraph: Meddelelser fra Rejseplanen, tjekket 07:20.
+    - paragraph: Tjekkes hvert 15. minut, mens kortet er åbent.
+- alert
+- region "Notifikationer"

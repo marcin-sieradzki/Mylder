@@ -1,0 +1,11 @@
+{
+  "journey": "t3-pulse",
+  "pass": true,
+  "steps": [
+    "01-en-city-pulse: en city pulse (http://localhost:4401/en)",
+    "02-en-vehicles: en vehicles (http://localhost:4401/en?tab=vehicles)",
+    "03-en-disruptions: en disruptions (http://localhost:4401/en?tab=disruptions)",
+    "04-da-city-pulse: da city pulse (http://localhost:4401/da)",
+    "05-da-disruptions: da disruptions (http://localhost:4401/da?tab=disruptions)"
+  ]
+}

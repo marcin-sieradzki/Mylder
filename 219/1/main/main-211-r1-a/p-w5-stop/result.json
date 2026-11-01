@@ -1,0 +1,13 @@
+{
+  "journey": "p-w5-stop",
+  "pass": true,
+  "steps": [
+    "01-27532-departures: 27532 departures (http://localhost:4302/en?stop=27532)",
+    "02-27532-arrivals: 27532 arrivals (http://localhost:4302/en?stop=27532&board=arrivals)",
+    "03-8600783-departures: 8600783 departures (http://localhost:4302/en?stop=8600783)",
+    "04-8600783-arrivals: 8600783 arrivals (http://localhost:4302/en?stop=8600783&board=arrivals)",
+    "05-8603313-departures: 8603313 departures (http://localhost:4302/en?stop=8603313)",
+    "06-8603313-arrivals: 8603313 arrivals (http://localhost:4302/en?stop=8603313&board=arrivals)",
+    "07-da-27532-departures: da 27532 departures (http://localhost:4302/da?stop=27532)"
+  ]
+}

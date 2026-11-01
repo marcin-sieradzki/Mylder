@@ -1,0 +1,12 @@
+{
+  "journey": "r-disruptions-lang",
+  "pass": true,
+  "steps": [
+    "01-disruptions-list: disruptions list (http://localhost:4303/en?tab=disruptions)",
+    "02-shown-on-map: shown on map (http://localhost:4303/en?tab=disruptions&map=11.28/55.70501/12.57566)",
+    "03-cleared: cleared (http://localhost:4303/en?tab=disruptions&map=11.28/55.70501/12.57566)",
+    "04-dansk: dansk (http://localhost:4303/da?line=5C)",
+    "05-about: about (http://localhost:4303/en?line=5C)",
+    "06-about-closed: about closed (http://localhost:4303/en?line=5C)"
+  ]
+}

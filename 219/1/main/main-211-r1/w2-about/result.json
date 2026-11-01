@@ -1,0 +1,13 @@
+{
+  "journey": "w2-about",
+  "pass": true,
+  "steps": [
+    "01-en-before-about: en before about (http://localhost:4302/en)",
+    "02-en-about-open: en about open (http://localhost:4302/en)",
+    "03-en-about-closed: en about closed (http://localhost:4302/en)",
+    "04-da-before-about: da before about (http://localhost:4302/da)",
+    "05-da-about-open: da about open (http://localhost:4302/da)",
+    "06-da-about-closed: da about closed (http://localhost:4302/da)",
+    "07-about-from-credit: about from credit (http://localhost:4302/en)"
+  ]
+}

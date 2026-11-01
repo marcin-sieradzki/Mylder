@@ -1,0 +1,207 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 12:42:53
+  - group "Filters":
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles
+  - button "About Mylder"
+- status: "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "Every vehicle is Timetable only for now: live positions aren't connected yet."
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 631" [selected]
+    - tab "Disruptions"
+  - tabpanel "Vehicles 631":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": Hillerød St.
+      - button "Clear"
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 12:42:53
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+      - rowgroup:
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1118"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1128"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1138"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1148"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1158"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1208"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1218"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1228"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "A S-tog A to Hillerød St. Timetable only":
+          - rowheader "A"
+          - rowheader "S-tog A to Hillerød St.":
+            - link "S-tog A to Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1238"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "303 Bus 303 to Hillerød St. Timetable only":
+          - rowheader "303"
+          - rowheader "Bus 303 to Hillerød St.":
+            - link "Bus 303 to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.303.d88dce2bcb.20261101.1240"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "326 Bus 326 to Hillerød St. Timetable only":
+          - rowheader "326"
+          - rowheader "Bus 326 to Hillerød St.":
+            - link "Bus 326 to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.326.dff4833169.20261101.1214"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "335 Bus 335 to Hillerød St. Timetable only":
+          - rowheader "335"
+          - rowheader "Bus 335 to Hillerød St.":
+            - link "Bus 335 to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.335.2c9c113cea.20261101.1221"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "337 Bus 337 to Hillerød St. Timetable only":
+          - rowheader "337"
+          - rowheader "Bus 337 to Hillerød St.":
+            - link "Bus 337 to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.337.bd029c665e.20261101.1245"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "600S Bus 600S to Hillerød St. Timetable only":
+          - rowheader "600S"
+          - rowheader "Bus 600S to Hillerød St.":
+            - link "Bus 600S to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.600S.7055549089.20261101.1035"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "600S Bus 600S to Hillerød St. Timetable only":
+          - rowheader "600S"
+          - rowheader "Bus 600S to Hillerød St.":
+            - link "Bus 600S to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.600S.7055549089.20261101.1105"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "600S Bus 600S to Hillerød St. Timetable only":
+          - rowheader "600S"
+          - rowheader "Bus 600S to Hillerød St.":
+            - link "Bus 600S to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.600S.7055549089.20261101.1135"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "600S Bus 600S to Hillerød St. Timetable only":
+          - rowheader "600S"
+          - rowheader "Bus 600S to Hillerød St.":
+            - link "Bus 600S to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.600S.7055549089.20261101.1205"
+              - text: Hillerød St.
+          - cell "Timetable only"
+        - row "600S Bus 600S to Hillerød St. Timetable only":
+          - rowheader "600S"
+          - rowheader "Bus 600S to Hillerød St.":
+            - link "Bus 600S to Hillerød St.":
+              - /url: "?tab=vehicles&trip=bus.600S.7055549089.20261101.1235"
+              - text: Hillerød St.
+          - cell "Timetable only"
+- alert
+- region "Notifications"

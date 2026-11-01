@@ -1,0 +1,14 @@
+{
+  "journey": "t4-vehicle",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: / to / })\nExpected: visible\nTimeout: 1500ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: / to / }) with timeout 1500ms\n  - waiting for getByRole('dialog', { name: / to / })\n\n\nCall Log:\n- Timeout 60000ms exceeded while waiting on the predicate",
+  "steps": [
+    "01-bus-centred: bus centred (http://localhost:4401/en?hide=metro,s-tog,train,light-rail,aircraft&map=14.00/55.66837/12.58400)",
+    "02-bus-vehicle-open: bus vehicle open (http://localhost:4401/en?hide=metro,s-tog,train,light-rail,aircraft&map=14.00/55.66837/12.58400&trip=bus.5C.32331e0e20.20260616.0707)",
+    "03-da-bus-vehicle: da bus vehicle (http://localhost:4401/da?trip=bus.5C.32331e0e20.20260616.0707)",
+    "04-metro-centred: metro centred (http://localhost:4401/en?hide=bus,s-tog,train,light-rail,aircraft&map=14.00/55.65049/12.58777)",
+    "05-metro-vehicle-open: metro vehicle open (http://localhost:4401/en?hide=bus,s-tog,train,light-rail,aircraft&map=14.00/55.65049/12.58777&trip=metro.M1.7f21f99145.20260616.0703)",
+    "06-s-tog-centred: s-tog centred (http://localhost:4401/en?hide=bus,metro,train,light-rail,aircraft&map=14.00/55.63346/12.49303)",
+    "07-failure: failure (http://localhost:4401/en?hide=bus,metro,train,light-rail,aircraft&map=14.00/55.63346/12.49303)"
+  ]
+}

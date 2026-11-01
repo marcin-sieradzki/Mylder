@@ -1,0 +1,287 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:22:27
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 17" [selected]
+    - tab "Disruptions 3"
+  - tabpanel "Vehicles 17":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": 5C
+      - button "Clear"
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: positions 07:22:27
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position Delay":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+          - columnheader "Delay":
+            - button "Delay"
+      - rowgroup:
+        - row "5C Bus 5C to Husum Torv Estimated 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "2 min late"
+        - row "5C Bus 5C to Husum Torv Estimated 1 min early":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0716"
+              - text: Husum Torv
+          - cell "Estimated"
+          - cell "1 min early"
+        - row "5C Bus 5C to Sundbyvester Plads Live 2 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.a74214d87d.20260616.0714"
+              - text: Sundbyvester Plads
+          - cell "Live"
+          - cell "2 min late"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated On time":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0700"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "On time"
+        - row "5C Bus 5C to Sundbyvester Plads Estimated 1 min late":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0716"
+              - text: Sundbyvester Plads
+          - cell "Estimated"
+          - cell "1 min late"
+- dialog "5C to Husum Torv":
+  - heading "5C to Husum Torv" [level=2]
+  - text: Bus
+  - button "Follow"
+  - button "Show whole line"
+  - button "Close"
+  - text: Estimated
+  - paragraph: Position computed by Rejseplanen
+  - term: Delay
+  - definition: 2 min late
+  - term: Last seen
+  - definition: Unknown
+  - term: Next stop
+  - definition: Klaksvigsgade (Langebro)
+  - paragraph: At Klaksvigsgade (Langebro)
+  - list "Stops":
+    - listitem:
+      - text: Sundbyvester Plads (Amagerbrogade) Passed
+      - time: 07:07
+      - text: Expected 07:09 2 min late
+    - listitem:
+      - text: Smyrnavej (Amagerbrogade) Passed
+      - time: 07:09
+      - text: Expected 07:11 2 min late
+    - listitem:
+      - text: Tycho Brahes Allé (Amagerbrogade) Passed
+      - time: 07:10
+      - text: Expected 07:12 2 min late
+    - listitem:
+      - text: Øresundsvej (Amagerbrogade) Passed
+      - time: 07:12
+      - text: Expected 07:14 2 min late
+    - listitem:
+      - text: Tingvej (Amagerbrogade) Passed
+      - time: 07:13
+      - text: Expected 07:15 2 min late
+    - listitem:
+      - text: Amagerbro St. (Amagerbrogade) Passed
+      - time: 07:15
+      - text: Expected 07:17 2 min late
+    - listitem:
+      - text: Sønderport (Amager Boulevard) Passed
+      - time: 07:16
+      - text: Expected 07:18 2 min late
+    - listitem:
+      - text: Amagerfælledvej (Amager Boulevard) Passed
+      - time: 07:17
+      - text: Expected 07:19 2 min late
+    - listitem:
+      - text: Ørestads Boulevard (Amager Boulevard) Passed
+      - time: 07:19
+      - text: Expected 07:21 2 min late
+    - listitem:
+      - text: Klaksvigsgade (Langebro) Next stop
+      - time: 07:21
+      - text: Expected 07:23 2 min late
+    - listitem:
+      - text: Otto Mønsteds Plads (Rysensteensgade)
+      - time: 07:24
+      - text: Expected 07:26 2 min late
+    - listitem:
+      - text: Polititorvet
+      - time: 07:25
+      - text: Expected 07:27 2 min late
+    - listitem:
+      - text: Hovedbanegården, Tivoli (Bernstorffsgade)
+      - time: 07:28
+      - text: Expected 07:30 2 min late
+    - listitem:
+      - text: Rådhuspladsen St. (H.C. Andersens Boulevard)
+      - time: 07:31
+      - text: Expected 07:33 2 min late
+    - listitem:
+      - text: Teglgårdstræde (Nørre Voldgade)
+      - time: 07:33
+      - text: Expected 07:35 2 min late
+    - listitem:
+      - text: Nørreport St. (Nørre Voldgade)
+      - time: 07:36
+      - text: Expected 07:38 2 min late
+    - listitem:
+      - text: Nørre Farimagsgade (Frederiksborggade)
+      - time: 07:37
+      - text: Expected 07:39 2 min late
+    - listitem:
+      - text: Ravnsborggade (Nørrebrogade)
+      - time: 07:39
+      - text: Expected 07:41 2 min late
+    - listitem:
+      - text: Elmegade (Nørrebrogade)
+      - time: 07:40
+      - text: Expected 07:42 2 min late
+    - listitem:
+      - text: Kapelvej (Nørrebrogade)
+      - time: 07:42
+      - text: Expected 07:44 2 min late
+    - listitem:
+      - text: Sjællandsgade (Nørrebrogade)
+      - time: 07:43
+      - text: Expected 07:45 2 min late
+    - listitem:
+      - text: Nørrebros Runddel St. (Nørrebrogade)
+      - time: 07:44
+      - text: Expected 07:46 2 min late
+    - listitem:
+      - text: Stefansgade (Nørrebrogade)
+      - time: 07:45
+      - text: Expected 07:47 2 min late
+    - listitem:
+      - text: Nørrebrohallen (Nørrebrogade)
+      - time: 07:47
+      - text: Expected 07:49 2 min late
+    - listitem:
+      - text: Nørrebro St. (Frederikssundsvej)
+      - time: 07:49
+      - text: Expected 07:51 2 min late
+    - listitem:
+      - text: Glasvej (Frederikssundsvej)
+      - time: 07:51
+      - text: Expected 07:53 2 min late
+    - listitem:
+      - text: Hulgårds Plads (Frederikssundsvej)
+      - time: 07:53
+      - text: Expected 07:55 2 min late
+    - listitem:
+      - text: Bellahøj (Frederikssundsvej)
+      - time: 07:55
+      - text: Expected 07:57 2 min late
+    - listitem:
+      - text: Hyrdevangen (Frederikssundsvej)
+      - time: 07:56
+      - text: Expected 07:58 2 min late
+    - listitem:
+      - text: Brønshøj Torv (Frederikssundsvej)
+      - time: 07:58
+      - text: Expected 08:00 2 min late
+    - listitem:
+      - text: Astrupvej (Frederikssundsvej)
+      - time: 08:00
+      - text: Expected 08:02 2 min late
+    - listitem:
+      - text: Veksøvej (Frederikssundsvej)
+      - time: 08:01
+      - text: Expected 08:03 2 min late
+    - listitem:
+      - text: Kobbelvænget (Frederikssundsvej)
+      - time: 08:02
+      - text: Expected 08:04 2 min late
+    - listitem:
+      - text: Husumvej (Frederikssundsvej)
+      - time: 08:03
+      - text: Expected 08:05 2 min late
+    - listitem:
+      - text: Husum Torv, Sløjfen (Sløjfen)
+      - time: 08:05
+      - text: Expected 08:07 2 min late
+  - text: From the timetable
+  - paragraph:
+    - text: Rejseplanen ·
+    - time: position 07:20:00
+    - text: · times from the timetable
+- alert
+- region "Notifications"

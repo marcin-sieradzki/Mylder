@@ -1,0 +1,13 @@
+{
+  "journey": "r-stop",
+  "pass": true,
+  "steps": [
+    "01-refshaleoen-standing: refshaleoen standing (http://localhost:4303/en?stop=48645)",
+    "02-standing-trip-opened: standing trip opened (http://localhost:4303/en?trip=bus.991.7ce514fd98.20260616.0700)",
+    "03-osterport-from-map: osterport from map (http://localhost:4303/en?map=15.00/55.69250/12.58779&stop=8600650)",
+    "04-kbh-syd-track: kbh syd track (http://localhost:4303/en?stop=8600783)",
+    "05-norreport-arrivals: norreport arrivals (http://localhost:4303/en?stop=27532&board=arrivals)",
+    "06-back-to-departures: back to departures (http://localhost:4303/en?stop=27532)",
+    "07-missing: missing (http://localhost:4303/en?stop=nowhere)"
+  ]
+}

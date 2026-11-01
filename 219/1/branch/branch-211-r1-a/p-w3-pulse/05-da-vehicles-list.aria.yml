@@ -1,0 +1,229 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 07:25:09
+  - group "Filtre":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Tog 1" [pressed]
+    - button "Fly 9" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en?tab=vehicles
+  - button "Om Mylder"
+- status: "Optagne data fra 16. juni 2026. Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls"
+    - tab "Køretøjer 18" [selected]
+    - tab "Driftsforstyrrelser 3"
+  - tabpanel "Køretøjer 18":
+    - text: Søg i linjer og destinationer
+    - group:
+      - combobox "Søg i linjer og destinationer"
+    - paragraph:
+      - text: Rejseplanen ·
+      - time: positioner 07:25:09
+    - status
+    - table "Køretøjer":
+      - rowgroup:
+        - row "Linje Destination Position Forsinkelse":
+          - columnheader "Linje":
+            - button "Linje"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+          - columnheader "Forsinkelse":
+            - button "Forsinkelse"
+      - rowgroup:
+        - row "M1 Metro M1 mod Vestamager St. (Metro) Kun køreplan Forsinkelse ukendt":
+          - rowheader "M1"
+          - rowheader "Metro M1 mod Vestamager St. (Metro)":
+            - link "Metro M1 mod Vestamager St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0703"
+              - text: Vestamager St. (Metro)
+          - cell "Kun køreplan"
+          - cell "Forsinkelse ukendt"
+        - row "M1 Metro M1 mod Vestamager St. (Metro) Kun køreplan Forsinkelse ukendt":
+          - rowheader "M1"
+          - rowheader "Metro M1 mod Vestamager St. (Metro)":
+            - link "Metro M1 mod Vestamager St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.7f21f99145.20260616.0707"
+              - text: Vestamager St. (Metro)
+          - cell "Kun køreplan"
+          - cell "Forsinkelse ukendt"
+        - row "M1 Metro M1 mod Vanløse St. (Metro) Kun køreplan Forsinkelse ukendt":
+          - rowheader "M1"
+          - rowheader "Metro M1 mod Vanløse St. (Metro)":
+            - link "Metro M1 mod Vanløse St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.c6fa766489.20260616.0701"
+              - text: Vanløse St. (Metro)
+          - cell "Kun køreplan"
+          - cell "Forsinkelse ukendt"
+        - row "M1 Metro M1 mod Vanløse St. (Metro) Kun køreplan Forsinkelse ukendt":
+          - rowheader "M1"
+          - rowheader "Metro M1 mod Vanløse St. (Metro)":
+            - link "Metro M1 mod Vanløse St. (Metro)":
+              - /url: "?tab=vehicles&trip=metro.M1.c6fa766489.20260616.0705"
+              - text: Vanløse St. (Metro)
+          - cell "Kun køreplan"
+          - cell "Forsinkelse ukendt"
+        - row "A S-tog A mod Hillerød St. Live 4 min forsinket":
+          - rowheader "A"
+          - rowheader "S-tog A mod Hillerød St.":
+            - link "S-tog A mod Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0707"
+              - text: Hillerød St.
+          - cell "Live"
+          - cell "4 min forsinket"
+        - row "A S-tog A mod Hillerød St. Live 2 min forsinket":
+          - rowheader "A"
+          - rowheader "S-tog A mod Hillerød St.":
+            - link "S-tog A mod Hillerød St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.0bc307e3eb.20260616.0717"
+              - text: Hillerød St.
+          - cell "Live"
+          - cell "2 min forsinket"
+        - row "A S-tog A mod Hundige St. Live 2 min forsinket":
+          - rowheader "A"
+          - rowheader "S-tog A mod Hundige St.":
+            - link "S-tog A mod Hundige St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.79fbe8e1f8.20260616.0705"
+              - text: Hundige St.
+          - cell "Live"
+          - cell "2 min forsinket"
+        - row "A S-tog A mod Hundige St. Live 2 min forsinket":
+          - rowheader "A"
+          - rowheader "S-tog A mod Hundige St.":
+            - link "S-tog A mod Hundige St.":
+              - /url: "?tab=vehicles&trip=s-tog.A.79fbe8e1f8.20260616.0715"
+              - text: Hundige St.
+          - cell "Live"
+          - cell "2 min forsinket"
+        - row "E S-tog E mod Holte St. Beregnet 1 min forsinket":
+          - rowheader "E"
+          - rowheader "S-tog E mod Holte St.":
+            - link "S-tog E mod Holte St.":
+              - /url: "?tab=vehicles&trip=s-tog.E.7c0294e28d.20260616.0705"
+              - text: Holte St.
+          - cell "Beregnet"
+          - cell "1 min forsinket"
+        - row "E S-tog E mod Køge St. Live 1 min forsinket":
+          - rowheader "E"
+          - rowheader "S-tog E mod Køge St.":
+            - link "S-tog E mod Køge St.":
+              - /url: "?tab=vehicles&trip=s-tog.E.e8dc141a28.20260616.0702"
+              - text: Køge St.
+          - cell "Live"
+          - cell "1 min forsinket"
+        - row "RE Tog RE mod Næstved St. Live 2 min forsinket":
+          - rowheader "RE"
+          - rowheader "Tog RE mod Næstved St.":
+            - link "Tog RE mod Næstved St.":
+              - /url: "?tab=vehicles&trip=train.RE.7c3e865b99.20260616.0717"
+              - text: Næstved St.
+          - cell "Live"
+          - cell "2 min forsinket"
+        - row "5C Bus 5C mod Husum Torv Beregnet 2 min forsinket":
+          - rowheader "5C"
+          - rowheader "Bus 5C mod Husum Torv":
+            - link "Bus 5C mod Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0707"
+              - text: Husum Torv
+          - cell "Beregnet"
+          - cell "2 min forsinket"
+        - row "5C Bus 5C mod Husum Torv Beregnet Til tiden":
+          - rowheader "5C"
+          - rowheader "Bus 5C mod Husum Torv":
+            - link "Bus 5C mod Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.32331e0e20.20260616.0716"
+              - text: Husum Torv
+          - cell "Beregnet"
+          - cell "Til tiden"
+        - row "5C Bus 5C mod Sundbyvester Plads Live 2 min forsinket":
+          - rowheader "5C"
+          - rowheader "Bus 5C mod Sundbyvester Plads":
+            - link "Bus 5C mod Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.a74214d87d.20260616.0714"
+              - text: Sundbyvester Plads
+          - cell "Live"
+          - cell "2 min forsinket"
+        - row "5C Bus 5C mod Sundbyvester Plads Beregnet 1 min før tid":
+          - rowheader "5C"
+          - rowheader "Bus 5C mod Sundbyvester Plads":
+            - link "Bus 5C mod Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0700"
+              - text: Sundbyvester Plads
+          - cell "Beregnet"
+          - cell "1 min før tid"
+        - row "5C Bus 5C mod Sundbyvester Plads Beregnet 1 min forsinket":
+          - rowheader "5C"
+          - rowheader "Bus 5C mod Sundbyvester Plads":
+            - link "Bus 5C mod Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.b4936c5f43.20260616.0716"
+              - text: Sundbyvester Plads
+          - cell "Beregnet"
+          - cell "1 min forsinket"
+        - row "991 Bus 991 mod Teglholmen Beregnet 1 min forsinket":
+          - rowheader "991"
+          - rowheader "Bus 991 mod Teglholmen":
+            - link "Bus 991 mod Teglholmen":
+              - /url: "?tab=vehicles&trip=bus.991.7ce514fd98.20260616.0700"
+              - text: Teglholmen
+          - cell "Beregnet"
+          - cell "1 min forsinket"
+        - row "991 Bus 991 mod Teglholmen Kun køreplan Forsinkelse ukendt":
+          - rowheader "991"
+          - rowheader "Bus 991 mod Teglholmen":
+            - link "Bus 991 mod Teglholmen":
+              - /url: "?tab=vehicles&trip=bus.991.7ce514fd98.20260616.0730"
+              - text: Teglholmen
+          - cell "Kun køreplan"
+          - cell "Forsinkelse ukendt"
+- alert
+- region "Notifikationer"
