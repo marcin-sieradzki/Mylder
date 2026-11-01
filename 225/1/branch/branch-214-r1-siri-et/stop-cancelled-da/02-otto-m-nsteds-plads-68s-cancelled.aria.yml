@@ -1,0 +1,443 @@
+- main:
+  - region "Livekort over København"
+- banner:
+  - link "Mylder":
+    - /url: /da
+  - time: Opdateret 09:22:15
+  - group "Filtre":
+    - button "Bus 366" [pressed]
+    - button "Metro 38" [pressed]
+    - button "S-tog 29" [pressed]
+    - button "Tog 74" [pressed]
+    - button "Letbane 20" [pressed]
+    - button "Fly 8" [pressed]
+  - navigation "Sprog":
+    - link "English":
+      - /url: /en?stop=30090
+  - button "Om Mylder"
+- status: "Køreplan og forsinkelser: der er endnu ingen livepositioner, så hvert køretøj er placeret ud fra sin køreplan og, hvor Rejseplanen har sendt en, sin forsinkelse. Fly: optagne data fra adsb.lol."
+- list "Datatilstande":
+  - listitem: Live
+  - listitem: Ældre
+  - listitem: Beregnet
+  - listitem: Kun køreplan
+  - listitem: Intet signal
+  - listitem: Fly
+- paragraph: "Indtil videre er et køretøj Beregnet, placeret ud fra sin forsinkelse, eller Kun køreplan: der er endnu ingen livepositioner."
+- text: Målestok 1 km
+- toolbar "Kortknapper":
+  - button "Zoom ind"
+  - button "Zoom ud"
+  - separator
+  - button "Centrér kortet"
+  - separator
+  - button "3D-visning"
+  - button "Drej mod nord"
+  - separator
+  - button "Pause"
+- text: "Trafikdata:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Fly:"
+- link "© adsb.lol-bidragydere":
+  - /url: https://adsb.lol/
+- text: under
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap-bidragydere":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overblik":
+  - heading "Overblik" [level=2]
+  - button "Luk"
+  - tablist "Overblik":
+    - tab "Byens puls" [selected]
+    - tab "Køretøjer 590"
+    - tab "Driftsforstyrrelser"
+  - tabpanel "Byens puls":
+    - group "I bevægelse":
+      - text: I bevægelse 527
+      - paragraph: af 590 i drift
+    - group "Meldt i dette minut":
+      - text: Meldt i dette minut Ukendt
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - group "Melder live":
+      - text: Melder live Ukendt
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - paragraph:
+      - text: Køreplan ·
+      - time: placeret 09:22:15
+    - list "På kortet nu":
+      - listitem: Live 0
+      - listitem: Ældre 0
+      - listitem: Beregnet 408
+      - listitem: Kun køreplan 182
+      - listitem: Intet signal 0
+    - region "I bevægelse, efter transportform":
+      - heading "I bevægelse, efter transportform" [level=3]
+      - term: Bus
+      - definition: "366"
+      - term: Metro
+      - definition: "38"
+      - term: S-tog
+      - definition: "29"
+      - term: Tog
+      - definition: "74"
+      - term: Letbane
+      - definition: "20"
+    - region "Melder live, efter transportform":
+      - heading "Melder live, efter transportform" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+      - meter "Metro": Metro x
+      - paragraph: Ingen realtid fra Metroen; placeret efter køreplanen
+      - meter "S-tog": S-tog x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+      - meter "Tog": Tog x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+      - meter "Letbane": Letbane x
+      - paragraph: Ingen livepositioner endnu; placeret efter køreplanen
+    - status
+    - figure "Køretøjer i drift i dag Planlagt, ud fra dagens køreplan":
+      - text: Køretøjer i drift i dag Planlagt, ud fra dagens køreplan
+      - group "Køretøjer i drift i dag Planlagt, ud fra dagens køreplan":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "351"
+          - listitem:
+            - time: 00:15
+            - text: "311"
+          - listitem:
+            - time: 00:30
+            - text: "262"
+          - listitem:
+            - time: 00:45
+            - text: "215"
+          - listitem:
+            - time: 01:00
+            - text: "167"
+          - listitem:
+            - time: 01:15
+            - text: "156"
+          - listitem:
+            - time: 01:30
+            - text: "137"
+          - listitem:
+            - time: 01:45
+            - text: "125"
+          - listitem:
+            - time: 02:00
+            - text: "116"
+          - listitem:
+            - time: 02:15
+            - text: "117"
+          - listitem:
+            - time: 02:30
+            - text: "123"
+          - listitem:
+            - time: 02:45
+            - text: "119"
+          - listitem:
+            - time: 03:00
+            - text: "114"
+          - listitem:
+            - time: 03:15
+            - text: "121"
+          - listitem:
+            - time: 03:30
+            - text: "120"
+          - listitem:
+            - time: 03:45
+            - text: "115"
+          - listitem:
+            - time: 04:00
+            - text: "110"
+          - listitem:
+            - time: 04:15
+            - text: "109"
+          - listitem:
+            - time: 04:30
+            - text: "119"
+          - listitem:
+            - time: 04:45
+            - text: "118"
+          - listitem:
+            - time: 05:00
+            - text: "116"
+          - listitem:
+            - time: 05:15
+            - text: "137"
+          - listitem:
+            - time: 05:30
+            - text: "152"
+          - listitem:
+            - time: 05:45
+            - text: "165"
+          - listitem:
+            - time: 06:00
+            - text: "179"
+          - listitem:
+            - time: 06:15
+            - text: "217"
+          - listitem:
+            - time: 06:30
+            - text: "260"
+          - listitem:
+            - time: 06:45
+            - text: "277"
+          - listitem:
+            - time: 07:00
+            - text: "314"
+          - listitem:
+            - time: 07:15
+            - text: "360"
+          - listitem:
+            - time: 07:30
+            - text: "381"
+          - listitem:
+            - time: 07:45
+            - text: "394"
+          - listitem:
+            - time: 08:00
+            - text: "419"
+          - listitem:
+            - time: 08:15
+            - text: "440"
+          - listitem:
+            - time: 08:30
+            - text: "446"
+          - listitem:
+            - time: 08:45
+            - text: "467"
+          - listitem:
+            - time: 09:00
+            - text: "491"
+          - listitem:
+            - time: 09:15
+            - text: "528"
+          - listitem:
+            - time: 09:30
+            - text: "541"
+          - listitem:
+            - time: 09:45
+            - text: "567"
+          - listitem:
+            - time: 10:00
+            - text: "597"
+          - listitem:
+            - time: 10:15
+            - text: "622"
+          - listitem:
+            - time: 10:30
+            - text: "621"
+          - listitem:
+            - time: 10:45
+            - text: "636"
+          - listitem:
+            - time: 11:00
+            - text: "642"
+          - listitem:
+            - time: 11:15
+            - text: "650"
+          - listitem:
+            - time: 11:30
+            - text: "637"
+          - listitem:
+            - time: 11:45
+            - text: "641"
+          - listitem:
+            - time: 12:00
+            - text: "649"
+          - listitem:
+            - time: 12:15
+            - text: "658"
+          - listitem:
+            - time: 12:30
+            - text: "641"
+          - listitem:
+            - time: 12:45
+            - text: "651"
+          - listitem:
+            - time: 13:00
+            - text: "652"
+          - listitem:
+            - time: 13:15
+            - text: "658"
+          - listitem:
+            - time: 13:30
+            - text: "644"
+          - listitem:
+            - time: 13:45
+            - text: "646"
+          - listitem:
+            - time: 14:00
+            - text: "649"
+          - listitem:
+            - time: 14:15
+            - text: "653"
+          - listitem:
+            - time: 14:30
+            - text: "636"
+          - listitem:
+            - time: 14:45
+            - text: "647"
+          - listitem:
+            - time: 15:00
+            - text: "647"
+          - listitem:
+            - time: 15:15
+            - text: "655"
+          - listitem:
+            - time: 15:30
+            - text: "634"
+          - listitem:
+            - time: 15:45
+            - text: "643"
+          - listitem:
+            - time: 16:00
+            - text: "639"
+          - listitem:
+            - time: 16:15
+            - text: "638"
+          - listitem:
+            - time: 16:30
+            - text: "613"
+          - listitem:
+            - time: 16:45
+            - text: "617"
+          - listitem:
+            - time: 17:00
+            - text: "606"
+          - listitem:
+            - time: 17:15
+            - text: "604"
+          - listitem:
+            - time: 17:30
+            - text: "583"
+          - listitem:
+            - time: 17:45
+            - text: "576"
+          - listitem:
+            - time: 18:00
+            - text: "566"
+          - listitem:
+            - time: 18:15
+            - text: "553"
+          - listitem:
+            - time: 18:30
+            - text: "533"
+          - listitem:
+            - time: 18:45
+            - text: "520"
+          - listitem:
+            - time: 19:00
+            - text: "512"
+          - listitem:
+            - time: 19:15
+            - text: "500"
+          - listitem:
+            - time: 19:30
+            - text: "493"
+          - listitem:
+            - time: 19:45
+            - text: "474"
+          - listitem:
+            - time: 20:00
+            - text: "464"
+          - listitem:
+            - time: 20:15
+            - text: "451"
+          - listitem:
+            - time: 20:30
+            - text: "447"
+          - listitem:
+            - time: 20:45
+            - text: "435"
+          - listitem:
+            - time: 21:00
+            - text: "439"
+          - listitem:
+            - time: 21:15
+            - text: "438"
+          - listitem:
+            - time: 21:30
+            - text: "430"
+          - listitem:
+            - time: 21:45
+            - text: "418"
+          - listitem:
+            - time: 22:00
+            - text: "424"
+          - listitem:
+            - time: 22:15
+            - text: "417"
+          - listitem:
+            - time: 22:30
+            - text: "423"
+          - listitem:
+            - time: 22:45
+            - text: "406"
+          - listitem:
+            - time: 23:00
+            - text: "407"
+          - listitem:
+            - time: 23:15
+            - text: "398"
+          - listitem:
+            - time: 23:30
+            - text: "382"
+          - listitem:
+            - time: 23:45
+            - text: "366"
+    - paragraph: Højest 658 kl. 12:15
+    - region "Hvor sikre er vi?":
+      - heading "Hvor sikre er vi?" [level=3]
+      - list "Hvor sikre er vi?":
+        - listitem: Live 0 Meldt af køretøjet i de seneste svar.
+        - listitem: Ældre 0 Sidst meldt for få minutter siden; kører siden videre ad sin rute.
+        - listitem: Beregnet 408 Placeret efter køreplanen og en kendt forsinkelse, eller beregnet af Rejseplanen.
+        - listitem: Kun køreplan 182 Ingen livepositioner endnu; placeret efter køreplanen.
+        - listitem: Intet signal 0 Havde realtid, mangler i 5 min; kører videre efter køreplanen og sin seneste forsinkelse.
+- dialog "Otto Mønsteds Plads":
+  - heading "Otto Mønsteds Plads" [level=2]
+  - list "Linjer":
+    - listitem: 5C
+    - listitem: "68"
+  - button "Luk"
+  - region "Ved perronerne nu":
+    - heading "Ved perronerne nu" [level=3]
+    - paragraph: Intet køretøj af de viste typer holder ved perronerne nu.
+  - tablist "Afgange og ankomster":
+    - tab "Afgange" [selected]
+    - tab "Ankomster"
+  - tabpanel "Afgange":
+    - list "Afgange":
+      - listitem:
+        - button "Bus 68 mod Lyngby St. (Jernbanepladsen)"
+        - text: 68 Lyngby St. (Jernbanepladsen) Aflyst 9 min
+        - time: 09:32
+      - listitem:
+        - button "Bus 68 mod Kigkurren (Sturlasgade)"
+        - text: 68 Kigkurren (Sturlasgade) Aflyst 15 min
+        - time: 09:38
+      - listitem:
+        - button "Bus 68 mod Gladsaxe Trafikplads Via Mellemvangen"
+        - text: 68 Gladsaxe Trafikplads Via Mellemvangen Kun køreplan 23 min
+        - time: 09:46
+        - text: Forsinkelse ukendt
+    - text: Nedtællinger bruger køreplanen, rykket med Rejseplanens forsinkelse, hvor en tur har en; resten bruger køreplanen alene.
+    - paragraph:
+      - text: Køreplan og Rejseplanens forsinkelser ·
+      - time: opdateret 09:22:02
+- alert
+- region "Notifikationer"

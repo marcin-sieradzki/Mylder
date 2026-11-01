@@ -1,0 +1,7 @@
+{
+  "journey": "reg-vehicle-dot",
+  "pass": true,
+  "steps": [
+    "01-trip-from-a-dot: trip from a dot (http://localhost:4313/en?map=14.00/55.70486/12.50263&trip=bus.5C.a74214d87d.20260616.0714)"
+  ]
+}

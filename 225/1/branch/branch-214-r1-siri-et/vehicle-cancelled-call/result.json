@@ -1,0 +1,9 @@
+{
+  "journey": "vehicle-cancelled-call",
+  "pass": true,
+  "steps": [
+    "01-bus-68-card-on-hover: bus 68 card on hover (http://localhost:4313/en?map=16.00/55.6579308/12.5701191)",
+    "02-bus-68-opened-from-its-dot: bus 68 opened from its dot (http://localhost:4313/en?map=16.00/55.65793/12.57012&trip=bus.68.bb4e5908a5.20261031.0916)",
+    "03-skipped-stop-reads-cancelled: skipped stop reads Cancelled (http://localhost:4313/en?map=16.00/55.65793/12.57012&trip=bus.68.bb4e5908a5.20261031.0916)"
+  ]
+}

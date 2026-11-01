@@ -1,0 +1,633 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 09:12:53
+  - group "Filters":
+    - button "Bus 361" [pressed]
+    - button "Metro 39" [pressed]
+    - button "S-tog 29" [pressed]
+    - button "Train 67" [pressed]
+    - button "Light rail 21" [pressed]
+    - button "Planes 10" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?stop=6584&board=arrivals
+  - button "About Mylder"
+- status: "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet."
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 582"
+    - tab "Disruptions"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 517
+      - paragraph: of 582 in service
+    - group "Reported this minute":
+      - text: Reported this minute Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - group "Reporting live":
+      - text: Reporting live Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 09:12:53
+    - list "On the map now":
+      - listitem: Live 0
+      - listitem: Ageing 0
+      - listitem: Estimated 404
+      - listitem: Timetable only 178
+      - listitem: No signal 0
+    - region "On the move, by mode":
+      - heading "On the move, by mode" [level=3]
+      - term: Bus
+      - definition: "361"
+      - term: Metro
+      - definition: "39"
+      - term: S-tog
+      - definition: "29"
+      - term: Train
+      - definition: "67"
+      - term: Light rail
+      - definition: "21"
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Train": Train x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Light rail": Light rail x
+      - paragraph: No live positions yet; placed from the timetable
+    - status
+    - figure "Vehicles in service today Planned, from today's timetable":
+      - text: Vehicles in service today Planned, from today's timetable
+      - group "Vehicles in service today Planned, from today's timetable":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "351"
+          - listitem:
+            - time: 00:15
+            - text: "311"
+          - listitem:
+            - time: 00:30
+            - text: "262"
+          - listitem:
+            - time: 00:45
+            - text: "215"
+          - listitem:
+            - time: 01:00
+            - text: "167"
+          - listitem:
+            - time: 01:15
+            - text: "156"
+          - listitem:
+            - time: 01:30
+            - text: "137"
+          - listitem:
+            - time: 01:45
+            - text: "125"
+          - listitem:
+            - time: 02:00
+            - text: "116"
+          - listitem:
+            - time: 02:15
+            - text: "117"
+          - listitem:
+            - time: 02:30
+            - text: "123"
+          - listitem:
+            - time: 02:45
+            - text: "119"
+          - listitem:
+            - time: 03:00
+            - text: "114"
+          - listitem:
+            - time: 03:15
+            - text: "121"
+          - listitem:
+            - time: 03:30
+            - text: "120"
+          - listitem:
+            - time: 03:45
+            - text: "115"
+          - listitem:
+            - time: 04:00
+            - text: "110"
+          - listitem:
+            - time: 04:15
+            - text: "109"
+          - listitem:
+            - time: 04:30
+            - text: "119"
+          - listitem:
+            - time: 04:45
+            - text: "118"
+          - listitem:
+            - time: 05:00
+            - text: "116"
+          - listitem:
+            - time: 05:15
+            - text: "137"
+          - listitem:
+            - time: 05:30
+            - text: "152"
+          - listitem:
+            - time: 05:45
+            - text: "165"
+          - listitem:
+            - time: 06:00
+            - text: "179"
+          - listitem:
+            - time: 06:15
+            - text: "217"
+          - listitem:
+            - time: 06:30
+            - text: "260"
+          - listitem:
+            - time: 06:45
+            - text: "277"
+          - listitem:
+            - time: 07:00
+            - text: "314"
+          - listitem:
+            - time: 07:15
+            - text: "360"
+          - listitem:
+            - time: 07:30
+            - text: "381"
+          - listitem:
+            - time: 07:45
+            - text: "394"
+          - listitem:
+            - time: 08:00
+            - text: "419"
+          - listitem:
+            - time: 08:15
+            - text: "440"
+          - listitem:
+            - time: 08:30
+            - text: "446"
+          - listitem:
+            - time: 08:45
+            - text: "467"
+          - listitem:
+            - time: 09:00
+            - text: "491"
+          - listitem:
+            - time: 09:15
+            - text: "528"
+          - listitem:
+            - time: 09:30
+            - text: "541"
+          - listitem:
+            - time: 09:45
+            - text: "567"
+          - listitem:
+            - time: 10:00
+            - text: "597"
+          - listitem:
+            - time: 10:15
+            - text: "622"
+          - listitem:
+            - time: 10:30
+            - text: "621"
+          - listitem:
+            - time: 10:45
+            - text: "636"
+          - listitem:
+            - time: 11:00
+            - text: "642"
+          - listitem:
+            - time: 11:15
+            - text: "650"
+          - listitem:
+            - time: 11:30
+            - text: "637"
+          - listitem:
+            - time: 11:45
+            - text: "641"
+          - listitem:
+            - time: 12:00
+            - text: "649"
+          - listitem:
+            - time: 12:15
+            - text: "658"
+          - listitem:
+            - time: 12:30
+            - text: "641"
+          - listitem:
+            - time: 12:45
+            - text: "651"
+          - listitem:
+            - time: 13:00
+            - text: "652"
+          - listitem:
+            - time: 13:15
+            - text: "658"
+          - listitem:
+            - time: 13:30
+            - text: "644"
+          - listitem:
+            - time: 13:45
+            - text: "646"
+          - listitem:
+            - time: 14:00
+            - text: "649"
+          - listitem:
+            - time: 14:15
+            - text: "653"
+          - listitem:
+            - time: 14:30
+            - text: "636"
+          - listitem:
+            - time: 14:45
+            - text: "647"
+          - listitem:
+            - time: 15:00
+            - text: "647"
+          - listitem:
+            - time: 15:15
+            - text: "655"
+          - listitem:
+            - time: 15:30
+            - text: "634"
+          - listitem:
+            - time: 15:45
+            - text: "643"
+          - listitem:
+            - time: 16:00
+            - text: "639"
+          - listitem:
+            - time: 16:15
+            - text: "638"
+          - listitem:
+            - time: 16:30
+            - text: "613"
+          - listitem:
+            - time: 16:45
+            - text: "617"
+          - listitem:
+            - time: 17:00
+            - text: "606"
+          - listitem:
+            - time: 17:15
+            - text: "604"
+          - listitem:
+            - time: 17:30
+            - text: "583"
+          - listitem:
+            - time: 17:45
+            - text: "576"
+          - listitem:
+            - time: 18:00
+            - text: "566"
+          - listitem:
+            - time: 18:15
+            - text: "553"
+          - listitem:
+            - time: 18:30
+            - text: "533"
+          - listitem:
+            - time: 18:45
+            - text: "520"
+          - listitem:
+            - time: 19:00
+            - text: "512"
+          - listitem:
+            - time: 19:15
+            - text: "500"
+          - listitem:
+            - time: 19:30
+            - text: "493"
+          - listitem:
+            - time: 19:45
+            - text: "474"
+          - listitem:
+            - time: 20:00
+            - text: "464"
+          - listitem:
+            - time: 20:15
+            - text: "451"
+          - listitem:
+            - time: 20:30
+            - text: "447"
+          - listitem:
+            - time: 20:45
+            - text: "435"
+          - listitem:
+            - time: 21:00
+            - text: "439"
+          - listitem:
+            - time: 21:15
+            - text: "438"
+          - listitem:
+            - time: 21:30
+            - text: "430"
+          - listitem:
+            - time: 21:45
+            - text: "418"
+          - listitem:
+            - time: 22:00
+            - text: "424"
+          - listitem:
+            - time: 22:15
+            - text: "417"
+          - listitem:
+            - time: 22:30
+            - text: "423"
+          - listitem:
+            - time: 22:45
+            - text: "406"
+          - listitem:
+            - time: 23:00
+            - text: "407"
+          - listitem:
+            - time: 23:15
+            - text: "398"
+          - listitem:
+            - time: 23:30
+            - text: "382"
+          - listitem:
+            - time: 23:45
+            - text: "366"
+    - paragraph: Peak 658 at 12:15
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 0 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 404 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 178 No live positions yet; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- dialog "Nørreport St.":
+  - heading "Nørreport St." [level=2]
+  - list "Lines":
+    - listitem: 5C
+    - listitem: 6A
+    - listitem: "14"
+    - listitem: 15E
+    - listitem: 150S
+    - listitem: "184"
+    - listitem: "185"
+    - listitem: 350S
+    - listitem: M1
+    - listitem: M2
+    - listitem: M1
+    - listitem: M2
+    - listitem: A
+    - listitem: B
+    - listitem: Bx
+    - listitem: C
+    - listitem: E
+    - listitem: H
+    - listitem: "802"
+    - listitem: "803"
+    - listitem: "804"
+    - listitem: "805"
+    - listitem: "806"
+    - listitem: IC
+    - listitem: ICL
+    - listitem: RE
+  - button "Close"
+  - region "At the platforms now":
+    - heading "At the platforms now" [level=3]
+    - button "Show all 5"
+    - list "At the platforms now":
+      - listitem:
+        - button "Bus 6A to Nørreport St."
+        - text: 6A Ends here Estimated Unknown
+      - listitem:
+        - button "Bus 185 to Klampenborg St."
+        - text: 185 Klampenborg St. Timetable only Now
+        - time: 09:14
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 6A to Nørreport St."
+        - text: 6A Ends here Estimated Unknown
+      - listitem:
+        - button "Bus 6A to Emdrup Torv"
+        - text: 6A Emdrup Torv Timetable only 3 min
+        - time: 09:16
+        - text: Delay unknown
+  - tablist "Departures and arrivals":
+    - tab "Departures"
+    - tab "Arrivals" [selected]
+  - tabpanel "Arrivals":
+    - list "Arrivals":
+      - listitem:
+        - text: M1 From Vestamager St. Timetable only Every 6 min
+        - paragraph: "Metro: planned times"
+      - listitem:
+        - text: M1 From Vanløse St. Timetable only Every 6 min
+        - paragraph: "Metro: planned times"
+      - listitem:
+        - text: M2 From Vanløse St. Timetable only Every 6 min
+        - paragraph: "Metro: planned times"
+      - listitem:
+        - text: M2 From Københavns Lufthavn St. Timetable only Every 6 min
+        - paragraph: "Metro: planned times"
+      - listitem:
+        - button "Bus 6A from Buddinge St."
+        - text: 6A From Buddinge St. Estimated Now Timetabled 09:16
+        - time: 09:13
+        - text: 3 min early
+      - listitem:
+        - button "S-tog B from Farum St."
+        - text: B From Farum St. Estimated 2 min
+        - time: 09:15
+        - text: On time
+      - listitem:
+        - button "Bus 5C from Husum Torv, Sløjfen"
+        - text: 5C From Husum Torv, Sløjfen Estimated 3 min Timetabled 09:14
+        - time: 09:16
+        - text: 2 min late
+      - listitem:
+        - button "Bus 14 from Ryparken"
+        - text: 14 From Ryparken Estimated 3 min Timetabled 09:13
+        - time: 09:16
+        - text: 3 min late
+      - listitem:
+        - button "S-tog A from Køge St."
+        - text: A From Køge St. Estimated 3 min
+        - time: 09:16
+        - text: On time
+      - listitem:
+        - button "Bus 350S from Ballerup St."
+        - text: 350S From Ballerup St. Estimated 5 min Timetabled 09:20
+        - time: 09:18
+        - text: 2 min early
+      - listitem:
+        - button "Train 802 from Kristiansstad C"
+        - text: 802 From Kristiansstad C Timetable only 5 min
+        - time: 09:18
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 5C from Herlev Hospital, Sløjfen"
+        - text: 5C From Herlev Hospital, Sløjfen Estimated 6 min Timetabled 09:22
+        - time: 09:19
+        - text: 3 min early
+      - listitem:
+        - button "Train RE from Helsingør St."
+        - text: RE From Helsingør St. Timetable only 6 min
+        - time: 09:19
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 5C from Københavns Lufthavn"
+        - text: 5C From Københavns Lufthavn Estimated 7 min Timetabled 09:19
+        - time: 09:20
+        - text: 1 min late
+      - listitem:
+        - button "Bus 150S from Kokkedal St."
+        - text: 150S From Kokkedal St. Estimated 8 min Timetabled 09:23
+        - time: 09:21
+        - text: 2 min early
+      - listitem:
+        - button "Train 804 from Østerport St."
+        - text: 804 From Østerport St. Timetable only 9 min
+        - time: 09:22
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 184 from Vedbæk St."
+        - text: 184 From Vedbæk St. Estimated 10 min
+        - time: 09:23
+        - text: On time
+      - listitem:
+        - button "S-tog C from Frederikssund St."
+        - text: C From Frederikssund St. Estimated 10 min Timetabled 09:22
+        - time: 09:23
+        - text: 1 min late
+      - listitem:
+        - button "S-tog C from Klampenborg St."
+        - text: C From Klampenborg St. Estimated 10 min
+        - time: 09:23
+        - text: On time
+      - listitem:
+        - button "Bus 6A from Emdrup Torv"
+        - text: 6A From Emdrup Torv Estimated 11 min Timetabled 09:26
+        - time: 09:24
+        - text: 2 min early
+      - listitem:
+        - button "Train RE from København H"
+        - text: RE From København H Timetable only 11 min
+        - time: 09:24
+        - text: Delay unknown
+      - listitem:
+        - button "Train IC from Østerport St."
+        - text: IC From Østerport St. Timetable only 12 min
+        - time: 09:25
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 5C from Sundbyvester Plads"
+        - text: 5C From Sundbyvester Plads Estimated 13 min Timetabled 09:25
+        - time: 09:26
+        - text: 1 min late
+      - listitem:
+        - button "Bus 5C from Husum Torv, Sløjfen"
+        - text: 5C From Husum Torv, Sløjfen Estimated 13 min Timetabled 09:28
+        - time: 09:26
+        - text: 2 min early
+      - listitem:
+        - button "Train RE from Kalundborg St."
+        - text: RE From Kalundborg St. Estimated 14 min
+        - time: 09:27
+        - text: On time
+      - listitem:
+        - button "Train IC from Østerport St."
+        - text: IC From Østerport St. Timetable only 15 min
+        - time: 09:28
+        - text: Delay unknown
+      - listitem:
+        - button "S-tog A from Hillerød St."
+        - text: A From Hillerød St. Estimated 16 min
+        - time: 09:29
+        - text: On time
+      - listitem:
+        - button "Bus 14 from Ryparken"
+        - text: 14 From Ryparken Estimated 17 min Timetabled 09:29
+        - time: 09:30
+        - text: 1 min late
+      - listitem:
+        - button "S-tog B from Høje Taastrup St."
+        - text: B From Høje Taastrup St. Estimated 17 min
+        - time: 09:30
+        - text: On time
+      - listitem:
+        - button "Bus 5C from Sundbyvester Plads"
+        - text: 5C From Sundbyvester Plads Estimated 18 min Timetabled 09:30
+        - time: 09:31
+        - text: 1 min late
+      - listitem:
+        - button "Bus 185 from Klampenborg St."
+        - text: 185 From Klampenborg St. Estimated 19 min Timetabled 09:35
+        - time: 09:32
+        - text: 3 min early
+      - listitem:
+        - button "S-tog C from København H"
+        - text: C From København H Timetable only 19 min
+        - time: 09:32
+        - text: Delay unknown
+      - listitem:
+        - button "Bus 5C from Herlev Hospital, Sløjfen"
+        - text: 5C From Herlev Hospital, Sløjfen Estimated 21 min
+        - time: 09:34
+        - text: On time
+      - listitem:
+        - button "Bus 6A from Buddinge St."
+        - text: 6A From Buddinge St. Estimated 21 min Timetabled 09:35
+        - time: 09:34
+        - text: 1 min early
+    - text: Countdowns use the timetable, moved by Rejseplanen's delay where a trip has one; the rest use the timetable alone.
+    - paragraph:
+      - text: Timetable and Rejseplanen's delays ·
+      - time: updated 09:12:51
+- alert
+- region "Notifications"

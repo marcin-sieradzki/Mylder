@@ -1,0 +1,9 @@
+{
+  "journey": "vehicle-late-da",
+  "pass": true,
+  "steps": [
+    "01-map-before-opening-the-trip: map before opening the trip (http://localhost:4411/da)",
+    "02-late-trip-opened: late trip opened (http://localhost:4411/da?trip=bus.2A.643c65fb6f.20261031.0857)",
+    "03-source-line-in-view: source line in view (http://localhost:4411/da?trip=bus.2A.643c65fb6f.20261031.0857)"
+  ]
+}

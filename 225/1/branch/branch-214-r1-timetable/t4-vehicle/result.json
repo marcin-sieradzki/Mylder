@@ -1,0 +1,13 @@
+{
+  "journey": "t4-vehicle",
+  "pass": true,
+  "steps": [
+    "01-bus-centred: bus centred (http://localhost:4313/en?hide=metro,s-tog,train,light-rail,aircraft&map=14.00/55.69480/12.56845)",
+    "02-bus-vehicle-open: bus vehicle open (http://localhost:4313/en?hide=metro,s-tog,train,light-rail,aircraft&map=14.00/55.69480/12.56845&trip=bus.1A.48c080f3c1.20261101.1755)",
+    "03-da-bus-vehicle: da bus vehicle (http://localhost:4313/da?trip=bus.1A.48c080f3c1.20261101.1755)",
+    "04-metro-centred: metro centred (http://localhost:4313/en?hide=bus,s-tog,train,light-rail,aircraft&map=14.00/55.62906/12.57939)",
+    "05-metro-vehicle-open: metro vehicle open (http://localhost:4313/en?hide=bus,s-tog,train,light-rail,aircraft&map=14.00/55.62906/12.57939&trip=metro.M1.7f21f99145.20261101.1827)",
+    "06-s-tog-list-searched: s-tog list searched (http://localhost:4313/en?tab=vehicles)",
+    "07-s-tog-vehicle-open: s-tog vehicle open (http://localhost:4313/en?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.1728)"
+  ]
+}

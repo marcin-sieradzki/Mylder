@@ -1,0 +1,9 @@
+{
+  "journey": "stop-delays-phone",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-st-departures: Nørreport St. departures (http://localhost:4411/en?stop=6584)",
+    "02-departures-source-line: departures source line (http://localhost:4411/en?stop=6584)",
+    "03-n-rreport-st-arrivals: Nørreport St. arrivals (http://localhost:4411/en?stop=6584&board=arrivals)"
+  ]
+}

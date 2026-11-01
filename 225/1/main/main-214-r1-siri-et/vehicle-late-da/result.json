@@ -1,0 +1,9 @@
+{
+  "journey": "vehicle-late-da",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: /(to|mod) Refshaleøen/ }).getByText('Køreplan og Rejseplanens forsinkelser')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: /(to|mod) Refshaleøen/ }).getByText('Køreplan og Rejseplanens forsinkelser') with timeout 5000ms\n  - waiting for getByRole('dialog', { name: /(to|mod) Refshaleøen/ }).getByText('Køreplan og Rejseplanens forsinkelser')\n",
+  "steps": [
+    "01-map-before-opening-the-trip: map before opening the trip (http://localhost:4411/da)",
+    "02-failure: failure (http://localhost:4411/da?trip=bus.2A.643c65fb6f.20261031.0819)"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "journey": "stop-cancelled-da",
+  "pass": false,
+  "error": "Fændediget's source line names Rejseplanen's delays\n\nexpect(received).toMatch(expected)\n\nExpected pattern: /Køreplan\\s*og\\s*Rejseplanens\\s*forsinkelser\\s*·\\s*opdateret\\s*(\\d\\d:\\d\\d:\\d\\d)/\nReceived string:  \"Fændediget101A102A241245R260RLukVed perronerne nuIntet køretøj af de viste typer holder ved perronerne nu.AfgangeAnkomster102AHerfølge HolmebækskolenKun køreplanNu09:25—Forsinkelse ukendt260RKøge St.Beregnet~7 minPlanlagt 09:33 09:33 ~09:32−1 min1 min før tid101AØlby St.Kun køreplan~14 min09:39—Forsinkelse ukendt102AKøge St.Aflyst~16 min09:40102APræstø St.Kun køreplan~20 min09:45—Forsinkelse ukendt101AHastrup FasanvejKun køreplan~21 min09:46—Forsinkelse ukendt245RBorup St.Kun køreplan~23 min09:47—Forsinkelse ukendt260RRingsted St.Kun køreplan~26 min09:50—Forsinkelse ukendtNedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu.Køreplan · 09:24:22\"",
+  "steps": [
+    "01-f-ndediget-102a-cancelled: Fændediget 102A Cancelled (http://localhost:4411/da?stop=5344)",
+    "02-failure: failure (http://localhost:4411/da?stop=5344)"
+  ]
+}

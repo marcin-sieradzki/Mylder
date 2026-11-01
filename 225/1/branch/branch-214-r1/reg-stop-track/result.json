@@ -1,0 +1,7 @@
+{
+  "journey": "reg-stop-track",
+  "pass": true,
+  "steps": [
+    "01-re-to-n-stved-on-track-8: RE to Næstved on track 8 (http://localhost:4313/en?stop=8600783)"
+  ]
+}

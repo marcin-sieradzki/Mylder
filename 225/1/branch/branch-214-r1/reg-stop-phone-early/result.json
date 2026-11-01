@@ -1,0 +1,11 @@
+{
+  "journey": "reg-stop-phone-early",
+  "pass": true,
+  "steps": [
+    "01-refshale-en-buses-hidden: Refshaleøen, buses hidden (http://localhost:4313/en?hide=bus&map=17.00/55.69105/12.60675&stop=48645)",
+    "02-991-card-in-the-row: 991 card in the row (http://localhost:4313/en?map=17.00/55.69105/12.60675&stop=48645)",
+    "03-card-opened-its-vehicle: card opened its vehicle (http://localhost:4313/en?map=17.00/55.69105/12.60675&trip=bus.991.7ce514fd98.20260616.0700)",
+    "04-n-rreport-in-front-of-the-overview: Nørreport in front of the Overview (http://localhost:4313/en?stop=27532)",
+    "05-arrivals-tab-tapped: Arrivals tab tapped (http://localhost:4313/en?stop=27532&board=arrivals)"
+  ]
+}

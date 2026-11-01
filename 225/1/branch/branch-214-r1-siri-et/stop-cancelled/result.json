@@ -1,0 +1,8 @@
+{
+  "journey": "stop-cancelled",
+  "pass": true,
+  "steps": [
+    "01-f-ndediget-102a-cancelled: Fændediget 102A Cancelled (http://localhost:4313/en?stop=5344)",
+    "02-otto-m-nsteds-plads-68s-cancelled: Otto Mønsteds Plads 68s Cancelled (http://localhost:4313/en?stop=30090)"
+  ]
+}

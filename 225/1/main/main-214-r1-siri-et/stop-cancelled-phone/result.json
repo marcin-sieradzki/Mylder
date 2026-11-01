@@ -1,0 +1,9 @@
+{
+  "journey": "stop-cancelled-phone",
+  "pass": false,
+  "error": "Fændediget's source line names Rejseplanen's delays\n\nexpect(received).toMatch(expected)\n\nExpected pattern: /Timetable\\s*and\\s*Rejseplanen's\\s*delays\\s*·\\s*updated\\s*(\\d\\d:\\d\\d:\\d\\d)/\nReceived string:  \"Fændediget101A102A241245R260RCloseAt the platforms nowNo vehicle of the types shown is standing at the platforms now.DeparturesArrivals102AHerfølge HolmebækskolenTimetable onlyNow09:25—Delay unknown260RKøge St.Estimated~7 minTimetabled 09:33 09:33 ~09:32−1 min1 min early101AØlby St.Timetable only~14 min09:39—Delay unknown102AKøge St.Cancelled~15 min09:40102APræstø St.Timetable only~20 min09:45—Delay unknown101AHastrup FasanvejTimetable only~21 min09:46—Delay unknown245RBorup St.Timetable only~22 min09:47—Delay unknown260RRingsted St.Timetable only~25 min09:50—Delay unknownCountdowns use the timetable alone; live times aren't connected yet.Timetable · 09:24:22\"",
+  "steps": [
+    "01-f-ndediget-102a-cancelled: Fændediget 102A Cancelled (http://localhost:4411/en?stop=5344)",
+    "02-failure: failure (http://localhost:4411/en?stop=5344)"
+  ]
+}

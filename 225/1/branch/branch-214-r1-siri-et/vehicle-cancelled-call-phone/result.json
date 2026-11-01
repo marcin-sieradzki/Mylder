@@ -1,0 +1,8 @@
+{
+  "journey": "vehicle-cancelled-call-phone",
+  "pass": true,
+  "steps": [
+    "01-bus-68-opened-by-link: bus 68 opened by link (http://localhost:4313/en?trip=bus.68.bb4e5908a5.20261031.0916)",
+    "02-skipped-stop-reads-cancelled: skipped stop reads Cancelled (http://localhost:4313/en?trip=bus.68.bb4e5908a5.20261031.0916)"
+  ]
+}

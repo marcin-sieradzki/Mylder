@@ -1,0 +1,10 @@
+{
+  "journey": "t5-stop",
+  "pass": true,
+  "steps": [
+    "01-tivoli-departures: tivoli departures (http://localhost:4313/en?map=17.00/55.67259/12.56661&stop=10842)",
+    "02-tivoli-arrivals: tivoli arrivals (http://localhost:4313/en?map=17.00/55.67259/12.56661&stop=10842&board=arrivals)",
+    "03-gammel-strand: gammel strand (http://localhost:4313/en?stop=8603332)",
+    "04-da-tivoli: da tivoli (http://localhost:4313/da?map=17.00/55.67259/12.56661&stop=10842)"
+  ]
+}

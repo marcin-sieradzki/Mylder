@@ -1,0 +1,8 @@
+{
+  "journey": "reg-stop-first-paint",
+  "pass": true,
+  "steps": [
+    "01-n-rreport-settled-never-now: Nørreport settled, never Now (http://localhost:4313/en?stop=27532)",
+    "02-k-benhavn-syd-arrivals-never-out-of-date: København Syd arrivals, never out of date (http://localhost:4313/en?stop=8600783&board=arrivals)"
+  ]
+}

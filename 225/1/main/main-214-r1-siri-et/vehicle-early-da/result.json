@@ -1,0 +1,9 @@
+{
+  "journey": "vehicle-early-da",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: /(to|mod) Hellerup St\\./ }).getByText('Køreplan og Rejseplanens forsinkelser')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: /(to|mod) Hellerup St\\./ }).getByText('Køreplan og Rejseplanens forsinkelser') with timeout 5000ms\n  - waiting for getByRole('dialog', { name: /(to|mod) Hellerup St\\./ }).getByText('Køreplan og Rejseplanens forsinkelser')\n",
+  "steps": [
+    "01-map-before-opening-the-trip: map before opening the trip (http://localhost:4411/da)",
+    "02-failure: failure (http://localhost:4411/da?trip=bus.1A.48c080f3c1.20261031.0809)"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "journey": "stop-delays",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Nørreport St.' }).getByText('Timetable and Rejseplanen\\'s delays')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Nørreport St.' }).getByText('Timetable and Rejseplanen\\'s delays') with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Nørreport St.' }).getByText('Timetable and Rejseplanen\\'s delays')\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4411/en?stop=6584)"
+  ]
+}
