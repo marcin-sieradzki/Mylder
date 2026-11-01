@@ -33,7 +33,7 @@ import {
   type Recorded,
   type RecordedApi,
 } from './layer'
-import { ON_TIMETABLE, RECORDINGS } from './plans'
+import { ENDING_TIMETABLE, ON_TIMETABLE, RECORDINGS, TIMETABLE_PLANS } from './plans'
 
 const timetable = await fixtureTimetable()
 
@@ -146,6 +146,34 @@ describe('a frozen recording', () => {
         }
         expect(snapshots.at(-1)!.trips.filter((trip) => trip.waiting)).not.toEqual([])
       }),
+  )
+
+  it.effect.each(TIMETABLE_PLANS.map((plan) => [plan.name, plan] as const))(
+    'saves %s’s start as its clock, for MYLDER_TIMETABLE_FROM, and its snapshots as the plan runs',
+    ([, plan]) =>
+      Effect.gen(function* () {
+        const dir = recordingDir(plan.name)
+        const clock = yield* Effect.promise(() => readJson(join(dir, 'clock.json')))
+        expect(clock).toEqual({ start: new Date(plan.start).toISOString() })
+        const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
+        const { snapshots } = yield* onTimetable(plan, recorded)
+        const saved = yield* Effect.promise(() =>
+          Promise.all(snapshots.map((_, i) => readJson(join(dir, 'snapshots', callFile(i))))),
+        )
+        expect(JSON.parse(JSON.stringify(snapshots))).toEqual(saved)
+      }),
+  )
+
+  it.effect('saves the timetable source in its timetable’s last week, the notice’s moment', () =>
+    Effect.gen(function* () {
+      const dir = recordingDir(ENDING_TIMETABLE.name)
+      const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
+      const { snapshots } = yield* onTimetable(ENDING_TIMETABLE, recorded)
+      for (const snapshot of snapshots) {
+        expect(snapshot).toMatchObject({ source: { kind: 'timetable' }, timetableRunningOut: true })
+        expect(snapshot.trips).not.toEqual([])
+      }
+    }),
   )
 
   it.effect('replays its aircraft folder into the aircraft snapshots saved beside it', () =>

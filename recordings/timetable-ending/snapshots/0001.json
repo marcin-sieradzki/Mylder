@@ -1,0 +1,460 @@
+{
+  "fetched": 1787635200000,
+  "nextDue": 1787635260000,
+  "pollInterval": 60,
+  "serviceDay": "2026-08-25",
+  "timetableVersion": "2026-06-02-4f2b8119",
+  "timetableRunningOut": true,
+  "positionMode": "none",
+  "api": {
+    "status": "ok",
+    "since": 1787635200000
+  },
+  "budget": {
+    "level": "normal",
+    "calls": 0
+  },
+  "store": "ok",
+  "lastSeen": {},
+  "disruptions": null,
+  "source": {
+    "kind": "timetable"
+  },
+  "status": {
+    "calls": [],
+    "unmatched": 0,
+    "modes": {
+      "bus": 6,
+      "s-tog": 6,
+      "train": 1
+    },
+    "states": {
+      "timetable-only": 13
+    },
+    "cpuMs": 0,
+    "timetable": {
+      "prepared": "2026-06-02",
+      "last": "2026-08-26",
+      "daysLeft": 2,
+      "daysOld": 84
+    }
+  },
+  "trips": [
+    {
+      "key": "bus.5C.32331e0e20.20260825.0707",
+      "line": "5C",
+      "mode": "bus",
+      "pattern": 0,
+      "headsign": "Husum Torv",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.668370436960345,
+        12.583999148704258
+      ],
+      "progress": 3346,
+      "next": [
+        {
+          "index": 9,
+          "stop": "807",
+          "time": 1787635260000
+        },
+        {
+          "index": 10,
+          "stop": "30091",
+          "time": 1787635440000
+        },
+        {
+          "index": 11,
+          "stop": "3005",
+          "time": 1787635500000
+        }
+      ]
+    },
+    {
+      "key": "bus.5C.32331e0e20.20260825.0716",
+      "line": "5C",
+      "mode": "bus",
+      "pattern": 0,
+      "headsign": "Husum Torv",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.656485784786874,
+        12.609243678087202
+      ],
+      "progress": 1140,
+      "next": [
+        {
+          "index": 3,
+          "stop": "664",
+          "time": 1787635260000
+        },
+        {
+          "index": 4,
+          "stop": "27539",
+          "time": 1787635320000
+        },
+        {
+          "index": 5,
+          "stop": "27526",
+          "time": 1787635440000
+        }
+      ]
+    },
+    {
+      "key": "bus.5C.a74214d87d.20260825.0714",
+      "line": "5C",
+      "mode": "bus",
+      "pattern": 1,
+      "headsign": "Sundbyvester Plads",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.70449,
+        12.49893
+      ],
+      "progress": 1963,
+      "next": [
+        {
+          "index": 6,
+          "stop": "2012",
+          "time": 1787635380000
+        },
+        {
+          "index": 7,
+          "stop": "2149",
+          "time": 1787635500000
+        },
+        {
+          "index": 8,
+          "stop": "2150",
+          "time": 1787635560000
+        }
+      ]
+    },
+    {
+      "key": "bus.5C.b4936c5f43.20260825.0700",
+      "line": "5C",
+      "mode": "bus",
+      "pattern": 2,
+      "headsign": "Sundbyvester Plads",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.706379303045665,
+        12.513507573302817
+      ],
+      "progress": 6287,
+      "next": [
+        {
+          "index": 11,
+          "stop": "2149",
+          "time": 1787635260000
+        },
+        {
+          "index": 12,
+          "stop": "2150",
+          "time": 1787635320000
+        },
+        {
+          "index": 13,
+          "stop": "1968",
+          "time": 1787635440000
+        }
+      ]
+    },
+    {
+      "key": "bus.5C.b4936c5f43.20260825.0716",
+      "line": "5C",
+      "mode": "bus",
+      "pattern": 2,
+      "headsign": "Sundbyvester Plads",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.72211,
+        12.44395
+      ],
+      "progress": 1328,
+      "next": [
+        {
+          "index": 2,
+          "stop": "2143",
+          "time": 1787635260000
+        },
+        {
+          "index": 3,
+          "stop": "2146",
+          "time": 1787635440000
+        },
+        {
+          "index": 4,
+          "stop": "2148",
+          "time": 1787635620000
+        }
+      ]
+    },
+    {
+      "key": "bus.991.7ce514fd98.20260825.0700",
+      "line": "991",
+      "mode": "bus",
+      "pattern": 3,
+      "headsign": "Teglholmen",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.69105,
+        12.60675
+      ],
+      "progress": 2724,
+      "next": [
+        {
+          "index": 1,
+          "stop": "48645",
+          "time": 1787635380000
+        },
+        {
+          "index": 2,
+          "stop": "10765",
+          "time": 1787635680000
+        },
+        {
+          "index": 3,
+          "stop": "29944",
+          "time": 1787636040000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.A.0bc307e3eb.20260825.0707",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 6,
+      "headsign": "Hillerød St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.63345526877692,
+        12.49302682577261
+      ],
+      "progress": 11703,
+      "next": [
+        {
+          "index": 6,
+          "stop": "8600763",
+          "time": 1787635260000
+        },
+        {
+          "index": 7,
+          "stop": "8600783",
+          "time": 1787635380000
+        },
+        {
+          "index": 8,
+          "stop": "8600761",
+          "time": 1787635500000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.A.0bc307e3eb.20260825.0717",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 6,
+      "headsign": "Hillerød St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.61928240069852,
+        12.364961102161526
+      ],
+      "progress": 3152,
+      "next": [
+        {
+          "index": 2,
+          "stop": "8600767",
+          "time": 1787635320000
+        },
+        {
+          "index": 3,
+          "stop": "8600766",
+          "time": 1787635440000
+        },
+        {
+          "index": 4,
+          "stop": "8600765",
+          "time": 1787635620000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.A.79fbe8e1f8.20260825.0705",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 7,
+      "headsign": "Hundige St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.80769,
+        12.46866
+      ],
+      "progress": 17619,
+      "next": [
+        {
+          "index": 5,
+          "stop": "8600676",
+          "time": 1787635260000
+        },
+        {
+          "index": 6,
+          "stop": "8600636",
+          "time": 1787635320000
+        },
+        {
+          "index": 7,
+          "stop": "8600675",
+          "time": 1787635500000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.A.79fbe8e1f8.20260825.0715",
+      "line": "A",
+      "mode": "s-tog",
+      "pattern": 7,
+      "headsign": "Hundige St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.88171107481406,
+        12.347273941831808
+      ],
+      "progress": 5933,
+      "next": [
+        {
+          "index": 2,
+          "stop": "8600681",
+          "time": 1787635260000
+        },
+        {
+          "index": 3,
+          "stop": "8600678",
+          "time": 1787635500000
+        },
+        {
+          "index": 4,
+          "stop": "8600677",
+          "time": 1787635800000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.E.7c0294e28d.20260825.0705",
+      "line": "E",
+      "mode": "s-tog",
+      "pattern": 9,
+      "headsign": "Holte St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.56993135455262,
+        12.279854092534434
+      ],
+      "progress": 15804,
+      "next": [
+        {
+          "index": 6,
+          "stop": "8600770",
+          "time": 1787635320000
+        },
+        {
+          "index": 7,
+          "stop": "8600769",
+          "time": 1787635440000
+        },
+        {
+          "index": 8,
+          "stop": "8600768",
+          "time": 1787635620000
+        }
+      ]
+    },
+    {
+      "key": "s-tog.E.e8dc141a28.20260825.0702",
+      "line": "E",
+      "mode": "s-tog",
+      "pattern": 10,
+      "headsign": "Køge St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.71993571091959,
+        12.571939679466963
+      ],
+      "progress": 12377,
+      "next": [
+        {
+          "index": 8,
+          "stop": "8600654",
+          "time": 1787635260000
+        },
+        {
+          "index": 9,
+          "stop": "8600653",
+          "time": 1787635380000
+        },
+        {
+          "index": 10,
+          "stop": "8600650",
+          "time": 1787635500000
+        }
+      ]
+    },
+    {
+      "key": "train.RE.7c3e865b99.20260825.0717",
+      "line": "RE",
+      "mode": "train",
+      "pattern": 11,
+      "headsign": "Næstved St.",
+      "state": "timetable-only",
+      "source": "timetable",
+      "hadRealtime": false,
+      "position": [
+        55.653155404456385,
+        12.533666003070332
+      ],
+      "progress": 3376,
+      "next": [
+        {
+          "index": 1,
+          "stop": "8600783",
+          "time": 1787635320000
+        },
+        {
+          "index": 2,
+          "stop": "8600797",
+          "time": 1787636220000
+        },
+        {
+          "index": 3,
+          "stop": "8600792",
+          "time": 1787636460000
+        }
+      ]
+    }
+  ]
+}

@@ -175,6 +175,76 @@ describe('the source banner', () => {
   })
 })
 
+describe('the timetable source', () => {
+  /** Its last saved minute, built at 07:25:00 in Copenhagen with no call made. */
+  const onTimetable = () => saved('0006.json', 'timetable-source')
+  const BANNER_EN =
+    "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be."
+  const BANNER_DA =
+    'Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være.'
+
+  it('says once, in the banner, that every vehicle is placed from its timetable', () => {
+    land(onTimetable(), '2026-06-16T05:25:20Z')
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([BANNER_EN])
+    expect(updatedLine()).toHaveTextContent('Updated 07:25:00')
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([BANNER_DA])
+    expect(updatedLine()).toHaveTextContent('Opdateret 07:25:00')
+  })
+
+  it('names the planes after it, in both languages', () => {
+    land(onTimetable(), '2026-06-16T05:25:20Z')
+    act(() => liveAircraft.update({ snapshot: aircraft('adsb.lol') }))
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([`${BANNER_EN} Planes: live from adsb.lol.`])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([`${BANNER_DA} Fly: live fra adsb.lol.`])
+  })
+
+  it('never shows Paused, however long after the snapshot was built', () => {
+    // Hours after its run, with the month's counter spent and the API's health failing, as no
+    // run on this source can make it: still no call was made, so nothing is paused.
+    const odd: Snapshot = {
+      ...onTimetable(),
+      api: { status: 'error', since: Date.parse('2026-06-16T05:20:00Z'), kind: 'status' },
+      budget: { level: 'spent', calls: 0, resumes: '2026-07-01' },
+    }
+    land(odd, '2026-06-16T09:25:00Z')
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([BANNER_EN])
+    expect(updatedLine()).toHaveTextContent('Updated 07:25:00')
+    expect(updatedLine()).not.toHaveTextContent('paused')
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([BANNER_DA])
+    expect(updatedLine()).not.toHaveTextContent('sat på pause')
+  })
+
+  it('keeps the timetable notice while the timetable has under 7 days left', () => {
+    const snapshot = onTimetable()
+    const { timetable } = snapshot.status
+    land(
+      {
+        ...snapshot,
+        timetableRunningOut: true,
+        status: {
+          ...snapshot.status,
+          timetable: { ...timetable, last: '2026-08-26', daysLeft: 6 },
+        },
+      },
+      '2026-08-21T10:00:00Z',
+    )
+    renderScreen('en')
+    expect(notices()).toEqual([
+      'The timetable ends on 26 August. Without a new one, the map has no trips after that.',
+      BANNER_EN,
+    ])
+  })
+})
+
 /** The browser's polls failing since `iso` on the server's clock. */
 const failingFrom = (iso: string) =>
   act(() =>

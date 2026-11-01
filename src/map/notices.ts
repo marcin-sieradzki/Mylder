@@ -27,6 +27,8 @@ export type PageNotice =
   /** The prepared timetable has under 7 days of service left, or none: its last covered day. */
   | { readonly kind: 'timetable'; readonly last: IsoDate; readonly ended: boolean }
   | { readonly kind: 'source'; readonly source: 'simulated' }
+  /** No live positions are connected: every vehicle is placed from its timetable. */
+  | { readonly kind: 'source'; readonly source: 'timetable' }
   /** `fetched` is when the recorded snapshot was built, which names the recording's day. */
   | { readonly kind: 'source'; readonly source: 'recording'; readonly fetched: number }
 
@@ -39,6 +41,7 @@ const NONE: PageNotices = []
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
   const { kind } = snapshot.source
   if (kind === 'simulated') return { kind: 'source', source: 'simulated' }
+  if (kind === 'timetable') return { kind: 'source', source: 'timetable' }
   if (kind === 'recording')
     return { kind: 'source', source: 'recording', fetched: snapshot.fetched }
   return undefined
