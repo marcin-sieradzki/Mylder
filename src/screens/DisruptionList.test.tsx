@@ -451,7 +451,7 @@ describe("Mylder's own data cards", () => {
   })
 })
 
-describe("Mylder's card for a quiet delay feed", () => {
+describe("Mylder's card for a quiet SIRI-ET feed", () => {
   // The SIRI-ET recording's saved minute of 09:22:00 on the timetable source, whose feed's last
   // message came at 09:21:52: Rejseplanen's messages need the live connection, so the tab says so,
   // and the delays' card, shown first, says when they were last updated.

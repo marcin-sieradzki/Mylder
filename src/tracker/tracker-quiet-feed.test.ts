@@ -15,7 +15,7 @@ import { loadTimetable } from './timetable'
 import { Tracker } from './tracker'
 import type { Updates } from './updates'
 
-// A quiet delay feed (spec #146, stories 19 to 21; #216): when SIRI-ET's messages stop for 5 min,
+// A quiet SIRI-ET feed (spec #146, stories 19 to 21; #216): when SIRI-ET's messages stop for 5 min,
 // every trip that had an update turns No signal from the last message's time and keeps moving on
 // its timetable plus its last delay, with Mylder's `updates-stale` card; at the next message the
 // card goes and the states come back. On the timetable source, over recordings/siri-et, whose

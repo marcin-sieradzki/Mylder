@@ -263,7 +263,7 @@ function footerOf(
  * messages active now, then those starting within the week under "Later", "Running normally"
  * once when nothing is active, and a footer that says when the list was checked. On a source that
  * brings no messages, such as the timetable, one sentence in their place: the messages come with
- * the live connection, under the one data card such a source can have, a quiet delay feed's.
+ * the live connection, under the one data card such a source can have, a quiet SIRI-ET feed's.
  */
 export function DisruptionList({ store = disruptionList }: { store?: DisruptionListStore }) {
   const { lang, dictionary } = useI18n()

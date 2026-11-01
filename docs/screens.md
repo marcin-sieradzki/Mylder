@@ -138,7 +138,7 @@ Cancellations make no card. They are shown where they are seen: a cancelled row 
 
 **Footer:** "Messages from Rejseplanen, checked 08:15. Checked every 15 min while the map is open." After a failed check, "Last checked 07:45; the latest check failed." After an hour without a successful check the list stays, marked "May be out of date", and the data card above says so. The time is the server's receipt time of the last good answer.
 
-**On the timetable source** (`MYLDER_SOURCE=timetable`) no message is asked for, since `himsearch` needs the key, and nothing it doesn't ask for can be missing: in place of the list, its footer and Rejseplanen's gaps, the screen says "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.", the tab counts nothing, and the About dialog's Disruptions fact reads "Not connected yet". The one card it can show is the quiet delay feed's, with SIRI-ET's delays on: above that sentence, counted by the tab.
+**On the timetable source** (`MYLDER_SOURCE=timetable`) no message is asked for, since `himsearch` needs the key, and nothing it doesn't ask for can be missing: in place of the list, its footer and Rejseplanen's gaps, the screen says "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.", and the About dialog's Disruptions fact reads "Not connected yet". The one card it can show is a quiet SIRI-ET feed's, with SIRI-ET's delays on, above that sentence; the tab counts that card while it shows, and nothing otherwise.
 
 **Built from:** DisruptionCard, SeverityLabel, Tag, NormalService, Button, Accordion, Section, Separator, DataStatePanel, Text.
 

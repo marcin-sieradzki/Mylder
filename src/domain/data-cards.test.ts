@@ -164,7 +164,7 @@ describe('Mylder’s own data cards on the timetable source', () => {
   })
 })
 
-describe('Mylder’s card for a quiet delay feed', () => {
+describe('Mylder’s card for a quiet SIRI-ET feed', () => {
   // SIRI-ET's update feed (spec #146): quiet once its last message is 5 min old, or before one has
   // come. Shown on any source, the timetable's too, which brings no other card.
   const onTimetable: DataCardFacts = {
