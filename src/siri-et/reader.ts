@@ -6,10 +6,9 @@
 // reader holds for the journey, a call replacing the one it held at the same stop and aimed time;
 // a message never replaces the journey. The reader holds every journey it hears of, since a later
 // message may bring a call inside the box, and the table lists those that call inside it.
-import 'server-only'
-import { addDays } from '../../timetable/dates.ts'
-import { platformId } from '../../timetable/stops.ts'
-import { calendarDay } from '../../timetable/time.ts'
+import { addDays } from '../timetable/dates.ts'
+import { platformId } from '../timetable/stops.ts'
+import { calendarDay } from '../timetable/time.ts'
 import { readSiriEt, type SiriCall } from './siri.ts'
 import {
   TABLE_VERSION,

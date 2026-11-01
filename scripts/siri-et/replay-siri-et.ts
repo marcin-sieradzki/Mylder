@@ -2,11 +2,11 @@
 // five minutes: journeys held and listed, steps, cancellations and the table's size as JSON and
 // gzipped. The figures in docs/live-data.md ("SIRI-ET", "The update table") come from it. The
 // reader's tests replay a sample instead, since the whole recording takes seconds.
-// Usage: node --conditions=react-server scripts/siri-et/replay-siri-et.ts [recordingDir]
+// Usage: node scripts/siri-et/replay-siri-et.ts [recordingDir]: plain Node, as the listener runs.
 import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { siriEtReader } from '../../src/tracker/siri-et/reader.ts'
-import { readBox, readSiriEtMessages } from '../../src/tracker/siri-et/recording.ts'
+import { siriEtReader } from '../../src/siri-et/reader.ts'
+import { readBox, readSiriEtMessages } from '../../src/siri-et/recording.ts'
 
 const dir = process.argv[2] ?? join(process.cwd(), 'recordings', 'siri-et')
 const messages = await readSiriEtMessages(join(dir, 'messages.jsonl.gz'))

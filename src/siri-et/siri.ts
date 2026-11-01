@@ -3,7 +3,6 @@
 // it doesn't know. An element the reader doesn't use is skipped, a namespace prefix is ignored, and
 // a value it can't read is left out. A body whose tags don't nest, or whose root isn't `Siri`, is
 // malformed as a whole.
-import 'server-only'
 
 /** One call as a message carries it: a `RecordedCall` or an `EstimatedCall`. */
 export interface SiriCall {

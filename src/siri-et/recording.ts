@@ -1,13 +1,12 @@
 // A SIRI-ET recording on disk (recordings/siri-et/README.md): its messages, one a line in
 // `messages.jsonl.gz` as `{ dataset, receivedAt, body }`, and the box's stops from the timetable
 // beside them.
-import 'server-only'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
-import type { Box } from '../../timetable/format.ts'
-import { readManifest } from '../../timetable/manifest.ts'
-import { platformId, readStops } from '../../timetable/stops.ts'
+import type { Box } from '../timetable/format.ts'
+import { readManifest } from '../timetable/manifest.ts'
+import { platformId, readStops } from '../timetable/stops.ts'
 import type { ReaderBox, SiriEtMessage } from './reader.ts'
 
 /** A recording's messages, in the order they were received. */

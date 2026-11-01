@@ -76,6 +76,37 @@
           }
         ]
       }
+    },
+    {
+      "files": ["src/siri-et/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(app|i18n|map|screens|tracker)(/|$)|^@/",
+                "message": "The SIRI-ET reader runs in the listener's plain Node: it imports from the timetable readers and the domain only."
+              },
+              {
+                "group": [
+                  "server-only",
+                  "server-only/**",
+                  "client-only",
+                  "client-only/**",
+                  "react",
+                  "react/**",
+                  "react-dom",
+                  "react-dom/**",
+                  "next",
+                  "next/**"
+                ],
+                "message": "The SIRI-ET reader runs in plain Node, outside Next.js, where `server-only` throws."
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

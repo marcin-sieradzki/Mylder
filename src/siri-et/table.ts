@@ -2,7 +2,6 @@
 // store and the tracker reads it. The contract between the two, so it is versioned and defined
 // once here as a schema both sides decode with. Times are milliseconds since the epoch, delays
 // seconds, as in the snapshot.
-import 'server-only'
 import { Schema } from 'effect'
 
 const optional = Schema.optionalKey
