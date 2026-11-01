@@ -201,7 +201,10 @@ describe('a frozen recording', () => {
         for (const [file, answer] of answers) {
           const kept = yield* Effect.promise(() => readJson(join(dir, file)))
           expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)
-          expect(answer?.source).toMatchObject({ kind: 'timetable', delaysUpdated: expect.any(Number) })
+          expect(answer?.source).toMatchObject({
+            kind: 'timetable',
+            delaysUpdated: expect.any(Number),
+          })
         }
       }),
   )

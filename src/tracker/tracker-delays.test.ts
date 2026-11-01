@@ -88,7 +88,10 @@ describe('SIRI-ET’s delays in the opened vehicle and stop', () => {
         const row = stop.departures.find((each) => each.trip === bus.key)
         expect(row?.expected).toBe(call.expectedDeparture)
         expect(row?.state).toBe('estimated')
-        expect(stop.source).toEqual({ kind: 'timetable', delaysUpdated: snapshot.updates.lastMessage })
+        expect(stop.source).toEqual({
+          kind: 'timetable',
+          delaysUpdated: snapshot.updates.lastMessage,
+        })
       }
     }).pipe(Effect.provide(onDelays)),
   )
