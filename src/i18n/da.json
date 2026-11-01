@@ -85,7 +85,9 @@
     "rangeTo": "{stop} — {head} hertil",
     "rangeAt": "{stop} — {head} her",
     "follow": "Følg",
-    "showLine": "Vis hele linjen"
+    "showLine": "Vis hele linjen",
+    "noLivePositions": "Ingen livepositioner endnu; placeret efter køreplanen.",
+    "placedAt": "placeret {time}"
   },
   "legend": {
     "label": "Datatilstande",
@@ -131,7 +133,9 @@
     "arrivalsAt": "ankomster {time}",
     "messages": "Meddelelser",
     "later": "Senere",
-    "messagesSource": "Fra Rejseplanen"
+    "messagesSource": "Fra Rejseplanen",
+    "timetableSource": "Køreplan",
+    "timetableNote": "Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu."
   },
   "about": {
     "title": "Om Mylder",
@@ -264,6 +268,13 @@
     "recorded": "Optagne data fra {date}.",
     "aircraftLive": "Fly: live fra {provider}.",
     "aircraftRecorded": "Fly: optagne data fra adsb.lol."
+  },
+  "onTimetable": {
+    "banner": "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være.",
+    "legend": "Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.",
+    "source": "Rejseplanens køreplan, endnu ingen livepositioner",
+    "note": "Positionerne på denne side er køreplanens plan, ikke meldinger fra køretøjerne.",
+    "transit": "Køreplansdata: {rejseplanen}, under {licence}. Køreplan fra {date}."
   },
   "interval": {
     "seconds": "{n}. sekund",

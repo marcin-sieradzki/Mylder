@@ -177,6 +177,11 @@ interface ListContext {
   readonly states: ReadonlyMap<string, DataState>
   readonly now: number | undefined
   readonly timezone: string
+  /**
+   * Whether the page runs on the timetable source, which asks Rejseplanen nothing: the lists are
+   * the timetable's by design, with no positions to move them by.
+   */
+  readonly onTimetable: boolean
   readonly lang: Lang
   readonly words: Words
 }
@@ -206,7 +211,8 @@ function StopLists({ state, timezone, lang, words, phone, above, until }: StopLi
   // so nothing counts down or calls an answer old by it.
   const now = useServerSecond(useKnownClockOffset())
   const board = useStopBoard()
-  const context: ListContext = { hidden, states, now, timezone, lang, words }
+  const onTimetable = useSnapshot()?.source.kind === 'timetable'
+  const context: ListContext = { hidden, states, now, timezone, onTimetable, lang, words }
   const { answer, status } = state
   return (
     <>
@@ -328,6 +334,7 @@ function Board({
   states,
   now,
   timezone,
+  onTimetable,
   lang,
   words,
 }: BoardProps) {
@@ -375,9 +382,13 @@ function Board({
       )}
       <Text variant="caption" emphasis="secondary">
         {/* A board's answer carries Rejseplanen's expected times, whichever list it fills. */}
-        {answer.source.kind === 'rejseplanen' ? words.note : words[named.note]}
+        {onTimetable
+          ? words.timetableNote
+          : answer.source.kind === 'rejseplanen'
+            ? words.note
+            : words[named.note]}
       </Text>
-      {answer.source.kind === 'timetable' ? (
+      {answer.source.kind === 'timetable' && !onTimetable ? (
         <Text variant="caption" emphasis="secondary">
           {words.fromTimetable}
         </Text>
@@ -394,7 +405,7 @@ function Board({
           ]}
         />
       ) : (
-        <SourceLine sources={[timetableSource(answer.fetched, timezone, words)]} />
+        <SourceLine sources={[timetableSource(answer.fetched, onTimetable, timezone, words)]} />
       )}
     </>
   )
@@ -402,12 +413,21 @@ function Board({
 
 /**
  * The timetable's source, named by its phrase alone: "Timetable and positions 08:14:05", the
- * positions' time of the snapshot its times were shifted by.
+ * positions' time of the snapshot its times were shifted by. On the timetable source no position
+ * moves them, so it is the timetable's alone, named with the time of its answer: "Timetable ·
+ * 08:14:05".
  */
-const timetableSource = (fetched: number, timezone: string, words: Words): SourceLineSource => ({
-  label: words.timetableAndPositions,
-  time: clockTime(fetched, timezone, { seconds: true }),
-})
+const timetableSource = (
+  fetched: number,
+  onTimetable: boolean,
+  timezone: string,
+  words: Words,
+): SourceLineSource => {
+  const time = clockTime(fetched, timezone, { seconds: true })
+  return onTimetable
+    ? { name: words.timetableSource, label: '{time}', time }
+    : { label: words.timetableAndPositions, time }
+}
 
 interface IntervalProps {
   row: StopInterval

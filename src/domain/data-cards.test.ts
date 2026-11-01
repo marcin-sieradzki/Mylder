@@ -11,6 +11,7 @@ const healthy: DataCardFacts = {
   lastSeen: { bus: NOW - MINUTE, 's-tog': NOW - MINUTE },
   disruptions: { fetched: NOW - 5 * MINUTE, ok: true },
   trips: [{ mode: 'bus' }, { mode: 's-tog' }, { mode: 'metro' }],
+  source: { kind: 'rejseplanen' },
 }
 
 describe('Mylder’s own data cards', () => {
@@ -127,5 +128,38 @@ describe('Mylder’s own data cards', () => {
       { kind: 'mode-quiet', mode: 's-tog', since: NOW - 10 * MINUTE },
       { kind: 'mode-quiet', mode: 'bus', since: NOW - 20 * MINUTE },
     ])
+  })
+})
+
+describe('Mylder’s own data cards on the timetable source', () => {
+  /**
+   * A snapshot on the timetable source, as the tracker builds it (recordings/timetable-source):
+   * no call made, so the API is ok, no position seen and no disruption list, with trips Waiting
+   * and underway.
+   */
+  const built = NOW
+  const onTimetable: DataCardFacts = {
+    api: { status: 'ok', since: built - 5 * MINUTE },
+    budget: { level: 'normal' },
+    lastSeen: {},
+    disruptions: null,
+    trips: [{ mode: 'bus' }, { mode: 's-tog' }, { mode: 'metro' }, { mode: 'bus', waiting: true }],
+    source: { kind: 'timetable' },
+  }
+  const HOUR = 60 * MINUTE
+
+  // No call is made, so no gap is a fault: whatever else the snapshot says, no card shows,
+  // minutes or hours after it was built.
+  it.each([
+    ['as built', onTimetable],
+    ['with the month spent', { ...onTimetable, budget: { level: 'spent', resumes: '2026-07-01' } }],
+    ['with the API failing', { ...onTimetable, api: { status: 'error', since: built - HOUR } }],
+    ['with a mode gone quiet', { ...onTimetable, lastSeen: { bus: built - 3 * HOUR } }],
+    ['with messages never fetched', { ...onTimetable, disruptions: { fetched: null, ok: false } }],
+    ['with old messages', { ...onTimetable, disruptions: { fetched: built - 3 * HOUR, ok: true } }],
+  ] satisfies [string, DataCardFacts][])('shows none %s', (_, facts) => {
+    for (const later of [0, 5 * MINUTE, 3 * HOUR, 30 * HOUR]) {
+      expect(dataCards(facts, built + later)).toEqual([])
+    }
   })
 })

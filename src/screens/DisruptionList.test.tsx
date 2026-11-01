@@ -375,6 +375,18 @@ describe("Mylder's own data cards", () => {
     expect(screen.queryByRole('list', { name: 'Fra Mylder' })).not.toBeInTheDocument()
   })
 
+  it('are none on the timetable source, hours after its last snapshot, in either language', async () => {
+    // No call is made there, so no gap is Mylder's to report, however old its snapshot.
+    const onTimetable = savedSnapshot('0006.json', 'timetable-source')
+    const list = savedList('0006.json', 'timetable-source')
+    const later = { live: onTimetable, polled: onTimetable.fetched + 3 * 60 * MINUTE }
+    await show('en', list, later)
+    expect(mine()).not.toBeInTheDocument()
+    cleanup()
+    await show('da', list, later)
+    expect(screen.queryByRole('list', { name: 'Fra Mylder' })).not.toBeInTheDocument()
+  })
+
   it('say live data is paused until the 1st while the month is spent, first in the list', async () => {
     await show('en', answer(), { live: savedSnapshot('0003.json', 'spent') })
     expect(titles()).toEqual(['Live data paused until 1 July'])

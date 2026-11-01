@@ -4,7 +4,7 @@ Rejseplanen answers the tracker replays with `MYLDER_SOURCE=recording:<name>`, o
 
 Until the key arrives, every recording is frozen from the simulation by `npm run recordings`, from the plans in `src/tracker/recording/plans.ts`, each on the fixture timetable its plan names in `scripts/timetable/fixtures/`; edit the plans and the fixtures, not the files. `docs/testing-seams.md` describes the format and the hand-made cases.
 
-`timetable-source/` is no recording: it is the tracker's run on the timetable source (`MYLDER_SOURCE=timetable`), which makes no call, saved by the same script from its plan, `ON_TIMETABLE`, for screen tests. It holds the `timetable/`, `snapshots/` and `answers/` a recording does, and no answers or `clock.json`, so `MYLDER_SOURCE=recording:timetable-source` has nothing to replay.
+`timetable-source/` and `timetable-ending/` are no recordings: each is the tracker's run on the timetable source (`MYLDER_SOURCE=timetable`), which makes no call, saved by the same script from its plan, `ON_TIMETABLE` for screen tests and `ENDING_TIMETABLE` for the timetable's last week. Each holds the `timetable/`, `snapshots/` and `answers/` a recording does, and its start in `clock.json`, which `MYLDER_TIMETABLE_FROM=<folder>` starts the timetable source at, but no API answers, so `MYLDER_SOURCE=recording:<folder>` has nothing to replay.
 
 ## Aircraft
 

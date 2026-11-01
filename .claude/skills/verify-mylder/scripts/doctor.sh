@@ -25,9 +25,14 @@ done
 body=$(curl -sf "http://localhost:$port/api/snapshot") || fail "/api/snapshot does not answer 200"
 echo "$body" | grep -q '"trips":\[{' || fail "the snapshot has no trips"
 recording=$(cat "$dir/recording" 2>/dev/null || echo weekday)
-# The timetable source runs at the real time and never runs out.
+# The timetable source runs at the real time and never runs out; on a saved folder it runs on
+# from the folder's moment, through its service day, as at the real time.
 if [ "$recording" = timetable ]; then
   echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source"
+  exit 0
+fi
+if [ "${recording#timetable:}" != "$recording" ]; then
+  echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source on recordings/${recording#timetable:}"
   exit 0
 fi
 minutes=$(ls "recordings/$recording/snapshots" | wc -l | tr -d ' ')

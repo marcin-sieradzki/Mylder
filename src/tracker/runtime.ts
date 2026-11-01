@@ -79,34 +79,53 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
   return trackerServiceLayer.pipe(Layer.provide(client), Layer.provideMerge(base))
 }
 
-/** Where a source's timetable lives: a recording brings its own, the rest use the deployed one. */
-export function timetableDirOf(source: Source): string {
-  return source.kind === 'recording'
-    ? join(recordingDir(source.folder), 'timetable')
-    : TIMETABLE_DIR
+/**
+ * The variable that runs the timetable source on a saved folder in `recordings/`, its timetable
+ * and its clock, so the verifier can drive a moment such as a timetable's last week again. Only
+ * the timetable source reads it; production never sets it.
+ */
+export const TIMETABLE_FROM_VARIABLE = 'MYLDER_TIMETABLE_FROM'
+
+/** The saved folder a source runs on: a recording's own, or the timetable source's from `from`. */
+function savedFolderOf(source: Source, from: string | undefined): string | undefined {
+  if (source.kind === 'recording') return source.folder
+  return source.kind === 'timetable' ? from?.trim() || undefined : undefined
 }
 
 /**
- * The tracker as the environment sets it up. A recording brings its own timetable and its clock,
- * which starts at the recording's moment, as the aircraft's does (docs/testing-seams.md, "The
- * switch").
+ * Where a source's timetable lives: a recording brings its own, as does the timetable source
+ * run on a saved folder (`from`, `MYLDER_TIMETABLE_FROM`); the rest use the deployed one.
  */
-async function environmentLayer(): Promise<Layer.Layer<Tracker | Store>> {
-  const source = readSource(process.env.MYLDER_SOURCE)
-  const positionMode = readPositionMode(process.env[POSITION_MODE_VARIABLE])
-  if (source.kind === 'recording') {
-    const dir = recordingDir(source.folder)
+export function timetableDirOf(source: Source, from?: string): string {
+  const folder = savedFolderOf(source, from)
+  return folder ? join(recordingDir(folder), 'timetable') : TIMETABLE_DIR
+}
+
+type Environment = Readonly<Record<string, string | undefined>>
+
+/**
+ * The tracker as the environment sets it up. A recording brings its own timetable and its clock,
+ * which starts at the recording's moment, as the aircraft's does, and so does the timetable source
+ * run on a saved folder (docs/testing-seams.md, "The switch").
+ */
+export async function environmentLayer(
+  env: Environment = process.env,
+): Promise<Layer.Layer<Tracker | Store>> {
+  const source = readSource(env.MYLDER_SOURCE)
+  const positionMode = readPositionMode(env[POSITION_MODE_VARIABLE])
+  const folder = savedFolderOf(source, env[TIMETABLE_FROM_VARIABLE])
+  if (folder) {
     const [timetable, start] = await Promise.all([
-      loadTimetable(timetableDirOf(source)),
-      readStart(dir),
+      loadTimetable(join(recordingDir(folder), 'timetable')),
+      readStart(recordingDir(folder)),
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
     return trackerLayer({ timetable, source, positionMode }).pipe(
       Layer.provideMerge(sharedStartingAt(start)),
     )
   }
-  const timetable = await loadTimetable(timetableDirOf(source))
-  return trackerLayer({ timetable, source, positionMode, key: process.env[KEY_VARIABLE] })
+  const timetable = await loadTimetable(TIMETABLE_DIR)
+  return trackerLayer({ timetable, source, positionMode, key: env[KEY_VARIABLE] })
 }
 
 /**

@@ -7,7 +7,7 @@ The maintained source for verifying what a rider sees in Mylder. Read this index
 - A run launched with `launch.sh <run-id>` on the `weekday` recording, `doctor.sh <run-id>` healthy, and under nine minutes since launch. A recipe that names another recording runs on a launch of its own, as [`../SKILL.md`](../SKILL.md)'s Launch says; the rest of this baseline is the weekday's.
 - The recording's first minute has 17 vehicles (6 bus, 4 Metro, 6 S-tog, 1 train), 3 disruption messages, and planes from the aircraft recording; later minutes move them on.
 - English at `/en`, Danish at `/da`; the source banner reads "Recorded data from 16 June 2026." on every page.
-- A recipe on the timetable source runs on a launch of its own with `timetable` as the third argument, at the real time: every vehicle is Timetable only, the snapshot's source is `timetable`, and the counts are whatever the deployed timetable plans at that moment.
+- A recipe on the timetable source runs on a launch of its own with `timetable` as the third argument, at the real time, or `timetable:<folder>` on a saved folder's timetable and moment (`timetable-ending` for the timetable's last week): every vehicle is Timetable only, the snapshot's source is `timetable`, and the counts are whatever the deployed timetable plans at that moment; its source banner reads "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be." and no Paused notice shows.
 
 ## Driving conventions
 

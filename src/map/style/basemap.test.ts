@@ -1,7 +1,8 @@
 import '@mylder/perron/tokens.css'
-import type { MultiLineString } from 'geojson'
+import type { MultiLineString, Point } from 'geojson'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { createExpression } from '@maplibre/maplibre-gl-style-spec'
 import type { LayerSpecification, StyleSpecification } from 'maplibre-gl'
 import { afterEach, describe, expect, it } from 'vitest'
 import { readNetwork, type Network } from '../../timetable/network.ts'
@@ -297,7 +298,9 @@ describe('the basemap', () => {
     const style = styleNow()
     expect(features(style, 'mylder-stops')).toHaveLength(109)
     const index = (id: string) => style.layers.findIndex((each) => each.id === id)
-    const firstLabel = style.layers.findIndex((each) => each.type === 'symbol')
+    const firstLabel = style.layers.findIndex(
+      (each) => each.type === 'symbol' && !each.id.startsWith('mylder-'),
+    )
     expect(index('mylder-lines-metro')).toBeGreaterThan(index('mylder-lines-train'))
     expect(index('mylder-stops-rail')).toBeGreaterThan(index('mylder-lines-metro'))
     expect(index('mylder-stops-rail')).toBeLessThan(firstLabel)
@@ -310,6 +313,120 @@ describe('the basemap', () => {
     )
     expect(norreport?.properties).toMatchObject({ id: '27532', rail: true })
     for (const id of STOP_LAYERS) expect(style.layers.some((each) => each.id === id)).toBe(true)
+  })
+
+  it('draws a station bigger as the map zooms in, and an interchange bigger than a station', () => {
+    const style = styleNow()
+    const stop = (name: string) => {
+      const found = features(style, 'mylder-stops').find((f) => f.properties!.name === name)
+      if (!found) throw new Error(`no stop ${name}`)
+      return found
+    }
+    // MapLibre's own evaluation of a layer's paint, at a zoom, for a stop.
+    const size = (id: string, property: string, zoom: number, name: string) => {
+      const parsed = createExpression(
+        layer(style, id).paint[property],
+        `layers.${id}.paint.${property}`,
+      )
+      if (parsed.result !== 'success') throw new Error(`${id} ${property} does not parse`)
+      return parsed.value.evaluate({ zoom }, stop(name) as never) as number
+    }
+    const rail = (zoom: number, name: string) =>
+      size('mylder-stops-rail', 'circle-radius', zoom, name)
+
+    // Nørreport has the Metro and the S-tog; Sorgenfri only the S-tog.
+    expect(stop('Nørreport St.').properties).toMatchObject({ interchange: true })
+    expect(stop('Sorgenfri St.').properties).toMatchObject({ interchange: false })
+    expect(rail(10, 'Sorgenfri St.')).toBeGreaterThanOrEqual(3)
+    expect(rail(13, 'Sorgenfri St.')).toBeGreaterThan(rail(10, 'Sorgenfri St.'))
+    expect(rail(16, 'Sorgenfri St.')).toBeGreaterThanOrEqual(8)
+    for (const zoom of [10, 13, 16]) {
+      expect(rail(zoom, 'Nørreport St.')).toBeGreaterThan(rail(zoom, 'Sorgenfri St.'))
+    }
+    // A bus stop grows too, and stays smaller than a station.
+    const bus = (zoom: number) => size('mylder-stops-bus', 'circle-radius', zoom, 'Husum Torv')
+    expect(bus(17)).toBeGreaterThan(bus(14))
+    expect(bus(16)).toBeLessThan(rail(16, 'Sorgenfri St.'))
+  })
+
+  it('draws a station close in as a bar across every line that stops there', () => {
+    const style = styleNow()
+    const bars = features(style, 'mylder-stations')
+    const lines = features(style, 'mylder-lines')
+    const RAD = Math.PI / 180
+    const plane = ([lon, lat]: number[]) => [
+      lon * RAD * 6_371_008.8 * Math.cos(55.68 * RAD),
+      lat * RAD * 6_371_008.8,
+    ]
+    // Where each drawn line crosses a bar's own line across the tracks, in px from the bar's
+    // anchor, at the middle of the bar's band of zoom.
+    const crossings = (bar: (typeof bars)[number], zoom: number) => {
+      const [bx, by] = plane((bar.geometry as Point).coordinates)
+      const bearing = (bar.properties!.bearing as number) * RAD
+      const along = [Math.sin(bearing), Math.cos(bearing)]
+      const right = [along[1], -along[0]]
+      const perPx = (40_075_016.686 * Math.cos(55.68 * RAD)) / (512 * 2 ** zoom)
+      const found: { line: string; at: number }[] = []
+      for (const line of lines) {
+        for (const piece of (line.geometry as MultiLineString).coordinates) {
+          for (let i = 1; i < piece.length; i++) {
+            const [a, b] = [plane(piece[i - 1]), plane(piece[i])]
+            const [da, db] = [a, b].map(([x, y]) => (x - bx) * along[0] + (y - by) * along[1])
+            if (da * db > 0 || da === db) continue
+            const t = da / (da - db)
+            const [x, y] = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+            const across = ((x - bx) * right[0] + (y - by) * right[1]) / perPx
+            if (Math.abs(across) > 60) continue
+            // MapLibre offsets a line to the right of the way it is drawn.
+            const length = Math.hypot(b[0] - a[0], b[1] - a[1])
+            const side = Math.sign(((b[1] - a[1]) * right[0] - (b[0] - a[0]) * right[1]) / length)
+            found.push({
+              line: line.properties!.line as string,
+              at: across + side * (line.properties!.offset as number),
+            })
+          }
+        }
+      }
+      return found
+    }
+    const barsAt = (name: string, band: number) =>
+      bars.filter((bar) => bar.properties!.name === name && bar.properties!.band === band)
+
+    for (const [name, crossing] of [
+      ['Østerport St.', ['A', 'E']],
+      ['København H', ['A', 'E', 'RE']],
+      ['Nørreport St.', ['A', 'E', 'M1']],
+    ] as const) {
+      for (const band of [0, 2, 4]) {
+        const zoom = [13.5, 15.5, 17.5][band / 2]
+        const crossed = new Set<string>()
+        for (const bar of barsAt(name, band)) {
+          const { length, offset } = bar.properties as { length: number; offset: number[] }
+          for (const { line, at } of crossings(bar, zoom)) {
+            // A line crossing near the bar, as one through it would, lies within it, 2 px clear
+            // of either end; one further off crosses elsewhere.
+            if (Math.abs(at - offset[0]) > length / 2 + 10) continue
+            const within = Math.abs(at - offset[0]) <= length / 2 - 2
+            expect({ line, name, within }).toEqual({ line, name, within: true })
+            crossed.add(line)
+          }
+        }
+        expect({ name, crossed: [...crossed].sort() }).toEqual({
+          name,
+          crossed: [...crossing].sort(),
+        })
+      }
+    }
+    // The Metro runs under Nørreport apart from the S-tog, so it has a bar of its own.
+    expect(barsAt('Nørreport St.', 2)).toHaveLength(2)
+    // A bar opens its station, as the dot further out does.
+    expect(barsAt('Nørreport St.', 2)[0].properties).toMatchObject({ id: '27532' })
+    for (const band of [0, 1, 2, 3, 4]) {
+      expect(STOP_LAYERS).toContain(`mylder-stations-${band}`)
+      expect(layer(style, `mylder-stations-${band}`)).toMatchObject({ type: 'symbol' })
+    }
+    expect(layer(style, 'mylder-stations-0').minzoom).toBe(13)
+    expect(layer(style, 'mylder-stations-far').maxzoom).toBe(13)
   })
 
   it('raises the buildings from zoom 14 from their OpenStreetMap heights, flat footprints below', () => {
@@ -409,7 +526,9 @@ describe('a highlight on the basemap', () => {
 
   it('draws the highlight over the lines and stops and under the place names', () => {
     const style = styleNow(busLine())
-    const firstLabel = style.layers.findIndex((each) => each.type === 'symbol')
+    const firstLabel = style.layers.findIndex(
+      (each) => each.type === 'symbol' && !each.id.startsWith('mylder-'),
+    )
     expect(index(style, 'mylder-highlight-lines')).toBeGreaterThan(
       index(style, 'mylder-stops-rail'),
     )

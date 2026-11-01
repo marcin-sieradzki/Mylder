@@ -48,9 +48,9 @@ function wordsOf(
         dayOf(notice.last, lang),
       )
     case 'source':
-      return notice.source === 'simulated'
-        ? words.simulated
-        : words.recorded.replace('{date}', longDateOf(notice.fetched, lang, timezone))
+      if (notice.source === 'simulated') return words.simulated
+      if (notice.source === 'timetable') return dictionary.onTimetable.banner
+      return words.recorded.replace('{date}', longDateOf(notice.fetched, lang, timezone))
   }
 }
 

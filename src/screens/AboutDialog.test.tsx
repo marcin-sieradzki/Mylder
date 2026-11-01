@@ -279,6 +279,50 @@ describe('the About dialog', () => {
     expect(dialog).not.toHaveTextContent(en.legend.noLive)
   })
 
+  describe('on the timetable source', () => {
+    // Its last saved minute, 07:25, on the timetable prepared on 2 June, with no call made.
+    const onTimetable = saved('timetable-source', '0006.json')
+
+    it('names the timetable as the source, says the positions are its plan, and credits it', () => {
+      show('en', onTimetable)
+      const dialog = openDialog('About Mylder')
+      expect(fact(dialog, 'Source')).toBe("Rejseplanen's timetable, no live positions yet")
+      expect(dialog).toHaveTextContent(
+        "The positions on this page are the timetable's plan, not reports from the vehicles.",
+      )
+      expect(dialog).not.toHaveTextContent('not real')
+      expect(dialog).toHaveTextContent(
+        'Timetable data: Rejseplanen, under CC BY 4.0. Timetable of 2 June.',
+      )
+      expect(dialog).not.toHaveTextContent('Realtime data')
+      expect(within(dialog).getByRole('link', { name: 'CC BY 4.0' })).toHaveAttribute(
+        'href',
+        'https://creativecommons.org/licenses/by/4.0/',
+      )
+      expect(dialog).toHaveTextContent(
+        "Every vehicle is Timetable only for now: live positions aren't connected yet.",
+      )
+      expect(fact(dialog, 'Positions')).toBe('No position calls')
+      expect(fact(dialog, 'Calls this month')).toBe('0')
+    })
+
+    it('says it in Danish', () => {
+      show('da', onTimetable)
+      const dialog = openDialog('Om Mylder')
+      expect(fact(dialog, 'Kilde')).toBe('Rejseplanens køreplan, endnu ingen livepositioner')
+      expect(dialog).toHaveTextContent(
+        'Positionerne på denne side er køreplanens plan, ikke meldinger fra køretøjerne.',
+      )
+      expect(dialog).not.toHaveTextContent('ikke rigtige')
+      expect(dialog).toHaveTextContent(
+        'Køreplansdata: Rejseplanen, under CC BY 4.0. Køreplan fra 2. juni.',
+      )
+      expect(dialog).toHaveTextContent(
+        'Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.',
+      )
+    })
+  })
+
   it('gives the budget line when the poll has stretched, and the date live data resumes', () => {
     show('en', { ...weekday, pollInterval: 120, budget: { level: 'tight', calls: 41_000 } })
     let dialog = openDialog('About Mylder')

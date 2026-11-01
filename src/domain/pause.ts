@@ -1,7 +1,8 @@
 // When live data is paused, as docs/data-states.md ("When the answers stop") gives it: at once
 // while the month's calls are spent, since the server knows; while Rejseplanen fails or answers
-// nothing, once its last good answer is old enough. The page notice waits the Live limit, the
-// data card 5 min; both read this one rule. Times are milliseconds since the epoch.
+// nothing, once its last good answer is old enough; never on the timetable source, which asks
+// Rejseplanen nothing. The page notice waits the Live limit, the data card 5 min; both read this
+// one rule. Times are milliseconds since the epoch.
 
 /** What the rule reads of a snapshot. */
 export interface PauseFacts {
@@ -12,6 +13,8 @@ export interface PauseFacts {
   }
   /** By mode, when a position answer last carried one of its trips this service day. */
   readonly lastSeen: Readonly<Record<string, number>>
+  /** Where the snapshot's transit comes from: `timetable` makes no call, so nothing can pause. */
+  readonly source: { readonly kind: string }
 }
 
 /** Why live data is paused: the month is spent, until a date, or no answer has come since a moment. */
@@ -28,22 +31,31 @@ export function lastCarried(lastSeen: PauseFacts['lastSeen']): number | undefine
   return moments.length === 0 ? undefined : Math.max(...moments)
 }
 
+/** Whether the snapshot is on the timetable source, which asks Rejseplanen nothing. */
+export const onTimetable = (facts: Pick<PauseFacts, 'source'>): boolean =>
+  facts.source.kind === 'timetable'
+
 /**
- * The last good position answer a snapshot knows of: its own time while the API answers well,
- * else the last answer that carried a trip. None when no answer has carried one this service day.
+ * The last good position answer a snapshot knows of: its own time while the API answers well, or
+ * on the timetable source, which places every vehicle when it builds; else the last answer that
+ * carried a trip. None when no answer has carried one this service day.
  */
 export function lastAnswer(facts: PauseFacts & { readonly fetched: number }): number | undefined {
-  return facts.api.status === 'ok' ? facts.fetched : lastCarried(facts.lastSeen)
+  return facts.api.status === 'ok' || onTimetable(facts)
+    ? facts.fetched
+    : lastCarried(facts.lastSeen)
 }
 
 /**
- * Whether live data is paused at `now`: at once while the month is spent; while Rejseplanen fails
+ * Whether live data is paused at `now`: never on the timetable source, whatever else the
+ * snapshot says, since no call was made to stop; at once while the month is spent; while Rejseplanen fails
  * or answers nothing, once its last good answer is `after` ms old. That answer is timed from
  * `lastSeen`, so it holds while the API's health switches between failing and empty; with none
  * this service day, from the moment the health began. An answer that carries no trip, as one may
  * at night, leaves no mark there, so after one the pause can come sooner.
  */
 export function pauseAt(facts: PauseFacts, now: number, after: number): Pause | undefined {
+  if (onTimetable(facts)) return undefined
   const { api, budget } = facts
   if (budget.level === 'spent' || api.status === 'spent') {
     return { reason: 'spent', ...(budget.resumes ? { resumes: budget.resumes } : {}) }

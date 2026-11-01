@@ -129,8 +129,9 @@ export const RECORDINGS: readonly RecordingPlan[] = [
 /**
  * A run of the tracker on the timetable source over the real fixture, saved beside the recordings
  * for screen tests: its snapshot of each minute, its disruption list and the route answers its
- * plan names. The source makes no call, so the folder holds no answers and is no recording for
- * `MYLDER_SOURCE=recording:<name>`.
+ * plan names, with its timetable and the moment it starts in `clock.json`, which
+ * `MYLDER_TIMETABLE_FROM=<name>` runs the timetable source on. The source makes no call, so the
+ * folder holds no answers and is no recording for `MYLDER_SOURCE=recording:<name>`.
  */
 export type TimetablePlan = Pick<RecordingPlan, 'name' | 'start' | 'minutes' | 'answers'>
 
@@ -152,3 +153,19 @@ export const ON_TIMETABLE: TimetablePlan = {
     ],
   },
 }
+
+/** 07:20 in Copenhagen on Tuesday 2026-08-25, the day before the fixture's window ends. */
+const LAST_WEEK = Date.UTC(2026, 7, 25, 5, 20)
+
+/**
+ * The timetable source in its timetable's last week, so the timetable notice shows: one minute,
+ * for the verifier to launch on (`launch.sh <run> <port> timetable:timetable-ending`).
+ */
+export const ENDING_TIMETABLE: TimetablePlan = {
+  name: 'timetable-ending',
+  start: LAST_WEEK,
+  minutes: 1,
+}
+
+/** The timetable source's plans, each saved by `npm run recordings`. */
+export const TIMETABLE_PLANS: readonly TimetablePlan[] = [ON_TIMETABLE, ENDING_TIMETABLE]

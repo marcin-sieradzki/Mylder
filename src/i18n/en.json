@@ -85,7 +85,9 @@
     "rangeTo": "{stop} — {head} to here",
     "rangeAt": "{stop} — {head} here",
     "follow": "Follow",
-    "showLine": "Show whole line"
+    "showLine": "Show whole line",
+    "noLivePositions": "No live positions yet; placed from the timetable.",
+    "placedAt": "placed {time}"
   },
   "legend": {
     "label": "Data states",
@@ -131,7 +133,9 @@
     "arrivalsAt": "arrivals {time}",
     "messages": "Messages",
     "later": "Later",
-    "messagesSource": "From Rejseplanen, in Danish"
+    "messagesSource": "From Rejseplanen, in Danish",
+    "timetableSource": "Timetable",
+    "timetableNote": "Countdowns use the timetable alone; live times aren't connected yet."
   },
   "about": {
     "title": "About Mylder",
@@ -264,6 +268,13 @@
     "recorded": "Recorded data from {date}.",
     "aircraftLive": "Planes: live from {provider}.",
     "aircraftRecorded": "Planes: recorded adsb.lol data."
+  },
+  "onTimetable": {
+    "banner": "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
+    "legend": "Every vehicle is Timetable only for now: live positions aren't connected yet.",
+    "source": "Rejseplanen's timetable, no live positions yet",
+    "note": "The positions on this page are the timetable's plan, not reports from the vehicles.",
+    "transit": "Timetable data: {rejseplanen}, under {licence}. Timetable of {date}."
   },
   "interval": {
     "seconds": "{n} s",

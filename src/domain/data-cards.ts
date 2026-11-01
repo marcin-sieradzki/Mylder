@@ -2,7 +2,7 @@
 // the Disruptions list like any other disruption, first and marked as Mylder's. Read from the
 // snapshot at a moment, so a card appears and clears by the clock between polls. Times are
 // milliseconds since the epoch.
-import { pauseAt, type PauseFacts } from './pause.ts'
+import { onTimetable, pauseAt, type PauseFacts } from './pause.ts'
 
 /** One of Mylder's own cards, as codes and times; the screen writes the words. */
 export type DataCard =
@@ -39,13 +39,15 @@ const modeRank = (mode: string) => {
 }
 
 /**
- * The cards at a moment, in order: paused while the month is spent; no answer once Rejseplanen
+ * The cards at a moment, in order, none on the timetable source, which asks Rejseplanen nothing
+ * and so has no gap to report: paused while the month is spent; no answer once Rejseplanen
  * has failed or answered nothing for 5 min since its last good answer (./pause.ts); while it
  * answers, one per mode with trips underway whose positions stopped 5 min ago; and the messages'
  * card once the list is more than 15 min old after a failed check, or an hour old however it was
  * checked, or has never been fetched.
  */
 export function dataCards(facts: DataCardFacts, now: number): DataCard[] {
+  if (onTimetable(facts)) return []
   const cards: DataCard[] = []
   const { api, lastSeen, disruptions } = facts
   const pause = pauseAt(facts, now, GAP)
