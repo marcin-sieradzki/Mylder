@@ -9,6 +9,8 @@ The maintained source for verifying what a rider sees in Mylder. Read this index
 - English at `/en`, Danish at `/da`; the source banner reads "Recorded data from 16 June 2026." on every page.
 - A recipe on the timetable source runs on a launch of its own with `timetable` as the third argument, at the real time, or `timetable:<folder>` on a saved folder's timetable and moment (`timetable-ending` for the timetable's last week): every vehicle is Timetable only, the snapshot's source is `timetable`, and the counts are whatever the deployed timetable plans at that moment; its source banner reads "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be." and no Paused notice shows.
 
+- A recipe with SIRI-ET's delays runs on a launch of its own with `updates:siri-et` as the third argument: the timetable source on the SIRI-ET recording's timetable from 09:00:03 on Saturday 31 October 2026, its reader replaying the recording's messages as the clock reaches them; trips with an update are Estimated, the rest and every Metro trip Timetable only, and the counts are whatever `/api/snapshot` says at that minute.
+
 ## Driving conventions
 
 - Start each journey from `/en` with nothing open, unless its preconditions say otherwise.
@@ -28,7 +30,7 @@ Each feature file starts with an H1 and one paragraph on what the rider sees, th
 
 ## Features
 
-- [The moving map](./moving-map.md): dots, the hover card, the legend, the controls, the mode filters, the banner and the credit, and the 3D view that tilts and turns it.
+- [The moving map](./moving-map.md): dots, the hover card, the legend, the controls, the mode filters, the banner and the credit, SIRI-ET's Estimated dots, and the 3D view that tilts and turns it.
 - [Vehicle detail](./vehicle-detail.md): one trip's panel, from a dot or a Vehicles list row, with Follow and Show whole line.
 - [Stop panel](./stop-panel.md): a stop's panel with the trips standing at its platforms, and its departures and arrivals as two tabs.
 - [The overview sheet](./overview-sheet.md): City pulse and the Vehicles list.

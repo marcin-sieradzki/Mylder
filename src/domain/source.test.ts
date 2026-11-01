@@ -92,6 +92,6 @@ describe('what a rider is told about each source', () => {
 
   it('takes no kind outside them', () => {
     // @ts-expect-error -- 'siri-et' is no kind the snapshot can name
-    expect(() => describeSource('siri-et')).toThrow()
+    expect(() => describeSource('siri-et')).toThrow(TypeError)
   })
 })
