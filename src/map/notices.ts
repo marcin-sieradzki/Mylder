@@ -6,10 +6,15 @@ import 'client-only'
 import { useSyncExternalStore } from 'react'
 import { liveLimit } from '../domain/data-state.ts'
 import { pauseAt } from '../domain/pause.ts'
-import { describeSource, type BannerWords } from '../domain/source.ts'
+import type { BannerWords } from '../domain/source.ts'
 import type { IsoDate } from '../timetable/format.ts'
 import type { Snapshot } from '../tracker/index.ts'
-import { liveSnapshot, type LiveSnapshot, type SnapshotStore } from './live.ts'
+import {
+  describeSnapshotSource,
+  liveSnapshot,
+  type LiveSnapshot,
+  type SnapshotStore,
+} from './live.ts'
 import { tickingStore, type TickingStore } from './ticking.ts'
 
 /** One notice, top to bottom in the order the page shows them. */
@@ -41,7 +46,7 @@ const NONE: PageNotices = []
 
 /** The source banner its description gives, whenever the data isn't Rejseplanen's own. */
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
-  const { banner } = describeSource(snapshot.source.kind)
+  const { banner } = describeSnapshotSource(snapshot)
   if (!banner) return undefined
   const { words, dated } = banner
   return dated ? { kind: 'source', words, fetched: snapshot.fetched } : { kind: 'source', words }

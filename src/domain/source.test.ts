@@ -17,6 +17,7 @@ describe('what a rider is told about each source', () => {
         positions: false,
         messages: false,
         banner: { words: 'onTimetable.banner', dated: false },
+        legend: 'onTimetable.legend',
         named: 'onTimetable.source',
         note: 'onTimetable.note',
         credit: 'timetable',
@@ -60,6 +61,21 @@ describe('what a rider is told about each source', () => {
     expect(describeSource(kind)).toEqual(description)
   })
 
+  it('says on the timetable source, with SIRI-ET’s delays on, that vehicles are placed from them', () => {
+    expect(describeSource('timetable', { delays: true })).toEqual({
+      ...describeSource('timetable'),
+      banner: { words: 'onTimetable.bannerWithDelays', dated: false },
+      legend: 'onTimetable.legendWithDelays',
+    })
+  })
+
+  it.each(['simulated', 'recording', 'rejseplanen'] as const)(
+    'tells of the %s source as before with delays on: its banner and legend are its own',
+    (kind) => {
+      expect(describeSource(kind, { delays: true })).toEqual(describeSource(kind))
+    },
+  )
+
   it('describes every kind the snapshot can name', () => {
     expect(SOURCE_KINDS).toEqual(['timetable', 'simulated', 'recording', 'rejseplanen'])
     expect(Object.keys(SOURCE_DESCRIPTIONS).sort()).toEqual([...SOURCE_KINDS].sort())
@@ -76,6 +92,6 @@ describe('what a rider is told about each source', () => {
 
   it('takes no kind outside them', () => {
     // @ts-expect-error -- 'siri-et' is no kind the snapshot can name
-    expect(describeSource('siri-et')).toBeUndefined()
+    expect(() => describeSource('siri-et')).toThrow()
   })
 })
