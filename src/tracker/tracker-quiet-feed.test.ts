@@ -235,6 +235,8 @@ describe('a quiet SIRI-ET feed, from the listener’s table', () => {
             if (!on || on.waiting || trip.waiting) continue
             expect(on.state).toBe('no-signal')
             expect(on.delay).toBe(trip.delay)
+            // It carries its last update's steps, which opened panels time its calls by.
+            expect(on.steps).toEqual(trip.steps)
             // Its calls are still timed by its update, call by call.
             for (const call of on.next) {
               const was = trip.next.find((each) => each.index === call.index)

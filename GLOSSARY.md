@@ -121,8 +121,12 @@ A position Rejseplanen works out for a trip from its timetable and realtime, rat
 _Avoid_: Calculated position, last position, estimate
 
 **Delay**:
-How far a trip runs behind its timetable: expected minus scheduled time at its latest updated call. Negative when early.
+How far a trip runs behind its timetable: expected minus scheduled time at its latest updated call. Negative when early. An opened vehicle's panel gives the delay at its next stop, which can differ from the delay it ends on.
 _Avoid_: Lateness, deviation
+
+**Delay step**:
+Where a trip's delay changes along its calls: the call it changes at and the delay from there on, taken from its update. A trip carries its steps so each call's expected time follows the update, not one delay for the whole trip.
+_Avoid_: Delay profile, per-stop delay
 
 **Position**:
 Where a trip is at a moment, as a point on its pattern's path.

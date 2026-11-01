@@ -1,0 +1,795 @@
+{
+  "stop": {
+    "id": "6584",
+    "name": "Nørreport St.",
+    "lines": [
+      {
+        "name": "5C",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "6A",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "14",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "15E",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "150S",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "184",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "185",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "350S",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "M1",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "M2",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "M1",
+        "mode": "metro",
+        "colour": "perron-color-transit-line-m1"
+      },
+      {
+        "name": "M2",
+        "mode": "metro",
+        "colour": "perron-color-transit-line-m2"
+      },
+      {
+        "name": "A",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-a"
+      },
+      {
+        "name": "B",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-b"
+      },
+      {
+        "name": "Bx",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "C",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-c"
+      },
+      {
+        "name": "E",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-e"
+      },
+      {
+        "name": "H",
+        "mode": "s-tog",
+        "colour": "perron-color-transit-line-h"
+      },
+      {
+        "name": "802",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "803",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "804",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "805",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "806",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "IC",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "ICL",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      },
+      {
+        "name": "RE",
+        "mode": "train",
+        "colour": "perron-color-transit-mode-regional"
+      }
+    ]
+  },
+  "fetched": 1793434920000,
+  "nextDue": 1793434980000,
+  "source": {
+    "kind": "timetable",
+    "delaysUpdated": 1793434912430
+  },
+  "arrivals": [
+    {
+      "trip": "s-tog.C.2030045537.20261031.0829",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Klampenborg St.",
+      "platform": "8600646",
+      "scheduled": 1793434920000,
+      "expected": 1793434920000,
+      "state": "estimated",
+      "origin": "Frederikssund St."
+    },
+    {
+      "trip": "train.804.2938485124.20261031.0920",
+      "line": "804",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Båstad",
+      "platform": "8600646",
+      "scheduled": 1793434920000,
+      "state": "timetable-only",
+      "origin": "Østerport St."
+    },
+    {
+      "trip": "bus.150S.ed59f9843e.20261031.0828",
+      "line": "150S",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793434980000,
+      "state": "timetable-only",
+      "origin": "Kokkedal St."
+    },
+    {
+      "trip": "bus.184.66ab950a78.20261031.0822",
+      "line": "184",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793434980000,
+      "expected": 1793434980000,
+      "state": "estimated",
+      "origin": "Vedbæk St."
+    },
+    {
+      "trip": "s-tog.C.fffba677a7.20261031.0906",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Frederikssund St.",
+      "platform": "8600646",
+      "scheduled": 1793434980000,
+      "expected": 1793434980000,
+      "state": "estimated",
+      "origin": "Klampenborg St."
+    },
+    {
+      "trip": "bus.6A.1c3f2d7f51.20261031.0905",
+      "line": "6A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793435160000,
+      "expected": 1793435040000,
+      "state": "estimated",
+      "origin": "Emdrup Torv"
+    },
+    {
+      "trip": "train.RE.c63cb446b4.20261031.0922",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Helsingør St.",
+      "platform": "8600646",
+      "scheduled": 1793435040000,
+      "expected": 1793435040000,
+      "state": "estimated",
+      "origin": "København H"
+    },
+    {
+      "trip": "train.IC.36aba2d06e.20261031.0923",
+      "line": "IC",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Esbjerg St.",
+      "platform": "8600646",
+      "scheduled": 1793435100000,
+      "state": "timetable-only",
+      "origin": "Østerport St."
+    },
+    {
+      "trip": "bus.5C.74043bd110.20261031.0901",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1793435280000,
+      "expected": 1793435160000,
+      "state": "estimated",
+      "origin": "Husum Torv, Sløjfen"
+    },
+    {
+      "trip": "train.RE.353d6d9234.20261031.0750",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Østerport St.",
+      "platform": "8600646",
+      "scheduled": 1793435220000,
+      "expected": 1793435220000,
+      "state": "estimated",
+      "origin": "Kalundborg St."
+    },
+    {
+      "trip": "bus.5C.21d4082f45.20261031.0901",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Husum Torv",
+      "platform": "50461",
+      "scheduled": 1793435100000,
+      "expected": 1793435280000,
+      "state": "estimated",
+      "origin": "Sundbyvester Plads"
+    },
+    {
+      "trip": "train.IC.ffe5b0b936.20261031.0926",
+      "line": "IC",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Fredericia St.",
+      "platform": "8600646",
+      "scheduled": 1793435280000,
+      "state": "timetable-only",
+      "origin": "Østerport St."
+    },
+    {
+      "trip": "s-tog.A.e30c3fb58b.20261031.0851",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Køge St.",
+      "platform": "8600646",
+      "scheduled": 1793435340000,
+      "expected": 1793435400000,
+      "state": "estimated",
+      "origin": "Hillerød St."
+    },
+    {
+      "trip": "s-tog.B.03989a6253.20261031.0900",
+      "line": "B",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-b",
+      "headsign": "Farum St.",
+      "platform": "8600646",
+      "scheduled": 1793435400000,
+      "expected": 1793435400000,
+      "state": "estimated",
+      "origin": "Høje Taastrup St."
+    },
+    {
+      "trip": "bus.5C.bfa9380a11.20261031.0906",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Herlev Hospital",
+      "platform": "50461",
+      "scheduled": 1793435400000,
+      "expected": 1793435460000,
+      "state": "estimated",
+      "origin": "Sundbyvester Plads"
+    },
+    {
+      "trip": "s-tog.C.7a5d260443.20261031.0929",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Klampenborg St.",
+      "platform": "8600646",
+      "scheduled": 1793435520000,
+      "state": "timetable-only",
+      "origin": "København H"
+    },
+    {
+      "trip": "bus.6A.439c29b3fe.20261031.0902",
+      "line": "6A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793435700000,
+      "expected": 1793435580000,
+      "state": "estimated",
+      "origin": "Buddinge St."
+    },
+    {
+      "trip": "bus.5C.cae926d4aa.20261031.0857",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Københavns Lufthavn",
+      "platform": "27532",
+      "scheduled": 1793435640000,
+      "expected": 1793435640000,
+      "state": "estimated",
+      "origin": "Herlev Hospital, Sløjfen"
+    },
+    {
+      "trip": "bus.14.e2077753ad.20261031.0901",
+      "line": "14",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "28329",
+      "scheduled": 1793435340000,
+      "expected": 1793435640000,
+      "state": "estimated",
+      "origin": "Ryparken"
+    },
+    {
+      "trip": "bus.185.e117407118.20261031.0901",
+      "line": "185",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793435700000,
+      "expected": 1793435640000,
+      "state": "estimated",
+      "origin": "Klampenborg St."
+    },
+    {
+      "trip": "train.RE.707c025e73.20261031.0843",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "København H",
+      "platform": "8600646",
+      "scheduled": 1793435640000,
+      "state": "timetable-only",
+      "origin": "Helsingør St."
+    },
+    {
+      "trip": "s-tog.B.7e91e04136.20261031.0901",
+      "line": "B",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-b",
+      "headsign": "Høje Taastrup St.",
+      "platform": "8600646",
+      "scheduled": 1793435700000,
+      "expected": 1793435700000,
+      "state": "estimated",
+      "origin": "Farum St."
+    },
+    {
+      "trip": "bus.5C.74043bd110.20261031.0911",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1793435880000,
+      "expected": 1793435760000,
+      "state": "estimated",
+      "origin": "Husum Torv, Sløjfen"
+    },
+    {
+      "trip": "s-tog.A.c11d77684a.20261031.0848",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600646",
+      "scheduled": 1793435760000,
+      "expected": 1793435760000,
+      "state": "estimated",
+      "origin": "Køge St."
+    },
+    {
+      "trip": "train.804.b8b3d78c8e.20261031.0732",
+      "line": "804",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Østerport",
+      "platform": "8600646",
+      "scheduled": 1793435760000,
+      "state": "timetable-only",
+      "origin": "Båstad St."
+    },
+    {
+      "trip": "bus.5C.e3976d01ff.20261031.0858",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Husum Torv",
+      "platform": "50461",
+      "scheduled": 1793435700000,
+      "expected": 1793435820000,
+      "state": "estimated",
+      "origin": "Københavns Lufthavn"
+    },
+    {
+      "trip": "train.802.2aefb0f4fc.20261031.0935",
+      "line": "802",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Karlskrona",
+      "platform": "8600646",
+      "scheduled": 1793435820000,
+      "state": "timetable-only",
+      "origin": "Østerport St."
+    },
+    {
+      "trip": "bus.5C.bfa9380a11.20261031.0916",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Herlev Hospital",
+      "platform": "50461",
+      "scheduled": 1793436000000,
+      "expected": 1793435940000,
+      "state": "estimated",
+      "origin": "Sundbyvester Plads"
+    },
+    {
+      "trip": "s-tog.A.e30c3fb58b.20261031.0901",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Køge St.",
+      "platform": "8600646",
+      "scheduled": 1793435940000,
+      "expected": 1793435940000,
+      "state": "estimated",
+      "origin": "Hillerød St."
+    },
+    {
+      "trip": "train.IC.48513d61e1.20261031.0632",
+      "line": "IC",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Østerport St.",
+      "platform": "8600646",
+      "scheduled": 1793435580000,
+      "expected": 1793435940000,
+      "state": "estimated",
+      "origin": "Esbjerg St."
+    },
+    {
+      "trip": "train.RE.bd06c84b2d.20261031.0905",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Helsingør St.",
+      "platform": "8600646",
+      "scheduled": 1793435940000,
+      "expected": 1793435940000,
+      "state": "estimated",
+      "origin": "Roskilde St."
+    },
+    {
+      "trip": "bus.5C.3b683c7f80.20261031.0905",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1793436120000,
+      "expected": 1793436060000,
+      "state": "estimated",
+      "origin": "Herlev Hospital, Sløjfen"
+    },
+    {
+      "trip": "bus.150S.ed59f9843e.20261031.0848",
+      "line": "150S",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793436180000,
+      "expected": 1793436060000,
+      "state": "estimated",
+      "origin": "Kokkedal St."
+    },
+    {
+      "trip": "bus.350S.dda2c7480a.20261031.0854",
+      "line": "350S",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793435940000,
+      "expected": 1793436120000,
+      "state": "estimated",
+      "origin": "Ballerup St."
+    },
+    {
+      "trip": "bus.6A.1c3f2d7f51.20261031.0922",
+      "line": "6A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793436180000,
+      "state": "timetable-only",
+      "origin": "Emdrup Torv"
+    },
+    {
+      "trip": "s-tog.C.2030045537.20261031.0849",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Klampenborg St.",
+      "platform": "8600646",
+      "scheduled": 1793436120000,
+      "expected": 1793436180000,
+      "state": "estimated",
+      "origin": "Frederikssund St."
+    },
+    {
+      "trip": "s-tog.C.fffba677a7.20261031.0926",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Frederikssund St.",
+      "platform": "8600646",
+      "scheduled": 1793436180000,
+      "state": "timetable-only",
+      "origin": "Klampenborg St."
+    },
+    {
+      "trip": "bus.5C.21d4082f45.20261031.0921",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Husum Torv",
+      "platform": "50461",
+      "scheduled": 1793436300000,
+      "state": "timetable-only",
+      "origin": "Sundbyvester Plads"
+    },
+    {
+      "trip": "bus.184.66ab950a78.20261031.0842",
+      "line": "184",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793436300000,
+      "expected": 1793436300000,
+      "state": "estimated",
+      "origin": "Vedbæk St."
+    },
+    {
+      "trip": "bus.5C.0fc1e8013d.20261031.0920",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Københavns Lufthavn",
+      "platform": "27532",
+      "scheduled": 1793436420000,
+      "expected": 1793436360000,
+      "state": "estimated",
+      "origin": "Husum Torv, Sløjfen"
+    },
+    {
+      "trip": "bus.14.e2077753ad.20261031.0916",
+      "line": "14",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "28329",
+      "scheduled": 1793436360000,
+      "expected": 1793436360000,
+      "state": "estimated",
+      "origin": "Ryparken"
+    },
+    {
+      "trip": "s-tog.A.b663ed2700.20261031.0943",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Hillerød St.",
+      "platform": "8600646",
+      "scheduled": 1793436360000,
+      "state": "timetable-only",
+      "origin": "København H"
+    },
+    {
+      "trip": "bus.6A.439c29b3fe.20261031.0917",
+      "line": "6A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Nørreport St.",
+      "platform": "6584",
+      "scheduled": 1793436600000,
+      "expected": 1793436480000,
+      "state": "estimated",
+      "origin": "Buddinge St."
+    },
+    {
+      "trip": "train.RE.cb0c79f85b.20261031.0836",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Østerport St.",
+      "platform": "8600646",
+      "scheduled": 1793436480000,
+      "expected": 1793436480000,
+      "state": "estimated",
+      "origin": "Næstved St."
+    },
+    {
+      "trip": "s-tog.A.e30c3fb58b.20261031.0911",
+      "line": "A",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-a",
+      "headsign": "Køge St.",
+      "platform": "8600646",
+      "scheduled": 1793436540000,
+      "expected": 1793436540000,
+      "state": "estimated",
+      "origin": "Hillerød St."
+    },
+    {
+      "trip": "train.RE.c4d19cc4a2.20261031.0858",
+      "line": "RE",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Næstved St.",
+      "platform": "8600646",
+      "scheduled": 1793436540000,
+      "expected": 1793436540000,
+      "state": "estimated",
+      "origin": "Helsingør St."
+    },
+    {
+      "trip": "bus.5C.3b683c7f80.20261031.0914",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Sundbyvester Plads",
+      "platform": "27532",
+      "scheduled": 1793436660000,
+      "expected": 1793436600000,
+      "state": "estimated",
+      "origin": "Herlev Hospital, Sløjfen"
+    },
+    {
+      "trip": "s-tog.B.03989a6253.20261031.0920",
+      "line": "B",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-b",
+      "headsign": "Farum St.",
+      "platform": "8600646",
+      "scheduled": 1793436600000,
+      "expected": 1793436600000,
+      "state": "estimated",
+      "origin": "Høje Taastrup St."
+    },
+    {
+      "trip": "bus.5C.94268b9b1c.20261031.0913",
+      "line": "5C",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Herlev Hospital",
+      "platform": "50461",
+      "scheduled": 1793436660000,
+      "expected": 1793436660000,
+      "state": "estimated",
+      "origin": "Københavns Lufthavn"
+    },
+    {
+      "trip": "train.803.174c8b6907.20261031.0816",
+      "line": "803",
+      "mode": "train",
+      "colour": "perron-color-transit-mode-regional",
+      "headsign": "Østerport",
+      "platform": "8600646",
+      "scheduled": 1793436660000,
+      "state": "timetable-only",
+      "origin": "Hässleholm C"
+    },
+    {
+      "trip": "s-tog.C.7a5d260443.20261031.0949",
+      "line": "C",
+      "mode": "s-tog",
+      "colour": "perron-color-transit-line-c",
+      "headsign": "Klampenborg St.",
+      "platform": "8600646",
+      "scheduled": 1793436720000,
+      "state": "timetable-only",
+      "origin": "København H"
+    }
+  ],
+  "intervals": [
+    {
+      "line": "M1",
+      "mode": "metro",
+      "colour": "perron-color-transit-line-m1",
+      "headsign": "Vanløse St. (Metro)",
+      "platform": "8603307",
+      "every": {
+        "from": 6,
+        "to": 6
+      },
+      "origin": "Vestamager St."
+    },
+    {
+      "line": "M1",
+      "mode": "metro",
+      "colour": "perron-color-transit-line-m1",
+      "headsign": "Vestamager St. (Metro)",
+      "platform": "8603307",
+      "every": {
+        "from": 6,
+        "to": 6
+      },
+      "origin": "Vanløse St."
+    },
+    {
+      "line": "M2",
+      "mode": "metro",
+      "colour": "perron-color-transit-line-m2",
+      "headsign": "Københavns Lufthavn St. (Metro)",
+      "platform": "8603307",
+      "every": {
+        "from": 6,
+        "to": 6
+      },
+      "origin": "Vanløse St."
+    },
+    {
+      "line": "M2",
+      "mode": "metro",
+      "colour": "perron-color-transit-line-m2",
+      "headsign": "Vanløse St. (Metro)",
+      "platform": "8603307",
+      "every": {
+        "from": 6,
+        "to": 6
+      },
+      "origin": "Københavns Lufthavn St."
+    }
+  ],
+  "messages": []
+}

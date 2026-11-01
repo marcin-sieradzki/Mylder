@@ -12,6 +12,7 @@ import {
 } from '../domain/data-state.ts'
 import {
   delayOf,
+  delaySteps,
   ENDED_STANDS_FOR,
   pointAt,
   progressAt,
@@ -23,6 +24,7 @@ import {
   type Position,
   type TripPhase,
   type Call,
+  type DelayStep,
   type TimedCall,
 } from '../domain/trip-motion.ts'
 import { clockMoment } from '../timetable/time.ts'
@@ -69,19 +71,6 @@ export interface TripHistory {
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
   readonly ref?: string
-}
-
-/** A call, by its index, where a trip's delay changes to `delay` seconds. */
-type DelayStep = readonly [index: number, delay: number]
-
-/** The calls of an update where its delay changes, and the delay there in seconds. */
-function stepsOf(calls: readonly Call[]): DelayStep[] {
-  const steps: DelayStep[] = []
-  calls.forEach((call, index) => {
-    const delay = delayOf([call])
-    if (delay !== undefined && delay !== steps.at(-1)?.[1]) steps.push([index, delay])
-  })
-  return steps
 }
 
 /**
@@ -264,7 +253,7 @@ export function buildTrips({
       const path = timetable.pathOf(trip.pattern)
       // A position's stops lie over SIRI-ET's expected times, where both give one: this run's
       // update's, or else the last one's, kept while the table no longer brings it.
-      const steps = update ? stepsOf(update.calls) : before?.steps
+      const steps = update ? delaySteps(update.calls) : before?.steps
       const base = update?.calls ?? (steps ? callsFromSteps(trip.calls, steps) : trip.calls)
       const calls = realtime
         ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop, base)
@@ -339,6 +328,7 @@ export function buildTrips({
         ...(atFirstStop ? { waiting: true as const } : {}),
         ...(update?.cancelled ? { cancelled: true as const } : {}),
         ...(update?.cancelledCalls.length ? { cancelledCalls: update.cancelledCalls } : {}),
+        ...(steps?.length ? { steps } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
       })

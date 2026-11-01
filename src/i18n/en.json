@@ -87,7 +87,8 @@
     "follow": "Follow",
     "showLine": "Show whole line",
     "noLivePositions": "No live positions yet; placed from the timetable.",
-    "placedAt": "placed {time}"
+    "placedAt": "placed {time}",
+    "delaysSource": "Timetable and Rejseplanen's delays"
   },
   "legend": {
     "label": "Data states",
@@ -135,7 +136,9 @@
     "later": "Later",
     "messagesSource": "From Rejseplanen, in Danish",
     "timetableSource": "Timetable",
-    "timetableNote": "Countdowns use the timetable alone; live times aren't connected yet."
+    "timetableNote": "Countdowns use the timetable alone; live times aren't connected yet.",
+    "delaysSource": "Timetable and Rejseplanen's delays",
+    "delaysNote": "Countdowns use the timetable, moved by Rejseplanen's delay where a trip has one; the rest use the timetable alone."
   },
   "about": {
     "title": "About Mylder",

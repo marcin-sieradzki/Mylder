@@ -9,6 +9,8 @@ import { savedUpdatesSnapshot, UPDATES_URL } from './recording'
 interface Trip {
   readonly key: string
   readonly mode: string
+  readonly headsign: string
+  readonly next: readonly { readonly stop: string }[]
   readonly state: string
   readonly position: [number, number]
   readonly delay?: number
@@ -85,4 +87,33 @@ test('a delayed bus’s card says Estimated', async ({ page }) => {
     await page.mouse.move(width / 2, height / 2)
     await expect(card).toContainText('Estimated', { timeout: 1000 })
   }).toPass()
+})
+
+test('an opened delayed bus and its next stop show its expected times and the delays’ update', async ({
+  page,
+  request,
+}) => {
+  const { trips } = await snapshotNow(request)
+  const bus = trips.find(
+    (trip) =>
+      trip.mode === 'bus' &&
+      trip.state === 'estimated' &&
+      !trip.cancelled &&
+      Math.abs(trip.delay ?? 0) >= 120 &&
+      trip.next.length > 0,
+  )!
+  const source = /Timetable and Rejseplanen's delays\s·\supdated\s\d\d:\d\d:\d\d/
+  await page.goto(`${UPDATES_URL}/en?trip=${encodeURIComponent(bus.key)}`)
+  const vehicle = page.getByRole('dialog', { name: `to ${bus.headsign}` })
+  await expect(vehicle).toContainText(source)
+  await expect(vehicle.getByRole('list', { name: 'Stops' })).toContainText(/~\d\d:\d\d/)
+  await page.goto(`${UPDATES_URL}/en?stop=${bus.next[0].stop}`)
+  const stop = page
+    .getByRole('dialog')
+    .filter({ has: page.getByRole('tab', { name: 'Departures' }) })
+  await expect(stop.getByRole('list', { name: 'Departures' })).toContainText(/~\d\d:\d\d/)
+  await expect(stop).toContainText(source)
+  await expect(stop).toContainText(
+    "Countdowns use the timetable, moved by Rejseplanen's delay where a trip has one; the rest use the timetable alone.",
+  )
 })
