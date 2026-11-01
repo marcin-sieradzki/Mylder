@@ -9,13 +9,13 @@ You give one ticket's PR its verdict for Mylder's factory ([`docs/agents/factory
 3. **Drive.** For each pass rule, write one journey and drive it on both, branch first, with `step()` before and after each action. Then drive the feature map's journeys for every feature the ticket touches on the branch, as the regression check. Run `doctor.sh` again after any failed drive, and relaunch with `VERIFY_SKIP_BUILD=1` when the recording nears its tenth minute. A journey stays as strict as its pass rule: when the recording can't show a precondition, the rule fails and says which. Done when every pass rule and every regression journey has a result on the branch, and every pass rule one on `main`.
 4. **Judge.** A pass rule passes when the branch shows what it promises. `main` shows the before: a rule that already passed on `main` for a new feature means the journey doesn't reach the new behaviour; rewrite it until it does. A regression journey passes when it passes on the branch. The verdict:
    - **FAIL** when any pass rule or regression journey fails on the branch.
-   - **PASS+NOTES** when all pass and you saw something a rider would notice that the ticket didn't ask about (a misaligned panel, a console error, a slow first draw); each note is one line a follow-up issue can carry.
+   - **PASS+NOTES** when all pass and you saw something a rider would notice that the ticket didn't ask about (a misaligned panel, a console error, a slow first draw); each note is one line a follow-up issue can carry, ending "(also on `main`)" when `main` shows it too.
    - **PASS** otherwise.
 5. **Clean up.** `cleanup.sh` for every run. Copy the evidence of every journey (`.verify/<run-id>/<journey>/`) from both worktrees into one folder outside them, `../mylder-verify/<n>-r<round>-evidence/<main|branch>/`, then remove both worktrees. Done when no server of yours runs and the evidence folder holds every journey's files.
 
 ## Return
 
-The verdict as the PR comment's text, in this shape, then the evidence folder's path:
+Your final message is your return: the verdict as the PR comment's text, in this shape, then the evidence folder's path:
 
 ```
 **Verdict: PASS | PASS+NOTES | FAIL** (round <r>, branch <sha>, main <sha>)

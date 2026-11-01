@@ -17,6 +17,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # A commit names who wrote it with its Co-Authored-By trailer, never a link to the session.
+      - if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          if git log --format=%B "origin/$BASE..HEAD" | grep -nE 'Claude-Session:|claude\.ai/code/session_'; then
+            echo "A commit message above links a session: reword it, keeping the Co-Authored-By trailer." >&2
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
