@@ -100,6 +100,13 @@ const fromRecording = (folder: string) =>
 /** How long the tracker waits for the listener's table before it runs without. */
 export const LISTENER_TIMEOUT = '3 seconds'
 
+/**
+ * The most of an answer the tracker reads, unzipped: about nine times the 895 KB of JSON the
+ * recorded Saturday's table reached at 09:56 (docs/live-data.md, "The update table"), room for a
+ * weekday peak. A longer answer is no table, and the rest of it is never read.
+ */
+export const TABLE_MAX_BYTES = 8 * 1024 * 1024
+
 /** A table built longer ago than this is a stuck listener's, and counts as none. */
 export const TABLE_MAX_AGE = 10 * 60_000
 
@@ -130,18 +137,26 @@ export const readUpdateTable = (
         undefined,
       )
     }
+    if (!sendsTokenSafely(listener.url)) {
+      return yield* Effect.as(
+        Effect.logError(
+          `${LISTENER_URL_VARIABLE} isn’t an https URL, or plain http on this machine, so the token isn’t sent; delays are left out`,
+        ),
+        undefined,
+      )
+    }
     const authorization = `Bearer ${listener.token}`
-    const answer = yield* Http.getText(client, listener.url, {}, { authorization }).pipe(
-      Effect.timeout(LISTENER_TIMEOUT),
-      Effect.result,
-    )
+    const answer = yield* Http.getTextUpTo(client, listener.url, TABLE_MAX_BYTES, {
+      authorization,
+    }).pipe(Effect.timeout(LISTENER_TIMEOUT), Effect.result)
     if (Result.isFailure(answer)) {
       const failure = answer.failure
       return yield* Cause.isTimeoutError(failure)
         ? without(`took over ${LISTENER_TIMEOUT}`)
         : without(`couldn’t be fetched: ${withoutToken(failure.message, listener.token)}`)
     }
-    const { status, text } = answer.success
+    const { status, text, tooLarge } = answer.success
+    if (tooLarge) return yield* without(`is over ${TABLE_MAX_BYTES / 1024 / 1024} MB`)
     if (status !== 200) {
       return yield* Effect.as(
         Effect.logWarning(`The listener answered ${status}; delays are left out this run`),
@@ -151,8 +166,13 @@ export const readUpdateTable = (
     const body = parseJson(text)
     const table = decodeTable(body)
     if (Option.isNone(table)) {
-      const version = (body as { version?: unknown } | undefined)?.version
-      return yield* without(`fails its schema (version ${String(version)})`)
+      // Only a version that is a number is logged; nothing else of the answer is.
+      const version = (body as { version?: unknown } | null | undefined)?.version
+      return yield* without(
+        Number.isSafeInteger(version)
+          ? `fails its schema (version ${version})`
+          : 'fails its schema',
+      )
     }
     if (now - table.value.writtenAt > TABLE_MAX_AGE) {
       return yield* without(
@@ -161,6 +181,16 @@ export const readUpdateTable = (
     }
     return table.value
   })
+
+/** Whether a URL is one the token may go to: https, or plain http to this machine. */
+function sendsTokenSafely(url: string): boolean {
+  if (!URL.canParse(url)) return false
+  const { protocol, hostname } = new URL(url)
+  return (
+    protocol === 'https:' ||
+    (protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(hostname))
+  )
+}
 
 const parseJson = (text: string): unknown => {
   try {

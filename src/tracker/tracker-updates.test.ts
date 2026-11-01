@@ -457,4 +457,71 @@ describe('SIRI-ET’s delays from the listener’s table, fetched over HTTPS', (
       expect(lines.join('\n')).toMatch(/Error .*MYLDER_UPDATES_URL and MYLDER_UPDATES_TOKEN/)
     }),
   )
+
+  it.effect('treats an answer over 8 MB as no table, and logs it', () =>
+    Effect.gen(function* () {
+      // Eight times the recorded Saturday's 895 KB of JSON, and then some.
+      const huge = listenerAnswering((request) =>
+        Effect.succeed(Http.text(request, 200, `{"version":1,"x":"${'x'.repeat(9_000_000)}"}`)),
+      )
+      const { snapshot, lines } = yield* loggedRun(huge)
+      expectNoTable(snapshot)
+      expect(lines.join('\n')).toMatch(/listener’s table is over 8 MB/)
+    }),
+  )
+
+  it.effect('logs no value of a refused table as it came, only a version that is a number', () =>
+    Effect.gen(function* () {
+      const table = yield* Effect.promise(() => listenersTable('09:21:30'))
+      const odd = `<script>${'x'.repeat(300)}`
+      const { snapshot, lines } = yield* loggedRun(serving({ ...table, version: odd }))
+      expectNoTable(snapshot)
+      const logged = lines.join('\n')
+      expect(logged).toMatch(/listener’s table fails its schema;/)
+      expect(logged).not.toContain('<script>')
+      expect(logged).not.toContain('xxxxxxxxxx')
+    }),
+  )
+
+  it.effect.each([
+    { url: 'http://listener.example/table', fetches: 0 },
+    { url: 'ftp://listener.example/table', fetches: 0 },
+    { url: 'not a url', fetches: 0 },
+    { url: 'http://127.0.0.1:8080/table', fetches: 1 },
+    { url: 'http://localhost:8080/table', fetches: 1 },
+  ])('fetches $url only over https, or plain http on this machine', ({ url, fetches }) =>
+    Effect.gen(function* () {
+      let asked = 0
+      const lines: string[] = []
+      const kept = Logger.layer([
+        Logger.make(({ message, logLevel }) => lines.push(`${logLevel} ${String(message)}`)),
+      ])
+      const http = Http.layer(
+        Http.client((request) => {
+          asked++
+          return Effect.succeed(Http.text(request, 503, ''))
+        }),
+      )
+      yield* snapshotAt('09:21:30').pipe(
+        Effect.provide(
+          Layer.merge(
+            trackerLayer({
+              timetable,
+              source: { kind: 'timetable' },
+              updates: { kind: 'siri' },
+              listener: { url, token: TOKEN },
+              updatesHttp: http,
+              cpu: stoppedCpu,
+            }),
+            kept,
+          ),
+        ),
+      )
+      expect(asked).toBe(fetches)
+      if (fetches === 0) {
+        expect(lines.join('\n')).toMatch(/Error MYLDER_UPDATES_URL isn’t an https URL/)
+      }
+      for (const line of lines) expect(line).not.toContain(TOKEN)
+    }),
+  )
 })
