@@ -12,6 +12,16 @@ describe('the update switch, MYLDER_UPDATES', () => {
     expect(readUpdates('recording:siri-et')).toEqual({ kind: 'recording', folder: 'siri-et' })
   })
 
+  it('reads recording:<folder>/<moment> as the same messages from a saved moment’s clock', () => {
+    expect(readUpdates('recording:siri-et/quiet')).toEqual({
+      kind: 'recording',
+      folder: 'siri-et',
+      moment: 'quiet',
+    })
+    expect(() => readUpdates('recording:siri-et/')).toThrow(/recording:<folder>/)
+    expect(() => readUpdates('recording:siri-et/a/b')).toThrow(/recording:<folder>/)
+  })
+
   it('reads siri as the listener’s table, fetched over HTTPS', () => {
     expect(readUpdates('siri')).toEqual({ kind: 'siri' })
   })
@@ -19,6 +29,7 @@ describe('the update switch, MYLDER_UPDATES', () => {
   it('stops at anything else, naming the choices', () => {
     expect(() => readUpdates('on')).toThrow(/MYLDER_UPDATES="on" is none of off, siri/)
     expect(() => readUpdates('recording:')).toThrow(/recording:<folder>/)
+    expect(() => readUpdates('recording:../siri-et')).toThrow(/recording:<folder>/)
   })
 })
 

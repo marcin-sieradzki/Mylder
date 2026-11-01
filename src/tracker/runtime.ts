@@ -141,9 +141,14 @@ export async function environmentLayer(
   const listener = readListener(env)
   const folder = savedFolderOf(source, from, updates)
   if (folder) {
+    // The recording's clock, or a saved moment's of the one its updates replay.
+    const moment =
+      updates.kind === 'recording' && folder === updates.folder ? updates.moment : undefined
+    const clockDir =
+      moment === undefined ? recordingDir(folder) : join(recordingDir(folder), moment)
     const [timetable, start] = await Promise.all([
       loadTimetable(join(recordingDir(folder), 'timetable')),
-      readStart(recordingDir(folder)),
+      readStart(clockDir),
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
     return trackerLayer({ timetable, source, positionMode, updates, listener }).pipe(

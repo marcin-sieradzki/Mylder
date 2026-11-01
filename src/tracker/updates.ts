@@ -20,25 +20,47 @@ import type { Timetable } from './timetable.ts'
 export type Updates =
   | { readonly kind: 'off' }
   | { readonly kind: 'siri' }
-  | { readonly kind: 'recording'; readonly folder: string }
+  | {
+      readonly kind: 'recording'
+      readonly folder: string
+      /**
+       * A saved moment of the recording, a folder of it with a `clock.json` of its own, whose
+       * clock the runtime starts at instead of the recording's, such as `quiet`, a few minutes
+       * before its messages end.
+       */
+      readonly moment?: string
+    }
 
 /** The variable that picks where updates come from. */
 export const UPDATES_VARIABLE = 'MYLDER_UPDATES'
 
 const OFF: Updates = { kind: 'off' }
 
+/** A recording's folder, or a saved moment's in it: lowercase letters, digits and dashes. */
+const FOLDER_NAME = /^[a-z0-9][a-z0-9-]*$/
+
 /**
  * Reads `MYLDER_UPDATES`: `off` (the default, when it is unset or empty, so local runs and tests
- * need no listener), `siri` or `recording:<folder>`. Anything else is a mistake worth stopping for.
+ * need no listener), `siri`, `recording:<folder>` or `recording:<folder>/<moment>`. Anything else
+ * is a mistake worth stopping for.
  */
 export function readUpdates(value: string | undefined): Updates {
   const setting = value?.trim() ?? ''
   if (setting === '' || setting === 'off') return OFF
   if (setting === 'siri') return { kind: 'siri' }
   const [kind, ...rest] = setting.split(':')
-  const folder = rest.join(':')
-  if (kind === 'recording' && folder) return { kind: 'recording', folder }
-  throw new Error(`${UPDATES_VARIABLE}="${setting}" is none of off, siri or recording:<folder>`)
+  const [folder = '', moment, ...more] = rest.join(':').split('/')
+  if (
+    kind === 'recording' &&
+    FOLDER_NAME.test(folder) &&
+    (moment === undefined || FOLDER_NAME.test(moment)) &&
+    more.length === 0
+  ) {
+    return { kind: 'recording', folder, ...(moment === undefined ? {} : { moment }) }
+  }
+  throw new Error(
+    `${UPDATES_VARIABLE}="${setting}" is none of off, siri, recording:<folder> or recording:<folder>/<moment>`,
+  )
 }
 
 /** The variables that name the listener's table route and the token it asks for. */
@@ -62,7 +84,9 @@ export function readListener(
 
 /** The variable's value as it was set, for a log line. */
 export const updatesSetting = (updates: Updates): string =>
-  updates.kind === 'recording' ? `recording:${updates.folder}` : updates.kind
+  updates.kind === 'recording'
+    ? `recording:${updates.folder}${updates.moment === undefined ? '' : `/${updates.moment}`}`
+    : updates.kind
 
 /** What the tracker reads its updates from: the table at a moment, or none. */
 export interface UpdateFeedShape {
