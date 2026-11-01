@@ -102,7 +102,7 @@ test('an opened delayed bus and its next stop show its expected times and the de
       Math.abs(trip.delay ?? 0) >= 120 &&
       trip.next.length > 0,
   )!
-  const source = /Timetable and Rejseplanen's delays · updated \d\d:\d\d:\d\d/
+  const source = /Timetable and Rejseplanen's delays\s·\supdated\s\d\d:\d\d:\d\d/
   await page.goto(`${UPDATES_URL}/en?trip=${encodeURIComponent(bus.key)}`)
   const vehicle = page.getByRole('dialog', { name: `to ${bus.headsign}` })
   await expect(vehicle).toContainText(source)
