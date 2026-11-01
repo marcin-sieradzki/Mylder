@@ -11,7 +11,7 @@ _Mylder_ is Danish for a teeming crowd, and it echoes _myldretid_, rush hour.
   <img alt="Mylder's map of Copenhagen: every bus, Metro, S-tog, train and light rail vehicle as a dot on its line, with City pulse open in the side sheet" src="docs/images/map-light.png">
 </picture>
 
-> **Status:** every screen of the first public version is built, and runs on a simulated Rejseplanen for now. Next come the timetable source, delays and cancellations from Rejseplanen's SIRI-ET feed, and deploying to Vercel. The Rejseplanen API joins once its key arrives ([ADR 0018](docs/adr/0018-mylder-goes-public-on-the-timetable-and-siri-et-and-adds-the-api-with-the-key.md)). See the [roadmap](#roadmap).
+> **Status:** every screen of the first public version is built, and runs on the timetable: every vehicle is placed where its timetable says it should be, and the page says so. Next come delays and cancellations from Rejseplanen's SIRI-ET feed, and deploying to Vercel. The Rejseplanen API joins once its key arrives ([ADR 0018](docs/adr/0018-mylder-goes-public-on-the-timetable-and-siri-et-and-adds-the-api-with-the-key.md)). See the [roadmap](#roadmap).
 
 ## Why
 
@@ -40,7 +40,7 @@ Rejseplanen API ──▶ one Next.js app ──────────CDN─�
   disruptions)       to the Labs GTFS timetable     along their paths
 ```
 
-The free Rejseplanen key allows about one call a minute, so browsers never call the API. The app's server makes that call only while someone is watching, joins the answer to a timetable prepared from Rejseplan Labs GTFS, decides each trip's data state, and serves one snapshot of the whole city through the CDN. Every browser polls that snapshot and moves each vehicle along its path until the next one. Until the key arrives, a simulated Rejseplanen answers in its place: it builds the same API answers from the timetable, so the tracker, the snapshot and every screen run exactly as they will on real data, and every screen says the data is simulated. One environment variable, `MYLDER_SOURCE`, picks the simulation, a recording or the real API ([`docs/testing-seams.md`](docs/testing-seams.md)). The planes overhead come from adsb.lol, which needs no key, on a snapshot of their own that browsers poll every 10 s ([`docs/aircraft.md`](docs/aircraft.md)). The decisions and their reasons are in [`docs/adr/`](docs/adr/); the plumbing in [`docs/live-data.md`](docs/live-data.md), [`docs/timetable.md`](docs/timetable.md) and [`docs/screens.md`](docs/screens.md).
+The free Rejseplanen key allows about one call a minute, so browsers never call the API. The app's server makes that call only while someone is watching, joins the answer to a timetable prepared from Rejseplan Labs GTFS, decides each trip's data state, and serves one snapshot of the whole city through the CDN. Every browser polls that snapshot and moves each vehicle along its path until the next one. Until the key arrives, Mylder runs on the timetable source: it makes no call, places every vehicle where its timetable says it should be, marks each one Timetable only, and says so on every screen ([ADR 0018](docs/adr/0018-mylder-goes-public-on-the-timetable-and-siri-et-and-adds-the-api-with-the-key.md)). A simulated Rejseplanen, which builds the API's answers from the timetable so every data state shows, is there to choose for development, the recordings and the demo. One environment variable, `MYLDER_SOURCE`, picks the timetable (the default), the simulation, a recording or the real API ([`docs/testing-seams.md`](docs/testing-seams.md)). The planes overhead come from adsb.lol, which needs no key, on a snapshot of their own that browsers poll every 10 s ([`docs/aircraft.md`](docs/aircraft.md)). The decisions and their reasons are in [`docs/adr/`](docs/adr/); the plumbing in [`docs/live-data.md`](docs/live-data.md), [`docs/timetable.md`](docs/timetable.md) and [`docs/screens.md`](docs/screens.md).
 
 ## Roadmap
 
@@ -58,7 +58,7 @@ The free Rejseplanen key allows about one call a minute, so browsers never call 
 - [x] English and Danish, light and dark, mobile first
 - [x] A simulated demo on GitHub Pages
 - [x] The planes over Copenhagen, live from adsb.lol with adsb.fi as its fallback
-- [ ] Every vehicle on its timetable by default, with no invented realtime
+- [x] Every vehicle on its timetable by default, with no invented realtime
 - [ ] Delays and cancellations from Rejseplanen's SIRI-ET feed, through one small always-on listener
 - [ ] Deploy production and previews on Vercel, with the tracker's state in a hosted Redis
 
@@ -87,7 +87,7 @@ npm install
 npm run dev
 ```
 
-It runs on the simulated Rejseplanen, so no API key is needed. The interface lives at `/en` and `/da`; `/` sends a visit to the language its browser asks for, English when it asks for neither.
+It runs on the timetable source, as production does until the Rejseplanen key arrives, so no API key is needed: every vehicle is placed where its timetable says it should be, and nothing is invented. To see the simulated Rejseplanen instead, with every data state from Live to No signal, start it with `MYLDER_SOURCE=simulated npm run dev` (or `simulated:<scenario>`, a scenario in `src/tracker/simulation/scenarios.ts`). The interface lives at `/en` and `/da`; `/` sends a visit to the language its browser asks for, English when it asks for neither.
 
 Before the first e2e run, install a browser with `npx playwright install chromium`.
 
