@@ -4,10 +4,11 @@
 import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { extname, join, normalize } from 'node:path'
+import { DEMO_PORT } from '../ports.ts'
 
 const ROOT = 'out'
 const BASE_PATH = process.env.MYLDER_DEMO_BASE_PATH ?? '/mylder'
-const PORT = Number(process.env.PORT ?? 4175)
+const PORT = Number(process.env.PORT ?? DEMO_PORT)
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',

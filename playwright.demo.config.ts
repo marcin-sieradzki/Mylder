@@ -1,10 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
+import { DEMO_PORT as PORT } from './scripts/ports.ts'
 
 // The GitHub Pages demo (ADR 0013), served from out/ as Pages serves it; build it first with
 // `npm run demo`. Its tracker runs in the page's Web Worker at the real time, on the deployed
 // timetable, so these tests prove the wiring, not the numbers.
-
-const PORT = 4175
 
 export default defineConfig({
   testDir: './e2e/demo',
