@@ -19,6 +19,7 @@
     "test:e2e": "playwright test",
     "test:e2e:demo": "playwright test --config playwright.demo.config.ts",
     "timetable": "node scripts/timetable/build.ts",
+    "stand-ins": "node scripts/stand-ins/run.ts",
     "recordings": "node --conditions=react-server scripts/recordings/freeze.ts",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },

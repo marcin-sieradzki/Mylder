@@ -7,6 +7,7 @@ import { sheetPeek } from '../map/peek'
 
 // A stand-in until Perron's Sheet offers a peek measured down to an element of its own body
 // (marcin-sieradzki/perron#191); it goes when that lands.
+// perron-stand-in: perron#191
 
 /** Perron's size.sheet-peek, the least a peek is, so it is Perron's number and no number of ours. */
 const SHEET_PEEK = 'perron-size-sheet-peek'
