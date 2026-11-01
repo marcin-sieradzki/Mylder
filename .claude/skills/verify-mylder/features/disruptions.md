@@ -8,11 +8,13 @@ The Disruptions tab lists Mylder's own data cards first, then Rejseplanen's mess
 - `dis-footer` says when the messages were checked.
 - `dis-show` rings a card's stops, fits them clear of the top bar, the notices and the legend at the map's tilt and heading, and raises "Showing: …" until Clear.
 - `dis-stop` opens a ringed stop's departures.
+- `dis-timetable` on the timetable source says, in place of the list, its footer and the data cards, that disruption messages come with Rejseplanen's live connection, which isn't connected yet.
 
 ## How to get to it (user POV)
 
 - Choose the Disruptions tab in the overview sheet.
 - Open a shared link with `?tab=disruptions`.
+- On a launch on the timetable source (`launch.sh <run-id> <port> timetable`), the same.
 
 ## Driving it with drive.ts
 
@@ -25,6 +27,7 @@ Preconditions:
 - **Show on map.** The first active card's `getByRole('button', { name: 'Show on map' })`; a button named `/^Showing: .* · Clear$/` appears; its click takes it away.
 - **Show on map, tilted.** Open `/en?tab=disruptions&map=13.00/55.67000/12.57000/-30.0/50.0` and press the 5C card's Show on map: the address settles at `map=15.00/…/-30.0/50.0`, the screenshot shows Klaksvigsgade's ring in the middle of the room between the sheet, the panel, the chip and the legend, and a click there opens its departures. The first active card's stretch, from København H to Hellerup, fits the same way at the same angle.
 - **Danish.** `/da?tab=disruptions`: the sheet is `Overblik`, the list `Aktuelle nu`, and the messages stay in Danish without an English caption.
+- **On the timetable source.** On its own launch (`timetable` as the third argument), `page.goto('/en?tab=disruptions')`: the tab panel's whole text is "Disruption messages come with Rejseplanen's live connection, which isn't connected yet.", with no `list` in it, no "From Mylder", "No answer from Rejseplanen", "No bus positions since", "Disruption messages not fetched yet" or "Messages from Rejseplanen", and the tab reads `Disruptions` with no count. Open About (the corner credit's Rejseplanen link): its `Disruptions` fact reads "Not connected yet". On `/da?tab=disruptions` the sentence reads "Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu." and About's `Driftsforstyrrelser` "Ikke koblet på endnu". With `--phone` the sentence wraps inside the sheet with no sideways scroll.
 
 ## Gotchas
 
