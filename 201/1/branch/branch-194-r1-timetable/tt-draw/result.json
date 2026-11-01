@@ -1,0 +1,10 @@
+{
+  "journey": "tt-draw",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-on-the-timetable: map drawn on the timetable (http://localhost:4401/en)",
+    "02-vehicles-list: vehicles list (http://localhost:4401/en?tab=vehicles)",
+    "03-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4401/en?map=15.00/55.72569/12.57679)",
+    "04-hover-card-says-timetable-only: hover card says Timetable only (http://localhost:4401/en?map=15.00/55.72569/12.57679)"
+  ]
+}

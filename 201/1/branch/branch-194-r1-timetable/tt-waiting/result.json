@@ -1,0 +1,9 @@
+{
+  "journey": "tt-waiting",
+  "pass": true,
+  "steps": [
+    "01-map-before-opening-the-waiting-trip: map before opening the waiting trip (http://localhost:4401/en)",
+    "02-waiting-trip-row-in-the-vehicles-list: waiting trip row in the Vehicles list (http://localhost:4401/en?tab=vehicles)",
+    "03-waiting-trip-panel-departs-at-its-first-stop: waiting trip panel: Departs at its first stop (http://localhost:4401/en?tab=vehicles&trip=bus.68.36a3ce3156.20261101.0859)"
+  ]
+}

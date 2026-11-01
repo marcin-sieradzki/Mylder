@@ -1,0 +1,9 @@
+{
+  "journey": "tt-follow",
+  "pass": true,
+  "steps": [
+    "01-s-tog-panel-open: S-tog panel open (http://localhost:4401/en?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.0748)",
+    "02-following-the-dot-at-the-centre: following: the dot at the centre (http://localhost:4401/en?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.0748)",
+    "03-following-12-s-later: following, 12 s later (http://localhost:4401/en?tab=vehicles&trip=s-tog.A.c11d77684a.20261101.0748)"
+  ]
+}

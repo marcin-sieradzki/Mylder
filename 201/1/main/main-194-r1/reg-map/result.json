@@ -1,0 +1,11 @@
+{
+  "journey": "reg-map",
+  "pass": true,
+  "steps": [
+    "01-map-drawn-with-17-and-chrome: map drawn with 17 and chrome (http://localhost:4302/en)",
+    "02-buses-filtered-off: buses filtered off (http://localhost:4302/en?hide=bus)",
+    "03-buses-back: buses back (http://localhost:4302/en)",
+    "04-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4302/en?map=15.00/55.66855/12.58294)",
+    "05-hover-card: hover card (http://localhost:4302/en?map=15.00/55.66855/12.58294)"
+  ]
+}

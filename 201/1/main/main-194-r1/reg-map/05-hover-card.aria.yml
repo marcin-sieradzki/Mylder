@@ -1,0 +1,394 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 07:22:22
+  - group "Filters":
+    - button "Bus 6" [pressed]
+    - button "Metro 4" [pressed]
+    - button "S-tog 6" [pressed]
+    - button "Train 1" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?map=15.00/55.66855/12.58294
+  - button "About Mylder"
+- status: "Recorded data from 16 June 2026. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- text: Scale 100 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Resume"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 17"
+    - tab "Disruptions 3"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 17
+      - paragraph: of 17 in service
+    - group "Reported this minute":
+      - text: Reported this minute 7
+      - paragraph: vehicles that reported their position
+    - group "Average delay":
+      - text: Average delay Unknown
+      - paragraph: Too few vehicles with a known delay
+    - list "On the map now":
+      - listitem: Live 7
+      - listitem: Ageing 0
+      - listitem: Estimated 6
+      - listitem: Timetable only 4
+      - listitem: No signal 0
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: 1/6 · Movia
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: 5/6 · DSB
+      - meter "Train": Train x
+      - paragraph: 1/1 · DSB
+    - status
+    - figure "Vehicles in service today Planned, from today's timetable":
+      - text: Vehicles in service today Planned, from today's timetable
+      - group "Vehicles in service today Planned, from today's timetable":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "0"
+          - listitem:
+            - time: 00:15
+            - text: "1"
+          - listitem:
+            - time: 00:30
+            - text: "1"
+          - listitem:
+            - time: 00:45
+            - text: "1"
+          - listitem:
+            - time: 01:00
+            - text: "0"
+          - listitem:
+            - time: 01:15
+            - text: "0"
+          - listitem:
+            - time: 01:30
+            - text: "0"
+          - listitem:
+            - time: 01:45
+            - text: "0"
+          - listitem:
+            - time: 02:00
+            - text: "0"
+          - listitem:
+            - time: 02:15
+            - text: "0"
+          - listitem:
+            - time: 02:30
+            - text: "0"
+          - listitem:
+            - time: 02:45
+            - text: "0"
+          - listitem:
+            - time: 03:00
+            - text: "0"
+          - listitem:
+            - time: 03:15
+            - text: "0"
+          - listitem:
+            - time: 03:30
+            - text: "0"
+          - listitem:
+            - time: 03:45
+            - text: "0"
+          - listitem:
+            - time: 04:00
+            - text: "0"
+          - listitem:
+            - time: 04:15
+            - text: "0"
+          - listitem:
+            - time: 04:30
+            - text: "0"
+          - listitem:
+            - time: 04:45
+            - text: "0"
+          - listitem:
+            - time: 05:00
+            - text: "0"
+          - listitem:
+            - time: 05:15
+            - text: "0"
+          - listitem:
+            - time: 05:30
+            - text: "0"
+          - listitem:
+            - time: 05:45
+            - text: "0"
+          - listitem:
+            - time: 06:00
+            - text: "0"
+          - listitem:
+            - time: 06:15
+            - text: "0"
+          - listitem:
+            - time: 06:30
+            - text: "0"
+          - listitem:
+            - time: 06:45
+            - text: "0"
+          - listitem:
+            - time: 07:00
+            - text: "2"
+          - listitem:
+            - time: 07:15
+            - text: "13"
+          - listitem:
+            - time: 07:30
+            - text: "14"
+          - listitem:
+            - time: 07:45
+            - text: "14"
+          - listitem:
+            - time: 08:00
+            - text: "14"
+          - listitem:
+            - time: 08:15
+            - text: "6"
+          - listitem:
+            - time: 08:30
+            - text: "1"
+          - listitem:
+            - time: 08:45
+            - text: "1"
+          - listitem:
+            - time: 09:00
+            - text: "0"
+          - listitem:
+            - time: 09:15
+            - text: "0"
+          - listitem:
+            - time: 09:30
+            - text: "0"
+          - listitem:
+            - time: 09:45
+            - text: "0"
+          - listitem:
+            - time: 10:00
+            - text: "0"
+          - listitem:
+            - time: 10:15
+            - text: "0"
+          - listitem:
+            - time: 10:30
+            - text: "0"
+          - listitem:
+            - time: 10:45
+            - text: "0"
+          - listitem:
+            - time: 11:00
+            - text: "0"
+          - listitem:
+            - time: 11:15
+            - text: "0"
+          - listitem:
+            - time: 11:30
+            - text: "0"
+          - listitem:
+            - time: 11:45
+            - text: "0"
+          - listitem:
+            - time: 12:00
+            - text: "0"
+          - listitem:
+            - time: 12:15
+            - text: "0"
+          - listitem:
+            - time: 12:30
+            - text: "0"
+          - listitem:
+            - time: 12:45
+            - text: "0"
+          - listitem:
+            - time: 13:00
+            - text: "0"
+          - listitem:
+            - time: 13:15
+            - text: "0"
+          - listitem:
+            - time: 13:30
+            - text: "0"
+          - listitem:
+            - time: 13:45
+            - text: "0"
+          - listitem:
+            - time: 14:00
+            - text: "0"
+          - listitem:
+            - time: 14:15
+            - text: "0"
+          - listitem:
+            - time: 14:30
+            - text: "0"
+          - listitem:
+            - time: 14:45
+            - text: "0"
+          - listitem:
+            - time: 15:00
+            - text: "0"
+          - listitem:
+            - time: 15:15
+            - text: "0"
+          - listitem:
+            - time: 15:30
+            - text: "0"
+          - listitem:
+            - time: 15:45
+            - text: "0"
+          - listitem:
+            - time: 16:00
+            - text: "0"
+          - listitem:
+            - time: 16:15
+            - text: "0"
+          - listitem:
+            - time: 16:30
+            - text: "0"
+          - listitem:
+            - time: 16:45
+            - text: "0"
+          - listitem:
+            - time: 17:00
+            - text: "0"
+          - listitem:
+            - time: 17:15
+            - text: "0"
+          - listitem:
+            - time: 17:30
+            - text: "0"
+          - listitem:
+            - time: 17:45
+            - text: "0"
+          - listitem:
+            - time: 18:00
+            - text: "0"
+          - listitem:
+            - time: 18:15
+            - text: "0"
+          - listitem:
+            - time: 18:30
+            - text: "0"
+          - listitem:
+            - time: 18:45
+            - text: "0"
+          - listitem:
+            - time: 19:00
+            - text: "0"
+          - listitem:
+            - time: 19:15
+            - text: "0"
+          - listitem:
+            - time: 19:30
+            - text: "0"
+          - listitem:
+            - time: 19:45
+            - text: "0"
+          - listitem:
+            - time: 20:00
+            - text: "0"
+          - listitem:
+            - time: 20:15
+            - text: "0"
+          - listitem:
+            - time: 20:30
+            - text: "0"
+          - listitem:
+            - time: 20:45
+            - text: "0"
+          - listitem:
+            - time: 21:00
+            - text: "0"
+          - listitem:
+            - time: 21:15
+            - text: "0"
+          - listitem:
+            - time: 21:30
+            - text: "0"
+          - listitem:
+            - time: 21:45
+            - text: "0"
+          - listitem:
+            - time: 22:00
+            - text: "0"
+          - listitem:
+            - time: 22:15
+            - text: "0"
+          - listitem:
+            - time: 22:30
+            - text: "0"
+          - listitem:
+            - time: 22:45
+            - text: "0"
+          - listitem:
+            - time: 23:00
+            - text: "0"
+          - listitem:
+            - time: 23:15
+            - text: "0"
+          - listitem:
+            - time: 23:30
+            - text: "0"
+          - listitem:
+            - time: 23:45
+            - text: "0"
+    - paragraph: Peak 14 at 07:30
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 7 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 6 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 4 No realtime for this trip today; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- alert
+- region "Notifications"
+- tooltip "Bus 5C to Husum Torv Estimated Estimated from schedule"

@@ -1,0 +1,8 @@
+{
+  "journey": "tt-draw",
+  "pass": false,
+  "error": "expect(locator).not.toHaveAttribute(expected) failed\n\nLocator: locator('[data-vehicles]')\nExpected: not \"0\"\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"not toHaveAttribute\" locator('[data-vehicles]') with timeout 30000ms\n  - waiting for locator('[data-vehicles]')\n",
+  "steps": [
+    "01-failure: failure (http://localhost:4401/en)"
+  ]
+}
