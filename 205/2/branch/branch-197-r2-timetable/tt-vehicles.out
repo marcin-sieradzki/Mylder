@@ -1,0 +1,3 @@
+headers: Line | Destination | Position
+rows 611, bad 0: []; first [["M1","Vestamager St. (Metro)","Timetable only"],["M1","Vestamager St. (Metro)","Timetable only"]]
+PASS tt-vehicles: 3 steps in .verify/branch-197-r2-timetable/tt-vehicles/

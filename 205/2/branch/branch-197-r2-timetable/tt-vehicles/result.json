@@ -1,0 +1,9 @@
+{
+  "journey": "tt-vehicles",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: City pulse (http://localhost:4422/en)",
+    "02-vehicles-list: Vehicles list (http://localhost:4422/en?tab=vehicles)",
+    "03-search-5c: search 5C (http://localhost:4422/en?tab=vehicles)"
+  ]
+}

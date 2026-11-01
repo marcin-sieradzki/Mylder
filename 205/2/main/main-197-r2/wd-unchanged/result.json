@@ -1,0 +1,12 @@
+{
+  "journey": "wd-unchanged",
+  "pass": true,
+  "steps": [
+    "01-en-city-pulse: en City pulse (http://localhost:4324/en)",
+    "02-en-vehicles: en Vehicles (http://localhost:4324/en?tab=vehicles)",
+    "03-en-disruptions: en Disruptions (http://localhost:4324/en?tab=disruptions)",
+    "04-da-city-pulse: da City pulse (http://localhost:4324/da)",
+    "05-da-vehicles: da Vehicles (http://localhost:4324/da?tab=vehicles)",
+    "06-da-disruptions: da Disruptions (http://localhost:4324/da?tab=disruptions)"
+  ]
+}

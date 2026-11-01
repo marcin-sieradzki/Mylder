@@ -1,0 +1,15 @@
+en statuses: ["Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."]
+FAIL tt-reg-about-banner: 1 steps in .verify/main-197-r2-timetable/tt-reg-about-banner/
+expect(locator).toHaveText(expected) failed
+
+Locator:  getByRole('tabpanel')
+Expected: "Disruption messages come with Rejseplanen's live connection, which isn't connected yet."
+Received: "Messages from Rejseplanen, not checked yet.Checked every 15 min while the map is open."
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveText" getByRole('tabpanel') with timeout 5000ms
+  - waiting for getByRole('tabpanel')
+    13 × locator resolved to <div tabindex="0" data-index="0" role="tabpanel" id="base-ui-_r_6_" class="pn-TabsPanel" data-orientation="horizontal" aria-labelledby="base-ui-_r_3_" data-activation-direction="none">…</div>
+       - unexpected value "Messages from Rejseplanen, not checked yet.Checked every 15 min while the map is open."
+

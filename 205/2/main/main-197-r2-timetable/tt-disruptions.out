@@ -1,0 +1,14 @@
+FAIL tt-disruptions: 2 steps in .verify/main-197-r2-timetable/tt-disruptions/
+expect(locator).toHaveAccessibleName(expected) failed
+
+Locator:  getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ })
+Expected: "Disruptions"
+Received: "Disruptions 0"
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveAccessibleName" getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ }) with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Overview' }).getByRole('tab', { name: /^Disruptions/ })
+    13 × locator resolved to <button role="tab" type="button" tabindex="-1" class="pn-Tab" id="base-ui-_r_3_" aria-disabled="false" aria-selected="false" data-orientation="horizontal" data-activation-direction="none">…</button>
+       - unexpected value "Disruptions 0"
+

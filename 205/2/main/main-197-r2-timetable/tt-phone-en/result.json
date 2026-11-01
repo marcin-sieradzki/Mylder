@@ -1,0 +1,10 @@
+{
+  "journey": "tt-phone-en",
+  "pass": false,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Overview' }).getByText('No live positions yet; placed from the timetable', { exact: true }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Overview' }).getByText('No live positions yet; placed from the timetable', { exact: true }).first() with timeout 5000ms\n  - waiting for getByRole('dialog', { name: 'Overview' }).getByText('No live positions yet; placed from the timetable', { exact: true }).first()\n",
+  "steps": [
+    "01-peek: peek (http://localhost:4422/en)",
+    "02-sheet-raised: sheet raised (http://localhost:4422/en)",
+    "03-failure: failure (http://localhost:4422/en)"
+  ]
+}

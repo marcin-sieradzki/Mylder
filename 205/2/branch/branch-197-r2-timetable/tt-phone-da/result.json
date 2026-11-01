@@ -1,0 +1,12 @@
+{
+  "journey": "tt-phone-da",
+  "pass": true,
+  "steps": [
+    "01-peek: peek (http://localhost:4422/da)",
+    "02-sheet-raised: sheet raised (http://localhost:4422/da)",
+    "03-pulse-top-on-a-phone: pulse top on a phone (http://localhost:4422/da)",
+    "04-pulse-meters-on-a-phone: pulse meters on a phone (http://localhost:4422/da)",
+    "05-vehicles-on-a-phone: vehicles on a phone (http://localhost:4422/da?tab=vehicles)",
+    "06-disruptions-on-a-phone: disruptions on a phone (http://localhost:4422/da?tab=disruptions)"
+  ]
+}

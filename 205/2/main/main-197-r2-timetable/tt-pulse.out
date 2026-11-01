@@ -1,0 +1,8 @@
+FAIL tt-pulse: 2 steps in .verify/main-197-r2-timetable/tt-pulse/
+expect(received).toBeGreaterThan(expected)
+
+Expected: > 0
+Received:   0
+
+Call Log:
+- Timeout 30000ms exceeded while waiting on the predicate

@@ -1,0 +1,16 @@
+meter Bus
+—
+x
+meter Metro
+—
+x
+meter S-tog
+—
+x
+meter Train
+—
+x
+meter Light rail
+—
+x
+PASS tt-pulse: 4 steps in .verify/branch-197-r2-timetable/tt-pulse/

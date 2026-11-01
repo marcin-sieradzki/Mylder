@@ -1,0 +1,7 @@
+headers: Line | Destination | Position
+rows 615, bad 0: []; first [["M1","Vestamager St. (Metro)","Timetable only"],["M1","Vestamager St. (Metro)","Timetable only"]]
+FAIL tt-vehicles: 3 steps in .verify/main-197-r2-timetable/tt-vehicles/
+locator.innerText: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog', { name: 'Overview' }).locator('time').filter({ hasText: /^placed \d\d:\d\d:\d\d$/ }).first().locator('..')[22m
+

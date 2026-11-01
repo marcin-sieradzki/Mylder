@@ -1,0 +1,12 @@
+{
+  "journey": "tt-reg-about-banner",
+  "pass": true,
+  "steps": [
+    "01-en-banner-legend-and-disruptions: en banner, legend and disruptions (http://localhost:4422/en?tab=disruptions)",
+    "02-en-about-top: en About, top (http://localhost:4422/en?tab=disruptions)",
+    "03-en-about-credit: en About, credit (http://localhost:4422/en?tab=disruptions)",
+    "04-da-banner-legend-and-disruptions: da banner, legend and disruptions (http://localhost:4422/da?tab=disruptions)",
+    "05-da-about-top: da About, top (http://localhost:4422/da?tab=disruptions)",
+    "06-da-about-credit: da About, credit (http://localhost:4422/da?tab=disruptions)"
+  ]
+}

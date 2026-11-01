@@ -1,0 +1,12 @@
+FAIL tt-phone-da: 3 steps in .verify/main-197-r2-timetable/tt-phone-da/
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog', { name: 'Overblik' }).getByText('Ingen livepositioner endnu; placeret efter køreplanen', { exact: true }).first()
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('dialog', { name: 'Overblik' }).getByText('Ingen livepositioner endnu; placeret efter køreplanen', { exact: true }).first() with timeout 5000ms
+  - waiting for getByRole('dialog', { name: 'Overblik' }).getByText('Ingen livepositioner endnu; placeret efter køreplanen', { exact: true }).first()
+

@@ -1,0 +1,240 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 10:57:06
+  - group "Filters":
+    - button "Bus 356" [pressed]
+    - button "Metro 38" [pressed]
+    - button "S-tog 47" [pressed]
+    - button "Train 85" [pressed]
+    - button "Light rail 14" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?tab=vehicles
+  - button "About Mylder"
+- status: "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "Every vehicle is Timetable only for now: live positions aren't connected yet."
+- text: Scale 1 km
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Pause"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse"
+    - tab "Vehicles 611" [selected]
+    - tab "Disruptions"
+  - tabpanel "Vehicles 611":
+    - text: Search lines and destinations
+    - group:
+      - combobox "Search lines and destinations": 5C
+      - button "Clear"
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 10:57:06
+    - status
+    - table "Vehicles":
+      - rowgroup:
+        - row "Line Destination Position":
+          - columnheader "Line":
+            - button "Line"
+          - columnheader "Destination":
+            - button "Destination"
+          - columnheader "Position":
+            - button "Position"
+      - rowgroup:
+        - row "5C Bus 5C to Husum Torv Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.21d4082f45.20261101.1022"
+              - text: Husum Torv
+          - cell "Timetable only"
+        - row "5C Bus 5C to Husum Torv Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.21d4082f45.20261101.1035"
+              - text: Husum Torv
+          - cell "Timetable only"
+        - row "5C Bus 5C to Husum Torv Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.21d4082f45.20261101.1102"
+              - text: Husum Torv
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.94268b9b1c.20261101.1014"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.94268b9b1c.20261101.1054"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Københavns Lufthavn Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Københavns Lufthavn":
+            - link "Bus 5C to Københavns Lufthavn":
+              - /url: "?tab=vehicles&trip=bus.5C.9e1a4581f9.20261101.1026"
+              - text: Københavns Lufthavn
+          - cell "Timetable only"
+        - row "5C Bus 5C to Københavns Lufthavn Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Københavns Lufthavn":
+            - link "Bus 5C to Københavns Lufthavn":
+              - /url: "?tab=vehicles&trip=bus.5C.9e1a4581f9.20261101.1101"
+              - text: Københavns Lufthavn
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.bfa9380a11.20261101.1001"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.bfa9380a11.20261101.1015"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.bfa9380a11.20261101.1042"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Herlev Hospital Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Herlev Hospital":
+            - link "Bus 5C to Herlev Hospital":
+              - /url: "?tab=vehicles&trip=bus.5C.bfa9380a11.20261101.1055"
+              - text: Herlev Hospital
+          - cell "Timetable only"
+        - row "5C Bus 5C to Københavns Lufthavn Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Københavns Lufthavn":
+            - link "Bus 5C to Københavns Lufthavn":
+              - /url: "?tab=vehicles&trip=bus.5C.c798be064c.20261101.0956"
+              - text: Københavns Lufthavn
+          - cell "Timetable only"
+        - row "5C Bus 5C to Københavns Lufthavn Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Københavns Lufthavn":
+            - link "Bus 5C to Københavns Lufthavn":
+              - /url: "?tab=vehicles&trip=bus.5C.c798be064c.20261101.1033"
+              - text: Københavns Lufthavn
+          - cell "Timetable only"
+        - row "5C Bus 5C to Husum Torv Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.e3976d01ff.20261101.0954"
+              - text: Husum Torv
+          - cell "Timetable only"
+        - row "5C Bus 5C to Husum Torv Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Husum Torv":
+            - link "Bus 5C to Husum Torv":
+              - /url: "?tab=vehicles&trip=bus.5C.e3976d01ff.20261101.1034"
+              - text: Husum Torv
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fc7dea5397.20261101.1013"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fc7dea5397.20261101.1038"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fc7dea5397.20261101.1050"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fcfb53abe0.20261101.1009"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fcfb53abe0.20261101.1021"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fcfb53abe0.20261101.1045"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+        - row "5C Bus 5C to Sundbyvester Plads Timetable only":
+          - rowheader "5C"
+          - rowheader "Bus 5C to Sundbyvester Plads":
+            - link "Bus 5C to Sundbyvester Plads":
+              - /url: "?tab=vehicles&trip=bus.5C.fcfb53abe0.20261101.1056"
+              - text: Sundbyvester Plads
+          - cell "Timetable only"
+- alert
+- region "Notifications"

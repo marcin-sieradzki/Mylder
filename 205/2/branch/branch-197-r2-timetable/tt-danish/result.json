@@ -1,0 +1,10 @@
+{
+  "journey": "tt-danish",
+  "pass": true,
+  "steps": [
+    "01-byens-puls: Byens puls (http://localhost:4422/da)",
+    "02-byens-puls-efter-transportform: Byens puls, efter transportform (http://localhost:4422/da)",
+    "03-k-ret-jer: Køretøjer (http://localhost:4422/da?tab=vehicles)",
+    "04-driftsforstyrrelser: Driftsforstyrrelser (http://localhost:4422/da?tab=disruptions)"
+  ]
+}
