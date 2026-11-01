@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { dataCards, type DataCardFacts } from './data-cards'
 
@@ -11,6 +13,7 @@ const healthy: DataCardFacts = {
   lastSeen: { bus: NOW - MINUTE, 's-tog': NOW - MINUTE },
   disruptions: { fetched: NOW - 5 * MINUTE, ok: true },
   trips: [{ mode: 'bus' }, { mode: 's-tog' }, { mode: 'metro' }],
+  source: { kind: 'rejseplanen' },
 }
 
 describe('Mylder’s own data cards', () => {
@@ -127,5 +130,32 @@ describe('Mylder’s own data cards', () => {
       { kind: 'mode-quiet', mode: 's-tog', since: NOW - 10 * MINUTE },
       { kind: 'mode-quiet', mode: 'bus', since: NOW - 20 * MINUTE },
     ])
+  })
+})
+
+describe('Mylder’s own data cards on the timetable source', () => {
+  /** The timetable source's last saved minute, 07:25:00 in Copenhagen on 16 June 2026. */
+  const onTimetable = JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'recordings', 'timetable-source', 'snapshots', '0006.json'),
+      'utf8',
+    ),
+  ) as DataCardFacts & { readonly fetched: number }
+  const built = onTimetable.fetched
+  const HOUR = 60 * MINUTE
+
+  // No call is made, so no gap is a fault: whatever else the snapshot says, no card shows,
+  // minutes or hours after it was built.
+  it.each([
+    ['as built', onTimetable],
+    ['with the month spent', { ...onTimetable, budget: { level: 'spent', resumes: '2026-07-01' } }],
+    ['with the API failing', { ...onTimetable, api: { status: 'error', since: built - HOUR } }],
+    ['with a mode gone quiet', { ...onTimetable, lastSeen: { bus: built - 3 * HOUR } }],
+    ['with messages never fetched', { ...onTimetable, disruptions: { fetched: null, ok: false } }],
+    ['with old messages', { ...onTimetable, disruptions: { fetched: built - 3 * HOUR, ok: true } }],
+  ] satisfies [string, DataCardFacts][])('shows none %s', (_, facts) => {
+    for (const later of [0, 5 * MINUTE, 3 * HOUR, 30 * HOUR]) {
+      expect(dataCards(facts, built + later)).toEqual([])
+    }
   })
 })
