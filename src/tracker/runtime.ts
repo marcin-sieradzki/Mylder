@@ -122,9 +122,10 @@ export async function environmentLayer(
 ): Promise<Layer.Layer<Tracker | Store>> {
   const source = readSource(env.MYLDER_SOURCE)
   const positionMode = readPositionMode(env[POSITION_MODE_VARIABLE])
-  const { updates, warning } = updatesFor(source, readUpdates(env[UPDATES_VARIABLE]))
+  const from = env[TIMETABLE_FROM_VARIABLE]
+  const { updates, warning } = updatesFor(source, readUpdates(env[UPDATES_VARIABLE]), from)
   const warned = warning ? Layer.effectDiscard(Effect.logWarning(warning)) : Layer.empty
-  const folder = savedFolderOf(source, env[TIMETABLE_FROM_VARIABLE], updates)
+  const folder = savedFolderOf(source, from, updates)
   if (folder) {
     const [timetable, start] = await Promise.all([
       loadTimetable(join(recordingDir(folder), 'timetable')),

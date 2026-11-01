@@ -79,4 +79,31 @@ describe('the update switch beside the source switch', () => {
       updates: { kind: 'off' },
     })
   })
+
+  it('replays a recording under the timetable source, which then runs at that recording’s clock', () => {
+    expect(updatesFor(readSource('timetable'), readUpdates('recording:siri-et'))).toEqual({
+      updates: { kind: 'recording', folder: 'siri-et' },
+    })
+  })
+
+  it('is turned off, and says so, where the source runs at another clock than the recording’s', () => {
+    // A recording's messages are due by its own clock: at another, all of them would be due at
+    // once, or none, and the table would be stale or empty with nothing to say why.
+    const cases: [string, string | undefined, RegExp][] = [
+      ['rejseplanen', undefined, /under MYLDER_SOURCE=rejseplanen/],
+      ['recording:weekday', undefined, /under MYLDER_SOURCE=recording:weekday/],
+      ['timetable', 'timetable-ending', /under MYLDER_TIMETABLE_FROM=timetable-ending/],
+    ]
+    for (const [source, from, names] of cases) {
+      const { updates, warning } = updatesFor(
+        readSource(source),
+        readUpdates('recording:siri-et'),
+        from,
+      )
+      expect(updates).toEqual({ kind: 'off' })
+      expect(warning).toMatch(/MYLDER_UPDATES=recording:siri-et is ignored/)
+      expect(warning).toMatch(names)
+      expect(warning).toMatch(/runs at its own clock, not recordings\/siri-et's/)
+    }
+  })
 })

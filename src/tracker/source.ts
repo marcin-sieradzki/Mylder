@@ -132,18 +132,40 @@ export function apiLayer(settings: SourceSettings): Layer.Layer<Http.HttpClient.
   }
 }
 
+/** The source as `MYLDER_SOURCE` names it, for a log line. */
+const sourceSetting = (source: Source): string => {
+  const { kind, name } = snapshotSourceOf(source)
+  return name ? `${kind}:${name}` : kind
+}
+
 /**
- * The updates a source runs with (`MYLDER_UPDATES`, ./updates.ts). The simulated Rejseplanen
- * brings its own invented updates, so under it the switch is ignored, with a warning to log when it
- * was set.
+ * The updates a source runs with (`MYLDER_UPDATES`, ./updates.ts), and a warning to log when the
+ * switch is set but ignored:
+ * - under the simulated Rejseplanen, which brings its own invented updates;
+ * - for a recording's messages, wherever the runtime's clock isn't that recording's: they are due
+ *   by its clock, and at another all of them would be due at once, or none. Only the timetable
+ *   source with no saved folder of its own (`from`, `MYLDER_TIMETABLE_FROM`) runs at it.
  */
 export function updatesFor(
   source: Source,
   updates: Updates,
+  from?: string,
 ): { readonly updates: Updates; readonly warning?: string } {
-  if (source.kind !== 'simulated' || updates.kind === 'off') return { updates }
-  return {
-    updates: { kind: 'off' },
-    warning: `${UPDATES_VARIABLE}=${updatesSetting(updates)} is ignored under MYLDER_SOURCE=simulated, which brings its own updates`,
+  if (updates.kind === 'off') return { updates }
+  const ignored = (why: string) => ({
+    updates: { kind: 'off' } as const,
+    warning: `${UPDATES_VARIABLE}=${updatesSetting(updates)} is ignored ${why}`,
+  })
+  if (source.kind === 'simulated') {
+    return ignored('under MYLDER_SOURCE=simulated, which brings its own updates')
   }
+  if (updates.kind === 'recording' && savedFolderOf(source, from, updates) !== updates.folder) {
+    const under = from?.trim()
+      ? `MYLDER_TIMETABLE_FROM=${from.trim()}`
+      : `MYLDER_SOURCE=${sourceSetting(source)}`
+    return ignored(
+      `under ${under}, which runs at its own clock, not recordings/${updates.folder}'s`,
+    )
+  }
+  return { updates }
 }

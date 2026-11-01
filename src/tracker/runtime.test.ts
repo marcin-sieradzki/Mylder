@@ -96,6 +96,28 @@ describe('updates from a SIRI-ET recording, MYLDER_UPDATES=recording:<folder>', 
     expect(manifest.version).toBe('2026-11-01-6495dcc6')
   })
 
+  it('is ignored, and logged, where the source runs at another clock than the recording’s', async () => {
+    const logged = vi.spyOn(console, 'log').mockImplementation(() => {})
+    try {
+      const recorded = await snapshotOn({
+        MYLDER_SOURCE: 'recording:weekday',
+        MYLDER_UPDATES: 'recording:siri-et',
+      })
+      expect(recorded.serviceDay).toBe('2026-06-16')
+      expect(recorded.updates.kind).toBe('off')
+      const ending = await snapshotOn({
+        MYLDER_TIMETABLE_FROM: 'timetable-ending',
+        MYLDER_UPDATES: 'recording:siri-et',
+      })
+      expect(ending.serviceDay).toBe('2026-08-25')
+      expect(ending.updates.kind).toBe('off')
+      const lines = logged.mock.calls.map((call) => call.map(String).join(' '))
+      expect(lines.filter((line) => line.includes('is ignored under'))).toHaveLength(2)
+    } finally {
+      logged.mockRestore()
+    }
+  })
+
   it('is ignored under the simulation, whose snapshot names updates off', async () => {
     const snapshot = await snapshotOn({ MYLDER_SOURCE: 'simulated', MYLDER_UPDATES: 'siri' })
     expect(snapshot.updates.kind).toBe('off')

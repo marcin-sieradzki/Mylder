@@ -98,8 +98,9 @@ const sourceFiles =
   (source?: Source): ReadTimetableFile =>
   (file) => {
     const running = source ?? environmentSource()
-    const { updates } = updatesFor(running, readUpdates(process.env[UPDATES_VARIABLE]))
-    return filesIn(timetableDirOf(running, process.env[TIMETABLE_FROM_VARIABLE], updates))(file)
+    const from = process.env[TIMETABLE_FROM_VARIABLE]
+    const { updates } = updatesFor(running, readUpdates(process.env[UPDATES_VARIABLE]), from)
+    return filesIn(timetableDirOf(running, from, updates))(file)
   }
 
 /** The manifest from a timetable folder's files. */
