@@ -82,7 +82,9 @@ export const connectAmqp: Connect = (address, clientId, token, events) => {
   connection.on('error', () => close('the connection failed'))
   return {
     renew: (jwt) => {
-      if (!closed && cbs.sendable()) putToken(jwt)
+      if (closed || !cbs.sendable()) return false
+      putToken(jwt)
+      return true
     },
     close: () => {
       closed = true

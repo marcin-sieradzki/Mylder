@@ -57,15 +57,19 @@ interface FakeLink {
   readonly events: LinkEvents
   readonly renewed: string[]
   closed: boolean
+  /** Whether a new token can be put on it; false as when its CBS link can't send. */
+  takesTokens: boolean
 }
 
 /** Entra ID and the app, answering as they would, and what each was sent. */
 function stubs() {
   const sent = { tokens: [] as string[], app: [] as string[] }
-  const stub = { entraUp: true }
+  /** Entra ID up or refusing, and, while `hold` is set, answering only when `release` says. */
+  const stub = { entraUp: true, hold: false, held: [] as (() => void)[] }
   const fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input)
     if (url === `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`) {
+      if (stub.hold) await new Promise<void>((answer) => stub.held.push(answer))
       sent.tokens.push(String(init?.body))
       if (!stub.entraUp) {
         // Even an answer that echoes what it was sent never reaches a line.
@@ -97,10 +101,14 @@ function started() {
       events,
       renewed: [],
       closed: false,
+      takesTokens: true,
     }
     links.push(link)
     return {
-      renew: (jwt) => link.renewed.push(jwt),
+      renew: (jwt) => {
+        if (link.takesTokens) link.renewed.push(jwt)
+        return link.takesTokens
+      },
       close: () => {
         link.closed = true
       },
@@ -272,6 +280,43 @@ describe('the listener’s loop', () => {
     })
     expect(minutes[1].datasets).toEqual({})
   })
+
+  it('opens one link a dataset when a reopen comes while the last still waits for a token', async () => {
+    const { open, opened, stub } = run()
+    await settle()
+    // Entra ID stops answering just before the token is 15 minutes old, so the renewal and every
+    // open after it wait; the quiet feed reopens every link at 09:15 and again at 09:20.
+    await vi.advanceTimersByTimeAsync(14 * 60_000)
+    stub.hold = true
+    await vi.advanceTimersByTimeAsync(6 * 60_000)
+    expect(open('788')).toHaveLength(0)
+    expect(stub.held.length).toBeGreaterThanOrEqual(3)
+    stub.hold = false
+    for (const answer of stub.held.splice(0)) answer()
+    await settle()
+    for (const dataset of ['788', '785']) {
+      expect(open(dataset)).toHaveLength(1)
+      // The 09:20 reopen's link, on the last token Entra ID gave.
+      expect(open(dataset)[0]).toBe(opened(dataset).at(-1))
+    }
+  })
+
+  it('reopens a link that can’t take its new token, and logs it', async () => {
+    vi.setSystemTime(cph('02:00:00'))
+    const { links, open, lines } = run()
+    await settle()
+    for (const link of links) link.events.onOpen()
+    links.find((l) => l.dataset === '788')!.takesTokens = false
+    await vi.advanceTimersByTimeAsync(15 * 60_000)
+    expect(lines).toContainEqual(
+      expect.objectContaining({
+        level: 'warn',
+        message: 'Dataset 788’s link couldn’t take its new token; reopening it',
+      }),
+    )
+    expect(open('788').map((l) => l.token)).toEqual(['jwt-2'])
+    expect(open('785').map((l) => [l.token, l.renewed])).toEqual([['jwt-1', ['jwt-2']]])
+  })
 })
 
 describe('the listener’s credentials', () => {
@@ -322,7 +367,7 @@ describe('the listener’s credentials', () => {
       config: { ...config, secret: 'red', clientId: 'act', datasets: [address('788')] },
       connect: (_, __, ___, events) => {
         links.push(events)
-        return { renew: () => {}, close: () => {} }
+        return { renew: () => true, close: () => {} }
       },
       fetch,
       log: (line) => lines.push(line),

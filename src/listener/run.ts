@@ -30,8 +30,8 @@ export interface LinkEvents {
 
 /** A dataset's open link. */
 export interface Link {
-  /** Puts a new token on the connection. */
-  renew(token: string): void
+  /** Puts a new token on the connection: false when it can't, as when its CBS link can't send. */
+  renew(token: string): boolean
   close(): void
 }
 
@@ -144,7 +144,15 @@ export function startListener({
   const renewToken = async () => {
     try {
       const token = await newToken()
-      for (const { link } of links.values()) link?.renew(token)
+      for (const address of config.datasets) {
+        const { link } = links.get(address.dataset)!
+        if (!link || link.renew(token)) continue
+        log({
+          level: 'warn',
+          message: `Dataset ${address.dataset}’s link couldn’t take its new token; reopening it`,
+        })
+        open(address)
+      }
       later(TOKEN_EVERY, renewToken)
     } catch (error) {
       log({ level: 'warn', message: `The listener couldn’t renew its token: ${messageOf(error)}` })
@@ -152,21 +160,42 @@ export function startListener({
     }
   }
 
-  // Each dataset's link, its backoff, and when the last message came from any of them.
+  // Each dataset's link, its backoff, its latest open, and when the last message came from any.
   const links = new Map<
     string,
-    { link?: Link; attempts: number; retry?: ReturnType<typeof setTimeout> }
-  >(config.datasets.map((d) => [d.dataset, { attempts: 0 }]))
+    { link?: Link; attempts: number; retry?: ReturnType<typeof setTimeout>; opening: number }
+  >(config.datasets.map((d) => [d.dataset, { attempts: 0, opening: 0 }]))
   let quietSince = now()
 
+  /** Stops a dataset's pending retry, if any. */
+  const cancelRetry = (state: { retry?: ReturnType<typeof setTimeout> }) => {
+    if (!state.retry) return
+    clearTimeout(state.retry)
+    timers.delete(state.retry)
+    state.retry = undefined
+  }
+
+  /**
+   * Opens a dataset's link, one at a time: each open supersedes the one before it, closing the
+   * link it replaces and cancelling its retry, and an open still waiting for a token when another
+   * starts opens nothing.
+   */
   const open = (address: DatasetAddress) => {
     const state = links.get(address.dataset)!
-    state.retry = undefined
+    const opening = ++state.opening
+    cancelRetry(state)
+    state.link?.close()
+    state.link = undefined
+    const latest = () => !stopped && opening === state.opening
     const fresh = jwt && now() - jwt.at < TOKEN_EVERY ? jwt.token : undefined
     if (fresh) return openWith(address, fresh)
     newToken().then(
-      (token) => openWith(address, token),
-      (error) => closed(address, `no token: ${messageOf(error)}`),
+      (token) => {
+        if (latest()) openWith(address, token)
+      },
+      (error) => {
+        if (latest()) closed(address, `no token: ${messageOf(error)}`)
+      },
     )
   }
 
@@ -210,16 +239,13 @@ export function startListener({
       level: 'warn',
       message: `Dataset ${address.dataset}’s link closed (${reason}); reopening in ${wait / 1000} s`,
     })
+    cancelRetry(state)
     state.retry = later(wait, () => open(address))
   }
 
   const reopenAll = () => {
     for (const address of config.datasets) {
-      const state = links.get(address.dataset)!
-      state.link?.close()
-      state.link = undefined
-      if (state.retry) clearTimeout(state.retry)
-      state.attempts = 0
+      links.get(address.dataset)!.attempts = 0
       open(address)
     }
     quietSince = now()
