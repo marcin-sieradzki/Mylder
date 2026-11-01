@@ -45,7 +45,7 @@ Preconditions:
 ## Gotchas
 
 - Dots move between frames; pause first or retry the hover inside `expect(...).toPass()`.
-- On the timetable source the counts and lines are the deployed timetable's plan at the real time, so assert against `/api/snapshot`, not the weekday's 17; the Disruptions screen and the panels' words there are other tickets' (#196, #197).
+- On the timetable source the counts and lines are the deployed timetable's plan at the real time, so assert against `/api/snapshot`, not the weekday's 17; the panels' words there are in `vehicle-detail.md` and `stop-panel.md`.
 - After a minute the next snapshot lands and counts can change; assert counts in the first minute or against `/api/snapshot` fetched at the same moment.
 - The recording has no Live trips in some minutes (its position mode alternates); a journey that needs a Live dot reports which minute it looked in.
 - The address takes the heading and tilt, to the tenth of a degree, only once the map comes to rest, and drops either when out of range (heading -180 to 180, tilt 0 to 60). `data-tilt` and `data-heading` are written when the map comes to rest, so wait for them after a move.

@@ -51,13 +51,18 @@ export interface StateInput {
   readonly state: DataState
   readonly timezone: string
   readonly words: Words
+  /**
+   * Whether the page runs on the timetable source, where no trip has realtime because none is
+   * asked for, so a Timetable only trip says live positions aren't there yet.
+   */
+  readonly onTimetable?: boolean
 }
 
 /**
  * The one line that says what the trip's state means, such as "Reported by the vehicle; seen
  * 08:14:05"; none where the snapshot no longer carries the time it would give.
  */
-export function stateSentence({ detail, trip, state, timezone, words }: StateInput) {
+export function stateSentence({ detail, trip, state, timezone, words, onTimetable }: StateInput) {
   if (detail.cancelled) return words.cancelled
   if (runsToInterval(detail)) return words.interval
   const at = (moment: number | undefined, seconds = false) =>
@@ -77,7 +82,7 @@ export function stateSentence({ detail, trip, state, timezone, words }: StateInp
       return fill(words.estimatedDelay, { delay: signedMinutes(delay, words) })
     }
     case 'timetable-only':
-      return words.timetableOnly
+      return onTimetable ? words.noLivePositions : words.timetableOnly
     case 'no-signal': {
       const time = at(trip?.seen ?? trip?.reported ?? trip?.updated)
       return time === undefined ? undefined : fill(words.noSignal, { time })
