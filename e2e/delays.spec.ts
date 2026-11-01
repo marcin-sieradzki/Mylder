@@ -47,15 +47,15 @@ test('with updates from the SIRI-ET recording, the server draws trips Estimated 
 
 test('the page draws the Estimated dots and says what they are', async ({ page, request }) => {
   await page.goto(`${UPDATES_URL}/en`)
-  const banner = page.getByRole('status').filter({ hasText: /^Timetable and delays:/ })
-  await expect(banner).toHaveText(
-    "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay.",
-  )
   await expect(
     page.getByText(
       "For now a vehicle is Estimated, placed from its delay, or Timetable only: live positions aren't connected yet.",
     ),
   ).toBeVisible()
+  // No banner names the source; the legend's note above says it.
+  await expect(page.getByRole('status').filter({ hasText: /^Timetable and delays:/ })).toHaveCount(
+    0,
+  )
   // Every trip of the snapshot is drawn but the cancelled ones; the next minute's may land.
   const map = page.locator('[data-vehicles]')
   await expect(async () => {

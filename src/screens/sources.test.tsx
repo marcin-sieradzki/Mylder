@@ -87,8 +87,7 @@ const recorded = (name: string): Record<Lang, Reads> => ({
 
 const ON_TIMETABLE: Record<Lang, Reads> = {
   en: {
-    banner:
-      "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
+    banner: undefined,
     legendNote: true,
     source: "Rejseplanen's timetable, no live positions yet",
     note: "The positions on this page are the timetable's plan, not reports from the vehicles.",
@@ -97,8 +96,7 @@ const ON_TIMETABLE: Record<Lang, Reads> = {
     noMessages: true,
   },
   da: {
-    banner:
-      'Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være.',
+    banner: undefined,
     legendNote: true,
     source: 'Rejseplanens køreplan, endnu ingen livepositioner',
     note: 'Positionerne på denne side er køreplanens plan, ikke meldinger fra køretøjerne.',

@@ -33,8 +33,8 @@ export type PageNotice =
   /** The prepared timetable has under 7 days of service left, or none: its last covered day. */
   | { readonly kind: 'timetable'; readonly last: IsoDate; readonly ended: boolean }
   /**
-   * Where the page's data comes from, when it isn't Rejseplanen's own live data, by the words of
-   * the source's description; `fetched`, when the banner is dated, is when the snapshot was built,
+   * That the page's data isn't real, simulated or recorded, by the words of the source's
+   * description; `fetched`, when the banner is dated, is when the snapshot was built,
    * which names a recording's day.
    */
   | { readonly kind: 'source'; readonly words: BannerWords; readonly fetched?: number }
@@ -44,7 +44,7 @@ export type PageNotices = readonly PageNotice[]
 
 const NONE: PageNotices = []
 
-/** The source banner its description gives, whenever the data isn't Rejseplanen's own. */
+/** The source banner its description gives, on simulated or recorded data. */
 function sourceNotice(snapshot: Snapshot): PageNotice | undefined {
   const { banner } = describeSnapshotSource(snapshot)
   if (!banner) return undefined
