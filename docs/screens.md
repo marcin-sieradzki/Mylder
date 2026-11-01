@@ -99,7 +99,7 @@ The tab counts: Vehicles, the trips on the map after the mode filters; Disruptio
 
 **On the timetable source** (`MYLDER_SOURCE=timetable`), which asks Rejseplanen nothing, City pulse reads as the plan, not the vehicles. On the move counts as anywhere, and "On the move, by mode" splits it by mode after the mode filters, each the count its mode's chip in the top bar gives. Reported this minute and Reporting live read "—" with "No live positions yet; placed from the timetable", and so does every mode's meter, neutral, not 0 % in red; the Metro's keeps its own line, since it runs to an interval on every source. The average delay is left out, since no delay can be known, and Reporting live takes its slot. How sure are we? gives Timetable only the sentence "No live positions yet; placed from the timetable." Positions are never paused there, whatever the snapshot's health or budget says. The source line under the figures reads "Timetable · placed 08:14:05", the time of the snapshot that placed the vehicles, and the planned-trips chart is unchanged.
 
-**Built from:** Stat, Meter, DayProfileChart, ReportStrip, VehicleDotLegend, Section, Sheet, Tabs with Tab counts, DataStatePanel, Text.
+**Built from:** Stat, Meter, DayProfileChart, ReportStrip, VehicleDotLegend, Section, FactList (On the move, by mode, on the timetable source), SourceLine, Sheet, Tabs with Tab counts, DataStatePanel, Text.
 
 ## The Vehicles list
 

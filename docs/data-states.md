@@ -122,6 +122,7 @@ Two conditions sit above the data states. Neither is a data state; both are noti
 
 - _The API answers HTTP 500 for 7 min:_ the notice appears after about 2.5 min; at 5 min every bus and train with realtime is No signal, still moving on timetable plus last delay; at 7 min one good answer brings them all back to Live or Estimated.
 - _The budget runs out at 18:00:_ the notice names the date; within 5 min every trip with realtime that day is No signal. From the next service day, no trip has had realtime, so the whole city is Timetable only until the 1st. Opening a stop or a vehicle spends no calls either; departures come from the timetable and say so.
+- _On the timetable source:_ Mylder asks Rejseplanen for no position, so none can stop coming, and City pulse never reads positions as paused there, whatever the snapshot's position mode, health or budget says; its figures say instead that no live positions are connected yet.
 
 **Disconnected** is when the browser's own polls of Mylder fail: a tunnel, a dead network, Mylder itself down. The notice shows at once, "Connection lost, reconnecting", because the browser knows at once. Dots keep moving on what the browser has, and states age by the clock under the same rules the server runs, so the browser needs nothing new to be honest.
 

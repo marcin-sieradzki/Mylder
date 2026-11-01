@@ -30,13 +30,13 @@ export interface ModeShare {
   readonly unknown?: Unknown | 'metro'
 }
 
-/** How many trips are in each state, as Perron's ReportStrip and DataStateKey count them. */
 /** How many vehicles of a mode are on the move, as On the move counts them. */
 export interface ModeCount {
   readonly mode: Mode
   readonly count: number
 }
 
+/** How many trips are in each state, as Perron's ReportStrip and DataStateKey count them. */
 export interface StateCounts {
   readonly live: number
   readonly ageing: number
