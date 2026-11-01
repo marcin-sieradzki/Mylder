@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { dataCards, type DataCardFacts } from './data-cards'
 
@@ -134,14 +132,20 @@ describe('Mylder’s own data cards', () => {
 })
 
 describe('Mylder’s own data cards on the timetable source', () => {
-  /** The timetable source's last saved minute, 07:25:00 in Copenhagen on 16 June 2026. */
-  const onTimetable = JSON.parse(
-    readFileSync(
-      join(process.cwd(), 'recordings', 'timetable-source', 'snapshots', '0006.json'),
-      'utf8',
-    ),
-  ) as DataCardFacts & { readonly fetched: number }
-  const built = onTimetable.fetched
+  /**
+   * A snapshot on the timetable source, as the tracker builds it (recordings/timetable-source):
+   * no call made, so the API is ok, no position seen and no disruption list, with trips Waiting
+   * and underway.
+   */
+  const built = NOW
+  const onTimetable: DataCardFacts = {
+    api: { status: 'ok', since: built - 5 * MINUTE },
+    budget: { level: 'normal' },
+    lastSeen: {},
+    disruptions: null,
+    trips: [{ mode: 'bus' }, { mode: 's-tog' }, { mode: 'metro' }, { mode: 'bus', waiting: true }],
+    source: { kind: 'timetable' },
+  }
   const HOUR = 60 * MINUTE
 
   // No call is made, so no gap is a fault: whatever else the snapshot says, no card shows,

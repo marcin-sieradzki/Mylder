@@ -1,20 +1,23 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { lastAnswer, pauseAt, type PauseFacts } from './pause'
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 
-/** The timetable source's last saved minute, 07:25:00 in Copenhagen on 16 June 2026. */
-const onTimetable = JSON.parse(
-  readFileSync(
-    join(process.cwd(), 'recordings', 'timetable-source', 'snapshots', '0006.json'),
-    'utf8',
-  ),
-) as PauseFacts & { readonly fetched: number }
+// 07:25 in Copenhagen on Tuesday 16 June 2026.
+const NOW = Date.UTC(2026, 5, 16, 5, 25)
 
-const NOW = onTimetable.fetched
+/**
+ * A snapshot on the timetable source, as the tracker builds it (recordings/timetable-source):
+ * no call made, so the API is ok since the first run, no budget spent and no position seen.
+ */
+const onTimetable: PauseFacts & { readonly fetched: number } = {
+  fetched: NOW,
+  api: { status: 'ok', since: NOW - 5 * MINUTE },
+  budget: { level: 'normal' },
+  lastSeen: {},
+  source: { kind: 'timetable' },
+}
 
 describe('the pause rule on the timetable source', () => {
   // The source asks Rejseplanen nothing, so nothing can stop answering: whatever else the
