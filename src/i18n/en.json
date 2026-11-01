@@ -248,7 +248,8 @@
       "none-underway": "No vehicles underway",
       "too-few": "Too few vehicles with a known delay",
       "metro": "No realtime from the Metro; placed from the timetable",
-      "computed-meters": "Every position is computed by Rejseplanen"
+      "computed-meters": "Every position is computed by Rejseplanen",
+      "no-delays": "Rejseplanen sends no delays for this mode; placed from the timetable"
     },
     "now": "On the map now",
     "howSure": "How sure are we?",

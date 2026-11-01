@@ -6,6 +6,8 @@ This supersedes ADR 0002 where that ADR makes the Rejseplanen API the only realt
 
 **Amended on 1 November 2026 (#217): the table travels over HTTPS, not through the store.** Spec #146 had the listener write the table to the server store each minute for the tracker to read back. The table measured about 112 KB gzipped for 1,282 journeys on a quiet Saturday morning (#212, `docs/live-data.md`, "The update table"), four times the 15 to 25 KB the spec budgeted for a weekday peak. Written and read back each minute, it would use nearly all of the store's free transfer, which the tracker's snapshots already use most of. So the listener serves it instead, and the store carries nothing of SIRI-ET's.
 
+**Amended on 1 November 2026 (#215): the delays' credit names no licence.** Every SIRI-ET dataset page on Dataudveksleren says "Licence: None" (#146's access comment), so the credit below no longer puts the delays under CC BY 4.0. About and the map's corner credit name Rejsekort & Rejseplan A/S for the delays and name no licence until Rejseplanen answers which applies; the timetable keeps its CC BY 4.0 credit.
+
 ## Considered Options
 
 - **Drain the subscription from the tracker, over AMQP on WebSockets, on each run.** No new host, and the reader would run inside the tracker. Ruled out for now by size: the subscription keeps messages while nobody reads them, so a night with nobody watching leaves hours of Movia's backlog, about 140 MB of XML an hour on a Saturday morning, for the first poll of the morning to read. The reader is one module that runs anywhere, so this can replace the listener without touching the reader or the table.
@@ -20,4 +22,4 @@ This supersedes ADR 0002 where that ADR makes the Rejseplanen API the only realt
 - The tracker's run makes one more call, to the listener, with a 3 s timeout. A failed, slow or refused fetch, or a table built over 10 minutes ago, is no table that run, logged and never failing the run, so a dead or stuck listener never leaves old delays looking fresh: its trips go as `docs/data-states.md` says for a feed that isn't fresh.
 - A listener that restarts catches up from the subscription's backlog within seconds; no snapshot is sent on subscribe, so a new subscription starts blank.
 - The listener's credentials live only in the host's secrets. No recording holds a credential or a subscription id.
-- Rejseplanen's licence for the datasets is unsettled: each dataset page says "None". Mylder credits Rejsekort & Rejseplan A/S, under CC BY 4.0 as the Labs guidelines give for its data, until Rejseplanen says otherwise.
+- Rejseplanen's licence for the datasets is unsettled: each dataset page says "None". Mylder credits Rejsekort & Rejseplan A/S for the delays, naming no licence until Rejseplanen says which applies (amended by #215; it first read "under CC BY 4.0 as the Labs guidelines give for its data").

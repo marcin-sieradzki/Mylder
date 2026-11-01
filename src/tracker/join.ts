@@ -4,6 +4,7 @@
 // rare trips those leave alike. A trip's `journeyDetail`, when a viewer opens it, can correct a
 // wrong first guess (`trip-detail.ts`); the correction is kept and the join takes it from then on.
 import 'server-only'
+import { NOT_IN_SIRI_ET } from '../domain/source.ts'
 import type { IsoDate } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import { serviceDayStart } from '../timetable/time.ts'
@@ -171,9 +172,6 @@ interface TableIndex {
 const tableIndexes = new WeakMap<Timetable, Map<IsoDate, TableIndex>>()
 
 const endsKey = (line: string, first: string, last: string) => `${line}|${first}|${last}`
-
-/** The modes SIRI-ET carries no journeys of, whose trips the join leaves alone. */
-const NOT_IN_SIRI_ET: ReadonlySet<string> = new Set(['metro', 'light-rail'])
 
 /** A service day's trips by train number and by their ends, built once per day. */
 function tableIndexOf(timetable: Timetable, day: IsoDate): TableIndex {

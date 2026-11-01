@@ -113,7 +113,7 @@ export function CityPulse() {
     [lang],
   )
   const onTimetable = dictionary.timetableOverview
-  const why = (unknown: Unknown | DelayUnknown | 'metro' | 'computed-meters') =>
+  const why = (unknown: Unknown | DelayUnknown | 'metro' | 'no-delays' | 'computed-meters') =>
     unknown === 'timetable' ? onTimetable.noLivePositions : words.unknown[unknown]
   const fill = (template: string, values: Record<string, string | number>) =>
     Object.entries(values).reduce(

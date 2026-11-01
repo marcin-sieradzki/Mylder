@@ -287,9 +287,10 @@ export function buildTrips({
           )
       const vehicleNumber = realtime?.journey.trainNumber
       const next = nextCalls(timetable, trip, timed, now)
-      // With SIRI-ET's steps, the delay a rider is given is at the trip's next call, as its panel
-      // gives it, not at its last step (#215).
-      const shown =
+      // With SIRI-ET's steps, the delay a rider is given is at the trip's next call, timed as its
+      // panel times it, not at its last step (#215). Once the key brings journeyPos, a position's
+      // times must win over the steps here, as an update and a position combine (spec #146).
+      const delayAtNext =
         next[0] && steps.length > 0 ? delayAtCall(trip.calls, steps, next[0].index) : delay
       trips.push({
         key: trip.key,
@@ -300,7 +301,7 @@ export function buildTrips({
         state,
         source: drawn.source,
         ...fields,
-        ...(shown === undefined ? {} : { delay: shown }),
+        ...(delayAtNext === undefined ? {} : { delay: delayAtNext }),
         position: pointAt(path, progress) as [number, number],
         progress: Math.round(progress),
         next,

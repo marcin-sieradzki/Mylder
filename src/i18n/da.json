@@ -248,7 +248,8 @@
       "none-underway": "Ingen køretøjer undervejs",
       "too-few": "For få køretøjer med kendt forsinkelse",
       "metro": "Ingen realtid fra Metroen; placeret efter køreplanen",
-      "computed-meters": "Alle positioner er beregnet af Rejseplanen"
+      "computed-meters": "Alle positioner er beregnet af Rejseplanen",
+      "no-delays": "Rejseplanen sender ingen forsinkelser for denne transportform; placeret efter køreplanen"
     },
     "now": "På kortet nu",
     "howSure": "Hvor sikre er vi?",

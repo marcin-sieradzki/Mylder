@@ -1,5 +1,5 @@
 import '@mylder/perron/tokens.css'
-import { act, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -19,8 +19,8 @@ import { Providers } from './Providers'
 // timetable source with `MYLDER_UPDATES=recording:siri-et`, saved in recordings/siri-et, its second
 // minute, 09:22:00 in Copenhagen on Saturday 31 October 2026, the delays' last message at 09:21:52.
 // Of its 589 trips on the map, 406 are Estimated, each with its delay at its next call, a mean of
-// +1.06 min; underway, 344 of 365 buses, 28 of 29 S-trains and 33 of 74 trains carry a delay, and
-// none of the 20 light rail trains or 38 Metro trains does. Read off the snapshot's trips.
+// +1.06 min; 344 of its 408 buses, 28 of its 32 S-trains and 34 of its 81 trains have an update,
+// and SIRI-ET carries no light rail or Metro. Read off the snapshot's trips.
 const folder = join(process.cwd(), 'recordings', 'siri-et')
 const minute2 = JSON.parse(readFileSync(join(folder, 'snapshots/0002.json'), 'utf8')) as Snapshot
 
@@ -30,9 +30,9 @@ const delaysOff: Snapshot = {
   updates: { kind: 'off', fresh: false, withUpdate: {}, unmatched: {} },
 }
 
-/** Opens the page in `lang` on City pulse, the server's clock at the snapshot's fetch. */
-function openPulse(lang: Lang, snapshot: Snapshot = minute2) {
-  vi.setSystemTime(snapshot.fetched)
+/** Opens the page in `lang` on City pulse, the server's clock `after` ms past the snapshot's fetch. */
+function openPulse(lang: Lang, snapshot: Snapshot = minute2, after = 0) {
+  vi.setSystemTime(snapshot.fetched + after)
   act(() => liveSnapshot.update({ snapshot, clockOffset: 0 }))
   window.history.replaceState(null, '', `/${lang}`)
   return render(
@@ -96,19 +96,35 @@ describe("City pulse with SIRI-ET's delays", () => {
     expect(within(panel()).queryByRole('group', { name: 'Reporting live' })).toBeNull()
   })
 
-  it('says what share of each mode’s vehicles have a delay', () => {
+  it('says what share of each mode’s vehicles have an update with delays', () => {
     openPulse('en')
     const shares = region('With delays, by mode')
-    expect(meterIn(shares, 'Bus')).toHaveAttribute('aria-valuenow', String((344 / 365) * 100))
-    expect(meterLine(shares, 'Bus')).toContain('344/365 · Movia')
-    expect(meterLine(shares, 'S-tog')).toContain('28/29 · DSB')
-    expect(meterLine(shares, 'Train')).toContain('33/74 · DSB')
-    expect(meterLine(shares, 'Light rail')).toContain('0/20 · Hovedstadens Letbane')
-    // SIRI-ET has no Metro, which runs to an interval and says so.
+    expect(meterIn(shares, 'Bus')).toHaveAttribute('aria-valuenow', String((344 / 408) * 100))
+    expect(meterLine(shares, 'Bus')).toContain('344/408 · Movia')
+    expect(meterLine(shares, 'S-tog')).toContain('28/32 · DSB')
+    expect(meterLine(shares, 'Train')).toContain('34/81 · DSB')
+    // SIRI-ET carries neither the light rail nor the Metro: "—", not a red 0 %.
+    expect(meterIn(shares, 'Light rail')).toHaveAttribute('aria-valuetext', 'Unknown')
+    expect(meterIn(shares, 'Light rail')).toHaveAttribute('data-color', 'neutral')
+    expect(meterLine(shares, 'Light rail')).toContain(
+      'Rejseplanen sends no delays for this mode; placed from the timetable',
+    )
     expect(meterIn(shares, 'Metro')).toHaveAttribute('aria-valuetext', 'Unknown')
     expect(meterLine(shares, 'Metro')).toContain(
       'No realtime from the Metro; placed from the timetable',
     )
+  })
+
+  it('keeps the shares while the feed is quiet and the trips with an update are No signal', () => {
+    // Six minutes past the delays' last message, at 09:21:52, the feed is no longer fresh.
+    openPulse('en', minute2, minute2.updates.lastMessage! + 6 * 60_000 - minute2.fetched)
+    const key = within(panel()).getByRole('list', { name: 'How sure are we?' })
+    expect(
+      within(key)
+        .getAllByRole('listitem')
+        .find((item) => item.textContent?.startsWith('No signal')),
+    ).toHaveTextContent(/^No signal [1-9]/)
+    expect(meterLine(region('With delays, by mode'), 'Bus')).toContain('344/408 · Movia')
   })
 
   it('keeps saying no live positions are connected yet where a figure needs them', () => {
@@ -127,8 +143,11 @@ describe("City pulse with SIRI-ET's delays", () => {
       /^Gennemsnitlig forsinkelse\+1,1min, køretøjer med kendt forsinkelse, Metro udeladt$/,
     )
     const shares = region('Med forsinkelser, efter transportform')
-    expect(meterLine(shares, 'Bus')).toContain('344/365 · Movia')
-    expect(meterLine(shares, 'Tog')).toContain('33/74 · DSB')
+    expect(meterLine(shares, 'Bus')).toContain('344/408 · Movia')
+    expect(meterLine(shares, 'Tog')).toContain('34/81 · DSB')
+    expect(meterLine(shares, 'Letbane')).toContain(
+      'Rejseplanen sender ingen forsinkelser for denne transportform; placeret efter køreplanen',
+    )
     expect(meterLine(shares, 'Metro')).toContain(
       'Ingen realtid fra Metroen; placeret efter køreplanen',
     )
@@ -167,6 +186,19 @@ describe("About and the credits with SIRI-ET's delays", () => {
     )
     expect(credit()).toHaveTextContent(
       `Trafikdata: Rejseplanen (CC BY 4.0) · Forsinkelser: ${COMPANY} · © OpenStreetMap-bidragydere`,
+    )
+  })
+
+  it('says no update has come yet before the first message, in English and Danish', () => {
+    const { lastMessage: _, ...waiting } = minute2.updates
+    const before: Snapshot = { ...minute2, updates: waiting }
+    expect(fact(openAbout('en', 'About Mylder', before), 'Delays')).toBe(
+      "Rejseplanen's SIRI-ET, no update yet",
+    )
+    act(() => aboutDialog.close())
+    cleanup()
+    expect(fact(openAbout('da', 'Om Mylder', before), 'Forsinkelser')).toBe(
+      'Rejseplanens SIRI-ET, ingen opdatering endnu',
     )
   })
 

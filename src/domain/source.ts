@@ -128,3 +128,9 @@ export function describeSource(
   const { withDelays, ...description } = SOURCE_DESCRIPTIONS[kind]
   return delays ? { ...description, ...withDelays } : description
 }
+
+/**
+ * The modes SIRI-ET carries no journeys of (ADR 0019): no dataset covers the Metro or the light
+ * rail, so their trips are never joined to an update and their share of delays is unknown, not 0.
+ */
+export const NOT_IN_SIRI_ET: ReadonlySet<string> = new Set(['metro', 'light-rail'])
