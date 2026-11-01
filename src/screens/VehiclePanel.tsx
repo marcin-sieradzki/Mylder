@@ -101,7 +101,14 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
         : {})}
     >
       {answer ? (
-        <Detail answer={answer} trip={trip} network={network} lang={lang} words={words} />
+        <Detail
+          answer={answer}
+          trip={trip}
+          network={network}
+          onTimetable={snapshot?.source.kind === 'timetable'}
+          lang={lang}
+          words={words}
+        />
       ) : (
         <Pending status={status} words={words} />
       )}
@@ -156,6 +163,11 @@ interface DetailProps {
   /** The trip as the snapshot carries it, while it is on the map. */
   trip: SnapshotTrip | undefined
   network: Network | undefined
+  /**
+   * Whether the page runs on the timetable source, which asks Rejseplanen nothing: the trip is
+   * placed from the timetable by design, not as a fallback.
+   */
+  onTimetable: boolean
   lang: Lang
   words: Words
 }
@@ -164,14 +176,14 @@ interface DetailProps {
  * The trip's state, facts, place and stops, aged by the server's clock, then its messages and the
  * source line.
  */
-function Detail({ answer, trip, network, lang, words }: DetailProps) {
+function Detail({ answer, trip, network, onTimetable, lang, words }: DetailProps) {
   const now = useServerSecond(useClockOffset())
   // The trip's state now, by the clock, while the snapshot carries it; else the answer's.
   const state: DataState = useDataState(answer.key) ?? answer.state
   const timezone = timezoneOf(network)
   const cancelled = answer.cancelled === true
   const interval = runsToInterval(answer)
-  const sentence = stateSentence({ detail: answer, trip, state, timezone, words })
+  const sentence = stateSentence({ detail: answer, trip, state, timezone, words, onTimetable })
   // The snapshot's trip, where its place is along the answer's calls: not while the trip's detail
   // shows them another planned trip's, until the run files the vehicle under it.
   const along = answer.planned === undefined ? trip : undefined
@@ -256,12 +268,12 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
           source={fill(words.messagesChecked, { time: clockTime(called, timezone) })}
         />
       )}
-      {answer.source.kind === 'timetable' ? (
+      {answer.source.kind === 'timetable' && !onTimetable ? (
         <Text variant="caption" emphasis="secondary">
           {words.fromTimetable}
         </Text>
       ) : null}
-      <SourceLine sources={sourcesOf(answer, trip, timezone, words)} />
+      <SourceLine sources={sourcesOf(answer, trip, onTimetable, timezone, words)} />
     </>
   )
 }
@@ -271,15 +283,20 @@ function Detail({ answer, trip, network, lang, words }: DetailProps) {
  * last carried the trip, when Rejseplanen has carried it; then the times, from a `journeyDetail`
  * call or from the timetable shifted by the snapshot's delay. "Rejseplanen · position 08:14:05 ·
  * times 08:14:20", the times reading as Rejseplanen's after the position; the timetable's alone
- * keeps its own name and the snapshot's time.
+ * keeps its own name and the snapshot's time. On the timetable source, which asks Rejseplanen
+ * nothing, the place and the times are both the timetable's: "Timetable · placed 08:14:05".
  */
 function sourcesOf(
   answer: TripDetail,
   trip: SnapshotTrip | undefined,
+  onTimetable: boolean,
   timezone: string,
   words: Words,
 ): readonly [SourceLineSource] | readonly [SourceLineSource, SourceLineSource] {
   const at = (moment: number) => clockTime(moment, timezone, { seconds: true })
+  if (onTimetable) {
+    return [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
+  }
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   if (trip?.seen === undefined) {
     return called === undefined

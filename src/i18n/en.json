@@ -85,7 +85,9 @@
     "rangeTo": "{stop} — {head} to here",
     "rangeAt": "{stop} — {head} here",
     "follow": "Follow",
-    "showLine": "Show whole line"
+    "showLine": "Show whole line",
+    "noLivePositions": "No live positions yet; placed from the timetable.",
+    "placedAt": "placed {time}"
   },
   "legend": {
     "label": "Data states",
@@ -131,7 +133,9 @@
     "arrivalsAt": "arrivals {time}",
     "messages": "Messages",
     "later": "Later",
-    "messagesSource": "From Rejseplanen, in Danish"
+    "messagesSource": "From Rejseplanen, in Danish",
+    "timetableSource": "Timetable",
+    "timetableNote": "Countdowns use the timetable alone; live times aren't connected yet."
   },
   "about": {
     "title": "About Mylder",
