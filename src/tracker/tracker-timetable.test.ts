@@ -28,7 +28,7 @@ interface Logged {
 }
 
 /** The tracker on the timetable source, with every log it writes kept in `logged`. */
-const tracker = (
+const onTimetable = (
   options: { timetable?: Timetable; positionMode?: PositionMode; logged?: Logged[] } = {},
 ) =>
   Layer.merge(
@@ -100,14 +100,14 @@ describe('the tracker on the timetable source', () => {
         return after && after.progress > trip.progress
       })
       expect(moved.length).toBeGreaterThan(10)
-    }).pipe(Effect.provide(tracker())),
+    }).pipe(Effect.provide(onTimetable())),
   )
 
   it.effect('reads position mode none whatever MYLDER_POSITION_MODE says', () =>
     Effect.gen(function* () {
       yield* TestClock.setTime(MOMENT)
       expectTimetableOnly(yield* snapshot)
-    }).pipe(Effect.provide(tracker({ positionMode: 'REPORT_ONLY' }))),
+    }).pipe(Effect.provide(onTimetable({ positionMode: 'REPORT_ONLY' }))),
   )
 
   it.effect('runs on through midnight and into the next service day', () =>
@@ -121,7 +121,7 @@ describe('the tracker on the timetable source', () => {
       )
       // Tuesday's night train and Wednesday's first trips, from midnight.
       expect(days).toEqual(new Set(['20260616', '20260617']))
-    }).pipe(Effect.provide(tracker({ timetable: night }))),
+    }).pipe(Effect.provide(onTimetable({ timetable: night }))),
   )
 
   it.effect(
@@ -147,7 +147,7 @@ describe('the tracker on the timetable source', () => {
         expect(find(yield* snapshot)?.waiting).toBeUndefined()
         yield* TestClock.setTime(arrives)
         expect(find(yield* snapshot)).toBeUndefined()
-      }).pipe(Effect.provide(tracker()))
+      }).pipe(Effect.provide(onTimetable()))
     },
   )
 
@@ -178,7 +178,7 @@ describe('the tracker on the timetable source', () => {
       // A minute on, the next run still counts no call.
       yield* TestClock.adjust('60 seconds')
       expectTimetableOnly(yield* tracker.getSnapshot)
-    }).pipe(Effect.provide(tracker())),
+    }).pipe(Effect.provide(onTimetable())),
   )
 
   it.effect('logs no error: its API layer, which refuses every request, is never reached', () => {
@@ -195,7 +195,7 @@ describe('the tracker on the timetable source', () => {
         yield* TestClock.adjust('60 seconds')
       }
       expect(logged.filter(({ level }) => level !== 'Info')).toEqual([])
-    }).pipe(Effect.provide(tracker({ logged })))
+    }).pipe(Effect.provide(onTimetable({ logged })))
   })
 
   it.effect(
@@ -225,7 +225,7 @@ describe('the tracker on the timetable source', () => {
           's-tog': s.trips.filter((trip) => trip.mode === 's-tog').length,
           train: s.trips.filter((trip) => trip.mode === 'train').length,
         })
-      }).pipe(Effect.provide(tracker({ logged })))
+      }).pipe(Effect.provide(onTimetable({ logged })))
     },
   )
 
