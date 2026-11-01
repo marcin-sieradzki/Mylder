@@ -4,9 +4,9 @@
 // message body goes to the loop (./run.ts), which hands it to the reader. No test reaches it; the
 // loop's tests run on a fake `Connect`, and the listener's minute line proves it in production.
 import { createRequire } from 'node:module'
-import { gunzipSync } from 'node:zlib'
 import type { EventContext, Message } from 'rhea'
-import type { SiriEtMessage } from '../siri-et/reader.ts'
+import { READER_LIMITS, type SiriEtMessage, type SkippedMessage } from '../siri-et/reader.ts'
+import { deliveredMessage } from './body.ts'
 import type { Connect } from './run.ts'
 
 // rhea exports one container as its CommonJS module, which ESM sees only as a default its types
@@ -91,19 +91,15 @@ export const connectAmqp: Connect = (address, clientId, token, events) => {
   }
 }
 
-/** The broker's message as the reader takes it: its body as text, and when it was queued. */
-function siriEtMessage(dataset: string, message: Message): SiriEtMessage {
+/**
+ * The broker's message as the reader takes it, when it was queued, its body from whichever AMQP
+ * section it came in, unzipped no further than the reader's size limit.
+ */
+function siriEtMessage(dataset: string, message: Message): SiriEtMessage | SkippedMessage {
   const queued = message.message_annotations?.['x-opt-enqueued-time'] as unknown
   const receivedAt =
     queued instanceof Date ? queued.getTime() : typeof queued === 'number' ? queued : Date.now()
-  return { dataset, receivedAt, body: bodyText(message.body) }
-}
-
-/** A body as text, from whichever AMQP section it came in, unzipped when it is gzip. */
-function bodyText(body: unknown): string {
-  const bytes = bufferOf(body)
-  const gzipped = bytes[0] === 0x1f && bytes[1] === 0x8b
-  return (gzipped ? gunzipSync(bytes) : bytes).toString('utf8')
+  return deliveredMessage(dataset, receivedAt, bufferOf(message.body), READER_LIMITS.messageChars)
 }
 
 function bufferOf(body: unknown): Buffer {

@@ -9,6 +9,7 @@ import {
   type ReaderBox,
   type ReaderLimits,
   type SiriEtMessage,
+  type SkippedMessage,
 } from '../siri-et/reader.ts'
 import type { DatasetCounts } from '../siri-et/table.ts'
 
@@ -31,7 +32,7 @@ export interface ListenerOptions {
 
 /** What the listener logs each minute: the minute's counts, and the table and reader as they stand. */
 export interface MinuteLine {
-  /** Each dataset's messages and their bytes, this minute. */
+  /** Each dataset's messages and the bytes of the bodies read, this minute. */
   readonly datasets: Readonly<Record<string, { messages: number; bytes: number }>>
   /** Journeys the reader holds, in the box or not, and those the table lists. */
   readonly held?: number
@@ -49,8 +50,8 @@ export interface MinuteLine {
 }
 
 export interface Listener {
-  /** Takes one message as the broker delivered it. */
-  receive(message: SiriEtMessage): void
+  /** Takes one message as the broker delivered it, or one the shell skipped as too large. */
+  receive(message: SiriEtMessage | SkippedMessage): void
   /** Takes the box's stops, at start and with each new timetable version. */
   useBox(box: ReaderBox): void
   /** The box it lists journeys by, once it has one. */
@@ -88,10 +89,11 @@ export function createListener(options: ListenerOptions): Listener {
   /** The reader's failure counts at the last minute line, so each line gives its minute's. */
   let failuresBefore: Failures = { malformed: 0, tooLarge: 0, skippedJourneys: 0 }
 
-  function receive(message: SiriEtMessage) {
+  function receive(message: SiriEtMessage | SkippedMessage) {
     const counts = (datasets[message.dataset] ??= { messages: 0, bytes: 0 })
     counts.messages++
-    counts.bytes += Buffer.byteLength(message.body)
+    // A skipped message's body was never held, so it adds no bytes; it counts as too large.
+    if ('body' in message) counts.bytes += Buffer.byteLength(message.body)
     reader.receive(message)
   }
 

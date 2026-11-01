@@ -3,7 +3,7 @@
 // them reconnected when no dataset has sent a message for 5 minutes in service hours. Each message
 // goes to the core (./listener.ts); every minute the core's line is logged and, while it has no
 // stops, the app is asked for them again. Every line it logs has its credentials cut out.
-import type { SiriEtMessage } from '../siri-et/reader.ts'
+import type { SiriEtMessage, SkippedMessage } from '../siri-et/reader.ts'
 import { createListener, type Listener } from './listener.ts'
 import type { Log, LogLine } from './log.ts'
 import { checkStops, STOPS_EVERY, STOPS_RETRY } from './stops.ts'
@@ -22,7 +22,8 @@ export interface DatasetAddress {
 export interface LinkEvents {
   /** Signed in, and receiving from its subscription. */
   onOpen(): void
-  onMessage(message: SiriEtMessage): void
+  /** A message, or one skipped unread as too large (./body.ts). */
+  onMessage(message: SiriEtMessage | SkippedMessage): void
   /** It closed, for a reason that may name what it was given, so it is never logged unredacted. */
   onClose(reason: string): void
 }

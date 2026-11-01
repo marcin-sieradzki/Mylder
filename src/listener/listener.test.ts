@@ -200,4 +200,15 @@ describe('the listener’s minute line', () => {
       skippedJourneys: 0,
     })
   })
+
+  it('counts a message skipped unread as too large', () => {
+    const { listener, clock } = listening('09:00:00')
+    listener.useBox(box)
+    listener.minute()
+    listener.receive({ dataset: '788', receivedAt: cph('09:00:00'), tooLarge: true })
+    clock.now += 60_000
+    const line = listener.minute()
+    expect(line.datasets).toEqual({ '788': { messages: 1, bytes: 0 } })
+    expect(line.parseFailures).toEqual({ malformed: 0, tooLarge: 1, skippedJourneys: 0 })
+  })
 })

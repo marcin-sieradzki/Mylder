@@ -25,6 +25,16 @@ export interface SiriEtMessage {
   readonly body: string
 }
 
+/**
+ * A message the listener skipped unread: its body was over the size limit once unzipped, so it
+ * was never held whole. The reader counts it as too large.
+ */
+export interface SkippedMessage {
+  readonly dataset: string
+  readonly receivedAt: number
+  readonly tooLarge: true
+}
+
 /** The stops inside the box, without leading zeros, from one timetable version. */
 export interface ReaderBox {
   readonly stops: ReadonlySet<string>
@@ -64,7 +74,7 @@ export interface ReaderOptions {
 }
 
 export interface SiriEtReader {
-  receive(message: SiriEtMessage): void
+  receive(message: SiriEtMessage | SkippedMessage): void
   /**
    * Lists the journeys by another box's stops from the next table on, such as a new timetable
    * version's, keeping every journey held.
@@ -117,15 +127,17 @@ export function siriEtReader({ box: given, listener, limits }: ReaderOptions): S
   let evicted = 0
   let box = given
 
-  function receive({ dataset, receivedAt, body }: SiriEtMessage) {
+  function receive(message: SiriEtMessage | SkippedMessage) {
+    const { dataset, receivedAt } = message
     const counts = countsOf(dataset, receivedAt)
     counts.messages++
     counts.lastMessageAt = receivedAt
     lastMessageAt = Math.max(lastMessageAt ?? receivedAt, receivedAt)
-    if (body.length > messageChars) {
+    if ('tooLarge' in message || message.body.length > messageChars) {
       counts.tooLarge++
       return
     }
+    const { body } = message
     const journeys = readSiriEt(body)
     if (!journeys) {
       counts.malformed++
