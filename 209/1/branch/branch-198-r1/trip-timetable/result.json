@@ -1,0 +1,8 @@
+{
+  "journey": "trip-timetable",
+  "pass": true,
+  "steps": [
+    "01-centred-on-a-bus: centred on a bus (http://localhost:4303/en?map=14.00/55.70099/12.57745)",
+    "02-vehicle-detail: vehicle detail (http://localhost:4303/en?map=14.00/55.70099/12.57745&trip=bus.14.e2077753ad.20261101.1118)"
+  ]
+}

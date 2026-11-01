@@ -1,0 +1,7 @@
+{
+  "journey": "map-weekday",
+  "pass": true,
+  "steps": [
+    "01-weekday-map: weekday map (http://localhost:4401/en)"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "journey": "stop-timetable",
+  "pass": true,
+  "steps": [
+    "01-centred-on-the-stop: centred on the stop (http://localhost:4303/en?map=17.00/55.67259/12.56661)",
+    "02-stop-departures: stop departures (http://localhost:4303/en?map=17.00/55.67259/12.56661&stop=10842)",
+    "03-stop-arrivals: stop arrivals (http://localhost:4303/en?map=17.00/55.67259/12.56661&stop=10842&board=arrivals)",
+    "04-metro-stop: metro stop (http://localhost:4303/en?stop=8603332)"
+  ]
+}

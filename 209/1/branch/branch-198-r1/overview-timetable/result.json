@@ -1,0 +1,8 @@
+{
+  "journey": "overview-timetable",
+  "pass": true,
+  "steps": [
+    "01-city-pulse: city pulse (http://localhost:4303/en)",
+    "02-vehicles-list: vehicles list (http://localhost:4303/en?tab=vehicles)"
+  ]
+}

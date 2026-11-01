@@ -1,0 +1,10 @@
+{
+  "journey": "disruptions-timetable",
+  "pass": true,
+  "steps": [
+    "01-overview-open: overview open (http://localhost:4303/en)",
+    "02-disruptions-tab: disruptions tab (http://localhost:4303/en?tab=disruptions)",
+    "03-about-from-the-credit: about from the credit (http://localhost:4303/en?tab=disruptions)",
+    "04-danish-disruptions: Danish disruptions (http://localhost:4303/da?tab=disruptions)"
+  ]
+}

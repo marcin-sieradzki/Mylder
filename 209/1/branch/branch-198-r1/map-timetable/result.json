@@ -1,0 +1,11 @@
+{
+  "journey": "map-timetable",
+  "pass": true,
+  "steps": [
+    "01-map-on-the-timetable-source: map on the timetable source (http://localhost:4303/en)",
+    "02-before-bus-filter: before Bus filter (http://localhost:4303/en)",
+    "03-bus-filtered-off: Bus filtered off (http://localhost:4303/en?hide=bus)",
+    "04-bus-back: Bus back (http://localhost:4303/en)",
+    "05-danish-banner-and-legend: Danish banner and legend (http://localhost:4303/da)"
+  ]
+}

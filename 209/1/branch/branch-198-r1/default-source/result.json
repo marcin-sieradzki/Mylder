@@ -1,0 +1,10 @@
+{
+  "journey": "default-source",
+  "pass": true,
+  "steps": [
+    "01-map-loaded-on-the-default-source: map loaded on the default source (http://localhost:4303/en)",
+    "02-banner-and-legend: banner and legend (http://localhost:4303/en)",
+    "03-centred-on-a-bus-paused: centred on a bus, paused (http://localhost:4303/en?map=15.00/55.69390/12.56675)",
+    "04-a-dot-reads-timetable-only: a dot reads Timetable only (http://localhost:4303/en?map=15.00/55.69390/12.56675)"
+  ]
+}

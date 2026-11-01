@@ -1,0 +1,9 @@
+{
+  "journey": "about-timetable",
+  "pass": true,
+  "steps": [
+    "01-map: map (http://localhost:4303/en)",
+    "02-about: about (http://localhost:4303/en)",
+    "03-om-mylder: om mylder (http://localhost:4303/da)"
+  ]
+}

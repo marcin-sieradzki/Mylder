@@ -1,0 +1,413 @@
+- main:
+  - region "Live map of Copenhagen"
+- banner:
+  - link "Mylder":
+    - /url: /en
+  - time: Updated 11:30:51
+  - group "Filters":
+    - button "Bus 369" [pressed]
+    - button "Metro 39" [pressed]
+    - button "S-tog 47" [pressed]
+    - button "Train 85" [pressed]
+    - button "Light rail 14" [pressed]
+    - button "Planes 8" [pressed]
+  - navigation "Language":
+    - link "Dansk":
+      - /url: /da?map=15.00/55.69390/12.56675
+  - button "About Mylder"
+- status: "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data."
+- list "Data states":
+  - listitem: Live
+  - listitem: Ageing
+  - listitem: Estimated
+  - listitem: Timetable only
+  - listitem: No signal
+  - listitem: Planes
+- paragraph: "Every vehicle is Timetable only for now: live positions aren't connected yet."
+- text: Scale 100 m
+- toolbar "Map controls":
+  - button "Zoom in"
+  - button "Zoom out"
+  - separator
+  - button "Centre the map"
+  - separator
+  - button "3D view"
+  - button "Reset to north"
+  - separator
+  - button "Resume"
+- text: "Transit data:"
+- link "Rejseplanen":
+  - /url: https://www.rejseplanen.dk/
+- text: (
+- link "CC BY 4.0":
+  - /url: https://creativecommons.org/licenses/by/4.0/
+- text: ") · Aircraft:"
+- link "© adsb.lol contributors":
+  - /url: https://adsb.lol/
+- text: under the
+- link "ODbL":
+  - /url: https://opendatacommons.org/licenses/odbl/
+- text: ·
+- link "© OpenStreetMap contributors":
+  - /url: https://www.openstreetmap.org/copyright
+- text: ·
+- link "© OpenMapTiles":
+  - /url: https://openmaptiles.org/
+- text: ·
+- link "OpenFreeMap":
+  - /url: https://openfreemap.org/
+- dialog "Overview":
+  - heading "Overview" [level=2]
+  - button "Close"
+  - tablist "Overview":
+    - tab "City pulse" [selected]
+    - tab "Vehicles 622"
+    - tab "Disruptions"
+  - tabpanel "City pulse":
+    - group "On the move":
+      - text: On the move 554
+      - paragraph: of 622 in service
+    - group "Reported this minute":
+      - text: Reported this minute Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - group "Reporting live":
+      - text: Reporting live Unknown
+      - paragraph: No live positions yet; placed from the timetable
+    - paragraph:
+      - text: Timetable ·
+      - time: placed 11:30:51
+    - list "On the map now":
+      - listitem: Live 0
+      - listitem: Ageing 0
+      - listitem: Estimated 0
+      - listitem: Timetable only 622
+      - listitem: No signal 0
+    - region "On the move, by mode":
+      - heading "On the move, by mode" [level=3]
+      - term: Bus
+      - definition: "369"
+      - term: Metro
+      - definition: "39"
+      - term: S-tog
+      - definition: "47"
+      - term: Train
+      - definition: "85"
+      - term: Light rail
+      - definition: "14"
+    - region "Reporting live, by mode":
+      - heading "Reporting live, by mode" [level=3]
+      - meter "Bus": Bus x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Metro": Metro x
+      - paragraph: No realtime from the Metro; placed from the timetable
+      - meter "S-tog": S-tog x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Train": Train x
+      - paragraph: No live positions yet; placed from the timetable
+      - meter "Light rail": Light rail x
+      - paragraph: No live positions yet; placed from the timetable
+    - status
+    - figure "Vehicles in service today Planned, from today's timetable":
+      - text: Vehicles in service today Planned, from today's timetable
+      - group "Vehicles in service today Planned, from today's timetable":
+        - list:
+          - listitem:
+            - time: 00:00
+            - text: "337"
+          - listitem:
+            - time: 00:15
+            - text: "294"
+          - listitem:
+            - time: 00:30
+            - text: "253"
+          - listitem:
+            - time: 00:45
+            - text: "209"
+          - listitem:
+            - time: 01:00
+            - text: "164"
+          - listitem:
+            - time: 01:15
+            - text: "157"
+          - listitem:
+            - time: 01:30
+            - text: "138"
+          - listitem:
+            - time: 01:45
+            - text: "131"
+          - listitem:
+            - time: 02:00
+            - text: "120"
+          - listitem:
+            - time: 02:15
+            - text: "118"
+          - listitem:
+            - time: 02:30
+            - text: "125"
+          - listitem:
+            - time: 02:45
+            - text: "118"
+          - listitem:
+            - time: 03:00
+            - text: "114"
+          - listitem:
+            - time: 03:15
+            - text: "121"
+          - listitem:
+            - time: 03:30
+            - text: "120"
+          - listitem:
+            - time: 03:45
+            - text: "113"
+          - listitem:
+            - time: 04:00
+            - text: "109"
+          - listitem:
+            - time: 04:15
+            - text: "109"
+          - listitem:
+            - time: 04:30
+            - text: "118"
+          - listitem:
+            - time: 04:45
+            - text: "114"
+          - listitem:
+            - time: 05:00
+            - text: "113"
+          - listitem:
+            - time: 05:15
+            - text: "129"
+          - listitem:
+            - time: 05:30
+            - text: "138"
+          - listitem:
+            - time: 05:45
+            - text: "151"
+          - listitem:
+            - time: 06:00
+            - text: "158"
+          - listitem:
+            - time: 06:15
+            - text: "186"
+          - listitem:
+            - time: 06:30
+            - text: "225"
+          - listitem:
+            - time: 06:45
+            - text: "236"
+          - listitem:
+            - time: 07:00
+            - text: "264"
+          - listitem:
+            - time: 07:15
+            - text: "304"
+          - listitem:
+            - time: 07:30
+            - text: "333"
+          - listitem:
+            - time: 07:45
+            - text: "336"
+          - listitem:
+            - time: 08:00
+            - text: "370"
+          - listitem:
+            - time: 08:15
+            - text: "384"
+          - listitem:
+            - time: 08:30
+            - text: "387"
+          - listitem:
+            - time: 08:45
+            - text: "402"
+          - listitem:
+            - time: 09:00
+            - text: "432"
+          - listitem:
+            - time: 09:15
+            - text: "454"
+          - listitem:
+            - time: 09:30
+            - text: "459"
+          - listitem:
+            - time: 09:45
+            - text: "467"
+          - listitem:
+            - time: 10:00
+            - text: "502"
+          - listitem:
+            - time: 10:15
+            - text: "524"
+          - listitem:
+            - time: 10:30
+            - text: "525"
+          - listitem:
+            - time: 10:45
+            - text: "542"
+          - listitem:
+            - time: 11:00
+            - text: "556"
+          - listitem:
+            - time: 11:15
+            - text: "566"
+          - listitem:
+            - time: 11:30
+            - text: "554"
+          - listitem:
+            - time: 11:45
+            - text: "560"
+          - listitem:
+            - time: 12:00
+            - text: "577"
+          - listitem:
+            - time: 12:15
+            - text: "584"
+          - listitem:
+            - time: 12:30
+            - text: "560"
+          - listitem:
+            - time: 12:45
+            - text: "573"
+          - listitem:
+            - time: 13:00
+            - text: "580"
+          - listitem:
+            - time: 13:15
+            - text: "586"
+          - listitem:
+            - time: 13:30
+            - text: "563"
+          - listitem:
+            - time: 13:45
+            - text: "572"
+          - listitem:
+            - time: 14:00
+            - text: "579"
+          - listitem:
+            - time: 14:15
+            - text: "584"
+          - listitem:
+            - time: 14:30
+            - text: "556"
+          - listitem:
+            - time: 14:45
+            - text: "571"
+          - listitem:
+            - time: 15:00
+            - text: "578"
+          - listitem:
+            - time: 15:15
+            - text: "583"
+          - listitem:
+            - time: 15:30
+            - text: "555"
+          - listitem:
+            - time: 15:45
+            - text: "569"
+          - listitem:
+            - time: 16:00
+            - text: "583"
+          - listitem:
+            - time: 16:15
+            - text: "583"
+          - listitem:
+            - time: 16:30
+            - text: "557"
+          - listitem:
+            - time: 16:45
+            - text: "571"
+          - listitem:
+            - time: 17:00
+            - text: "570"
+          - listitem:
+            - time: 17:15
+            - text: "569"
+          - listitem:
+            - time: 17:30
+            - text: "543"
+          - listitem:
+            - time: 17:45
+            - text: "549"
+          - listitem:
+            - time: 18:00
+            - text: "550"
+          - listitem:
+            - time: 18:15
+            - text: "535"
+          - listitem:
+            - time: 18:30
+            - text: "514"
+          - listitem:
+            - time: 18:45
+            - text: "495"
+          - listitem:
+            - time: 19:00
+            - text: "492"
+          - listitem:
+            - time: 19:15
+            - text: "475"
+          - listitem:
+            - time: 19:30
+            - text: "470"
+          - listitem:
+            - time: 19:45
+            - text: "456"
+          - listitem:
+            - time: 20:00
+            - text: "454"
+          - listitem:
+            - time: 20:15
+            - text: "441"
+          - listitem:
+            - time: 20:30
+            - text: "442"
+          - listitem:
+            - time: 20:45
+            - text: "430"
+          - listitem:
+            - time: 21:00
+            - text: "434"
+          - listitem:
+            - time: 21:15
+            - text: "427"
+          - listitem:
+            - time: 21:30
+            - text: "420"
+          - listitem:
+            - time: 21:45
+            - text: "411"
+          - listitem:
+            - time: 22:00
+            - text: "420"
+          - listitem:
+            - time: 22:15
+            - text: "410"
+          - listitem:
+            - time: 22:30
+            - text: "410"
+          - listitem:
+            - time: 22:45
+            - text: "398"
+          - listitem:
+            - time: 23:00
+            - text: "396"
+          - listitem:
+            - time: 23:15
+            - text: "385"
+          - listitem:
+            - time: 23:30
+            - text: "369"
+          - listitem:
+            - time: 23:45
+            - text: "357"
+    - paragraph: Peak 586 at 13:15
+    - region "How sure are we?":
+      - heading "How sure are we?" [level=3]
+      - list "How sure are we?":
+        - listitem: Live 0 Reported by the vehicle in the latest answers.
+        - listitem: Ageing 0 Last reported a few minutes ago; moving on along its path since.
+        - listitem: Estimated 0 Placed from the timetable and a known delay, or computed by Rejseplanen.
+        - listitem: Timetable only 622 No live positions yet; placed from the timetable.
+        - listitem: No signal 0 Had realtime, missing for 5 min; moving on the timetable and its last delay.
+- alert
+- region "Notifications"
+- tooltip "Bus 1A to Hellerup St. Timetable only"

@@ -1,0 +1,9 @@
+{
+  "journey": "default-source",
+  "pass": false,
+  "error": "expect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 2\n\n  Object {\n-   \"kind\": \"timetable\",\n+   \"kind\": \"simulated\",\n+   \"name\": \"weekday\",\n  }",
+  "steps": [
+    "01-map-loaded-on-the-default-source: map loaded on the default source (http://localhost:4302/en)",
+    "02-failure: failure (http://localhost:4302/en)"
+  ]
+}

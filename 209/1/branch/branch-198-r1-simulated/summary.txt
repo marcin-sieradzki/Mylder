@@ -1,0 +1,1 @@
+{'kind': 'simulated', 'name': 'weekday'} Counter({'estimated': 486, 'timetable-only': 138})
