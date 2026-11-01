@@ -1,0 +1,45 @@
+name: Listener
+
+# Deploys the SIRI-ET listener to Fly.io (#218, docs/live-data.md, "The listener") from main
+# whenever its image or its settings change, and by hand. It needs the FLY_API_TOKEN secret, a
+# deploy token scoped to the one app; without it the job says so and deploys nothing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/listener.yml
+      - fly.toml
+      - listener.Dockerfile
+      - listener.Dockerfile.dockerignore
+      - package-lock.json
+      - src/listener/**
+      - src/siri-et/**
+      - src/timetable/**
+      - src/domain/**
+  workflow_dispatch:
+
+concurrency:
+  group: listener-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - name: Needs the deploy token
+        if: env.FLY_API_TOKEN == ''
+        run: echo "::notice::FLY_API_TOKEN is not set, so the listener isn't deployed."
+      - uses: actions/checkout@v4
+        if: env.FLY_API_TOKEN != ''
+      - uses: superfly/flyctl-actions/setup-flyctl@1.6
+        if: env.FLY_API_TOKEN != ''
+      - name: Deploy
+        if: env.FLY_API_TOKEN != ''
+        run: flyctl deploy --remote-only --build-arg VERSION=${{ github.sha }} --wait-timeout 300
+      - name: Running
+        if: env.FLY_API_TOKEN != ''
+        run: flyctl status
