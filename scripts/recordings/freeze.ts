@@ -3,7 +3,9 @@
 // whole: its plan's fixture timetable prepared into `timetable/`, `clock.json`, each service's answers
 // in call order, the tracker's snapshot of every minute in `snapshots/`, and in `answers/` its
 // disruption list of every minute and the stop answers the plan saves. Its `aircraft/` folder is
-// kept as it is, and the aircraft snapshot of each of its calls saved in `answers/aircraft/`.
+// kept as it is, and the aircraft snapshot of each of its calls saved in `answers/aircraft/`. The
+// timetable source's plan is saved the same way, with no answers or `clock.json`, since it makes no
+// call and is no recording to replay.
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect } from 'effect'
@@ -17,12 +19,18 @@ import {
   aircraftFile,
   disruptionsFile,
   freeze,
+  onTimetable,
   replayAircraft,
   savedAnswers,
   UNFROZEN,
+  type Served,
 } from '../../src/tracker/recording/freeze.ts'
-import { RECORDINGS } from '../../src/tracker/recording/plans.ts'
-import { loadTimetable } from '../../src/tracker/timetable.ts'
+import {
+  ON_TIMETABLE,
+  RECORDINGS,
+  type RecordingPlan,
+} from '../../src/tracker/recording/plans.ts'
+import { loadTimetable, type Timetable } from '../../src/tracker/timetable.ts'
 import { prepareTimetable } from '../timetable/prepare.ts'
 import { fixtureDir, fixtureHash } from '../timetable/testing.ts'
 
@@ -31,14 +39,13 @@ const writeJson = async (path: string, value: unknown) => {
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
-const only = process.argv.slice(2)
-for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.includes(each.name))) {
-  const dir = recordingDir(plan.name)
+/** Empties a plan's folder but for what is its own, and prepares its fixture timetable in it. */
+async function emptied(name: string, fixture = 'gtfs'): Promise<Timetable> {
+  const dir = recordingDir(name)
   const entries = await readdir(dir).catch(() => [])
-  for (const entry of entries.filter((name) => !UNFROZEN.includes(name))) {
+  for (const entry of entries.filter((each) => !UNFROZEN.includes(each))) {
     await rm(join(dir, entry), { recursive: true, force: true })
   }
-  const fixture = plan.fixture ?? 'gtfs'
   await prepareTimetable({
     gtfs: fixtureDir(fixture),
     out: join(dir, 'timetable'),
@@ -46,16 +53,17 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
     preparedDate: '2026-06-02',
     log: () => {},
   })
-  const timetable = await loadTimetable(join(dir, 'timetable'))
-  const { calls, snapshots, disruptions } = await Effect.runPromise(freeze(plan, timetable))
+  return loadTimetable(join(dir, 'timetable'))
+}
+
+/** Saves what the routes served over a plan: its snapshots, lists and route answers. */
+async function saveServed(
+  plan: Pick<RecordingPlan, 'name' | 'answers'>,
+  timetable: Timetable,
+  { snapshots, disruptions }: Served,
+): Promise<string> {
+  const dir = recordingDir(plan.name)
   const answers = savedAnswers(plan, timetable, snapshots)
-  const clock: RecordingClock = { start: new Date(plan.start).toISOString() }
-  await writeJson(join(dir, 'clock.json'), clock)
-  for (const [service, recorded] of calls) {
-    for (const [i, call] of recorded.entries()) {
-      await writeJson(join(dir, service, callFile(i)), fileContent(call))
-    }
-  }
   for (const [i, snapshot] of snapshots.entries()) {
     await writeJson(join(dir, 'snapshots', callFile(i)), snapshot)
   }
@@ -63,13 +71,36 @@ for (const plan of RECORDINGS.filter((each) => only.length === 0 || only.include
     await writeJson(join(dir, disruptionsFile(callFile(i))), list)
   }
   for (const [file, answer] of answers) await writeJson(join(dir, file), answer)
+  return `${snapshots.length} snapshots` + (answers.size ? `, ${answers.size} route answers` : '')
+}
+
+const only = process.argv.slice(2)
+const chosen = (name: string) => only.length === 0 || only.includes(name)
+
+for (const plan of RECORDINGS.filter((each) => chosen(each.name))) {
+  const dir = recordingDir(plan.name)
+  const timetable = await emptied(plan.name, plan.fixture)
+  const { calls, ...served } = await Effect.runPromise(freeze(plan, timetable))
+  const clock: RecordingClock = { start: new Date(plan.start).toISOString() }
+  await writeJson(join(dir, 'clock.json'), clock)
+  for (const [service, recorded] of calls) {
+    for (const [i, call] of recorded.entries()) {
+      await writeJson(join(dir, service, callFile(i)), fileContent(call))
+    }
+  }
+  const saved = await saveServed(plan, timetable, served)
   const aircraft = await Effect.runPromise(replayAircraft(dir))
   for (const [i, snapshot] of aircraft.entries()) {
     await writeJson(join(dir, aircraftFile(callFile(i))), snapshot)
   }
   const answered = [...calls].map(([service, each]) => `${each.length} ${service}`).join(', ')
-  const saved =
-    (answers.size ? `, ${answers.size} route answers` : '') +
-    (aircraft.length ? `, ${aircraft.length} aircraft snapshots` : '')
-  console.log(`recordings/${plan.name}: ${answered}, ${snapshots.length} snapshots${saved}`)
+  const planes = aircraft.length ? `, ${aircraft.length} aircraft snapshots` : ''
+  console.log(`recordings/${plan.name}: ${answered}, ${saved}${planes}`)
+}
+
+if (chosen(ON_TIMETABLE.name)) {
+  const timetable = await emptied(ON_TIMETABLE.name)
+  const served = await Effect.runPromise(onTimetable(ON_TIMETABLE, timetable))
+  const saved = await saveServed(ON_TIMETABLE, timetable, served)
+  console.log(`recordings/${ON_TIMETABLE.name}: no calls on the timetable source, ${saved}`)
 }

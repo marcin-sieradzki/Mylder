@@ -1,19 +1,27 @@
 #!/usr/bin/env bash
-# Builds this checkout and starts it on a recording, for one verification run.
-# Usage: launch.sh <run-id> [port] [recording]. The port defaults to 4300 and the recording to
-# weekday; the aircraft are always the weekday recording's. Prints the URL once the map's
-# snapshot answers with vehicles. VERIFY_SKIP_BUILD=1 reuses a build of the same commit.
+# Builds this checkout and starts it on a recording, or on the timetable source, for one
+# verification run.
+# Usage: launch.sh <run-id> [port] [recording|timetable]. The port defaults to 4300 and the
+# recording to weekday; `timetable` starts it on MYLDER_SOURCE=timetable instead, on the deployed
+# timetable at the real time. The aircraft are always the weekday recording's. Prints the URL once
+# the map's snapshot answers with vehicles. VERIFY_SKIP_BUILD=1 reuses a build of the same commit.
 set -euo pipefail
 set -m # the server gets a process group of its own, so cleanup.sh stops all of it
 
-run=${1:?usage: launch.sh <run-id> [port] [recording]}
+run=${1:?usage: launch.sh <run-id> [port] [recording|timetable]}
 port=${2:-4300}
 recording=${3:-weekday}
 dir=".verify/$run"
 url="http://localhost:$port"
 
-if [ ! -f "recordings/$recording/clock.json" ]; then
-  echo "No recording named $recording in recordings/." >&2
+if [ "$recording" = timetable ]; then
+  source=timetable
+  on="the timetable source"
+elif [ -f "recordings/$recording/clock.json" ]; then
+  source=recording:$recording
+  on="recording $recording"
+else
+  echo "No recording named $recording in recordings/, and not timetable." >&2
   exit 1
 fi
 if curl -s -o /dev/null "$url"; then
@@ -30,7 +38,7 @@ else
   git rev-parse HEAD >.next/verify-head
 fi
 
-MYLDER_SOURCE=recording:$recording MYLDER_AIRCRAFT_SOURCE=recording:weekday \
+MYLDER_SOURCE=$source MYLDER_AIRCRAFT_SOURCE=recording:weekday \
   node_modules/.bin/next start --port "$port" >"$dir/server.log" 2>&1 &
 echo $! >"$dir/server.pid"
 echo "$port" >"$dir/port"
@@ -40,7 +48,7 @@ date +%s >"$dir/started"
 
 for _ in $(seq 60); do
   if curl -sf "$url/api/snapshot" | grep -q '"trips":\[{'; then
-    echo "Ready: $url/en (run $run on recording $recording, server pid $(cat "$dir/server.pid"))"
+    echo "Ready: $url/en (run $run on $on, server pid $(cat "$dir/server.pid"))"
     exit 0
   fi
   sleep 1

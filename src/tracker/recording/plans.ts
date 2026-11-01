@@ -1,6 +1,7 @@
 // The recordings in `recordings/`, as the plans `npm run recordings` freezes them from: each a
 // scenario of the simulated Rejseplanen over the fixture timetable, from a moment, for a number
-// of minutes. The hand-made cases docs/testing-seams.md lists are frozen the same way.
+// of minutes. The hand-made cases docs/testing-seams.md lists are frozen the same way, and beside
+// them the timetable source's run, which `npm run recordings` saves too.
 import 'server-only'
 import { MAX_JOURNEYS } from '../tracker.ts'
 import { CAP, SPENT, WEEKDAY, type FailureKind, type Scenario } from '../simulation/scenarios.ts'
@@ -124,3 +125,30 @@ export const RECORDINGS: readonly RecordingPlan[] = [
     answers: { minute: 2, stops: ['8600626'] },
   },
 ]
+
+/**
+ * A run of the tracker on the timetable source over the real fixture, saved beside the recordings
+ * for screen tests: its snapshot of each minute, its disruption list and the route answers its
+ * plan names. The source makes no call, so the folder holds no answers and is no recording for
+ * `MYLDER_SOURCE=recording:<name>`.
+ */
+export type TimetablePlan = Pick<RecordingPlan, 'name' | 'start' | 'minutes' | 'answers'>
+
+export const ON_TIMETABLE: TimetablePlan = {
+  name: 'timetable-source',
+  start: RECORDING_START,
+  // To 07:25, when the 991 stands Waiting at Orientkaj St.
+  minutes: 6,
+  // Nørreport, with buses and S-tog; Orientkaj St., where the 991 leaves at 07:30; Bella Center
+  // St., where the Metro runs to an interval. An S-tog, a bus and a Metro trip underway.
+  answers: {
+    minute: 1,
+    stops: ['27532', '54307', '8603313'],
+    arrivals: ['27532', '8603313'],
+    trips: [
+      's-tog.A.0bc307e3eb.20260616.0707',
+      'bus.5C.32331e0e20.20260616.0707',
+      'metro.M1.7f21f99145.20260616.0707',
+    ],
+  },
+}

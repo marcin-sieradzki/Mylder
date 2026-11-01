@@ -1,0 +1,126 @@
+{
+  "key": "metro.M1.7f21f99145.20260616.0707",
+  "line": "M1",
+  "mode": "metro",
+  "colour": "perron-color-transit-line-m1",
+  "headsign": "Vestamager St. (Metro)",
+  "pattern": 4,
+  "state": "timetable-only",
+  "runsToInterval": true,
+  "interval": {
+    "from": 4,
+    "to": 4
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "8603301",
+      "name": "Vanløse St. (Metro)",
+      "arrival": 1781586420000,
+      "departure": 1781586420000
+    },
+    {
+      "index": 1,
+      "stop": "8603302",
+      "name": "Flintholm St. (Metro)",
+      "arrival": 1781586480000,
+      "departure": 1781586480000
+    },
+    {
+      "index": 2,
+      "stop": "8603303",
+      "name": "Lindevang St. (Metro)",
+      "arrival": 1781586540000,
+      "departure": 1781586540000
+    },
+    {
+      "index": 3,
+      "stop": "8603304",
+      "name": "Fasanvej St. (Metro)",
+      "arrival": 1781586660000,
+      "departure": 1781586660000
+    },
+    {
+      "index": 4,
+      "stop": "8603305",
+      "name": "Frederiksberg St. (Metro)",
+      "arrival": 1781586720000,
+      "departure": 1781586720000
+    },
+    {
+      "index": 5,
+      "stop": "8603306",
+      "name": "Forum St. (Metro)",
+      "arrival": 1781586840000,
+      "departure": 1781586840000
+    },
+    {
+      "index": 6,
+      "stop": "8603307",
+      "name": "Nørreport St. (Metro)",
+      "arrival": 1781586900000,
+      "departure": 1781586960000
+    },
+    {
+      "index": 7,
+      "stop": "8603308",
+      "name": "Kongens Nytorv St. (Metro)",
+      "arrival": 1781587020000,
+      "departure": 1781587080000
+    },
+    {
+      "index": 8,
+      "stop": "8603309",
+      "name": "Christianshavn St. (Metro)",
+      "arrival": 1781587140000,
+      "departure": 1781587200000
+    },
+    {
+      "index": 9,
+      "stop": "8603310",
+      "name": "Islands Brygge St. (Metro)",
+      "arrival": 1781587260000,
+      "departure": 1781587320000
+    },
+    {
+      "index": 10,
+      "stop": "8603311",
+      "name": "DR Byen St. (Metro)",
+      "arrival": 1781587380000,
+      "departure": 1781587380000
+    },
+    {
+      "index": 11,
+      "stop": "8603312",
+      "name": "Sundby St. (Metro)",
+      "arrival": 1781587500000,
+      "departure": 1781587500000
+    },
+    {
+      "index": 12,
+      "stop": "8603313",
+      "name": "Bella Center St. (Metro)",
+      "arrival": 1781587560000,
+      "departure": 1781587620000
+    },
+    {
+      "index": 13,
+      "stop": "8603315",
+      "name": "Ørestad St. (Metro)",
+      "arrival": 1781587680000,
+      "departure": 1781587740000
+    },
+    {
+      "index": 14,
+      "stop": "8603317",
+      "name": "Vestamager St. (Metro)",
+      "arrival": 1781587800000,
+      "departure": 1781587800000
+    }
+  ]
+}

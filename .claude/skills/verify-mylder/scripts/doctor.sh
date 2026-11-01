@@ -25,6 +25,11 @@ done
 body=$(curl -sf "http://localhost:$port/api/snapshot") || fail "/api/snapshot does not answer 200"
 echo "$body" | grep -q '"trips":\[{' || fail "the snapshot has no trips"
 recording=$(cat "$dir/recording" 2>/dev/null || echo weekday)
+# The timetable source runs at the real time and never runs out.
+if [ "$recording" = timetable ]; then
+  echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source"
+  exit 0
+fi
 minutes=$(ls "recordings/$recording/snapshots" | wc -l | tr -d ' ')
 age=$(($(date +%s) - $(cat "$dir/started")))
 if [ "$age" -gt $(((minutes - 1) * 60)) ]; then

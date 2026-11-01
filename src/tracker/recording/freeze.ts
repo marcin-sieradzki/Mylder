@@ -1,7 +1,8 @@
 // Freezing and replaying recordings: the tracker runs over a plan's minutes on the test clock,
 // once against the simulated Rejseplanen with every answer kept, and once against the recorded
 // layer, and both give the same snapshots and disruption lists (docs/testing-seams.md). The stop
-// and trip answers a plan saves for screen tests are worked out from those snapshots. A
+// and trip answers a plan saves for screen tests are worked out from those snapshots. The
+// timetable source's plan runs the same way on that source, which needs nothing to replay. A
 // recording's `aircraft/` folder is recorded from the feed, never frozen: the aircraft snapshots
 // saved beside it are what the aircraft source makes of it, one call every 10 s from its start.
 import 'server-only'
@@ -32,7 +33,7 @@ import { loadTimetable, type Timetable } from '../timetable.ts'
 import { Tracker } from '../tracker.ts'
 import * as RecordedHttpClient from './layer.ts'
 import { callFolder, readCalls, readStart, type Calls, type Recorded } from './layer.ts'
-import type { RecordingPlan } from './plans.ts'
+import type { RecordingPlan, TimetablePlan } from './plans.ts'
 
 const MINUTE = 60_000
 
@@ -88,7 +89,7 @@ export const replayAircraft = (dir: string): Effect.Effect<readonly AircraftSnap
  * call, so saving them spends none and leaves the snapshots as they are.
  */
 export function savedAnswers(
-  plan: RecordingPlan,
+  plan: Pick<RecordingPlan, 'answers'>,
   timetable: Timetable,
   snapshots: readonly Snapshot[],
 ): ReadonlyMap<string, StopDepartures | StopArrivals | TripDetail | undefined> {
@@ -122,7 +123,9 @@ const sourceOf = (plan: RecordingPlan): Source => ({ kind: 'recording', folder: 
  * The tracker's snapshot at the start of each of a plan's minutes, and its disruption list, with
  * the stops whose boards it keeps opened at theirs, on both tabs.
  */
-const play = (plan: RecordingPlan): Effect.Effect<Served, never, Tracker> =>
+const play = (
+  plan: Pick<RecordingPlan, 'start' | 'minutes' | 'boards'>,
+): Effect.Effect<Served, never, Tracker> =>
   Effect.gen(function* () {
     const tracker = yield* Tracker
     const snapshots: Snapshot[] = []
@@ -230,3 +233,13 @@ export const replay = (plan: RecordingPlan, dir: string): Effect.Effect<Served> 
       ),
     )
   }).pipe(Effect.provide(TestClock.layer()))
+
+/**
+ * Runs the tracker over the timetable source's plan: no call to keep or replay, so freezing it and
+ * checking it again are the same run.
+ */
+export const onTimetable = (plan: TimetablePlan, timetable: Timetable): Effect.Effect<Served> =>
+  play(plan).pipe(
+    Effect.provide(trackerLayer({ timetable, source: { kind: 'timetable' }, cpu: stoppedCpu })),
+    Effect.provide(TestClock.layer()),
+  )

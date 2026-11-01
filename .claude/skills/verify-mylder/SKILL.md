@@ -12,12 +12,14 @@ The feature map in [`features/README.md`](features/README.md) says what to drive
 ## Launch
 
 ```sh
-.claude/skills/verify-mylder/scripts/launch.sh <run-id> [port] [recording]
+.claude/skills/verify-mylder/scripts/launch.sh <run-id> [port] [recording|timetable]
 ```
 
 It runs `npm run build`, starts `next start` on the port (4300 by default) with `MYLDER_SOURCE` set to `recording:<recording>` (`weekday` by default) and `MYLDER_AIRCRAFT_SOURCE` to `recording:weekday`, and waits until `/api/snapshot` answers with vehicles: ready is printed as `Ready: http://localhost:<port>/en`. It refuses a port that already answers. `node_modules` must match the lockfile (`npm ci` in a fresh worktree). `VERIFY_SKIP_BUILD=1` reuses the build when it was made from the same clean commit, which a relaunch on an unchanged checkout wants.
 
 The `weekday` recording holds ten minutes from 07:20 on 16 June 2026, and the server's clock starts there at launch and runs on in real time; the page takes its time from the server, so nothing in the browser is faked. After ten minutes the recording repeats its last answer and every vehicle ages towards No signal, so drive within nine minutes of launch, or relaunch. A recipe that names another recording, such as `crowded` (five minutes from the same moment, on a timetable of its own), runs on its own launch with that name as the third argument, on a port and run id of its own.
+
+**The timetable source.** `timetable` as the third argument starts the build with `MYLDER_SOURCE=timetable` in place of a recording: the deployed timetable in `public/timetable/` at the real time, with no call of any kind, so every vehicle is Timetable only and nothing runs out (the doctor skips the recording's minutes). What it shows is the real network's plan at that moment: fewer vehicles at night, and none if the deployed timetable's window has ended. It runs on its own launch, port and run id, as another recording does. To check it: `/en` draws vehicles (`[data-vehicles]` above 0) and every trip in `/api/snapshot` has `"state":"timetable-only"`, with the snapshot's `source` `{"kind":"timetable"}`.
 
 **Main against the branch.** To see how main behaves, launch main from its own worktree on another port: `git worktree add ../mylder-verify-main origin/main`, then `npm ci` and `launch.sh main-<n> 4301` there. Two runs never share a port, a build folder or a run id; the ports every server takes are in `scripts/ports.ts` and the table in `docs/testing-seams.md`.
 
@@ -71,4 +73,4 @@ Stops the server's whole process group by the pid `launch.sh` recorded, and keep
 
 ## Helpers
 
-All four are in `scripts/` and executable or run with `node`: `launch.sh <run-id> [port]`, `doctor.sh <run-id>`, `drive.ts <run-id> <journey.ts> [--phone]`, `cleanup.sh <run-id>`. Keep this skill honest with `/maintain-verification-skill`.
+All four are in `scripts/` and executable or run with `node`: `launch.sh <run-id> [port] [recording|timetable]`, `doctor.sh <run-id>`, `drive.ts <run-id> <journey.ts> [--phone]`, `cleanup.sh <run-id>`. Keep this skill honest with `/maintain-verification-skill`.

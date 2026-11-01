@@ -10,7 +10,14 @@ import { apiLayer, readSource } from '../source'
 import { fixtureTimetable } from '../testing'
 import { loadTimetable } from '../timetable'
 import { sharedStartingAt, startingAt } from './clock'
-import { aircraftFile, disruptionsFile, replay, replayAircraft, savedAnswers } from './freeze'
+import {
+  aircraftFile,
+  disruptionsFile,
+  onTimetable,
+  replay,
+  replayAircraft,
+  savedAnswers,
+} from './freeze'
 import {
   bundledFiles,
   callFile,
@@ -26,7 +33,7 @@ import {
   type Recorded,
   type RecordedApi,
 } from './layer'
-import { RECORDINGS } from './plans'
+import { ON_TIMETABLE, RECORDINGS } from './plans'
 
 const timetable = await fixtureTimetable()
 
@@ -92,6 +99,52 @@ describe('a frozen recording', () => {
           const kept = yield* Effect.promise(() => readJson(join(dir, file)))
           expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)
         }
+      }),
+  )
+
+  it.effect(
+    'runs the timetable source’s plan again into the snapshots and route answers saved for it',
+    () =>
+      Effect.gen(function* () {
+        const plan = ON_TIMETABLE
+        const dir = recordingDir(plan.name)
+        const recorded = yield* Effect.promise(() => loadTimetable(join(dir, 'timetable')))
+        const { snapshots, disruptions } = yield* onTimetable(plan, recorded)
+        const saved = (path: (file: string) => string) =>
+          Effect.promise(() =>
+            Promise.all(snapshots.map((_, i) => readJson(join(dir, path(callFile(i)))))),
+          )
+        expect(snapshots).toHaveLength(plan.minutes)
+        expect(JSON.parse(JSON.stringify(snapshots))).toEqual(
+          yield* saved((file) => join('snapshots', file)),
+        )
+        expect(JSON.parse(JSON.stringify(disruptions))).toEqual(yield* saved(disruptionsFile))
+        const answers = savedAnswers(plan, recorded, snapshots)
+        expect([...answers.keys()]).toEqual([
+          'answers/stops/27532.json',
+          'answers/stops/54307.json',
+          'answers/stops/8603313.json',
+          'answers/arrivals/27532.json',
+          'answers/arrivals/8603313.json',
+          'answers/trips/s-tog.A.0bc307e3eb.20260616.0707.json',
+          'answers/trips/bus.5C.32331e0e20.20260616.0707.json',
+          'answers/trips/metro.M1.7f21f99145.20260616.0707.json',
+        ])
+        for (const [file, answer] of answers) {
+          const kept = yield* Effect.promise(() => readJson(join(dir, file)))
+          expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)
+          expect(answer?.source).toEqual({ kind: 'timetable' })
+        }
+        // What the screens get: every trip Timetable only, from a source that made no call, and
+        // by the last minute a bus Waiting at Orientkaj St.
+        for (const snapshot of snapshots) {
+          expect(snapshot).toMatchObject({ source: { kind: 'timetable' }, positionMode: 'none' })
+          expect(snapshot.status.calls).toEqual([])
+          expect(new Set(snapshot.trips.map((trip) => trip.state))).toEqual(
+            new Set(['timetable-only']),
+          )
+        }
+        expect(snapshots.at(-1)!.trips.filter((trip) => trip.waiting)).not.toEqual([])
       }),
   )
 

@@ -1,0 +1,34 @@
+{
+  "stop": {
+    "id": "8603313",
+    "name": "Bella Center St.",
+    "lines": [
+      {
+        "name": "M1",
+        "mode": "metro",
+        "colour": "perron-color-transit-line-m1"
+      }
+    ]
+  },
+  "fetched": 1781587260000,
+  "nextDue": 1781587320000,
+  "source": {
+    "kind": "timetable"
+  },
+  "standing": [],
+  "departures": [],
+  "intervals": [
+    {
+      "line": "M1",
+      "mode": "metro",
+      "colour": "perron-color-transit-line-m1",
+      "headsign": "Vestamager St. (Metro)",
+      "platform": "8603313",
+      "every": {
+        "from": 4,
+        "to": 4
+      }
+    }
+  ],
+  "messages": []
+}

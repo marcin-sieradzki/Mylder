@@ -1,6 +1,7 @@
 // The tracker run (docs/live-data.md, "One call a minute"): whoever asks, at most once a poll
 // interval, take the lease for the run or serve the stored snapshot; set the budget level and,
-// unless the month is spent, call `journeyPos` for the city box in the configured position mode;
+// unless the month is spent or the source has no API (the timetable source, which makes no call of
+// any kind), call `journeyPos` for the city box in the configured position mode;
 // join the answer to the timetable and the stored
 // history, run the domain rules for every trip on the map, store the snapshot and the history,
 // and return the snapshot. A failed or empty call keeps every trip's history, so trips age by the
@@ -21,7 +22,7 @@ import {
   type TripDetail,
 } from './answers.ts'
 import { MIN_CDN_SECONDS } from './caching.ts'
-import { onDemand } from './on-demand.ts'
+import { onDemand, type OnDemand } from './on-demand.ts'
 import { stopAnswer, stopArrivalsAnswer } from './stop-board.ts'
 import { tripAnswer } from './trip-detail.ts'
 import { correctionsIn } from './corrections.ts'
@@ -46,7 +47,7 @@ import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './heal
 import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot } from './snapshot.ts'
-import type { Source } from './source.ts'
+import { callsApi, type Source } from './source.ts'
 import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
 
@@ -92,6 +93,9 @@ interface RunOutcome {
   readonly calls: Snapshot['status']['calls']
 }
 
+/** A run that made no call and had no answer, with the API's health ok. */
+const NO_CALL: RunOutcome = { health: { status: 'ok' }, calls: [] }
+
 export interface TrackerShape {
   readonly getSnapshot: Effect.Effect<Snapshot>
   readonly getStopDepartures: (stopId: string) => Effect.Effect<StopDepartures | undefined>
@@ -132,7 +136,10 @@ export const describeSource = (source: Source): Snapshot['source'] =>
     ? { kind: 'simulated', name: source.scenario }
     : source.kind === 'recording'
       ? { kind: 'recording', name: source.folder }
-      : { kind: 'rejseplanen' }
+      : { kind: source.kind }
+
+/** Asks for nothing: the timetable source's opened stops and trips answer from the timetable. */
+const neverAsk: OnDemand = () => Effect.succeed({})
 
 export const layer: Layer.Layer<
   Tracker,
@@ -147,6 +154,9 @@ export const layer: Layer.Layer<
     const rejseplanen = yield* Rejseplanen
     const cpu = yield* CpuClock
     const key = (name: string) => `${config.keyPrefix}:${name}`
+    // A source with no API asks for no position, whatever the configured mode says.
+    const calling = callsApi(config.source)
+    const positionMode: PositionMode = calling ? config.positionMode : 'none'
     const { timezone } = timetable.manifest
     const area = { stops: timetable.stops, products: PRODUCTS, timezone }
 
@@ -210,7 +220,7 @@ export const layer: Layer.Layer<
           corrections: yield* corrections.read(timetable.serviceDaysAt(now)),
           context: {
             pollInterval: pace.pollInterval,
-            positionMode: config.positionMode,
+            positionMode,
             health: api,
           },
         })
@@ -223,10 +233,8 @@ export const layer: Layer.Layer<
           serviceDay,
           timetableVersion: timetable.manifest.version,
           ...(age.daysLeft < RUNNING_OUT_DAYS ? { timetableRunningOut: true as const } : {}),
-          positionMode: config.positionMode,
-          ...(config.positionMode === 'alternating' && outcome.mode
-            ? { answerMode: outcome.mode }
-            : {}),
+          positionMode,
+          ...(positionMode === 'alternating' && outcome.mode ? { answerMode: outcome.mode } : {}),
           ...(outcome.apiTime ? { apiTime: outcome.apiTime } : {}),
           api,
           budget: {
@@ -259,10 +267,8 @@ export const layer: Layer.Layer<
     const askPositions = (now: number, previous: Snapshot | undefined, pace: Pacing) =>
       Effect.gen(function* (): Effect.fn.Return<RunOutcome> {
         const mode =
-          config.positionMode === 'alternating'
-            ? alternatingMode(previous?.answerMode, now)
-            : config.positionMode
-        if (mode === 'none') return { health: { status: 'ok' }, calls: [] }
+          positionMode === 'alternating' ? alternatingMode(previous?.answerMode, now) : positionMode
+        if (mode === 'none') return NO_CALL
         const result = yield* Effect.result(
           rejseplanen.journeyPos({
             box: COPENHAGEN_BOX,
@@ -329,6 +335,9 @@ export const layer: Layer.Layer<
       Effect.gen(function* () {
         const cpuFrom = yield* cpu
         const pace = yield* paceAt(now)
+        // The timetable source builds every run from the timetable alone, as a run with no answer,
+        // whatever the budget reads.
+        if (!calling) return yield* snapshotAt(now, previous, pace, NO_CALL, cpuFrom)
         // A spent month makes no call: the trips move on and age from their history alone, and
         // the modes take turns again from where they stopped.
         if (pace.level === 'spent') {
@@ -373,7 +382,7 @@ export const layer: Layer.Layer<
           now,
           previous,
           yield* paceAt(now),
-          { health: { status: 'ok' }, calls: [] },
+          NO_CALL,
           yield* cpu,
         )
         return { ...snapshot, nextDue: now + MIN_CDN_SECONDS * 1000 }
@@ -392,12 +401,14 @@ export const layer: Layer.Layer<
     })
 
     /** The on-demand calls opened stops and trips make, cached and limited in the store. */
-    const ask = onDemand({
-      store,
-      key,
-      pace: paceAt,
-      failed: (error, pace) => noteFailure(error, pace, 'On-demand call'),
-    })
+    const ask = calling
+      ? onDemand({
+          store,
+          key,
+          pace: paceAt,
+          failed: (error, pace) => noteFailure(error, pace, 'On-demand call'),
+        })
+      : neverAsk
 
     // A board's rows join as the run's journeys do, corrections and all.
     const correctionsNow = Clock.currentTimeMillis.pipe(
