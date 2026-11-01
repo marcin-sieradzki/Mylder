@@ -14,7 +14,7 @@ export interface SiriCall {
   cancelled: boolean
 }
 
-/** One `EstimatedVehicleJourney`, with the parts the reader uses. */
+/** One journey (GLOSSARY.md), an `EstimatedVehicleJourney`, with the parts the reader uses. */
 export interface SiriJourney {
   /** `DataFrameRef`: the service day. */
   day?: string

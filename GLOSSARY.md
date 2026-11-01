@@ -44,7 +44,7 @@ _Avoid_: Operator, agency
 
 **Trip**:
 One run of a line along a pattern, from its first stop to its last, on one service day. The thing Mylder tracks.
-_Avoid_: Journey, run, service journey
+_Avoid_: Journey (that is a feed's record of a trip), run, service journey
 
 **Vehicle**:
 A trip on the map, waiting or underway, as passengers see it. Its fleet number is known only when a source reports one.
@@ -90,18 +90,26 @@ _Avoid_: Flight, plane (in code)
 
 **Answer**:
 One reply from Rejseplanen to one call Mylder makes: the whole city's positions, one stop's departures, or one trip's calls. Everything realtime carries the time of the answer that last brought it.
-_Avoid_: Response, feed, message
+_Avoid_: Response, feed, message (that is SIRI-ET's)
 
 **Update**:
-An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation. An update also comes from SIRI-ET, Rejseplanen's push feed of every trip's expected times and cancellations, as one journey in one of its messages; a message carries only some of a trip's calls, so a trip's update is every message about it merged.
+An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation. An update also comes from SIRI-ET, as journeys in SIRI-ET messages: a message carries only some of a journey's calls, so a trip's update is every message about its journey merged.
 _Avoid_: Report, prediction, event
 
+**SIRI-ET message**:
+One delivery of Rejseplanen's SIRI-ET push feed from Dataudveksleren to the listener: one dataset's XML, received at a moment, carrying one or more journeys. Mylder never asks for it, so it is not an answer.
+_Avoid_: Answer, event, push
+
+**Journey**:
+A feed's record of one trip, before the tracker joins it to a trip of the timetable: in SIRI-ET, an `EstimatedVehicleJourney`, named by its service day and `DatedVehicleJourneyRef`, with its line, first and last stops, train number and the calls its messages carried; in Rejseplanen's answers, the journey a position or a `journeyDetail` answer names by its reference. A journey that joins no trip stays a journey.
+_Avoid_: Trip (before the join), vehicle journey
+
 **Update table**:
-The trips with an update from SIRI-ET that call inside Mylder's box and haven't finished, each with its delays, its cancelled calls and whether it is cancelled, as the listener keeps it for the tracker to read.
+The journeys with an update from SIRI-ET that call inside Mylder's box and haven't finished, each with its delays, its cancelled calls and whether it is cancelled, as the listener keeps it for the tracker to read and join to its trips.
 _Avoid_: Delay feed, delay cache
 
 **Listener**:
-The one always-on process, outside the app, that receives SIRI-ET's messages and writes the update table to the server store.
+The one always-on process, outside the app, that receives SIRI-ET messages and keeps the update table in the server store.
 _Avoid_: Consumer, worker, daemon
 
 **Report**:

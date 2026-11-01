@@ -1,7 +1,7 @@
-// The update table (spec #146): what the SIRI-ET reader holds, as the listener writes it to the
-// store and the tracker reads it. The contract between the two, so it is versioned and defined
-// once here as a schema both sides decode with. Times are milliseconds since the epoch, delays
-// seconds, as in the snapshot.
+// The update table (spec #146, GLOSSARY.md): the journeys the SIRI-ET reader holds that call inside
+// the box and haven't finished, as the listener keeps it in the store and the tracker reads it.
+// The contract between the two, so it is versioned and defined once here as a schema both sides
+// decode with. Times are milliseconds since the epoch, delays seconds, as in the snapshot.
 import { Schema } from 'effect'
 
 const optional = Schema.optionalKey
@@ -24,7 +24,10 @@ export const DelayStep = Schema.Struct({
   delay: Schema.Number,
 })
 
-/** One journey with an update, which calls inside the box and hasn't finished. */
+/**
+ * One journey with an update, which calls inside the box and hasn't finished: SIRI-ET's record of
+ * one trip, every message about it merged, before the tracker joins it to its trip.
+ */
 export const TableJourney = Schema.Struct({
   /** The Dataudveksleren dataset it came from: `788` Movia, `785` DSB, `801` S-tog, `799` Lokaltog. */
   dataset: Schema.String,
