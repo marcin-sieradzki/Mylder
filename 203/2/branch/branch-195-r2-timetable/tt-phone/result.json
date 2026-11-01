@@ -1,0 +1,8 @@
+{
+  "journey": "tt-phone",
+  "pass": true,
+  "steps": [
+    "01-phone-en: phone en (http://localhost:4402/en)",
+    "02-phone-da: phone da (http://localhost:4402/da)"
+  ]
+}

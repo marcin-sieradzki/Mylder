@@ -1,0 +1,10 @@
+{
+  "journey": "map-right-drag",
+  "pass": true,
+  "steps": [
+    "01-flat: flat (http://localhost:4305/en)",
+    "02-turned-by-right-drag: turned by right-drag (http://localhost:4305/en?map=11.20/55.68000/12.56500/120.0/0.0)",
+    "03-tilted-by-right-drag: tilted by right-drag (http://localhost:4305/en?map=11.20/55.68000/12.56500/120.0/30.0)",
+    "04-flat-again: flat again (http://localhost:4305/en?map=11.20/55.68000/12.56500/120.0/0.0)"
+  ]
+}

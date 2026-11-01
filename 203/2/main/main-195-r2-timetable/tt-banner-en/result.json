@@ -1,0 +1,9 @@
+{
+  "journey": "tt-banner-en",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /^Timetable only: live positions aren['’]t connected yet, so every vehicle is placed where its timetable says it should be\\.\\s*Planes: recorded adsb\\.lol data\\.$/\nReceived string:  \"Planes: recorded adsb.lol data.\"",
+  "steps": [
+    "01-map-on-the-timetable-source: map on the timetable source (http://localhost:4402/en)",
+    "02-failure: failure (http://localhost:4402/en)"
+  ]
+}

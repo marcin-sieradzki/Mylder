@@ -1,0 +1,4 @@
+[
+  "Køreplanen slutter 26. august. Uden en ny har kortet ingen ture derefter.",
+  "Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være. Fly: optagne data fra adsb.lol."
+]

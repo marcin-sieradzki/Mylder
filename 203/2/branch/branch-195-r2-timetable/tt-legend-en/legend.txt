@@ -1,0 +1,8 @@
+Live
+Ageing
+Estimated
+Timetable only
+No signal
+Planes
+
+Every vehicle is Timetable only for now: live positions aren't connected yet.

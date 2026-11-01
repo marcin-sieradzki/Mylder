@@ -1,0 +1,15 @@
+{
+  "vw": 412,
+  "sw": 412,
+  "boxes": [
+    {
+      "text": "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.",
+      "box": {
+        "x": 12,
+        "y": 110.296875,
+        "width": 388,
+        "height": 84.5
+      }
+    }
+  ]
+}

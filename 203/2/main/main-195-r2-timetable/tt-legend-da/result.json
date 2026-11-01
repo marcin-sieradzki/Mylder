@@ -1,0 +1,9 @@
+{
+  "journey": "tt-legend-da",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner\\./\nReceived string:  \"Fly\"",
+  "steps": [
+    "01-legend: legend (http://localhost:4402/da)",
+    "02-failure: failure (http://localhost:4402/da)"
+  ]
+}

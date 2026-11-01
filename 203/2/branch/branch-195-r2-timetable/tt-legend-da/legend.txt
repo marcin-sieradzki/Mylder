@@ -1,0 +1,8 @@
+Live
+Ældre
+Beregnet
+Kun køreplan
+Intet signal
+Fly
+
+Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.

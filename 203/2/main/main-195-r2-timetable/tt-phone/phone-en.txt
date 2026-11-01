@@ -1,0 +1,15 @@
+{
+  "vw": 412,
+  "sw": 412,
+  "boxes": [
+    {
+      "text": "Planes: recorded adsb.lol data.",
+      "box": {
+        "x": 12,
+        "y": 110.296875,
+        "width": 388,
+        "height": 45.5
+      }
+    }
+  ]
+}

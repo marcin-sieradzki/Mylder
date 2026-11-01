@@ -1,0 +1,9 @@
+{
+  "journey": "tt-banner-da",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /^Kun køreplan: der er endnu ingen livepositioner, så hvert køretøj er placeret, hvor køreplanen siger, det skal være\\.\\s*Fly: optagne data fra adsb\\.lol\\.$/\nReceived string:  \"Fly: optagne data fra adsb.lol.\"",
+  "steps": [
+    "01-map-on-the-timetable-source: map on the timetable source (http://localhost:4402/da)",
+    "02-failure: failure (http://localhost:4402/da)"
+  ]
+}

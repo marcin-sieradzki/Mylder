@@ -1,0 +1,9 @@
+{
+  "journey": "tt-about-en",
+  "pass": true,
+  "steps": [
+    "01-map: map (http://localhost:4402/en)",
+    "02-about-open: about open (http://localhost:4402/en)",
+    "03-credit: credit (http://localhost:4402/en)"
+  ]
+}
