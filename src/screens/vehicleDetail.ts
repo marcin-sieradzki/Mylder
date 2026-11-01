@@ -30,12 +30,27 @@ export const timedCallsOf = (detail: TripDetail): TimedCall[] =>
 
 /**
  * The trip's delay in seconds, as its panel gives it: Rejseplanen's own at the next call, from the
- * trip's detail, else the answer's snapshot's, else the snapshot's now, which may be newer.
+ * trip's detail; else expected minus timetabled at its `next` call, where the answer expects it, as
+ * SIRI-ET's delays time each call; else the answer's snapshot's, else the snapshot's now, which may
+ * be newer.
  */
 export const shownDelayOf = (
   detail: TripDetail,
   trip: SnapshotTrip | undefined,
-): number | undefined => detail.nextCallDelay ?? detail.delay ?? trip?.delay
+  next?: number,
+): number | undefined =>
+  detail.nextCallDelay ?? delayAtCall(detail, next) ?? detail.delay ?? trip?.delay
+
+/** Seconds late at a call the answer has an expected time for: its departure, its last's arrival. */
+function delayAtCall(detail: TripDetail, index: number | undefined): number | undefined {
+  const call = index === undefined ? undefined : detail.calls[index]
+  if (!call) return undefined
+  const last = index === detail.calls.length - 1
+  const [planned, expected] = last
+    ? [call.arrival, call.expectedArrival]
+    : [call.departure, call.expectedDeparture]
+  return expected === undefined ? undefined : (expected - planned) / 1000
+}
 
 /** A delay in seconds as whole minutes with their sign, "+3 min", "−1 min" or "0 min". */
 function signedMinutes(delay: number, words: Words): string {
@@ -56,13 +71,16 @@ export interface StateInput {
    * only trip says live positions aren't there yet.
    */
   readonly noPositions?: boolean
+  /** The index of the trip's next call (`nextCallOf`), whose delay an Estimated trip gives. */
+  readonly next?: number
 }
 
 /**
  * The one line that says what the trip's state means, such as "Reported by the vehicle; seen
  * 08:14:05"; none where the snapshot no longer carries the time it would give.
  */
-export function stateSentence({ detail, trip, state, timezone, words, noPositions }: StateInput) {
+export function stateSentence(input: StateInput) {
+  const { detail, trip, state, timezone, words, noPositions, next } = input
   if (detail.cancelled) return words.cancelled
   if (runsToInterval(detail)) return words.interval
   const at = (moment: number | undefined, seconds = false) =>
@@ -78,7 +96,7 @@ export function stateSentence({ detail, trip, state, timezone, words, noPosition
     }
     case 'estimated': {
       if (trip?.source === 'computed') return words.computed
-      const delay = shownDelayOf(detail, trip) ?? 0
+      const delay = shownDelayOf(detail, trip, next) ?? 0
       return fill(words.estimatedDelay, { delay: signedMinutes(delay, words) })
     }
     case 'timetable-only':

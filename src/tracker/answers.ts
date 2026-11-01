@@ -10,7 +10,7 @@
 import 'server-only'
 import { shownAt } from '../domain/departure.ts'
 import { intervalOf, runsToInterval, type Interval, type LineTrip } from '../domain/interval.ts'
-import { timedCalls } from '../domain/trip-motion.ts'
+import { expectedTimes } from '../domain/trip-motion.ts'
 import { MODES, type IsoDate, type LineRecord, type Mode } from '../timetable/format.ts'
 import { platformId } from '../timetable/stops.ts'
 import { hourStart } from '../timetable/time.ts'
@@ -34,11 +34,13 @@ export const MAX_DEPARTURES = 30
 const INTERVAL_HOUR = 3600_000
 
 /**
- * Where an answer's times came from: the timetable plus the snapshot's delays, or an on-demand
- * call to Rejseplanen made at `at`.
+ * Where an answer's times came from: the timetable plus the snapshot's delays, with when SIRI-ET's
+ * delays among them were last updated (`delaysUpdated`: the trip's own update for a trip, the feed's last
+ * message for a stop; spec #146), or an on-demand call to Rejseplanen made at `at`.
  */
 export type AnswerSource =
-  { readonly kind: 'timetable' } | { readonly kind: 'rejseplanen'; readonly at: number }
+  | { readonly kind: 'timetable'; readonly delaysUpdated?: number }
+  | { readonly kind: 'rejseplanen'; readonly at: number }
 
 const FROM_TIMETABLE: AnswerSource = { kind: 'timetable' }
 
@@ -215,16 +217,27 @@ export interface TripDetail {
   readonly messages?: readonly TripMessage[]
 }
 
-/** What the answers read from a snapshot. */
-export type SnapshotDelays = Pick<Snapshot, 'fetched' | 'nextDue' | 'trips'>
+/** What the answers read from a snapshot: its trips, and when its delays were last updated. */
+export type SnapshotDelays = Pick<Snapshot, 'fetched' | 'nextDue' | 'trips'> & {
+  readonly updates?: Pick<Snapshot['updates'], 'lastMessage'>
+}
+
+/** A stop's answer from the timetable and the snapshot, with its delays' last update. */
+const fromTimetable = (snapshot: SnapshotDelays): AnswerSource => {
+  const delaysUpdated = snapshot.updates?.lastMessage
+  return delaysUpdated === undefined ? FROM_TIMETABLE : { kind: 'timetable', delaysUpdated }
+}
 
 /** The snapshot's trips by key. */
 export const tripsByKey = (snapshot: SnapshotDelays) =>
   new Map(snapshot.trips.map((trip) => [trip.key, trip]))
 
-/** A trip's calls shifted by the snapshot's delay for it, when it has one. */
-const withDelay = (trip: PlannedTrip, delay: number | undefined) =>
-  delay === undefined ? undefined : timedCalls(trip.calls, delay)
+/**
+ * A trip's calls at the times the snapshot's entry for it expects them, by SIRI-ET's steps where
+ * it has them, else shifted by its delay; none with neither.
+ */
+const withDelay = (trip: PlannedTrip, live: SnapshotTrip | undefined) =>
+  live && expectedTimes(trip.calls, live)
 
 /**
  * The service days whose trips may leave in the departures' window from a moment: those running
@@ -468,7 +481,7 @@ export function departuresAt(
     stop,
     fetched: now,
     nextDue: snapshot.nextDue,
-    source: FROM_TIMETABLE,
+    source: fromTimetable(snapshot),
     standing: standingAt(timetable, snapshot, index, standing),
     ...listed(timetable, snapshot, stop, departures, calls, now),
     messages: [],
@@ -501,7 +514,7 @@ export function arrivalsAt(
     stop,
     fetched: now,
     nextDue: snapshot.nextDue,
-    source: FROM_TIMETABLE,
+    source: fromTimetable(snapshot),
     ...listedArrivals(timetable, snapshot, stop, rows, calls, now),
     messages: [],
   }
@@ -549,7 +562,7 @@ function timedRows(
   const rows: { row: StopDeparture; trip: PlannedTrip }[] = []
   for (const { trip, index: i } of calls) {
     const live = onMap.get(trip.key)
-    if (!shifted.has(trip)) shifted.set(trip, withDelay(trip, live?.delay))
+    if (!shifted.has(trip)) shifted.set(trip, withDelay(trip, live))
     const call = trip.calls[i]
     const times = { scheduled: call[side], expected: shifted.get(trip)?.[i][side] }
     const state = live?.state ?? 'timetable-only'
@@ -631,7 +644,7 @@ export function tripDetailOf(
   now: number,
 ): TripDetail {
   const { platforms } = timetable.stops
-  const expected = withDelay(trip, live?.delay)
+  const expected = withDelay(trip, live)
   // The rule its stops' interval rows follow, so the trip's panel and theirs agree.
   const toInterval = lineRunsToInterval(snapshot, [], trip.line)
   const interval = toInterval ? intervalAt(timetable, trip, now) : undefined
@@ -649,7 +662,10 @@ export function tripDetailOf(
     ...(interval ? { interval } : {}),
     fetched: snapshot.fetched,
     nextDue: snapshot.nextDue,
-    source: FROM_TIMETABLE,
+    source:
+      live?.updated === undefined
+        ? FROM_TIMETABLE
+        : { kind: 'timetable', delaysUpdated: live.updated },
     calls: trip.calls.map((call, index) => ({
       index,
       stop: platforms[call.platform].id,

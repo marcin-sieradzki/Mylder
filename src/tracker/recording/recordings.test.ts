@@ -195,6 +195,17 @@ describe('a frozen recording', () => {
           )
         expect(bus102A(snapshots[0])?.cancelled).toBeUndefined()
         expect(bus102A(snapshots[1])?.cancelled).toBe(true)
+        // And the stop and trip answers of 09:22, each saying when its delays were last updated.
+        const answers = savedAnswers(plan, recorded, snapshots)
+        expect(answers.size).toBe(7)
+        for (const [file, answer] of answers) {
+          const kept = yield* Effect.promise(() => readJson(join(dir, file)))
+          expect(JSON.parse(JSON.stringify(answer))).toEqual(kept)
+          expect(answer?.source).toMatchObject({
+            kind: 'timetable',
+            delaysUpdated: expect.any(Number),
+          })
+        }
       }),
   )
 

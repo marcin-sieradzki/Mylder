@@ -11,7 +11,7 @@ import type { DataState } from '../domain/data-state.ts'
 import { followsExpected, shownAt } from '../domain/departure.ts'
 import {
   ENDED_STANDS_FOR,
-  timedCalls,
+  expectedTimes,
   WAITING_FROM,
   type TimedCall,
 } from '../domain/trip-motion.ts'
@@ -77,7 +77,7 @@ function fromBoard(trip: PlannedTrip, index: number, board: BoardCall): CallTime
   return { arrival, departure, expectedArrival, expectedDeparture: expected }
 }
 
-/** A call's times shifted by the snapshot's delay for its trip, when it has one. */
+/** A call's times as the snapshot expects them for its trip, when it has a delay. */
 function fromSnapshot(
   trip: PlannedTrip,
   index: number,
@@ -141,7 +141,8 @@ export function standingAt(
         if (live?.cancelled || live?.cancelledCalls?.includes(index)) return
         const word = index < last ? board?.get(callKey(trip, index)) : undefined
         if (word?.cancelled) return
-        if (!word && delay !== undefined) shifted ??= timedCalls(trip.calls, delay)
+        // On the map, by SIRI-ET's steps where it has them, as the map moves it.
+        if (!word && delay !== undefined) shifted ??= expectedTimes(trip.calls, live ?? { delay })
         const times = word ? fromBoard(trip, index, word) : fromSnapshot(trip, index, shifted)
         const off = delay === undefined ? 'timetable-only' : 'estimated'
         const state = word?.state ?? live?.state ?? off

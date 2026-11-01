@@ -176,12 +176,30 @@ const SIRI_ET_MOMENT = Date.UTC(2026, 9, 31, 8, 21)
 /**
  * The timetable source with SIRI-ET's updates from `recordings/siri-et` (spec #146,
  * `MYLDER_UPDATES=recording:siri-et`), on that recording's own timetable, at its own clock: its
- * snapshots of 09:21 and 09:22 are saved beside its messages for screen tests. Bus 102A of 09:04
- * has two cancelled calls in the first and is cancelled whole in the second. The folder's messages,
- * timetable and clock are recorded, never frozen, so `npm run recordings` rewrites only its
- * `snapshots/` and `answers/`.
+ * snapshots of 09:21 and 09:22 are saved beside its messages for screen tests, with the route
+ * answers of 09:22. Bus 102A of 09:04 has two cancelled calls in the first and is cancelled whole
+ * in the second. The folder's messages, timetable and clock are recorded, never frozen, so
+ * `npm run recordings` rewrites only its `snapshots/` and `answers/`.
  */
-export const ON_SIRI_ET: TimetablePlan = { name: 'siri-et', start: SIRI_ET_MOMENT, minutes: 2 }
+export const ON_SIRI_ET: TimetablePlan = {
+  name: 'siri-et',
+  start: SIRI_ET_MOMENT,
+  minutes: 2,
+  // Nørreport St., with updated S-tog, trains and buses, others on their timetable, and the Metro
+  // on its interval; Otto Mønsteds Plads, which two of bus 68's trips skip; Fændediget, where bus
+  // 102A of 09:22 is cancelled whole. Bus 2A, 6 min late at its next stop; bus 4A, 4 min early;
+  // bus 68 to Lyngby St., which skips Otto Mønsteds Plads.
+  answers: {
+    minute: 1,
+    stops: ['6584', '30090', '5344'],
+    arrivals: ['6584'],
+    trips: [
+      'bus.2A.643c65fb6f.20261031.0857',
+      'bus.4A.a47257f88b.20261031.0900',
+      'bus.68.bb4e5908a5.20261031.0916',
+    ],
+  },
+}
 
 /** The plans run with updates from their own folder's SIRI-ET recording. */
 export const UPDATES_PLANS: readonly TimetablePlan[] = [ON_SIRI_ET]

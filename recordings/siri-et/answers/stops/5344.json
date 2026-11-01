@@ -1,0 +1,137 @@
+{
+  "stop": {
+    "id": "5344",
+    "name": "Fændediget",
+    "lines": [
+      {
+        "name": "101A",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "102A",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "241",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "245R",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      },
+      {
+        "name": "260R",
+        "mode": "bus",
+        "colour": "perron-color-transit-mode-bus"
+      }
+    ]
+  },
+  "fetched": 1793434920000,
+  "nextDue": 1793434980000,
+  "source": {
+    "kind": "timetable",
+    "delaysUpdated": 1793434912430
+  },
+  "standing": [],
+  "departures": [
+    {
+      "trip": "bus.102A.4a8f8e09fc.20261031.0924",
+      "line": "102A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Herfølge Holmebækskolen",
+      "platform": "5344",
+      "scheduled": 1793435100000,
+      "state": "timetable-only"
+    },
+    {
+      "trip": "bus.101A.4ca1ddb116.20261031.0914",
+      "line": "101A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Hastrup Fasanvej",
+      "platform": "5344",
+      "scheduled": 1793435160000,
+      "expected": 1793435160000,
+      "state": "estimated"
+    },
+    {
+      "trip": "bus.260R.b3404db84d.20261031.0857",
+      "line": "260R",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Køge St.",
+      "platform": "5396",
+      "scheduled": 1793435580000,
+      "expected": 1793435640000,
+      "state": "estimated"
+    },
+    {
+      "trip": "bus.101A.68abc63cc0.20261031.0924",
+      "line": "101A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Ølby St.",
+      "platform": "5396",
+      "scheduled": 1793435940000,
+      "state": "timetable-only"
+    },
+    {
+      "trip": "bus.102A.5c72f1b7d1.20261031.0922",
+      "line": "102A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Køge St.",
+      "platform": "5396",
+      "scheduled": 1793436030000,
+      "state": "estimated",
+      "cancelled": true
+    },
+    {
+      "trip": "bus.102A.d85a2b2eeb.20261031.0944",
+      "line": "102A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Præstø St.",
+      "platform": "5344",
+      "scheduled": 1793436300000,
+      "state": "timetable-only"
+    },
+    {
+      "trip": "bus.101A.4ca1ddb116.20261031.0934",
+      "line": "101A",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Hastrup Fasanvej",
+      "platform": "5344",
+      "scheduled": 1793436360000,
+      "state": "timetable-only"
+    },
+    {
+      "trip": "bus.245R.364d54a080.20261031.0947",
+      "line": "245R",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Borup St.",
+      "platform": "5344",
+      "scheduled": 1793436450000,
+      "state": "timetable-only"
+    },
+    {
+      "trip": "bus.260R.65cd1a1f37.20261031.0950",
+      "line": "260R",
+      "mode": "bus",
+      "colour": "perron-color-transit-mode-bus",
+      "headsign": "Ringsted St.",
+      "platform": "5344",
+      "scheduled": 1793436630000,
+      "state": "timetable-only"
+    }
+  ],
+  "intervals": [],
+  "messages": []
+}

@@ -1,0 +1,360 @@
+{
+  "key": "bus.2A.643c65fb6f.20261031.0857",
+  "line": "2A",
+  "mode": "bus",
+  "colour": "perron-color-transit-mode-bus",
+  "headsign": "Refshaleøen",
+  "pattern": 8,
+  "state": "estimated",
+  "delay": 240,
+  "fetched": 1793434920000,
+  "nextDue": 1793434980000,
+  "source": {
+    "kind": "timetable",
+    "delaysUpdated": 1793434903492
+  },
+  "calls": [
+    {
+      "index": 0,
+      "stop": "2000",
+      "name": "Tingbjerg, Gavlhusvej (Terrasserne)",
+      "arrival": 1793433420000,
+      "departure": 1793433420000,
+      "expectedArrival": 1793433780000,
+      "expectedDeparture": 1793433780000
+    },
+    {
+      "index": 1,
+      "stop": "2005",
+      "name": "Terrasserne (Åkandevej)",
+      "arrival": 1793433480000,
+      "departure": 1793433480000,
+      "expectedArrival": 1793433840000,
+      "expectedDeparture": 1793433900000
+    },
+    {
+      "index": 2,
+      "stop": "2006",
+      "name": "Energicenter Voldparken (Åkandevej)",
+      "arrival": 1793433600000,
+      "departure": 1793433600000,
+      "expectedArrival": 1793434020000,
+      "expectedDeparture": 1793434020000
+    },
+    {
+      "index": 3,
+      "stop": "2007",
+      "name": "Husumvold Kirke (Åkandevej)",
+      "arrival": 1793433660000,
+      "departure": 1793433660000,
+      "expectedArrival": 1793434020000,
+      "expectedDeparture": 1793434020000
+    },
+    {
+      "index": 4,
+      "stop": "52318",
+      "name": "Veksøvej (Frederikssundsvej)",
+      "arrival": 1793433780000,
+      "departure": 1793433780000,
+      "expectedArrival": 1793434140000,
+      "expectedDeparture": 1793434140000
+    },
+    {
+      "index": 5,
+      "stop": "2009",
+      "name": "Astrupvej (Frederikssundsvej)",
+      "arrival": 1793433840000,
+      "departure": 1793433840000,
+      "expectedArrival": 1793434140000,
+      "expectedDeparture": 1793434200000
+    },
+    {
+      "index": 6,
+      "stop": "1902",
+      "name": "Brønshøj Torv (Brønshøjvej)",
+      "arrival": 1793433960000,
+      "departure": 1793433960000,
+      "expectedArrival": 1793434320000,
+      "expectedDeparture": 1793434320000
+    },
+    {
+      "index": 7,
+      "stop": "698",
+      "name": "Valløvej (Brønshøjvej)",
+      "arrival": 1793433990000,
+      "departure": 1793433990000,
+      "expectedArrival": 1793434320000,
+      "expectedDeparture": 1793434320000
+    },
+    {
+      "index": 8,
+      "stop": "700",
+      "name": "Fuglsang Allé (Annebergvej)",
+      "arrival": 1793434080000,
+      "departure": 1793434080000,
+      "expectedArrival": 1793434380000,
+      "expectedDeparture": 1793434380000
+    },
+    {
+      "index": 9,
+      "stop": "701",
+      "name": "Bellahøjvej (Primulavej)",
+      "arrival": 1793434140000,
+      "departure": 1793434140000,
+      "expectedArrival": 1793434440000,
+      "expectedDeparture": 1793434440000
+    },
+    {
+      "index": 10,
+      "stop": "702",
+      "name": "Rødkildevej (Godthåbsvej)",
+      "arrival": 1793434170000,
+      "departure": 1793434170000,
+      "expectedArrival": 1793434470000,
+      "expectedDeparture": 1793434470000
+    },
+    {
+      "index": 11,
+      "stop": "703",
+      "name": "Hulgårdsvej (Godthåbsvej)",
+      "arrival": 1793434200000,
+      "departure": 1793434200000,
+      "expectedArrival": 1793434500000,
+      "expectedDeparture": 1793434500000
+    },
+    {
+      "index": 12,
+      "stop": "704",
+      "name": "Rønnebærvej (Godthåbsvej)",
+      "arrival": 1793434260000,
+      "departure": 1793434260000,
+      "expectedArrival": 1793434560000,
+      "expectedDeparture": 1793434560000
+    },
+    {
+      "index": 13,
+      "stop": "705",
+      "name": "Grøndal St. (Godthåbsvej)",
+      "arrival": 1793434320000,
+      "departure": 1793434320000,
+      "expectedArrival": 1793434620000,
+      "expectedDeparture": 1793434620000
+    },
+    {
+      "index": 14,
+      "stop": "706",
+      "name": "C.F. Richs Vej (Godthåbsvej)",
+      "arrival": 1793434380000,
+      "departure": 1793434380000,
+      "expectedArrival": 1793434680000,
+      "expectedDeparture": 1793434740000
+    },
+    {
+      "index": 15,
+      "stop": "707",
+      "name": "Tesdorpfsvej (Godthåbsvej)",
+      "arrival": 1793434410000,
+      "departure": 1793434410000,
+      "expectedArrival": 1793434770000,
+      "expectedDeparture": 1793434770000
+    },
+    {
+      "index": 16,
+      "stop": "708",
+      "name": "Ndr. Fasanvej (Godthåbsvej)",
+      "arrival": 1793434440000,
+      "departure": 1793434440000,
+      "expectedArrival": 1793434800000,
+      "expectedDeparture": 1793434800000
+    },
+    {
+      "index": 17,
+      "stop": "27518",
+      "name": "Aksel Møllers Have St. (Godthåbsvej)",
+      "arrival": 1793434500000,
+      "departure": 1793434500000,
+      "expectedArrival": 1793434860000,
+      "expectedDeparture": 1793434860000
+    },
+    {
+      "index": 18,
+      "stop": "711",
+      "name": "Falkoner Allé (Rolighedsvej)",
+      "arrival": 1793434620000,
+      "departure": 1793434620000,
+      "expectedArrival": 1793434980000,
+      "expectedDeparture": 1793434980000
+    },
+    {
+      "index": 19,
+      "stop": "27521",
+      "name": "Det Biovidenskabelige Fakultet (Rolighedsvej)",
+      "arrival": 1793434680000,
+      "departure": 1793434680000,
+      "expectedArrival": 1793435040000,
+      "expectedDeparture": 1793435040000
+    },
+    {
+      "index": 20,
+      "stop": "714",
+      "name": "H.C. Ørsteds Vej (Rosenørns Allé)",
+      "arrival": 1793434740000,
+      "departure": 1793434740000,
+      "expectedArrival": 1793435100000,
+      "expectedDeparture": 1793435100000
+    },
+    {
+      "index": 21,
+      "stop": "715",
+      "name": "Forum St. (Rosenørns Allé)",
+      "arrival": 1793434800000,
+      "departure": 1793434800000,
+      "expectedArrival": 1793435160000,
+      "expectedDeparture": 1793435160000
+    },
+    {
+      "index": 22,
+      "stop": "230",
+      "name": "Vester Farimagsgade (Gyldenløvesgade)",
+      "arrival": 1793434920000,
+      "departure": 1793434920000,
+      "expectedArrival": 1793435280000,
+      "expectedDeparture": 1793435280000
+    },
+    {
+      "index": 23,
+      "stop": "718",
+      "name": "Rådhuspladsen St. (Vesterbrogade)",
+      "arrival": 1793435100000,
+      "departure": 1793435100000,
+      "expectedArrival": 1793435400000,
+      "expectedDeparture": 1793435400000
+    },
+    {
+      "index": 24,
+      "stop": "10843",
+      "name": "Hovedbanegården, Tivoli (Bernstorffsgade)",
+      "arrival": 1793435280000,
+      "departure": 1793435280000,
+      "expectedArrival": 1793435580000,
+      "expectedDeparture": 1793435580000
+    },
+    {
+      "index": 25,
+      "stop": "719",
+      "name": "Glyptoteket (Tietgensgade)",
+      "arrival": 1793435340000,
+      "departure": 1793435340000,
+      "expectedArrival": 1793435640000,
+      "expectedDeparture": 1793435640000
+    },
+    {
+      "index": 26,
+      "stop": "720",
+      "name": "Stormbroen, Nationalmuseet (Vindebrogade)",
+      "arrival": 1793435400000,
+      "departure": 1793435400000,
+      "expectedArrival": 1793435700000,
+      "expectedDeparture": 1793435700000
+    },
+    {
+      "index": 27,
+      "stop": "1986",
+      "name": "Gammel Strand St. Christiansborg (Vindebrogade)",
+      "arrival": 1793435460000,
+      "departure": 1793435460000,
+      "expectedArrival": 1793435700000,
+      "expectedDeparture": 1793435760000
+    },
+    {
+      "index": 28,
+      "stop": "722",
+      "name": "Børsen (Børsgade)",
+      "arrival": 1793435580000,
+      "departure": 1793435580000,
+      "expectedArrival": 1793435880000,
+      "expectedDeparture": 1793435880000
+    },
+    {
+      "index": 29,
+      "stop": "27856",
+      "name": "Knippelsbro (Torvegade)",
+      "arrival": 1793435640000,
+      "departure": 1793435640000,
+      "expectedArrival": 1793435940000,
+      "expectedDeparture": 1793435940000
+    },
+    {
+      "index": 30,
+      "stop": "27525",
+      "name": "Christianshavn St. (Torvegade)",
+      "arrival": 1793435700000,
+      "departure": 1793435700000,
+      "expectedArrival": 1793436000000,
+      "expectedDeparture": 1793436060000
+    },
+    {
+      "index": 31,
+      "stop": "2042",
+      "name": "Skt. Annæ Gade (Prinsessegade)",
+      "arrival": 1793435730000,
+      "departure": 1793435730000,
+      "expectedArrival": 1793436090000,
+      "expectedDeparture": 1793436090000
+    },
+    {
+      "index": 32,
+      "stop": "2043",
+      "name": "Bodenhoffs Plads (Prinsessegade)",
+      "arrival": 1793435820000,
+      "departure": 1793435820000,
+      "expectedArrival": 1793436180000,
+      "expectedDeparture": 1793436180000
+    },
+    {
+      "index": 33,
+      "stop": "2784",
+      "name": "Arsenaløen",
+      "arrival": 1793435880000,
+      "departure": 1793435880000,
+      "expectedArrival": 1793436180000,
+      "expectedDeparture": 1793436240000
+    },
+    {
+      "index": 34,
+      "stop": "33321",
+      "name": "Galionsvej (Danneskiold-Samsøes Allé)",
+      "arrival": 1793435940000,
+      "departure": 1793435940000,
+      "expectedArrival": 1793436300000,
+      "expectedDeparture": 1793436300000
+    },
+    {
+      "index": 35,
+      "stop": "2801",
+      "name": "Fabrikmestervej, Operaen",
+      "arrival": 1793436000000,
+      "departure": 1793436000000,
+      "expectedArrival": 1793436360000,
+      "expectedDeparture": 1793436360000
+    },
+    {
+      "index": 36,
+      "stop": "3167",
+      "name": "Margretheholm (Refshalevej)",
+      "arrival": 1793436180000,
+      "departure": 1793436180000,
+      "expectedArrival": 1793436480000,
+      "expectedDeparture": 1793436480000
+    },
+    {
+      "index": 37,
+      "stop": "3168",
+      "name": "Refshaleøen (Refshalevej)",
+      "arrival": 1793436360000,
+      "departure": 1793436360000,
+      "expectedArrival": 1793436600000,
+      "expectedDeparture": 1793436600000
+    }
+  ]
+}

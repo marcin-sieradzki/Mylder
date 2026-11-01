@@ -21,6 +21,24 @@ const read = (path: string): unknown => JSON.parse(readFileSync(join(recording, 
 const minute = (file: string) => read(`snapshots/${file}`) as Snapshot
 const saved = (key: string) => read(`answers/trips/${key}.json`) as TripDetail
 
+/**
+ * A saved answer from the timetable as made against a snapshot with another delay for its trip, in
+ * seconds, or none: every call shifted by it, as such an answer's are, or by none.
+ */
+function delayedBy(answer: TripDetail, delay?: number): TripDetail {
+  const { delay: _, ...rest } = answer
+  const calls = answer.calls.map(({ expectedArrival: _a, expectedDeparture: _d, ...call }) =>
+    delay === undefined
+      ? call
+      : {
+          ...call,
+          expectedArrival: call.arrival + delay * 1000,
+          expectedDeparture: call.departure + delay * 1000,
+        },
+  )
+  return { ...rest, ...(delay === undefined ? {} : { delay }), calls }
+}
+
 /** Fetched at 07:21:00, the saved answers' minute. */
 const minute2 = minute('0002.json')
 /** Fetched at 07:25:00, with the 07:30 bus Waiting at its first stop. */
@@ -203,7 +221,7 @@ describe("a vehicle's detail", () => {
       updated: minute2.fetched,
       delay: 180,
     })
-    answers.set(BUS_ESTIMATED, { ...saved(BUS_ESTIMATED), delay: 180 })
+    answers.set(BUS_ESTIMATED, delayedBy(saved(BUS_ESTIMATED), 180))
     openTrip('en', BUS_ESTIMATED, updated)
     const trip = await panel(/to Husum Torv/, 'Estimated from the timetable and a delay of +3 min')
     expect(fact(trip, 'Delay')).toHaveTextContent('+3 min')
@@ -233,8 +251,7 @@ describe("a vehicle's detail", () => {
       delay: 180,
     })
     // An answer made against an earlier snapshot, which gave the trip no delay yet.
-    const { delay: _, ...undelayed } = saved(BUS_ESTIMATED)
-    answers.set(BUS_ESTIMATED, undelayed)
+    answers.set(BUS_ESTIMATED, delayedBy(saved(BUS_ESTIMATED)))
     openTrip('en', BUS_ESTIMATED, updated)
     const trip = await panel(/to Husum Torv/, 'Estimated from the timetable and a delay of +3 min')
     expect(fact(trip, 'Delay')).toHaveTextContent('+3 min')
@@ -453,7 +470,7 @@ describe("a vehicle's detail in Danish", () => {
     const computed = await panel(/mod Husum Torv/, 'Position beregnet af Rejseplanen')
     expect(computed).toHaveTextContent('Beregnet')
     unmount()
-    answers.set(BUS_ESTIMATED, { ...saved(BUS_ESTIMATED), delay: 180 })
+    answers.set(BUS_ESTIMATED, delayedBy(saved(BUS_ESTIMATED), 180))
     openTrip(
       'da',
       BUS_ESTIMATED,

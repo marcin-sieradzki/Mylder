@@ -87,7 +87,8 @@
     "follow": "Følg",
     "showLine": "Vis hele linjen",
     "noLivePositions": "Ingen livepositioner endnu; placeret efter køreplanen.",
-    "placedAt": "placeret {time}"
+    "placedAt": "placeret {time}",
+    "delaysSource": "Køreplan og Rejseplanens forsinkelser"
   },
   "legend": {
     "label": "Datatilstande",
@@ -135,7 +136,9 @@
     "later": "Senere",
     "messagesSource": "Fra Rejseplanen",
     "timetableSource": "Køreplan",
-    "timetableNote": "Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu."
+    "timetableNote": "Nedtællinger bruger kun køreplanen; realtiden er ikke koblet på endnu.",
+    "delaysSource": "Køreplan og Rejseplanens forsinkelser",
+    "delaysNote": "Nedtællinger bruger køreplanen, rykket med Rejseplanens forsinkelse, hvor en tur har en; resten bruger køreplanen alene."
   },
   "about": {
     "title": "Om Mylder",
