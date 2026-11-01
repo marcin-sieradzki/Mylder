@@ -1,0 +1,9 @@
+{
+  "journey": "tt-phone",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /^Timetable only: live positions aren['’]t connected yet, so every vehicle is placed where its timetable says it should be\\.\\s*Planes: recorded adsb\\.lol data\\.$/\nReceived string:  \"Planes: recorded adsb.lol data.\"",
+  "steps": [
+    "01-phone-en: phone en (http://localhost:4401/en)",
+    "02-failure: failure (http://localhost:4401/en)"
+  ]
+}

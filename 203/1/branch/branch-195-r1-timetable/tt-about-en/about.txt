@@ -1,0 +1,80 @@
+About Mylder
+Close
+
+A live map of Copenhagen's buses, S-tog, Metro and trains, honest about how fresh each position is.
+
+Mylder shows the data as Rejseplanen sends it, in its own words and language, and marks every figure it works out itself.
+
+Mylder is non-commercial: no advertising, no paid tier, and no sale of the data or of anything built on it.
+
+DATA AND CREDITS
+
+Timetable data: Rejseplanen, under CC BY 4.0. Timetable of 1 November.
+
+Map: © OpenStreetMap contributors under the ODbL, © OpenMapTiles, OpenFreeMap.
+
+Building heights come from OpenStreetMap and are approximate.
+
+Aircraft: © adsb.lol contributors under the ODbL.
+
+The planes are recorded adsb.lol data, open under the same licence in Mylder's repository.
+
+The map's style is a fork of OpenFreeMap's Positron, itself from OpenMapTiles' Positron GL Style: see its licence.
+
+DATA STATES
+Live
+
+The vehicle itself reported this position within about the last two polls.
+
+Ageing
+
+The vehicle's last report is older than that but under 5 minutes; the dot moves on from it along the line.
+
+Estimated
+
+No recent report, but Rejseplanen still has the trip: a position it computed, or expected times.
+
+Timetable only
+
+No realtime for this trip today, so it is placed from the timetable. Every Metro train is.
+
+No signal
+
+The trip had realtime, and it stopped 5 minutes ago or more; the dot moves on the timetable and its last delay.
+
+Every vehicle is Timetable only for now: live positions aren't connected yet.
+
+THIS PAGE
+
+The positions on this page are the timetable's plan, not reports from the vehicles.
+
+Source
+Rejseplanen's timetable, no live positions yet
+Positions
+No position calls
+Rejseplanen's realtime
+—
+Unknown
+Poll
+Every 60 s
+Data budget
+Normal
+Calls this month
+0
+Server store
+Available
+Disruptions
+Not checked yet
+KEYS
+
++ and − zoom the map.
+
+← → ↑ ↓ move it.
+
+Shift + ← and → turn the map.
+
+Shift + ↑ and ↓ tilt it.
+
+Esc closes the vehicle card or panel.
+
+The pause button, beside the zoom buttons, stops the vehicles moving, and the play button starts them again.

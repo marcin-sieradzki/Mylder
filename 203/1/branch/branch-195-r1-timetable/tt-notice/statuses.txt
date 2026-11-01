@@ -1,0 +1,4 @@
+[
+  "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.",
+  ""
+]

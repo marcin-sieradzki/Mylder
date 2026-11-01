@@ -1,0 +1,9 @@
+{
+  "journey": "map-filter",
+  "pass": true,
+  "steps": [
+    "01-before-filter-17-bus-6: before filter 17 bus 6 (http://localhost:4303/en)",
+    "02-bus-off: bus off (http://localhost:4303/en?hide=bus)",
+    "03-bus-back: bus back (http://localhost:4303/en)"
+  ]
+}

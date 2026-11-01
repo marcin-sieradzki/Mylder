@@ -1,0 +1,29 @@
+mylder
+Updated 09:37:41
+Bus
+308
+Metro
+39
+S-tog
+29
+Train
+77
+Light rail
+14
+Planes
+9
+Dansk
+About Mylder
+Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.
+Live
+Ageing
+Estimated
+Timetable only
+No signal
+Planes
+
+Every vehicle is Timetable only for now: live positions aren't connected yet.
+
+Scale
+1 km
+Transit data: Rejseplanen (CC BY 4.0) · Aircraft: © adsb.lol contributors under the ODbL · © OpenStreetMap contributors · © OpenMapTiles · OpenFreeMap

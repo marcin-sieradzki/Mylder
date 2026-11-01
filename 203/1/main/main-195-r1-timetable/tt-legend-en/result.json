@@ -1,0 +1,9 @@
+{
+  "journey": "tt-legend-en",
+  "pass": false,
+  "error": "expect(received).toMatch(expected)\n\nExpected pattern: /Every vehicle is Timetable only for now: live positions aren['’]t connected yet\\./\nReceived string:  \"Planes\"",
+  "steps": [
+    "01-legend: legend (http://localhost:4401/en)",
+    "02-failure: failure (http://localhost:4401/en)"
+  ]
+}

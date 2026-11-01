@@ -1,0 +1,9 @@
+{
+  "journey": "tt-notice",
+  "pass": false,
+  "error": "Precondition not reachable: the deployed timetable has 74 days left (last day 2027-01-13), and the timetable source runs at the real time; the notice needs under 7. No notice shows now, as expected at 74 days: [\"Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be. Planes: recorded adsb.lol data.\",\"\"]",
+  "steps": [
+    "01-timetable-74-days-left: timetable 74 days left (http://localhost:4401/en)",
+    "02-failure: failure (http://localhost:4401/en)"
+  ]
+}

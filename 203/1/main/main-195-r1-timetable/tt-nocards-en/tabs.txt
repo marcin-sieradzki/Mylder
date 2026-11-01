@@ -1,0 +1,5 @@
+[
+  "City pulse",
+  "Vehicles\n517",
+  "Disruptions\n0"
+]

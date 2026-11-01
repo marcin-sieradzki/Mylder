@@ -1,0 +1,15 @@
+{
+  "vw": 412,
+  "sw": 412,
+  "boxes": [
+    {
+      "text": "Recorded data from 16 June 2026. Planes: recorded adsb.lol data.",
+      "box": {
+        "x": 12,
+        "y": 110.296875,
+        "width": 388,
+        "height": 65
+      }
+    }
+  ]
+}

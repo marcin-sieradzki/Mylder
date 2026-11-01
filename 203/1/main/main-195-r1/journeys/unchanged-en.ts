@@ -1,0 +1,26 @@
+import type { Journey } from '../../../.claude/skills/verify-mylder/scripts/drive.ts'
+import { dump } from './_dump.ts'
+export default async ({ page, step, expect }: Journey) => {
+  await page.goto('/en')
+  await expect(page.getByRole('banner').getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Recorded data from 16 June 2026/ })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /^Recorded data from 16 June 2026\. Planes: recorded adsb\.lol data\.$/ })).toBeVisible({ timeout: 20000 })
+  await step('map with banner')
+  const statuses = await page.getByRole('status').allInnerTexts()
+  dump('statuses', statuses)
+  const legend = await page.getByRole('list', { name: 'Data states' }).locator('xpath=..').innerText()
+  dump('legend', legend)
+  expect(legend).not.toMatch(/Timetable only for now/)
+  expect(statuses.join(' ')).not.toMatch(/Timetable only: live positions/)
+  expect(statuses.join(' ')).not.toMatch(/paused|hasn't answered/i)
+  await page.getByRole('button', { name: 'About Mylder' }).click()
+  const dialog = page.getByRole('dialog', { name: 'About Mylder' })
+  await expect(dialog).toBeVisible()
+  await step('about open')
+  const about = await dialog.innerText()
+  dump('about', about)
+  expect(about).not.toMatch(/no live positions yet/)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await step('about closed')
+}
