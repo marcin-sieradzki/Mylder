@@ -111,9 +111,7 @@ describe("a vehicle's detail on the timetable", () => {
     expect(trip).toHaveTextContent('Timetable only')
     expect(fact(trip, 'Delay')).toHaveTextContent('—')
     expect(fact(trip, 'Last seen')).toHaveTextContent('—')
-    const items = within(within(trip).getByRole('list', { name: 'Stops' })).getAllByRole(
-      'listitem',
-    )
+    const items = within(within(trip).getByRole('list', { name: 'Stops' })).getAllByRole('listitem')
     expect(items[0]).toHaveTextContent('Hundige St.')
     expect(items[0]).toHaveTextContent('07:07')
     expect(items[1]).toHaveTextContent('07:09')
@@ -157,9 +155,7 @@ describe("a vehicle's detail on the timetable", () => {
     const trip = await panel(/mod Hillerød St\./, 'Køreplan · placeret 07:21:00')
     expect(trip).toHaveTextContent('Ingen livepositioner endnu; placeret efter køreplanen.')
     expect(fact(trip, 'Forsinkelse')).toHaveTextContent('—')
-    const items = within(within(trip).getByRole('list', { name: 'Stop' })).getAllByRole(
-      'listitem',
-    )
+    const items = within(within(trip).getByRole('list', { name: 'Stop' })).getAllByRole('listitem')
     expect(items[0]).toHaveTextContent('07:07')
     expect(items[0]).not.toHaveTextContent('~')
     expect(trip).not.toHaveTextContent('Rejseplanen')
