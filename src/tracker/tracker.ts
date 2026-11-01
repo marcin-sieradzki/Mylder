@@ -10,7 +10,7 @@
 // (`corrections.ts`), which the next run and every stop's board read.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
-import { UPDATES_FRESH } from '../domain/data-state.ts'
+import { feedFresh, updatesContext } from '../domain/data-state.ts'
 import { checkedEvery } from '../domain/disruption.ts'
 import { describeSource } from '../domain/source.ts'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
@@ -149,7 +149,6 @@ export const layer: Layer.Layer<
     const rejseplanen = yield* Rejseplanen
     const cpu = yield* CpuClock
     const feed = yield* UpdateFeed
-    const updatesOn = feed.updates.kind !== 'off'
     const key = (name: string) => `${config.keyPrefix}:${name}`
     // A source that asks Rejseplanen nothing asks for no position, whatever mode is configured.
     const calling = describeSource(config.source.kind).callsRejseplanen
@@ -224,7 +223,7 @@ export const layer: Layer.Layer<
             pollInterval: pace.pollInterval,
             positionMode,
             health: api,
-            ...(updatesOn ? { updates: lastMessage === undefined ? {} : { lastMessage } } : {}),
+            ...updatesContext({ kind: feed.updates.kind, lastMessage }),
           },
         })
         const serviceDay = timetable.serviceDaysAt(now).at(-1)!
@@ -256,7 +255,7 @@ export const layer: Layer.Layer<
           updates: {
             kind: feed.updates.kind,
             ...(lastMessage === undefined ? {} : { lastMessage }),
-            fresh: lastMessage !== undefined && now - lastMessage < UPDATES_FRESH,
+            fresh: feedFresh(lastMessage, now),
             withUpdate: countBy(
               trips.filter((trip) => trip.updated !== undefined),
               'mode',

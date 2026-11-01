@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { dataState, liveLimit, type DataStateContext, type TripRealtime } from './data-state'
+import {
+  dataState,
+  feedFresh,
+  liveLimit,
+  updatesContext,
+  type DataStateContext,
+  type TripRealtime,
+} from './data-state'
 
 const now = Date.UTC(2026, 9, 26, 7, 30)
 const s = (seconds: number) => now - seconds * 1000
@@ -253,6 +260,26 @@ describe('dataState with SIRI-ET’s update feed on', () => {
     expect(
       dataState({ updated: min(10), hadRealtime: true }, { ...context, now: now + 60_000 }),
     ).toBe('no-signal')
+  })
+})
+
+describe('SIRI-ET’s update feed in the context', () => {
+  it('leaves the context alone while updates are off, so position answers judge updates', () => {
+    expect(updatesContext({ kind: 'off' })).toEqual({})
+    expect(updatesContext({ kind: 'off', lastMessage: min(1) })).toEqual({})
+  })
+
+  it('gives the table’s last message while updates are on, and none with no table', () => {
+    expect(updatesContext({ kind: 'siri', lastMessage: min(1) })).toEqual({
+      updates: { lastMessage: min(1) },
+    })
+    expect(updatesContext({ kind: 'recording' })).toEqual({ updates: {} })
+  })
+
+  it('calls the feed fresh while its last message is under 5 min old', () => {
+    expect(feedFresh(s(299), now)).toBe(true)
+    expect(feedFresh(min(5), now)).toBe(false)
+    expect(feedFresh(undefined, now)).toBe(false)
   })
 })
 

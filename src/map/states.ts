@@ -6,7 +6,12 @@
 // then.
 import 'client-only'
 import { useSyncExternalStore } from 'react'
-import { dataState, type DataState, type DataStateContext } from '../domain/data-state.ts'
+import {
+  dataState,
+  updatesContext,
+  type DataState,
+  type DataStateContext,
+} from '../domain/data-state.ts'
 import type { Snapshot } from '../tracker/index.ts'
 import { liveSnapshot, type SnapshotStore } from './live.ts'
 import { sameByKey, tickingStore, type TickingStore } from './ticking.ts'
@@ -21,15 +26,14 @@ const NONE: DataStates = new Map()
 
 /** Every trip's state in `snapshot` at `now`. */
 export function statesAt(snapshot: Snapshot, now: number): DataStates {
-  const { kind, lastMessage } = snapshot.updates
   const context: DataStateContext = {
     now,
     fetched: snapshot.fetched,
     pollInterval: snapshot.pollInterval,
     positionMode: snapshot.positionMode,
     health: snapshot.api,
-    // With SIRI-ET's feed on, its freshness ages by the clock here too.
-    ...(kind === 'off' ? {} : { updates: lastMessage === undefined ? {} : { lastMessage } }),
+    // With SIRI-ET's feed on, whether it is fresh is judged by the clock here too.
+    ...updatesContext(snapshot.updates),
   }
   return new Map(snapshot.trips.map((trip) => [trip.key, dataState(trip, context)]))
 }

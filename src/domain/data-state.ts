@@ -45,8 +45,8 @@ export interface DataStateContext {
   readonly health: ApiHealth
   /**
    * SIRI-ET's update feed, when updates are on (spec #146): when its table's last message was
-   * received, or nothing when the table is gone from the store. Its freshness, not the position
-   * answers', then decides whether an update keeps a trip Estimated.
+   * received, or nothing when the table is gone from the store. Whether the feed is fresh, not the
+   * position answers, then decides whether an update keeps a trip Estimated (`updatesContext`).
    */
   readonly updates?: { readonly lastMessage?: number }
 }
@@ -92,6 +92,24 @@ function lastAnswer({ fetched, health }: DataStateContext): number {
   return health.status === 'ok' ? fetched : Math.min(health.since, fetched)
 }
 
+/** Whether SIRI-ET's update feed is fresh at `now`: its table present, its last message under 5 min old. */
+export function feedFresh(lastMessage: number | undefined, now: number): boolean {
+  return lastMessage !== undefined && now - lastMessage < UPDATES_FRESH
+}
+
+/**
+ * The feed's part of the context, from the snapshot's `updates` (or the run's, as it builds them):
+ * none while updates are off, so position answers judge updates as before; otherwise the table's
+ * last message, if a table is there.
+ */
+export function updatesContext(feed: {
+  readonly kind: string
+  readonly lastMessage?: number
+}): Pick<DataStateContext, 'updates'> {
+  if (feed.kind === 'off') return {}
+  return { updates: feed.lastMessage === undefined ? {} : { lastMessage: feed.lastMessage } }
+}
+
 /**
  * Whether an update is still current: with SIRI-ET's feed on, while the feed is fresh, its table
  * present and its last message under 5 min old; without it, while a position answer has arrived in
@@ -101,7 +119,7 @@ function lastAnswer({ fetched, health }: DataStateContext): number {
 function updatesCurrent(context: DataStateContext): boolean {
   const { now, updates } = context
   if (!updates) return now - lastAnswer(context) < NO_SIGNAL_AFTER
-  return updates.lastMessage !== undefined && now - updates.lastMessage < UPDATES_FRESH
+  return feedFresh(updates.lastMessage, now)
 }
 
 /**
