@@ -87,7 +87,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.70675,
         12.57748
@@ -279,7 +279,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.65248,
         12.51762
@@ -419,7 +419,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.64729666666666,
         12.46674
@@ -650,7 +650,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -60,
       "position": [
         55.65325244868147,
         12.483018521963876
@@ -766,7 +766,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": -120,
       "position": [
         55.66192,
         12.52462
@@ -902,7 +902,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.68718,
         12.55507
@@ -1022,7 +1022,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.719836440737765,
         12.577102637258115
@@ -1134,7 +1134,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 360,
       "position": [
         55.658955000000006,
         12.525475
@@ -1234,7 +1234,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.67283,
         12.54466
@@ -1342,7 +1342,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.69883,
         12.57603
@@ -1479,7 +1479,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.72987,
         12.5766
@@ -1550,7 +1550,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.688706669463144,
         12.556750091261032
@@ -1650,7 +1650,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": -120,
       "position": [
         55.66508,
         12.542895
@@ -1790,7 +1790,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.65237,
         12.49359
@@ -1914,7 +1914,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 120,
       "position": [
         55.67731,
         12.57923
@@ -1994,7 +1994,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": 240,
+      "delay": 360,
       "position": [
         55.685795,
         12.536495
@@ -2174,7 +2174,7 @@
       "source": "timetable",
       "updated": 1793434902488,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.71244,
         12.48575
@@ -2319,7 +2319,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 300,
       "position": [
         55.70738,
         12.48627
@@ -2531,7 +2531,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.684605000000005,
         12.541625
@@ -2635,7 +2635,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.674280845730294,
         12.56481206586331
@@ -2747,7 +2747,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.67211,
         12.59382
@@ -2887,7 +2887,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 120,
       "position": [
         55.68393120815589,
         12.609809781649247
@@ -3048,7 +3048,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 180,
       "position": [
         55.68145,
         12.52248
@@ -3164,7 +3164,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.70848,
         12.53208
@@ -3292,7 +3292,7 @@
       "source": "timetable",
       "updated": 1793434902488,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.74194,
         12.49175
@@ -3433,7 +3433,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 240,
       "position": [
         55.71198,
         12.53301
@@ -3533,7 +3533,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -240,
       "position": [
         55.69408,
         12.53339
@@ -3769,7 +3769,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.70248,
         12.53344
@@ -3877,7 +3877,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.66692,
         12.51725
@@ -4042,7 +4042,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.71028,
         12.47818
@@ -4138,7 +4138,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.70207915793251,
         12.532702654999957
@@ -4210,7 +4210,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 240,
       "position": [
         55.67285,
         12.56621
@@ -4354,7 +4354,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 180,
       "position": [
         55.70576849673116,
         12.49080857143237
@@ -4494,7 +4494,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.7151,
         12.46233
@@ -4602,7 +4602,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.66268,
         12.60224
@@ -4678,7 +4678,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 240,
       "position": [
         55.67688784979256,
         12.566531496058067
@@ -4762,7 +4762,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.69236,
         12.55181
@@ -4858,7 +4858,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.70575,
         12.52258
@@ -4962,7 +4962,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": 360,
+      "delay": 420,
       "position": [
         55.7180846083634,
         12.454271821234576
@@ -5090,7 +5090,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.70459,
         12.49832
@@ -5206,7 +5206,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.68529,
         12.56747
@@ -5326,7 +5326,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.63584612103495,
         12.62269059364166
@@ -5474,7 +5474,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.66971,
         12.5706
@@ -5586,7 +5586,7 @@
       "source": "timetable",
       "updated": 1793434902488,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.662060000000004,
         12.603024999999999
@@ -5740,7 +5740,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.63662,
         12.62829
@@ -5800,7 +5800,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.66708719349541,
         12.592401217156649
@@ -5860,7 +5860,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.681834288727934,
         12.56944473238945
@@ -5952,7 +5952,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 180,
       "position": [
         55.704582179816285,
         12.526456280641508
@@ -6136,7 +6136,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.66584,
         12.59802
@@ -6264,7 +6264,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.69669,
         12.56051
@@ -6320,7 +6320,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.69178863581437,
         12.5697562131316
@@ -6408,7 +6408,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.70443,
         12.5458
@@ -6492,7 +6492,7 @@
       "source": "timetable",
       "updated": 1793434902488,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 120,
       "position": [
         55.74091,
         12.50177
@@ -6681,7 +6681,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.67192,
         12.5189
@@ -6749,7 +6749,7 @@
       "source": "timetable",
       "updated": 1793434900152,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.68094,
         12.44481
@@ -6805,7 +6805,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.6796,
         12.45411
@@ -6889,7 +6889,7 @@
       "source": "timetable",
       "updated": 1793434852534,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.67288,
         12.54932
@@ -6985,7 +6985,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.67271,
         12.55117
@@ -7053,7 +7053,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.67269,
         12.47515
@@ -7157,7 +7157,7 @@
       "source": "timetable",
       "updated": 1793434902488,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.69820210332545,
         12.448670653409444
@@ -7261,7 +7261,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": -60,
       "position": [
         55.6725,
         12.49478
@@ -7369,7 +7369,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 240,
+      "delay": 300,
       "position": [
         55.65396,
         12.61902
@@ -7444,7 +7444,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.647226496686386,
         12.539441566654244
@@ -7516,7 +7516,7 @@
       "source": "timetable",
       "updated": 1793434900152,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.66163,
         12.5184
@@ -7584,7 +7584,7 @@
       "source": "timetable",
       "updated": 1793434831498,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.63847,
         12.58153
@@ -7664,7 +7664,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": 240,
+      "delay": 300,
       "position": [
         55.65703,
         12.52603
@@ -7748,7 +7748,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 0,
       "position": [
         55.64403,
         12.54494
@@ -7916,7 +7916,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.66004,
         12.61436
@@ -7992,7 +7992,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.6935,
         12.50772
@@ -8056,7 +8056,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.66517,
         12.48402
@@ -8124,7 +8124,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.67662,
         12.48732
@@ -8216,7 +8216,7 @@
       "source": "timetable",
       "updated": 1793434866380,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.70196,
         12.49777
@@ -8380,7 +8380,7 @@
       "source": "timetable",
       "updated": 1793434911352,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 0,
       "position": [
         55.67119,
         12.56657
@@ -8476,7 +8476,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.65344958113715,
         12.483787155273223
@@ -8593,7 +8593,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.66419,
         12.55013
@@ -8701,7 +8701,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.69411,
         12.49501
@@ -8789,7 +8789,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.70126,
         12.457255000000002
@@ -8873,7 +8873,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.70792477966542,
         12.549243524641644
@@ -9097,7 +9097,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.70816,
         12.55708
@@ -9197,7 +9197,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.70186,
         12.58173
@@ -9285,7 +9285,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.66116,
         12.55749
@@ -9393,7 +9393,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.69633,
         12.5511
@@ -9518,7 +9518,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.69966,
         12.55503
@@ -9602,7 +9602,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.66383,
         12.51618
@@ -10074,7 +10074,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.69792,
         12.51509
@@ -10223,7 +10223,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.70158,
         12.51903
@@ -10364,7 +10364,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.65658,
         12.3967
@@ -10431,7 +10431,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.67276427256888,
         12.478469384800954
@@ -10543,7 +10543,7 @@
       "source": "timetable",
       "updated": 1793434911352,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.70508,
         12.47864
@@ -10627,7 +10627,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -360,
+      "delay": 60,
       "position": [
         55.71360398584185,
         12.475295306250722
@@ -10707,7 +10707,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -60,
       "position": [
         55.64799,
         12.47204
@@ -10847,7 +10847,7 @@
       "source": "timetable",
       "updated": 1793434772646,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -120,
       "position": [
         55.65985,
         12.49809
@@ -10923,7 +10923,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.67891,
         12.58563
@@ -11071,7 +11071,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.73151,
         12.57489
@@ -11255,7 +11255,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 120,
       "position": [
         55.74999,
         12.58955
@@ -11335,7 +11335,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.69553,
         12.58057
@@ -11463,7 +11463,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.66376,
         12.54214
@@ -11663,7 +11663,7 @@
       "source": "timetable",
       "updated": 1793434745515,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.67596,
         12.57648
@@ -11751,7 +11751,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 240,
       "position": [
         55.66607,
         12.5132
@@ -11867,7 +11867,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 180,
       "position": [
         55.68793,
         12.49072
@@ -12064,7 +12064,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.66605,
         12.51295
@@ -12176,7 +12176,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.674319588149295,
         12.570870571709174
@@ -12276,7 +12276,7 @@
       "source": "timetable",
       "updated": 1793434911352,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.69516,
         12.59842
@@ -12357,7 +12357,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.64627,
         12.62839
@@ -12453,7 +12453,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.674708524455966,
         12.573648819655281
@@ -12589,7 +12589,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": -60,
       "position": [
         55.67945376085081,
         12.524504848334308
@@ -12770,7 +12770,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.67535,
         12.54618
@@ -12874,7 +12874,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.6655,
         12.60858
@@ -13003,7 +13003,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.63502,
         12.63369
@@ -13083,7 +13083,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.61892,
         12.57503
@@ -13195,7 +13195,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 60,
       "position": [
         55.64656,
         12.59806
@@ -13275,7 +13275,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 60,
       "position": [
         55.60907,
         12.58431
@@ -13371,7 +13371,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 0,
       "position": [
         55.56444,
         12.58639
@@ -13696,7 +13696,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.59457,
         12.67021
@@ -13780,7 +13780,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.60129,
         12.66021
@@ -13856,7 +13856,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.63529,
         12.6187
@@ -13932,7 +13932,7 @@
       "source": "timetable",
       "updated": 1793434772646,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.62243,
         12.59259
@@ -14060,7 +14060,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.67101,
         12.57403
@@ -14160,7 +14160,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 180,
+      "delay": 240,
       "position": [
         55.73539,
         12.48688
@@ -14279,7 +14279,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.69155,
         12.53822
@@ -14468,7 +14468,7 @@
       "source": "timetable",
       "updated": 1793434710417,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.67257,
         12.56649
@@ -14559,7 +14559,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 0,
       "position": [
         55.70454238069279,
         12.51795590707986
@@ -14850,7 +14850,7 @@
       "source": "timetable",
       "updated": 1793434843579,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 240,
       "position": [
         55.66146,
         12.62359
@@ -14961,7 +14961,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.64604,
         12.60961
@@ -15009,7 +15009,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.46632,
         12.18184
@@ -15182,7 +15182,7 @@
       "source": "timetable",
       "updated": 1793434843579,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.49327,
         12.16041
@@ -15241,7 +15241,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.14918,
         12.01013
@@ -15411,7 +15411,7 @@
       "source": "timetable",
       "updated": 1793434762660,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.41499,
         12.25506
@@ -15549,7 +15549,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.67935955977397,
         12.310277148168977
@@ -15625,7 +15625,7 @@
       "source": "timetable",
       "updated": 1793434729077,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.65269,
         12.3183
@@ -15693,7 +15693,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.64414,
         12.27016
@@ -15757,7 +15757,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.63628,
         12.27591
@@ -15849,7 +15849,7 @@
       "source": "timetable",
       "updated": 1793434852534,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.65152,
         12.30788
@@ -15937,7 +15937,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -300,
+      "delay": -60,
       "position": [
         55.50024,
         12.19024
@@ -16032,7 +16032,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.51837,
         12.20986
@@ -16103,7 +16103,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.64906,
         12.26952
@@ -16203,7 +16203,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.64217,
         12.11169
@@ -16303,7 +16303,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 540,
+      "delay": 600,
       "position": [
         55.64122,
         12.10054
@@ -16375,7 +16375,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.64871,
         12.26964
@@ -16451,7 +16451,7 @@
       "source": "timetable",
       "updated": 1793434874444,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.66465,
         12.37896
@@ -16547,7 +16547,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.64804,
         12.29818
@@ -16705,7 +16705,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.62731,
         12.21833
@@ -16879,7 +16879,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.62162,
         12.42436
@@ -16990,7 +16990,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.66545,
         12.44005
@@ -17130,7 +17130,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": 180,
+      "delay": 240,
       "position": [
         55.7127,
         12.47767
@@ -17251,7 +17251,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 120,
       "position": [
         55.69886,
         12.45699
@@ -17403,7 +17403,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.62857,
         12.48224
@@ -17487,7 +17487,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.652106680102044,
         12.486430850127558
@@ -17575,7 +17575,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.64361,
         12.47141
@@ -17910,7 +17910,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.7013,
         12.40295
@@ -18029,7 +18029,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.69199,
         12.46173
@@ -18265,7 +18265,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 180,
+      "delay": 120,
       "position": [
         55.72337,
         12.34292
@@ -18412,7 +18412,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.75073,
         12.30941
@@ -18564,7 +18564,7 @@
       "source": "timetable",
       "updated": 1793434843579,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.67522,
         12.37138
@@ -18656,7 +18656,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.90508,
         12.47781
@@ -18724,7 +18724,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.823914229449706,
         12.52599059740162
@@ -18800,7 +18800,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.70609,
         12.5629
@@ -18944,7 +18944,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.76713082991342,
         12.522710717886577
@@ -19008,7 +19008,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.88095,
         12.49879
@@ -19209,7 +19209,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 300,
       "position": [
         55.768570000000004,
         12.36749
@@ -19342,7 +19342,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.74524,
         12.32764
@@ -19418,7 +19418,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.8015,
         12.2229
@@ -19486,7 +19486,7 @@
       "source": "timetable",
       "updated": 1793434643518,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 180,
       "position": [
         55.71089,
         12.30658
@@ -19558,7 +19558,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.720945,
         12.6083
@@ -19634,7 +19634,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.73367,
         12.56229
@@ -19742,7 +19742,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -60,
       "position": [
         55.73539,
         12.48688
@@ -19890,7 +19890,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.7451724475235,
         12.385050517060504
@@ -20034,7 +20034,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.74463,
         12.47071
@@ -20150,7 +20150,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.730981639293745,
         12.576123583159822
@@ -20298,7 +20298,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.76341751329332,
         12.407216262697903
@@ -20386,7 +20386,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.75458,
         12.39248
@@ -20502,7 +20502,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.73511,
         12.47727
@@ -20655,7 +20655,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -120,
       "position": [
         55.72900207052787,
         12.476221350344261
@@ -20808,7 +20808,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.72215435398264,
         12.44405095166681
@@ -20916,7 +20916,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.73451,
         12.41991
@@ -21033,7 +21033,7 @@
       "source": "timetable",
       "updated": 1793434762660,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 60,
       "position": [
         55.75632,
         12.56344
@@ -21137,7 +21137,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.74573,
         12.52294
@@ -21250,7 +21250,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 120,
       "position": [
         55.7666,
         12.50999
@@ -21428,7 +21428,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": 240,
+      "delay": 180,
       "position": [
         55.77491,
         12.52338
@@ -21520,7 +21520,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 0,
       "position": [
         55.78934,
         12.47345
@@ -21636,7 +21636,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.78787,
         12.45294
@@ -21728,7 +21728,7 @@
       "source": "timetable",
       "updated": 1793434874444,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.77424546990021,
         12.514131982180809
@@ -21812,7 +21812,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.691035726803584,
         12.570958873990433
@@ -21900,7 +21900,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.76356,
         12.51154
@@ -22016,7 +22016,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.80739,
         12.46922
@@ -22220,7 +22220,7 @@
       "source": "timetable",
       "updated": 1793434643518,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.81523,
         12.48203
@@ -22336,7 +22336,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 240,
       "position": [
         55.756518023531854,
         12.519634360916326
@@ -22476,7 +22476,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.69976,
         12.56198
@@ -22632,7 +22632,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.7247398049383,
         12.547739843950643
@@ -22728,7 +22728,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.76215,
         12.57586
@@ -22796,7 +22796,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.70609,
         12.5629
@@ -22884,7 +22884,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.821536883714906,
         12.560947703958615
@@ -22963,7 +22963,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.78934,
         12.47345
@@ -23091,7 +23091,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.81092,
         12.46371
@@ -23210,7 +23210,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.74639,
         12.5227
@@ -23290,7 +23290,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.748175953499626,
         12.5215692372003
@@ -23350,7 +23350,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.81527,
         12.53305
@@ -23462,7 +23462,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.8098,
         12.50337
@@ -23646,7 +23646,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.83372934396895,
         12.430313510331441
@@ -23706,7 +23706,7 @@
       "source": "timetable",
       "updated": 1793434753675,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.67519,
         12.45521
@@ -23798,7 +23798,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.73409,
         12.47614
@@ -23870,7 +23870,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.71794,
         12.47024
@@ -23934,7 +23934,7 @@
       "source": "timetable",
       "updated": 1793434552227,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.66501,
         12.45964
@@ -24030,7 +24030,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.64452,
         12.09086
@@ -24147,7 +24147,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.65722806887337,
         12.091313814195532
@@ -24227,7 +24227,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.63048,
         12.07891
@@ -24377,7 +24377,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.64359840803581,
         12.074057730397664
@@ -24432,7 +24432,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.63448,
         12.06428
@@ -24484,7 +24484,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -60,
       "position": [
         55.63464241668768,
         12.107592610022698
@@ -24540,7 +24540,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.64084,
         11.96076
@@ -24624,7 +24624,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.66375772995423,
         12.002851366196895
@@ -24692,7 +24692,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 120,
       "position": [
         55.64756,
         12.08361
@@ -24759,7 +24759,7 @@
       "source": "timetable",
       "updated": 1793434729077,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.54874941433232,
         12.139251088302666
@@ -24896,7 +24896,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -300,
+      "delay": 0,
       "position": [
         55.69012218749093,
         12.175960599614848
@@ -25000,7 +25000,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.630722857756176,
         12.191184927952323
@@ -25064,7 +25064,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -300,
+      "delay": -120,
       "position": [
         55.5877,
         12.32738
@@ -25143,7 +25143,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.58166,
         12.29133
@@ -25223,7 +25223,7 @@
       "source": "timetable",
       "updated": 1793434710417,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.60166,
         12.34702
@@ -25316,7 +25316,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.6788120867471,
         11.928460771505534
@@ -25432,7 +25432,7 @@
       "source": "timetable",
       "updated": 1793434772646,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.63464066694929,
         12.037684612271043
@@ -25545,7 +25545,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -300,
+      "delay": 60,
       "position": [
         55.51138880249869,
         11.867964238434185
@@ -25629,7 +25629,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 180,
       "position": [
         55.567391382744326,
         11.972834590903512
@@ -25729,7 +25729,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.49898,
         12.12439
@@ -25797,7 +25797,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": 300,
+      "delay": 480,
       "position": [
         55.61589,
         12.60894
@@ -25873,7 +25873,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": 360,
+      "delay": 420,
       "position": [
         55.66870700557083,
         12.581887699960719
@@ -25973,7 +25973,7 @@
       "source": "timetable",
       "updated": 1793434772646,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.6841562051332,
         12.546461558891965
@@ -26085,7 +26085,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.71707868343067,
         12.499422005191981
@@ -26245,7 +26245,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.756302264843995,
         12.447320807768453
@@ -26337,7 +26337,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.72451,
         12.488
@@ -26417,7 +26417,7 @@
       "source": "timetable",
       "updated": 1793434772646,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 120,
       "position": [
         55.68130448694367,
         12.560055992281173
@@ -26517,7 +26517,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 300,
       "position": [
         55.63874261716727,
         12.618061380411964
@@ -26645,7 +26645,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.58405,
         12.64642
@@ -26785,7 +26785,7 @@
       "source": "timetable",
       "updated": 1793434580374,
       "hadRealtime": true,
-      "delay": 60,
+      "delay": 180,
       "position": [
         55.44542,
         11.83104
@@ -26873,7 +26873,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 300,
       "position": [
         55.46321228696349,
         12.045434904552515
@@ -26977,7 +26977,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.93753,
         12.24894
@@ -27104,7 +27104,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.94119,
         12.24791
@@ -27207,7 +27207,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.930574023235025,
         12.294550629981398
@@ -27291,7 +27291,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.93425473180339,
         12.296769247400483
@@ -27383,7 +27383,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.84677,
         12.12437
@@ -27475,7 +27475,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 60,
       "position": [
         55.82625849627395,
         12.295005352417755
@@ -27559,7 +27559,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.837082229266095,
         12.0666907525357
@@ -27623,7 +27623,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.77758,
         12.17467
@@ -27707,7 +27707,7 @@
       "source": "timetable",
       "updated": 1793434812495,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.78218,
         12.17137
@@ -27879,7 +27879,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.8029383061072,
         11.972881303653695
@@ -27955,7 +27955,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.80774497161792,
         12.021107079541316
@@ -28055,7 +28055,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.81770381523792,
         12.014932733915165
@@ -28147,7 +28147,7 @@
       "source": "timetable",
       "updated": 1793434710417,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.96857,
         12.01986
@@ -28263,7 +28263,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -360,
+      "delay": 60,
       "position": [
         55.87095348637535,
         12.07317435219921
@@ -28399,7 +28399,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.95159,
         12.26239
@@ -28475,7 +28475,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.95475224910328,
         11.854902173087597
@@ -28623,7 +28623,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 180,
       "position": [
         55.93419715882519,
         12.08297868988768
@@ -28791,7 +28791,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.87355170724343,
         12.421065840595281
@@ -28895,7 +28895,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.87994,
         12.45094
@@ -29111,7 +29111,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.80134,
         12.22226
@@ -29223,7 +29223,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.82313,
         12.39993
@@ -29275,7 +29275,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.91977,
         12.31781
@@ -29423,7 +29423,7 @@
       "source": "timetable",
       "updated": 1793434832670,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.84739,
         12.31478
@@ -29601,7 +29601,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 180,
+      "delay": 300,
       "position": [
         56.06079,
         12.41929
@@ -29726,7 +29726,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         56.04669,
         12.49438
@@ -29818,7 +29818,7 @@
       "source": "timetable",
       "updated": 1793434843579,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 300,
       "position": [
         55.72512,
         12.42748
@@ -29906,7 +29906,7 @@
       "source": "timetable",
       "updated": 1793434762660,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.70662,
         12.51496
@@ -30031,7 +30031,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": 180,
+      "delay": 360,
       "position": [
         55.71195,
         12.47224
@@ -30127,7 +30127,7 @@
       "source": "timetable",
       "updated": 1793434843579,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.72422,
         12.38557
@@ -30203,7 +30203,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": -60,
       "position": [
         55.91074,
         12.47852
@@ -30303,7 +30303,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         56.02936,
         12.6041
@@ -30399,7 +30399,7 @@
       "source": "timetable",
       "updated": 1793434867537,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.93673678930177,
         12.502149874066141
@@ -30466,7 +30466,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.8948,
         12.49133
@@ -30562,7 +30562,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.81946,
         12.46713
@@ -30638,7 +30638,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.86438,
         12.49695
@@ -30734,7 +30734,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.93203,
         12.48477
@@ -30910,7 +30910,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 180,
       "position": [
         56.12130991591903,
         12.272991281170567
@@ -30974,7 +30974,7 @@
       "source": "timetable",
       "updated": 1793434762660,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         56.07903,
         12.13214
@@ -31199,7 +31199,7 @@
       "source": "timetable",
       "updated": 1793434762660,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.96908,
         12.41126
@@ -31263,7 +31263,7 @@
       "source": "timetable",
       "updated": 1793434745515,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.96567186172415,
         12.471145426896747
@@ -31343,7 +31343,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.87971,
         12.50618
@@ -31443,7 +31443,7 @@
       "source": "timetable",
       "updated": 1793434853566,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.92828,
         12.3344
@@ -31567,7 +31567,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 180,
       "position": [
         55.94736,
         12.26253
@@ -31647,7 +31647,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.96651137638218,
         12.185206083041379
@@ -31803,7 +31803,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -360,
+      "delay": -240,
       "position": [
         55.80072,
         12.58622
@@ -31952,7 +31952,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": -60,
       "position": [
         55.82711,
         12.57433
@@ -32153,7 +32153,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 240,
       "position": [
         55.73222,
         12.37479
@@ -32245,7 +32245,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.66465557410811,
         12.298156124065917
@@ -32353,7 +32353,7 @@
       "source": "timetable",
       "updated": 1793434842594,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 120,
       "position": [
         55.61743,
         12.34756
@@ -32465,7 +32465,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 180,
       "position": [
         55.6315527143853,
         12.29417035122787
@@ -32537,7 +32537,7 @@
       "source": "timetable",
       "updated": 1793434782571,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.69547982524638,
         12.358449096084879
@@ -32713,7 +32713,7 @@
       "source": "timetable",
       "updated": 1793434729077,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 180,
       "position": [
         55.82492,
         12.39372
@@ -32821,7 +32821,7 @@
       "source": "timetable",
       "updated": 1793434796619,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.71198,
         12.36053
@@ -32981,7 +32981,7 @@
       "source": "timetable",
       "updated": 1793434710417,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 60,
       "position": [
         55.61325,
         12.45972
@@ -33158,7 +33158,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.663440407626965,
         12.402725472378837
@@ -33258,7 +33258,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 120,
       "position": [
         55.75732036061359,
         12.371320343540349
@@ -33378,7 +33378,7 @@
       "source": "timetable",
       "updated": 1793434912430,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 60,
       "position": [
         55.84482204300353,
         12.437890320022717
@@ -33563,7 +33563,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.896457594876544,
         12.218309819118378
@@ -33635,7 +33635,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         55.76245496782295,
         12.115271789605863
@@ -33715,7 +33715,7 @@
       "source": "timetable",
       "updated": 1793434825575,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.632381188692115,
         12.115863033936051
@@ -33827,7 +33827,7 @@
       "source": "timetable",
       "updated": 1793434805525,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": -60,
       "position": [
         55.58572752974993,
         12.297333109876847
@@ -33983,7 +33983,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.59794548421017,
         12.223930808132224
@@ -34075,7 +34075,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 300,
       "position": [
         55.66523783531252,
         12.112504046830157
@@ -34207,7 +34207,7 @@
       "source": "timetable",
       "updated": 1793434875569,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         55.79533,
         12.16005
@@ -34355,7 +34355,7 @@
       "source": "timetable",
       "updated": 1793434771459,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 60,
       "position": [
         55.92245,
         12.30022
@@ -34499,7 +34499,7 @@
       "source": "timetable",
       "updated": 1793434901634,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         56.01982,
         12.57232
@@ -34611,7 +34611,7 @@
       "source": "timetable",
       "updated": 1793434903492,
       "hadRealtime": true,
-      "delay": -180,
+      "delay": 0,
       "position": [
         56.020287885131395,
         12.575313737443189
@@ -36427,7 +36427,7 @@
       "source": "timetable",
       "updated": 1793434902510,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.49285131917035,
         12.171631641935729
@@ -37700,7 +37700,7 @@
       "source": "timetable",
       "updated": 1793434190314,
       "hadRealtime": true,
-      "delay": -120,
+      "delay": 0,
       "position": [
         55.47985,
         12.17597
@@ -38273,7 +38273,7 @@
       "source": "timetable",
       "updated": 1793434727748,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.78445,
         12.49726
@@ -38533,7 +38533,7 @@
       "source": "timetable",
       "updated": 1793434583437,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         56.04723,
         12.59417
@@ -38588,7 +38588,7 @@
       "source": "timetable",
       "updated": 1793434727779,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         56.09827,
         12.35589
@@ -38746,7 +38746,7 @@
       "source": "timetable",
       "updated": 1793434556275,
       "hadRealtime": true,
-      "delay": -60,
+      "delay": 0,
       "position": [
         55.99764,
         12.2861
@@ -38827,7 +38827,7 @@
       "source": "timetable",
       "updated": 1793434727748,
       "hadRealtime": true,
-      "delay": -240,
+      "delay": 0,
       "position": [
         56.06253,
         12.13629
@@ -39048,7 +39048,7 @@
       "source": "timetable",
       "updated": 1793434842547,
       "hadRealtime": true,
-      "delay": 300,
+      "delay": 480,
       "position": [
         55.58948009258371,
         12.268648169556307
@@ -39104,7 +39104,7 @@
       "source": "timetable",
       "updated": 1793434902722,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.316627708098814,
         10.921486745726202
@@ -39192,7 +39192,7 @@
       "source": "timetable",
       "updated": 1793434866521,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 600,
       "position": [
         55.42873,
         9.93013
@@ -39453,7 +39453,7 @@
       "source": "timetable",
       "updated": 1793434911445,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 180,
       "position": [
         55.96312953654741,
         9.962709439457896
@@ -39646,7 +39646,7 @@
       "source": "timetable",
       "updated": 1793434621576,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 300,
       "position": [
         55.35044713469488,
         11.096208310236234
@@ -39806,7 +39806,7 @@
       "source": "timetable",
       "updated": 1793434911383,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.66482,
         11.55367
@@ -39898,7 +39898,7 @@
       "source": "timetable",
       "updated": 1793434852456,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 120,
       "position": [
         55.66443633340655,
         12.47276275931597
@@ -40286,7 +40286,7 @@
       "source": "timetable",
       "updated": 1793434899152,
       "hadRealtime": true,
-      "delay": 120,
+      "delay": 0,
       "position": [
         55.74337172220791,
         12.564631589824932
@@ -40378,7 +40378,7 @@
       "source": "timetable",
       "updated": 1793434902592,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.49926,
         12.17409
@@ -40558,7 +40558,7 @@
       "source": "timetable",
       "updated": 1793434902479,
       "hadRealtime": true,
-      "delay": 0,
+      "delay": 60,
       "position": [
         55.64896261018787,
         12.153999603408396

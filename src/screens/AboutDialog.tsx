@@ -6,7 +6,7 @@ import type { ClientDictionary } from '../i18n/dictionary'
 import { intlLocale } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { useAircraftProvider } from '../map/aircraft'
-import { useSnapshot, useSource } from '../map/live'
+import { delaysOn, useSnapshot, useSource } from '../map/live'
 import { timezoneOf, useNetwork } from '../map/timetable'
 import { clockTime } from '../timetable/time'
 import type { Snapshot } from '../tracker/index'
@@ -18,6 +18,7 @@ import { sourceWords } from './sourceWords'
 import {
   aircraftCredit,
   CC_BY,
+  DELAYS_PUBLISHER,
   MAP_STYLE_LICENCE,
   ODBL,
   OPENFREEMAP,
@@ -82,6 +83,19 @@ function apiTimeOf(snapshot: Snapshot, timezone: string, dictionary: ClientDicti
   return Number.isNaN(apiTime) ? undefined : clockTime(apiTime, timezone, { seconds: true })
 }
 
+/**
+ * SIRI-ET's delays as a source, with the moment their latest message came, when they are on;
+ * none when they are off.
+ */
+function delaysOf(snapshot: Snapshot, timezone: string, dictionary: ClientDictionary) {
+  if (!delaysOn(snapshot)) return undefined
+  const words = dictionary.about.status
+  const { lastMessage } = snapshot.updates
+  return lastMessage === undefined
+    ? words.delaysNotYet
+    : words.delaysUpdated.replace('{time}', clockTime(lastMessage, timezone, { seconds: true }))
+}
+
 /** The page's status from the snapshot (docs/screens.md, "The About dialog"). */
 function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   const { lang, dictionary } = useI18n()
@@ -90,6 +104,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   const status = words.status
   if (!snapshot) return <FactList items={[{ label: status.source }]} />
   const { budget } = snapshot
+  const delays = delaysOf(snapshot, timezone, dictionary)
   const notes: string[] = []
   const sourceNote = sourceNoteOf(snapshot, dictionary)
   if (sourceNote) notes.push(sourceNote)
@@ -111,6 +126,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
           { label: status.source, value: sourceOf(snapshot, dictionary) },
           { label: status.positions, value: status.positionModes[snapshot.positionMode] },
           { label: status.apiTime, value: apiTimeOf(snapshot, timezone, dictionary) },
+          ...(delays ? [{ label: status.delays, value: delays }] : []),
           {
             label: status.updates,
             value: status.every.replace(
@@ -185,6 +201,7 @@ export function AboutDialog() {
   const words = dictionary.about
   const prepared = snapshot?.status.timetable.prepared
   const source = useSource()
+  const delays = delaysOn(snapshot)
   // Credited to the timetable alone on the timetable source, which asks for no realtime.
   const transit =
     source?.credit === 'timetable' ? dictionary.onTimetable.transit : words.credits.transit
@@ -207,6 +224,11 @@ export function AboutDialog() {
               date: prepared ? dayOf(prepared, lang) : '—',
             })}
           </Text>
+          {delays ? (
+            <Text render={<p />}>
+              {words.credits.delays.replace('{company}', DELAYS_PUBLISHER)}
+            </Text>
+          ) : null}
           <Text render={<p />}>
             {compose(words.credits.map, {
               openStreetMap: <Link href={OPENSTREETMAP}>{dictionary.credit.openStreetMap}</Link>,

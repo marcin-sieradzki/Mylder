@@ -21,9 +21,9 @@ import {
   pausedFrom,
   pulseOf,
   type DelayUnknown,
+  type MeterUnknown,
   type ModeShare,
   type Share,
-  type Unknown,
 } from './pulse'
 
 /**
@@ -82,10 +82,11 @@ function usePaused(snapshot: Snapshot | undefined, clockOffset: number): boolean
 }
 
 /**
- * City pulse (docs/screens.md, "City pulse"): the key figures, a meter per mode and how sure the
- * map is, from the snapshot and the states by the clock alone, so they age with the dots. Each
- * follows the mode filters with the whole kept in view, and a figure the data can't back shows
- * "—" and says why.
+ * City pulse (docs/screens.md, "City pulse"): the key figures, a meter per mode (and with SIRI-ET's
+ * delays on, a second for each mode's share of trips with an update) and how sure the map is,
+ * from the snapshot and the states by the clock alone, so they age with the dots. Each follows the
+ * mode filters with the whole kept in view, and a figure the data can't back shows "—" and says
+ * why.
  */
 export function CityPulse() {
   const { lang, dictionary } = useI18n()
@@ -112,7 +113,7 @@ export function CityPulse() {
     [lang],
   )
   const onTimetable = dictionary.timetableOverview
-  const why = (unknown: Unknown | DelayUnknown | 'metro' | 'computed-meters') =>
+  const why = (unknown: MeterUnknown | DelayUnknown | 'computed-meters') =>
     unknown === 'timetable' ? onTimetable.noLivePositions : words.unknown[unknown]
   const fill = (template: string, values: Record<string, string | number>) =>
     Object.entries(values).reduce(
@@ -127,6 +128,26 @@ export function CityPulse() {
           operator: OPERATORS[mode],
         })
       : why(unknown === 'computed-only' ? 'computed-meters' : unknown!)
+
+  /** A meter per mode under `title`: its share, coloured, or "—" and why. */
+  const meters = (title: string, shares: readonly ModeShare[]) => (
+    <Section title={title}>
+      <div className={styles.meters}>
+        {shares.map((each) => (
+          <div key={each.mode} className={styles.meter}>
+            <Meter
+              label={dictionary.modes[each.mode]}
+              value={each.share ? (each.share.count / each.share.total) * 100 : null}
+              color={each.share ? colourOf(each.share) : 'neutral'}
+            />
+            <Text variant="caption" emphasis="secondary" render={<p />} className={styles.line}>
+              {meterLine(each)}
+            </Text>
+          </div>
+        ))}
+      </div>
+    </Section>
+  )
 
   if (!pulse)
     return (
@@ -187,22 +208,8 @@ export function CityPulse() {
           />
         </Section>
       ) : null}
-      <Section title={words.byMode}>
-        <div className={styles.meters}>
-          {pulse.modes.map((each) => (
-            <div key={each.mode} className={styles.meter}>
-              <Meter
-                label={dictionary.modes[each.mode]}
-                value={each.share ? (each.share.count / each.share.total) * 100 : null}
-                color={each.share ? colourOf(each.share) : 'neutral'}
-              />
-              <Text variant="caption" emphasis="secondary" render={<p />} className={styles.line}>
-                {meterLine(each)}
-              </Text>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {pulse.updateShares ? meters(words.withDelays, pulse.updateShares) : null}
+      {meters(words.byMode, pulse.modes)}
       <DayProfile />
       <Section title={words.howSure} slotProps={{ title: { id: sureId } }}>
         <DataStateKey

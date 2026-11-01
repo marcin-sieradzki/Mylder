@@ -4,7 +4,8 @@
 // (`MYLDER_UPDATES`, spec #146) or off. The domain's rules, the
 // screens and the tracker's run read this description, never the kind itself: only
 // src/tracker/source.ts tells its sources apart, to build each one. A new source changes this one
-// place.
+// place. Beside it, `NOT_IN_SIRI_ET`: the modes SIRI-ET's delays never reach, whatever the source,
+// which the tracker's join leaves alone and City pulse's shares with an update read as "—".
 
 /** Every source the snapshot can name. */
 export const SOURCE_KINDS = ['timetable', 'simulated', 'recording', 'rejseplanen'] as const
@@ -129,3 +130,9 @@ export function describeSource(
   const { withDelays, ...description } = SOURCE_DESCRIPTIONS[kind]
   return delays ? { ...description, ...withDelays } : description
 }
+
+/**
+ * The modes SIRI-ET carries no journeys of (ADR 0019): no dataset covers the Metro or the light
+ * rail, so their trips are never joined to an update and their share of delays is unknown, not 0.
+ */
+export const NOT_IN_SIRI_ET: ReadonlySet<string> = new Set(['metro', 'light-rail'])

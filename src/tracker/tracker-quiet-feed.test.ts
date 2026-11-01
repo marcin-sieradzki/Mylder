@@ -99,8 +99,9 @@ describe('a quiet SIRI-ET feed, replayed from the recording', () => {
         expect(withoutUpdate(quiet).length).toBeGreaterThan(100)
         for (const trip of withoutUpdate(quiet)) expect(trip.state).toBe('timetable-only')
 
-        // Each keeps its last delay and moves on by it: two minutes on, it is further along,
-        // and its next calls are as late as its update made them.
+        // Each keeps its last update's steps and moves on by them: two minutes on, it is further
+        // along, its next calls are as late as its update made them, and its delay is the one at
+        // its next call, as its panel gives it, which changes as it passes its stops.
         const later = yield* snapshotAt('10:03:31')
         expect(cardsOf(later)).toEqual([{ kind: 'updates-stale', since: LAST_MESSAGE }])
         let moved = 0
@@ -108,7 +109,8 @@ describe('a quiet SIRI-ET feed, replayed from the recording', () => {
           const on = later.trips.find((each) => each.key === trip.key)
           if (!on || on.waiting || trip.waiting) continue
           expect(on.state).toBe('no-signal')
-          expect(on.delay).toBe(trip.delay)
+          expect(on.steps).toEqual(trip.steps)
+          expect(on.delay).toBe(lateness(on)[0])
           expect(on.progress).toBeGreaterThanOrEqual(trip.progress)
           if (on.progress > trip.progress) moved++
           const shared = on.next.filter((call) => trip.next.some((was) => was.index === call.index))
@@ -242,7 +244,8 @@ describe('a quiet SIRI-ET feed, from the listener’s table', () => {
             const on = quiet.trips.find((each) => each.key === trip.key)
             if (!on || on.waiting || trip.waiting) continue
             expect(on.state).toBe('no-signal')
-            expect(on.delay).toBe(trip.delay)
+            // Its delay is the one at its next call by those steps, as its panel gives it.
+            expect(on.delay).toBe(lateness(on)[0])
             // It carries its last update's steps, which opened panels time its calls by.
             expect(on.steps).toEqual(trip.steps)
             // Its calls are still timed by its update, call by call.

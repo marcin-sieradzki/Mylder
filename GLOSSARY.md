@@ -121,7 +121,7 @@ A position Rejseplanen works out for a trip from its timetable and realtime, rat
 _Avoid_: Calculated position, last position, estimate
 
 **Delay**:
-How far a trip runs behind its timetable: expected minus scheduled time at its latest updated call. Negative when early. An opened vehicle's panel gives the delay at its next stop, which can differ from the delay it ends on.
+How far a trip runs behind its timetable: expected minus scheduled time, at its next call wherever Mylder shows one (an opened vehicle's panel, the Vehicles list, City pulse's average), which can differ from the delay it ends on. Negative when early. A trip with no delay steps carries the delay at its latest updated call.
 _Avoid_: Lateness, deviation
 
 **Delay step**:

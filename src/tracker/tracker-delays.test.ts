@@ -50,7 +50,7 @@ describe('SIRI-ET’s delays in the opened vehicle and stop', () => {
   it.effect('times an opened trip’s calls as its update does, as the map moves it', () =>
     Effect.gen(function* () {
       // Bus 68 of 09:03, a whole trip from its first message: 1 to 3 min early by call, and 2 min
-      // early at its last step, the snapshot's delay.
+      // early at its first stop, its next call, the snapshot's delay.
       const snapshot = yield* snapshotAt('09:02:00')
       const bus = tripOf(snapshot, '68', '09:03')
       expect(bus.delay).toBe(-120)
@@ -93,6 +93,21 @@ describe('SIRI-ET’s delays in the opened vehicle and stop', () => {
           delaysUpdated: snapshot.updates.lastMessage,
         })
       }
+    }).pipe(Effect.provide(onDelays)),
+  )
+
+  it.effect('gives a trip’s delay at its next call, the one its panel gives', () =>
+    Effect.gen(function* () {
+      // Bus 2A of 08:57 at 09:22: 6 min late at Falkoner Allé, its next call, though its update
+      // has it 4 min late at its last step, Refshaleøen.
+      const snapshot = yield* snapshotAt('09:22:00')
+      const bus = tripOf(snapshot, '2A', '08:57')
+      const calls = planned(bus)
+      expect(bus.next[0].index).toBe(18)
+      expect(bus.next[0].time - calls[18].departure).toBe(360_000)
+      expect(bus.delay).toBe(360)
+      const detail = (yield* (yield* Tracker).getTripDetail(bus.key))!
+      expect(detail.delay).toBe(360)
     }).pipe(Effect.provide(onDelays)),
   )
 })

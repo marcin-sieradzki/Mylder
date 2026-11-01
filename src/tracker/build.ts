@@ -11,6 +11,7 @@ import {
   type DataStateContext,
 } from '../domain/data-state.ts'
 import {
+  delayAtCall,
   delayOf,
   delaySteps,
   ENDED_STANDS_FOR,
@@ -305,6 +306,13 @@ export function buildTrips({
             path.length,
           )
       const vehicleNumber = realtime?.journey.trainNumber
+      const next = nextCalls(timetable, trip, timed, now)
+      // With SIRI-ET's steps, this run's update's or the last one's that the history keeps, the
+      // delay a rider is given is at the trip's next call, timed as its panel times it, not at its
+      // last step (#215). Once the key brings journeyPos, a position's times must win over the
+      // steps here, as an update and a position combine (spec #146).
+      const delayAtNext =
+        next[0] && steps?.length ? delayAtCall(trip.calls, steps, next[0].index) : delay
       trips.push({
         key: trip.key,
         line: trip.line.name,
@@ -314,10 +322,10 @@ export function buildTrips({
         state,
         source: drawn.source,
         ...fields,
-        ...(delay === undefined ? {} : { delay }),
+        ...(delayAtNext === undefined ? {} : { delay: delayAtNext }),
         position: pointAt(path, progress) as [number, number],
         progress: Math.round(progress),
-        next: nextCalls(timetable, trip, timed, now),
+        next,
         ...(atFirstStop ? { waiting: true as const } : {}),
         ...(cancelled ? { cancelled: true as const } : {}),
         ...(cancelledCalls.length ? { cancelledCalls } : {}),

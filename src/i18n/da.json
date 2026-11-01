@@ -97,6 +97,7 @@
   },
   "credit": {
     "transitData": "Trafikdata",
+    "delays": "Forsinkelser",
     "openStreetMap": "OpenStreetMap-bidragydere",
     "aircraft": "Fly: {source} under {licence}",
     "aircraftFrom": "Fly: {source}",
@@ -149,6 +150,7 @@
       "title": "Data og kreditering",
       "transit": "Realtidsdata og køreplan: {rejseplanen}, under {licence}. Køreplan fra {date}.",
       "map": "Kort: © {openStreetMap} under {odbl}, © {openMapTiles}, {openFreeMap}.",
+      "delays": "Forsinkelser og aflysninger: {company}, via Rejseplanens SIRI-ET.",
       "buildings": "Bygningshøjderne kommer fra OpenStreetMap og er omtrentlige.",
       "aircraft": "Fly: © {source} under {licence}.",
       "aircraftFrom": "Fly: © {source}.",
@@ -195,6 +197,9 @@
       "store": "Serverlager",
       "storeOk": "Tilgængeligt",
       "storeUnavailable": "Utilgængeligt: intet køretøj kan være Ældre eller Intet signal, før det er tilbage.",
+      "delays": "Forsinkelser",
+      "delaysUpdated": "Rejseplanens SIRI-ET, opdateret {time}",
+      "delaysNotYet": "Rejseplanens SIRI-ET, ingen opdatering endnu",
       "disruptions": "Driftsforstyrrelser",
       "checked": "Tjekket {time}",
       "checkFailed": "Sidst tjekket {time}; det seneste tjek mislykkedes.",
@@ -235,6 +240,7 @@
     "reportingLive": "Melder live",
     "reportingLiveSub": "{count} af {total} køretøjer, der kunne melde",
     "byMode": "Melder live, efter transportform",
+    "withDelays": "Med forsinkelser, efter transportform",
     "modeShare": "{count}/{total} · {operator}",
     "unknown": {
       "computed-only": "Rejseplanen sender kun beregnede positioner",
@@ -242,7 +248,8 @@
       "none-underway": "Ingen køretøjer undervejs",
       "too-few": "For få køretøjer med kendt forsinkelse",
       "metro": "Ingen realtid fra Metroen; placeret efter køreplanen",
-      "computed-meters": "Alle positioner er beregnet af Rejseplanen"
+      "computed-meters": "Alle positioner er beregnet af Rejseplanen",
+      "no-delays": "Rejseplanen sender ingen forsinkelser for denne transportform; placeret efter køreplanen"
     },
     "now": "På kortet nu",
     "howSure": "Hvor sikre er vi?",

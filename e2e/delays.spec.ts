@@ -14,6 +14,7 @@ interface Trip {
   readonly state: string
   readonly position: [number, number]
   readonly delay?: number
+  readonly steps?: readonly (readonly [index: number, delay: number])[]
   readonly updated?: number
   readonly cancelled?: true
 }
@@ -94,12 +95,14 @@ test('an opened delayed bus and its next stop show its expected times and the de
   request,
 }) => {
   const { trips } = await snapshotNow(request)
+  // A bus whose update has some call 2 min or more off its timetable. Its `delay` is the one at its
+  // next call, which in the recording's first minute is under 2 min for every bus with an update.
   const bus = trips.find(
     (trip) =>
       trip.mode === 'bus' &&
       trip.state === 'estimated' &&
       !trip.cancelled &&
-      Math.abs(trip.delay ?? 0) >= 120 &&
+      (trip.steps ?? []).some(([, delay]) => Math.abs(delay) >= 120) &&
       trip.next.length > 0,
   )!
   const source = /Timetable and Rejseplanen's delays\s·\supdated\s\d\d:\d\d:\d\d/

@@ -3,6 +3,11 @@
 import type { AircraftProvider } from '../tracker/aircraft/index'
 
 export const REJSEPLANEN = 'https://www.rejseplanen.dk/'
+/**
+ * Whom SIRI-ET's delays are credited to: their publisher, by name alone, since the datasets' pages
+ * give no licence until Rejseplanen says which applies (spec #146).
+ */
+export const DELAYS_PUBLISHER = 'Rejsekort & Rejseplan A/S'
 export const CC_BY = 'https://creativecommons.org/licenses/by/4.0/'
 export const OPENSTREETMAP = 'https://www.openstreetmap.org/copyright'
 export const ODBL = 'https://opendatacommons.org/licenses/odbl/'
