@@ -38,11 +38,21 @@ const STATES = [
 ] as const
 
 /** Where the page's vehicles come from. */
-function sourceOf({ source }: Snapshot, words: Words['status']): string {
+function sourceOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary): string {
   const name = source.name ?? ''
-  if (source.kind === 'simulated') return words.simulated.replace('{name}', name)
-  if (source.kind === 'recording') return words.recording.replace('{name}', name)
-  return words.rejseplanen
+  if (source.kind === 'simulated') return about.status.simulated.replace('{name}', name)
+  if (source.kind === 'recording') return about.status.recording.replace('{name}', name)
+  if (source.kind === 'timetable') return onTimetable.source
+  return about.status.rejseplanen
+}
+
+/**
+ * What the page says of its vehicles when they aren't Rejseplanen's live data: on the timetable
+ * source that they are the timetable's plan, on a simulation or a recording that they aren't real.
+ */
+function sourceNoteOf({ source }: Snapshot, { about, onTimetable }: ClientDictionary) {
+  if (source.kind === 'rejseplanen') return undefined
+  return source.kind === 'timetable' ? onTimetable.note : about.status.notReal
 }
 
 /** The disruption list's last check, as the status says it. */
@@ -65,7 +75,8 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
   const { budget } = snapshot
   const apiTime = snapshot.apiTime ? Date.parse(snapshot.apiTime) : Number.NaN
   const notes: string[] = []
-  if (snapshot.source.kind !== 'rejseplanen') notes.push(status.notReal)
+  const sourceNote = sourceNoteOf(snapshot, dictionary)
+  if (sourceNote) notes.push(sourceNote)
   if (budget.level === 'spent' && budget.resumes) {
     notes.push(status.paused.replace('{date}', dayOf(budget.resumes, lang)))
   } else {
@@ -81,7 +92,7 @@ function PageStatus({ snapshot }: { snapshot: Snapshot | undefined }) {
       ))}
       <FactList
         items={[
-          { label: status.source, value: sourceOf(snapshot, status) },
+          { label: status.source, value: sourceOf(snapshot, dictionary) },
           { label: status.positions, value: status.positionModes[snapshot.positionMode] },
           {
             label: status.apiTime,
@@ -162,6 +173,8 @@ export function AboutDialog() {
   const snapshot = useSnapshot()
   const words = dictionary.about
   const prepared = snapshot?.status.timetable.prepared
+  // On the timetable source no realtime is asked for, so the credit names the timetable alone.
+  const onTimetable = snapshot?.source.kind === 'timetable'
   return (
     <Dialog
       title={words.title}
@@ -175,7 +188,7 @@ export function AboutDialog() {
         <Text render={<p />}>{words.nonCommercial}</Text>
         <Section title={words.credits.title}>
           <Text render={<p />}>
-            {compose(words.credits.transit, {
+            {compose(onTimetable ? dictionary.onTimetable.transit : words.credits.transit, {
               rejseplanen: <Link href={REJSEPLANEN}>Rejseplanen</Link>,
               licence: <Link href={CC_BY}>CC BY 4.0</Link>,
               date: prepared ? dayOf(prepared, lang) : '—',
@@ -209,6 +222,7 @@ export function AboutDialog() {
           {snapshot?.positionMode === 'CALC_REPORT' ? (
             <Text render={<p />}>{dictionary.legend.noLive}</Text>
           ) : null}
+          {onTimetable ? <Text render={<p />}>{dictionary.onTimetable.legend}</Text> : null}
         </Section>
         <Section title={words.status.title}>
           <PageStatus snapshot={snapshot} />
