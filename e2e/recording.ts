@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test as base, expect, type Page } from '@playwright/test'
+import { E2E_PORTS } from '../scripts/ports.ts'
 
 // The production build serves the weekday recording (playwright.config.ts); every page's clock
 // starts at the recording's moment, as the server's does.
@@ -47,15 +48,15 @@ export async function serveAircraft(page: Page, call: number) {
 }
 
 /** The server on the recording, and a second one on the same build on the simulation. */
-export const PORT = 4173
-export const SIMULATED_PORT = 4174
+export const PORT = E2E_PORTS.recording
+export const SIMULATED_PORT = E2E_PORTS.simulated
 export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 
 /**
  * A third server on the same build and recording, which only the snapshot route's tests ask, so
  * its runs, and the calls it counts, are theirs alone, whatever the other tests open and when.
  */
-export const SNAPSHOT_PORT = 4176
+export const SNAPSHOT_PORT = E2E_PORTS.snapshot
 export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
 
 /**
@@ -65,7 +66,7 @@ export const SNAPSHOT_URL = `http://localhost:${SNAPSHOT_PORT}`
  * request, so only the test that asks it, once, may ask it.
  */
 export const CROWDED = 'crowded'
-export const CROWDED_PORT = 4177
+export const CROWDED_PORT = E2E_PORTS.crowded
 export const CROWDED_URL = `http://localhost:${CROWDED_PORT}`
 export const CROWDED_START = Date.parse(
   (readJson(join('recordings', CROWDED, 'clock.json')) as { start: string }).start,

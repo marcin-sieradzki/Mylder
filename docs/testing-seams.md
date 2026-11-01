@@ -47,6 +47,26 @@ Every test asserts external behaviour: what the route returns, what the snapshot
 - **Screens** (`src/screens/*.test.tsx`, jsdom, Testing Library): render with a saved snapshot and assert text and roles in English and Danish. "A No signal vehicle's detail says 'No signal since 10:42'." "Metro departures read 'every 3 min'."
 - **End to end** (`e2e/*.spec.ts`, Playwright on the production build with `MYLDER_SOURCE=recording:weekday`, every page's clock installed at the recording's moment by `e2e/recording.ts`, and a second server on the same build on the simulation, to prove the default source starts): a few journeys that prove the wiring, not the time rules. The map shows as many vehicles as the recording's snapshot, and as many aircraft as the aircraft snapshot it was served; open one and follow it; a stop's departures; the Disruptions screen; `/da`; the page's notice when its own polls fail (block the route with `page.route`). The 5-minute rules are proven in the tracker tests, where the clock is free. A third server on the recording serves the snapshot route's tests alone: they count its calls, so no other test's stop or vehicle may spend one there. A fourth, on the `crowded` recording, serves the tests that open a stop with more trains standing than its panel lists before "Show all": the side panel's list and "Show all", and a phone's row of six cards with the tabs at the sheet's peek.
 
+## Ports
+
+Every server the tests, the demo and the verifier start has a port of its own, all in `scripts/ports.ts`, which the Playwright configs and the demo's server import. A new server takes a free port there and a row here; `scripts/ports.test.ts` fails when two meet or when this table, `verify-mylder`'s `launch.sh` or the factory's skill disagrees with the file.
+
+| Port      | Server                                                                                  | Started by                                        |
+| --------- | --------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 3000      | `npm run dev`, Next.js's default                                                        | The maintainer                                    |
+| 4173      | Production build on the `weekday` recording, with its aircraft; the e2e tests' base URL | `playwright.config.ts`                            |
+| 4174      | The same build on the simulation, aircraft off                                          | `playwright.config.ts`                            |
+| 4175      | The GitHub Pages demo, from `out/`                                                      | `npm run demo:serve`, `playwright.demo.config.ts` |
+| 4176      | The same build on `weekday`, for the snapshot route's tests alone                       | `playwright.config.ts`                            |
+| 4177      | The same build on the `crowded` recording                                               | `playwright.config.ts`                            |
+| 4300      | `verify-mylder`'s run of a checkout, by hand (`launch.sh`'s default)                    | The maintainer or an agent                        |
+| 4301      | `verify-mylder`'s run of main beside it                                                 | The maintainer or an agent                        |
+| 4300 + 2r | The factory verifier's run of main in round r, from 1 (4302, 4304, ...)                 | `/factory`                                        |
+| 4301 + 2r | The factory verifier's run of the branch in round r (4303, 4305, ...)                   | `/factory`                                        |
+| 4400 + r  | The factory verifier's run on another recording in round r (4401, 4402, ...)            | `/factory`                                        |
+
+Playwright reuses a server already on its port outside CI, so a stray server there, such as the demo's on an e2e port, answers the tests in its place.
+
 ## Rules
 
 - Recordings carry no key, no personal data and no more than a scenario needs; prefer a hand-made 20-journey recording to a full-city hour where the case allows. A real recording keeps the minutes the tests and the demo use and is cut to a box a little wider than theirs: the `weekday` aircraft to 55.40 to 56.10 N and 12.00 to 12.75 E, plus three aircraft outside it, with every field of each answer kept so the answers stay the shape of the feed's contract.

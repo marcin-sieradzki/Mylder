@@ -19,7 +19,7 @@ It runs `npm run build`, starts `next start` on the port (4300 by default) with 
 
 The `weekday` recording holds ten minutes from 07:20 on 16 June 2026, and the server's clock starts there at launch and runs on in real time; the page takes its time from the server, so nothing in the browser is faked. After ten minutes the recording repeats its last answer and every vehicle ages towards No signal, so drive within nine minutes of launch, or relaunch. A recipe that names another recording, such as `crowded` (five minutes from the same moment, on a timetable of its own), runs on its own launch with that name as the third argument, on a port and run id of its own.
 
-**Main against the branch.** To see how main behaves, launch main from its own worktree on another port: `git worktree add ../mylder-verify-main origin/main`, then `npm ci` and `launch.sh main-<n> 4301` there. Two runs never share a port, a build folder or a run id.
+**Main against the branch.** To see how main behaves, launch main from its own worktree on another port: `git worktree add ../mylder-verify-main origin/main`, then `npm ci` and `launch.sh main-<n> 4301` there. Two runs never share a port, a build folder or a run id; the ports every server takes are in `scripts/ports.ts` and the table in `docs/testing-seams.md`.
 
 ## Doctor
 
