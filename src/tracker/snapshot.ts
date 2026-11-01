@@ -86,7 +86,7 @@ export const DisruptionsSummary = Schema.Struct({
 })
 
 export const SnapshotSource = Schema.Struct({
-  /** The kinds `describeSource` describes (src/domain/source.ts), each with its own case. */
+  /** The kinds `SOURCE_DESCRIPTIONS` describes (src/domain/source.ts), every one required. */
   kind: Schema.Literals(SOURCE_KINDS),
   /** The scenario or the recording's folder. */
   name: optional(Schema.String),

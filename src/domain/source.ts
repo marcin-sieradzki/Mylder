@@ -1,8 +1,9 @@
 // What a rider is told about the source the page runs on (docs/testing-seams.md, "The switch"):
 // whether it asks Rejseplanen, whether it has positions, whether it brings disruption messages,
-// and the words that name and credit it, as keys into the dictionary. The tracker, the domain's
-// rules and the screens read this description, never the kind itself, so a new source changes
-// this one place.
+// and the words that name and credit it, as keys into the dictionary. The domain's rules, the
+// screens and the tracker's run read this description, never the kind itself: only
+// src/tracker/source.ts tells its sources apart, to build each one. A new source changes this one
+// place.
 
 /** Every source the snapshot can name. */
 export const SOURCE_KINDS = ['timetable', 'simulated', 'recording', 'rejseplanen'] as const
