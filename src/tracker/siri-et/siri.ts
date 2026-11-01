@@ -30,7 +30,8 @@ export interface SiriJourney {
   calls: SiriCall[]
 }
 
-const TAG = /<(\/?)(?:[\w.-]+:)?([\w.-]+)[^>]*?(\/?)>|<\?[\s\S]*?\?>|<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<![^>]*>/g
+const TAG =
+  /<(\/?)(?:[\w.-]+:)?([\w.-]+)[^>]*?(\/?)>|<\?[\s\S]*?\?>|<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<![^>]*>/g
 
 const CALLS = new Set(['RecordedCall', 'EstimatedCall'])
 
@@ -130,7 +131,8 @@ function decoded(raw: string): string {
   if (!text.includes('&')) return text
   return text.replace(/&(#x[\da-f]+|#\d+|\w+);/gi, (whole, entity: string) => {
     if (entity[0] !== '#') return ENTITIES[entity] ?? whole
-    const code = entity[1] === 'x' || entity[1] === 'X' ? parseInt(entity.slice(2), 16) : +entity.slice(1)
+    const code =
+      entity[1] === 'x' || entity[1] === 'X' ? parseInt(entity.slice(2), 16) : +entity.slice(1)
     return String.fromCodePoint(code)
   })
 }
