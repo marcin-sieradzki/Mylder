@@ -305,6 +305,22 @@ describe('the SIRI-ET reader', () => {
     expect(journey(table, '6800119-8601705300000')).toBeUndefined()
   })
 
+  it("counts and skips a journey whose service day isn't a date", () => {
+    const both = sample.find((m) => m.receivedAt === Date.parse('2026-10-31T08:32:23.782Z'))!
+    const reader = siriEtReader({ box, listener: LISTENER })
+    reader.receive({
+      ...both,
+      // Bus 68's journey comes second, so its DataFrameRef is the last one in the body.
+      body: both.body.replace(
+        /<DataFrameRef>2026-10-31<\/DataFrameRef>(?![\s\S]*<DataFrameRef>)/,
+        '<DataFrameRef>31-10-2026</DataFrameRef>',
+      ),
+    })
+    const table = reader.table(cph('09:32:30'))
+    expect(table.datasets['788']).toMatchObject({ skippedJourneys: 1, journeyUpdates: 1 })
+    expect(journey(table, '6800119-8601705300000')).toBeUndefined()
+  })
+
   it('skips a message over the size limit', () => {
     const table = replayed('09:56:08', { messageChars: 18_000 }).table(cph('09:56:08'))
     // Two S-tog messages, of 18,081 and 22,040 characters, and one of Movia's, 19,438.
