@@ -59,20 +59,21 @@ Every test asserts external behaviour: what the route returns, what the snapshot
 
 Every server the tests, the demo and the verifier start has a port of its own, all in `scripts/ports.ts`, which the Playwright configs and the demo's server import. A new server takes a free port there and a row here; `scripts/ports.test.ts` fails when two meet or when this table, `verify-mylder`'s `launch.sh` or the factory's skill disagrees with the file.
 
-| Port      | Server                                                                                  | Started by                                        |
-| --------- | --------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 3000      | `npm run dev`, Next.js's default                                                        | The maintainer                                    |
-| 4173      | Production build on the `weekday` recording, with its aircraft; the e2e tests' base URL | `playwright.config.ts`                            |
-| 4174      | The same build with `MYLDER_SOURCE` unset, so on the timetable, aircraft off            | `playwright.config.ts`                            |
-| 4175      | The GitHub Pages demo, from `out/`                                                      | `npm run demo:serve`, `playwright.demo.config.ts` |
-| 4176      | The same build on `weekday`, for the snapshot route's tests alone                       | `playwright.config.ts`                            |
-| 4177      | The same build on the `crowded` recording                                               | `playwright.config.ts`                            |
-| 4178      | The same build on the simulation, aircraft off                                          | `playwright.config.ts`                            |
-| 4300      | `verify-mylder`'s run of a checkout, by hand (`launch.sh`'s default)                    | The maintainer or an agent                        |
-| 4301      | `verify-mylder`'s run of main beside it                                                 | The maintainer or an agent                        |
-| 4300 + 2r | The factory verifier's run of main in round r, from 1 (4302, 4304, ...)                 | `/factory`                                        |
-| 4301 + 2r | The factory verifier's run of the branch in round r (4303, 4305, ...)                   | `/factory`                                        |
-| 4400 + r  | The factory verifier's run on another recording in round r (4401, 4402, ...)            | `/factory`                                        |
+| Port      | Server                                                                                     | Started by                                        |
+| --------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| 3000      | `npm run dev`, Next.js's default                                                           | The maintainer                                    |
+| 4173      | Production build on the `weekday` recording, with its aircraft; the e2e tests' base URL    | `playwright.config.ts`                            |
+| 4174      | The same build with `MYLDER_SOURCE` unset, so on the timetable, aircraft off               | `playwright.config.ts`                            |
+| 4175      | The GitHub Pages demo, from `out/`                                                         | `npm run demo:serve`, `playwright.demo.config.ts` |
+| 4176      | The same build on `weekday`, for the snapshot route's tests alone                          | `playwright.config.ts`                            |
+| 4177      | The same build on the `crowded` recording                                                  | `playwright.config.ts`                            |
+| 4178      | The same build on the simulation, aircraft off                                             | `playwright.config.ts`                            |
+| 4179      | The same build on the timetable source with SIRI-ET's updates from `siri-et`, aircraft off | `playwright.config.ts`                            |
+| 4300      | `verify-mylder`'s run of a checkout, by hand (`launch.sh`'s default)                       | The maintainer or an agent                        |
+| 4301      | `verify-mylder`'s run of main beside it                                                    | The maintainer or an agent                        |
+| 4300 + 2r | The factory verifier's run of main in round r, from 1 (4302, 4304, ...)                    | `/factory`                                        |
+| 4301 + 2r | The factory verifier's run of the branch in round r (4303, 4305, ...)                      | `/factory`                                        |
+| 4400 + r  | The factory verifier's run on another recording in round r (4401, 4402, ...)               | `/factory`                                        |
 
 Playwright reuses a server already on its port outside CI, so a stray server there, such as the demo's on an e2e port, answers the tests in its place.
 

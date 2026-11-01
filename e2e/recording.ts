@@ -76,6 +76,19 @@ export const CROWDED_START = Date.parse(
 export const SIMULATED_PORT = E2E_PORTS.simulated
 export const SIMULATED_URL = `http://localhost:${SIMULATED_PORT}`
 
+/**
+ * A sixth server on the same build, on the timetable source with SIRI-ET's updates from their
+ * recording (`MYLDER_UPDATES=recording:siri-et`), on its timetable from its clock, 09:00 on
+ * Saturday 31 October 2026. Its snapshots of 09:21 and 09:22 are saved beside its messages.
+ */
+export const UPDATES = 'siri-et'
+export const UPDATES_PORT = E2E_PORTS.updates
+export const UPDATES_URL = `http://localhost:${UPDATES_PORT}`
+
+/** One of the SIRI-ET recording's saved snapshots, by its file's name. */
+export const savedUpdatesSnapshot = (name: string): unknown =>
+  readJson(join('recordings', UPDATES, 'snapshots', name))
+
 export const test = base.extend({
   page: async ({ page }, provide) => {
     await page.clock.install({ time: RECORDING_START })
