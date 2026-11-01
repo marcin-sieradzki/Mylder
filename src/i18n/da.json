@@ -274,7 +274,8 @@
     "legend": "Alle køretøjer er Kun køreplan indtil videre: der er endnu ingen livepositioner.",
     "source": "Rejseplanens køreplan, endnu ingen livepositioner",
     "note": "Positionerne på denne side er køreplanens plan, ikke meldinger fra køretøjerne.",
-    "transit": "Køreplansdata: {rejseplanen}, under {licence}. Køreplan fra {date}."
+    "transit": "Køreplansdata: {rejseplanen}, under {licence}. Køreplan fra {date}.",
+    "notConnected": "Ikke koblet på endnu"
   },
   "interval": {
     "seconds": "{n}. sekund",
@@ -323,7 +324,6 @@
     "byMode": "I bevægelse, efter transportform",
     "noLivePositions": "Ingen livepositioner endnu; placeret efter køreplanen",
     "timetableOnly": "Ingen livepositioner endnu; placeret efter køreplanen.",
-    "disruptions": "Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu.",
-    "disruptionsFact": "Ikke koblet på endnu"
+    "disruptions": "Driftsmeddelelser kommer med Rejseplanens liveforbindelse, som ikke er koblet på endnu."
   }
 }
