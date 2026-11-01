@@ -11,11 +11,14 @@ import {
   type DataStateContext,
 } from '../domain/data-state.ts'
 import {
+  delayAtCall,
   delayOf,
+  delaySteps,
   ENDED_STANDS_FOR,
   pointAt,
   progressAt,
   snapToPath,
+  steppedCalls,
   timedCalls,
   timelineFrom,
   timelineOf,
@@ -23,6 +26,7 @@ import {
   type Position,
   type TripPhase,
   type Call,
+  type DelayStep,
   type TimedCall,
 } from '../domain/trip-motion.ts'
 import { clockMoment } from '../timetable/time.ts'
@@ -31,6 +35,7 @@ import { joinJourney, type Corrections } from './join.ts'
 import type { PositionJourney, Stop } from './rejseplanen/answers.ts'
 import type { NextCall, SnapshotTrip } from './snapshot.ts'
 import type { Timetable } from './timetable.ts'
+import type { TripUpdate } from './updates.ts'
 
 const onMap = (phase: TripPhase) => phase === 'waiting' || phase === 'underway'
 
@@ -57,6 +62,19 @@ export interface TripHistory {
   readonly reported?: Position
   /** Its last known delay, in seconds, which it keeps for the rest of its day. */
   readonly delay?: number
+  /** When its latest update from SIRI-ET's feed was received. */
+  readonly updated?: number
+  /**
+   * Its latest SIRI-ET update's delays, where each changes, so it keeps moving on them once the
+   * table no longer brings it, as a No signal trip does when the feed goes quiet.
+   */
+  readonly steps?: readonly DelayStep[]
+  /**
+   * Whether its latest SIRI-ET update cancelled it whole, and the calls it cancelled, kept the
+   * same way, so a run without the table never draws it again or unmarks its departures.
+   */
+  readonly cancelled?: true
+  readonly cancelledCalls?: readonly number[]
   /** Rejseplanen's journey, `ZI@DA`. */
   readonly journey?: string
   /** The journey's whole reference, which an opened trip's `journeyDetail` call asks with. */
@@ -73,6 +91,8 @@ export interface BuildInput {
   readonly history?: History
   /** The join's corrections, from the `journeyDetail` calls opened trips made. */
   readonly corrections?: Corrections
+  /** By trip key, the updates SIRI-ET's table gives the trips it joins (./updates.ts). */
+  readonly updates?: ReadonlyMap<string, TripUpdate>
   readonly context: Omit<DataStateContext, 'now' | 'fetched'> & { readonly health: ApiHealth }
 }
 
@@ -91,8 +111,9 @@ function callsWithStops(
   timetable: Timetable,
   trip: PlannedTrip,
   stops: readonly Stop[] | undefined,
+  base: readonly Call[] = trip.calls,
 ): Call[] {
-  const calls: Call[] = trip.calls.map(({ arrival, departure }) => ({ arrival, departure }))
+  const calls: Call[] = [...base]
   const { platforms } = timetable.stops
   const { timezone } = timetable.manifest
   let from = 0
@@ -196,6 +217,7 @@ export function buildTrips({
   answer,
   history: stored = {},
   corrections = {},
+  updates = new Map(),
   context,
 }: BuildInput): Built {
   const history = correctedHistory(stored, corrections)
@@ -215,12 +237,17 @@ export function buildTrips({
     for (const trip of timetable.tripsOn(day)) {
       const realtime = joined.get(trip.key)
       const before = history[trip.key] as TripHistory | undefined
-      if (!realtime && !before && !onMap(tripPhase(trip.calls, now))) continue
+      const update = updates.get(trip.key)
+      if (!realtime && !before && !update && !onMap(tripPhase(trip.calls, now))) continue
       const path = timetable.pathOf(trip.pattern)
+      // A position's stops lie over SIRI-ET's expected times, where both give one: this run's
+      // update's, or else the last one's, kept while the table no longer brings it.
+      const steps = update ? delaySteps(update.calls) : before?.steps
+      const base = update?.calls ?? (steps ? steppedCalls(trip.calls, steps) : trip.calls)
       const calls = realtime
-        ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop)
-        : trip.calls
-      const delay = (realtime ? delayOf(calls) : undefined) ?? before?.delay
+        ? callsWithStops(timetable, trip, realtime.journey.Stops?.Stop, base)
+        : base
+      const delay = (realtime || update ? delayOf(calls) : undefined) ?? before?.delay
       const timed = timedCalls(calls, before?.delay)
       // A trip that has arrived on its expected times is done with, whatever an answer says; its
       // delay is kept while it stands at its last stop.
@@ -244,20 +271,29 @@ export function buildTrips({
       const ref = realtime?.ref ?? before?.ref
       const seen = position ?? before?.seen
       const reported = reportedNow ? position : before?.reported
+      const updated = update?.received ?? before?.updated
+      // The cancellations of this run's update, or else of the last one's.
+      const cancelled = update ? update.cancelled : before?.cancelled === true
+      const cancelledCalls = update ? update.cancelledCalls : (before?.cancelledCalls ?? [])
       const remembered: TripHistory = {
         ...(seen ? { seen } : {}),
         ...(reported ? { reported } : {}),
+        ...(updated === undefined ? {} : { updated }),
         ...(delay === undefined ? {} : { delay }),
+        ...(steps?.length ? { steps } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
         ...(journey ? { journey } : {}),
         ...(ref ? { ref } : {}),
       }
-      const hadRealtime = realtime !== undefined || before !== undefined
+      const hadRealtime = realtime !== undefined || before !== undefined || update !== undefined
       if (hadRealtime) kept[trip.key] = remembered
       // More than 5 min before it leaves on its expected times, a trip is remembered, not drawn.
       if (phase === 'upcoming') continue
       const fields = {
         ...(seen ? { seen: seen.time } : {}),
         ...(reported ? { reported: reported.time } : {}),
+        ...(updated === undefined ? {} : { updated }),
         hadRealtime,
       }
       const state = dataState(fields, ctx)
@@ -270,6 +306,13 @@ export function buildTrips({
             path.length,
           )
       const vehicleNumber = realtime?.journey.trainNumber
+      const next = nextCalls(timetable, trip, timed, now)
+      // With SIRI-ET's steps, this run's update's or the last one's that the history keeps, the
+      // delay a rider is given is at the trip's next call, timed as its panel times it, not at its
+      // last step (#215). Once the key brings journeyPos, a position's times must win over the
+      // steps here, as an update and a position combine (spec #146).
+      const delayAtNext =
+        next[0] && steps?.length ? delayAtCall(trip.calls, steps, next[0].index) : delay
       trips.push({
         key: trip.key,
         line: trip.line.name,
@@ -279,11 +322,14 @@ export function buildTrips({
         state,
         source: drawn.source,
         ...fields,
-        ...(delay === undefined ? {} : { delay }),
+        ...(delayAtNext === undefined ? {} : { delay: delayAtNext }),
         position: pointAt(path, progress) as [number, number],
         progress: Math.round(progress),
-        next: nextCalls(timetable, trip, timed, now),
+        next,
         ...(atFirstStop ? { waiting: true as const } : {}),
+        ...(cancelled ? { cancelled: true as const } : {}),
+        ...(cancelledCalls.length ? { cancelledCalls } : {}),
+        ...(steps?.length ? { steps } : {}),
         ...(vehicleNumber ? { vehicleNumber } : {}),
         ...(journey ? { journey } : {}),
       })

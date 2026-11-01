@@ -4,6 +4,7 @@
 // since the epoch, intervals and delays seconds.
 import 'server-only'
 import { Schema } from 'effect'
+import { SOURCE_KINDS } from '../domain/source.ts'
 
 const optional = Schema.optionalKey
 
@@ -52,6 +53,14 @@ export const SnapshotTrip = Schema.Struct({
   cancelled: optional(Schema.Literal(true)),
   extra: optional(Schema.Literal(true)),
   cancelledCalls: optional(Schema.Array(Schema.Number)),
+  /**
+   * SIRI-ET's delays for the trip, from its latest update (spec #146), kept once the table no
+   * longer brings it, as for a No signal trip on a quiet feed; as steps: a call index and the delay
+   * in seconds there, listed where the delay changes, the calls between taking the step before
+   * them (`expectedTimes`, src/domain/trip-motion.ts). Opened trips and stops time each call by
+   * them, as the map moves the trip.
+   */
+  steps: optional(Schema.Array(Schema.Tuple([Schema.Number, Schema.Number]))),
   vehicleNumber: optional(Schema.String),
   /** Rejseplanen's journey number and day, `ZI@DA`, once the trip has been in an answer. */
   journey: optional(Schema.String),
@@ -85,9 +94,29 @@ export const DisruptionsSummary = Schema.Struct({
 })
 
 export const SnapshotSource = Schema.Struct({
-  kind: Schema.Literals(['timetable', 'simulated', 'recording', 'rejseplanen']),
+  /** The kinds `SOURCE_DESCRIPTIONS` describes (src/domain/source.ts), every one required. */
+  kind: Schema.Literals(SOURCE_KINDS),
   /** The scenario or the recording's folder. */
   name: optional(Schema.String),
+})
+
+/**
+ * Where the snapshot's updates come from (`MYLDER_UPDATES`, spec #146): SIRI-ET's update table
+ * from the listener, the reader over a recording, or none; and how the feed stands.
+ */
+export const SnapshotUpdates = Schema.Struct({
+  kind: Schema.Literals(['off', 'siri', 'recording']),
+  /**
+   * When the feed's last message was received, from any dataset: the latest a run has read, kept
+   * through runs without the table; absent before any has come.
+   */
+  lastMessage: optional(Schema.Number),
+  /** Whether the feed was fresh at fetch time: its last message under 5 min old. */
+  fresh: Schema.Boolean,
+  /** The snapshot's trips with an update this service day, by mode. */
+  withUpdate: Schema.Record(Schema.String, Schema.Number),
+  /** The table's journeys that joined no trip, by the mode of their dataset; counted, not drawn. */
+  unmatched: Schema.Record(Schema.String, Schema.Number),
 })
 
 /** The run's own figures, which the about panel shows and a monitor can poll. */
@@ -146,6 +175,7 @@ export const Snapshot = Schema.Struct({
   /** Null until the first `himsearch` (#57). */
   disruptions: Schema.NullOr(DisruptionsSummary),
   source: SnapshotSource,
+  updates: SnapshotUpdates,
   status: Status,
   trips: Schema.Array(SnapshotTrip),
 })
@@ -153,3 +183,4 @@ export const Snapshot = Schema.Struct({
 export type Snapshot = typeof Snapshot.Type
 export type SnapshotTrip = typeof SnapshotTrip.Type
 export type NextCall = typeof NextCall.Type
+export type SnapshotUpdates = typeof SnapshotUpdates.Type

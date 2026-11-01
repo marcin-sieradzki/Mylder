@@ -1,6 +1,7 @@
 // Which delays the screens count (docs/screens.md, "City pulse" and "The Vehicles list"): whether
-// the answers carry delays for the city, which decides City pulse's third figure and the list's
-// Delay column alike, and the states whose delay is known now.
+// the answers carry delays for the city, which decides the list's Delay column and, on a source
+// with positions, City pulse's third figure (with none, SIRI-ET's delays being on decides it), and
+// the states whose delay is known now.
 import type { DataState } from '../domain/data-state'
 import type { Snapshot } from '../tracker/index'
 

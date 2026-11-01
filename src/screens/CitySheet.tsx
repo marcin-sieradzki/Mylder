@@ -4,7 +4,7 @@ import { Sheet, Tab, Tabs, TabsList, TabsPanel } from '@mylder/perron'
 import { useRef, type ReactNode, type RefObject } from 'react'
 import { useI18n } from '../i18n/useI18n'
 import { useDataCards, useListedDisruptions } from '../map/disruptions'
-import { useSnapshot } from '../map/live'
+import { useSnapshot, useSource } from '../map/live'
 import { onMap } from '../map/vehicles'
 import { isTab, mapView, SHEET_TABS, useHiddenModes, useSheetTab, type SheetTab } from '../map/view'
 import { CityPulse } from './CityPulse'
@@ -43,19 +43,21 @@ export function CitySheet({ open, onClose, asked, opener, behindPanel }: CityShe
   const tab = useSheetTab()
   const hidden = useHiddenModes()
   const snapshot = useSnapshot()
+  const messages = useSource()?.messages !== false
   // Loaded with the page, so the tab counts its cards before it opens.
   const disruptions = useListedDisruptions()?.reading
+  // Rejseplanen's messages, listed only on a source that brings them.
+  const listed = messages ? disruptions : undefined
   const dataCards = useDataCards()
   const popup = useRef<HTMLDivElement>(null)
   const counts: Partial<Record<SheetTab, number>> = {
     // The trips on the map after the filters.
     vehicles: snapshot?.trips.filter((trip) => onMap(trip, hidden)).length,
     // The cards listed: Mylder's own, shown at once, and Rejseplanen's once its list has come;
-    // none on the timetable source, which lists no card.
+    // on a source that brings no messages, such as the timetable, Mylder's alone.
     disruptions:
-      snapshot?.source.kind !== 'timetable' && (disruptions || dataCards.length > 0)
-        ? dataCards.length +
-          (disruptions ? disruptions.active.length + disruptions.later.length : 0)
+      listed || dataCards.length > 0
+        ? dataCards.length + (listed ? listed.active.length + listed.later.length : 0)
         : undefined,
   }
 

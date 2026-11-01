@@ -75,3 +75,68 @@ describe('the timetable source on a saved folder', () => {
     expect(timetableDirOf(readSource('simulated'), 'timetable-ending')).toBe(TIMETABLE_DIR)
   })
 })
+
+describe('updates from a SIRI-ET recording, MYLDER_UPDATES=recording:<folder>', () => {
+  it('runs the reader over the folder’s messages at its clock, on its timetable, beside the timetable source', async () => {
+    const snapshot = await snapshotOn({ MYLDER_UPDATES: 'recording:siri-et' })
+    expect(snapshot.source).toEqual({ kind: 'timetable' })
+    expect(snapshot.serviceDay).toBe('2026-10-31')
+    expect(snapshot.timetableVersion).toBe('2026-11-01-6495dcc6')
+    expect(snapshot.updates).toMatchObject({ kind: 'recording' })
+    // The recording's clock starts at its first message and runs on, so its table holds the
+    // messages of its first seconds.
+    const start = Date.parse('2026-10-31T08:00:03.761Z')
+    expect(snapshot.updates.lastMessage).toBeGreaterThanOrEqual(start)
+    expect(snapshot.updates.lastMessage).toBeLessThan(start + 60_000)
+  })
+
+  it('starts at a saved moment’s clock, recording:<folder>/<moment>, a few minutes before the messages end', async () => {
+    // recordings/siri-et/quiet/clock.json: 09:55:00, 67 s before the last message, at 09:56:07,
+    // so the feed is fresh at first and quiet 5 min after that message.
+    const snapshot = await snapshotOn({ MYLDER_UPDATES: 'recording:siri-et/quiet' })
+    expect(snapshot.serviceDay).toBe('2026-10-31')
+    expect(snapshot.fetched).toBeGreaterThanOrEqual(Date.parse('2026-10-31T08:55:00Z'))
+    expect(snapshot.fetched).toBeLessThan(Date.parse('2026-10-31T08:56:00Z'))
+    expect(snapshot.updates).toMatchObject({ kind: 'recording', fresh: true })
+    expect(snapshot.updates.withUpdate.bus).toBeGreaterThan(100)
+  }, 30_000)
+
+  it('refuses a saved moment that isn’t there', async () => {
+    await expect(environmentLayer({ MYLDER_UPDATES: 'recording:siri-et/never' })).rejects.toThrow(
+      /siri-et.never.clock\.json/,
+    )
+  })
+
+  it('serves the browser the folder’s timetable files', async () => {
+    vi.stubEnv('MYLDER_UPDATES', 'recording:siri-et')
+    const manifest = (await (await timetableManifestResponse()).json()) as { version: string }
+    expect(manifest.version).toBe('2026-11-01-6495dcc6')
+  })
+
+  it('is ignored, and logged, where the source runs at another clock than the recording’s', async () => {
+    const logged = vi.spyOn(console, 'log').mockImplementation(() => {})
+    try {
+      const recorded = await snapshotOn({
+        MYLDER_SOURCE: 'recording:weekday',
+        MYLDER_UPDATES: 'recording:siri-et',
+      })
+      expect(recorded.serviceDay).toBe('2026-06-16')
+      expect(recorded.updates.kind).toBe('off')
+      const ending = await snapshotOn({
+        MYLDER_TIMETABLE_FROM: 'timetable-ending',
+        MYLDER_UPDATES: 'recording:siri-et',
+      })
+      expect(ending.serviceDay).toBe('2026-08-25')
+      expect(ending.updates.kind).toBe('off')
+      const lines = logged.mock.calls.map((call) => call.map(String).join(' '))
+      expect(lines.filter((line) => line.includes('is ignored under'))).toHaveLength(2)
+    } finally {
+      logged.mockRestore()
+    }
+  })
+
+  it('is ignored under the simulation, whose snapshot names updates off', async () => {
+    const snapshot = await snapshotOn({ MYLDER_SOURCE: 'simulated', MYLDER_UPDATES: 'siri' })
+    expect(snapshot.updates.kind).toBe('off')
+  })
+})

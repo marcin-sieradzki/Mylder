@@ -245,6 +245,45 @@ describe('the timetable source', () => {
   })
 })
 
+describe('the timetable source with SIRI-ET’s delays', () => {
+  /** The SIRI-ET recording's second saved minute, built at 09:22:00 in Copenhagen. */
+  const withDelays = () => saved('0002.json', 'siri-et')
+  const BANNER_EN =
+    "Timetable and delays: live positions aren't connected yet, so each vehicle is placed from its timetable and, where Rejseplanen has sent one, its delay."
+  const BANNER_DA =
+    'Køreplan og forsinkelser: der er endnu ingen livepositioner, så hvert køretøj er placeret ud fra sin køreplan og, hvor Rejseplanen har sendt en, sin forsinkelse.'
+
+  it('says once, in the banner, that vehicles are placed from the timetable and their delay', () => {
+    land(withDelays(), '2026-10-31T08:22:20Z')
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([BANNER_EN])
+    expect(updatedLine()).toHaveTextContent('Updated 09:22:00')
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([BANNER_DA])
+  })
+
+  it('shows no Paused notice when the delays go quiet, only the banner', () => {
+    // 09:28:00, over 5 min after the feed's last message, at 09:21:52: Mylder's card in
+    // Disruptions says so, and nothing pauses, since the transit asks Rejseplanen nothing.
+    const quiet = withDelays()
+    land(quiet, '2026-10-31T08:28:00Z')
+    const { unmount } = renderScreen('en')
+    expect(notices()).toEqual([BANNER_EN])
+    unmount()
+    renderScreen('da')
+    expect(notices()).toEqual([BANNER_DA])
+  })
+
+  it('says the timetable alone places every vehicle once the updates are off', () => {
+    land({ ...withDelays(), updates: { kind: 'off', fresh: false, withUpdate: {}, unmatched: {} } })
+    renderScreen('en')
+    expect(notices()).toEqual([
+      "Timetable only: live positions aren't connected yet, so every vehicle is placed where its timetable says it should be.",
+    ])
+  })
+})
+
 /** The browser's polls failing since `iso` on the server's clock. */
 const failingFrom = (iso: string) =>
   act(() =>

@@ -6,7 +6,8 @@
 // kept as it is, and the aircraft snapshot of each of its calls saved in `answers/aircraft/`. The
 // timetable source's plans are saved the same way, with no answers, since that source makes no
 // call and they are no recordings to replay; their `clock.json` is the moment
-// `MYLDER_TIMETABLE_FROM` starts the timetable source at.
+// `MYLDER_TIMETABLE_FROM` starts the timetable source at. A SIRI-ET recording's plan runs the
+// timetable source with updates from its messages, and only its snapshots and answers are saved.
 import { mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Effect } from 'effect'
@@ -24,11 +25,13 @@ import {
   replayAircraft,
   savedAnswers,
   UNFROZEN,
+  withUpdates,
   type Served,
 } from '../../src/tracker/recording/freeze.ts'
 import {
   RECORDINGS,
   TIMETABLE_PLANS,
+  UPDATES_PLANS,
   type RecordingPlan,
 } from '../../src/tracker/recording/plans.ts'
 import { loadTimetable, type Timetable } from '../../src/tracker/timetable.ts'
@@ -106,4 +109,15 @@ for (const plan of TIMETABLE_PLANS.filter((each) => chosen(each.name))) {
   await writeJson(join(recordingDir(plan.name), 'clock.json'), clock)
   const saved = await saveServed(plan, timetable, served)
   console.log(`recordings/${plan.name}: no calls on the timetable source, ${saved}`)
+}
+
+for (const plan of UPDATES_PLANS.filter((each) => chosen(each.name))) {
+  // The folder's messages, timetable and clock are recorded: only what the routes served is new.
+  const dir = recordingDir(plan.name)
+  for (const served of ['snapshots', 'answers']) {
+    await rm(join(dir, served), { recursive: true, force: true })
+  }
+  const timetable = await loadTimetable(join(dir, 'timetable'))
+  const saved = await saveServed(plan, timetable, await Effect.runPromise(withUpdates(plan, timetable)))
+  console.log(`recordings/${plan.name}: the timetable source with its SIRI-ET updates, ${saved}`)
 }

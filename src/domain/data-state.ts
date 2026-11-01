@@ -43,6 +43,13 @@ export interface DataStateContext {
   readonly pollInterval: number
   readonly positionMode: PositionMode
   readonly health: ApiHealth
+  /**
+   * SIRI-ET's update feed, when updates are on (spec #146): when the last message the tracker has
+   * read was received, kept through runs without the table, or nothing before any has come.
+   * Whether the feed is fresh, not the position answers, then decides whether an update keeps a
+   * trip Estimated (`updatesContext`).
+   */
+  readonly updates?: { readonly lastMessage?: number }
 }
 
 /** The Live limit is this many report intervals, so one missed answer ends nothing and two do. */
@@ -59,6 +66,9 @@ export const FRESH_REALTIME = 5 * 60_000
 
 /** A trip missing from position answers this long, or with no position answers at all, is No signal. */
 export const NO_SIGNAL_AFTER = 5 * 60_000
+
+/** SIRI-ET's update feed is fresh while its last message is younger than this. */
+export const UPDATES_FRESH = 5 * 60_000
 
 /**
  * The time between two report answers, in seconds: the poll interval, or two of them when the
@@ -83,6 +93,51 @@ function lastAnswer({ fetched, health }: DataStateContext): number {
   return health.status === 'ok' ? fetched : Math.min(health.since, fetched)
 }
 
+/** Whether SIRI-ET's update feed is fresh at `now`: its last message under 5 min old. */
+export function feedFresh(lastMessage: number | undefined, now: number): boolean {
+  return lastMessage !== undefined && now - lastMessage < UPDATES_FRESH
+}
+
+/**
+ * The feed's part of the context, from the snapshot's `updates` (or the run's, as it builds them):
+ * none while updates are off, so position answers judge updates as before; otherwise the last
+ * message the tracker has read, if one has come.
+ */
+export function updatesContext(feed: {
+  readonly kind: string
+  readonly lastMessage?: number
+}): Pick<DataStateContext, 'updates'> {
+  if (feed.kind === 'off') return {}
+  return { updates: feed.lastMessage === undefined ? {} : { lastMessage: feed.lastMessage } }
+}
+
+/**
+ * Whether an update is still current: with SIRI-ET's feed on, while the feed is fresh, its last
+ * message under 5 min old; without it, while a position answer has arrived in
+ * the last 5 min. Silence is not judged per trip, since SIRI-ET sends a trip's update only when
+ * something changes.
+ */
+function updatesCurrent(context: DataStateContext): boolean {
+  const { now, updates } = context
+  if (!updates) return now - lastAnswer(context) < NO_SIGNAL_AFTER
+  return feedFresh(updates.lastMessage, now)
+}
+
+/**
+ * Since when a No signal trip has had no signal, as its label says: the last position answer that
+ * carried it, or its last report; else, for a trip whose realtime was an update, the last message
+ * of SIRI-ET's feed while the feed is on (`updates`, the context's), since its update held until
+ * the feed went quiet, and otherwise the update itself. None for a trip with no realtime.
+ */
+export function noSignalSince(
+  trip: TripRealtime,
+  updates: DataStateContext['updates'],
+): number | undefined {
+  const position = trip.seen ?? trip.reported
+  if (position !== undefined || trip.updated === undefined) return position
+  return Math.max(trip.updated, updates?.lastMessage ?? -Infinity)
+}
+
 /**
  * A trip's data state at a moment: the first of the rules in docs/data-states.md that holds.
  * Every Metro trip falls to Timetable only because no answer carries it, and gets the ordinary
@@ -98,7 +153,7 @@ export function dataState(trip: TripRealtime, context: DataStateContext): DataSt
   if (age(trip.seen) < FRESH_REALTIME) return 'estimated'
   const updateIsLatest =
     trip.updated !== undefined && (trip.seen === undefined || trip.updated > trip.seen)
-  if (updateIsLatest && now - lastAnswer(context) < NO_SIGNAL_AFTER) return 'estimated'
+  if (updateIsLatest && updatesCurrent(context)) return 'estimated'
   if (!trip.hadRealtime) return 'timetable-only'
   return 'no-signal'
 }

@@ -28,6 +28,12 @@
     "kind": "recording",
     "name": "empty"
   },
+  "updates": {
+    "kind": "off",
+    "fresh": false,
+    "withUpdate": {},
+    "unmatched": {}
+  },
   "status": {
     "calls": [
       {

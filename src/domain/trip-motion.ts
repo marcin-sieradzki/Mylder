@@ -154,6 +154,77 @@ export function timedCalls(calls: readonly Call[], delay?: number): TimedCall[] 
   })
 }
 
+/**
+ * One of a trip's delay steps (spec #146): a call its update gave an expected time, by its index,
+ * and its delay there in seconds, late at its departure, or at its arrival at the last stop.
+ * SIRI-ET's update table lists a journey's delays this way, only where the delay changes.
+ */
+export type DelayStep = readonly [index: number, delay: number]
+
+/**
+ * The steps of an update's calls: each call with an expected time whose delay differs from the
+ * step before's, and its delay there. The calls left out time the same by the step before them.
+ */
+export function delaySteps(calls: readonly Call[]): DelayStep[] {
+  const steps: DelayStep[] = []
+  calls.forEach((call, index) => {
+    const delay = delayAt(call)
+    if (delay !== undefined && delay / 1000 !== steps.at(-1)?.[1]) steps.push([index, delay / 1000])
+  })
+  return steps
+}
+
+/**
+ * A trip's scheduled `calls` with the expected times its delay steps give: each step's call leaves
+ * that late, and arrives so at the last stop. The calls between keep their plan, for `timedCalls`
+ * to time by the step before them.
+ */
+export function steppedCalls(calls: readonly Call[], steps: readonly DelayStep[]): Call[] {
+  const last = calls.length - 1
+  const stepped: Call[] = calls.map(({ arrival, departure }) => ({ arrival, departure }))
+  for (const [index, late] of steps) {
+    const call = stepped[index]
+    if (!call) continue
+    stepped[index] = {
+      ...call,
+      expectedDeparture: call.departure + late * 1000,
+      ...(index === last ? { expectedArrival: call.arrival + late * 1000 } : {}),
+    }
+  }
+  return stepped
+}
+
+/**
+ * The times a trip will keep at each of its scheduled `calls`, from what the snapshot carries of
+ * it: by its delay steps where it has them (`steppedCalls`), the calls between timed as
+ * `timedCalls` times an update's; else every call shifted by its delay; none with neither.
+ */
+export function expectedTimes(
+  calls: readonly Call[],
+  { delay, steps }: { readonly delay?: number; readonly steps?: readonly DelayStep[] },
+): TimedCall[] | undefined {
+  if (steps && steps.length > 0) return timedCalls(steppedCalls(calls, steps))
+  return delay === undefined ? undefined : timedCalls(calls, delay)
+}
+
+/**
+ * Seconds a trip runs behind its timetable at one of its `calls`, by its delay steps, as its
+ * opened panel gives it: at the call's departure, or its arrival at the last stop, timed by
+ * `expectedTimes`; negative when early, and none where the steps give no time.
+ */
+export function delayAtCall(
+  calls: readonly Call[],
+  steps: readonly DelayStep[],
+  index: number,
+): number | undefined {
+  const call = calls[index]
+  const timed = call && expectedTimes(calls, { steps })?.[index]
+  if (!timed) return undefined
+  return index === calls.length - 1
+    ? (timed.arrival - call.arrival) / 1000
+    : (timed.departure - call.departure) / 1000
+}
+
 /** Where a trip is in its day at a moment, from all its timed calls. */
 export function tripPhase(calls: readonly TimedCall[], now: number): TripPhase {
   if (calls.length === 0) return 'finished'

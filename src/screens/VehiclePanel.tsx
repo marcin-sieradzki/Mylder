@@ -8,13 +8,13 @@ import {
   type SourceLineSource,
 } from '@mylder/perron/patterns'
 import { useEffect, useRef } from 'react'
-import type { DataState } from '../domain/data-state'
+import { updatesContext, type DataState, type DataStateContext } from '../domain/data-state'
 import { disruptionPhase } from '../domain/disruption'
 import type { ClientDictionary } from '../i18n/dictionary'
 import type { Lang } from '../i18n/lang'
 import { useI18n } from '../i18n/useI18n'
 import { followedVehicle } from '../map/follow'
-import { useClockOffset, useSnapshot } from '../map/live'
+import { useClockOffset, useSnapshot, useSource } from '../map/live'
 import type { PanelStateOf } from '../map/panels'
 import { useDataState } from '../map/states'
 import { openPanel, useHiddenModes } from '../map/view'
@@ -68,6 +68,7 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
   const trip = snapshot?.trips.find((each) => each.key === state.panel.id)
   useKeptVehicle(state.panel.id, snapshot)
   const hidden = useHiddenModes()
+  const noPositions = useSource()?.positions === false
   const named = answer ?? trip
   // The line's colour from the answer, or from the timetable's pattern before the answer lands.
   const pattern = trip && network?.patterns.patterns[trip.pattern]
@@ -104,8 +105,9 @@ export function VehiclePanel({ state, frame }: VehiclePanelProps) {
         <Detail
           answer={answer}
           trip={trip}
+          updates={snapshot && updatesContext(snapshot.updates).updates}
           network={network}
-          onTimetable={snapshot?.source.kind === 'timetable'}
+          noPositions={noPositions}
           lang={lang}
           words={words}
         />
@@ -162,12 +164,14 @@ interface DetailProps {
   answer: TripDetail
   /** The trip as the snapshot carries it, while it is on the map. */
   trip: SnapshotTrip | undefined
+  /** SIRI-ET's feed, from the snapshot, whose last message dates a No signal trip it updated. */
+  updates: DataStateContext['updates']
   network: Network | undefined
   /**
-   * Whether the page runs on the timetable source, which asks Rejseplanen nothing: the trip is
+   * Whether the page's source has no positions, as the timetable source has none: the trip is
    * placed from the timetable by design, not as a fallback.
    */
-  onTimetable: boolean
+  noPositions: boolean
   lang: Lang
   words: Words
 }
@@ -176,20 +180,29 @@ interface DetailProps {
  * The trip's state, facts, place and stops, aged by the server's clock, then its messages and the
  * source line.
  */
-function Detail({ answer, trip, network, onTimetable, lang, words }: DetailProps) {
+function Detail({ answer, trip, updates, network, noPositions, lang, words }: DetailProps) {
   const now = useServerSecond(useClockOffset())
   // The trip's state now, by the clock, while the snapshot carries it; else the answer's.
   const state: DataState = useDataState(answer.key) ?? answer.state
   const timezone = timezoneOf(network)
   const cancelled = answer.cancelled === true
   const interval = runsToInterval(answer)
-  const sentence = stateSentence({ detail: answer, trip, state, timezone, words, onTimetable })
   // The snapshot's trip, where its place is along the answer's calls: not while the trip's detail
   // shows them another planned trip's, until the run files the vehicle under it.
   const along = answer.planned === undefined ? trip : undefined
   const next = nextCallOf(answer, along, now)
+  const sentence = stateSentence({
+    detail: answer,
+    trip,
+    state,
+    timezone,
+    words,
+    noPositions,
+    next,
+    updates,
+  })
   const live = state === 'live' || state === 'ageing'
-  const delaySeconds = shownDelayOf(answer, trip)
+  const delaySeconds = shownDelayOf(answer, trip, next)
   // The messages listed now, from the trip's detail, and the moment it was called.
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   const messages =
@@ -268,12 +281,12 @@ function Detail({ answer, trip, network, onTimetable, lang, words }: DetailProps
           source={fill(words.messagesChecked, { time: clockTime(called, timezone) })}
         />
       )}
-      {answer.source.kind === 'timetable' && !onTimetable ? (
+      {answer.source.kind === 'timetable' && !noPositions ? (
         <Text variant="caption" emphasis="secondary">
           {words.fromTimetable}
         </Text>
       ) : null}
-      <SourceLine sources={sourcesOf(answer, trip, onTimetable, timezone, words)} />
+      <SourceLine sources={sourcesOf(answer, trip, noPositions, timezone, words)} />
     </>
   )
 }
@@ -283,19 +296,25 @@ function Detail({ answer, trip, network, onTimetable, lang, words }: DetailProps
  * last carried the trip, when Rejseplanen has carried it; then the times, from a `journeyDetail`
  * call or from the timetable shifted by the snapshot's delay. "Rejseplanen · position 08:14:05 ·
  * times 08:14:20", the times reading as Rejseplanen's after the position; the timetable's alone
- * keeps its own name and the snapshot's time. On the timetable source, which asks Rejseplanen
- * nothing, the place and the times are both the timetable's: "Timetable · placed 08:14:05".
+ * keeps its own name and the snapshot's time. On a source with no positions, such as the
+ * timetable, the place and the times are both the timetable's: "Timetable · placed 08:14:05"; or,
+ * for a trip SIRI-ET has sent an update for, the timetable's moved by it, with the time of its
+ * latest: "Timetable and Rejseplanen's delays · updated 08:14:05".
  */
 function sourcesOf(
   answer: TripDetail,
   trip: SnapshotTrip | undefined,
-  onTimetable: boolean,
+  noPositions: boolean,
   timezone: string,
   words: Words,
 ): readonly [SourceLineSource] | readonly [SourceLineSource, SourceLineSource] {
   const at = (moment: number) => clockTime(moment, timezone, { seconds: true })
-  if (onTimetable) {
-    return [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
+  if (noPositions) {
+    const delaysUpdated =
+      answer.source.kind === 'timetable' ? answer.source.delaysUpdated : undefined
+    return delaysUpdated === undefined
+      ? [{ name: words.timetableSource, label: words.placedAt, time: at(answer.fetched) }]
+      : [{ name: words.delaysSource, time: at(delaysUpdated) }]
   }
   const called = answer.source.kind === 'rejseplanen' ? answer.source.at : undefined
   if (trip?.seen === undefined) {

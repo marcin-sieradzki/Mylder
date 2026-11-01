@@ -41,6 +41,19 @@ if [ "${recording#timetable:}" != "$recording" ]; then
   echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source on recordings/${recording#timetable:}"
   exit 0
 fi
+# A SIRI-ET recording's messages run 56 minutes from its clock; after them the feed goes quiet. A
+# saved moment, such as siri-et/quiet, starts near their end so that it does, and has no limit.
+if [ "${recording#updates:}" != "$recording" ] && [ "${recording#*/}" != "$recording" ]; then
+  age=$(($(date +%s) - $(cat "$dir/started")))
+  echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source with SIRI-ET's updates from recordings/${recording#updates:}, minute $((age / 60))"
+  exit 0
+fi
+if [ "${recording#updates:}" != "$recording" ]; then
+  age=$(($(date +%s) - $(cat "$dir/started")))
+  [ "$age" -lt 3300 ] || fail "the server has run ${age} s; the SIRI-ET recording's messages end 56 minutes after its clock starts, after which the feed is quiet. Clean up and relaunch with VERIFY_SKIP_BUILD=1"
+  echo "healthy: http://localhost:$port/en, commit $(git rev-parse --short HEAD), the timetable source with SIRI-ET's updates from recordings/${recording#updates:}, minute $((age / 60))"
+  exit 0
+fi
 minutes=$(ls "recordings/$recording/snapshots" | wc -l | tr -d ' ')
 age=$(($(date +%s) - $(cat "$dir/started")))
 if [ "$age" -gt $(((minutes - 1) * 60)) ]; then

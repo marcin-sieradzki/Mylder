@@ -44,7 +44,7 @@ _Avoid_: Operator, agency
 
 **Trip**:
 One run of a line along a pattern, from its first stop to its last, on one service day. The thing Mylder tracks.
-_Avoid_: Journey, run, service journey
+_Avoid_: Journey (that is a feed's record of a trip), run, service journey
 
 **Vehicle**:
 A trip on the map, waiting or underway, as passengers see it. Its fleet number is known only when a source reports one.
@@ -90,11 +90,27 @@ _Avoid_: Flight, plane (in code)
 
 **Answer**:
 One reply from Rejseplanen to one call Mylder makes: the whole city's positions, one stop's departures, or one trip's calls. Everything realtime carries the time of the answer that last brought it.
-_Avoid_: Response, feed, message
+_Avoid_: Response, feed, message (that is SIRI-ET's)
 
 **Update**:
-An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation.
+An answer, or the part of one, that revises a trip's calls: expected times, platforms or a cancellation. An update also comes from SIRI-ET, as journeys in SIRI-ET messages: a message carries only some of a journey's calls, so a trip's update is every message about its journey merged.
 _Avoid_: Report, prediction, event
+
+**SIRI-ET message**:
+One delivery of Rejseplanen's SIRI-ET push feed from Dataudveksleren to the listener: one dataset's XML, received at a moment, carrying one or more journeys. Mylder never asks for it, so it is not an answer.
+_Avoid_: Answer, event, push
+
+**Journey**:
+A feed's record of one trip, before the tracker joins it to a trip of the timetable: in SIRI-ET, an `EstimatedVehicleJourney`, named by its service day and `DatedVehicleJourneyRef`, with its line, first and last stops, train number and the calls its messages carried; in Rejseplanen's answers, the journey a position or a `journeyDetail` answer names by its reference. A journey that joins no trip stays a journey.
+_Avoid_: Trip (before the join), vehicle journey
+
+**Update table**:
+The journeys with an update from SIRI-ET that call inside Mylder's box and haven't finished, each with its delays, its cancelled calls and whether it is cancelled, as the listener keeps it for the tracker to read and join to its trips.
+_Avoid_: Delay feed, delay cache
+
+**Listener**:
+The one always-on process, outside the app, that receives SIRI-ET messages, keeps the update table and serves it over HTTPS, behind a token, for the tracker to fetch on each run.
+_Avoid_: Consumer, worker, daemon
 
 **Report**:
 A trip's position at a moment, as its vehicle sent it, from an answer that holds reports only. A computed position is not one.
@@ -105,8 +121,12 @@ A position Rejseplanen works out for a trip from its timetable and realtime, rat
 _Avoid_: Calculated position, last position, estimate
 
 **Delay**:
-How far a trip runs behind its timetable: expected minus scheduled time at its latest updated call. Negative when early.
+How far a trip runs behind its timetable: expected minus scheduled time, at its next call wherever Mylder shows one (an opened vehicle's panel, the Vehicles list, City pulse's average), which can differ from the delay it ends on. Negative when early. A trip with no delay steps carries the delay at its latest updated call.
 _Avoid_: Lateness, deviation
+
+**Delay step**:
+Where a trip's delay changes along its calls: the call it changes at and the delay from there on, taken from its update. A trip carries its steps so each call's expected time follows the update, not one delay for the whole trip.
+_Avoid_: Delay profile, per-stop delay
 
 **Position**:
 Where a trip is at a moment, as a point on its pattern's path.
@@ -135,7 +155,7 @@ The trip has had no realtime this service day, so it is placed where its timetab
 _Avoid_: Scheduled, scheduled only, static
 
 **No signal**:
-The trip had realtime, and it stopped: the trip has been missing from the answers for five minutes, or no answers have come for five minutes.
+The trip had realtime, and it stopped: the trip has been missing from the answers for five minutes, or no answers have come for five minutes, or, for a trip with an update from SIRI-ET, its feed has sent no message for five minutes.
 _Avoid_: Stale, lost, offline
 
 ## Page conditions
@@ -155,5 +175,5 @@ One of Rejseplanen's messages about the network that belongs to Copenhagen, show
 _Avoid_: Alert, incident, notice
 
 **Data card**:
-Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen or no positions for a mode, shown first and marked as Mylder's.
+Mylder's own card in the Disruptions list for a gap in its data, such as no answer from Rejseplanen, no positions for a mode or no delays from SIRI-ET's feed for five minutes, shown first and marked as Mylder's.
 _Avoid_: System alert, status card

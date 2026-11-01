@@ -2,7 +2,7 @@
 // feed's adapter at the API seam, live, recorded or simulated, builds its client and its answers
 // here, so a minor release can break only this file. It knows no feed.
 import 'server-only'
-import { Effect, Layer } from 'effect'
+import { Effect, Layer, Stream } from 'effect'
 import { FetchHttpClient, HttpClient, HttpClientError, HttpClientResponse } from 'effect/http'
 import type { HttpClientRequest } from 'effect/http'
 
@@ -51,6 +51,16 @@ const TIMEOUT_AFTER = '30 seconds'
 export const gatewayTimeout = (request: Request): Effect.Effect<Response> =>
   Effect.sleep(TIMEOUT_AFTER).pipe(Effect.as(text(request, 504, 'Gateway Timeout')))
 
+/** Fails a request as a network that can't reach its host does. */
+export const unreachable = (
+  request: Request,
+): Effect.Effect<never, HttpClientError.HttpClientError> =>
+  Effect.fail(
+    new HttpClientError.HttpClientError({
+      reason: new HttpClientError.TransportError({ request, description: 'unreachable' }),
+    }),
+  )
+
 /** An `HttpClient` that answers every request itself, from the request and its URL. */
 export const client = (
   answer: (request: Request, url: URL) => Effect.Effect<Response, HttpClientError.HttpClientError>,
@@ -95,3 +105,56 @@ export const getText = (
       message: failure.message,
     })),
   )
+
+/** A body cut off at its limit: none of it is kept. */
+class OverLimit {
+  readonly _tag = 'OverLimit'
+}
+
+/**
+ * GETs a URL with headers, reading at most `maxBytes` of its body: an answer longer than that is
+ * given as `tooLarge`, with no text, and the rest of it is never read.
+ */
+export const getTextUpTo = (
+  httpClient: HttpClient.HttpClient,
+  url: string,
+  maxBytes: number,
+  headers: ExtraHeaders = {},
+): Effect.Effect<Answer & { readonly tooLarge?: true }, Unanswered> =>
+  httpClient.get(url, { headers }).pipe(
+    Effect.flatMap((response) => {
+      const chunks: Uint8Array[] = []
+      let size = 0
+      const answer = (body: string) => ({
+        status: response.status,
+        headers: response.headers,
+        text: body,
+      })
+      return Stream.runForEach(response.stream, (chunk) => {
+        size += chunk.byteLength
+        if (size > maxBytes) return Effect.fail(new OverLimit())
+        chunks.push(chunk)
+        return Effect.void
+      }).pipe(
+        Effect.map(() => answer(decodeAll(chunks, size))),
+        Effect.catchTag('OverLimit', () =>
+          Effect.succeed({ ...answer(''), tooLarge: true as const }),
+        ),
+      )
+    }),
+    Effect.mapError((failure) => ({
+      network: failure.reason instanceof HttpClientError.TransportError,
+      message: failure.message,
+    })),
+  )
+
+/** Chunks of UTF-8, `size` bytes in all, as one string. */
+function decodeAll(chunks: readonly Uint8Array[], size: number): string {
+  const all = new Uint8Array(size)
+  let at = 0
+  for (const chunk of chunks) {
+    all.set(chunk, at)
+    at += chunk.byteLength
+  }
+  return new TextDecoder().decode(all)
+}

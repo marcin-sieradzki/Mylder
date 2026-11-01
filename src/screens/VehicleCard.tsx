@@ -2,6 +2,7 @@
 
 import { MapTooltip, VehicleDotLabel } from '@mylder/perron'
 import { useMemo, type ReactNode } from 'react'
+import { updatesContext, type DataStateContext } from '../domain/data-state'
 import { useI18n } from '../i18n/useI18n'
 import { useClockOffset, useSnapshot } from '../map/live'
 import { pickedVehicle, usePickedVehicle } from '../map/picking'
@@ -37,8 +38,9 @@ export function VehicleCard() {
   // An aircraft's card is its own (AircraftCard.tsx).
   const trip = picked?.kind === 'trip' ? tripOf(snapshot, picked.key) : undefined
   const timezone = timezoneOf(useNetwork(snapshot?.timetableVersion))
-  if (!picked || !trip) return null
-  return <Card trip={trip} point={picked.point} timezone={timezone} />
+  if (!picked || !trip || !snapshot) return null
+  const { updates } = updatesContext(snapshot.updates)
+  return <Card trip={trip} point={picked.point} timezone={timezone} updates={updates} />
 }
 
 interface CardProps {
@@ -46,14 +48,16 @@ interface CardProps {
   point: readonly [number, number]
   /** The timetable's zone, whose clock the card's times read on. */
   timezone: string
+  /** SIRI-ET's feed, whose last message dates a No signal trip it updated. */
+  updates: DataStateContext['updates']
 }
 
-function Card({ trip, point, timezone }: CardProps) {
+function Card({ trip, point, timezone, updates }: CardProps) {
   const { dictionary } = useI18n()
   const words = dictionary.vehicle
   const state = useDataState(trip.key) ?? trip.state
   const now = useServerSecond(useClockOffset())
-  const label = stateLabelOf(trip, state, now, timezone, words)
+  const label = stateLabelOf(trip, state, now, timezone, words, updates)
   return (
     <DotCard point={point}>
       <span className={styles.title}>{titleOf(trip, dictionary)}</span>

@@ -10,7 +10,9 @@
 // (`corrections.ts`), which the next run and every stop's board read.
 import 'server-only'
 import { Clock, Context, Effect, Layer, Result } from 'effect'
+import { feedFresh, updatesContext } from '../domain/data-state.ts'
 import { checkedEvery } from '../domain/disruption.ts'
+import { describeSource } from '../domain/source.ts'
 import { COPENHAGEN_BOX } from '../timetable/format.ts'
 import { serviceDayStart } from '../timetable/time.ts'
 import {
@@ -47,9 +49,10 @@ import { answerOutcome, failureOutcome, healthAfter, type Outcome } from './heal
 import { countBy, CpuClock, RUNNING_OUT_DAYS, runLine, STALE_DAYS, timetableAge } from './report.ts'
 import { callsKey, Rejseplanen, type CallError } from './rejseplanen/client.ts'
 import type { Snapshot } from './snapshot.ts'
-import { callsApi, type Source } from './source.ts'
+import { snapshotSourceOf, type Source } from './source.ts'
 import { Store } from './store.ts'
 import type { Timetable } from './timetable.ts'
+import { joinTable, NO_UPDATES, UpdateFeed } from './updates.ts'
 
 /** Every product that runs on a line (docs/live-data.md): trains, S-tog, buses, ferries, Metro, light rail. */
 export const PRODUCTS = 3839
@@ -130,13 +133,9 @@ const DISRUPTIONS_SECONDS = 32 * 86_400
 /** How long a quota error is kept: past the end of any month it falls in. */
 const QUOTA_SECONDS = 32 * 86_400
 
-/** A source as the snapshot names it. */
-export const describeSource = (source: Source): Snapshot['source'] =>
-  source.kind === 'simulated'
-    ? { kind: 'simulated', name: source.scenario }
-    : source.kind === 'recording'
-      ? { kind: 'recording', name: source.folder }
-      : { kind: source.kind }
+/** The later of two moments, either of which may be missing. */
+const latest = (a: number | undefined, b: number | undefined) =>
+  a === undefined ? b : b === undefined ? a : Math.max(a, b)
 
 /** Asks for nothing: the timetable source's opened stops and trips answer from the timetable. */
 const neverAsk: OnDemand = () => Effect.succeed({})
@@ -144,7 +143,7 @@ const neverAsk: OnDemand = () => Effect.succeed({})
 export const layer: Layer.Layer<
   Tracker,
   never,
-  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock
+  TrackerConfig | TimetableService | Store | Rejseplanen | CpuClock | UpdateFeed
 > = Layer.effect(
   Tracker,
   Effect.gen(function* () {
@@ -153,9 +152,10 @@ export const layer: Layer.Layer<
     const store = yield* Store
     const rejseplanen = yield* Rejseplanen
     const cpu = yield* CpuClock
+    const feed = yield* UpdateFeed
     const key = (name: string) => `${config.keyPrefix}:${name}`
-    // A source with no API asks for no position, whatever the configured mode says.
-    const calling = callsApi(config.source)
+    // A source that asks Rejseplanen nothing asks for no position, whatever mode is configured.
+    const calling = describeSource(config.source.kind).callsRejseplanen
     const positionMode: PositionMode = calling ? config.positionMode : 'none'
     const { timezone } = timetable.manifest
     const area = { stops: timetable.stops, products: PRODUCTS, timezone }
@@ -212,16 +212,25 @@ export const layer: Layer.Layer<
           outcome.health.status === 'spent' && before.level !== 'spent'
             ? pacing({ calls: before.calls, now, timezone, quotaGone: true })
             : before
+        // SIRI-ET's table, one read a run, joined to the trips it updates. The feed's last message
+        // is the latest any run has read, so a run without the table, such as one whose fetch
+        // failed, leaves the feed fresh until no message has come for 5 min (docs/data-states.md,
+        // rule 3), and the quiet feed's card and No signal trips keep its time.
+        const table = yield* feed.table(now)
+        const joined = table ? joinTable(timetable, table) : NO_UPDATES
+        const lastMessage = latest(table?.lastMessageAt, previous?.updates.lastMessage)
         const { trips, unmatched, history } = buildTrips({
           timetable,
           now,
           answer: outcome.answer,
           history: yield* storedHistory,
           corrections: yield* corrections.read(timetable.serviceDaysAt(now)),
+          updates: joined.trips,
           context: {
             pollInterval: pace.pollInterval,
             positionMode,
             health: api,
+            ...updatesContext({ kind: feed.updates.kind, lastMessage }),
           },
         })
         const serviceDay = timetable.serviceDaysAt(now).at(-1)!
@@ -249,7 +258,17 @@ export const layer: Layer.Layer<
             serviceDayStart(timetable.serviceDaysAt(now)[0], timezone),
           ),
           disruptions: summaryOf(yield* storedDisruptions),
-          source: describeSource(config.source),
+          source: snapshotSourceOf(config.source),
+          updates: {
+            kind: feed.updates.kind,
+            ...(lastMessage === undefined ? {} : { lastMessage }),
+            fresh: feedFresh(lastMessage, now),
+            withUpdate: countBy(
+              trips.filter((trip) => trip.updated !== undefined),
+              'mode',
+            ),
+            unmatched: joined.unmatched,
+          },
           status: {
             calls: outcome.calls,
             unmatched,

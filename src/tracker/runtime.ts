@@ -9,13 +9,28 @@ import { rememberRuntime } from './remember.ts'
 import { CpuClock, processCpu } from './report.ts'
 import { PositionMode as PositionModeSchema } from './snapshot.ts'
 import * as Rejseplanen from './rejseplanen/client.ts'
-import type * as Http from './http.ts'
-import { apiLayer, KEY_VARIABLE, readSource, type Source } from './source.ts'
+import * as Http from './http.ts'
+import {
+  apiLayer,
+  KEY_VARIABLE,
+  readSource,
+  savedFolderOf,
+  snapshotSourceOf,
+  type Source,
+  updatesFor,
+} from './source.ts'
 import { memoryLayer, type Store } from './store.ts'
 import { loadTimetable, TIMETABLE_DIR, type Timetable } from './timetable.ts'
 import {
+  feedLayer,
+  type ListenerAddress,
+  readListener,
+  readUpdates,
+  UPDATES_VARIABLE,
+  type Updates,
+} from './updates.ts'
+import {
   clientSettings,
-  describeSource,
   layer as trackerServiceLayer,
   TimetableService,
   Tracker,
@@ -42,7 +57,7 @@ export function readPositionMode(value: string | undefined): PositionMode {
 
 /** Each source keeps its own state, so a simulated call never touches a live counter. */
 export function keyPrefixOf(source: Source): string {
-  const { kind, name } = describeSource(source)
+  const { kind, name } = snapshotSourceOf(source)
   return name ? `mylder:${kind}:${name}` : `mylder:${kind}`
 }
 
@@ -55,6 +70,12 @@ export interface TrackerLayerOptions {
   readonly key?: string
   /** The CPU clock runs measure themselves by; the process's own when left out. */
   readonly cpu?: Layer.Layer<CpuClock>
+  /** Where updates come from (`MYLDER_UPDATES`); off when left out. */
+  readonly updates?: Updates
+  /** Where `siri` fetches the listener's table (`MYLDER_UPDATES_URL`, `MYLDER_UPDATES_TOKEN`). */
+  readonly listener?: ListenerAddress
+  /** The `HttpClient` the listener's table is fetched through; the real network when left out. */
+  readonly updatesHttp?: Layer.Layer<Http.HttpClient.HttpClient>
 }
 
 /** The tracker with all it needs: the store in memory, the timetable, the source's client. */
@@ -76,7 +97,14 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
     Layer.succeed(TrackerConfig, settings),
     options.cpu ?? processCpu,
   )
-  return trackerServiceLayer.pipe(Layer.provide(client), Layer.provideMerge(base))
+  const feed = feedLayer(options.updates ?? { kind: 'off' }, options.listener).pipe(
+    Layer.provide(options.updatesHttp ?? Http.fetchLayer),
+  )
+  return trackerServiceLayer.pipe(
+    Layer.provide(client),
+    Layer.provide(feed),
+    Layer.provideMerge(base),
+  )
 }
 
 /**
@@ -86,18 +114,12 @@ export function trackerLayer(options: TrackerLayerOptions): Layer.Layer<Tracker 
  */
 export const TIMETABLE_FROM_VARIABLE = 'MYLDER_TIMETABLE_FROM'
 
-/** The saved folder a source runs on: a recording's own, or the timetable source's from `from`. */
-function savedFolderOf(source: Source, from: string | undefined): string | undefined {
-  if (source.kind === 'recording') return source.folder
-  return source.kind === 'timetable' ? from?.trim() || undefined : undefined
-}
-
 /**
  * Where a source's timetable lives: a recording brings its own, as does the timetable source
  * run on a saved folder (`from`, `MYLDER_TIMETABLE_FROM`); the rest use the deployed one.
  */
-export function timetableDirOf(source: Source, from?: string): string {
-  const folder = savedFolderOf(source, from)
+export function timetableDirOf(source: Source, from?: string, updates?: Updates): string {
+  const folder = savedFolderOf(source, from, updates)
   return folder ? join(recordingDir(folder), 'timetable') : TIMETABLE_DIR
 }
 
@@ -113,19 +135,36 @@ export async function environmentLayer(
 ): Promise<Layer.Layer<Tracker | Store>> {
   const source = readSource(env.MYLDER_SOURCE)
   const positionMode = readPositionMode(env[POSITION_MODE_VARIABLE])
-  const folder = savedFolderOf(source, env[TIMETABLE_FROM_VARIABLE])
+  const from = env[TIMETABLE_FROM_VARIABLE]
+  const { updates, warning } = updatesFor(source, readUpdates(env[UPDATES_VARIABLE]), from)
+  const warned = warning ? Layer.effectDiscard(Effect.logWarning(warning)) : Layer.empty
+  const listener = readListener(env)
+  const folder = savedFolderOf(source, from, updates)
   if (folder) {
+    // The recording's clock, or a saved moment's of the one its updates replay.
+    const moment =
+      updates.kind === 'recording' && folder === updates.folder ? updates.moment : undefined
+    const clockDir =
+      moment === undefined ? recordingDir(folder) : join(recordingDir(folder), moment)
     const [timetable, start] = await Promise.all([
       loadTimetable(join(recordingDir(folder), 'timetable')),
-      readStart(recordingDir(folder)),
+      readStart(clockDir),
     ])
     // Provided beneath the tracker, so whatever it starts while it is built runs on recorded time.
-    return trackerLayer({ timetable, source, positionMode }).pipe(
+    return trackerLayer({ timetable, source, positionMode, updates, listener }).pipe(
+      Layer.merge(warned),
       Layer.provideMerge(sharedStartingAt(start)),
     )
   }
   const timetable = await loadTimetable(TIMETABLE_DIR)
-  return trackerLayer({ timetable, source, positionMode, key: env[KEY_VARIABLE] })
+  return trackerLayer({
+    timetable,
+    source,
+    positionMode,
+    key: env[KEY_VARIABLE],
+    updates,
+    listener,
+  }).pipe(Layer.merge(warned))
 }
 
 /**

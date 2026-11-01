@@ -2,6 +2,8 @@
 // clock alone, so the figures and the dots never disagree. Each figure follows the mode filters;
 // a figure the data can't back is none, with the reason it can't be known.
 import { AGEING_ENDS, liveLimit, reportInterval, type DataState } from '../domain/data-state'
+import { describeSource, NOT_IN_SIRI_ET } from '../domain/source'
+import { delaysOn } from '../map/live'
 import type { DataStates } from '../map/states'
 import { onMap } from '../map/vehicles'
 import { MODES, type Mode } from '../timetable/format'
@@ -23,11 +25,20 @@ export interface Share {
   readonly total: number
 }
 
+/**
+ * Why a mode's meter is "—": as a figure, or the Metro, an interval line with no realtime, or a
+ * mode SIRI-ET carries nothing of, among the shares with an update.
+ */
+export type MeterUnknown = Unknown | 'metro' | 'no-delays'
+
 export interface ModeShare {
   readonly mode: Mode
-  /** None for the Metro, an interval line with no realtime (ADR 0006), or when it can't be known. */
+  /**
+   * None for the Metro, an interval line with no realtime (ADR 0006), for a mode SIRI-ET carries
+   * nothing of among the shares with delays, or when it can't be known.
+   */
   readonly share?: Share
-  readonly unknown?: Unknown | 'metro'
+  readonly unknown?: MeterUnknown
 }
 
 /** How many vehicles of a mode are on the move, as On the move counts them. */
@@ -53,13 +64,19 @@ export interface Pulse {
   readonly reported: number | Unknown
   /**
    * The mean delay in seconds, when at least `MIN_DELAYS` trips carry one, or why it can't be
-   * known; none when the snapshot carries no delays at all, or on the timetable source, which
-   * can't know one, and Reporting live takes its slot.
+   * known; none when the snapshot carries no delays at all, or on a source with no positions, such
+   * as the timetable, with SIRI-ET's delays off, and Reporting live takes its slot.
    */
   readonly delay?: { readonly mean: number; readonly count: number } | DelayUnknown
   /** Live and Ageing over underway, the Metro left out: the sum of the meters. */
   readonly live: Share | Unknown
   readonly modes: readonly ModeShare[]
+  /**
+   * With SIRI-ET's delays on, per mode the trips on the map with an update this service day over
+   * all its trips on the map, Waiting ones included: the share the run's log line gives, which a
+   * quiet feed's No signal trips keep. None with the delays off.
+   */
+  readonly updateShares?: readonly ModeShare[]
   /**
    * The vehicles on the move in each mode the filters show, in the modes' order: together the
    * On the move figure, each the count its mode's chip gives while none is No signal.
@@ -80,13 +97,13 @@ const REPORTING: ReadonlySet<DataState> = new Set(['live', 'ageing'])
 const NO_FILTER: ReadonlySet<Mode> = new Set()
 
 /**
- * When positions are paused (docs/data-states.md, "Paused"): never on the timetable source, which
- * asks Rejseplanen nothing; at once when the month's calls are spent or no position is asked for,
- * else the moment the latest good answer is older than the Live limit; none while the API answers
- * well.
+ * When positions are paused (docs/data-states.md, "Paused"): never on a source that asks
+ * Rejseplanen nothing, such as the timetable; at once when the month's calls are spent or no
+ * position is asked for, else the moment the latest good answer is older than the Live limit; none
+ * while the API answers well.
  */
 export function pausedFrom(snapshot: Snapshot): number | undefined {
-  if (snapshot.source.kind === 'timetable') return undefined
+  if (!describeSource(snapshot.source.kind).callsRejseplanen) return undefined
   if (snapshot.budget.level === 'spent' || snapshot.positionMode === 'none') return -Infinity
   if (snapshot.api.status === 'ok') return undefined
   const answered = Math.min(snapshot.api.since, snapshot.fetched)
@@ -108,8 +125,8 @@ export function pulseOf(
   const reporting = (trip: SnapshotTrip) => REPORTING.has(stateOf(trip))
 
   const computedOnly = snapshot.positionMode === 'CALC_REPORT'
-  const onTimetable = snapshot.source.kind === 'timetable'
-  const why: Unknown | undefined = onTimetable
+  const noPositions = !describeSource(snapshot.source.kind).positions
+  const why: Unknown | undefined = noPositions
     ? 'timetable'
     : paused
       ? 'paused'
@@ -128,23 +145,24 @@ export function pulseOf(
         stateOf(trip) === 'live',
     ).length
 
-  const delays = shown
-    .filter((trip) => trip.mode !== 'metro' && trip.delay !== undefined)
-    .filter((trip) => DELAY_KNOWN.has(stateOf(trip)))
-    .map((trip) => trip.delay!)
+  const delayKnown = (trip: SnapshotTrip) =>
+    trip.mode !== 'metro' && trip.delay !== undefined && DELAY_KNOWN.has(stateOf(trip))
+  const delays = shown.filter(delayKnown).map((trip) => trip.delay!)
   // Whether the answers carry delays is the city's, so a filter or a quiet hour never swaps the
-  // figure for another: under the minimum it says so.
-  const delay: Pulse['delay'] =
-    onTimetable || !carriesDelays(snapshot)
-      ? undefined
-      : paused
-        ? 'paused'
-        : delays.length < MIN_DELAYS
-          ? 'too-few'
-          : {
-              mean: delays.reduce((sum, each) => sum + each, 0) / delays.length,
-              count: delays.length,
-            }
+  // figure for another: under the minimum it says so. With no positions, only SIRI-ET's delays,
+  // when they are on, can bring one.
+  const delaysAreOn = delaysOn(snapshot)
+  const hasDelayFigure = noPositions ? delaysAreOn : carriesDelays(snapshot)
+  const delay: Pulse['delay'] = !hasDelayFigure
+    ? undefined
+    : paused
+      ? 'paused'
+      : delays.length < MIN_DELAYS
+        ? 'too-few'
+        : {
+            mean: delays.reduce((sum, each) => sum + each, 0) / delays.length,
+            count: delays.length,
+          }
 
   const shareOf = (trips: readonly SnapshotTrip[]): Share | Unknown =>
     why ??
@@ -159,6 +177,16 @@ export function pulseOf(
     const share = shareOf(underway.filter((trip) => trip.mode === mode))
     return typeof share === 'string' ? { mode, unknown: share } : { mode, share }
   })
+  const updateShares = delaysAreOn
+    ? shownModes.map((mode): ModeShare => {
+        if (mode === 'metro') return { mode, unknown: 'metro' }
+        if (NOT_IN_SIRI_ET.has(mode)) return { mode, unknown: 'no-delays' }
+        // Every shown mode has a trip on the map, so the total is never 0.
+        const trips = shown.filter((trip) => trip.mode === mode)
+        const count = trips.filter((trip) => trip.updated !== undefined).length
+        return { mode, share: { count, total: trips.length } }
+      })
+    : undefined
 
   const counts: Record<DataState, number> = {
     live: 0,
@@ -183,6 +211,7 @@ export function pulseOf(
     ...(delay === undefined ? {} : { delay }),
     live: shareOf(underway.filter((trip) => trip.mode !== 'metro')),
     modes,
+    ...(updateShares ? { updateShares } : {}),
     movingByMode: shownModes.map((mode) => ({
       mode,
       count: moving.filter((trip) => trip.mode === mode).length,
